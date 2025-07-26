@@ -1,0 +1,9 @@
+name: BlightedMC
+version: '1.0-SNAPSHOT'
+main: fr.moussax.blightedMC.BlightedMC
+api-version: '1.21'
+authors: [ MrInspection ]
+
+commands:
+  broadcast:
+    description: BlightedMC provided commands
