@@ -1,9 +1,11 @@
 package fr.moussax.blightedMC.core.utils;
 
 import org.bukkit.Material;
+import org.bukkit.block.banner.Pattern;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.checkerframework.checker.index.qual.Positive;
@@ -34,6 +36,8 @@ public class ItemBuilder {
   private Map<Enchantment, Integer> enchantments = new HashMap<>();
   private List<String> itemLores = new ArrayList<>();
   private List<ItemFlag> itemFlags = new ArrayList<>();
+  private List<Pattern> bannerPatterns;
+
 
   public ItemBuilder(Material material) {
     if (material == null) {
@@ -183,6 +187,11 @@ public class ItemBuilder {
     return this;
   }
 
+  public ItemBuilder setBannerPatterns(List<Pattern> patterns) {
+    this.bannerPatterns = patterns;
+    return this;
+  }
+
   public ItemBuilder setUnbreakable(boolean unbreakable) {
     itemMeta.setUnbreakable(unbreakable);
     return this;
@@ -224,6 +233,10 @@ public class ItemBuilder {
     return itemFlags;
   }
 
+  public List<Pattern> getBannerPatterns() {
+    return bannerPatterns;
+  }
+
   public ItemStack toItemStack() {
     item.setType(material);
     item.setAmount(amount);
@@ -252,6 +265,13 @@ public class ItemBuilder {
       for (ItemFlag flag : itemFlags) {
         meta.addItemFlags(flag);
       }
+    }
+
+    if (bannerPatterns != null && item.getItemMeta() instanceof BannerMeta) {
+      BannerMeta bm = (BannerMeta) item.getItemMeta();
+      bm.setPatterns(bannerPatterns);
+      bm.addItemFlags(ItemFlag.HIDE_BANNER_PATTERNS);
+      item.setItemMeta(bm);
     }
 
     item.setItemMeta(meta);
