@@ -68,7 +68,6 @@ public abstract class BlightedEntity {
     return entity;
   }
 
-
   private void setAttribute(Attribute attribute, double value) {
     AttributeInstance instance = entity.getAttribute(attribute);
     if (instance != null) {
@@ -104,7 +103,6 @@ public abstract class BlightedEntity {
 
     String colorPrefix = "§a";
 
-
     if (percentage < 10) {
       colorPrefix = "§c";
     } else if (percentage < 50) {
@@ -114,7 +112,7 @@ public abstract class BlightedEntity {
     return switch (nameTagType) {
       case BOSS -> "§d" + name;
       case BLIGHTED -> "§5" + name + " §d" + (int) health +"§r/§5" + maxHealth + "§c❤";
-      case SMALL_NUMBER -> "§c" + name + " §7" + toShortNumber(health) + "§c❤";
+      case SMALL_NUMBER -> "§c" + name + " " + colorPrefix + toShortNumber(health) + "§c❤";
       case DEFAULT -> "§c" + name + " " + colorPrefix + (int) health + "§8/§a" + maxHealth + "§c❤";
     };
   }
