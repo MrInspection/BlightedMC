@@ -7,3 +7,5 @@ authors: [ MrInspection ]
 commands:
   broadcast:
     description: BlightedMC provided commands
+  spawnmob:
+    description: BlightedMc provided command
