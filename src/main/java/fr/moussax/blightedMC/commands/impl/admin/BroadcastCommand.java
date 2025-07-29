@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.commands;
+package fr.moussax.blightedMC.commands.impl.admin;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -32,7 +32,9 @@ public class BroadcastCommand implements CommandExecutor {
       }
 
       String message = messageBuilder.toString().trim();
-      Bukkit.broadcastMessage("\n §3§lBROADCAST! §f" + player.getName() + " §f» §b§l" + message + "\n");
+      Bukkit.broadcastMessage(" ");
+      Bukkit.broadcastMessage(" §5§lBROADCAST! §f" + player.getName() + " §8» §d" + message);
+      Bukkit.broadcastMessage(" ");
       return true;
     }
     return false;

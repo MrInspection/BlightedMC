@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC;
 
 import fr.moussax.blightedMC.managers.EventsManager;
-import fr.moussax.blightedMC.utils.CommandBuilder;
+import fr.moussax.blightedMC.commands.CommandBuilder;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BlightedMC extends JavaPlugin {

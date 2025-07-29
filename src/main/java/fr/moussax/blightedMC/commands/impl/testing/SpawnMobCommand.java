@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.commands;
+package fr.moussax.blightedMC.commands.impl.testing;
 
 import fr.moussax.blightedMC.gameplay.mobs.ExperimentalMob;
 import fr.moussax.blightedMC.gameplay.mobs.GaiaConstruct;
@@ -26,7 +26,7 @@ public class SpawnMobCommand implements CommandExecutor {
         case "EXPERIMENT":
           ExperimentalMob experimental = new ExperimentalMob();
           experimental.spawn(player.getLocation());
-          player.sendMessage("§6§lSUCCESS! §7You spawned §6EXPERIMENTAL_MOB§7.");
+          player.sendMessage("§7You summoned a creature and received a custom head.");
           break;
         case "GAIA":
           GaiaConstruct gaiaConstruct = new GaiaConstruct(true);
