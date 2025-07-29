@@ -1,34 +1,34 @@
 package fr.moussax.blightedMC.core.players;
 
 public class BlightedFavorsManager {
-  private double favors = 0;
+  private int favors = 0;
 
-  public double getFavors() {
+  public int getFavors() {
     return favors;
   }
 
-  public void setFavors(double value) {
+  public void setFavors(int value) {
     if (favors < 0) {
       throw new IllegalArgumentException("Favors amount cannot be negative.");
     }
     this.favors = value;
   }
 
-  public void addFavors(double value) {
+  public void addFavors(int value) {
     if (value <= 0) {
       throw new IllegalArgumentException("Added favors must be positive.");
     }
     favors += value;
   }
 
-  public void removeFavors(double value) {
+  public void removeFavors(int value) {
     if (value <= 0) {
       throw new IllegalArgumentException("Removed favors must be positive.");
     }
     favors = Math.max(0, favors - value);
   }
 
-  public boolean hasEnoughFavors(double value) {
+  public boolean hasEnoughFavors(int value) {
     return favors >= value;
   }
 }

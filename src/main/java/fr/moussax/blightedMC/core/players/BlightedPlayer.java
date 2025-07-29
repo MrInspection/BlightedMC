@@ -21,7 +21,7 @@ public class BlightedPlayer {
     this.uuid = player.getUniqueId();
     this.dataHandler = new PlayerDataHandler(uuid);
 
-    double storedFavors = dataHandler.getConfig().getDouble("blightedFavors", 0.0);
+    int storedFavors = dataHandler.getConfig().getInt("blightedFavors", 0);
     this.favors = new BlightedFavorsManager();
     this.favors.setFavors(storedFavors);
 
@@ -51,8 +51,20 @@ public class BlightedPlayer {
     return favors;
   }
 
-  public BlightedFavorsManager addFavors(double value) {
+  public BlightedFavorsManager addFavors(int value) {
     favors.addFavors(value);
+    actionBarManager.tick();
+    return favors;
+  }
+
+  public BlightedFavorsManager removeFavors(int value) {
+    favors.removeFavors(value);
+    actionBarManager.tick();
+    return favors;
+  }
+
+  public BlightedFavorsManager setFavors(int value) {
+    favors.setFavors(value);
     actionBarManager.tick();
     return favors;
   }

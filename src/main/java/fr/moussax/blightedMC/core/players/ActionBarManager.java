@@ -40,7 +40,7 @@ public class ActionBarManager implements Runnable {
   }
 
   private String getFavorsComponent() {
-    double favors = player.getFavors().getFavors();
-    return ChatColor.LIGHT_PURPLE + Formatter.formatDouble(favors, 2) + "☤ Favors";
+    int favors = player.getFavors().getFavors();
+    return "§d" + favors + "☤ Favors";
   }
 }
