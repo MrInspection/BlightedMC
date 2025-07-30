@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.items.crafting.registry.categories;
+package fr.moussax.blightedMC.core.items.__registry__.recipes;
 
 import fr.moussax.blightedMC.core.items.crafting.registry.RecipeCategory;
 
