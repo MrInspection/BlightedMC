@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC;
 
+import fr.moussax.blightedMC.core.items.crafting.registry.RecipesRegistry;
 import fr.moussax.blightedMC.managers.EventsManager;
 import fr.moussax.blightedMC.commands.CommandBuilder;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -13,6 +14,8 @@ public final class BlightedMC extends JavaPlugin {
     CommandBuilder.initialize(this);
     CommandBuilder.initializeCommands();
     new EventsManager().registerListeners();
+
+    RecipesRegistry.initializeRecipes();
   }
 
   public static BlightedMC getInstance() {
