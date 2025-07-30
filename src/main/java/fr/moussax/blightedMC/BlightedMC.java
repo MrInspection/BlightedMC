@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC;
 
+import fr.moussax.blightedMC.core.items.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.crafting.registry.RecipesRegistry;
 import fr.moussax.blightedMC.managers.EventsManager;
 import fr.moussax.blightedMC.commands.CommandBuilder;
@@ -15,6 +16,7 @@ public final class BlightedMC extends JavaPlugin {
     CommandBuilder.initializeCommands();
     new EventsManager().registerListeners();
 
+    ItemsRegistry.initializeItems();
     RecipesRegistry.initializeRecipes();
   }
 
