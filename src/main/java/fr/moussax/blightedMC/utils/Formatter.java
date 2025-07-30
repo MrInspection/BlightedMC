@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.utils;
+package fr.moussax.blightedMC.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

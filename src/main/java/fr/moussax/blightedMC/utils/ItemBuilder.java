@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.utils;
+package fr.moussax.blightedMC.utils;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -33,7 +33,7 @@ import java.util.*;
  */
 public class ItemBuilder {
 
-  private ItemStack item;
+  private final ItemStack item;
   private ItemMeta itemMeta;
   private Material material;
 

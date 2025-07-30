@@ -9,3 +9,8 @@ commands:
     description: BlightedMC provided commands
   spawnmob:
     description: BlightedMc provided command
+  test:
+  favors:
+    description: Manage the Favors currency system
+  laser:
+  craft:
