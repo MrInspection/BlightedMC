@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.gameplay.mobs;
+package fr.moussax.blightedMC.core.__registry__.entities;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
