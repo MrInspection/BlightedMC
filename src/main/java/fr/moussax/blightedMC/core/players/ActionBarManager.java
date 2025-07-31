@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.players;
 
-import fr.moussax.blightedMC.core.utils.Formatter;
+import fr.moussax.blightedMC.utils.Formatter;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
@@ -24,10 +24,11 @@ public class ActionBarManager implements Runnable {
     String space = "     ";
     String healthComponent = getHealthComponent();
     String favorsComponent = space + getFavorsComponent();
+    String manaComponent = space + getManaComponent();
 
     player.getPlayer().spigot().sendMessage(
         ChatMessageType.ACTION_BAR,
-        new TextComponent(healthComponent + favorsComponent)
+        new TextComponent(healthComponent + favorsComponent + manaComponent)
     );
   }
 
@@ -42,5 +43,11 @@ public class ActionBarManager implements Runnable {
   private String getFavorsComponent() {
     int favors = player.getFavors().getFavors();
     return "§d" + favors + "☤ Favors";
+  }
+
+  private String getManaComponent() {
+    double current = player.getMana().getCurrentMana();
+    double max = player.getMana().getMaxMana();
+    return "§b" + Formatter.formatDouble(current, 0) + "/" + Formatter.formatDouble(max, 0) + "✎ Mana";
   }
 }

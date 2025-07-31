@@ -1,6 +1,8 @@
 package fr.moussax.blightedMC.core.players;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.core.players.managers.BlightedFavorsManager;
+import fr.moussax.blightedMC.core.players.managers.BlightedManaManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -16,6 +18,8 @@ public class BlightedPlayer {
   private final PlayerDataHandler dataHandler;
   private final ActionBarManager actionBarManager;
 
+  private final BlightedManaManager manaManager;
+
   public BlightedPlayer(Player player) {
     this.player = player;
     this.uuid = player.getUniqueId();
@@ -24,6 +28,8 @@ public class BlightedPlayer {
     int storedFavors = dataHandler.getConfig().getInt("blightedFavors", 0);
     this.favors = new BlightedFavorsManager();
     this.favors.setFavors(storedFavors);
+
+    this.manaManager = new BlightedManaManager(100.0, 1.0);
 
     this.actionBarManager = new ActionBarManager(this);
     players.put(uuid, this);
@@ -67,6 +73,10 @@ public class BlightedPlayer {
     favors.setFavors(value);
     actionBarManager.tick();
     return favors;
+  }
+
+  public BlightedManaManager getMana() {
+    return manaManager;
   }
 
   public void saveData() {

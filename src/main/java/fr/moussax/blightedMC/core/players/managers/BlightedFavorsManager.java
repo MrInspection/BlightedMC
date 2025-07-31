@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.players;
+package fr.moussax.blightedMC.core.players.managers;
 
 public class BlightedFavorsManager {
   private int favors = 0;
