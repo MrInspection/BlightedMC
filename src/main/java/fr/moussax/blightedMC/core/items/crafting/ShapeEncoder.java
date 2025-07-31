@@ -1,5 +1,8 @@
 package fr.moussax.blightedMC.core.items.crafting;
 
+import fr.moussax.blightedMC.core.items.ItemManager;
+import org.bukkit.Material;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -23,6 +26,14 @@ public class ShapeEncoder {
     keys.put(key, object);
   }
 
+  public void bindKey(char key, ItemManager manager, int amount) {
+    keys.put(key, new CraftingObject(manager, amount));
+  }
+
+  public void bindKey(char key, Material material, int amount) {
+    keys.put(key, new CraftingObject(material, amount));
+  }
+
   public ArrayList<CraftingObject> encodeCraftingRecipe() {
     ArrayList<CraftingObject> objects = new ArrayList<>();
     String[] lines = {line1, line2, line3};
@@ -30,7 +41,7 @@ public class ShapeEncoder {
     for(String line : lines) {
       for(char c : line.toCharArray()) {
         if(c == ' ' || !keys.containsKey(c)) {
-          objects.add(new CraftingObject(null, 0));
+          objects.add(null);
         } else {
           objects.add(keys.get(c));
         }

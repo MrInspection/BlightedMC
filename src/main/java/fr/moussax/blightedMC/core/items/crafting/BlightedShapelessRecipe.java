@@ -30,11 +30,15 @@ public final class BlightedShapelessRecipe extends BlightedRecipe {
 
   public void addIngredient(CraftingObject ingredient) {
     ingredientList.add(ingredient);
-    ingredientCountMap.merge(
-        ingredient.manager().getItemId(),
-        ingredient.amount(),
-        Integer::sum
-    );
+    String itemId;
+    if (ingredient.isCustom()) {
+      itemId = ingredient.getManager().getItemId();
+    } else if (ingredient.isVanilla()) {
+      itemId = "vanilla:" + ingredient.getVanillaItem().getType().name().toLowerCase();
+    } else {
+      throw new IllegalArgumentException("Ingredient must be custom or vanilla");
+    }
+    ingredientCountMap.merge(itemId, ingredient.getAmount(), Integer::sum);
   }
 
   public List<CraftingObject> getIngredients() {

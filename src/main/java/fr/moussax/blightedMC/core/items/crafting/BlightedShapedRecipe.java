@@ -78,4 +78,25 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
   public boolean hasAttributeSourceSlot() {
     return attributeSourceSlotIndex >= 0;
   }
+
+  /**
+   * Returns a Map<String, Integer> of all ingredients and their total amounts,
+   * with itemIds as keys.
+   */
+  public java.util.Map<String, Integer> getIngredientCountMap() {
+    var ingredientCountMap = new java.util.HashMap<String, Integer>();
+    for (CraftingObject ingredient : recipePattern) {
+      if (ingredient == null) continue;
+      String itemId;
+      if (ingredient.isCustom()) {
+        itemId = ingredient.getManager().getItemId();
+      } else if (ingredient.isVanilla()) {
+        itemId = "vanilla:" + ingredient.getVanillaItem().getType().name().toLowerCase();
+      } else {
+        throw new IllegalArgumentException("Ingredient must be custom or vanilla");
+      }
+      ingredientCountMap.merge(itemId, ingredient.getAmount(), Integer::sum);
+    }
+    return Collections.unmodifiableMap(ingredientCountMap);
+  }
 }

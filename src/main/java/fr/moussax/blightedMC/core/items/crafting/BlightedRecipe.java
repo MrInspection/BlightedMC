@@ -31,6 +31,10 @@ public sealed abstract class BlightedRecipe
    * @return Set of all matching Blighted recipes
    */
   public static Set<BlightedRecipe> findMatchingRecipes(List<ItemStack> craftingGrid) {
+    boolean isEmpty = craftingGrid.stream()
+        .allMatch(item -> item == null || item.getType() == Material.AIR);
+    if (isEmpty) return Collections.emptySet();
+
     List<String> craftingGridItemIds = extractItemIds(craftingGrid);
     Set<BlightedRecipe> matchingRecipes = new HashSet<>();
 
@@ -52,6 +56,7 @@ public sealed abstract class BlightedRecipe
 
   /**
    * Extracts the persistent custom item IDs from a crafting grid.
+   * For vanilla items, assigns ID "vanilla:{itemname_lowercase}".
    * Empty slots return an empty string.
    */
   private static List<String> extractItemIds(List<ItemStack> craftingGrid) {
@@ -67,7 +72,12 @@ public sealed abstract class BlightedRecipe
           .getPersistentDataContainer()
           .get(new NamespacedKey(BlightedMC.getInstance(), "id"), PersistentDataType.STRING);
 
-      itemIdsInGrid.add(customItemId != null ? customItemId : "");
+      if (customItemId != null) {
+        itemIdsInGrid.add(customItemId);
+      } else {
+        // Vanilla item ID format
+        itemIdsInGrid.add("vanilla:" + stack.getType().name().toLowerCase(Locale.ROOT));
+      }
     }
 
     return itemIdsInGrid;
@@ -88,17 +98,26 @@ public sealed abstract class BlightedRecipe
       String currentItemId = craftingGridItemIds.get(slotIndex);
 
       // Slot expected to be empty must be empty
-      if (expectedSlot == null || expectedSlot.manager() == null) {
+      if (expectedSlot == null || (expectedSlot.getManager() == null && !expectedSlot.isVanilla())) {
         if (!currentItemId.isEmpty()) return false;
         continue;
       }
 
-      // Must match expected custom item ID
-      if (!currentItemId.equals(expectedSlot.manager().getItemId())) return false;
+      String expectedItemId;
+      if (expectedSlot.isCustom()) {
+        expectedItemId = expectedSlot.getManager().getItemId();
+      } else if (expectedSlot.isVanilla()) {
+        expectedItemId = "vanilla:" + expectedSlot.getVanillaItem().getType().name().toLowerCase(Locale.ROOT);
+      } else {
+        return false;
+      }
+
+      // Must match expected item ID
+      if (!currentItemId.equals(expectedItemId)) return false;
 
       // Must meet the required amount
       ItemStack currentStack = craftingGrid.get(slotIndex);
-      if (currentStack == null || currentStack.getAmount() < expectedSlot.amount()) return false;
+      if (currentStack == null || currentStack.getAmount() < expectedSlot.getAmount()) return false;
     }
 
     return true;
@@ -111,7 +130,6 @@ public sealed abstract class BlightedRecipe
                                                 List<ItemStack> craftingGrid,
                                                 List<String> craftingGridItemIds) {
 
-    // Clone precomputed a map instead of rebuilding each time
     Map<String, Integer> remainingRequiredCounts = new HashMap<>(recipe.getIngredientCountMap());
 
     for (int slotIndex = 0; slotIndex < craftingGrid.size(); slotIndex++) {
