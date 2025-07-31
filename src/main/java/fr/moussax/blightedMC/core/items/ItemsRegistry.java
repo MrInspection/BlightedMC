@@ -1,16 +1,22 @@
 package fr.moussax.blightedMC.core.items;
 
+import fr.moussax.blightedMC.core.items.__registry__.items.MaterialsRegistry;
+
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class ItemsRegistry {
-  public static final HashMap<String, ItemManager> BLIGHTED_ITEMS = new HashMap<>();
+  public static final Map<String, ItemManager> BLIGHTED_ITEMS = new HashMap<>();
 
   public static void clearItems() {
     BLIGHTED_ITEMS.clear();
   }
 
   public static void addItem(ItemManager item) {
+    if (BLIGHTED_ITEMS.containsKey(item.getItemId())) {
+      throw new IllegalArgumentException("Duplicate item ID: " + item.getItemId());
+    }
     BLIGHTED_ITEMS.put(item.getItemId(), item);
   }
 
@@ -18,7 +24,7 @@ public final class ItemsRegistry {
     clearItems();
 
     List<ItemCategory> categories = List.of(
-        // Init categories to the registry, classes must be from __registry__
+        new MaterialsRegistry()
     );
     for(ItemCategory category : categories) {
       category.registerItems();

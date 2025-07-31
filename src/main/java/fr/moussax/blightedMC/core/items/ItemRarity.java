@@ -15,6 +15,10 @@ public enum ItemRarity {
     this.colorPrefix = colorPrefix;
   }
 
+  public String getName() {
+    return name;
+  }
+
   public String getColorPrefix() {
     return colorPrefix;
   }
