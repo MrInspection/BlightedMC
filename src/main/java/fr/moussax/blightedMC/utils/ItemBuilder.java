@@ -79,7 +79,7 @@ public class ItemBuilder {
   public ItemBuilder(Material material, @Positive int amount, @Nonnull String displayName) {
     this.material = material;
     this.amount = amount;
-    this.item = new ItemStack(material);
+    this.item = new ItemStack(material, amount);
     this.itemMeta = item.getItemMeta();
     this.displayName = displayName;
   }
@@ -131,7 +131,7 @@ public class ItemBuilder {
     return this;
   }
 
-  public ItemBuilder setDurability(int damage) {
+  public ItemBuilder setDurabilityDamage(int damage) {
     this.damage = damage;
     return this;
   }
@@ -216,7 +216,6 @@ public class ItemBuilder {
   public List<Pattern> getBannerPatterns() {
     return bannerPatterns;
   }
-
   // Other methods ------------------------------------------------------------------------
 
   public ItemBuilder addLore(String line) {
@@ -237,6 +236,17 @@ public class ItemBuilder {
   }
 
   public ItemBuilder addLore(String line, int index) {
+    if (index < 0 || index > itemLores.size()) {
+      throw new IndexOutOfBoundsException("Index out of bounds for lore list: " + index);
+    }
+    itemLores.add(index, line);
+    return this;
+  }
+
+  public ItemBuilder setLore(String line, int index) {
+    if (index < 0 || index >= itemLores.size()) {
+      throw new IndexOutOfBoundsException("Index out of bounds for lore list: " + index);
+    }
     itemLores.set(index, line);
     return this;
   }
@@ -248,6 +258,22 @@ public class ItemBuilder {
 
   public ItemBuilder addEnchantment(Map<Enchantment, Integer> enchantments) {
     this.enchantments.putAll(enchantments);
+    return this;
+  }
+
+  public ItemBuilder hideTooltip(boolean hide) {
+    if (itemMeta == null) {
+      itemMeta = item.getItemMeta();
+    }
+    assert itemMeta != null;
+
+    if (hide) {
+      itemMeta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+    } else {
+      itemMeta.removeItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+    }
+
+    item.setItemMeta(itemMeta);
     return this;
   }
 
