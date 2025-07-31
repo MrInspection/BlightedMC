@@ -1,6 +1,8 @@
 package fr.moussax.blightedMC.core.items;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.__registry__.items.MaterialsRegistry;
+import org.bukkit.NamespacedKey;
 
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.Map;
 
 public final class ItemsRegistry {
   public static final Map<String, ItemManager> BLIGHTED_ITEMS = new HashMap<>();
+  public static final NamespacedKey ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "id");
+
 
   public static void clearItems() {
     BLIGHTED_ITEMS.clear();

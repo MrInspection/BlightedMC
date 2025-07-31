@@ -3,9 +3,13 @@ package fr.moussax.blightedMC.core.items;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityLore;
+import fr.moussax.blightedMC.core.items.rules.ItemRule;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.event.Event;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.checkerframework.checker.index.qual.Positive;
@@ -14,12 +18,13 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemManager extends ItemBuilder {
+public class ItemManager extends ItemBuilder implements ItemRule {
   private final String itemId;
   private final ItemRarity itemRarity;
   private final ItemType itemType;
 
   private final List<Ability> abilities = new ArrayList<>();
+  private final List<ItemRule> rules = new ArrayList<>();
 
   public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material) {
     super(material);
@@ -58,6 +63,11 @@ public class ItemManager extends ItemBuilder {
 
   public ItemManager addAbility(Ability ability) {
     abilities.add(ability);
+    return this;
+  }
+
+  public ItemManager addRule(ItemRule rule) {
+    rules.add(rule);
     return this;
   }
 
@@ -104,6 +114,30 @@ public class ItemManager extends ItemBuilder {
 
     item.setItemMeta(meta);
     return item;
+  }
+
+  @Override
+  public boolean canPlace(BlockPlaceEvent event, ItemStack itemStack) {
+    for (ItemRule rule : rules) {
+      if (!rule.canPlace(event, itemStack)) return false;
+    }
+    return true;
+  }
+
+  @Override
+  public boolean canInteract(PlayerInteractEvent event, ItemStack itemStack) {
+    for (ItemRule rule : rules) {
+      if (!rule.canInteract(event, itemStack)) return false;
+    }
+    return true;
+  }
+
+  @Override
+  public boolean canUse(Event event, ItemStack itemStack) {
+    for (ItemRule rule : rules) {
+      if (!rule.canUse(event, itemStack)) return false;
+    }
+    return true;
   }
 
   public String getItemId() {
