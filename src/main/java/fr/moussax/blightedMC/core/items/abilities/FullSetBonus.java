@@ -4,34 +4,29 @@ import fr.moussax.blightedMC.core.players.BlightedPlayer;
 
 public interface FullSetBonus {
   void startAbility();
-
   void stopAbility();
 
   int getPieces();
-
   int getMaxPieces();
 
   void setPlayer(BlightedPlayer player);
-
   Bonuses getBonus();
 
-  default setType type() {
-    return setType.NORMAL;
+  default SetType type() {
+    return SetType.NORMAL;
   }
 
   default FullSetBonus createNew(BlightedPlayer player) {
-    FullSetBonus bonus;
-
     try {
-      bonus = this.getClass().getDeclaredConstructor(BlightedPlayer.class).newInstance(player);
+      FullSetBonus bonus = this.getClass().getDeclaredConstructor().newInstance();
       bonus.setPlayer(player);
-    } catch (Exception ignored) {
+      return bonus;
+    } catch (Exception e) {
+      throw new IllegalStateException("Cannot create new FullSetBonus instance", e);
     }
-
-    return null;
   }
 
-  enum setType {
+  enum SetType {
     NORMAL,
     SNEAK
   }
