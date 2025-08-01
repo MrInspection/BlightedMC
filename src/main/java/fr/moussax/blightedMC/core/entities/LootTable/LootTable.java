@@ -1,111 +1,99 @@
 package fr.moussax.blightedMC.core.entities.LootTable;
 
+import fr.moussax.blightedMC.core.items.ItemsRegistry;
+import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class LootTable {
+  private final List<LootEntry> lootEntries = new ArrayList<>();
   private static final Random randomizer = new Random();
-  private final Map<ItemStack, LootDropRarity> lootPool = new HashMap<>();
 
-  private ItemStack item;
-  private int min = 1, max = 1;
-  private double lootChance;
-  private LootDropRarity rarity;
-
-  public LootTable(ItemStack item, double lootChance, LootDropRarity rarity) {
-    validateChance(lootChance);
-    this.item = item;
-    this.lootChance = lootChance;
-    this.rarity = rarity;
-  }
-
-  public LootTable(ItemStack item, int min, int max, double lootChance, LootDropRarity rarity) {
-    validateChance(lootChance);
-    this.item = item;
-    this.min = min;
-    this.max = max;
-    this.lootChance = lootChance;
-    this.rarity = rarity;
-  }
-
-  public LootTable addLoot(ItemStack item, LootDropRarity rarity) {
-    lootPool.put(item, rarity);
+  public LootTable addLoot(String itemId, int minAmount, int maxAmount, double dropChance, LootDropRarity rarity) {
+    ItemLoot itemLoot = new ItemLoot(
+        ItemsRegistry.BLIGHTED_ITEMS.get(itemId).toItemStack(),
+        minAmount, maxAmount
+    );
+    lootEntries.add(new LootEntry(itemLoot, dropChance, rarity));
     return this;
   }
 
-  public void dropLootItem(Location location, Player player) {
-    if (randomizer.nextDouble() > lootChance) return;
-
-    int amount = randomizer.nextInt(max - min + 1) + min;
-    if (amount == 0) return;
-
-    ItemStack clonedItem = item.clone();
-    clonedItem.setAmount(amount);
-    Objects.requireNonNull(location.getWorld()).dropItemNaturally(location, clonedItem);
-
-    if (player != null && shouldSendMessage(rarity)) {
-      player.sendMessage(getRarityMessage(rarity, clonedItem));
-    }
+  public LootTable addLoot(Material material, int minAmount, int maxAmount, double dropChance, LootDropRarity rarity) {
+    ItemStack stack = new ItemStack(material);
+    ItemLoot itemLoot = new ItemLoot(stack, minAmount, maxAmount);
+    lootEntries.add(new LootEntry(itemLoot, dropChance, rarity));
+    return this;
   }
 
-  public void dropFromLootPool(Location location, Player player) {
-    for (Map.Entry<ItemStack, LootDropRarity> entry : lootPool.entrySet()) {
-      ItemStack lootItem = entry.getKey();
-      LootDropRarity dropRarity = entry.getValue();
-
-      double dropChance = getChanceByRarity(dropRarity);
-      if (randomizer.nextDouble() > dropChance) continue;
-
-      ItemStack cloned = lootItem.clone();
-      Objects.requireNonNull(location.getWorld()).dropItemNaturally(location, cloned);
-
-      if (player != null && shouldSendMessage(dropRarity)) {
-        player.sendMessage(getRarityMessage(dropRarity, cloned));
+  public void dropLoot(Location location, BlightedPlayer killer) {
+    for (LootEntry entry : lootEntries) {
+      if (randomizer.nextDouble() <= entry.dropChance) {
+        int amount = entry.item.generateAmount();
+        String itemName = formatItemName(entry.item.name(), amount);
+        entry.item.consume(killer, location, false, amount);
+        if (killer != null && shouldSendMessage(entry.rarity)) {
+          killer.getPlayer().sendMessage(getRarityMessage(entry.rarity, itemName));
+          playDropSound(killer, entry.rarity);
+        }
       }
-
-      break;
-    }
-  }
-
-  private void validateChance(double chance) {
-    if (chance < 0.0 || chance > 1.0) {
-      throw new IllegalArgumentException("lootChance must be between 0.0 and 1.0, got " + chance);
     }
   }
 
   private boolean shouldSendMessage(LootDropRarity rarity) {
-    return rarity.ordinal() <= LootDropRarity.EXTRAORDINARY.ordinal();
-  }
-
-  private double getChanceByRarity(LootDropRarity rarity) {
     return switch (rarity) {
-      case INSANE -> 0.0003;
-      case MIRACULOUS -> 0.006;
-      case EXTRAORDINARY -> 0.03;
-      case RARE -> 0.11;
-      case UNCOMMON -> 0.31;
-      case COMMON -> 1.0;
+      case EXTRAORDINARY, MIRACULOUS, INSANE -> true;
+      default -> false;
     };
   }
 
-  private String getRarityMessage(LootDropRarity rarity, ItemStack item) {
-    String itemName = item.hasItemMeta() && Objects.requireNonNull(item.getItemMeta()).hasDisplayName()
-        ? item.getItemMeta().getDisplayName()
-        : item.getType().name();
-
-    return switch (rarity) {
-      case INSANE -> "§d§lINSANE DROP! §7You found §r" + itemName;
-      case MIRACULOUS -> "§6§lMIRACULOUS DROP! §7You found §r" + itemName;
-      case EXTRAORDINARY -> "§5§lEXTRAORDINARY DROP! §7You found §r" + itemName;
-      case RARE -> "§9§lRARE DROP! §7You found §r" + itemName;
-      case UNCOMMON -> "§a§lUNCOMMON DROP! §7You found §r" + itemName;
-      case COMMON -> "§7You found " + itemName;
+  private String getRarityMessage(LootDropRarity rarity, String itemName) {
+    String prefix = switch (rarity) {
+      case INSANE -> " §c§lINSANE DROP! §7You found §c";
+      case MIRACULOUS -> " §d§lMIRACULOUS DROP! §7You found §d";
+      case EXTRAORDINARY -> " §b§lEXTRAORDINARY DROP! §7You found §5";
+      case RARE -> " §e§lRARE DROP! §7You found §b";
+      default -> null;
     };
+    return prefix + itemName;
   }
+
+  private void playDropSound(BlightedPlayer player, LootDropRarity rarity) {
+    Sound sound;
+    float pitch;
+
+    switch (rarity) {
+      case INSANE -> {
+        sound = Sound.UI_TOAST_CHALLENGE_COMPLETE;
+        pitch = 0.9f;
+      }
+      case MIRACULOUS -> {
+        sound = Sound.UI_TOAST_CHALLENGE_COMPLETE;
+        pitch = 1.2f;
+      }
+      case EXTRAORDINARY -> {
+        sound = Sound.UI_TOAST_CHALLENGE_COMPLETE;
+        pitch = 1.5f;
+      }
+      default -> {
+        sound = null;
+        pitch = 1.0f;
+      }
+    }
+
+    if (sound != null && player.getPlayer() != null) {
+      player.getPlayer().playSound(player.getPlayer().getLocation(), sound, 1.0f, pitch);
+    }
+  }
+
+  private String formatItemName(String baseName, int amount) {
+    return amount > 1 ? baseName + " §8(x" + amount + ")" : baseName;
+  }
+
+  private record LootEntry(ItemLoot item, double dropChance, LootDropRarity rarity) {}
 }

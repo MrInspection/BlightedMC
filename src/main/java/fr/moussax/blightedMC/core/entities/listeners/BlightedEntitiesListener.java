@@ -2,7 +2,8 @@ package fr.moussax.blightedMC.core.entities.listeners;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
-import fr.moussax.blightedMC.core.utils.Formatter;
+import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
@@ -49,6 +50,7 @@ public class BlightedEntitiesListener implements Listener {
     Location location = entity.getLocation().clone().add(getRandomOffset(), 1.0, getRandomOffset());
     World world = location.getWorld();
 
+    assert world != null;
     world.spawn(location, ArmorStand.class, stand -> {
       stand.setMarker(true);
       stand.setVisible(false);
@@ -97,10 +99,12 @@ public class BlightedEntitiesListener implements Listener {
     BlightedEntity blighted = blightedEntities.remove(event.getEntity().getUniqueId());
     if (blighted == null) return;
 
-    blighted.dropLoot(event.getEntity().getLocation());
+    Player killer = event.getEntity().getKiller();
+    BlightedPlayer player = (killer != null) ? BlightedPlayer.getBlightedPlayer(killer) : null;
+
+    blighted.dropLoot(event.getEntity().getLocation(), player);
 
     event.getDrops().clear();
     event.setDroppedExp(0);
   }
-
 }

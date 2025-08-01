@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.core.entities;
 
 import fr.moussax.blightedMC.core.entities.LootTable.LootTable;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -25,6 +26,8 @@ public abstract class BlightedEntity {
   protected LivingEntity entity;
   protected LootTable lootTable;
   protected EntityNameTag nameTagType = EntityNameTag.DEFAULT;
+
+  // TODO: Add xp drop
 
   protected final Map<Attribute, Double> attributes = new HashMap<>();
 
@@ -87,10 +90,9 @@ public abstract class BlightedEntity {
     updateNameTag();
   }
 
-  public void dropLoot(Location location) {
+  public void dropLoot(Location location, BlightedPlayer player) {
     if (lootTable == null) return;
-    lootTable.dropLootItem(location, null);
-    lootTable.dropFromLootPool(location, null);
+    lootTable.dropLoot(location, player);
   }
 
   public void updateNameTag() {
