@@ -12,28 +12,50 @@ public final class AbilityExecutor {
 
   public static <T extends Event> void execute(Ability ability, BlightedPlayer player, T event) {
     AbilityManager<T> manager = castManager(ability.getManager());
+
+    // 1. Check cooldown
+    for (CooldownEntry entry : player.getCooldowns()) {
+        if (entry.abilityManager().equals(manager.getClass()) && entry.abilityType() == ability.getType()) {
+            player.getPlayer().sendMessage("§cAbility is on cooldown!");
+            if (event instanceof Cancellable c) c.setCancelled(true);
+            return;
+        }
+    }
+
+    // 2. Check mana
+    int manaCost = manager.getManaCost();
+    if (player.getMana().getCurrentMana() < manaCost) {
+        player.getPlayer().sendMessage("§cNot enough mana!");
+        if (event instanceof Cancellable c) c.setCancelled(true);
+        return;
+    }
+
     if (!manager.canTrigger(player)) {
-      if (event instanceof Cancellable c) c.setCancelled(true);
-      return;
+        if (event instanceof Cancellable c) c.setCancelled(true);
+        return;
     }
+
     try {
-      boolean success = manager.triggerAbility(event);
-      if (event instanceof Cancellable c) c.setCancelled(!success || c.isCancelled());
-      if (success) {
-        // Call the start method to execute the actual ability logic
-        manager.start(player);
-        
-        startCooldown(player,
-          manager.getClass(),
-          ability.getType(),
-          manager.getCooldownTicks());
-      }
+        boolean success = manager.triggerAbility(event);
+        if (event instanceof Cancellable c) c.setCancelled(!success || c.isCancelled());
+        if (success) {
+            // 3. Subtract mana
+            if (manaCost > 0) {
+                player.getMana().consumeMana(manaCost);
+                player.getActionBarManager().tick();
+            }
+            manager.start(player);
+            startCooldown(player,
+                manager.getClass(),
+                ability.getType(),
+                manager.getCooldownTicks());
+        }
     } catch (Exception e) {
-      e.printStackTrace();
-      player.getPlayer().sendMessage("§cAbility execution failed: " + e.getClass().getSimpleName());
-      if (event instanceof Cancellable c) c.setCancelled(true);
+        e.printStackTrace();
+        player.getPlayer().sendMessage("§cAbility execution failed: " + e.getClass().getSimpleName());
+        if (event instanceof Cancellable c) c.setCancelled(true);
     }
-  }
+}
 
   @SuppressWarnings("unchecked")
   private static <T extends Event> AbilityManager<T> castManager(AbilityManager<?> manager) {
