@@ -1,13 +1,13 @@
 package fr.moussax.blightedMC.core.players.managers;
 
-public class BlightedManaManager {
+public class ManaManager {
   private double currentMana;
   private double maxMana;
   private double manaRegenerationRate;
 
-  public BlightedManaManager(double maxMana, double manaRegenerationRate) {
+  public ManaManager(double maxMana, double manaRegenRate) {
     this.maxMana = maxMana;
-    this.manaRegenerationRate = manaRegenerationRate;
+    this.manaRegenerationRate = manaRegenRate;
     this.currentMana = maxMana;
   }
 
@@ -23,8 +23,8 @@ public class BlightedManaManager {
     this.maxMana = maxMana;
   }
 
-  public void setManaRegenerationRate(double manaRegenerationRate) {
-    this.manaRegenerationRate = manaRegenerationRate;
+  public void setManaRegenerationRate(double manaRegenRate) {
+    this.manaRegenerationRate = manaRegenRate;
   }
 
   public boolean consumeMana(double amount) {

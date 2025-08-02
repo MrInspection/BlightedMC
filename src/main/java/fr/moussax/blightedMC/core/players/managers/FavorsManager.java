@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.players.managers;
 
-public class BlightedFavorsManager {
+public class FavorsManager {
   private int favors = 0;
 
   public int getFavors() {

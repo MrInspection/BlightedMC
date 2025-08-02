@@ -1,5 +1,6 @@
-package fr.moussax.blightedMC.core.players;
+package fr.moussax.blightedMC.core.players.managers;
 
+import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.Formatter;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
