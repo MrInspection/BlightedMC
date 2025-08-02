@@ -2,8 +2,11 @@ package fr.moussax.blightedMC.core.items;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.abilities.Ability;
-import fr.moussax.blightedMC.core.items.abilities.AbilityLore;
+import fr.moussax.blightedMC.core.items.abilities.AbilityExecutor;
+import fr.moussax.blightedMC.core.items.abilities.AbilityType;
+import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.core.items.rules.ItemRule;
+import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -18,10 +21,14 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static fr.moussax.blightedMC.core.items.ItemsRegistry.BLIGHTED_ITEMS;
+import static fr.moussax.blightedMC.core.items.ItemsRegistry.ID_KEY;
+
 public class ItemManager extends ItemBuilder implements ItemRule {
   private final String itemId;
   private final ItemRarity itemRarity;
   private final ItemType itemType;
+  private FullSetBonus fullSetBonus;
 
   private final List<Ability> abilities = new ArrayList<>();
   private final List<ItemRule> rules = new ArrayList<>();
@@ -82,6 +89,70 @@ public class ItemManager extends ItemBuilder implements ItemRule {
     return this;
   }
 
+  public ItemManager setFullSetBonus(FullSetBonus bonus) {
+    this.fullSetBonus = bonus;
+    return this;
+  }
+
+  public FullSetBonus getFullSetBonus() {
+    return fullSetBonus;
+  }
+
+  public static ItemManager fromItemStack(ItemStack itemStack) {
+    if (itemStack == null || itemStack.getType().isAir()) return null;
+
+    var meta = itemStack.getItemMeta();
+    if (meta == null) return null;
+
+    var container = meta.getPersistentDataContainer();
+    String itemId = container.get(ID_KEY, PersistentDataType.STRING);
+    if (itemId == null) return null;
+
+    return BLIGHTED_ITEMS.get(itemId);
+  }
+
+  public void triggerAbilities(BlightedPlayer blightedPlayer, Event event) {
+    for (Ability ability : abilities) {
+      // Check if the ability type matches the current event
+      if (shouldTriggerAbility(ability, event)) {
+        AbilityExecutor.execute(ability, blightedPlayer, event);
+      }
+    }
+
+    for (FullSetBonus activeBonus : blightedPlayer.getActiveFullSetBonuses()) {
+      if (activeBonus.getPieces() >= activeBonus.getMaxPieces()) {
+        activeBonus.startAbility();
+      }
+    }
+  }
+
+  private boolean shouldTriggerAbility(Ability ability, Event event) {
+    if (event instanceof org.bukkit.event.player.PlayerInteractEvent interactEvent) {
+      org.bukkit.event.block.Action action = interactEvent.getAction();
+      AbilityType abilityType = ability.getType();
+      
+      // Check for sneak requirements first
+      if (abilityType.isSneak() && !interactEvent.getPlayer().isSneaking()) {
+        return false;
+      }
+      
+      // Check if the ability type matches the current action
+      if (abilityType.isRightClick() && (action == org.bukkit.event.block.Action.RIGHT_CLICK_AIR || 
+                                        action == org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK)) {
+        return true;
+      }
+      if (abilityType.isLeftClick() && (action == org.bukkit.event.block.Action.LEFT_CLICK_AIR || 
+                                       action == org.bukkit.event.block.Action.LEFT_CLICK_BLOCK)) {
+        return true;
+      }
+      
+      return false;
+    }
+    
+    // For other event types, allow all abilities for now
+    return true;
+  }
+
   @Override
   public ItemStack toItemStack() {
     ItemStack item = super.toItemStack();
@@ -99,18 +170,6 @@ public class ItemManager extends ItemBuilder implements ItemRule {
         PersistentDataType.STRING,
         itemRarity.name()
     );
-
-    List<String> combinedLore = new ArrayList<>(getItemLores());
-    for (Ability ability : abilities) {
-      AbilityLore lore = ability.getAbilityLore();
-      if (lore != null) {
-        combinedLore.addAll(lore.makeLore(null, item));
-      }
-    }
-
-    if (!combinedLore.isEmpty()) {
-      meta.setLore(combinedLore);
-    }
 
     item.setItemMeta(meta);
     return item;
