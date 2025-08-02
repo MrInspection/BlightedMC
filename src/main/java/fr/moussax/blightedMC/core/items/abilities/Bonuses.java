@@ -12,7 +12,7 @@ public enum Bonuses {
   }
 
   public FullSetBonus getBonus(BlightedPlayer player) {
-    if(setBonus.type() == FullSetBonus.SetType.SNEAK) {
+    if(setBonus.getType() == FullSetBonus.SetType.SNEAK) {
       SneakAbilityWrapper wrapper = new SneakAbilityWrapper(setBonus);
       wrapper.setPlayer(player);
       return wrapper;
@@ -21,6 +21,6 @@ public enum Bonuses {
   }
 
   public boolean isSneak(){
-    return setBonus.type() == FullSetBonus.SetType.SNEAK;
+    return setBonus.getType() == FullSetBonus.SetType.SNEAK;
   }
 }

@@ -11,10 +11,10 @@ import fr.moussax.blightedMC.core.players.BlightedPlayerListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
-public class EventsManager {
+public final class EventsRegistry {
   private final BlightedMC instance = BlightedMC.getInstance();
 
-  public void registerListeners() {
+  public void initializeListeners() {
     PluginManager pm = Bukkit.getPluginManager();
     pm.registerEvents(new MenuListeners(), instance);
     pm.registerEvents(new BlightedEntitiesListener(), instance);

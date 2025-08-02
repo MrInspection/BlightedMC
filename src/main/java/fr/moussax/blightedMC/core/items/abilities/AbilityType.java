@@ -2,79 +2,44 @@ package fr.moussax.blightedMC.core.items.abilities;
 
 import org.bukkit.event.block.Action;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 public enum AbilityType {
-  RIGHT_CLICK(true, false, false, false),
-  LEFT_CLICK(false, true, false, false),
-  LEFT_OR_RIGHT_CLICK(true, true, false, false),
-  SNEAK(false, false, true, false),
-  SNEAK_RIGHT_CLICK(true, false, true, false),
-  SNEAK_LEFT_CLICK(false, true, true, false),
-  SNEAK_LEFT_OR_RIGHT_CLICK(true, true, true, false),
-  FULL_SET_BONUS(),
-  ENTITY_HIT(),
-  PRE_HIT(),
-  AFTER_HIT(),;
+  RIGHT_CLICK(true, false, false),
+  LEFT_CLICK(false, true, false),
+  LEFT_OR_RIGHT_CLICK(true, true, false),
+  SNEAK(false, false, true),
+  SNEAK_RIGHT_CLICK(true, false, true),
+  SNEAK_LEFT_CLICK(false, true, true),
+  SNEAK_LEFT_OR_RIGHT_CLICK(true, true, true),
+  FULL_SET_BONUS(false, false, false),
+  ENTITY_HIT(false, false, false),
+  PRE_HIT(false, false, false),
+  AFTER_HIT(false, false, false);
 
-  private final boolean isRightClick;
-  private final boolean isLeftClick;
-  private final boolean isSneak;
-  private final boolean isOther;
+  private final boolean rightClick, leftClick, sneak;
 
-  AbilityType(boolean isRightClick, boolean isLeftClick, boolean isSneak, boolean isOther) {
-    this.isRightClick = isRightClick;
-    this.isLeftClick = isLeftClick;
-    this.isSneak = isSneak;
-    this.isOther = isOther;
+  AbilityType(boolean rightClick, boolean leftClick, boolean sneak) {
+    this.rightClick = rightClick;
+    this.leftClick = leftClick;
+    this.sneak = sneak;
   }
 
-  AbilityType() {
-    this(false, false, false, true);
-  }
+  public boolean isRightClick() { return rightClick; }
+  public boolean isLeftClick() { return leftClick; }
+  public boolean isSneak() { return sneak; }
 
-  @Override
-  public String toString() {
-    return switch (this) {
-      case ENTITY_HIT, PRE_HIT, AFTER_HIT -> "Hit";
-      case RIGHT_CLICK -> "Right Click";
-      case LEFT_CLICK -> "Left Click";
-      case LEFT_OR_RIGHT_CLICK -> "Left/Right Click";
-      case SNEAK -> "Sneak";
-      case SNEAK_RIGHT_CLICK -> "Sneak Right Click";
-      case SNEAK_LEFT_CLICK -> "Sneak Left Click";
-      case SNEAK_LEFT_OR_RIGHT_CLICK -> "Sneak Left/Right Click";
-      case FULL_SET_BONUS -> "Full Set Bonus";
-    };
-  }
-
-  public Set<Action> toAction() {
-    Set<Action> actions = new HashSet<>();
-    if(isRightClick) {
+  public Set<Action> toActions() {
+    EnumSet<Action> actions = EnumSet.noneOf(Action.class);
+    if (rightClick) {
       actions.add(Action.RIGHT_CLICK_AIR);
       actions.add(Action.RIGHT_CLICK_BLOCK);
     }
-    if(isLeftClick) {
+    if (leftClick) {
       actions.add(Action.LEFT_CLICK_AIR);
       actions.add(Action.LEFT_CLICK_BLOCK);
     }
     return actions;
-  }
-
-  public boolean isRightClick() {
-    return isRightClick;
-  }
-
-  public boolean isLeftClick() {
-    return isLeftClick;
-  }
-
-  public boolean isSneak() {
-    return isSneak;
-  }
-
-  public boolean isOther() {
-    return isOther;
   }
 }
