@@ -269,8 +269,12 @@ public class ItemBuilder {
 
     if (hide) {
       itemMeta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+      if (!itemFlags.contains(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)) {
+        itemFlags.add(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+      }
     } else {
       itemMeta.removeItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+      itemFlags.remove(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
     }
 
     item.setItemMeta(itemMeta);
