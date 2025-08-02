@@ -6,11 +6,18 @@ authors: [ MrInspection ]
 
 commands:
   broadcast:
-    description: BlightedMC provided commands
+    description: Broadcast a message to the server
   spawnmob:
     description: BlightedMc provided command
   test:
+    description: General testing command
   favors:
     description: Manage the Favors currency system
   laser:
+    description: BlightedMC test command for lazer ability
   craft:
+    description: Open the BlightedMC custom crafting table
+  loop:
+    description: Execute multiple times a command
+  kaboom:
+    description: Launch all players or a specific player into the sky
