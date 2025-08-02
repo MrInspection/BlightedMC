@@ -1,12 +1,12 @@
 package fr.moussax.blightedMC.core.menus;
 
-import fr.moussax.blightedMC.core.events.BlightedPlayerEvent;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
-public class MenuItemClickEvent extends BlightedPlayerEvent implements Cancellable {
+public class MenuItemClickEvent extends Event implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
   private final ClickableItem item;
   private final ItemStack cursorItem;
@@ -24,7 +24,6 @@ public class MenuItemClickEvent extends BlightedPlayerEvent implements Cancellab
     return handlers;
   }
 
-  @Override
   public HandlerList getHandlers() {
     return handlers;
   }
@@ -47,7 +46,6 @@ public class MenuItemClickEvent extends BlightedPlayerEvent implements Cancellab
     return cursorItem;
   }
 
-  @Override
   public BlightedPlayer getBlightedPlayer() {
     return player;
   }
