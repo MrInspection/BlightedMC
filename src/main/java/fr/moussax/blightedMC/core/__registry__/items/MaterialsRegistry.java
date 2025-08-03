@@ -22,7 +22,7 @@ public class MaterialsRegistry implements ItemCategory {
     ItemManager enchantedIronBlock = new ItemManager(
         "ENCHANTED_IRON_BLOCK", ItemType.MATERIAL, ItemRarity.RARE, Material.IRON_BLOCK,"Enchanted Iron Block"
     );
-
+    enchantedIronBlock.addLore(ItemRarity.RARE.getName());
     enchantedIronBlock.addEnchantmentGlint();
     enchantedIronBlock.addRule(new PreventPlacementRule());
     ItemsRegistry.addItem(enchantedIronBlock);

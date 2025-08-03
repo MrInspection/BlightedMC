@@ -5,7 +5,8 @@ public enum ItemRarity {
   UNCOMMON("§e§lUNCOMMON", "§e"),
   RARE("§b§lRARE", "§b"),
   EPIC("§d§lEPIC", "§d"),
-  LEGENDARY("§c§lLEGENDARY", "§c");
+  LEGENDARY("§c§lLEGENDARY", "§c"),
+  SPECIAL("§5§lSPECIAL", "§5");
 
   private final String name;
   private final String colorPrefix;
