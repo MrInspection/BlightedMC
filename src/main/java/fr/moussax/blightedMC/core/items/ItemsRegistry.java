@@ -1,9 +1,9 @@
 package fr.moussax.blightedMC.core.items;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.__registry__.items.MaterialsRegistry;
-import fr.moussax.blightedMC.core.__registry__.armors.SpecialArmorRegistry;
-import fr.moussax.blightedMC.core.__registry__.items.SpecialItems;
+import fr.moussax.blightedMC.core.registry.items.MaterialsRegistry;
+import fr.moussax.blightedMC.core.registry.armors.SpecialArmorRegistry;
+import fr.moussax.blightedMC.core.registry.items.SpecialItems;
 import org.bukkit.NamespacedKey;
 
 import java.util.HashMap;

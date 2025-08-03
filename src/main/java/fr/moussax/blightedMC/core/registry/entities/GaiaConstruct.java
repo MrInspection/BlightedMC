@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.__registry__.entities;
+package fr.moussax.blightedMC.core.registry.entities;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
@@ -19,15 +19,21 @@ import java.util.Random;
 public class GaiaConstruct extends BlightedEntity {
   private int hits;
   private final boolean highLevel;
+  private final String entityId;
 
   public GaiaConstruct(boolean highLevel) {
     super("§6Gaia Construct", 200, EntityType.IRON_GOLEM);
     this.highLevel = highLevel;
-    this.level = highLevel ? 260 : 140;
     this.hits = 6;
+    this.entityId = highLevel ? "GAIA_CONSTRUCT_HIGH" : "GAIA_CONSTRUCT_LOW";
 
     setNameTagType(EntityNameTag.SMALL_NUMBER);
     addAttribute(Attribute.ATTACK_DAMAGE, 24);
+  }
+
+  @Override
+  public String getEntityId() {
+    return entityId;
   }
 
   @Override

@@ -1,10 +1,7 @@
-package fr.moussax.blightedMC.core.__registry__.items;
+package fr.moussax.blightedMC.core.registry.items;
 
-import fr.moussax.blightedMC.core.__registry__.abilities.TestAbility;
 import fr.moussax.blightedMC.core.items.*;
 import fr.moussax.blightedMC.core.items.ItemCategory;
-import fr.moussax.blightedMC.core.items.abilities.Ability;
-import fr.moussax.blightedMC.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.core.items.rules.PreventPlacementRule;
 import org.bukkit.Material;
 

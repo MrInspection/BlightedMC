@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.__registry__.items;
+package fr.moussax.blightedMC.core.registry.items;
 
 import fr.moussax.blightedMC.core.entities.LootTable.favors.FavorsItem;
 import fr.moussax.blightedMC.core.items.*;

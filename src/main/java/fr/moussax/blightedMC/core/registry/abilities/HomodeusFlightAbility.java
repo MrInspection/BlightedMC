@@ -1,8 +1,7 @@
-package fr.moussax.blightedMC.core.__registry__.abilities;
+package fr.moussax.blightedMC.core.registry.abilities;
 
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;

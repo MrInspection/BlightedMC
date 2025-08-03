@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.__registry__.abilities;
+package fr.moussax.blightedMC.core.registry.abilities;
 
 import fr.moussax.blightedMC.core.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
