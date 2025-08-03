@@ -113,7 +113,6 @@ public class AbilityListener implements Listener {
   @EventHandler
   public void onArmorEquip(InventoryClickEvent e) {
     if (!(e.getWhoClicked() instanceof Player player)) return;
-    // Always update armor after any inventory click (not just shift-click)
     new BukkitRunnable() {
       @Override
       public void run() {
@@ -126,13 +125,11 @@ public class AbilityListener implements Listener {
   private <T extends Event> void trigger(Player player, T event) {
     BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(player);
     if (bp == null) {
-      // If no BlightedPlayer exists, create one
       bp = new BlightedPlayer(player);
     }
 
     ItemManager itemManager = bp.getEquippedItemManager();
     if (itemManager == null || itemManager.getAbilities().isEmpty()) {
-      // No item or no abilities, do not trigger
       return;
     }
 

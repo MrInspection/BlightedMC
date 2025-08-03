@@ -2,7 +2,6 @@ package fr.moussax.blightedMC.core.items.abilities;
 
 import fr.moussax.blightedMC.core.items.ItemManager;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -43,7 +42,6 @@ public final class ArmorManager {
         setBonus.setPlayer(player);
         // Check if the player has the required number of pieces for the full set bonus
         if (count >= setBonus.getMaxPieces()) {
-          // Check if this bonus is already active
           boolean alreadyActive = false;
           for (FullSetBonus activeBonus : player.getActiveFullSetBonuses()) {
             if (activeBonus.getClass().equals(bonusClass)) {
