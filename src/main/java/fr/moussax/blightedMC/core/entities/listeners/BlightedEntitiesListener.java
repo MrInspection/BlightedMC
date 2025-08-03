@@ -105,6 +105,6 @@ public class BlightedEntitiesListener implements Listener {
     blighted.dropLoot(event.getEntity().getLocation(), player);
 
     event.getDrops().clear();
-    event.setDroppedExp(0);
+    event.setDroppedExp(blighted.getDroppedExp());
   }
 }

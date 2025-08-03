@@ -14,9 +14,10 @@ import org.bukkit.inventory.ItemStack;
 import java.util.*;
 
 public abstract class BlightedEntity {
+  protected String entityId;
   protected String name;
   protected int maxHealth;
-  protected int level = -1;
+  protected int droppedExp = 0;
 
   protected ItemStack itemInMainHand;
   protected ItemStack itemInOffHand;
@@ -27,8 +28,6 @@ public abstract class BlightedEntity {
   protected LootTable lootTable;
   protected EntityNameTag nameTagType = EntityNameTag.DEFAULT;
 
-  // TODO: Add xp drop
-
   protected final Map<Attribute, Double> attributes = new HashMap<>();
 
   public BlightedEntity(String name, int maxHealth, EntityType entityType) {
@@ -37,10 +36,10 @@ public abstract class BlightedEntity {
     this.entityType = entityType;
   }
 
-  public BlightedEntity(String name, int maxHealth, double baseDamage, double speed, double defense, double scale, int level, ItemStack itemInMainHand, ItemStack itemInOffHand, ItemStack[] armor, EntityType entityType, LivingEntity entity, LootTable lootTable, EntityNameTag nameTagType) {
+  public BlightedEntity(String name, int maxHealth, double baseDamage, double speed, double defense, double scale, int droppedExp, ItemStack itemInMainHand, ItemStack itemInOffHand, ItemStack[] armor, EntityType entityType, LivingEntity entity, LootTable lootTable, EntityNameTag nameTagType) {
     this.name = name;
     this.maxHealth = maxHealth;
-    this.level = level;
+    this.droppedExp = droppedExp;
     this.itemInMainHand = itemInMainHand;
     this.itemInOffHand = itemInOffHand;
     this.armor = armor;
@@ -54,6 +53,20 @@ public abstract class BlightedEntity {
     attributes.put(attribute, value);
   }
 
+  private void setAttribute(Attribute attribute, double value) {
+    AttributeInstance instance = entity.getAttribute(attribute);
+    if (instance != null) {
+      instance.setBaseValue(value);
+    }
+  }
+
+  /**
+   * Spawns the entity at the given location with applied attributes, equipment, and name tag.
+   * Registers the entity for event handling.
+   *
+   * @param location the location to spawn the entity
+   * @return the spawned LivingEntity instance
+   */
   public LivingEntity spawn(Location location) {
     entity = (LivingEntity) Objects.requireNonNull(location.getWorld()).spawnEntity(location, entityType);
 
@@ -71,25 +84,32 @@ public abstract class BlightedEntity {
     return entity;
   }
 
-  private void setAttribute(Attribute attribute, double value) {
-    AttributeInstance instance = entity.getAttribute(attribute);
-    if (instance != null) {
-      instance.setBaseValue(value);
-    }
-  }
-
+  /**
+   * Kills the entity if it is alive.
+   */
   public void kill() {
     if (entity != null && !entity.isDead()) {
       entity.setHealth(0);
     }
   }
 
+  /**
+   * Inflicts damage to the entity if it is alive and updates the name tag.
+   *
+   * @param amount the amount of damage to apply
+   */
   public void damage(double amount) {
     if (entity == null || entity.isDead()) return;
     entity.damage(amount);
     updateNameTag();
   }
 
+  /**
+   * Drops loot at the specified location for the given player if a loot table is set.
+   *
+   * @param location the location to drop the loot
+   * @param player the player who killed the entity
+   */
   public void dropLoot(Location location, BlightedPlayer player) {
     if (lootTable == null) return;
     lootTable.dropLoot(location, player);
@@ -156,11 +176,27 @@ public abstract class BlightedEntity {
     return entity;
   }
 
+  public String getEntityId() {
+    return entityId;
+  }
+
+  public String getName() {
+    return name;
+  }
+
   public void setLootTable(LootTable lootTable) {
     this.lootTable = lootTable;
   }
 
   public void setNameTagType(EntityNameTag nameTagType) {
     this.nameTagType = nameTagType;
+  }
+
+  public int getDroppedExp() {
+    return droppedExp;
+  }
+
+  public void setDroppedExp(int droppedExp) {
+    this.droppedExp = droppedExp;
   }
 }
