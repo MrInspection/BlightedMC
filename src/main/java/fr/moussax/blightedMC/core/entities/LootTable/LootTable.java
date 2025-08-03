@@ -1,5 +1,8 @@
 package fr.moussax.blightedMC.core.entities.LootTable;
 
+import fr.moussax.blightedMC.core.entities.LootTable.favors.FavorsItem;
+import fr.moussax.blightedMC.core.entities.LootTable.favors.FavorsLoot;
+import fr.moussax.blightedMC.core.entities.LootTable.favors.FavorsLootAdapter;
 import fr.moussax.blightedMC.core.items.ItemsRegistry;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Location;
@@ -28,6 +31,13 @@ public class LootTable {
     ItemStack stack = new ItemStack(material);
     ItemLoot itemLoot = new ItemLoot(stack, minAmount, maxAmount);
     lootEntries.add(new LootEntry(itemLoot, dropChance, rarity));
+    return this;
+  }
+
+  public LootTable addFavorsLoot(int favors, double dropChance, LootDropRarity rarity) {
+    FavorsLoot favorsLoot = new FavorsLoot(favors);
+    FavorsLootAdapter adapter = new FavorsLootAdapter(favorsLoot, new FavorsItem(favors).createItemStack());
+    lootEntries.add(new LootEntry(adapter, dropChance, rarity));
     return this;
   }
 
