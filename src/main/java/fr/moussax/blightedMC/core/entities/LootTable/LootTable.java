@@ -11,29 +11,61 @@ import org.bukkit.Sound;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Represents a loot table capable of generating item drops for entities.
+ * Supports standard items, materials, and special Blighted Favors.
+ * Handles drop chance, rarity messaging, sound feedback, and maximum drop limits.
+ */
 public class LootTable {
   private final List<LootEntry> lootEntries = new ArrayList<>();
   private static final Random randomizer = new Random();
+  private int maxDrops = 3;
 
-  public LootTable addLoot(String itemId, int minAmount, int maxAmount, double dropChance, LootDropRarity rarity) {
-    ItemLoot itemLoot = new ItemLoot(
-        ItemsRegistry.BLIGHTED_ITEMS.get(itemId).toItemStack(),
-        minAmount, maxAmount
-    );
+  /**
+   * Adds a custom item from the ItemsRegistry to the loot table.
+   *
+   * @param itemId     the ID of the registered blighted item
+   * @param min        minimum drop quantity
+   * @param max        maximum drop quantity
+   * @param dropChance probability to drop (0.0-1.0)
+   * @param rarity     the drop rarity
+   * @return this LootTable for chaining
+   */
+  public LootTable addLoot(String itemId, int min, int max, double dropChance, LootDropRarity rarity) {
+    ItemLoot itemLoot = new ItemLoot(ItemsRegistry.BLIGHTED_ITEMS.get(itemId).toItemStack(), min, max);
     lootEntries.add(new LootEntry(itemLoot, dropChance, rarity));
     return this;
   }
 
-  public LootTable addLoot(Material material, int minAmount, int maxAmount, double dropChance, LootDropRarity rarity) {
+  /**
+   * Adds a vanilla Material item to the loot table.
+   *
+   * @param material   the Material to drop
+   * @param min        minimum drop quantity
+   * @param max        maximum drop quantity
+   * @param dropChance probability to drop (0.0-1.0)
+   * @param rarity     the drop rarity
+   * @return this LootTable for chaining
+   */
+  public LootTable addLoot(Material material, int min, int max, double dropChance, LootDropRarity rarity) {
     ItemStack stack = new ItemStack(material);
-    ItemLoot itemLoot = new ItemLoot(stack, minAmount, maxAmount);
+    ItemLoot itemLoot = new ItemLoot(stack, min, max);
     lootEntries.add(new LootEntry(itemLoot, dropChance, rarity));
     return this;
   }
 
+  /**
+   * Adds a Blighted Favors loot entry to the loot table.
+   *
+   * @param favors     number of favors contained
+   * @param dropChance probability to drop (0.0-1.0)
+   * @param rarity     the drop rarity
+   * @return this LootTable for chaining
+   */
   public LootTable addFavorsLoot(int favors, double dropChance, LootDropRarity rarity) {
     FavorsLoot favorsLoot = new FavorsLoot(favors);
     FavorsLootAdapter adapter = new FavorsLootAdapter(favorsLoot, new FavorsItem(favors).createItemStack());
@@ -41,16 +73,54 @@ public class LootTable {
     return this;
   }
 
+  /**
+   * Sets the maximum number of items that can drop from this table.
+   *
+   * @param maxDrops the max number of items to drop
+   * @return this LootTable for chaining
+   */
+  public LootTable setMaxDrop(int maxDrops) {
+    this.maxDrops = maxDrops;
+    return this;
+  }
+
+  public int getMaxDrops() {
+    return maxDrops;
+  }
+
+  /**
+   * Attempts to drop items at the specified location.
+   * Determines drops by chance, applies the maximum drop limit,
+   * notifies the killer with messages and sounds for rare drops.
+   *
+   * @param location the world location to drop items
+   * @param killer   the player who killed the entity (can be null)
+   */
   public void dropLoot(Location location, BlightedPlayer killer) {
+    List<LootEntry> successfulDrops = new ArrayList<>();
+    
+    // First pass: determine which items will drop
     for (LootEntry entry : lootEntries) {
       if (randomizer.nextDouble() <= entry.dropChance) {
-        int amount = entry.item.generateAmount();
-        String itemName = formatItemName(entry.item.name(), amount);
-        entry.item.consume(killer, location, false, amount);
-        if (killer != null && shouldSendMessage(entry.rarity)) {
-          killer.getPlayer().sendMessage(getRarityMessage(entry.rarity, itemName));
-          playDropSound(killer, entry.rarity);
-        }
+        successfulDrops.add(entry);
+      }
+    }
+    
+    // Apply max drops limit
+    if (successfulDrops.size() > maxDrops) {
+      // Shuffle and take only the first maxDrops items
+      Collections.shuffle(successfulDrops, randomizer);
+      successfulDrops = successfulDrops.subList(0, maxDrops);
+    }
+    
+    // Second pass: actually drop the items
+    for (LootEntry entry : successfulDrops) {
+      int amount = entry.item.generateAmount();
+      String itemName = formatItemName(entry.item.name(), amount);
+      entry.item.consume(killer, location, false, amount);
+      if (killer != null && shouldSendMessage(entry.rarity)) {
+        killer.getPlayer().sendMessage(getRarityMessage(entry.rarity, itemName));
+        playDropSound(killer, entry.rarity);
       }
     }
   }
@@ -105,5 +175,13 @@ public class LootTable {
     return amount > 1 ? baseName + " §8(x" + amount + ")" : baseName;
   }
 
-  private record LootEntry(ItemLoot item, double dropChance, LootDropRarity rarity) {}
+  /**
+   * Represents a single loot entry containing an item,
+   * its drop chance, and rarity.
+   *
+   * @param item       the lootable item
+   * @param dropChance the probability to drop (0.0-1.0)
+   * @param rarity     the drop rarity
+   */
+  private record LootEntry(ItemLoot item, double dropChance, LootDropRarity rarity) { }
 }

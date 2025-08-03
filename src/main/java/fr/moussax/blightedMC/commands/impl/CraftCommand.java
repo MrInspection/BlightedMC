@@ -12,7 +12,6 @@ public class CraftCommand implements CommandExecutor {
   @Override
   public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
     if(!(label.equalsIgnoreCase("craft") && sender instanceof Player player)) return false;
-
     player.openInventory(CraftingTableMenu.createInventory());
     return true;
   }

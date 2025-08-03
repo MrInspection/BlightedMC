@@ -18,14 +18,14 @@ public final class AbilityExecutor {
     for (CooldownEntry entry : player.getCooldowns()) {
       if (entry.abilityManager().equals(manager.getClass()) && entry.abilityType() == ability.getType()) {
         double remainingSeconds = entry.getRemainingSeconds();
-        
+
         if (remainingSeconds <= 0) {
           continue;
         }
-        
+
         String abilityName = ability.getName();
         String timeText = String.format("%.0fs", remainingSeconds);
-        MessageUtils.warnSender(player.getPlayer(),"§cYour §6" + abilityName + " §cability is on cooldown for §d" + timeText + "§c!");
+        MessageUtils.warnSender(player.getPlayer(), "§cYour §6" + abilityName + " §cability is on cooldown for §d" + timeText + "§c!");
         if (event instanceof Cancellable c) c.setCancelled(true);
         return;
       }
@@ -58,10 +58,9 @@ public final class AbilityExecutor {
         startCooldown(player,
           manager.getClass(),
           ability.getType(),
-          manager.getCooldownSeconds()); // Use seconds directly
+          manager.getCooldownSeconds());
       }
     } catch (Exception e) {
-      e.printStackTrace();
       player.getPlayer().sendMessage("§cAbility execution failed: " + e.getClass().getSimpleName());
       if (event instanceof Cancellable c) c.setCancelled(true);
     }
@@ -74,7 +73,7 @@ public final class AbilityExecutor {
 
   private static String getAbilityDisplayName(AbilityManager<?> manager) {
     String className = manager.getClass().getSimpleName();
-    
+
     // Remove common suffixes
     if (className.endsWith("Ability")) {
       className = className.substring(0, className.length() - 8);
@@ -82,23 +81,23 @@ public final class AbilityExecutor {
     if (className.endsWith("Manager")) {
       className = className.substring(0, className.length() - 7);
     }
-    
+
     // If it's a single word, just return it as-is
     if (className.length() <= 1) {
       return className;
     }
-    
+
     // Convert camelCase to Title Case
     StringBuilder result = new StringBuilder();
-    
+
     for (int i = 0; i < className.length(); i++) {
       char c = className.charAt(i);
-      
+
       // Add space before uppercase letters (except the first one)
       if (Character.isUpperCase(c) && i > 0) {
         result.append(' ');
       }
-      
+
       // Always capitalize the first letter of each word
       if (i == 0 || Character.isUpperCase(className.charAt(i - 1))) {
         result.append(Character.toUpperCase(c));
@@ -106,7 +105,7 @@ public final class AbilityExecutor {
         result.append(Character.toLowerCase(c));
       }
     }
-    
+
     return result.toString().trim();
   }
 

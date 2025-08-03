@@ -10,7 +10,7 @@ public class MenuRouter {
   private static final Map<Player, Stack<Menu>> menuHistory = new HashMap<>();
 
   public static void openMenu(Player player, Menu menu) {
-    closeCurrentMenu(player); // Close any currently open menu
+    closeCurrentMenu(player);
     menu.open(player);
     menuHistory.computeIfAbsent(player, k -> new Stack<>()).push(menu);
   }
