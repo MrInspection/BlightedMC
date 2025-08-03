@@ -11,9 +11,19 @@ import java.util.Objects;
 
 public class ActionBarManager implements Runnable {
   private final BlightedPlayer player;
+  private boolean insufficientMana = false;
+  private long insufficientManaStartTime = 0;
+  private static final long INSUFFICIENT_MANA_DURATION = 1000; // 1 second in milliseconds
 
   public ActionBarManager(BlightedPlayer player) {
     this.player = player;
+  }
+
+  public void setInsufficientMana(boolean insufficient) {
+    this.insufficientMana = insufficient;
+    if (insufficient) {
+      this.insufficientManaStartTime = System.currentTimeMillis();
+    }
   }
 
   @Override
@@ -22,6 +32,12 @@ public class ActionBarManager implements Runnable {
   }
 
   public void tick() {
+    player.getMana().regenerateMana();
+
+    if (insufficientMana && System.currentTimeMillis() - insufficientManaStartTime > INSUFFICIENT_MANA_DURATION) {
+      insufficientMana = false;
+    }
+    
     String space = "     ";
     String healthComponent = getHealthComponent();
     String favorsComponent = space + getFavorsComponent();
@@ -43,10 +59,13 @@ public class ActionBarManager implements Runnable {
 
   private String getFavorsComponent() {
     int favors = player.getFavors().getFavors();
-    return "§d" + favors + "☤ Favors";
+    return "§6" + favors + "✵ Favors";
   }
 
   private String getManaComponent() {
+    if (insufficientMana) {
+      return "§c§lNOT ENOUGH MANA!";
+    }
     double current = player.getMana().getCurrentMana();
     double max = player.getMana().getMaxMana();
     return "§b" + Formatter.formatDouble(current, 0) + "/" + Formatter.formatDouble(max, 0) + "✎ Mana";

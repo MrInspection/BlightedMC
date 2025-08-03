@@ -4,6 +4,7 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemManager;
 import fr.moussax.blightedMC.core.items.ItemType;
 import fr.moussax.blightedMC.core.items.abilities.Bonuses;
+import fr.moussax.blightedMC.core.items.abilities.CooldownEntry;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.core.players.managers.ActionBarManager;
 import fr.moussax.blightedMC.core.players.managers.FavorsManager;
@@ -46,7 +47,7 @@ public class BlightedPlayer {
     int storedFavors = dataHandler.getConfig().getInt("blightedFavors", 0);
     this.favors = new FavorsManager();
     this.favors.setFavors(storedFavors);
-    this.manaManager = new ManaManager(100.0, 1.0);
+    this.manaManager = new ManaManager(100.0, 0.5);
     this.actionBarManager = new ActionBarManager(this);
 
     players.put(uuid, this);
@@ -59,8 +60,6 @@ public class BlightedPlayer {
   public static BlightedPlayer getBlightedPlayer(Player player) {
     return players.get(player.getUniqueId());
   }
-
-  // FIXME: TEMPORARY PLACEHOLDER: COOLDOWN SYSTEM
 
   public ArrayList<CooldownEntry> getCooldowns() {
     return cooldowns;

@@ -6,7 +6,7 @@ import org.bukkit.event.Event;
 public interface AbilityManager<T extends Event> {
   boolean triggerAbility(T event);
 
-  long getCooldownTicks();
+  int getCooldownSeconds();
   int getManaCost();
   boolean canTrigger(BlightedPlayer player);
 
