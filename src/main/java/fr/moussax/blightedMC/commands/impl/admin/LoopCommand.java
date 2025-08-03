@@ -26,11 +26,11 @@ public class LoopCommand implements CommandExecutor {
 
     if (args.length < 3) {
       MessageUtils.informSender(sender,
-        " ",
+        "",
         "§8 ■ §7Usage: §6/§rloop §6<§famount§6> §6<§rdelay§6> [§rcommand§6]",
         "§8 ■ §7Description: §eBulk execute command with a delay in tick.",
-        "§8 ■ §Params: §ramount §6[§r" + MIN_AMOUNT + "-" + MAX_AMOUNT + "§6] §8| §rdelay §6[§r" + MIN_DELAY_TICKS + "-" + MAX_DELAY_TICKS + "§6]",
-        " "
+        "§8 ■ §7Params: §ramount §6[§r" + MIN_AMOUNT + "-" + MAX_AMOUNT + "§6] §8| §rdelay §6[§r" + MIN_DELAY_TICKS + "-" + MAX_DELAY_TICKS + "§6]",
+        ""
       );
       return false;
     }
@@ -68,14 +68,14 @@ public class LoopCommand implements CommandExecutor {
       Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> Bukkit.dispatchCommand(player, commandToExecute), ticksDelay);
     }
 
-    TextComponent message = new TextComponent("\n§8 ■ §7Looping your §d");
+    TextComponent message = new TextComponent("\n§8 ■ §7Looping your §f");
     TextComponent commandWord = MessageUtils.createClickableText(
-      "§d§lCOMMAND",
+      "§f§lCOMMAND",
       "§7Click to fill §dcommand §7in chat",
       ClickEvent.Action.SUGGEST_COMMAND,
       "/" + commandToExecute
     );
-    TextComponent afterCommand = new TextComponent(" §7with §6" + delay + " tick§7 delay. §e(Repeat " + amount + "x)\n");
+    TextComponent afterCommand = new TextComponent(" §7with §d" + delay + " tick§7 delay. §d(Repeat " + amount + "x)\n");
 
     message.addExtra(commandWord);
     message.addExtra(afterCommand);

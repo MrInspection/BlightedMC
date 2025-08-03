@@ -1,5 +1,7 @@
 package fr.moussax.blightedMC.commands;
 
+import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.EntitiesRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -32,6 +34,12 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
         if (suggestions.size() == 1 && suggestions.getFirst().equals("$players")) {
           return Bukkit.getOnlinePlayers().stream()
               .map(Player::getName)
+              .toList();
+        }
+
+        if (suggestions.size() == 1 && suggestions.getFirst().equals("$entities")) {
+          return EntitiesRegistry.getAllEntities().stream()
+              .map(BlightedEntity::getEntityId)
               .toList();
         }
 
