@@ -37,17 +37,20 @@ public class FavorsItem implements ItemGenerator {
 
     @Override
     public boolean triggerAbility(PlayerInteractEvent event) {
-      assert event.getItem() != null;
+      if (event.getItem() == null) return false;
       BlightedPlayer bPlayer = BlightedPlayer.getBlightedPlayer(event.getPlayer());
       FavorsItem favorsItem = new FavorsItem(event.getItem());
+      
       if (favorsItem.amount <= 0) {
         MessageUtils.warnSender(event.getPlayer(), "This gemstone doesn't have any favors to redeem.");
         return false;
       }
+      
       favorsItem.addFavors(bPlayer);
       event.getPlayer().sendMessage("§8 ■ §7You received §6" + favorsItem.amount + "✵ Favors §7from a §5Blighted Gemstone.");
       event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 100f, 0f);
       event.getPlayer().getInventory().remove(event.getItem());
+      event.setCancelled(true);
       return true;
     }
 

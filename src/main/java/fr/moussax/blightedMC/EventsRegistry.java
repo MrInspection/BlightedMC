@@ -1,6 +1,8 @@
 package fr.moussax.blightedMC;
 
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedMC.core.entities.listeners.SpawnableEntitiesListener;
+import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntitiesRegistry;
 import fr.moussax.blightedMC.core.entities.magic.LaserBeam;
 import fr.moussax.blightedMC.core.items.abilities.AbilityListener;
 import fr.moussax.blightedMC.core.items.blocks.BlightedBlock;
@@ -18,6 +20,7 @@ public final class EventsRegistry {
     PluginManager pm = Bukkit.getPluginManager();
     pm.registerEvents(new MenuListeners(), instance);
     pm.registerEvents(new BlightedEntitiesListener(), instance);
+    pm.registerEvents(new SpawnableEntitiesListener(), instance);
     pm.registerEvents(new LaserBeam.LaserBeamListener(), instance);
     pm.registerEvents(new BlightedBlock.BlightedBlockListener(), instance);
     pm.registerEvents(new BlightedPlayerListener(), instance);
