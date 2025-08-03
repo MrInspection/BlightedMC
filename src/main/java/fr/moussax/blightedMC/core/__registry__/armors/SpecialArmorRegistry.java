@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.__registry__.items;
+package fr.moussax.blightedMC.core.__registry__.armors;
 
 import fr.moussax.blightedMC.core.__registry__.abilities.HomodeusFlightAbility;
 import fr.moussax.blightedMC.core.items.*;
@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemFlag;
 
 import java.util.List;
 
-public class SpecialItemRegistry implements ItemCategory {
+public class SpecialArmorRegistry implements ItemCategory {
   @Override
   public void registerItems() {
     FullSetBonus homodeusFlightBonus = new HomodeusFlightAbility();

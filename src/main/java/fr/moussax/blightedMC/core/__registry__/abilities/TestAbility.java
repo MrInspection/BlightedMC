@@ -13,8 +13,8 @@ public class TestAbility implements AbilityManager<PlayerInteractEvent> {
   }
 
   @Override
-  public long getCooldownTicks() {
-    return 20*2;
+  public int getCooldownSeconds() {
+    return 2;
   }
 
   @Override
