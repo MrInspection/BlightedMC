@@ -28,15 +28,10 @@ public class SpawnableEntitiesListener implements Listener {
 
     Location spawnLocation = event.getLocation();
     World world = spawnLocation.getWorld();
-    
     if (world == null) return;
 
-    // Get all registered spawnable entities
     List<SpawnableEntity> spawnableEntities = SpawnableEntitiesRegistry.getAllEntities();
-    
     if (spawnableEntities.isEmpty()) return;
-
-    // Try to spawn custom entities at the same location
     for (SpawnableEntity spawnableEntity : spawnableEntities) {
       if (shouldSpawnCustomEntity(spawnableEntity, spawnLocation, world)) {
         spawnCustomEntity(spawnableEntity, spawnLocation);
@@ -53,12 +48,10 @@ public class SpawnableEntitiesListener implements Listener {
    * @return true if the entity should spawn
    */
   private boolean shouldSpawnCustomEntity(SpawnableEntity entity, Location location, World world) {
-    // Check if the entity can spawn at this location based on its conditions
     if (!entity.canSpawnAt(location, world)) {
       return false;
     }
 
-    // Check spawn chance
     return randomizer.nextDouble() <= entity.getSpawnChance();
   }
 
@@ -70,10 +63,8 @@ public class SpawnableEntitiesListener implements Listener {
    */
   private void spawnCustomEntity(SpawnableEntity entity, Location location) {
     try {
-      // Spawn the entity using the vanilla spawn method
       entity.spawn(location);
     } catch (Exception e) {
-      // Log error but don't crash the server
       System.err.println("Failed to spawn custom entity " + entity.getEntityId() + ": " + e.getMessage());
     }
   }
