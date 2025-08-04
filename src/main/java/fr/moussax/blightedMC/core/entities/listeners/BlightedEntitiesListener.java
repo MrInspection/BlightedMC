@@ -41,13 +41,26 @@ public class BlightedEntitiesListener implements Listener {
     BlightedEntity blighted = blightedEntities.get(entity.getUniqueId());
     if (blighted == null) return;
 
-    if(blighted.isImmuneTo(entity, event)) {
-      event.setCancelled(true);
-      Player p = ((LivingEntity) event.getEntity()).getKiller();
-      assert p != null;
-      p.sendMessage("§4 ■ §cThis creature is immune to this type of damage!");
-      p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 100, 0f);
-      return;
+    if (event instanceof org.bukkit.event.entity.EntityDamageByEntityEvent e) {
+      Entity damager = e.getDamager();
+      Player player = null;
+
+      if (damager instanceof Player p) {
+        player = p;
+      } else if (damager instanceof org.bukkit.entity.Projectile projectile &&
+        projectile.getShooter() instanceof Player shooter) {
+        player = shooter;
+      }
+
+      if (blighted.isImmuneTo(entity, event)) {
+        event.setCancelled(true);
+
+        if (player != null) {
+          player.sendMessage("§4 ■ §cThis creature is immune to this type of damage!");
+          player.playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 100, 0f);
+        }
+        return;
+      }
     }
 
     double damage = event.getFinalDamage();
