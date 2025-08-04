@@ -2,7 +2,6 @@ package fr.moussax.blightedMC;
 
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.core.entities.listeners.SpawnableEntitiesListener;
-import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntitiesRegistry;
 import fr.moussax.blightedMC.core.entities.magic.LaserBeam;
 import fr.moussax.blightedMC.core.items.abilities.AbilityListener;
 import fr.moussax.blightedMC.core.items.blocks.BlightedBlock;

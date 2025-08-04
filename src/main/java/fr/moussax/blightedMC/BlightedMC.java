@@ -11,6 +11,7 @@ public final class BlightedMC extends JavaPlugin {
   public void onEnable() {
     instance = this;
     RegistrySystem.initializeAllRegistries();
+    
     new EventsRegistry().initializeListeners();
     CommandBuilder.initialize(this);
     CommandBuilder.initializeCommands();
