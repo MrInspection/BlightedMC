@@ -4,6 +4,8 @@ import fr.moussax.blightedMC.core.registry.entities.ExperimentalMob;
 import fr.moussax.blightedMC.core.registry.entities.GaiaConstruct;
 import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntity;
 import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntitiesRegistry;
+import fr.moussax.blightedMC.core.registry.entities.bosses.AtonedHorror;
+import fr.moussax.blightedMC.core.registry.entities.bosses.RevenantHorror;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,10 +36,10 @@ public final class EntitiesRegistry {
   public static void initializeEntities() {
     clearEntities();
 
-    // Register regular BlightedEntity instances
     addEntity(new ExperimentalMob());
-    addEntity(new GaiaConstruct(false));
-    addEntity(new GaiaConstruct(true));
+    addEntity(new GaiaConstruct());
+    addEntity(new RevenantHorror());
+    addEntity(new AtonedHorror());
 
     // Register spawnable entities from SpawnableEntitiesRegistry
     List<SpawnableEntity> spawnableEntities = SpawnableEntitiesRegistry.getAllEntities();
