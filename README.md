@@ -2,20 +2,17 @@
 
 BlightedMC is a open-source project inspired by Hypixel Skyblock for some core mechanics. It aims to create some similar experience, adapted for Minecraft Survival with more punishing mobs, custom items, bosses and more...
 
-# Why This Project Exists
+### Why This Project Exists
 
 This project exists for a single reason, Minecraft isn't difficult enough. I play the game in **HARD** difficulty when you're good with the game, it feels not really hard. Therefore, I'm creating this custom experience to add some difficulty to the game without removing the Vanilla experience.
 
 This project is also a way for me to practice in java with design patterns, efficient code, etc... I'm mainly a web developer, but Java is one of my first programming language. I don't usually code a lot in java, so this project will help me do that, in a fun manner.
 
-## Core Mechanics
-
-### Item Rarity
-
-### Creatures
-
-
-## Setup Guide
+### Features:
+* Custom crafting system
+* Custom mobs creation system
+* Custom items creation system w/ full set bonus & item abilities
+* Some fun commands and some OP commands (not to abuse, can crash a server)
 
 ### Development Environment
 
