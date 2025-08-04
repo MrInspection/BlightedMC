@@ -5,6 +5,7 @@ import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -14,12 +15,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
 public class BlightedEntitiesListener implements Listener {
-
   private static final Map<UUID, BlightedEntity> blightedEntities = new HashMap<>();
   private final Map<Entity, Integer> damageIndicators = new HashMap<>();
 
@@ -39,6 +40,15 @@ public class BlightedEntitiesListener implements Listener {
 
     BlightedEntity blighted = blightedEntities.get(entity.getUniqueId());
     if (blighted == null) return;
+
+    if(blighted.isImmuneTo(entity, event)) {
+      event.setCancelled(true);
+      Player p = ((LivingEntity) event.getEntity()).getKiller();
+      assert p != null;
+      p.sendMessage("§4 ■ §cThis creature is immune to this type of damage!");
+      p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 100, 0f);
+      return;
+    }
 
     double damage = event.getFinalDamage();
     double remainingHealth = entity.getHealth() + entity.getAbsorptionAmount() - damage;
@@ -95,15 +105,21 @@ public class BlightedEntitiesListener implements Listener {
   }
 
   @EventHandler
+  public void onEntityHeal(EntityRegainHealthEvent event) {
+    if (!(event.getEntity() instanceof LivingEntity entity)) return;
+    BlightedEntity blighted = blightedEntities.get(entity.getUniqueId());
+    if (blighted == null) return;
+    blighted.updateNameTag();
+  }
+
+  @EventHandler
   public void onEntityDeath(EntityDeathEvent event) {
     BlightedEntity blighted = blightedEntities.remove(event.getEntity().getUniqueId());
     if (blighted == null) return;
-
+    blighted.removeBossBar();
     Player killer = event.getEntity().getKiller();
     BlightedPlayer player = (killer != null) ? BlightedPlayer.getBlightedPlayer(killer) : null;
-
     blighted.dropLoot(event.getEntity().getLocation(), player);
-
     event.getDrops().clear();
     event.setDroppedExp(blighted.getDroppedExp());
   }

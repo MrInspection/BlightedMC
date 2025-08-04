@@ -15,7 +15,6 @@ public @interface EntityAttributes {
     PROJECTILE_IMMUNITY,
     FIRE_IMMUNITY,
     MAGIC_IMMUNITY,
-    DINNERBONE_ENTITY
   }
 
   @Target(ElementType.TYPE)
