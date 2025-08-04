@@ -51,8 +51,13 @@ public class ActionBarManager implements Runnable {
 
   private String getHealthComponent() {
     double current = player.getPlayer().getHealth();
+    double absorption = player.getPlayer().getAbsorptionAmount() / 2;
     double max = Objects.requireNonNull(Objects.requireNonNull(player.getPlayer()).getAttribute(Attribute.MAX_HEALTH)).getValue();
     if (current > max) current = max;
+
+    if(absorption > 0) {
+      return ChatColor.GOLD + Formatter.formatDouble(current + absorption, 1) + "/" + Formatter.formatDouble(max, 1) + "❤";
+    }
 
     return ChatColor.RED + Formatter.formatDouble(current, 1) + "/" + Formatter.formatDouble(max, 1) + "❤";
   }
