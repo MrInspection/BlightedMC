@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.core.registry.entities;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.EntityAttributes;
 import fr.moussax.blightedMC.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.core.entities.LootTable.LootTable;
 import org.bukkit.*;
@@ -10,30 +11,28 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
 
+@EntityAttributes({EntityAttributes.Attributes.PROJECTILE_IMMUNITY})
 public class GaiaConstruct extends BlightedEntity {
   private int hits;
-  private final boolean highLevel;
-  private final String entityId;
 
-  public GaiaConstruct(boolean highLevel) {
+  public GaiaConstruct() {
     super("§6Gaia Construct", 200, EntityType.IRON_GOLEM);
-    this.highLevel = highLevel;
     this.hits = 6;
-    this.entityId = highLevel ? "GAIA_CONSTRUCT_HIGH" : "GAIA_CONSTRUCT_LOW";
-
     setNameTagType(EntityNameTag.SMALL_NUMBER);
-    addAttribute(Attribute.ATTACK_DAMAGE, 24);
+    addAttribute(Attribute.ATTACK_DAMAGE, 15);
   }
 
   @Override
   public String getEntityId() {
-    return entityId;
+    return "GAIA_CONSTRUCT";
   }
 
   @Override
@@ -81,70 +80,69 @@ public class GaiaConstruct extends BlightedEntity {
   }
 
   private void performSkill(Player player) {
-    Block centerBlock = getSafeGround(player.getLocation().getBlock());
+    Block centerBlock = getNextFittingBlock(player.getLocation().getBlock());
     if (centerBlock == null) return;
 
-    LinkedList<Block> positions = new LinkedList<>();
+    Map<Block, Material> materials = new HashMap<>();
+    Set<Block> positions = new HashSet<>();
+    
+    // Add a center block
     positions.add(centerBlock);
-    positions.add(getSafeGround(centerBlock.getRelative(BlockFace.NORTH)));
-    positions.add(getSafeGround(centerBlock.getRelative(BlockFace.SOUTH)));
-    positions.add(getSafeGround(centerBlock.getRelative(BlockFace.EAST)));
-    positions.add(getSafeGround(centerBlock.getRelative(BlockFace.WEST)));
-
-    LinkedList<FallingBlock> visuals = new LinkedList<>();
-    for (Block block : positions) {
-      if (block == null) continue;
-      Location spawnLoc = block.getLocation().add(0.5, 1, 0.5);
-      FallingBlock fb = block.getWorld().spawnFallingBlock(spawnLoc, Material.IRON_BLOCK.createBlockData());
-      fb.setGravity(false);
-      fb.setDropItem(false);
-      fb.setHurtEntities(false);
-      fb.setInvulnerable(true);
-      fb.setPersistent(true);
-      fb.setSilent(true);
-      fb.setGlowing(false);
-      visuals.add(fb);
-    }
+    materials.put(centerBlock, centerBlock.getType());
+    centerBlock.setType(Material.IRON_BLOCK);
+    
+    // Add surrounding blocks
+    addBlock(centerBlock.getRelative(BlockFace.NORTH), positions, materials);
+    addBlock(centerBlock.getRelative(BlockFace.SOUTH), positions, materials);
+    addBlock(centerBlock.getRelative(BlockFace.EAST), positions, materials);
+    addBlock(centerBlock.getRelative(BlockFace.WEST), positions, materials);
 
     Location center = centerBlock.getLocation().add(0.5, 1, 0.5);
     Objects.requireNonNull(center.getWorld()).playSound(center, Sound.BLOCK_ANVIL_PLACE, 1, 1.5f);
     center.getWorld().strikeLightningEffect(center);
 
-    // Keep falling blocks visually in place by teleporting each tick
-    BukkitRunnable visualTask = new BukkitRunnable() {
-      int ticks = 0;
-
+    // Restore blocks after 15 ticks
+    new BukkitRunnable() {
       @Override
       public void run() {
-        if (ticks++ >= 15) {
-          for (FallingBlock fb : visuals) {
-            if (!fb.isDead()) fb.remove();
-          }
-          cancel();
-          return;
-        }
-
-        for (int i = 0; i < visuals.size(); i++) {
-          FallingBlock fb = visuals.get(i);
-          if (fb.isDead()) continue;
-          Block block = positions.get(i);
-          Location loc = block.getLocation().add(0.5, 1, 0.5);
-          fb.teleport(loc);
-          fb.setVelocity(new Vector(0, 0, 0));
+        for (Map.Entry<Block, Material> entry : materials.entrySet()) {
+          entry.getKey().setType(entry.getValue());
         }
       }
-    };
-    visualTask.runTaskTimer(BlightedMC.getInstance(), 0L, 1L);
+    }.runTaskLater(BlightedMC.getInstance(), 15L);
 
     new BukkitRunnable() {
       @Override
       public void run() {
         if (player.getLocation().distance(center) <= 1.5) {
-          double damage = (highLevel ? 25 : 15) + (player.getHealth() * 0.4);
+          double damage = 15 + (player.getHealth() * 0.4);
           player.damage(damage, entity);
         }
       }
     }.runTaskLater(BlightedMC.getInstance(), 15L);
+  }
+
+  private void addBlock(Block block, Set<Block> positions, Map<Block, Material> materials) {
+    Block fittingBlock = getNextFittingBlock(block);
+    if (fittingBlock != null) {
+      positions.add(fittingBlock);
+      materials.put(fittingBlock, fittingBlock.getType());
+      fittingBlock.setType(Material.IRON_BLOCK);
+    }
+  }
+
+  private static Block getNextFittingBlock(Block b) {
+    if (b.isPassable()) {
+      while (b.isPassable()) {
+        b = b.getLocation().subtract(0, 1, 0).getBlock();
+      }
+      return b;
+    } else {
+      while (!b.isPassable()) {
+        b = b.getLocation().add(0, 1, 0).getBlock();
+      }
+      return b.getLocation().subtract(0, 1, 0).getBlock();
+    }
   }
 
   private Block getSafeGround(Block base) {
