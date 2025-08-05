@@ -19,7 +19,7 @@ public class ItemLoot implements DroppableConsumable {
   private final int maxAmount;
 
   /**
-   * Constructs an ItemLoot with specified item and amount range.
+   * Constructs an ItemLoot with a specified item and amount range.
    *
    * @param itemStack the base item stack to drop
    * @param minAmount minimum amount (must be >= 1)
