@@ -11,13 +11,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Central registry for all custom {@link BlightedEntity} instances in the plugin.
+ * <p>
+ * This class handles registration, retrieval, and initialization of entities,
+ * including bosses and spawnable mobs.
+ */
 public final class EntitiesRegistry {
   public static final Map<String, BlightedEntity> BLIGHTED_ENTITIES = new HashMap<>();
 
+  /**
+   * Removes all entities from the registry.
+   */
   public static void clearEntities() {
     BLIGHTED_ENTITIES.clear();
   }
 
+  /**
+   * Registers a new entity in the registry.
+   *
+   * @param entity the entity to register
+   * @throws IllegalArgumentException if an entity with the same ID is already registered
+   */
   public static void addEntity(BlightedEntity entity) {
     if (BLIGHTED_ENTITIES.containsKey(entity.getEntityId())) {
       throw new IllegalArgumentException("Duplicate entity ID: " + entity.getEntityId());
@@ -25,14 +40,35 @@ public final class EntitiesRegistry {
     BLIGHTED_ENTITIES.put(entity.getEntityId(), entity);
   }
 
+  /**
+   * Retrieves a registered entity by its unique ID.
+   *
+   * @param entityId the entity ID
+   * @return the corresponding {@link BlightedEntity}, or {@code null} if not found
+   */
   public static BlightedEntity getEntity(String entityId) {
     return BLIGHTED_ENTITIES.get(entityId);
   }
 
+  /**
+   * Returns an immutable list of all registered entities.
+   *
+   * @return a list containing all {@link BlightedEntity} instances
+   */
   public static List<BlightedEntity> getAllEntities() {
     return List.copyOf(BLIGHTED_ENTITIES.values());
   }
 
+  /**
+   * Clears and re-registers all default and spawnable entities.
+   * <p>
+   * This method initializes:
+   * <ul>
+   *   <li>Experimental and construct mobs</li>
+   *   <li>Bosses like {@link RevenantHorror} and {@link AtonedHorror}</li>
+   *   <li>All entities from {@link SpawnableEntitiesRegistry}</li>
+   * </ul>
+   */
   public static void initializeEntities() {
     clearEntities();
 

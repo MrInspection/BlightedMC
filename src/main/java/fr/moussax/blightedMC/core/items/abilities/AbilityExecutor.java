@@ -8,9 +8,36 @@ import org.bukkit.Sound;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
+/**
+ * Executes abilities for players, handling cooldowns, mana consumption, and activation logic.
+ * <p>
+ * This class provides static methods to:
+ * <ul>
+ *   <li>Validate if an ability can be executed (cooldown and mana check).</li>
+ *   <li>Trigger the ability through its {@link AbilityManager}.</li>
+ *   <li>Manage cooldown entries for abilities.</li>
+ * </ul>
+ * This class is not instantiable.
+ */
 public final class AbilityExecutor {
   private AbilityExecutor() {}
 
+  /**
+   * Executes an ability for a given player when an event occurs.
+   * <p>
+   * Steps performed:
+   * <ol>
+   *   <li>Checks if the ability is on cooldown; cancels the event if so.</li>
+   *   <li>Checks if the player has enough mana; cancels the event if not.</li>
+   *   <li>Validates custom conditions using {@link AbilityManager#canTrigger(BlightedPlayer)}.</li>
+   *   <li>Attempts to trigger the ability; if successful, subtracts mana and starts cooldown.</li>
+   * </ol>
+   *
+   * @param ability the ability to execute
+   * @param player the {@link BlightedPlayer} attempting to use the ability
+   * @param event the triggering Bukkit event
+   * @param <T> the event type
+   */
   public static <T extends Event> void execute(Ability ability, BlightedPlayer player, T event) {
     AbilityManager<T> manager = castManager(ability.getManager());
 
@@ -66,11 +93,27 @@ public final class AbilityExecutor {
     }
   }
 
+  /**
+   * Casts a generic {@link AbilityManager} to a typed instance for the event.
+   *
+   * @param manager the raw manager instance
+   * @param <T> the Bukkit event type handled by the manager
+   * @return the typed {@link AbilityManager} instance
+   */
   @SuppressWarnings("unchecked")
   private static <T extends Event> AbilityManager<T> castManager(AbilityManager<?> manager) {
     return (AbilityManager<T>) manager;
   }
 
+  /**
+   * Generates a human-readable display name for an ability manager class.
+   * <p>
+   * Removes the suffixes "Ability" and "Manager" and converts camel case to
+   * a space-separated title case string.
+   *
+   * @param manager the ability manager
+   * @return the formatted display name
+   */
   private static String getAbilityDisplayName(AbilityManager<?> manager) {
     String className = manager.getClass().getSimpleName();
 
@@ -109,6 +152,17 @@ public final class AbilityExecutor {
     return result.toString().trim();
   }
 
+  /**
+   * Starts a cooldown timer for a specific ability and registers it in the player's cooldown list.
+   * <p>
+   * If the player already has a cooldown entry for the same ability manager and type,
+   * this method does nothing.
+   *
+   * @param blightedPlayer the player to apply the cooldown to
+   * @param abilityManagerClass the ability manager class
+   * @param abilityType the ability to type
+   * @param cooldownSeconds the duration of the cooldown in seconds
+   */
   public static void startCooldown(BlightedPlayer blightedPlayer,
                                    Class<? extends AbilityManager> abilityManagerClass,
                                    AbilityType abilityType,

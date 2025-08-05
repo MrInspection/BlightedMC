@@ -15,24 +15,55 @@ import org.bukkit.persistence.PersistentDataType;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Represents a custom block within the BlightedMC plugin.
+ * Each {@link BlightedBlock} can handle placement, interaction, and breaking events.
+ */
 public abstract class BlightedBlock {
   protected final Material material;
   protected final ItemManager itemManager;
 
+  /**
+   * Creates a new custom block and registers it in the {@link BlocksRegistry}.
+   *
+   * @param material    the Bukkit {@link Material} used to render the block
+   * @param itemManager the {@link ItemManager} for generating its item form
+   */
   public BlightedBlock(@Nonnull Material material, ItemManager itemManager) {
     this.material = material;
     this.itemManager = itemManager;
     BlocksRegistry.addBlock(this);
   }
 
+  /**
+   * Called when this block is placed.
+   *
+   * @param event the {@link BlockPlaceEvent} triggered by the placement
+   */
   public void onPlace(BlockPlaceEvent event) {}
 
+  /**
+   * Called when a player interacts with this block.
+   *
+   * @param event the {@link PlayerInteractEvent} triggered by interaction
+   */
   public void onInteract(PlayerInteractEvent event) {}
 
+  /**
+   * Called when this block is broken.
+   *
+   * @param event       the {@link BlockBreakEvent} triggered by the break
+   * @param droppedItem the item initially set to drop
+   * @return the final item to drop; may be {@code null} to drop nothing
+   */
   public ItemStack onBreak(BlockBreakEvent event, ItemStack droppedItem){
     return droppedItem;
   }
 
+  /**
+   * Listener handling block events for all {@link BlightedBlock} instances.
+   * It links placed blocks to their custom implementations using metadata and persistent data.
+   */
   public static class BlightedBlockListener implements Listener {
 
     @EventHandler

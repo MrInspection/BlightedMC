@@ -12,9 +12,16 @@ import fr.moussax.blightedMC.core.players.BlightedPlayerListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
+/**
+ * Registers all event listeners required by the plugin.
+ * Should be initialized once during plugin startup.
+ */
 public final class EventsRegistry {
   private final BlightedMC instance = BlightedMC.getInstance();
 
+  /**
+   * Registers all listeners to the Bukkit PluginManager.
+   */
   public void initializeListeners() {
     PluginManager pm = Bukkit.getPluginManager();
     pm.registerEvents(new MenuListeners(), instance);

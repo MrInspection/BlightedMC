@@ -8,6 +8,10 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import java.util.EnumSet;
 import java.util.Set;
 
+/**
+ * Enum representing types of abilities triggered by player actions or events.
+ * Supports differentiation between right-click, left-click, sneak states, and entity hits.
+ */
 public enum AbilityType {
   RIGHT_CLICK(true, false, false),
   LEFT_CLICK(false, true, false),
@@ -41,6 +45,11 @@ public enum AbilityType {
     return sneak;
   }
 
+  /**
+   * Converts this AbilityType to a set of Bukkit Actions it corresponds to.
+   *
+   * @return Set of corresponding Actions.
+   */
   public Set<Action> toActions() {
     EnumSet<Action> actions = EnumSet.noneOf(Action.class);
     if (rightClick) {
@@ -54,26 +63,54 @@ public enum AbilityType {
     return actions;
   }
 
+  /**
+   * Checks if this AbilityType matches the given Bukkit Event.
+   *
+   * @param event the event to check against
+   * @return true if this AbilityType matches the event context, false otherwise
+   */
   public boolean matches(Event event) {
     if (event instanceof PlayerInteractEvent interactEvent) {
       Action action = interactEvent.getAction();
       boolean isSneaking = interactEvent.getPlayer().isSneaking();
+
       if (this.isSneak() && !isSneaking) return false;
-      if (!this.isSneak() && isSneaking && this != SNEAK && this != SNEAK_RIGHT_CLICK && this != SNEAK_LEFT_CLICK && this != SNEAK_LEFT_OR_RIGHT_CLICK)
+
+      if (!this.isSneak() && isSneaking
+        && this != SNEAK
+        && this != SNEAK_RIGHT_CLICK
+        && this != SNEAK_LEFT_CLICK
+        && this != SNEAK_LEFT_OR_RIGHT_CLICK)
         return false;
-      if (this.isRightClick() && (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)) return true;
-      if (this.isLeftClick() && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)) return true;
-      // SNEAK only
-      if (this == SNEAK && isSneaking && (action == Action.PHYSICAL || action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK || action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK))
+
+      if (this.isRightClick() && (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK))
         return true;
-      // SNEAK + click
-      if (this.isSneak() && isSneaking && (this.isRightClick() && (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) || this.isLeftClick() && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)))
+
+      if (this.isLeftClick() && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK))
         return true;
+
+      // Special case for SNEAK only (no click)
+      if (this == SNEAK && isSneaking
+        && (action == Action.PHYSICAL
+        || action == Action.RIGHT_CLICK_AIR
+        || action == Action.RIGHT_CLICK_BLOCK
+        || action == Action.LEFT_CLICK_AIR
+        || action == Action.LEFT_CLICK_BLOCK))
+        return true;
+
+      // Sneak + click combinations
+      if (this.isSneak() && isSneaking
+        && ((this.isRightClick() && (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK))
+        || (this.isLeftClick() && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK))))
+        return true;
+
       return false;
     }
+
     if (event instanceof EntityDamageByEntityEvent) {
       return this == ENTITY_HIT;
     }
+
     return false;
   }
 }

@@ -24,6 +24,14 @@ import java.util.List;
 import static fr.moussax.blightedMC.core.items.ItemsRegistry.BLIGHTED_ITEMS;
 import static fr.moussax.blightedMC.core.items.ItemsRegistry.ID_KEY;
 
+/**
+ * Manages custom items in the BlightedMC system.
+ * <p>
+ * Extends {@link ItemBuilder} to add item ID, rarity, type, abilities,
+ * and rules for interaction and usage.
+ * <p>
+ * Handles ability triggering based on events and stores persistent data keys.
+ */
 public class ItemManager extends ItemBuilder implements ItemRule {
   private final String itemId;
   private final ItemRarity itemRarity;
@@ -33,6 +41,14 @@ public class ItemManager extends ItemBuilder implements ItemRule {
   private final List<Ability> abilities = new ArrayList<>();
   private final List<ItemRule> rules = new ArrayList<>();
 
+  /**
+   * Constructs an ItemManager with basic parameters.
+   *
+   * @param itemId   unique identifier for the item
+   * @param type     item type/category
+   * @param rarity   rarity classification
+   * @param material base Bukkit material
+   */
   public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material) {
     super(material);
     this.itemId = itemId;
@@ -40,6 +56,15 @@ public class ItemManager extends ItemBuilder implements ItemRule {
     this.itemRarity = rarity;
   }
 
+  /**
+   * Constructs an ItemManager with a display name.
+   *
+   * @param itemId      unique identifier for the item
+   * @param type        item type/category
+   * @param rarity      rarity classification
+   * @param material    base Bukkit material
+   * @param displayName display name for the item (colored by rarity)
+   */
   public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Nonnull String displayName) {
     super(material, rarity.getColorPrefix() + displayName);
     this.itemId = itemId;
@@ -47,6 +72,15 @@ public class ItemManager extends ItemBuilder implements ItemRule {
     this.itemRarity = rarity;
   }
 
+  /**
+   * Constructs an ItemManager with amount.
+   *
+   * @param itemId   unique identifier for the item
+   * @param type     item type/category
+   * @param rarity   rarity classification
+   * @param material base Bukkit material
+   * @param amount   stack amount (positive)
+   */
   public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount) {
     super(material, amount);
     this.itemId = itemId;
@@ -54,6 +88,16 @@ public class ItemManager extends ItemBuilder implements ItemRule {
     this.itemRarity = rarity;
   }
 
+  /**
+   * Constructs an ItemManager with amount and display name.
+   *
+   * @param itemId      unique identifier for the item
+   * @param type        item type/category
+   * @param rarity      rarity classification
+   * @param material    base Bukkit material
+   * @param amount      stack amount (positive)
+   * @param displayName display name for the item (colored by rarity)
+   */
   public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount, @Nonnull String displayName) {
     super(material, amount, rarity.getColorPrefix() + displayName);
     this.itemId = itemId;
@@ -61,6 +105,11 @@ public class ItemManager extends ItemBuilder implements ItemRule {
     this.itemRarity = rarity;
   }
 
+  /**
+   * Constructs an ItemManager from an existing ItemStack.
+   *
+   * @param itemStack the base Bukkit ItemStack
+   */
   public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, ItemStack itemStack) {
     super(itemStack);
     this.itemId = itemId;
@@ -68,16 +117,33 @@ public class ItemManager extends ItemBuilder implements ItemRule {
     this.itemRarity = rarity;
   }
 
+  /**
+   * Adds an ability to this item.
+   *
+   * @param ability the ability to add
+   * @return this instance for chaining
+   */
   public ItemManager addAbility(Ability ability) {
     abilities.add(ability);
     return this;
   }
 
+  /**
+   * Adds an item rule (usage/interaction restrictions).
+   *
+   * @param rule the rule to add
+   * @return this instance for chaining
+   */
   public ItemManager addRule(ItemRule rule) {
     rules.add(rule);
     return this;
   }
 
+  /**
+   * Returns all abilities attached to this item.
+   *
+   * @return list of abilities
+   */
   public List<Ability> getAbilities() {
     return abilities;
   }
@@ -98,6 +164,12 @@ public class ItemManager extends ItemBuilder implements ItemRule {
     return fullSetBonus;
   }
 
+  /**
+   * Retrieves an ItemManager from a Bukkit ItemStack by reading the persistent item ID.
+   *
+   * @param itemStack the Bukkit ItemStack
+   * @return corresponding ItemManager or null if not found
+   */
   public static ItemManager fromItemStack(ItemStack itemStack) {
     if (itemStack == null || itemStack.getType().isAir()) return null;
 
@@ -111,6 +183,12 @@ public class ItemManager extends ItemBuilder implements ItemRule {
     return BLIGHTED_ITEMS.get(itemId);
   }
 
+  /**
+   * Triggers all applicable abilities of this item for the player and event.
+   *
+   * @param blightedPlayer the player holding the item
+   * @param event          the event triggering abilities
+   */
   public void triggerAbilities(BlightedPlayer blightedPlayer, Event event) {
     for (Ability ability : abilities) {
       // Check if the ability type matches the current event
@@ -126,6 +204,13 @@ public class ItemManager extends ItemBuilder implements ItemRule {
     }
   }
 
+  /**
+   * Determines if an ability should trigger based on the event type.
+   *
+   * @param ability the ability to test
+   * @param event   the event being processed
+   * @return true if the ability should trigger
+   */
   private boolean shouldTriggerAbility(Ability ability, Event event) {
     if (event instanceof org.bukkit.event.player.PlayerInteractEvent interactEvent) {
       org.bukkit.event.block.Action action = interactEvent.getAction();

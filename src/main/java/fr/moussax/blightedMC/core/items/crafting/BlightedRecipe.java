@@ -10,7 +10,14 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.*;
 
 /**
- * Base class for all BlightedMC Crafting System (shaped & shapeless recipes).
+ * Base class for all recipes in the BlightedMC crafting system.
+ * <p>
+ * Supports both shaped and shapeless recipes. Subclasses handle
+ * specific pattern matching logic.
+ * <ul>
+ *   <li>{@link BlightedShapedRecipe} – fixed 3×3 pattern</li>
+ *   <li>{@link BlightedShapelessRecipe} – ingredients in any order</li>
+ * </ul>
  */
 public sealed abstract class BlightedRecipe
     permits BlightedShapedRecipe, BlightedShapelessRecipe {
@@ -18,17 +25,25 @@ public sealed abstract class BlightedRecipe
   public static final Set<BlightedRecipe> REGISTERED_RECIPES = new HashSet<>();
   public abstract ItemManager getResult();
 
+  /**
+   * Returns the number of items produced by this recipe.
+   *
+   * @return the result quantity
+   */
   public abstract int getAmount();
 
+  /**
+   * Registers this recipe into the global crafting system.
+   */
   public void addRecipe() {
     REGISTERED_RECIPES.add(this);
   }
 
   /**
-   * Checks the crafting grid for matching registered recipes.
+   * Searches for all recipes that match the provided 3×3 crafting grid.
    *
-   * @param craftingGrid Crafting a grid as a 3×3 list of ItemStacks
-   * @return Set of all matching Blighted recipes
+   * @param craftingGrid the 3×3 crafting grid as a list of ItemStacks
+   * @return all matching recipes, or an empty set if none match
    */
   public static Set<BlightedRecipe> findMatchingRecipes(List<ItemStack> craftingGrid) {
     boolean isEmpty = craftingGrid.stream()
@@ -55,9 +70,15 @@ public sealed abstract class BlightedRecipe
   }
 
   /**
-   * Extracts the persistent custom item IDs from a crafting grid.
-   * For vanilla items, assigns ID "vanilla:{itemname_lowercase}".
-   * Empty slots return an empty string.
+   * Extracts item identifiers for each slot in the crafting grid.
+   * <ul>
+   *   <li>Custom items → PersistentData key {@code id}</li>
+   *   <li>Vanilla items → {@code vanilla:{material_lowercase}}</li>
+   *   <li>Empty slots → empty string</li>
+   * </ul>
+   *
+   * @param craftingGrid the crafting grid
+   * @return list of item IDs per slot
    */
   private static List<String> extractItemIds(List<ItemStack> craftingGrid) {
     List<String> itemIdsInGrid = new ArrayList<>(craftingGrid.size());
@@ -84,7 +105,18 @@ public sealed abstract class BlightedRecipe
   }
 
   /**
-   * Checks if a shaped recipe matches the given crafting grid.
+   * Checks if a shaped recipe exactly matches a given crafting grid.
+   * <p>Validates:
+   * <ul>
+   *   <li>Slot-by-slot item identity (custom or vanilla)</li>
+   *   <li>Required amounts per slot</li>
+   *   <li>Empty slots must remain empty</li>
+   * </ul>
+   *
+   * @param recipe the shaped recipe to test
+   * @param craftingGrid the crafting grid
+   * @param craftingGridItemIds precomputed slot item IDs
+   * @return true if the grid matches the shaped recipe
    */
   private static boolean matchesShapedRecipe(BlightedShapedRecipe recipe,
                                              List<ItemStack> craftingGrid,
@@ -125,6 +157,12 @@ public sealed abstract class BlightedRecipe
 
   /**
    * Checks if a shapeless recipe matches the given crafting grid.
+   * <p>Validation is order-independent but quantity-dependent.
+   *
+   * @param recipe the shapeless recipe to test
+   * @param craftingGrid the crafting grid
+   * @param craftingGridItemIds precomputed slot item IDs
+   * @return true if the grid matches the shapeless recipe
    */
   private static boolean matchesShapelessRecipe(BlightedShapelessRecipe recipe,
                                                 List<ItemStack> craftingGrid,

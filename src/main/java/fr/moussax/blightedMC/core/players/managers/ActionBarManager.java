@@ -9,6 +9,12 @@ import org.bukkit.attribute.Attribute;
 
 import java.util.Objects;
 
+/**
+ * Manages the display of the action bar for a BlightedPlayer.
+ * <p>
+ * Periodically updates health, favors, and mana information,
+ * including handling insufficient mana warnings.
+ */
 public class ActionBarManager implements Runnable {
   private final BlightedPlayer player;
   private boolean insufficientMana = false;

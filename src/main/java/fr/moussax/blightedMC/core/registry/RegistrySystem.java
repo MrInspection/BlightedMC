@@ -7,24 +7,31 @@ import fr.moussax.blightedMC.core.items.blocks.BlocksRegistry;
 import fr.moussax.blightedMC.core.items.crafting.registry.RecipesRegistry;
 
 /**
- * Central registry orchestrator.
+ * Centralized manager for all plugin registries.
  * <p>
- * Handles the initialization and clearing of all registries related to:
+ * This class provides unified methods to initialize and clear
+ * the registries responsible for managing:
  * <ul>
- *   <li>Items and blocks</li>
+ *   <li>Item definitions and their variants</li>
+ *   <li>Custom block registrations</li>
  *   <li>Crafting recipes</li>
- *   <li>Custom entities and spawnable entities</li>
+ *   <li>Custom and spawnable entity registrations</li>
  * </ul>
- *
- * <p>Acts as a single entry point to manage registry lifecycle.
+ * <p>
+ * It ensures proper load order and lifecycle handling of these registries,
+ * enabling consistent plugin behavior and resource management.
+ * <p>
+ * Usage of this class guarantees that all game content managed by the plugin
+ * is properly registered or released when necessary.
  */
 public final class RegistrySystem {
 
   /**
-   * Initializes all registries in the correct order.
+   * Initializes all plugin registries in the appropriate sequence.
    * <p>
-   * Required to make items, blocks, recipes, and entities available
-   * to the rest of the plugin.
+   * This method must be called during plugin startup or when reloading
+   * to ensure that all items, blocks, recipes, and entities are
+   * fully registered and ready for use.
    */
   public static void initializeAllRegistries() {
     ItemsRegistry.initializeItems();
@@ -35,10 +42,11 @@ public final class RegistrySystem {
   }
 
   /**
-   * Clears all registry data.
+   * Clears all data from the plugin registries.
    * <p>
-   * Releases all items, blocks, recipes, and entity registrations
-   * to free memory and prevent stale references.
+   * This method releases references held by items, blocks, recipes,
+   * and entities registries to facilitate garbage collection and
+   * prevent memory leaks during plugin shutdown or reload.
    */
   public static void clearAllRegistries() {
     ItemsRegistry.clearItems();

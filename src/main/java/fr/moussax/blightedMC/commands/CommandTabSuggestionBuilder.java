@@ -11,9 +11,25 @@ import org.bukkit.entity.Player;
 import javax.annotation.Nonnull;
 import java.util.*;
 
+/**
+ * Dynamic tab-completion builder that generates command suggestions based on
+ * {@link CommandArgument} annotations present on a command executor class.
+ * <p>
+ * Supports special placeholders:
+ * <ul>
+ *   <li><b>$players</b> – Suggests all online players.</li>
+ *   <li><b>$entities</b> – Suggests all registered {@link BlightedEntity} IDs.</li>
+ * </ul>
+ */
 public class CommandTabSuggestionBuilder implements TabCompleter {
   public final HashMap<ArgumentRule, List<String>> rules = new LinkedHashMap<>();
 
+  /**
+   * Constructs a tab suggestion builder for a given command class.
+   *
+   * @param commandClass the command executor class annotated with {@link CommandArgument}
+   * @throws IllegalArgumentException if the class lacks the required annotation
+   */
   public CommandTabSuggestionBuilder(Class<?> commandClass) {
     var annotations = commandClass.getAnnotationsByType(CommandArgument.class);
     if (annotations.length == 0) {
@@ -25,6 +41,15 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
     }
   }
 
+  /**
+   * Provides tab completion suggestions based on the current command input and predefined rules.
+   *
+   * @param sender the entity requesting tab completion
+   * @param command the command being executed
+   * @param label the command alias used
+   * @param args the arguments currently typed
+   * @return a list of matching suggestions, or an empty list if none apply
+   */
   @Override
   public List<String> onTabComplete(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String label, @Nonnull String[] args) {
     for (var entry : rules.entrySet()) {
@@ -49,15 +74,33 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
     return Collections.emptyList();
   }
 
+  /**
+   * Internal rule representation for tab-completion behavior.
+   * <p>
+   * A rule matches a specific argument position and may optionally require
+   * that the preceding argument matches one of a set of keywords.
+   */
   private static class ArgumentRule {
     private final int position;
     private final Set<String> after;
 
+    /**
+     * Creates a new argument rule.
+     *
+     * @param position the zero-based index of the argument this rule applies to
+     * @param after array of allowed preceding arguments; empty means no restriction
+     */
     ArgumentRule(int position, String[] after) {
       this.position = position;
       this.after = Set.of(after);
     }
 
+    /**
+     * Checks whether the current user input satisfies this rule.
+     *
+     * @param input the current command arguments
+     * @return true if this rule should provide suggestions, false otherwise
+     */
     boolean matches(String[] input) {
       if (input.length != position + 1) return false;
       return after.isEmpty() || after.contains(input[position - 1]);
