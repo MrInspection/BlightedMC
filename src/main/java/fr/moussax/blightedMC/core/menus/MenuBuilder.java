@@ -16,19 +16,19 @@ public class MenuBuilder {
     this.size = size;
   }
 
-  public MenuBuilder setItem(int slot, ItemStack item, ItemInteraction interaction, MenuAction action) {
+  public MenuBuilder setItem(int slot, ItemStack item, MenuItemInteraction interaction, MenuAction action) {
     slots.put(slot, new Menu.MenuSlot(item, interaction, action));
     return this;
   }
 
-  public MenuBuilder setItem(int slot, MenuElementPreset preset, ItemInteraction interaction, MenuAction action) {
+  public MenuBuilder setItem(int slot, MenuElementPreset preset, MenuItemInteraction interaction, MenuAction action) {
     return setItem(slot, preset.getItem(), interaction, action);
   }
 
   public MenuBuilder fillEmptyWith(MenuElementPreset preset) {
     for (int i = 0; i < size; i++) {
       if (!slots.containsKey(i)) {
-        setItem(i, preset.getItem(), ItemInteraction.ANY_CLICK, (p, t) -> {
+        setItem(i, preset.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
         });
       }
     }
