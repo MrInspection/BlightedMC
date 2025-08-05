@@ -24,12 +24,34 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * A utility class for building {@link ItemStack} instances with a fluent interface.
- * <p>
- * This class simplifies the creation and customization of items by providing methods
- * to set various properties such as material, amount, display name, lore, enchantments,
- * item flags, and more.
- * </p>
+ * A utility class for constructing and customizing {@link ItemStack} instances
+ * in a fluent, chainable manner.
+ *
+ * <p>This builder simplifies the creation of items with various properties, including:</p>
+ * <ul>
+ *   <li>Material and stack amount</li>
+ *   <li>Display name and lore</li>
+ *   <li>Enchantments and item flags</li>
+ *   <li>Durability damage and unbreakable state</li>
+ *   <li>Banner patterns, leather armor colors, and armor trims</li>
+ *   <li>Player head owners or custom Base64 textures</li>
+ * </ul>
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * ItemStack customSword = new ItemBuilder(Material.DIAMOND_SWORD)
+ *      .setDisplayName("§bEpic Sword")
+ *      .addEnchantment(Enchantment.SHARPNESS, 5)
+ *      .addLore("§7A legendary blade")
+ *      .setUnbreakable(true)
+ *      .toItemStack();
+ * }</pre>
+ *
+ * <p>All setter methods return the same {@code ItemBuilder} instance, allowing
+ * for method chaining.</p>
+ *
+ * <p><strong>Note:</strong> Validation is performed for stack size, lore indices,
+ * color formats, and Base64 skull textures. Exceptions are thrown for invalid inputs.</p>
  */
 public class ItemBuilder {
 
@@ -51,14 +73,24 @@ public class ItemBuilder {
   private Color leatherColor;
   private ArmorTrim armorTrim;
 
-  // Constructors ------------------------------------------------------------------------
 
+  /**
+   * Creates a new ItemBuilder with the given material.
+   *
+   * @param material the material of the item (cannot be null)
+   */
   public ItemBuilder(@Nonnull Material material) {
     this.material = material;
     this.item = new ItemStack(material);
     this.itemMeta = item.getItemMeta();
   }
 
+  /**
+   * Creates a new ItemBuilder with a material and display name.
+   *
+   * @param material    the material of the item
+   * @param displayName the display name for the item
+   */
   public ItemBuilder(@Nonnull Material material, @Nonnull String displayName) {
     this.material = material;
     this.displayName = displayName;
@@ -66,6 +98,13 @@ public class ItemBuilder {
     this.itemMeta = item.getItemMeta();
   }
 
+  /**
+   * Creates a new ItemBuilder with a material and stack amount.
+   *
+   * @param material the material of the item
+   * @param amount   the stack amount (1 to material max stack size)
+   * @throws IllegalArgumentException if the amount exceeds the max stack size
+   */
   public ItemBuilder(@Nonnull Material material, @Positive int amount) {
     this.material = material;
     if (amount > material.getMaxStackSize()) {
@@ -76,6 +115,13 @@ public class ItemBuilder {
     this.itemMeta = item.getItemMeta();
   }
 
+  /**
+   * Creates a new ItemBuilder with material, amount, and display name.
+   *
+   * @param material    the material of the item
+   * @param amount      the stack amount
+   * @param displayName the display name
+   */
   public ItemBuilder(Material material, @Positive int amount, @Nonnull String displayName) {
     this.material = material;
     this.amount = amount;
@@ -84,6 +130,12 @@ public class ItemBuilder {
     this.displayName = displayName;
   }
 
+  /**
+   * Creates a new ItemBuilder from an existing {@link ItemStack}.
+   * Copies metadata, enchantments, lore, flags, and damage.
+   *
+   * @param itemStack the source item stack
+   */
   public ItemBuilder(ItemStack itemStack) {
     this.item = itemStack;
     this.material = itemStack.getType();
@@ -106,18 +158,35 @@ public class ItemBuilder {
     this.enchantments = new HashMap<>(itemStack.getEnchantments());
   }
 
-  // Setters ------------------------------------------------------------------------
-
+  /**
+   * Sets the display name of the item.
+   *
+   * @param displayName the new display name
+   * @return this builder
+   */
   public ItemBuilder setDisplayName(@Nonnull String displayName) {
     this.displayName = displayName;
     return this;
   }
 
+  /**
+   * Sets the material of the item.
+   *
+   * @param material the new material
+   * @return this builder
+   */
   public ItemBuilder setMaterial(Material material) {
     this.material = material;
     return this;
   }
 
+  /**
+   * Sets the stack amount.
+   *
+   * @param amount new stack amount
+   * @return this builder
+   * @throws IllegalArgumentException if amount exceeds the max stack size
+   */
   public ItemBuilder setAmount(@Positive int amount) {
     if (amount > material.getMaxStackSize()) {
       throw new IllegalArgumentException("Amount must be between 1 and " + material.getMaxStackSize());
@@ -126,16 +195,34 @@ public class ItemBuilder {
     return this;
   }
 
+  /**
+   * Sets the item meta directly.
+   *
+   * @param itemMeta the meta to set
+   * @return this builder
+   */
   public ItemBuilder setItemMeta(ItemMeta itemMeta) {
     this.itemMeta = itemMeta;
     return this;
   }
 
+  /**
+   * Sets durability damage for damageable items.
+   *
+   * @param damage the damage value
+   * @return this builder
+   */
   public ItemBuilder setDurabilityDamage(int damage) {
     this.damage = damage;
     return this;
   }
 
+  /**
+   * Marks the item as unbreakable or not.
+   *
+   * @param unbreakable true to make unbreakable
+   * @return this builder
+   */
   public ItemBuilder setUnbreakable(boolean unbreakable) {
     if (itemMeta == null) itemMeta = item.getItemMeta();
     assert itemMeta != null;
@@ -144,6 +231,12 @@ public class ItemBuilder {
     return this;
   }
 
+  /**
+   * Makes this item a player head belonging to the given UUID.
+   *
+   * @param playerId the UUID of the player
+   * @return this builder
+   */
   public ItemBuilder setSkullOwner(@Nonnull UUID playerId) {
     this.material = Material.PLAYER_HEAD;
     this.skullOwnerUUID = playerId;
@@ -151,6 +244,12 @@ public class ItemBuilder {
     return this;
   }
 
+  /**
+   * Sets a custom Base64 skull texture for a player head.
+   *
+   * @param base64Texture Base64-encoded texture data
+   * @return this builder
+   */
   public ItemBuilder setCustomSkullTexture(@Nonnull String base64Texture) {
     this.material = Material.PLAYER_HEAD;
     this.base64Texture = base64Texture;
@@ -158,6 +257,13 @@ public class ItemBuilder {
     return this;
   }
 
+  /**
+   * Sets the leather armor color using a hex string (#RRGGBB).
+   *
+   * @param hex a valid 6-digit hex color, with or without #
+   * @return this builder
+   * @throws IllegalArgumentException if the color format is invalid
+   */
   public ItemBuilder setLeatherColor(@Nonnull String hex) {
     if (!hex.matches("^#?[0-9a-fA-F]{6}$")) {
       throw new IllegalArgumentException("Invalid hex color: " + hex);
@@ -170,64 +276,46 @@ public class ItemBuilder {
     return this;
   }
 
+  /**
+   * Sets armor trim for applicable armor pieces.
+   *
+   * @param material the trim material
+   * @param pattern  the trim pattern
+   * @return this builder
+   */
   public ItemBuilder setArmorTrim(@Nonnull TrimMaterial material, @Nonnull TrimPattern pattern) {
     this.armorTrim = new ArmorTrim(material, pattern);
     return this;
   }
 
-  // Getters ------------------------------------------------------------------------
-
-  public ItemStack getItem() {
-    return item;
-  }
-
-  public ItemMeta getItemMeta() {
-    return itemMeta;
-  }
-
-  public Material getMaterial() {
-    return material;
-  }
-
-  public String getDisplayName() {
-    return displayName;
-  }
-
-  public int getAmount() {
-    return amount;
-  }
-
-  public int getDamage() {
-    return damage;
-  }
-
-  public Map<Enchantment, Integer> getEnchantments() {
-    return enchantments;
-  }
-
-  public List<String> getItemLores() {
-    return itemLores;
-  }
-
-  public List<ItemFlag> getItemFlags() {
-    return itemFlags;
-  }
-
-  public List<Pattern> getBannerPatterns() {
-    return bannerPatterns;
-  }
-  // Other methods ------------------------------------------------------------------------
-
+  /**
+   * Adds a single line to the lore.
+   *
+   * @param line the lore line
+   * @return this builder
+   */
   public ItemBuilder addLore(String line) {
     itemLores.add(line);
     return this;
   }
 
+  /**
+   * Adds multiple lines to the lore.
+   *
+   * @param lines the lore lines
+   * @return this builder
+   */
   public ItemBuilder addLore(List<String> lines) {
     itemLores.addAll(lines);
     return this;
   }
 
+  /**
+   * Adds multiple lines to the lore (varargs).
+   *
+   * @param lines the lore lines
+   * @return this builder
+   */
   public ItemBuilder addLore(String... lines) {
     for (String line : lines) {
       addLore(line);
@@ -235,6 +323,14 @@ public class ItemBuilder {
     return this;
   }
 
+  /**
+   * Inserts a lore line at a specific index.
+   *
+   * @param line  the lore line
+   * @param index the insertion index
+   * @return this builder
+   * @throws IndexOutOfBoundsException if the index is invalid
+   */
   public ItemBuilder addLore(String line, int index) {
     if (index < 0 || index > itemLores.size()) {
       throw new IndexOutOfBoundsException("Index out of bounds for lore list: " + index);
@@ -243,6 +339,14 @@ public class ItemBuilder {
     return this;
   }
 
+  /**
+   * Replaces a lore line at a specific index.
+   *
+   * @param line  the new lore line
+   * @param index the index to replace
+   * @return this builder
+   * @throws IndexOutOfBoundsException if the index is invalid
+   */
   public ItemBuilder setLore(String line, int index) {
     if (index < 0 || index >= itemLores.size()) {
       throw new IndexOutOfBoundsException("Index out of bounds for lore list: " + index);
@@ -251,16 +355,94 @@ public class ItemBuilder {
     return this;
   }
 
+  /**
+   * Adds or updates an enchantment.
+   *
+   * @param enchantment the enchantment
+   * @param level       the level
+   * @return this builder
+   */
   public ItemBuilder addEnchantment(Enchantment enchantment, int level) {
     enchantments.put(enchantment, level);
     return this;
   }
 
+  /**
+   * Adds multiple enchantments.
+   *
+   * @param enchantments map of enchantments to levels
+   * @return this builder
+   */
   public ItemBuilder addEnchantment(Map<Enchantment, Integer> enchantments) {
     this.enchantments.putAll(enchantments);
     return this;
   }
 
+  /**
+   * Removes an enchantment.
+   *
+   * @param enchantment the enchantment to remove
+   * @return this builder
+   */
+  public ItemBuilder removeEnchantment(Enchantment enchantment) {
+    enchantments.remove(enchantment);
+    return this;
+  }
+
+  /**
+   * Adds a visual enchantment glint, optionally hiding the enchant.
+   *
+   * @param add true to add glint, false to remove
+   * @return this builder
+   */
+  public ItemBuilder addEnchantmentGlint(boolean add) {
+    if (add) {
+      addEnchantment(Enchantment.UNBREAKING, 1);
+      addItemFlag(ItemFlag.HIDE_ENCHANTS);
+    } else {
+      enchantments.remove(Enchantment.UNBREAKING);
+      itemFlags.remove(ItemFlag.HIDE_ENCHANTS);
+    }
+    return this;
+  }
+
+  /**
+   * Adds an enchantment glint.
+   *
+   * @return this builder
+   */
+  public ItemBuilder addEnchantmentGlint() {
+    return addEnchantmentGlint(true);
+  }
+
+  /**
+   * Adds an item flag.
+   *
+   * @param flag the flag to add
+   * @return this builder
+   */
+  public ItemBuilder addItemFlag(ItemFlag flag) {
+    itemFlags.add(flag);
+    return this;
+  }
+
+  /**
+   * Adds multiple item flags.
+   *
+   * @param flags the flags to add
+   * @return this builder
+   */
+  public ItemBuilder addItemFlag(List<ItemFlag> flags) {
+    itemFlags.addAll(flags);
+    return this;
+  }
+
+  /**
+   * Hides or shows the tooltip.
+   *
+   * @param hide true to hide, false to show
+   * @return this builder
+   */
   public ItemBuilder hideTooltip(boolean hide) {
     if (itemMeta == null) {
       itemMeta = item.getItemMeta();
@@ -282,43 +464,21 @@ public class ItemBuilder {
   }
 
   /**
-   * Adds an enchantment glint to the item to look enchanted, typically used for visual effects.
+   * Adds banner patterns to the item if it's a banner.
+   *
+   * @param patterns list of banner patterns
+   * @return this builder
    */
-  public ItemBuilder addEnchantmentGlint(boolean add) {
-    if (add) {
-      addEnchantment(Enchantment.UNBREAKING, 1);
-      addItemFlag(ItemFlag.HIDE_ENCHANTS);
-    } else {
-      enchantments.remove(Enchantment.UNBREAKING);
-      itemFlags.remove(ItemFlag.HIDE_ENCHANTS);
-    }
-    return this;
-  }
-
-  public ItemBuilder addEnchantmentGlint() {
-    return addEnchantmentGlint(true);
-  }
-
-  public ItemBuilder removeEnchantment(Enchantment enchantment) {
-    enchantments.remove(enchantment);
-    return this;
-  }
-
-  public ItemBuilder addItemFlag(ItemFlag flag) {
-    itemFlags.add(flag);
-    return this;
-  }
-
-  public ItemBuilder addItemFlag(List<ItemFlag> flags) {
-    itemFlags.addAll(flags);
-    return this;
-  }
-
   public ItemBuilder addBannerPatterns(List<Pattern> patterns) {
     this.bannerPatterns = patterns;
     return this;
   }
 
+  /**
+   * Builds and returns the final {@link ItemStack} with all properties applied.
+   *
+   * @return the constructed ItemStack
+   */
   public ItemStack toItemStack() {
     item.setType(material);
     item.setAmount(amount);
@@ -375,6 +535,46 @@ public class ItemBuilder {
 
     item.setItemMeta(meta);
     return item;
+  }
+
+  public ItemStack getItem() {
+    return item;
+  }
+
+  public ItemMeta getItemMeta() {
+    return itemMeta;
+  }
+
+  public Material getMaterial() {
+    return material;
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public int getAmount() {
+    return amount;
+  }
+
+  public int getDamage() {
+    return damage;
+  }
+
+  public Map<Enchantment, Integer> getEnchantments() {
+    return enchantments;
+  }
+
+  public List<String> getItemLores() {
+    return itemLores;
+  }
+
+  public List<ItemFlag> getItemFlags() {
+    return itemFlags;
+  }
+
+  public List<Pattern> getBannerPatterns() {
+    return bannerPatterns;
   }
 
   private static boolean isLeatherDyeable(Material material){
