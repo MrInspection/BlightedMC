@@ -2,6 +2,8 @@ package fr.moussax.blightedMC.core.items.crafting.menu;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.crafting.*;
+import fr.moussax.blightedMC.core.menus.Menu;
+import fr.moussax.blightedMC.core.menus.MenuManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Item;
@@ -28,7 +30,7 @@ public class CraftingTableListener implements Listener {
   public void onDrag(InventoryDragEvent event) {
     if (!event.getView().getTitle().equals("§rCraft Items")) return;
     Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(),
-        () -> updateOutput(event.getView().getTopInventory()), 1);
+      () -> updateOutput(event.getView().getTopInventory()), 1);
   }
 
   @EventHandler
@@ -41,6 +43,21 @@ public class CraftingTableListener implements Listener {
     if (event.getSlot() == 49) {
       event.setCancelled(true);
       player.closeInventory();
+      return;
+    }
+
+    // Recipe Book button (slot 25)
+    if (event.getSlot() == 25) {
+      event.setCancelled(true);
+      player.closeInventory();
+      MenuManager.openMenu(
+        new RecipeBookMenu.RecipeListMenu(
+          new Menu("Crafting Table", 54) {
+            @Override
+            public void build(Player p) {
+            }
+          }
+        ), player);
       return;
     }
 
@@ -76,7 +93,7 @@ public class CraftingTableListener implements Listener {
 
     // Schedule output update after the click
     Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(),
-        () -> updateOutput(topInventory), 1);
+      () -> updateOutput(topInventory), 1);
   }
 
   private void craftOnce(BlightedRecipe recipe, Inventory inventory, Player player) {
@@ -85,7 +102,8 @@ public class CraftingTableListener implements Listener {
 
     // Combine with cursor if same type
     if (cursorItem != null && cursorItem.getType() != Material.AIR) {
-      if (!cursorItem.isSimilar(resultItem) || cursorItem.getAmount() + resultItem.getAmount() > cursorItem.getMaxStackSize()) return;
+      if (!cursorItem.isSimilar(resultItem) || cursorItem.getAmount() + resultItem.getAmount() > cursorItem.getMaxStackSize())
+        return;
       cursorItem.setAmount(cursorItem.getAmount() + resultItem.getAmount());
       player.setItemOnCursor(cursorItem);
     } else {
@@ -192,8 +210,8 @@ public class CraftingTableListener implements Listener {
     }
 
     ItemStack indicator = (recipe == null)
-        ? CraftingTableMenu.VALID_RECIPE_INDICATOR(false)
-        : CraftingTableMenu.VALID_RECIPE_INDICATOR(true);
+      ? CraftingTableMenu.VALID_RECIPE_INDICATOR(false)
+      : CraftingTableMenu.VALID_RECIPE_INDICATOR(true);
 
     for (int slot = 45; slot < 49; slot++) {
       inventory.setItem(slot, indicator);
