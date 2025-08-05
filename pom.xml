@@ -55,10 +55,6 @@
       <id>spigotmc-repo</id>
       <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
-    <!--<repository>
-        <entityId>loohpjames</entityId>
-        <url>https://repo.loohpjames.com/repository/</url>
-    </repository>-->
     <repository>
       <id>sonatype</id>
       <url>https://oss.sonatype.org/content/groups/public/</url>
@@ -72,11 +68,5 @@
       <version>1.21.8-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
-    <!--<dependency>
-        <groupId>org.bukkit</groupId>
-        <artifactId>craftbukkit</artifactId>
-        <version>1.21.8-R0.1-SNAPSHOT</version>
-        <scope>provided</scope>
-    </dependency>-->
   </dependencies>
 </project>
