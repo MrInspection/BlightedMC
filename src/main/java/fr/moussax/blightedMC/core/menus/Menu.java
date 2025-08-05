@@ -1,145 +1,156 @@
 package fr.moussax.blightedMC.core.menus;
 
-import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Stack;
+import java.util.function.BiFunction;
 
-public abstract class Menu implements BlightedInventory {
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
+public class Menu {
+    private static final Map<Player, Stack<Menu>> history = new HashMap<>();
+    private final String title;
+    private final int size;
+    private final Inventory inventory;
+    private final Map<Integer, MenuSlot> slots;
 
-  public static ClickableItem EMPTY_PANE() {
-    ItemBuilder emptyPane = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, " ");
-    return new ClickableItem(emptyPane.toItemStack(), player -> {});
-  }
-
-  public static ClickableItem BACK_BUTTON() {
-    ItemBuilder backButton = new ItemBuilder(Material.ARROW, 1, "§cBack");
-    return new ClickableItem(backButton.toItemStack(), player -> MenuRouter.goBack(player));
-  }
-
-  public static ClickableItem NEXT_PAGE_BUTTON(Consumer<Player> onClick) {
-    ItemBuilder nextButton = new ItemBuilder(Material.ARROW, 1, "§aNext Page");
-    return new ClickableItem(nextButton.toItemStack(), onClick);
-  }
-
-  public static ClickableItem CLOSE_BUTTON() {
-    ItemBuilder closeButton = new ItemBuilder(Material.BARRIER, 1, "§cClose");
-    return new ClickableItem(closeButton.toItemStack(), player -> MenuRouter.closeCurrentMenu(player));
-  }
-
-  protected final Inventory inventory;
-  protected final int size;
-  protected final String title;
-  protected final Map<Integer, ClickableItem> clickableItems = new HashMap<>();
-
-  private int incrementalSlot = 0;
-
-  public abstract void initializeItems(Player player);
-
-  public Menu(String title, int size) {
-    this.size = size;
-    this.title = title;
-    this.inventory = Bukkit.createInventory(this, size, title);
+    public Menu(String title, int size, Map<Integer, MenuSlot> slots) {
+        this.title = title;
+        this.size = size;
+        this.inventory = Bukkit.createInventory(null, size, title);
+        this.slots = new HashMap<>(slots);
+        for (Map.Entry<Integer, MenuSlot> entry : slots.entrySet()) {
+            inventory.setItem(entry.getKey(), entry.getValue().item);
+        }
   }
 
   public void open(Player player) {
-    this.clickableItems.clear();
-    this.incrementalSlot = 0;
-
-    this.initializeItems(player);
-    player.openInventory(this.inventory);
+        history.computeIfAbsent(player, k -> new Stack<>()).push(this);
+        player.openInventory(inventory);
   }
 
   public void close(Player player) {
     player.closeInventory();
-  }
-
-  public void setItemAt(int slot, ClickableItem item) {
-    this.clickableItems.put(slot, item);
-    this.inventory.setItem(slot, item.getItem());
-  }
-
-  public void setItemAt(int x, int y, ClickableItem item) {
-    setItemAt((x - 1) + ((y - 1) * 9), item);
-  }
-
-  public void setNextItem(ClickableItem item) {
-    while (incrementalSlot < this.inventory.getSize() &&
-        this.clickableItems.containsKey(incrementalSlot)) {
-      incrementalSlot++;
+        Stack<Menu> stack = history.get(player);
+        if (stack != null) stack.clear();
     }
 
-    if (incrementalSlot >= this.inventory.getSize()) {
-      throw new IndexOutOfBoundsException("The inventory is full!");
+    public static void goBack(Player player) {
+        Stack<Menu> stack = history.get(player);
+        if (stack == null || stack.size() <= 1) {
+            player.closeInventory();
+            if (stack != null) stack.clear();
+            return;
+        }
+        stack.pop();
+        stack.peek().open(player);
     }
 
-    setItemAt(incrementalSlot, item);
-    incrementalSlot++;
-  }
-
-  @Override
-  public ClickableItem getItemAt(int slot) {
-    return this.clickableItems.getOrDefault(slot, null);
-  }
-
-  /**
-   * Fill every remaining slot with an empty pane.
-   * This method updates both the clickable map and the actual inventory.
-   */
-  public void fillRemainingSlotsWithEmptyPanes() {
-    for (int slot = 0; slot < this.inventory.getSize(); slot++) {
-      if (!this.clickableItems.containsKey(slot)) {
-        ClickableItem empty = EMPTY_PANE();
-        this.clickableItems.put(slot, empty);
-        this.inventory.setItem(slot, empty.getItem());
-      }
+    public static Menu getCurrent(Player player) {
+        Stack<Menu> stack = history.get(player);
+        return (stack == null || stack.isEmpty()) ? null : stack.peek();
     }
-  }
 
-  public enum BorderType { TOP, BOTTOM, LEFT, RIGHT, ALL }
-  public enum Direction { HORIZONTAL, VERTICAL }
-
-  public void fillBorder(BorderType borderType) {
-    ClickableItem item = EMPTY_PANE();
-
-    switch (borderType) {
-      case TOP -> {
-        for (int slot = 0; slot < 9; slot++) setItemAt(slot, item);
-      }
-      case BOTTOM -> {
-        for (int slot = this.inventory.getSize() - 9; slot < this.inventory.getSize(); slot++) setItemAt(slot, item);
-      }
-      case LEFT -> {
-        for (int slot = 0; slot < this.inventory.getSize(); slot += 9) setItemAt(slot, item);
-      }
-      case RIGHT -> {
-        for (int slot = 8; slot < this.inventory.getSize(); slot += 9) setItemAt(slot, item);
-      }
-      case ALL -> {
-        fillBorder(BorderType.TOP);
-        fillBorder(BorderType.BOTTOM);
-        fillBorder(BorderType.LEFT);
-        fillBorder(BorderType.RIGHT);
-      }
+    public void handleClick(Player player, int slot, ClickType clickType) {
+        MenuSlot menuSlot = slots.get(slot);
+        if (menuSlot != null) menuSlot.handle(player, clickType);
     }
-  }
 
-  public void fillBorder(int location, Direction direction) {
-    ClickableItem item = EMPTY_PANE();
-    location--;
+    public Inventory getInventory() {
+        return inventory;
+    }
 
-    switch (direction) {
-      case HORIZONTAL -> {
-        for (int slot = location * 9; slot < (location * 9) + 9; slot++) setItemAt(slot, item);
-      }
-      case VERTICAL -> {
-        for (int slot = location % 9; slot < this.inventory.getSize(); slot += 9) setItemAt(slot, item);
-      }
+    // --- Pagination Helper ---
+    public static Menu paginated(String title, int size, int totalItems, BiFunction<Player, Integer, MenuSlot> itemProvider, int page, Player player) {
+        Map<Integer, MenuSlot> slots = new HashMap<>();
+        int start = page * (size - 9);
+        int end = Math.min(start + (size - 9), totalItems);
+        int slotIndex = 0;
+        for (int i = start; i < end; i++) {
+            slots.put(slotIndex++, itemProvider.apply(player, i));
+        }
+        // Navigation
+        if (page > 0) {
+            slots.put(size - 9, new MenuSlot(MenuElementPreset.BACK_BUTTON.getItem(), (p, t) -> openPaginated(title, size, totalItems, itemProvider, page - 1, p)));
+        }
+        if (end < totalItems) {
+            slots.put(size - 1, new MenuSlot(MenuElementPreset.NEXT_BUTTON.getItem(), (p, t) -> openPaginated(title, size, totalItems, itemProvider, page + 1, p)));
+        }
+        slots.put(size - 5, new MenuSlot(MenuElementPreset.CLOSE_BUTTON.getItem(), (p, t) -> getCurrent(p).close(p)));
+        // Fill empty
+        for (int i = 0; i < size; i++) {
+            if (!slots.containsKey(i)) {
+                slots.put(i, new MenuSlot(MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), (p, t) -> {}));
+            }
+        }
+        return new Menu(title + " (Page " + (page + 1) + ")", size, slots);
+    }
+
+    public static void openPaginated(String title, int size, int totalItems, BiFunction<Player, Integer, MenuSlot> itemProvider, int page, Player player) {
+        Menu menu = paginated(title, size, totalItems, itemProvider, page, player);
+        menu.open(player);
+    }
+
+    // --- AbstractMenu for easy extension ---
+    public static abstract class AbstractMenu {
+        protected final String title;
+        protected final int size;
+        protected final Map<Integer, MenuSlot> slots = new HashMap<>();
+        public AbstractMenu(String title, int size) {
+            this.title = title;
+            this.size = size;
+        }
+        public abstract void build(Player player);
+        public void open(Player player) {
+            build(player);
+            Menu menu = new Menu(title, size, slots);
+            menu.open(player);
+        }
+        public void setItem(int slot, ItemStack item, MenuAction action) {
+            slots.put(slot, new MenuSlot(item, action));
+        }
+        public void setItem(int slot, ItemStack item, MenuAction left, MenuAction right) {
+            slots.put(slot, new MenuSlot(item, left, right));
+        }
+        public void setItem(int slot, MenuElementPreset preset, MenuAction action) {
+            setItem(slot, preset.getItem(), action);
+        }
+        public void setItem(int slot, MenuElementPreset preset, MenuAction left, MenuAction right) {
+            setItem(slot, preset.getItem(), left, right);
+        }
+        public void fillEmptyWith(MenuElementPreset preset) {
+            for (int i = 0; i < size; i++) {
+                if (!slots.containsKey(i)) {
+                    setItem(i, preset.getItem(), (p, t) -> {});
+                }
+            }
+        }
+    }
+
+    public static class MenuSlot {
+        private final ItemStack item;
+        private final MenuAction left;
+        private final MenuAction right;
+        private final MenuAction any;
+
+        public MenuSlot(ItemStack item, MenuAction any) {
+            this(item, any, null);
+        }
+        public MenuSlot(ItemStack item, MenuAction left, MenuAction right) {
+            this.item = item;
+            this.left = left;
+            this.right = right;
+            this.any = null;
+        }
+        public void handle(Player player, ClickType clickType) {
+            if (clickType == ClickType.LEFT && left != null) left.execute(player, clickType);
+            else if (clickType == ClickType.RIGHT && right != null) right.execute(player, clickType);
+            else if (any != null) any.execute(player, clickType);
     }
   }
 }

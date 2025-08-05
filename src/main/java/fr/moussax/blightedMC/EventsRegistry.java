@@ -7,7 +7,7 @@ import fr.moussax.blightedMC.core.items.abilities.AbilityListener;
 import fr.moussax.blightedMC.core.items.blocks.BlightedBlock;
 import fr.moussax.blightedMC.core.items.crafting.menu.CraftingTableListener;
 import fr.moussax.blightedMC.core.items.rules.ItemRuleListener;
-import fr.moussax.blightedMC.core.menus.MenuListeners;
+import fr.moussax.blightedMC.core.menus.MenuListener;
 import fr.moussax.blightedMC.core.players.BlightedPlayerListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -24,7 +24,7 @@ public final class EventsRegistry {
    */
   public void initializeListeners() {
     PluginManager pm = Bukkit.getPluginManager();
-    pm.registerEvents(new MenuListeners(), instance);
+    pm.registerEvents(new MenuListener(), instance);
     pm.registerEvents(new BlightedEntitiesListener(), instance);
     pm.registerEvents(new SpawnableEntitiesListener(), instance);
     pm.registerEvents(new LaserBeam.LaserBeamListener(), instance);
