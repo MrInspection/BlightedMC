@@ -2,8 +2,11 @@ package fr.moussax.blightedMC.core.items.blocks;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemManager;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.TileState;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -11,60 +14,83 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a custom block within the BlightedMC plugin.
- * Each {@link BlightedBlock} can handle placement, interaction, and breaking events.
  */
 public abstract class BlightedBlock {
+
   protected final Material material;
   protected final ItemManager itemManager;
 
-  /**
-   * Creates a new custom block and registers it in the {@link BlocksRegistry}.
-   *
-   * @param material    the Bukkit {@link Material} used to render the block
-   * @param itemManager the {@link ItemManager} for generating its item form
-   */
   public BlightedBlock(@Nonnull Material material, ItemManager itemManager) {
     this.material = material;
     this.itemManager = itemManager;
     BlocksRegistry.addBlock(this);
   }
 
-  /**
-   * Called when this block is placed.
-   *
-   * @param event the {@link BlockPlaceEvent} triggered by the placement
-   */
   public void onPlace(BlockPlaceEvent event) {}
 
-  /**
-   * Called when a player interacts with this block.
-   *
-   * @param event the {@link PlayerInteractEvent} triggered by interaction
-   */
   public void onInteract(PlayerInteractEvent event) {}
 
-  /**
-   * Called when this block is broken.
-   *
-   * @param event       the {@link BlockBreakEvent} triggered by the break
-   * @param droppedItem the item initially set to drop
-   * @return the final item to drop; may be {@code null} to drop nothing
-   */
-  public ItemStack onBreak(BlockBreakEvent event, ItemStack droppedItem){
+  public ItemStack onBreak(BlockBreakEvent event, ItemStack droppedItem) {
     return droppedItem;
   }
 
   /**
-   * Listener handling block events for all {@link BlightedBlock} instances.
-   * It links placed blocks to their custom implementations using metadata and persistent data.
+   * Handles all BlightedBlock events and persistence.
    */
   public static class BlightedBlockListener implements Listener {
+    private final BlightedMC plugin = BlightedMC.getInstance();
+    private final NamespacedKey key = new NamespacedKey(plugin, "id");
+
+    // In-memory cache
+    private final Map<String, String> placedBlocks = new HashMap<>();
+
+    // Data file
+    private final File dataFile;
+    private final YamlConfiguration dataConfig;
+
+    public BlightedBlockListener() {
+      dataFile = new File(plugin.getDataFolder(), "blighted_blocks.yml");
+      dataConfig = YamlConfiguration.loadConfiguration(dataFile);
+      loadData();
+    }
+
+    /** Reads custom block ID using metadata or PDC */
+    private String getBlockId(Block block) {
+      // 1) Metadata fast path
+      if (block.hasMetadata("id")) {
+        for (MetadataValue mv : block.getMetadata("id")) {
+          if (mv.getOwningPlugin() == plugin) {
+            return mv.asString();
+          }
+        }
+      }
+
+      // 2) TileState Persistent fallback
+      BlockState state = block.getState();
+      if (!(state instanceof TileState tile)) return null;
+
+      PersistentDataContainer pdc = tile.getPersistentDataContainer();
+      if (pdc.has(key, PersistentDataType.STRING)) {
+        String id = pdc.get(key, PersistentDataType.STRING);
+        block.setMetadata("id", new FixedMetadataValue(plugin, id)); // cache
+        return id;
+      }
+
+      return null;
+    }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
@@ -74,28 +100,41 @@ public abstract class BlightedBlock {
       var meta = item.getItemMeta();
       if (meta == null) return;
 
-      if (!meta.getPersistentDataContainer().has(new NamespacedKey(BlightedMC.getInstance(), "id"), PersistentDataType.STRING)) return;
-
-      String id = meta.getPersistentDataContainer().get(new NamespacedKey(BlightedMC.getInstance(), "id"), PersistentDataType.STRING);
+      if (!meta.getPersistentDataContainer().has(key, PersistentDataType.STRING)) return;
+      String id = meta.getPersistentDataContainer().get(key, PersistentDataType.STRING);
       if (id == null) return;
 
       BlightedBlock block = BlocksRegistry.CUSTOM_BLOCKS.get(id);
       if (block == null) return;
 
-      event.getBlockPlaced().setType(block.material);
-      event.getBlockPlaced().setMetadata("id", new FixedMetadataValue(BlightedMC.getInstance(), id));
+      Block placed = event.getBlockPlaced();
+      placed.setType(block.material);
+
+      // Store in TileState PDC if supported
+      BlockState state = placed.getState();
+      if (state instanceof TileState tile) {
+        tile.getPersistentDataContainer().set(key, PersistentDataType.STRING, id);
+        tile.update(true);
+      }
+
+      // Cache metadata
+      placed.setMetadata("id", new FixedMetadataValue(plugin, id));
+
+      // Track and persist immediately
+      String locKey = serializeLocation(placed.getLocation());
+      placedBlocks.put(locKey, id);
+      dataConfig.set(locKey, id);
+      saveData(); // persist immediately
 
       block.onPlace(event);
     }
 
     @EventHandler
     public void onBlockInteract(PlayerInteractEvent event) {
-      if (event.getClickedBlock() == null) return;
+      Block block = event.getClickedBlock();
+      if (block == null) return;
 
-      var block = event.getClickedBlock();
-      if (!block.hasMetadata("id")) return;
-
-      String id = block.getMetadata("id").getFirst().asString();
+      String id = getBlockId(block);
       if (id == null) return;
 
       BlightedBlock customBlock = BlocksRegistry.CUSTOM_BLOCKS.get(id);
@@ -106,10 +145,8 @@ public abstract class BlightedBlock {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-      var block = event.getBlock();
-      if (!block.hasMetadata("id")) return;
-
-      String id = block.getMetadata("id").getFirst().asString();
+      Block block = event.getBlock();
+      String id = getBlockId(block);
       if (id == null) return;
 
       BlightedBlock customBlock = BlocksRegistry.CUSTOM_BLOCKS.get(id);
@@ -121,6 +158,67 @@ public abstract class BlightedBlock {
       if (drop != null) {
         block.getWorld().dropItemNaturally(block.getLocation(), drop);
       }
+
+      // Remove from memory and YAML
+      String locKey = serializeLocation(block.getLocation());
+      placedBlocks.remove(locKey);
+      dataConfig.set(locKey, null);
+      saveData(); // persist immediately
+
+      // Remove from PDC if applicable
+      BlockState state = block.getState();
+      if (state instanceof TileState tile) {
+        tile.getPersistentDataContainer().remove(key);
+        tile.update(true);
+      }
+    }
+
+    /** Save all placed custom blocks to disk */
+    public void saveData() {
+      try {
+        dataConfig.save(dataFile);
+      } catch (IOException e) {
+        plugin.getLogger().severe("Failed to save blighted block data: " + e.getMessage());
+      }
+    }
+
+    /** Load all blocks from disk and restore metadata */
+    private void loadData() {
+      if (!dataFile.exists()) return;
+
+      for (String locKey : dataConfig.getKeys(false)) {
+        String id = dataConfig.getString(locKey);
+        if (id == null) continue;
+
+        Location loc = deserializeLocation(locKey);
+        if (loc == null) continue;
+
+        Block block = loc.getBlock();
+        block.setMetadata("id", new FixedMetadataValue(plugin, id));
+        placedBlocks.put(locKey, id);
+      }
+
+      plugin.getLogger().info("Loaded " + placedBlocks.size() + " blighted blocks.");
+    }
+
+    /** Serialize location to string key */
+    private String serializeLocation(Location loc) {
+      return Objects.requireNonNull(loc.getWorld()).getName() + ";" +
+        loc.getBlockX() + ";" +
+        loc.getBlockY() + ";" +
+        loc.getBlockZ();
+    }
+
+    /** Deserialize location string back to Location */
+    private Location deserializeLocation(String key) {
+      String[] parts = key.split(";");
+      if (parts.length != 4) return null;
+      World world = Bukkit.getWorld(parts[0]);
+      if (world == null) return null;
+      return new Location(world,
+        Integer.parseInt(parts[1]),
+        Integer.parseInt(parts[2]),
+        Integer.parseInt(parts[3]));
     }
   }
 }

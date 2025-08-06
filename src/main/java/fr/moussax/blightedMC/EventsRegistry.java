@@ -3,6 +3,7 @@ package fr.moussax.blightedMC;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.core.entities.listeners.SpawnableEntitiesListener;
 import fr.moussax.blightedMC.core.entities.magic.LaserBeam;
+import fr.moussax.blightedMC.core.items.ItemsRegistrySearch;
 import fr.moussax.blightedMC.core.items.abilities.AbilityListener;
 import fr.moussax.blightedMC.core.items.blocks.BlightedBlock;
 import fr.moussax.blightedMC.core.items.crafting.menu.CraftingTableListener;
@@ -18,6 +19,7 @@ import org.bukkit.plugin.PluginManager;
  */
 public final class EventsRegistry {
   private final BlightedMC instance = BlightedMC.getInstance();
+  private BlightedBlock.BlightedBlockListener blockListener;
 
   /**
    * Registers all listeners to the Bukkit PluginManager.
@@ -28,10 +30,20 @@ public final class EventsRegistry {
     pm.registerEvents(new BlightedEntitiesListener(), instance);
     pm.registerEvents(new SpawnableEntitiesListener(), instance);
     pm.registerEvents(new LaserBeam.LaserBeamListener(), instance);
-    pm.registerEvents(new BlightedBlock.BlightedBlockListener(), instance);
+
+    // Store reference to block listener
+    blockListener = new BlightedBlock.BlightedBlockListener();
+    pm.registerEvents(blockListener, instance);
+
     pm.registerEvents(new BlightedPlayerListener(), instance);
     pm.registerEvents(new CraftingTableListener(), instance);
     pm.registerEvents(new ItemRuleListener(), instance);
     pm.registerEvents(new AbilityListener(), instance);
+    pm.registerEvents(new ItemsRegistrySearch(), instance);
+  }
+
+  /** Expose for saving data on shutdown */
+  public BlightedBlock.BlightedBlockListener getBlockListener() {
+    return blockListener;
   }
 }
