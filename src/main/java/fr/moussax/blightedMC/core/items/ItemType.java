@@ -1,71 +1,48 @@
 package fr.moussax.blightedMC.core.items;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public enum ItemType {
-  HELMET(Type.Armor),
-  CHESTPLATE(Type.Armor),
-  LEGGINGS(Type.Armor),
-  BOOTS(Type.Armor),
+  HELMET(Category.ARMOR),
+  CHESTPLATE(Category.ARMOR),
+  LEGGINGS(Category.ARMOR),
+  BOOTS(Category.ARMOR),
 
-  SWORD(Type.Sword),
-  LONGSWORD(Type.Sword),
-  BOW(Type.Bow),
-  WAND(Type.Equipment),
+  SWORD(Category.MELEE_WEAPON),
+  LONGSWORD(Category.MELEE_WEAPON),
+  WAND(Category.MELEE_WEAPON),
 
-  PICKAXE(Type.Tool),
-  DRILL(Type.Tool),
-  AXE(Type.Tool),
-  HOE(Type.Tool),
-  SHOVEL(Type.Tool),
-  FISHING_ROD(Type.Tool),
+  BOW(Category.RANGE_WEAPON),
 
-  ENCHANTED_BOOK,
-  GEMSTONE,
-  MATERIAL,
-  UPGRADE_MODULE;
+  PICKAXE(Category.TOOLS),
+  DRILL(Category.TOOLS),
+  AXE(Category.TOOLS),
+  HOE(Category.TOOLS),
+  SHOVEL(Category.TOOLS),
+  FISHING_ROD(Category.TOOLS),
 
-  private final Type type;
+  MATERIAL(Category.MATERIAL),
+  GEMSTONE(Category.MATERIAL),
+  UPGRADE_MODULE(Category.MATERIAL),
+  BLOCK(Category.BLOCKS),
 
-  ItemType(Type type) {
-    this.type = type;
-    type.typeList.add(this);
-    Type.available.add(this);
-    if (type == Type.Sword || type == Type.Bow) {
-      Type.combat.add(this);
-    }
+  ENCHANTED_BOOK(Category.MISCELLANEOUS);
+
+  private final Category category;
+
+  ItemType(Category category) {
+    this.category = category;
   }
 
-  ItemType() {
-    this.type = null;
+  public Category getCategory() {
+    return category;
   }
 
-  public Type getType() {
-    return type;
-  }
-
-  public enum Type {
-    Sword,
-    Tool,
-    Armor,
-    Bow,
-    Equipment;
-
-    private final List<ItemType> typeList = new ArrayList<>();
-    private static final List<ItemType> combat = new ArrayList<>();
-    private static final List<ItemType> available = new ArrayList<>();
-
-    public List<ItemType> getTypeList() {
-      return typeList;
-    }
-
-    public static List<ItemType> getCombat() {
-      return combat;
-    }
-
-    public static List<ItemType> getAvailable() {
-      return available;
-    }
+  public enum Category {
+    ARMOR,
+    MELEE_WEAPON,
+    RANGE_WEAPON,
+    TOOLS,
+    BLOCKS,
+    MATERIAL,
+    MISCELLANEOUS
   }
 }

@@ -27,5 +27,6 @@ public final class CommandsRegistry {
     CommandBuilder.register("loop", new LoopCommand());
     CommandBuilder.register("kaboom", new KaboomCommand());
     CommandBuilder.register("forcecommand", new ForceCommand());
+    CommandBuilder.register("giveitem", GiveItemCommand.class);
   }
 }

@@ -2,6 +2,8 @@ package fr.moussax.blightedMC.commands;
 
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntitiesRegistry;
+import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemsRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -37,17 +39,17 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
     }
 
     for (var argument : annotations) {
-        rules.put(new ArgumentRule(argument.position(), argument.after()), List.of(argument.suggestions()));
+      rules.put(new ArgumentRule(argument.position(), argument.after()), List.of(argument.suggestions()));
     }
   }
 
   /**
    * Provides tab completion suggestions based on the current command input and predefined rules.
    *
-   * @param sender the entity requesting tab completion
+   * @param sender  the entity requesting tab completion
    * @param command the command being executed
-   * @param label the command alias used
-   * @param args the arguments currently typed
+   * @param label   the command alias used
+   * @param args    the arguments currently typed
    * @return a list of matching suggestions, or an empty list if none apply
    */
   @Override
@@ -58,14 +60,20 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
 
         if (suggestions.size() == 1 && suggestions.getFirst().equals("$players")) {
           return Bukkit.getOnlinePlayers().stream()
-              .map(Player::getName)
-              .toList();
+            .map(Player::getName)
+            .toList();
+        }
+
+        if (suggestions.size() == 1 && suggestions.getFirst().equals("$items")) {
+          return ItemsRegistry.getAllItems().stream()
+            .map(ItemManager::getItemId)
+            .toList();
         }
 
         if (suggestions.size() == 1 && suggestions.getFirst().equals("$entities")) {
           return EntitiesRegistry.getAllEntities().stream()
-              .map(BlightedEntity::getEntityId)
-              .toList();
+            .map(BlightedEntity::getEntityId)
+            .toList();
         }
 
         return suggestions;
@@ -88,7 +96,7 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
      * Creates a new argument rule.
      *
      * @param position the zero-based index of the argument this rule applies to
-     * @param after array of allowed preceding arguments; empty means no restriction
+     * @param after    array of allowed preceding arguments; empty means no restriction
      */
     ArgumentRule(int position, String[] after) {
       this.position = position;

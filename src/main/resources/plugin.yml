@@ -23,3 +23,5 @@ commands:
     description: Force another player to execute a command
   kaboom:
     description: Launch all players or a specific player into the sky
+  giveitem:
+    description: Open or give yourself a custom item

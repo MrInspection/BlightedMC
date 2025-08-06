@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.core.items;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.registry.items.MaterialsRegistry;
 import fr.moussax.blightedMC.core.registry.armors.SpecialArmorRegistry;
 import fr.moussax.blightedMC.core.registry.items.SpecialItems;
@@ -52,6 +53,15 @@ public final class ItemsRegistry {
       throw new IllegalArgumentException("Duplicate item ID: " + item.getItemId());
     }
     BLIGHTED_ITEMS.put(item.getItemId(), item);
+  }
+
+  /**
+   * Returns an immutable list of all registered items.
+   *
+   * @return a list containing all {@link ItemManager} instances
+   */
+  public static List<ItemManager> getAllItems() {
+    return List.copyOf(BLIGHTED_ITEMS.values());
   }
 
   /**
