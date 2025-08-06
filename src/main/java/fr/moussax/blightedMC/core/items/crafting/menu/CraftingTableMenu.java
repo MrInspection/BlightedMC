@@ -22,7 +22,14 @@ public class CraftingTableMenu {
     inv.setItem(22, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());
     inv.setItem(23, RECIPE_REQUIRED());
     inv.setItem(24, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());
-    inv.setItem(25, new ItemBuilder(Material.KNOWLEDGE_BOOK, "§aRecipe Book").addLore("§eClick to view recipes!").toItemStack());
+    inv.setItem(25, new ItemBuilder(Material.BOOK, "§aBlighted Blueprints")
+      .addLore("§7Ideas bounds in warped hide, each page",
+        "§7whispers a path from thought to creation.",
+        "§7Without them, blighted crafting collapses",
+        "§7into ruin.", "", "§eClick to view!")
+      .addEnchantmentGlint()
+      .toItemStack()
+    );
     inv.setItem(26, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());
     inv.setItem(27, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());
     inv.setItem(31, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());

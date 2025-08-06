@@ -6,8 +6,8 @@ import org.bukkit.inventory.ItemStack;
 
 public enum MenuElementPreset {
   CLOSE_BUTTON(new ItemBuilder(Material.BARRIER, "§cClose").toItemStack()),
-  BACK_BUTTON(new ItemBuilder(Material.ARROW, "§6Go Back").toItemStack()),
-  NEXT_BUTTON(new ItemBuilder(Material.ARROW, "§6Next Page").toItemStack()),
+  BACK_BUTTON(new ItemBuilder(Material.ARROW, "§aGo Back").toItemStack()),
+  NEXT_BUTTON(new ItemBuilder(Material.ARROW, "§aNext Page").toItemStack()),
   EMPTY_SLOT_FILLER(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE, "§r").hideTooltip(true).toItemStack());
 
   private final ItemStack item;
