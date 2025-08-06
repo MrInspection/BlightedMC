@@ -1,5 +1,7 @@
 package fr.moussax.blightedMC.core.items.blocks;
 
+import fr.moussax.blightedMC.core.registry.blocks.BlightedCraftingTable;
+
 import java.util.HashMap;
 
 public final class BlocksRegistry {
@@ -17,5 +19,6 @@ public final class BlocksRegistry {
     clearBlocks();
 
     // Register custom placeable blocks here
+    new BlightedCraftingTable();
   }
 }
