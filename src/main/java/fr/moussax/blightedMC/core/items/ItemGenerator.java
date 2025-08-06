@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.entities.LootTable;
+package fr.moussax.blightedMC.core.items;
 
 import org.bukkit.inventory.ItemStack;
 
