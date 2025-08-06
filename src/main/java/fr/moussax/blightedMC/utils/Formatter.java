@@ -12,6 +12,34 @@ public class Formatter {
   }
 
   /**
+   * Converts an UPPER_CASE_UNDERSCORE string into a capitalized space-separated string.
+   * Example: "RANGED_WEAPON" -> "Ranged Weapon".
+   *
+   * @param input the string to format
+   * @return the formatted string, or the original if null or empty
+   */
+  public static String formatEnumName(String input) {
+    if (input == null || input.isEmpty()) {
+      return input;
+    }
+
+    String[] words = input.split("_");
+    StringBuilder formatted = new StringBuilder();
+
+    for (int i = 0; i < words.length; i++) {
+      String word = words[i].toLowerCase();
+      formatted.append(Character.toUpperCase(word.charAt(0)))
+        .append(word.substring(1));
+      if (i < words.length - 1) {
+        formatted.append(' ');
+      }
+    }
+
+    return formatted.toString();
+  }
+
+
+  /**
    * Formats a double to a string with a specified number of decimal places.
    * ex) 1.97349873, 3 -> "1.973"
    * @param v1 double to format
