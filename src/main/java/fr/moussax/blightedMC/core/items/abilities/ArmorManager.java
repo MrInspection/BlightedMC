@@ -49,7 +49,7 @@ public final class ArmorManager {
     }
 
     // Check current active bonuses and stop those that no longer meet requirements
-    for (FullSetBonus activeBonus : player.getActiveFullSetBonuses()) {
+    for (FullSetBonus activeBonus : new ArrayList<>(player.getActiveFullSetBonuses())) {
       Class<? extends FullSetBonus> bonusClass = activeBonus.getClass();
       int currentPieces = bonusCount.getOrDefault(bonusClass, 0);
       int requiredPieces = activeBonus.getMaxPieces();
