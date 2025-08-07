@@ -146,6 +146,7 @@ public abstract class BlightedBlock {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
       Block block = event.getBlock();
+      Location loc = block.getLocation();
       String id = getBlockId(block);
       if (id == null) return;
 
@@ -154,23 +155,26 @@ public abstract class BlightedBlock {
 
       event.setDropItems(false);
 
-      ItemStack drop = customBlock.onBreak(event, customBlock.itemManager.toItemStack());
-      if (drop != null) {
-        block.getWorld().dropItemNaturally(block.getLocation(), drop);
-      }
+      // Preventing player in CREATIVE to drop the item when hitting the block with a sword
+      Bukkit.getScheduler().runTask(plugin, () -> {
+        if (!loc.getBlock().getType().isAir()) return; // Block wasn't destroyed → skip
 
-      // Remove from memory and YAML
-      String locKey = serializeLocation(block.getLocation());
-      placedBlocks.remove(locKey);
-      dataConfig.set(locKey, null);
-      saveData(); // persist immediately
+        ItemStack drop = customBlock.onBreak(event, customBlock.itemManager.toItemStack());
+        if (drop != null) {
+          Objects.requireNonNull(loc.getWorld()).dropItemNaturally(loc, drop);
+        }
 
-      // Remove from PDC if applicable
-      BlockState state = block.getState();
-      if (state instanceof TileState tile) {
-        tile.getPersistentDataContainer().remove(key);
-        tile.update(true);
-      }
+        String locKey = serializeLocation(loc);
+        placedBlocks.remove(locKey);
+        dataConfig.set(locKey, null);
+        saveData();
+
+        BlockState state = block.getState();
+        if (state instanceof TileState tile) {
+          tile.getPersistentDataContainer().remove(key);
+          tile.update(true);
+        }
+      });
     }
 
     /** Save all placed custom blocks to disk */
