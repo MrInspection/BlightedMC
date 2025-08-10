@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.entities.pathfinding;
+package fr.moussax.blightedMC.core.entities.abilities;
 
 import fr.moussax.blightedMC.BlightedMC;
 import org.bukkit.Bukkit;
