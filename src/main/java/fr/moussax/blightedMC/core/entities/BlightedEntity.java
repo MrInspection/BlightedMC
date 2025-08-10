@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.core.entities;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.LootTable.LootTable;
 import fr.moussax.blightedMC.core.entities.immunity.EntityImmunityRule;
 import fr.moussax.blightedMC.core.entities.immunity.FireImmunityRule;
@@ -8,6 +9,7 @@ import fr.moussax.blightedMC.core.entities.immunity.ProjectileImmunity;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.EntityType;
@@ -19,8 +21,12 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.Bukkit;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public abstract class BlightedEntity {
   protected String entityId;
@@ -29,7 +35,9 @@ public abstract class BlightedEntity {
   protected LivingEntity entity;
 
   protected int maxHealth;
+  protected int damage;
   protected int droppedExp = 0;
+  protected int trueDamage = 0;
   protected final Map<Attribute, Double> attributes = new HashMap<>();
 
   protected ItemStack itemInMainHand;
@@ -41,6 +49,8 @@ public abstract class BlightedEntity {
 
   protected BossBar bossBar;
   private final List<EntityImmunityRule> immunityRules = new ArrayList<>();
+  private boolean runtimeInitialized = false;
+  private final LifecycleTaskManager lifecycleTasks = new LifecycleTaskManager();
 
   /**
    * Create a new BlightedEntity.
@@ -65,6 +75,13 @@ public abstract class BlightedEntity {
     initImmunityRules();
     entity = (LivingEntity) Objects.requireNonNull(location.getWorld()).spawnEntity(location, entityType);
 
+    PersistentDataContainer data = entity.getPersistentDataContainer();
+    data.set(
+      new NamespacedKey(BlightedMC.getPlugin(BlightedMC.class), "entityId"),
+      PersistentDataType.STRING,
+      getEntityId()
+    );
+
     setAttribute(Attribute.MAX_HEALTH, maxHealth);
     applyAttributes();
 
@@ -78,16 +95,72 @@ public abstract class BlightedEntity {
     }
 
     BlightedEntitiesListener.registerEntity(entity, this);
+    initRuntime();
     return entity;
   }
+
+  /**
+   * Attaches this logical entity to an already existing Bukkit entity that was
+   * loaded from disk (e.g., after a server restart) and reinitialized runtime-only
+   * systems such as name tags, boss bars, and immunity rules.
+   * <p>
+   * This does not overwrite current health or equipment to preserve persisted state.
+   *
+   * @param existing the already spawned/loaded entity
+   */
+  public void attachToExisting(LivingEntity existing) {
+    this.entity = existing;
+    initImmunityRules();
+
+    updateNameTag();
+    if (nameTagType == EntityNameTag.BOSS) {
+      createBossBar();
+    }
+
+    // Re-register for damage/loot handling
+    BlightedEntitiesListener.registerEntity(existing, this);
+    initRuntime();
+  }
+
+  /**
+   * Initializes runtime-only behaviors once per entity lifecycle instance.
+   * Calls subclass hook {@link #onPostAttach()} and, if present, invokes
+   * a no-arg method named "startAbility" or "startAbilities" via reflection.
+   */
+  protected final void initRuntime() {
+    if (runtimeInitialized) return;
+    runtimeInitialized = true;
+    lifecycleTasks.scheduleAll();
+  }
+
+  /**
+   * Registers a repeating task that is automatically started on spawn/attach
+   * and restarted on rehydration. The task will be owned and canceled on kill.
+   */
+  protected final void addRepeatingTask(
+    Supplier<BukkitRunnable> factory, long delayTicks, long periodTicks) {
+    lifecycleTasks.addRepeatingTask(factory, delayTicks, periodTicks);
+    if (entity != null && !entity.isDead() && runtimeInitialized) lifecycleTasks.scheduleLast();
+  }
+
+  /**
+   * Registers a one-shot delayed task bound to this entity's lifecycle.
+   */
+  protected final void addDelayedTask(
+    Supplier<BukkitRunnable> factory, long delayTicks) {
+    lifecycleTasks.addDelayedTask(factory, delayTicks);
+    if (entity != null && !entity.isDead() && runtimeInitialized) lifecycleTasks.scheduleLast();
+  }
+
 
   /**
    * Instantly kills the entity if it is alive and removes its boss bar.
    */
   public void kill() {
     if (entity == null || entity.isDead()) return;
-    entity.setHealth(0);
     removeBossBar();
+    lifecycleTasks.cancelAll();
+    entity.setHealth(0);
   }
 
   /**
@@ -130,8 +203,8 @@ public abstract class BlightedEntity {
    * @return true if the entity is immune, false otherwise
    */
   public boolean isImmuneTo(LivingEntity entity, EntityDamageEvent event) {
-    for(EntityImmunityRule rule : immunityRules) {
-      if(rule.isImmune(entity, event)) return true;
+    for (EntityImmunityRule rule : immunityRules) {
+      if (rule.isImmune(entity, event)) return true;
     }
     return false;
   }
@@ -169,6 +242,7 @@ public abstract class BlightedEntity {
         case MELEE_IMMUNITY -> immunityRules.add(new MeleeImmunityRule());
         case FIRE_IMMUNITY -> immunityRules.add(new FireImmunityRule());
         case PROJECTILE_IMMUNITY -> immunityRules.add(new ProjectileImmunity());
+        default -> { /* ignore unimplemented attributes for now */ }
       }
     }
   }
@@ -305,6 +379,10 @@ public abstract class BlightedEntity {
    */
   public int getDroppedExp() {
     return droppedExp;
+  }
+
+  public int getTrueDamage() {
+    return trueDamage;
   }
 
   /**

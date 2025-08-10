@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.core.entities.listeners;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.EntitiesRegistry;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.Location;
@@ -11,12 +12,17 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.Chunk;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.NamespacedKey;
 
 import java.util.*;
 
@@ -85,7 +91,6 @@ public class BlightedEntitiesListener implements Listener {
     });
 
     new BukkitRunnable() {
-      final List<Entity> toRemove = new ArrayList<>();
 
       @Override
       public void run() {
@@ -135,5 +140,33 @@ public class BlightedEntitiesListener implements Listener {
     blighted.dropLoot(event.getEntity().getLocation(), player);
     event.getDrops().clear();
     event.setDroppedExp(blighted.getDroppedExp());
+  }
+
+  @EventHandler
+  public void onChunkLoad(ChunkLoadEvent event) {
+    rehydrateChunk(event.getChunk());
+  }
+
+  public static void rehydrateChunk(Chunk chunk) {
+    NamespacedKey key = new NamespacedKey(BlightedMC.getInstance(), "entityId");
+    for (Entity e : chunk.getEntities()) {
+      if (!(e instanceof LivingEntity living)) continue;
+      PersistentDataContainer pdc = living.getPersistentDataContainer();
+      String id = pdc.get(key, PersistentDataType.STRING);
+      if (id == null || id.isEmpty()) continue;
+
+      if (blightedEntities.containsKey(living.getUniqueId())) continue;
+
+      BlightedEntity proto = EntitiesRegistry.getEntity(id);
+      if (proto == null) continue;
+
+      BlightedEntity instance;
+      try {
+        instance = proto.getClass().getDeclaredConstructor().newInstance();
+      } catch (Exception ex) {
+        instance = proto;
+      }
+      instance.attachToExisting(living);
+    }
   }
 }
