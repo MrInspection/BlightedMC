@@ -48,6 +48,8 @@ public abstract class BlightedEntity {
   protected EntityNameTag nameTagType = EntityNameTag.DEFAULT;
 
   protected BossBar bossBar;
+  protected BarColor bossBarColor = BarColor.PURPLE;
+  protected BarStyle bossBarStyle = BarStyle.SOLID;
   private final List<EntityImmunityRule> immunityRules = new ArrayList<>();
   private boolean runtimeInitialized = false;
   private final LifecycleTaskManager lifecycleTasks = new LifecycleTaskManager();
@@ -122,11 +124,6 @@ public abstract class BlightedEntity {
     initRuntime();
   }
 
-  /**
-   * Initializes runtime-only behaviors once per entity lifecycle instance.
-   * Calls subclass hook {@link #onPostAttach()} and, if present, invokes
-   * a no-arg method named "startAbility" or "startAbilities" via reflection.
-   */
   protected final void initRuntime() {
     if (runtimeInitialized) return;
     runtimeInitialized = true;
@@ -215,7 +212,7 @@ public abstract class BlightedEntity {
   public void updateNameTag() {
     if (entity != null) entity.setCustomName(generateNameTag());
     if (bossBar != null && nameTagType == EntityNameTag.BOSS) {
-      bossBar.setTitle(generateNameTag());
+      bossBar.setTitle(getBossBarTitle());
       bossBar.setProgress(Math.max(0, Math.min(1, entity.getHealth() / (double) maxHealth)));
     }
   }
@@ -283,9 +280,37 @@ public abstract class BlightedEntity {
    */
   protected void createBossBar() {
     if (bossBar != null) return;
-    bossBar = Bukkit.createBossBar("§d" + getName(), BarColor.PURPLE, BarStyle.SOLID); // Customize color/style here
+    bossBar = Bukkit.createBossBar(getBossBarTitle(), bossBarColor, bossBarStyle);
     bossBar.setProgress(1.0);
     Bukkit.getOnlinePlayers().forEach(bossBar::addPlayer);
+  }
+
+  /**
+   * Returns the title displayed on the boss bar. Defaults to the plain entity name without health.
+   * Subclasses can override if they want custom formatting.
+   */
+  protected String getBossBarTitle() {
+    return "§5" + getName();
+  }
+
+  /**
+   * Updates the boss bar color and style. If a boss bar already exists it is updated live.
+   */
+  public void setBossBarAppearance(BarColor color, BarStyle style) {
+    this.bossBarColor = color;
+    this.bossBarStyle = style;
+    if (bossBar != null) {
+      bossBar.setColor(color);
+      bossBar.setStyle(style);
+    }
+  }
+
+  public void setBossBarColor(BarColor color) {
+    setBossBarAppearance(color, this.bossBarStyle);
+  }
+
+  public void setBossBarStyle(BarStyle style) {
+    setBossBarAppearance(this.bossBarColor, style);
   }
 
   /**
@@ -295,33 +320,7 @@ public abstract class BlightedEntity {
    */
   protected String generateNameTag() {
     if (entity == null) return name;
-    double health = entity.getHealth();
-    double percentage = (health / maxHealth) * 100;
-
-    String colorPrefix = "§a";
-    if (percentage < 10) colorPrefix = "§c";
-    else if (percentage < 50) colorPrefix = "§e";
-
-    return switch (nameTagType) {
-      case HIDDEN -> null;
-      case BOSS -> "§5" + name + " " + colorPrefix + toShortNumber(health) + "§5❤";
-      case BLIGHTED -> "§5" + name + " §d" + (int) health + "§r/§5" + maxHealth + "§c❤";
-      case SMALL_NUMBER -> "§c" + name + " " + colorPrefix + toShortNumber(health) + "§c❤";
-      case DEFAULT -> "§c" + name + " " + colorPrefix + (int) health + "§8/§a" + maxHealth + "§c❤";
-    };
-  }
-
-  /**
-   * Converts a large number into a short format (e.g., 1.2K, 3.4M).
-   *
-   * @param value the number to convert
-   * @return the short string representation
-   */
-  protected String toShortNumber(double value) {
-    if (value >= 1_000_000_000) return String.format("%.1fB", value / 1_000_000_000);
-    if (value >= 1_000_000) return String.format("%.1fM", value / 1_000_000);
-    if (value >= 1_000) return String.format("%.1fK", value / 1_000);
-    return String.valueOf((int) value);
+    return nameTagType.format(name, entity.getHealth(), maxHealth);
   }
 
   /**
