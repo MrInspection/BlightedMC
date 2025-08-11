@@ -151,17 +151,16 @@ public class BlightedEntitiesListener implements Listener {
 
   @EventHandler
   public void onChunkLoad(ChunkLoadEvent event) {
-    rehydrateChunk(event.getChunk());
+    Bukkit.getScheduler().runTask(BlightedMC.getInstance(), () -> rehydrateChunk(event.getChunk()));
   }
 
   public static void rehydrateChunk(Chunk chunk) {
     NamespacedKey key = new NamespacedKey(BlightedMC.getInstance(), "entityId");
-    for (Entity e : chunk.getEntities()) {
-      if (!(e instanceof LivingEntity living)) continue;
+    for (Entity entity : chunk.getEntities()) {
+      if (!(entity instanceof LivingEntity living)) continue;
       PersistentDataContainer pdc = living.getPersistentDataContainer();
       String id = pdc.get(key, PersistentDataType.STRING);
       if (id == null || id.isEmpty()) continue;
-
       if (blightedEntities.containsKey(living.getUniqueId())) continue;
 
       BlightedEntity proto = EntitiesRegistry.getEntity(id);
@@ -170,15 +169,14 @@ public class BlightedEntitiesListener implements Listener {
       BlightedEntity instance;
       try {
         instance = proto.getClass().getDeclaredConstructor().newInstance();
-      } catch (Exception ex) {
-        instance = proto;
+        instance.attachToExisting(living);
+      } catch (Exception e) {
+        BlightedMC.getInstance().getLogger().warning("Failed to instantiate BlightedEntity: " + e);
+        continue;
       }
-      instance.attachToExisting(living);
-
-      // Sync attachments armor and health on rehydrate
+      blightedEntities.put(living.getUniqueId(), instance);
       for (EntityAttachment att : instance.attachments) {
         if (att.entity() instanceof LivingEntity livingAtt && !livingAtt.isDead()) {
-          livingAtt.setHealth(instance.getMaxHealth());
           livingAtt.setHealth(instance.getMaxHealth());
           syncArmor(livingAtt, living);
         }
