@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.core.entities.listeners;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.EntityAttachment;
 import fr.moussax.blightedMC.core.entities.EntitiesRegistry;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.Formatter;
@@ -20,14 +21,15 @@ import org.bukkit.projectiles.ProjectileSource;
 import java.util.*;
 
 public class BlightedEntitiesListener implements Listener {
-  private static final Map<UUID, BlightedEntity> blightedEntities = new HashMap<>();
+  private static final Map<UUID, BlightedEntity> BLIGHTED_ENTITIES = new HashMap<>();
   private final Map<Entity, Integer> damageIndicators = new HashMap<>();
 
   // Prevent infinite recursion when forwarding damage
   private final ThreadLocal<Set<UUID>> processingDamage = ThreadLocal.withInitial(HashSet::new);
 
   public static void registerEntity(LivingEntity entity, BlightedEntity blighted) {
-    blightedEntities.put(entity.getUniqueId(), blighted);
+    if (entity == null || blighted == null) return;
+    BLIGHTED_ENTITIES.put(entity.getUniqueId(), blighted);
   }
 
   private double getRandomOffset() {
@@ -44,9 +46,26 @@ public class BlightedEntitiesListener implements Listener {
     processingDamage.get().add(entity.getUniqueId());
 
     try {
-      BlightedEntity blighted = blightedEntities.get(entity.getUniqueId());
+      BlightedEntity blighted = BLIGHTED_ENTITIES.get(entity.getUniqueId());
+      EntityAttachment attachment = BlightedEntity.getAttachment(entity);
+
+      if (attachment != null) {
+        LivingEntity ownerEntity = attachment.owner().getEntity();
+        if (ownerEntity != null && !ownerEntity.isDead()) {
+          ownerEntity.damage(event.getFinalDamage(), getRealDamager(event));
+          syncArmor((LivingEntity) attachment.entity(), ownerEntity);
+        }
+      }
 
       if (blighted != null) {
+        // Damage to owner -> forward to attachments
+        for (EntityAttachment att : new ArrayList<>(blighted.attachments)) {
+          if (att.entity() instanceof LivingEntity living && !living.isDead()) {
+            living.damage(event.getFinalDamage(), getRealDamager(event));
+            syncArmor(living, entity);
+          }
+        }
+
         if (event instanceof EntityDamageByEntityEvent e) {
           Player player = getPlayerDamager(e.getDamager());
           if (blighted.isImmuneTo(entity, event)) {
@@ -62,9 +81,20 @@ public class BlightedEntitiesListener implements Listener {
         double damage = event.getFinalDamage();
         double remainingHealth = entity.getHealth() + entity.getAbsorptionAmount() - damage;
 
-        // update name tag or let onEntityDeath handle death logic
+        boolean anyAttachmentAlive = blighted.attachments.stream()
+          .anyMatch(att -> att.entity() instanceof LivingEntity living && !living.isDead());
+
+        if (remainingHealth <= 0 && anyAttachmentAlive) {
+          event.setCancelled(true);
+          entity.setHealth(1.0);
+          blighted.updateNameTag();
+          return;
+        }
+
         if (remainingHealth > 0) {
           blighted.updateNameTag();
+        } else {
+          blighted.killAllAttachments();
         }
 
         spawnDamageIndicator(entity, damage);
@@ -86,39 +116,99 @@ public class BlightedEntitiesListener implements Listener {
   public void onEntityHeal(EntityRegainHealthEvent event) {
     if (!(event.getEntity() instanceof LivingEntity entity)) return;
 
-    BlightedEntity blighted = blightedEntities.get(entity.getUniqueId());
+    BlightedEntity blighted = BLIGHTED_ENTITIES.get(entity.getUniqueId());
+    EntityAttachment attachment = BlightedEntity.getAttachment(entity);
 
     if (blighted != null) {
       blighted.updateNameTag();
+      double newHealth = entity.getHealth() + event.getAmount();
+      // Sync all attachments to new health value immediately
+      for (EntityAttachment att : new ArrayList<>(blighted.attachments)) {
+        if (att.entity() instanceof LivingEntity living && !living.isDead()) {
+          living.setHealth(newHealth);
+          syncArmor(living, entity);
+        }
+      }
+    } else if (attachment != null) {
+      LivingEntity ownerEntity = attachment.owner().getEntity();
+      if (ownerEntity != null && !ownerEntity.isDead()) {
+        double newHealth = entity.getHealth() + event.getAmount();
+        ownerEntity.setHealth(newHealth);
+        entity.setHealth(newHealth);
+        syncArmor((LivingEntity) attachment.entity(), ownerEntity);
+      }
     }
   }
 
   @EventHandler
   public void onEntityDeath(EntityDeathEvent event) {
-    BlightedEntity blighted = blightedEntities.remove(event.getEntity().getUniqueId());
+    LivingEntity dead = event.getEntity();
+    BlightedEntity blighted = BLIGHTED_ENTITIES.remove(dead.getUniqueId());
+
     if (blighted != null) {
+      // Immediate forceful removal of attachments
+      Set<EntityAttachment> attachmentsToKill = new HashSet<>(blighted.attachments);
+      for (EntityAttachment attachment : attachmentsToKill) {
+        try {
+          Entity attachmentEntity = attachment.entity();
+          if (attachmentEntity != null) {
+            // Remove from tracking first
+            BLIGHTED_ENTITIES.remove(attachmentEntity.getUniqueId());
+            BlightedEntity.unregisterAttachment(attachment);
+
+            // Force kill in multiple ways to ensure death
+            if (attachmentEntity instanceof LivingEntity living) {
+              living.setHealth(0);
+              living.damage(99999);
+            }
+            attachmentEntity.remove();
+          }
+        } catch (Throwable ignored) {}
+      }
+      blighted.attachments.clear();
+
+      // Immediate cleanup
       blighted.removeBossBar();
-      Player killer = event.getEntity().getKiller();
+
+      // Handle drops
+      Player killer = dead.getKiller();
       BlightedPlayer player = (killer != null) ? BlightedPlayer.getBlightedPlayer(killer) : null;
-      blighted.dropLoot(event.getEntity().getLocation(), player);
+      blighted.dropLoot(dead.getLocation(), player);
+
       event.getDrops().clear();
       event.setDroppedExp(blighted.getDroppedExp());
+    } else {
+      EntityAttachment attachment = BlightedEntity.getAttachment(dead);
+      if (attachment != null) {
+        // Clear drops from attachments
+        event.getDrops().clear();
+        try {
+          BlightedEntity.unregisterAttachment(attachment);
+        } catch (Throwable ignored) {}
+      }
     }
   }
 
   @EventHandler
   public void onChunkLoad(ChunkLoadEvent event) {
-    Bukkit.getScheduler().runTask(BlightedMC.getInstance(), () -> rehydrateChunk(event.getChunk()));
+    // delay rehydrate slightly to avoid chunk entities not being ready (prevents NPE on some server builds)
+    new BukkitRunnable() {
+      @Override
+      public void run() {
+        rehydrateChunk(event.getChunk());
+      }
+    }.runTaskLater(BlightedMC.getInstance(), 2L);
   }
 
   public static void rehydrateChunk(Chunk chunk) {
     NamespacedKey key = new NamespacedKey(BlightedMC.getInstance(), "entityId");
-    for (Entity entity : chunk.getEntities()) {
-      if (!(entity instanceof LivingEntity living)) continue;
+    for (Entity e : chunk.getEntities()) {
+      if (!(e instanceof LivingEntity living)) continue;
       PersistentDataContainer pdc = living.getPersistentDataContainer();
       String id = pdc.get(key, PersistentDataType.STRING);
       if (id == null || id.isEmpty()) continue;
-      if (blightedEntities.containsKey(living.getUniqueId())) continue;
+
+      if (BLIGHTED_ENTITIES.containsKey(living.getUniqueId())) continue;
 
       BlightedEntity proto = EntitiesRegistry.getEntity(id);
       if (proto == null) continue;
@@ -126,12 +216,20 @@ public class BlightedEntitiesListener implements Listener {
       BlightedEntity instance;
       try {
         instance = proto.getClass().getDeclaredConstructor().newInstance();
-        instance.attachToExisting(living);
-      } catch (Exception e) {
-        BlightedMC.getInstance().getLogger().warning("Failed to instantiate BlightedEntity: " + e);
-        continue;
+      } catch (Exception ex) {
+        instance = proto;
       }
-      blightedEntities.put(living.getUniqueId(), instance);
+
+      // attach to this existing living entity; this calls initRuntime() and schedules tasks
+      instance.attachToExisting(living);
+
+      // sync attachments state (armor/health) if any attachments exist in the instance
+      for (EntityAttachment att : new ArrayList<>(instance.attachments)) {
+        if (att.entity() instanceof LivingEntity livingAtt && !livingAtt.isDead()) {
+          livingAtt.setHealth(instance.getMaxHealth());
+          syncArmor(livingAtt, living);
+        }
+      }
     }
   }
 

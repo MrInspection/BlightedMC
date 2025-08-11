@@ -53,7 +53,6 @@ public abstract class BlightedEntity implements Cloneable {
   protected BarColor bossBarColor = BarColor.PURPLE;
   protected BarStyle bossBarStyle = BarStyle.SOLID;
 
-
   private static final Map<Entity, EntityAttachment> ENTITY_ATTACHMENTS =
     Collections.synchronizedMap(new WeakHashMap<>());
 
@@ -272,19 +271,52 @@ public abstract class BlightedEntity implements Cloneable {
 
   public static void addAttachment(EntityAttachment attachment) {
     if (attachment == null || attachment.entity() == null || attachment.owner() == null) return;
+
     ENTITY_ATTACHMENTS.put(attachment.entity(), attachment);
     attachment.owner().attachments.add(attachment);
+
+    try {
+      Entity e = attachment.entity();
+      if (e instanceof LivingEntity living) {
+        EntityEquipment eq = living.getEquipment();
+        if (eq != null) {
+          eq.setHelmetDropChance(0);
+          eq.setChestplateDropChance(0);
+          eq.setLeggingsDropChance(0);
+          eq.setBootsDropChance(0);
+          eq.setItemInMainHandDropChance(0);
+          eq.setItemInOffHandDropChance(0);
+        }
+      }
+    } catch (Throwable ignored) {
+    }
+  }
+
+  public static void unregisterAttachment(EntityAttachment attachment) {
+    if (attachment == null) return;
+    try {
+      ENTITY_ATTACHMENTS.remove(attachment.entity());
+    } catch (Throwable ignored) {
+    }
+    try {
+      if (attachment.owner() != null) attachment.owner().attachments.remove(attachment);
+    } catch (Throwable ignored) {
+    }
   }
 
   private void removeAttachment() {
     List<EntityAttachment> copy = new ArrayList<>(attachments);
-    for (EntityAttachment att : copy) {
+    for (EntityAttachment attachment : copy) {
       try {
-        Entity e = att.entity();
-        if (e != null && !e.isDead()) e.remove();
-      } catch (Throwable ignored) { }
-      try { ENTITY_ATTACHMENTS.remove(att.entity()); } catch (Throwable ignored) { }
-      attachments.remove(att);
+        Entity entity = attachment.entity();
+        if (entity != null && !entity.isDead()) entity.remove();
+      } catch (Throwable ignored) {
+      }
+      try {
+        ENTITY_ATTACHMENTS.remove(attachment.entity());
+      } catch (Throwable ignored) {
+      }
+      attachments.remove(attachment);
     }
     attachments.clear();
   }
@@ -298,14 +330,15 @@ public abstract class BlightedEntity implements Cloneable {
   }
 
   public void killAllAttachments() {
-    for (EntityAttachment att : new ArrayList<>(attachments)) {
-      Entity e = att.entity();
-      if (e instanceof LivingEntity living && !living.isDead()) {
+    for (EntityAttachment attachment : new ArrayList<>(attachments)) {
+      Entity entity = attachment.entity();
+      if (entity instanceof LivingEntity living && !living.isDead()) {
         try {
           living.setHealth(0);
-        } catch (Throwable ignored) { }
+        } catch (Throwable ignored) {
+        }
       }
-      ENTITY_ATTACHMENTS.remove(e);
+      ENTITY_ATTACHMENTS.remove(entity);
     }
     attachments.clear();
   }
