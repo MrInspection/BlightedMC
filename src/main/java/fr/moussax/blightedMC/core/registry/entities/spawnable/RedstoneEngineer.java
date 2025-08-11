@@ -1,6 +1,5 @@
-package fr.moussax.blightedMC.core.registry.entities.giants;
+package fr.moussax.blightedMC.core.registry.entities.spawnable;
 
-import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntity;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Color;
@@ -30,32 +29,23 @@ public class RedstoneEngineer extends SpawnableEntity {
     );
 
     addAttribute(Attribute.SCALE, 6.5);
-  }
 
-  @Override
-  public LivingEntity spawn(Location location) {
-    LivingEntity entity = super.spawn(location);
-    startLaserAbility(entity);
-    return entity;
-  }
-
-  private void startLaserAbility(LivingEntity entity) {
-    new BukkitRunnable() {
-
+    // Lifecycle laser ability; targets nearest valid player periodically
+    addRepeatingTask(() -> new BukkitRunnable() {
       @Override
       public void run() {
-        if(!entity.isValid()) {
+        LivingEntity self = getEntity();
+        if (self == null || !self.isValid()) {
           cancel();
           return;
         }
 
-        List<Player> nearbyPlayers = entity.getNearbyEntities(LASER_RANGE, LASER_RANGE, LASER_RANGE)
+        List<Player> nearbyPlayers = self.getNearbyEntities(LASER_RANGE, LASER_RANGE, LASER_RANGE)
           .stream().filter(e -> e instanceof Player).map(e -> (Player) e).toList();
-
-        if(nearbyPlayers.isEmpty()) return;
+        if (nearbyPlayers.isEmpty()) return;
 
         Player targetPlayer;
-        Mob mob = (entity instanceof Mob) ? (Mob) entity : null;
+        Mob mob = (self instanceof Mob) ? (Mob) self : null;
 
         if (mob != null) {
           LivingEntity current = mob.getTarget();
@@ -69,10 +59,17 @@ public class RedstoneEngineer extends SpawnableEntity {
           targetPlayer = nearbyPlayers.get(ThreadLocalRandom.current().nextInt(nearbyPlayers.size()));
         }
 
-        laser(entity, BlightedPlayer.getBlightedPlayer(targetPlayer));
+        laser(self, BlightedPlayer.getBlightedPlayer(targetPlayer));
       }
-    }.runTaskTimer(BlightedMC.getInstance(), TICK_DELAY, TICK_DELAY);
+    }, TICK_DELAY, TICK_DELAY);
   }
+
+  @Override
+  public LivingEntity spawn(Location location) {
+    return super.spawn(location);
+  }
+
+  // no-op: ability logic migrated to lifecycle task registration in constructor
 
   private void laser(LivingEntity entity, BlightedPlayer target) {
     Player player = target.getPlayer();

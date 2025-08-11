@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.entities;
 
-import fr.moussax.blightedMC.core.registry.entities.GaiaConstruct;
+import fr.moussax.blightedMC.core.registry.entities.Dummy;
 import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntity;
 import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntitiesRegistry;
 import fr.moussax.blightedMC.core.registry.entities.bosses.RevenantHorror;
@@ -38,9 +38,9 @@ public final class EntitiesRegistry {
   public static void initializeEntities() {
     clearEntities();
 
-    addEntity(new GaiaConstruct());
     addEntity(new RevenantHorror());
     addEntity(new TheAncientKnight());
+    addEntity(new Dummy());
 
     List<SpawnableEntity> spawnableEntities = SpawnableEntitiesRegistry.getAllEntities();
     for (SpawnableEntity entity : spawnableEntities) {

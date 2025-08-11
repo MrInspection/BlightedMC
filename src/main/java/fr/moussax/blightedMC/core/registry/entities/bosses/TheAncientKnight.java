@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.registry.entities.giants;
+package fr.moussax.blightedMC.core.registry.entities.bosses;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
@@ -17,12 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class GiantDiamond extends BlightedEntity {
+public class TheAncientKnight extends BlightedEntity {
   private BukkitRunnable abilityRunnable;
   public ArrayList<StabPlayer> swords = new ArrayList<>();
 
-  public GiantDiamond() {
-    super("§bThe Ancient Knight", 50, EntityType.ZOMBIE);
+  public TheAncientKnight() {
+    super("The Ancient Knight", 50, EntityType.ZOMBIE);
     addAttribute(Attribute.SCALE, 6);
 
     armor = new ItemStack[]{
@@ -33,11 +33,70 @@ public class GiantDiamond extends BlightedEntity {
     };
 
     itemInMainHand = new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack();
+
+    // Register ability factory with lifecycle manager (will be scheduled on spawn via initRuntime)
+    addRepeatingTask(() -> {
+      BukkitRunnable task = new BukkitRunnable() {
+        @Override
+        public void run() {
+          if (entity == null || entity.isDead()) {
+            stopAbility();
+            cancel();
+            return;
+          }
+
+          List<Entity> nearbyPlayers = entity.getNearbyEntities(20, 20, 20).stream()
+            .filter(e -> e instanceof Player)
+            .toList();
+          if (nearbyPlayers.isEmpty()) return;
+
+          BlightedPlayer target = BlightedPlayer.getBlightedPlayer((Player) nearbyPlayers.getFirst());
+          stabAbility(target);
+        }
+      };
+      // keep reference so stopAbility can cancel the created runnable for this instance
+      abilityRunnable = task;
+      return task;
+    }, 100L, 300L);
   }
 
   @Override
   public String getEntityId() {
     return "DIAMOND_GIANT";
+  }
+
+  @Override
+  public TheAncientKnight clone() {
+    TheAncientKnight clone = (TheAncientKnight) super.clone();
+    // reset per-instance mutable state
+    clone.abilityRunnable = null;
+    clone.swords = new ArrayList<>();
+
+    // re-register the ability factory on the clone so it has its own scheduled task when spawned
+    clone.addRepeatingTask(() -> {
+      BukkitRunnable task = new BukkitRunnable() {
+        @Override
+        public void run() {
+          if (clone.entity == null || clone.entity.isDead()) {
+            clone.stopAbility();
+            cancel();
+            return;
+          }
+
+          List<Entity> nearbyPlayers = clone.entity.getNearbyEntities(20, 20, 20).stream()
+            .filter(e -> e instanceof Player)
+            .toList();
+          if (nearbyPlayers.isEmpty()) return;
+
+          BlightedPlayer target = BlightedPlayer.getBlightedPlayer((Player) nearbyPlayers.getFirst());
+          clone.stabAbility(target);
+        }
+      };
+      clone.abilityRunnable = task;
+      return task;
+    }, 100L, 300L);
+
+    return clone;
   }
 
   @Override
@@ -48,7 +107,7 @@ public class GiantDiamond extends BlightedEntity {
       ((Zombie) entity).setBaby(false);
     }
 
-    startAbility();
+    // no direct startAbility() call — lifecycle's tasks (added in ctor/clone) are scheduled by initRuntime()
     return entity;
   }
 
@@ -58,48 +117,30 @@ public class GiantDiamond extends BlightedEntity {
     super.kill();
   }
 
-  private void startAbility() {
-    abilityRunnable = new BukkitRunnable() {
-      @Override
-      public void run() {
-        if (entity == null || entity.isDead()) {
-          stopAbility();
-          cancel();
-          return;
-        }
-
-        List<Entity> nearbyPlayers = entity.getNearbyEntities(20, 20, 20).stream()
-          .filter(e -> e instanceof Player)
-          .toList();
-        if (nearbyPlayers.isEmpty()) return;
-
-        BlightedPlayer target = BlightedPlayer.getBlightedPlayer((Player) nearbyPlayers.getFirst());
-        stabAbility(target);
-      }
-    };
-    abilityRunnable.runTaskTimer(BlightedMC.getInstance(), 100, 300);
-  }
-
   private void stabAbility(BlightedPlayer target) {
     swords.add(new StabPlayer(target, this));
   }
 
   private void stopAbility() {
-    if (abilityRunnable != null) abilityRunnable.cancel();
+    if (abilityRunnable != null) {
+      try { abilityRunnable.cancel(); } catch (IllegalStateException ignored) {}
+      abilityRunnable = null;
+    }
+
     for (StabPlayer sword : new ArrayList<>(swords)) {
-      sword.cancel();
+      try { sword.cancel(); } catch (IllegalStateException ignored) {}
     }
     swords.clear();
   }
 
   private static class StabPlayer extends BukkitRunnable {
     private final BlightedPlayer blightedPlayer;
-    private final GiantDiamond giant;
+    private final TheAncientKnight giant;
     private Location location;
     private Giant sword;
     private int runTime = 0;
 
-    public StabPlayer(BlightedPlayer player, GiantDiamond giant) {
+    public StabPlayer(BlightedPlayer player, TheAncientKnight giant) {
       this.blightedPlayer = player;
       this.giant = giant;
       summonGiantSword();
@@ -142,14 +183,14 @@ public class GiantDiamond extends BlightedEntity {
         swordLocation.setPitch(0);
         swordLocation.setYaw(0);
         swordLocation.subtract(2, -4, 4);
-        sword.teleport(swordLocation);
+        if (sword != null && !sword.isDead()) sword.teleport(swordLocation);
         location = blightedPlayer.getPlayer().getLocation();
       } else if (runTime == 101) {
         Location swordLocation = blightedPlayer.getPlayer().getLocation().clone();
         swordLocation.setPitch(0);
         swordLocation.setYaw(0);
         swordLocation.subtract(2, 1, 4);
-        sword.teleport(swordLocation);
+        if (sword != null && !sword.isDead()) sword.teleport(swordLocation);
 
         Objects.requireNonNull(location.getWorld())
           .spawnParticle(Particle.EXPLOSION_EMITTER, location, 1);
