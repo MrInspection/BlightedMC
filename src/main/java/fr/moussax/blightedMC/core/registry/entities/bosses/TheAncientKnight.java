@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.core.registry.entities.bosses;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Location;
@@ -22,8 +23,9 @@ public class TheAncientKnight extends BlightedEntity {
   public ArrayList<StabPlayer> swords = new ArrayList<>();
 
   public TheAncientKnight() {
-    super("The Ancient Knight", 50, EntityType.ZOMBIE);
+    super("The Ancient Knight", 250, 30, EntityType.ZOMBIE);
     addAttribute(Attribute.SCALE, 6);
+    setNameTagType(EntityNameTag.BOSS);
 
     armor = new ItemStack[]{
       new ItemStack(Material.NETHERITE_BOOTS),
@@ -68,11 +70,9 @@ public class TheAncientKnight extends BlightedEntity {
   @Override
   public TheAncientKnight clone() {
     TheAncientKnight clone = (TheAncientKnight) super.clone();
-    // reset per-instance mutable state
     clone.abilityRunnable = null;
     clone.swords = new ArrayList<>();
 
-    // re-register the ability factory on the clone so it has its own scheduled task when spawned
     clone.addRepeatingTask(() -> {
       BukkitRunnable task = new BukkitRunnable() {
         @Override
@@ -102,12 +102,9 @@ public class TheAncientKnight extends BlightedEntity {
   @Override
   public LivingEntity spawn(Location location) {
     super.spawn(location);
-
     if (entity instanceof Zombie) {
       ((Zombie) entity).setBaby(false);
     }
-
-    // no direct startAbility() call — lifecycle's tasks (added in ctor/clone) are scheduled by initRuntime()
     return entity;
   }
 
@@ -123,12 +120,18 @@ public class TheAncientKnight extends BlightedEntity {
 
   private void stopAbility() {
     if (abilityRunnable != null) {
-      try { abilityRunnable.cancel(); } catch (IllegalStateException ignored) {}
+      try {
+        abilityRunnable.cancel();
+      } catch (IllegalStateException ignored) {
+      }
       abilityRunnable = null;
     }
 
     for (StabPlayer sword : new ArrayList<>(swords)) {
-      try { sword.cancel(); } catch (IllegalStateException ignored) {}
+      try {
+        sword.cancel();
+      } catch (IllegalStateException ignored) {
+      }
     }
     swords.clear();
   }

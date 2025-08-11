@@ -11,21 +11,40 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
+import java.util.Objects;
 
 public class RevenantHorror extends BlightedEntity {
-  private BukkitRunnable abilityCycleTask;
   private boolean inEnrageState = false;
-  private final int baseDamage = 30;
+  private BukkitRunnable abilityRunnable;
 
   public RevenantHorror() {
-    super("Revenant Horror", 250, EntityType.ZOMBIE);
+    super("Revenant Horror", 250, 30, EntityType.ZOMBIE);
+    this.entityId = "REVENANT_HORROR";
     setNameTagType(EntityNameTag.BOSS);
-    addAttribute(Attribute.ATTACK_DAMAGE, baseDamage);
-  }
 
-  @Override
-  public String getEntityId() {
-    return "REVENANT_HORROR";
+    addRepeatingTask(() -> {
+      abilityRunnable = new BukkitRunnable() {
+        private int phase = 0;
+
+        @Override
+        public void run() {
+          if (entity == null || entity.isDead()) {
+            stopAbility();
+            cancel();
+            return;
+          }
+
+          switch (phase) {
+            case 0 -> performLifeDrain();
+            case 1 -> performPestilence();
+            case 2 -> startEnragePhase();
+          }
+
+          phase = (phase + 1) % 3;
+        }
+      };
+      return abilityRunnable;
+    }, 20L * 10, 20L * 10);
   }
 
   @Override
@@ -40,54 +59,13 @@ public class RevenantHorror extends BlightedEntity {
     super.applyEquipment();
   }
 
-  @Override
-  public LivingEntity spawn(Location location) {
-    super.spawn(location);
-
-    // Start the ability cycle
-    startAbilityCycle();
-
-    return entity;
-  }
-
-  private void startAbilityCycle() {
-    if (abilityCycleTask != null) abilityCycleTask.cancel();
-
-    abilityCycleTask = new BukkitRunnable() {
-      private int phase = 0; // 0=LifeDrain, 1=Pestilence, 2=Enrage
-
-      @Override
-      public void run() {
-        if (entity == null || entity.isDead()) {
-          cancel();
-          return;
-        }
-
-        switch (phase) {
-          case 0 -> performLifeDrain();
-          case 1 -> performPestilence();
-          case 2 -> startEnragePhase();
-        }
-
-        phase = (phase + 1) % 3;
-      }
-    };
-
-    // 10s per phase
-    abilityCycleTask.runTaskTimer(BlightedMC.getInstance(), 20 * 10, 20 * 10);
-  }
-
-    /* -----------------------
-       ABILITIES
-    ------------------------ */
-
   private void performLifeDrain() {
     double newHealth = Math.min(
       entity.getHealth() + getDamage(),
-      entity.getAttribute(Attribute.MAX_HEALTH).getBaseValue()
+      Objects.requireNonNull(entity.getAttribute(Attribute.MAX_HEALTH)).getBaseValue()
     );
     entity.setHealth(newHealth);
-    updateNameTag(); // Update nametag and bossbar after healing
+    updateNameTag();
 
     entity.getWorld().spawnParticle(
       Particle.HEART,
@@ -128,7 +106,7 @@ public class RevenantHorror extends BlightedEntity {
 
   private void equipEnrage() {
     if (entity instanceof Zombie zombie) {
-      zombie.getEquipment().setChestplate(
+      Objects.requireNonNull(zombie.getEquipment()).setChestplate(
         new ItemBuilder(Material.LEATHER_CHESTPLATE)
           .setLeatherColor("#FF4B4B")
           .toItemStack()
@@ -137,21 +115,60 @@ public class RevenantHorror extends BlightedEntity {
   }
 
   private void equipNormal(Zombie zombie) {
-    zombie.getEquipment().setChestplate(
+    Objects.requireNonNull(zombie.getEquipment()).setChestplate(
       new ItemBuilder(Material.DIAMOND_CHESTPLATE).addEnchantmentGlint().toItemStack()
     );
   }
 
   public int getDamage() {
-    return inEnrageState ? baseDamage * 3 : baseDamage;
+    return inEnrageState ? damage * 3 : damage;
+  }
+
+  private void stopAbility() {
+    if (abilityRunnable != null) {
+      try {
+        abilityRunnable.cancel();
+      } catch (IllegalStateException ignored) {}
+      abilityRunnable = null;
+    }
   }
 
   @Override
   public void kill() {
+    stopAbility();
     super.kill();
-    if (abilityCycleTask != null) {
-      abilityCycleTask.cancel();
-      abilityCycleTask = null;
-    }
+  }
+
+  @Override
+  public RevenantHorror clone() {
+    RevenantHorror clone = (RevenantHorror) super.clone();
+    clone.inEnrageState = false;
+    clone.abilityRunnable = null;
+
+    clone.addRepeatingTask(() -> {
+      clone.abilityRunnable = new BukkitRunnable() {
+        private int phase = 0;
+
+        @Override
+        public void run() {
+          if (clone.entity == null || clone.entity.isDead()) {
+            clone.stopAbility();
+            cancel();
+            return;
+          }
+
+          switch (phase) {
+            case 0 -> clone.performLifeDrain();
+            case 1 -> clone.performPestilence();
+            case 2 -> clone.startEnragePhase();
+          }
+
+          phase = (phase + 1) % 3;
+        }
+      };
+      return clone.abilityRunnable;
+    }, 20L * 10, 20L * 10);
+
+    return clone;
   }
 }
