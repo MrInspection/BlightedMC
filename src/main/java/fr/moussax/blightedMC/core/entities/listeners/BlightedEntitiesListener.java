@@ -122,7 +122,6 @@ public class BlightedEntitiesListener implements Listener {
     if (blighted != null) {
       blighted.updateNameTag();
       double newHealth = entity.getHealth() + event.getAmount();
-      // Sync all attachments to new health value immediately
       for (EntityAttachment att : new ArrayList<>(blighted.attachments)) {
         if (att.entity() instanceof LivingEntity living && !living.isDead()) {
           living.setHealth(newHealth);
@@ -143,51 +142,39 @@ public class BlightedEntitiesListener implements Listener {
   @EventHandler
   public void onEntityDeath(EntityDeathEvent event) {
     LivingEntity dead = event.getEntity();
-    BlightedEntity blighted = BLIGHTED_ENTITIES.remove(dead.getUniqueId());
+    BlightedEntity blighted = BLIGHTED_ENTITIES.get(dead.getUniqueId());
 
     if (blighted != null) {
-      // Immediate forceful removal of attachments
-      Set<EntityAttachment> attachmentsToKill = new HashSet<>(blighted.attachments);
-      for (EntityAttachment attachment : attachmentsToKill) {
-        try {
-          Entity attachmentEntity = attachment.entity();
-          if (attachmentEntity != null) {
-            // Remove from tracking first
-            BLIGHTED_ENTITIES.remove(attachmentEntity.getUniqueId());
-            BlightedEntity.unregisterAttachment(attachment);
-
-            // Force kill in multiple ways to ensure death
-            if (attachmentEntity instanceof LivingEntity living) {
-              living.setHealth(0);
-              living.damage(99999);
-            }
-            attachmentEntity.remove();
-          }
-        } catch (Throwable ignored) {}
-      }
-      blighted.attachments.clear();
-
-      // Immediate cleanup
+      blighted.killAllAttachments();
       blighted.removeBossBar();
 
-      // Handle drops
       Player killer = dead.getKiller();
       BlightedPlayer player = (killer != null) ? BlightedPlayer.getBlightedPlayer(killer) : null;
       blighted.dropLoot(dead.getLocation(), player);
+
+      BLIGHTED_ENTITIES.remove(dead.getUniqueId());
 
       event.getDrops().clear();
       event.setDroppedExp(blighted.getDroppedExp());
     } else {
       EntityAttachment attachment = BlightedEntity.getAttachment(dead);
       if (attachment != null) {
-        // Clear drops from attachments
-        event.getDrops().clear();
+        LivingEntity owner = attachment.owner().getEntity();
+        if (owner != null && !owner.isDead()) {
+          owner.setHealth(0);
+          BLIGHTED_ENTITIES.remove(owner.getUniqueId());
+        }
+
         try {
           BlightedEntity.unregisterAttachment(attachment);
         } catch (Throwable ignored) {}
+
+        event.getDrops().clear();
+        event.setDroppedExp(0);
       }
     }
   }
+
 
   @EventHandler
   public void onChunkLoad(ChunkLoadEvent event) {
