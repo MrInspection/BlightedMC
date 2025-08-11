@@ -12,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -51,6 +52,12 @@ public abstract class BlightedEntity implements Cloneable {
   protected BossBar bossBar;
   protected BarColor bossBarColor = BarColor.PURPLE;
   protected BarStyle bossBarStyle = BarStyle.SOLID;
+
+
+  private static final Map<Entity, EntityAttachment> ENTITY_ATTACHMENTS =
+    Collections.synchronizedMap(new WeakHashMap<>());
+
+  public final Set<EntityAttachment> attachments = new HashSet<>();
 
   private List<EntityImmunityRule> immunityRules = new ArrayList<>();
   private LifecycleTaskManager lifecycleTasks = new LifecycleTaskManager();
@@ -135,6 +142,7 @@ public abstract class BlightedEntity implements Cloneable {
   public void kill() {
     if (entity == null || entity.isDead()) return;
     removeBossBar();
+    removeAttachment();
     lifecycleTasks.cancelAll();
     entity.setHealth(0);
   }
@@ -262,6 +270,46 @@ public abstract class BlightedEntity implements Cloneable {
     if (entity != null && !entity.isDead() && runtimeInitialized) lifecycleTasks.scheduleLast();
   }
 
+  public static void addAttachment(EntityAttachment attachment) {
+    if (attachment == null || attachment.entity() == null || attachment.owner() == null) return;
+    ENTITY_ATTACHMENTS.put(attachment.entity(), attachment);
+    attachment.owner().attachments.add(attachment);
+  }
+
+  private void removeAttachment() {
+    List<EntityAttachment> copy = new ArrayList<>(attachments);
+    for (EntityAttachment att : copy) {
+      try {
+        Entity e = att.entity();
+        if (e != null && !e.isDead()) e.remove();
+      } catch (Throwable ignored) { }
+      try { ENTITY_ATTACHMENTS.remove(att.entity()); } catch (Throwable ignored) { }
+      attachments.remove(att);
+    }
+    attachments.clear();
+  }
+
+  public static EntityAttachment getAttachment(Entity entity) {
+    return ENTITY_ATTACHMENTS.get(entity);
+  }
+
+  public static boolean isAttachment(Entity entity) {
+    return ENTITY_ATTACHMENTS.containsKey(entity);
+  }
+
+  public void killAllAttachments() {
+    for (EntityAttachment att : new ArrayList<>(attachments)) {
+      Entity e = att.entity();
+      if (e instanceof LivingEntity living && !living.isDead()) {
+        try {
+          living.setHealth(0);
+        } catch (Throwable ignored) { }
+      }
+      ENTITY_ATTACHMENTS.remove(e);
+    }
+    attachments.clear();
+  }
+
   public LivingEntity getEntity() {
     return entity;
   }
@@ -309,7 +357,6 @@ public abstract class BlightedEntity implements Cloneable {
   @Override
   public BlightedEntity clone() {
     try {
-
       BlightedEntity clone = (BlightedEntity) super.clone();
 
       clone.entity = null;
@@ -319,6 +366,8 @@ public abstract class BlightedEntity implements Cloneable {
       clone.attributes = new HashMap<>(this.attributes);
       clone.immunityRules = new ArrayList<>(this.immunityRules);
       clone.lifecycleTasks = new LifecycleTaskManager();
+
+      clone.attachments.clear();
 
       if (this.armor != null) {
         clone.armor = new ItemStack[this.armor.length];

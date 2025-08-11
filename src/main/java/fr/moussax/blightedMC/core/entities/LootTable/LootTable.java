@@ -89,6 +89,32 @@ public class LootTable {
   }
 
   /**
+   * Generates a list of items that will be given to the player based on drop chances.
+   * This method determines which items will drop but doesn't actually drop them.
+   *
+   * @return list of DroppableConsumable items to give
+   */
+  public List<DroppableConsumable> generateLoot() {
+    List<DroppableConsumable> successfulDrops = new ArrayList<>();
+    
+    // First pass: determine which items will drop based on chance
+    for (LootEntry entry : lootEntries) {
+      if (randomizer.nextDouble() <= entry.dropChance) {
+        successfulDrops.add(entry.item);
+      }
+    }
+    
+    // Apply max drops limit
+    if (successfulDrops.size() > maxDrops) {
+      // Shuffle and take only the first maxDrops items
+      Collections.shuffle(successfulDrops, randomizer);
+      successfulDrops = successfulDrops.subList(0, maxDrops);
+    }
+    
+    return successfulDrops;
+  }
+
+  /**
    * Attempts to drop items at the specified location.
    * Determines drops by chance, applies the maximum drop limit,
    * notifies the killer with messages and sounds for rare drops.
