@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.commands.impl.testing;
 
-import fr.moussax.blightedMC.core.entities.magic.LaserBeam;
+import fr.moussax.blightedMC.core.entities.abilities.LaserBeam;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

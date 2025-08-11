@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.entities.magic;
+package fr.moussax.blightedMC.core.entities.abilities;
 
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import org.bukkit.Location;

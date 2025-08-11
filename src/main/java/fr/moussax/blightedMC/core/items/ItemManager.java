@@ -32,7 +32,7 @@ import static fr.moussax.blightedMC.core.items.ItemsRegistry.ID_KEY;
  * <p>
  * Handles ability triggering based on events and stores persistent data keys.
  */
-public class ItemManager extends ItemBuilder implements ItemRule {
+public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator {
   private final String itemId;
   private final ItemRarity itemRarity;
   private final ItemType itemType;
@@ -294,5 +294,10 @@ public class ItemManager extends ItemBuilder implements ItemRule {
 
   public ItemType getItemType() {
     return itemType;
+  }
+
+  @Override
+  public ItemStack createItemStack() {
+    return this.toItemStack();
   }
 }

@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.core.entities;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.LootTable.LootTable;
 import fr.moussax.blightedMC.core.entities.immunity.EntityImmunityRule;
 import fr.moussax.blightedMC.core.entities.immunity.FireImmunityRule;
@@ -8,8 +9,10 @@ import fr.moussax.blightedMC.core.entities.immunity.ProjectileImmunity;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -19,18 +22,25 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.Bukkit;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.function.Supplier;
 
-public abstract class BlightedEntity {
+public abstract class BlightedEntity implements Cloneable {
   protected String entityId;
   protected String name;
   protected EntityType entityType;
   protected LivingEntity entity;
 
   protected int maxHealth;
+  protected int damage;
+  protected int trueDamage = 0;
+  protected int defense;
   protected int droppedExp = 0;
-  protected final Map<Attribute, Double> attributes = new HashMap<>();
+  protected Map<Attribute, Double> attributes = new HashMap<>();
 
   protected ItemStack itemInMainHand;
   protected ItemStack itemInOffHand;
@@ -40,142 +50,112 @@ public abstract class BlightedEntity {
   protected EntityNameTag nameTagType = EntityNameTag.DEFAULT;
 
   protected BossBar bossBar;
-  private final List<EntityImmunityRule> immunityRules = new ArrayList<>();
+  protected BarColor bossBarColor = BarColor.PURPLE;
+  protected BarStyle bossBarStyle = BarStyle.SOLID;
 
-  /**
-   * Create a new BlightedEntity.
-   *
-   * @param name       the display name of the entity
-   * @param maxHealth  the maximum health of the entity
-   * @param entityType the Bukkit entity type
-   */
+  private static final Map<Entity, EntityAttachment> ENTITY_ATTACHMENTS =
+    Collections.synchronizedMap(new WeakHashMap<>());
+
+  public final Set<EntityAttachment> attachments = new HashSet<>();
+
+  private List<EntityImmunityRule> immunityRules = new ArrayList<>();
+  private LifecycleTaskManager lifecycleTasks = new LifecycleTaskManager();
+  private boolean runtimeInitialized = false;
+
   public BlightedEntity(String name, int maxHealth, EntityType entityType) {
     this.name = name;
     this.maxHealth = maxHealth;
     this.entityType = entityType;
   }
 
-  /**
-   * Spawns the entity at a given location with attributes, equipment, and name tags applied.
-   *
-   * @param location the spawn location
-   * @return the spawned LivingEntity
-   */
+  public BlightedEntity(String name, int maxHealth, int damage, EntityType entityType) {
+    this.name = name;
+    this.damage = damage;
+    this.maxHealth = maxHealth;
+    this.entityType = entityType;
+  }
+
+  public BlightedEntity(String name, int maxHealth, int damage, int defense, EntityType entityType) {
+    this.name = name;
+    this.maxHealth = maxHealth;
+    this.damage = damage;
+    this.defense = defense;
+    this.entityType = entityType;
+  }
+
   public LivingEntity spawn(Location location) {
     initImmunityRules();
     entity = (LivingEntity) Objects.requireNonNull(location.getWorld()).spawnEntity(location, entityType);
 
+    PersistentDataContainer data = entity.getPersistentDataContainer();
+    data.set(
+      new NamespacedKey(BlightedMC.getPlugin(BlightedMC.class), "entityId"),
+      PersistentDataType.STRING,
+      getEntityId()
+    );
+
     setAttribute(Attribute.MAX_HEALTH, maxHealth);
+    setAttribute(Attribute.ATTACK_DAMAGE, damage);
+    setAttribute(Attribute.ARMOR, defense);
     applyAttributes();
 
     entity.setHealth(maxHealth);
 
     applyEquipment();
     updateNameTag();
-    entity.setCustomNameVisible(true);
+
+    if (nameTagType != EntityNameTag.HIDDEN) {
+      entity.setCustomNameVisible(true);
+    }
+
     if (nameTagType == EntityNameTag.BOSS) {
       createBossBar();
     }
 
     BlightedEntitiesListener.registerEntity(entity, this);
+
+    initRuntime();
     return entity;
   }
 
-  /**
-   * Instantly kills the entity if it is alive and removes its boss bar.
-   */
-  public void kill() {
-    if (entity == null || entity.isDead()) return;
-    entity.setHealth(0);
-    removeBossBar();
+  public void attachToExisting(LivingEntity existing) {
+    this.entity = existing;
+    initImmunityRules();
+
+    updateNameTag();
+    if (nameTagType == EntityNameTag.BOSS) {
+      createBossBar();
+    }
+
+    BlightedEntitiesListener.registerEntity(existing, this);
+
+    initRuntime();
   }
 
-  /**
-   * Damages the entity and updates its name tag.
-   *
-   * @param amount the damage amount
-   */
+  protected final void initRuntime() {
+    if (runtimeInitialized) return;
+    runtimeInitialized = true;
+    lifecycleTasks.scheduleAll();
+  }
+
+  public void kill() {
+    if (entity == null || entity.isDead()) return;
+    removeBossBar();
+    removeAttachment();
+    lifecycleTasks.cancelAll();
+    entity.setHealth(0);
+  }
+
   public void damage(double amount) {
     if (entity == null || entity.isDead()) return;
     entity.damage(amount);
     updateNameTag();
   }
 
-  /**
-   * Adds a custom attribute to this entity before spawning.
-   *
-   * @param attribute the attribute to modify
-   * @param value     the base value to set
-   */
   public void addAttribute(Attribute attribute, double value) {
     attributes.put(attribute, value);
   }
 
-  /**
-   * Drops the assigned loot table at a specific location for a player.
-   *
-   * @param location the drop location
-   * @param player   the player for loot context
-   */
-  public void dropLoot(Location location, BlightedPlayer player) {
-    if (lootTable == null) return;
-    lootTable.dropLoot(location, player);
-  }
-
-  /**
-   * Checks if this entity is immune to a given damage event.
-   *
-   * @param entity the entity that caused the damage
-   * @param event  the damage event
-   * @return true if the entity is immune, false otherwise
-   */
-  public boolean isImmuneTo(LivingEntity entity, EntityDamageEvent event) {
-    for(EntityImmunityRule rule : immunityRules) {
-      if(rule.isImmune(entity, event)) return true;
-    }
-    return false;
-  }
-
-  /**
-   * Updates the entity's custom name and boss bar (if any) to reflect its current health.
-   */
-  public void updateNameTag() {
-    if (entity != null) entity.setCustomName(generateNameTag());
-    if (bossBar != null && nameTagType == EntityNameTag.BOSS) {
-      bossBar.setTitle(generateNameTag());
-      bossBar.setProgress(Math.max(0, Math.min(1, entity.getHealth() / (double) maxHealth)));
-    }
-  }
-
-  /**
-   * Removes the boss bar from all players if present.
-   */
-  public void removeBossBar() {
-    if (bossBar != null) {
-      bossBar.removeAll();
-      bossBar = null;
-    }
-  }
-
-  /**
-   * Initializes the immunity rules based on the {@link EntityAttributes} annotation.
-   */
-  protected void initImmunityRules() {
-    EntityAttributes attribute = getClass().getAnnotation(EntityAttributes.class);
-    if (attribute == null) return;
-
-    for (EntityAttributes.Attributes a : attribute.value()) {
-      switch (a) {
-        case MELEE_IMMUNITY -> immunityRules.add(new MeleeImmunityRule());
-        case FIRE_IMMUNITY -> immunityRules.add(new FireImmunityRule());
-        case PROJECTILE_IMMUNITY -> immunityRules.add(new ProjectileImmunity());
-      }
-    }
-  }
-
-  /**
-   * Applies all registered attributes to the entity.
-   */
   protected void applyAttributes() {
     for (Map.Entry<Attribute, Double> entry : attributes.entrySet()) {
       AttributeInstance instance = entity.getAttribute(entry.getKey());
@@ -183,10 +163,11 @@ public abstract class BlightedEntity {
     }
   }
 
-  /**
-   * Equips the entity with the specified armor and hand items.
-   * Drop chances are set to 0.
-   */
+  private void setAttribute(Attribute attribute, double value) {
+    AttributeInstance instance = entity.getAttribute(attribute);
+    if (instance != null) instance.setBaseValue(value);
+  }
+
   protected void applyEquipment() {
     if (armor == null && itemInMainHand == null && itemInOffHand == null) return;
     EntityEquipment equipment = entity.getEquipment();
@@ -204,115 +185,238 @@ public abstract class BlightedEntity {
     equipment.setItemInOffHandDropChance(0);
   }
 
-  /**
-   * Creates a boss bar for this entity if it does not already exist.
-   */
+  protected void initImmunityRules() {
+    EntityAttributes attribute = getClass().getAnnotation(EntityAttributes.class);
+    if (attribute == null) return;
+
+    for (EntityAttributes.Attributes a : attribute.value()) {
+      switch (a) {
+        case MELEE_IMMUNITY -> immunityRules.add(new MeleeImmunityRule());
+        case FIRE_IMMUNITY -> immunityRules.add(new FireImmunityRule());
+        case PROJECTILE_IMMUNITY -> immunityRules.add(new ProjectileImmunity());
+        default -> { /* ignore unimplemented attributes for now */ }
+      }
+    }
+  }
+
+  public boolean isImmuneTo(LivingEntity entity, EntityDamageEvent event) {
+    for (EntityImmunityRule rule : immunityRules) {
+      if (rule.isImmune(entity, event)) return true;
+    }
+    return false;
+  }
+
+  public void updateNameTag() {
+    if (entity != null) entity.setCustomName(generateNameTag());
+    if (bossBar != null && nameTagType == EntityNameTag.BOSS) {
+      bossBar.setTitle(getBossBarTitle());
+      bossBar.setProgress(Math.max(0, Math.min(1, entity.getHealth() / (double) maxHealth)));
+    }
+  }
+
+  protected String generateNameTag() {
+    if (entity == null) return name;
+    return nameTagType.format(name, entity.getHealth(), maxHealth);
+  }
+
   protected void createBossBar() {
     if (bossBar != null) return;
-    bossBar = Bukkit.createBossBar("§d" + getName(), BarColor.PURPLE, BarStyle.SOLID); // Customize color/style here
+    bossBar = Bukkit.createBossBar(getBossBarTitle(), bossBarColor, bossBarStyle);
     bossBar.setProgress(1.0);
     Bukkit.getOnlinePlayers().forEach(bossBar::addPlayer);
   }
 
-  /**
-   * Generates the entity's name tag based on its health and {@link EntityNameTag} type.
-   *
-   * @return the formatted name tag
-   */
-  protected String generateNameTag() {
-    if (entity == null) return name;
-    double health = entity.getHealth();
-    double percentage = (health / maxHealth) * 100;
-
-    String colorPrefix = "§a";
-    if (percentage < 10) colorPrefix = "§c";
-    else if (percentage < 50) colorPrefix = "§e";
-
-    return switch (nameTagType) {
-      case HIDDEN -> null;
-      case BOSS -> "§5" + name + " " + colorPrefix + toShortNumber(health) + "§5❤";
-      case BLIGHTED -> "§5" + name + " §d" + (int) health + "§r/§5" + maxHealth + "§c❤";
-      case SMALL_NUMBER -> "§c" + name + " " + colorPrefix + toShortNumber(health) + "§c❤";
-      case DEFAULT -> "§c" + name + " " + colorPrefix + (int) health + "§8/§a" + maxHealth + "§c❤";
-    };
+  protected String getBossBarTitle() {
+    return "§5" + getName();
   }
 
-  /**
-   * Converts a large number into a short format (e.g., 1.2K, 3.4M).
-   *
-   * @param value the number to convert
-   * @return the short string representation
-   */
-  protected String toShortNumber(double value) {
-    if (value >= 1_000_000_000) return String.format("%.1fB", value / 1_000_000_000);
-    if (value >= 1_000_000) return String.format("%.1fM", value / 1_000_000);
-    if (value >= 1_000) return String.format("%.1fK", value / 1_000);
-    return String.valueOf((int) value);
+  public void setBossBarAppearance(BarColor color, BarStyle style) {
+    this.bossBarColor = color;
+    this.bossBarStyle = style;
+    if (bossBar != null) {
+      bossBar.setColor(color);
+      bossBar.setStyle(style);
+    }
   }
 
-  /**
-   * @return the underlying Bukkit entity
-   */
+  public void setBossBarColor(BarColor color) {
+    setBossBarAppearance(color, this.bossBarStyle);
+  }
+
+  public void setBossBarStyle(BarStyle style) {
+    setBossBarAppearance(this.bossBarColor, style);
+  }
+
+  public void removeBossBar() {
+    if (bossBar != null) {
+      bossBar.removeAll();
+      bossBar = null;
+    }
+  }
+
+  public void dropLoot(Location location, BlightedPlayer player) {
+    if (lootTable == null) return;
+    lootTable.dropLoot(location, player);
+  }
+
+  protected final void addRepeatingTask(Supplier<BukkitRunnable> factory, long delayTicks, long periodTicks) {
+    lifecycleTasks.addRepeatingTask(factory, delayTicks, periodTicks);
+    if (entity != null && !entity.isDead() && runtimeInitialized) lifecycleTasks.scheduleLast();
+  }
+
+  protected final void addDelayedTask(Supplier<BukkitRunnable> factory, long delayTicks) {
+    lifecycleTasks.addDelayedTask(factory, delayTicks);
+    if (entity != null && !entity.isDead() && runtimeInitialized) lifecycleTasks.scheduleLast();
+  }
+
+  public static void addAttachment(EntityAttachment attachment) {
+    if (attachment == null || attachment.entity() == null || attachment.owner() == null) return;
+
+    ENTITY_ATTACHMENTS.put(attachment.entity(), attachment);
+    attachment.owner().attachments.add(attachment);
+
+    try {
+      Entity e = attachment.entity();
+      if (e instanceof LivingEntity living) {
+        EntityEquipment eq = living.getEquipment();
+        if (eq != null) {
+          eq.setHelmetDropChance(0);
+          eq.setChestplateDropChance(0);
+          eq.setLeggingsDropChance(0);
+          eq.setBootsDropChance(0);
+          eq.setItemInMainHandDropChance(0);
+          eq.setItemInOffHandDropChance(0);
+        }
+      }
+    } catch (Throwable ignored) {
+    }
+  }
+
+  public static void unregisterAttachment(EntityAttachment attachment) {
+    if (attachment == null) return;
+    try {
+      ENTITY_ATTACHMENTS.remove(attachment.entity());
+    } catch (Throwable ignored) {
+    }
+    try {
+      if (attachment.owner() != null) attachment.owner().attachments.remove(attachment);
+    } catch (Throwable ignored) {
+    }
+  }
+
+  private void removeAttachment() {
+    List<EntityAttachment> copy = new ArrayList<>(attachments);
+    for (EntityAttachment attachment : copy) {
+      try {
+        Entity entity = attachment.entity();
+        if (entity != null && !entity.isDead()) entity.remove();
+      } catch (Throwable ignored) {
+      }
+      try {
+        ENTITY_ATTACHMENTS.remove(attachment.entity());
+      } catch (Throwable ignored) {
+      }
+      attachments.remove(attachment);
+    }
+    attachments.clear();
+  }
+
+  public static EntityAttachment getAttachment(Entity entity) {
+    return ENTITY_ATTACHMENTS.get(entity);
+  }
+
+  public static boolean isAttachment(Entity entity) {
+    return ENTITY_ATTACHMENTS.containsKey(entity);
+  }
+
+  public void killAllAttachments() {
+    for (EntityAttachment attachment : new ArrayList<>(attachments)) {
+      Entity entity = attachment.entity();
+      if (entity instanceof LivingEntity living && !living.isDead()) {
+        try {
+          living.setHealth(0);
+        } catch (Throwable ignored) {
+        }
+      }
+      ENTITY_ATTACHMENTS.remove(entity);
+    }
+    attachments.clear();
+  }
+
   public LivingEntity getEntity() {
     return entity;
   }
 
-  /**
-   * @return the internal entity ID linked for the {@link EntitiesRegistry} system
-   */
   public String getEntityId() {
     return entityId;
   }
 
-  /**
-   * @return the display name of the entity
-   */
   public String getName() {
     return name;
   }
 
-  /**
-   * Sets an attribute on the Bukkit entity directly.
-   *
-   * @param attribute the attribute
-   * @param value     the base value
-   */
-  private void setAttribute(Attribute attribute, double value) {
-    AttributeInstance instance = entity.getAttribute(attribute);
-    if (instance != null) instance.setBaseValue(value);
-  }
-
-  /**
-   * Assigns a loot table to this entity.
-   *
-   * @param lootTable the loot table
-   */
   public void setLootTable(LootTable lootTable) {
     this.lootTable = lootTable;
   }
 
-  /**
-   * Sets the name tag display type for this entity.
-   *
-   * @param nameTagType the name tag type
-   */
   public void setNameTagType(EntityNameTag nameTagType) {
     this.nameTagType = nameTagType;
   }
 
-  /**
-   * @return the experience dropped on death
-   */
   public int getDroppedExp() {
     return droppedExp;
   }
 
-  /**
-   * Sets the experience amount dropped on death.
-   *
-   * @param droppedExp the experience amount
-   */
   public void setDroppedExp(int droppedExp) {
     this.droppedExp = droppedExp;
+  }
+
+  public int getTrueDamage() {
+    return trueDamage;
+  }
+
+  public void setDamage(int damage) {
+    this.damage = damage;
+  }
+
+  public void setDefense(int defense) {
+    this.defense = defense;
+  }
+
+  public int getMaxHealth() {
+    return maxHealth;
+  }
+
+  @Override
+  public BlightedEntity clone() {
+    try {
+      BlightedEntity clone = (BlightedEntity) super.clone();
+
+      clone.entity = null;
+      clone.bossBar = null;
+      clone.runtimeInitialized = false;
+
+      clone.attributes = new HashMap<>(this.attributes);
+      clone.immunityRules = new ArrayList<>(this.immunityRules);
+      clone.lifecycleTasks = new LifecycleTaskManager();
+
+      clone.attachments.clear();
+
+      if (this.armor != null) {
+        clone.armor = new ItemStack[this.armor.length];
+        for (int i = 0; i < this.armor.length; i++) {
+          clone.armor[i] = this.armor[i] != null ? this.armor[i].clone() : null;
+        }
+      } else {
+        clone.armor = null;
+      }
+
+      clone.itemInMainHand = this.itemInMainHand != null ? this.itemInMainHand.clone() : null;
+      clone.itemInOffHand = this.itemInOffHand != null ? this.itemInOffHand.clone() : null;
+
+      return clone;
+    } catch (CloneNotSupportedException e) {
+      throw new RuntimeException("Failed to clone BlightedEntity", e);
+    }
   }
 }

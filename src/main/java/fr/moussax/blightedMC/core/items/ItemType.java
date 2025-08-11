@@ -24,6 +24,7 @@ public enum ItemType {
   UPGRADE_MODULE(Category.MATERIAL),
   BLOCK(Category.BLOCKS),
 
+  UNCATEGORIZED(Category.MISCELLANEOUS),
   ENCHANTED_BOOK(Category.MISCELLANEOUS);
 
   private final Category category;
