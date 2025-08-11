@@ -12,7 +12,6 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -29,7 +28,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.*;
 import java.util.function.Supplier;
 
-public abstract class BlightedEntity {
+public abstract class BlightedEntity implements Cloneable {
   protected String entityId;
   protected String name;
   protected EntityType entityType;
@@ -40,8 +39,7 @@ public abstract class BlightedEntity {
   protected int trueDamage = 0;
   protected int defense;
   protected int droppedExp = 0;
-
-  protected final Map<Attribute, Double> attributes = new HashMap<>();
+  protected Map<Attribute, Double> attributes = new HashMap<>();
 
   protected ItemStack itemInMainHand;
   protected ItemStack itemInOffHand;
@@ -54,11 +52,8 @@ public abstract class BlightedEntity {
   protected BarColor bossBarColor = BarColor.PURPLE;
   protected BarStyle bossBarStyle = BarStyle.SOLID;
 
-  protected static final HashMap<Entity, EntityAttachment> entityAttachment = new HashMap<>();
-  public final Set<EntityAttachment> attachments = new HashSet<>();
-
-  private final List<EntityImmunityRule> immunityRules = new ArrayList<>();
-  private final LifecycleTaskManager lifecycleTasks = new LifecycleTaskManager();
+  private List<EntityImmunityRule> immunityRules = new ArrayList<>();
+  private LifecycleTaskManager lifecycleTasks = new LifecycleTaskManager();
   private boolean runtimeInitialized = false;
 
   public BlightedEntity(String name, int maxHealth, EntityType entityType) {
@@ -112,6 +107,7 @@ public abstract class BlightedEntity {
     }
 
     BlightedEntitiesListener.registerEntity(entity, this);
+
     initRuntime();
     return entity;
   }
@@ -126,6 +122,7 @@ public abstract class BlightedEntity {
     }
 
     BlightedEntitiesListener.registerEntity(existing, this);
+
     initRuntime();
   }
 
@@ -138,7 +135,6 @@ public abstract class BlightedEntity {
   public void kill() {
     if (entity == null || entity.isDead()) return;
     removeBossBar();
-    removeAttachment();
     lifecycleTasks.cancelAll();
     entity.setHealth(0);
   }
@@ -266,31 +262,6 @@ public abstract class BlightedEntity {
     if (entity != null && !entity.isDead() && runtimeInitialized) lifecycleTasks.scheduleLast();
   }
 
-  public static void addAttachment(EntityAttachment attachment) {
-    attachment.owner().attachments.add(attachment);
-    entityAttachment.put(attachment.entity(), attachment);
-  }
-
-  private void removeAttachment() {
-    attachments.forEach(attachment -> attachment.entity().remove());
-  }
-
-  public static EntityAttachment getAttachment(Entity entity) {
-    return entityAttachment.get(entity);
-  }
-
-  public static boolean isAttachment(Entity entity) {
-    return entityAttachment.containsKey(entity);
-  }
-
-  public void killAllAttachments() {
-    attachments.forEach(att -> {
-      if (att.entity() instanceof LivingEntity living && !living.isDead()) {
-        living.setHealth(0);
-      }
-    });
-  }
-
   public LivingEntity getEntity() {
     return entity;
   }
@@ -333,5 +304,37 @@ public abstract class BlightedEntity {
 
   public int getMaxHealth() {
     return maxHealth;
+  }
+
+  @Override
+  public BlightedEntity clone() {
+    try {
+
+      BlightedEntity clone = (BlightedEntity) super.clone();
+
+      clone.entity = null;
+      clone.bossBar = null;
+      clone.runtimeInitialized = false;
+
+      clone.attributes = new HashMap<>(this.attributes);
+      clone.immunityRules = new ArrayList<>(this.immunityRules);
+      clone.lifecycleTasks = new LifecycleTaskManager();
+
+      if (this.armor != null) {
+        clone.armor = new ItemStack[this.armor.length];
+        for (int i = 0; i < this.armor.length; i++) {
+          clone.armor[i] = this.armor[i] != null ? this.armor[i].clone() : null;
+        }
+      } else {
+        clone.armor = null;
+      }
+
+      clone.itemInMainHand = this.itemInMainHand != null ? this.itemInMainHand.clone() : null;
+      clone.itemInOffHand = this.itemInOffHand != null ? this.itemInOffHand.clone() : null;
+
+      return clone;
+    } catch (CloneNotSupportedException e) {
+      throw new RuntimeException("Failed to clone BlightedEntity", e);
+    }
   }
 }

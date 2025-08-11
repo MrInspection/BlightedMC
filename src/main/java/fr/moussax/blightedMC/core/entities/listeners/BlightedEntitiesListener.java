@@ -2,7 +2,6 @@ package fr.moussax.blightedMC.core.entities.listeners;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
-import fr.moussax.blightedMC.core.entities.EntityAttachment;
 import fr.moussax.blightedMC.core.entities.EntitiesRegistry;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.Formatter;
@@ -46,28 +45,8 @@ public class BlightedEntitiesListener implements Listener {
 
     try {
       BlightedEntity blighted = blightedEntities.get(entity.getUniqueId());
-      EntityAttachment attachment = BlightedEntity.getAttachment(entity);
-
-      if (attachment != null) {
-        // Forward damage from attachment to owner
-        LivingEntity ownerEntity = attachment.owner().getEntity();
-        if (ownerEntity != null && !ownerEntity.isDead()) {
-          ownerEntity.damage(event.getFinalDamage(), getRealDamager(event));
-          syncArmor((LivingEntity) attachment.entity(), ownerEntity);
-        }
-        event.setCancelled(true);
-        return;
-      }
 
       if (blighted != null) {
-        // Forward damage from owner to attachments
-        for (EntityAttachment att : blighted.attachments) {
-          if (att.entity() instanceof LivingEntity living && !living.isDead()) {
-            living.damage(event.getFinalDamage(), getRealDamager(event));
-            syncArmor(living, entity);
-          }
-        }
-
         if (event instanceof EntityDamageByEntityEvent e) {
           Player player = getPlayerDamager(e.getDamager());
           if (blighted.isImmuneTo(entity, event)) {
@@ -83,10 +62,9 @@ public class BlightedEntitiesListener implements Listener {
         double damage = event.getFinalDamage();
         double remainingHealth = entity.getHealth() + entity.getAbsorptionAmount() - damage;
 
+        // update name tag or let onEntityDeath handle death logic
         if (remainingHealth > 0) {
           blighted.updateNameTag();
-        } else {
-          blighted.killAllAttachments();
         }
 
         spawnDamageIndicator(entity, damage);
@@ -109,22 +87,9 @@ public class BlightedEntitiesListener implements Listener {
     if (!(event.getEntity() instanceof LivingEntity entity)) return;
 
     BlightedEntity blighted = blightedEntities.get(entity.getUniqueId());
-    EntityAttachment attachment = BlightedEntity.getAttachment(entity);
 
     if (blighted != null) {
       blighted.updateNameTag();
-      for (EntityAttachment att : blighted.attachments) {
-        if (att.entity() instanceof LivingEntity living && !living.isDead()) {
-          living.setHealth(Math.min(living.getHealth(), entity.getHealth()));
-          syncArmor(living, entity);
-        }
-      }
-    } else if (attachment != null) {
-      LivingEntity ownerEntity = attachment.owner().getEntity();
-      if (ownerEntity != null && !ownerEntity.isDead()) {
-        ownerEntity.setHealth(Math.min(ownerEntity.getHealth(), entity.getHealth()));
-        syncArmor((LivingEntity) attachment.entity(), ownerEntity);
-      }
     }
   }
 
@@ -138,14 +103,6 @@ public class BlightedEntitiesListener implements Listener {
       blighted.dropLoot(event.getEntity().getLocation(), player);
       event.getDrops().clear();
       event.setDroppedExp(blighted.getDroppedExp());
-    } else {
-      EntityAttachment attachment = BlightedEntity.getAttachment(event.getEntity());
-      if (attachment != null) {
-        LivingEntity ownerEntity = attachment.owner().getEntity();
-        if (ownerEntity != null && !ownerEntity.isDead()) {
-          ownerEntity.setHealth(0);
-        }
-      }
     }
   }
 
@@ -175,12 +132,6 @@ public class BlightedEntitiesListener implements Listener {
         continue;
       }
       blightedEntities.put(living.getUniqueId(), instance);
-      for (EntityAttachment att : instance.attachments) {
-        if (att.entity() instanceof LivingEntity livingAtt && !livingAtt.isDead()) {
-          livingAtt.setHealth(instance.getMaxHealth());
-          syncArmor(livingAtt, living);
-        }
-      }
     }
   }
 
