@@ -25,9 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * Represents a custom block within the BlightedMC plugin.
- */
 public abstract class BlightedBlock {
 
   protected final Material material;
@@ -40,24 +37,17 @@ public abstract class BlightedBlock {
   }
 
   public void onPlace(BlockPlaceEvent event) {}
-
   public void onInteract(PlayerInteractEvent event) {}
-
   public ItemStack onBreak(BlockBreakEvent event, ItemStack droppedItem) {
     return droppedItem;
   }
 
-  /**
-   * Handles all BlightedBlock events and persistence.
-   */
   public static class BlightedBlockListener implements Listener {
     private final BlightedMC plugin = BlightedMC.getInstance();
     private final NamespacedKey key = new NamespacedKey(plugin, "id");
 
-    // In-memory cache
     private final Map<String, String> placedBlocks = new HashMap<>();
 
-    // Data file
     private final File dataFile;
     private final YamlConfiguration dataConfig;
 
@@ -83,10 +73,14 @@ public abstract class BlightedBlock {
       if (!(state instanceof TileState tile)) return null;
 
       PersistentDataContainer pdc = tile.getPersistentDataContainer();
+      if (pdc == null) return null; // Prevent NPE
+
       if (pdc.has(key, PersistentDataType.STRING)) {
         String id = pdc.get(key, PersistentDataType.STRING);
-        block.setMetadata("id", new FixedMetadataValue(plugin, id)); // cache
-        return id;
+        if (id != null) {
+          block.setMetadata("id", new FixedMetadataValue(plugin, id)); // cache
+          return id;
+        }
       }
 
       return null;
@@ -124,7 +118,7 @@ public abstract class BlightedBlock {
       String locKey = serializeLocation(placed.getLocation());
       placedBlocks.put(locKey, id);
       dataConfig.set(locKey, id);
-      saveData(); // persist immediately
+      saveData();
 
       block.onPlace(event);
     }
@@ -146,16 +140,16 @@ public abstract class BlightedBlock {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
       Block block = event.getBlock();
-      Location loc = block.getLocation();
+
+      // Skip if it's not a custom block
       String id = getBlockId(block);
       if (id == null) return;
-
       BlightedBlock customBlock = BlocksRegistry.CUSTOM_BLOCKS.get(id);
       if (customBlock == null) return;
 
+      Location loc = block.getLocation();
       event.setDropItems(false);
 
-      // Preventing player in CREATIVE to drop the item when hitting the block with a sword
       Bukkit.getScheduler().runTask(plugin, () -> {
         if (!loc.getBlock().getType().isAir()) return; // Block wasn't destroyed → skip
 
@@ -171,13 +165,15 @@ public abstract class BlightedBlock {
 
         BlockState state = block.getState();
         if (state instanceof TileState tile) {
-          tile.getPersistentDataContainer().remove(key);
+          PersistentDataContainer pdc = tile.getPersistentDataContainer();
+          if (pdc != null) {
+            pdc.remove(key);
+          }
           tile.update(true);
         }
       });
     }
 
-    /** Save all placed custom blocks to disk */
     public void saveData() {
       try {
         dataConfig.save(dataFile);
@@ -186,7 +182,6 @@ public abstract class BlightedBlock {
       }
     }
 
-    /** Load all blocks from disk and restore metadata */
     private void loadData() {
       if (!dataFile.exists()) return;
 
@@ -205,7 +200,6 @@ public abstract class BlightedBlock {
       plugin.getLogger().info("Loaded " + placedBlocks.size() + " blighted blocks.");
     }
 
-    /** Serialize location to string key */
     private String serializeLocation(Location loc) {
       return Objects.requireNonNull(loc.getWorld()).getName() + ";" +
         loc.getBlockX() + ";" +
@@ -213,7 +207,6 @@ public abstract class BlightedBlock {
         loc.getBlockZ();
     }
 
-    /** Deserialize location string back to Location */
     private Location deserializeLocation(String key) {
       String[] parts = key.split(";");
       if (parts.length != 4) return null;
