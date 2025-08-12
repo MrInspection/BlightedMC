@@ -35,7 +35,7 @@ public class BlightedZombie extends SpawnableEntity {
   public BlightedZombie() {
     super("BLIGHTED_ZOMBIE", "Zombie", 30, EntityType.ZOMBIE, 0.15);
     setNameTagType(EntityNameTag.BLIGHTED);
-    setDamage(10);
+    setDamage(15);
     setDroppedExp(10);
     setLootTable(createLootTable());
 
@@ -46,7 +46,6 @@ public class BlightedZombie extends SpawnableEntity {
       new ItemBuilder(Material.LEATHER_HELMET).setLeatherColor("#81CFE2").toItemStack()
     };
 
-    // Register ability factory with lifecycle manager
     addRepeatingTask(() -> {
       BukkitRunnable task = new BukkitRunnable() {
         @Override
