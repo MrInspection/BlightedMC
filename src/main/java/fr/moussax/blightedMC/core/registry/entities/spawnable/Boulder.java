@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC.core.registry.entities.spawnable;
 
-import fr.moussax.blightedMC.core.entities.EntityAttributes;
 import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntity;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
@@ -14,7 +13,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
-@EntityAttributes(EntityAttributes.Attributes.PROJECTILE_IMMUNITY)
 public class Boulder extends SpawnableEntity {
   private BukkitRunnable yeetAbilityTask;
 

@@ -113,7 +113,6 @@ public class LaserEngineer extends SpawnableEntity {
     if (!(entity instanceof Zombie zombie)) return;
 
     if (isActive) {
-      entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 60f, 0.9f);
       Objects.requireNonNull(zombie.getEquipment()).setChestplate(
         new ItemBuilder(Material.LEATHER_CHESTPLATE)
           .setLeatherColor("#7D807E")
