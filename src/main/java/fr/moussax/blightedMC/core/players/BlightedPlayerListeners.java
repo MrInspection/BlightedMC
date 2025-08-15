@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-public class BlightedPlayerListener implements Listener {
+public class BlightedPlayerListeners implements Listener {
   @EventHandler
   public void onJoin(PlayerJoinEvent event) {
     new BlightedPlayer(event.getPlayer());
@@ -33,7 +33,7 @@ public class BlightedPlayerListener implements Listener {
     BlightedPlayer player = BlightedPlayer.getBlightedPlayer(event.getPlayer());
     if(player != null) {
       player.saveData();
-      BlightedPlayer.remove(event.getPlayer());
+      BlightedPlayer.removePlayer(event.getPlayer());
     }
     event.setQuitMessage("§8 ■ §f" + event.getPlayer().getName() + " §7left the SMP.");
   }

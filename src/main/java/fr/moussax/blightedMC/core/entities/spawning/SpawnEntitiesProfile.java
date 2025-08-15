@@ -28,7 +28,6 @@ public class SpawnEntitiesProfile implements Cloneable {
   public SpawnEntitiesProfile clone() {
     try {
       SpawnEntitiesProfile clone = (SpawnEntitiesProfile) super.clone();
-      // Deep copy the list of conditions (shallow copy is probably sufficient if conditions are immutable)
       clone.conditions.clear();
       clone.conditions.addAll(this.conditions);
       return clone;

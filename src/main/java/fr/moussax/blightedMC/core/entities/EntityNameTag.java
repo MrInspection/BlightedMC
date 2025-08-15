@@ -13,7 +13,7 @@ public enum EntityNameTag {
    * @param name       base entity name
    * @param health     current health
    * @param maxHealth  maximum health
-   * @return formatted display string (may be empty for HIDDEN)
+   * @return formatted display string or empty string if HIDDEN
    */
   public String format(String name, double health, int maxHealth) {
     double percentage = (maxHealth > 0) ? (health / maxHealth) * 100.0 : 0.0;

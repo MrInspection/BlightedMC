@@ -102,7 +102,7 @@ public class AbilityListener implements Listener {
 
   @EventHandler
   public void onPlayerQuit(PlayerQuitEvent e) {
-    BlightedPlayer.remove(e.getPlayer());
+    BlightedPlayer.removePlayer(e.getPlayer());
   }
 
   @EventHandler
