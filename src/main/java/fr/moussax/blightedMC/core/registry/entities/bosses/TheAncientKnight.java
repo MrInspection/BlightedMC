@@ -5,10 +5,7 @@ import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
@@ -36,7 +33,6 @@ public class TheAncientKnight extends BlightedEntity {
 
     itemInMainHand = new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack();
 
-    // Register ability factory with lifecycle manager (will be scheduled on spawn via initRuntime)
     addRepeatingTask(() -> {
       BukkitRunnable task = new BukkitRunnable() {
         @Override
@@ -47,16 +43,16 @@ public class TheAncientKnight extends BlightedEntity {
             return;
           }
 
-          List<Entity> nearbyPlayers = entity.getNearbyEntities(20, 20, 20).stream()
-            .filter(e -> e instanceof Player)
+          List<Player> nearbyPlayers = entity.getNearbyEntities(20, 20, 20).stream()
+            .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+            .map(e -> (Player) e)
             .toList();
           if (nearbyPlayers.isEmpty()) return;
 
-          BlightedPlayer target = BlightedPlayer.getBlightedPlayer((Player) nearbyPlayers.getFirst());
+          BlightedPlayer target = BlightedPlayer.getBlightedPlayer(nearbyPlayers.getFirst());
           stabAbility(target);
         }
       };
-      // keep reference so stopAbility can cancel the created runnable for this instance
       abilityRunnable = task;
       return task;
     }, 100L, 300L);
@@ -83,12 +79,13 @@ public class TheAncientKnight extends BlightedEntity {
             return;
           }
 
-          List<Entity> nearbyPlayers = clone.entity.getNearbyEntities(20, 20, 20).stream()
-            .filter(e -> e instanceof Player)
+          List<Player> nearbyPlayers = clone.entity.getNearbyEntities(20, 20, 20).stream()
+            .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+            .map(e -> (Player) e)
             .toList();
           if (nearbyPlayers.isEmpty()) return;
 
-          BlightedPlayer target = BlightedPlayer.getBlightedPlayer((Player) nearbyPlayers.getFirst());
+          BlightedPlayer target = BlightedPlayer.getBlightedPlayer(nearbyPlayers.getFirst());
           clone.stabAbility(target);
         }
       };
@@ -198,13 +195,14 @@ public class TheAncientKnight extends BlightedEntity {
         Objects.requireNonNull(location.getWorld())
           .spawnParticle(Particle.EXPLOSION_EMITTER, location, 1);
 
-        List<Entity> nearbyPlayers = location.getWorld()
+        List<Player> nearbyPlayers = location.getWorld()
           .getNearbyEntities(location, 6, 6, 6).stream()
-          .filter(e -> e instanceof Player)
+          .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+          .map(e -> (Player) e)
           .toList();
 
-        for (Entity nearbyPlayer : nearbyPlayers) {
-          BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer((Player) nearbyPlayer);
+        for (Player nearbyPlayer : nearbyPlayers) {
+          BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(nearbyPlayer);
           blightedPlayer.getPlayer().damage(16, sword);
         }
 
