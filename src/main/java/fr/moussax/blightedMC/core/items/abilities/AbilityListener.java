@@ -27,20 +27,20 @@ public class AbilityListener implements Listener {
     // Periodic armor refresh for all online players (every 2 seconds)
     Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(), () -> {
       for (Player player : Bukkit.getOnlinePlayers()) {
-        BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(player);
-        if (bp != null) ArmorManager.updatePlayerArmor(bp);
+        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        if (blightedPlayer != null) ArmorManager.updatePlayerArmor(blightedPlayer);
       }
     }, 0L, 40L);
   }
 
   private void checkArmorChange(Player player) {
-    BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(player);
-    if (bp == null) return;
-    ItemStack[] before = bp.getLastKnownArmor();
+    BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+    if (blightedPlayer == null) return;
+    ItemStack[] before = blightedPlayer.getLastKnownArmor();
     ItemStack[] after = player.getInventory().getArmorContents();
     if (hasArmorChanged(before, after)) {
-      ArmorManager.updatePlayerArmor(bp);
-      bp.setLastKnownArmor(after);
+      ArmorManager.updatePlayerArmor(blightedPlayer);
+      blightedPlayer.setLastKnownArmor(after);
     }
   }
 
@@ -116,27 +116,27 @@ public class AbilityListener implements Listener {
     new BukkitRunnable() {
       @Override
       public void run() {
-        BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(player);
-        if (bp != null) ArmorManager.updatePlayerArmor(bp);
+        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        if (blightedPlayer != null) ArmorManager.updatePlayerArmor(blightedPlayer);
       }
     }.runTaskLater(BlightedMC.getInstance(), 1);
   }
 
   private <T extends Event> void trigger(Player player, T event) {
-    BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(player);
-    if (bp == null) {
-      bp = new BlightedPlayer(player);
+    BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+    if (blightedPlayer == null) {
+      blightedPlayer = new BlightedPlayer(player);
     }
 
-    ItemManager itemManager = bp.getEquippedItemManager();
+    ItemManager itemManager = blightedPlayer.getEquippedItemManager();
     if (itemManager == null || itemManager.getAbilities().isEmpty()) {
       return;
     }
 
     // Only trigger if the event matches the ability's trigger type
     for (Ability ability : itemManager.getAbilities()) {
-      if (ability.getType().matches(event)) {
-        itemManager.triggerAbilities(bp, event);
+      if (ability.type().matches(event)) {
+        itemManager.triggerAbilities(blightedPlayer, event);
         break;
       }
     }

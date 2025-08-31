@@ -3,7 +3,6 @@ package fr.moussax.blightedMC.core.players;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemManager;
 import fr.moussax.blightedMC.core.items.ItemType;
-import fr.moussax.blightedMC.core.items.abilities.Bonuses;
 import fr.moussax.blightedMC.core.items.abilities.CooldownEntry;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.core.players.data.PlayerDataHandler;
@@ -33,7 +32,6 @@ public class BlightedPlayer {
   public ItemManager chestplate;
   public ItemManager leggings;
   public ItemManager boots;
-  public HashMap<Bonuses, Integer> bonuses = new HashMap<>();
   public ArrayList<FullSetBonus> activeFullSetBonuses = new ArrayList<>();
 
   private final ManaManager manaManager;
@@ -75,12 +73,12 @@ public class BlightedPlayer {
   }
 
   public void initializeFullSetBonuses() {
-    for(FullSetBonus bonus : activeFullSetBonuses) {
-      bonus.stopAbility();
+    for (FullSetBonus bonus : activeFullSetBonuses) {
+      bonus.deactivate();
     }
 
-    for(FullSetBonus bonus : activeFullSetBonuses) {
-      bonus.startAbility();
+    for (FullSetBonus bonus : activeFullSetBonuses) {
+      bonus.activate();
     }
   }
 
@@ -106,25 +104,25 @@ public class BlightedPlayer {
 
   public void clearActiveBonuses() {
     for (FullSetBonus bonus : activeFullSetBonuses) {
-      bonus.stopAbility();
+      bonus.deactivate();
     }
     activeFullSetBonuses.clear();
   }
 
   public void addActiveBonus(FullSetBonus bonus) {
     activeFullSetBonuses.add(bonus);
-    bonus.startAbility();
+    bonus.activate();
   }
 
   public void removeActiveBonus(FullSetBonus bonus) {
     activeFullSetBonuses.remove(bonus);
-    bonus.stopAbility();
+    bonus.deactivate();
   }
 
   public void removeActiveBonusByClass(Class<? extends FullSetBonus> bonusClass) {
     activeFullSetBonuses.removeIf(bonus -> {
       if (bonus.getClass().equals(bonusClass)) {
-        bonus.stopAbility();
+        bonus.deactivate();
         return true;
       }
       return false;
@@ -132,7 +130,7 @@ public class BlightedPlayer {
   }
 
   public void setArmorPiece(ItemType type, ItemManager itemManager) {
-    switch(type) {
+    switch (type) {
       case HELMET:
         helmet = itemManager;
         break;
@@ -166,22 +164,19 @@ public class BlightedPlayer {
     return favors;
   }
 
-  public FavorsManager addFavors(int value) {
+  public void addFavors(int value) {
     favors.addFavors(value);
     actionBarManager.tick();
-    return favors;
   }
 
-  public FavorsManager removeFavors(int value) {
+  public void removeFavors(int value) {
     favors.removeFavors(value);
     actionBarManager.tick();
-    return favors;
   }
 
-  public FavorsManager setFavors(int value) {
+  public void setFavors(int value) {
     favors.setFavors(value);
     actionBarManager.tick();
-    return favors;
   }
 
   public ManaManager getMana() {
