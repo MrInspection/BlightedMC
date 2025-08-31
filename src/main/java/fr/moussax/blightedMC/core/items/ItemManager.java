@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.core.items;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.core.fishing.RodType;
 import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityExecutor;
 import fr.moussax.blightedMC.core.items.abilities.AbilityType;
@@ -11,6 +12,7 @@ import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Event;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -40,6 +42,7 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
 
   private final List<Ability> abilities = new ArrayList<>();
   private final List<ItemRule> rules = new ArrayList<>();
+  private RodType rodType = RodType.NORMAL_FISHING_ROD;
 
   /**
    * Constructs an ItemManager with basic parameters.
@@ -121,22 +124,18 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
    * Adds an ability to this item.
    *
    * @param ability the ability to add
-   * @return this instance for chaining
    */
-  public ItemManager addAbility(Ability ability) {
+  public void addAbility(Ability ability) {
     abilities.add(ability);
-    return this;
   }
 
   /**
    * Adds an item rule (usage/interaction restrictions).
    *
    * @param rule the rule to add
-   * @return this instance for chaining
    */
-  public ItemManager addRule(ItemRule rule) {
+  public void addRule(ItemRule rule) {
     rules.add(rule);
-    return this;
   }
 
   /**
@@ -155,9 +154,8 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     return this;
   }
 
-  public ItemManager setFullSetBonus(FullSetBonus bonus) {
+  public void setFullSetBonus(FullSetBonus bonus) {
     this.fullSetBonus = bonus;
-    return this;
   }
 
   public FullSetBonus getFullSetBonus() {
@@ -199,9 +197,17 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
 
     for (FullSetBonus activeBonus : blightedPlayer.getActiveFullSetBonuses()) {
       if (activeBonus.getPieces() >= activeBonus.getMaxPieces()) {
-        activeBonus.startAbility();
+        activeBonus.activate();
       }
     }
+  }
+
+  public void setRodType(RodType type) {
+    this.rodType = type;
+  }
+
+  public RodType getRodType() {
+    return rodType;
   }
 
   /**
@@ -212,29 +218,22 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
    * @return true if the ability should trigger
    */
   private boolean shouldTriggerAbility(Ability ability, Event event) {
-    if (event instanceof org.bukkit.event.player.PlayerInteractEvent interactEvent) {
-      org.bukkit.event.block.Action action = interactEvent.getAction();
-      AbilityType abilityType = ability.getType();
-      
-      // Check for sneak requirements first
+    if (event instanceof PlayerInteractEvent interactEvent) {
+      Action action = interactEvent.getAction();
+      AbilityType abilityType = ability.type();
+
       if (abilityType.isSneak() && !interactEvent.getPlayer().isSneaking()) {
         return false;
       }
-      
-      // Check if the ability type matches the current action
-      if (abilityType.isRightClick() && (action == org.bukkit.event.block.Action.RIGHT_CLICK_AIR || 
-                                        action == org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK)) {
-        return true;
-      }
-      if (abilityType.isLeftClick() && (action == org.bukkit.event.block.Action.LEFT_CLICK_AIR || 
-                                       action == org.bukkit.event.block.Action.LEFT_CLICK_BLOCK)) {
-        return true;
-      }
-      
-      return false;
+
+      boolean rightClick = abilityType.isRightClick() &&
+        (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK);
+
+      boolean leftClick = abilityType.isLeftClick() &&
+        (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK);
+
+      return rightClick || leftClick;
     }
-    
-    // For other event types, allow all abilities for now
     return true;
   }
 

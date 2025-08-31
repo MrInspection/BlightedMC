@@ -1,8 +1,10 @@
 package fr.moussax.blightedMC.core.items;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.core.registry.armors.ArmorRegistry;
 import fr.moussax.blightedMC.core.registry.blocks.BlockItemsRegistry;
-import fr.moussax.blightedMC.core.registry.items.MaterialsRegistry;
+import fr.moussax.blightedMC.core.registry.items.BlightedItems;
+import fr.moussax.blightedMC.core.registry.items.BlightedMaterials;
 import fr.moussax.blightedMC.core.registry.armors.SpecialArmorRegistry;
 import fr.moussax.blightedMC.core.registry.items.SpecialItems;
 import org.bukkit.NamespacedKey;
@@ -34,10 +36,12 @@ public final class ItemsRegistry {
     clearItems();
 
     List<ItemCategory> categories = List.of(
-      new MaterialsRegistry(),
+      new BlightedMaterials(),
       new SpecialArmorRegistry(),
+      new ArmorRegistry(),
       new BlockItemsRegistry(),
-      new SpecialItems()
+      new SpecialItems(),
+      new BlightedItems()
     );
     for (ItemCategory category : categories) {
       category.registerItems();

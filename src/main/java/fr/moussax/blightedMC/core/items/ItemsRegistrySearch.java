@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.core.items;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.menus.Menu;
 import fr.moussax.blightedMC.core.menus.MenuManager;
 import org.bukkit.Bukkit;
@@ -20,7 +21,7 @@ public class ItemsRegistrySearch implements Listener {
       event.setCancelled(true);
       String search = event.getMessage().trim();
       Menu previousMenu = awaitingSearch.remove(uuid);
-      Bukkit.getScheduler().runTask(fr.moussax.blightedMC.BlightedMC.getInstance(), () -> {
+      Bukkit.getScheduler().runTask(BlightedMC.getInstance(), () -> {
         if (!search.isEmpty()) {
           MenuManager.openMenu(new ItemsRegistryMenu.SearchResultsPaginatedMenu(search, previousMenu), event.getPlayer());
         } else {
