@@ -11,7 +11,7 @@ public class HomodeusFlightAbility implements FullSetBonus {
   private boolean isActive = false;
 
   @Override
-  public void startAbility() {
+  public void startAbilityEffect() {
     if (isActive) return;
 
     Player bukkitPlayer = player.getPlayer();
@@ -28,7 +28,7 @@ public class HomodeusFlightAbility implements FullSetBonus {
   }
 
   @Override
-  public void stopAbility() {
+  public void stopAbilityEffect() {
     if (!isActive) return;
 
     Player bukkitPlayer = player.getPlayer();
@@ -54,4 +54,7 @@ public class HomodeusFlightAbility implements FullSetBonus {
   public void setPlayer(BlightedPlayer player) {
     this.player = player;
   }
-} 
+
+  @Override
+  public BlightedPlayer getAbilityOwner() { return this.player; }
+}
