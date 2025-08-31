@@ -70,7 +70,7 @@ public class ActionBarManager implements Runnable {
 
   private String getFavorsComponent() {
     int favors = player.getFavors().getFavors();
-    return "§6" + favors + "✵ Favors";
+    return "§d" + favors + "✵ Favors";
   }
 
   private String getManaComponent() {

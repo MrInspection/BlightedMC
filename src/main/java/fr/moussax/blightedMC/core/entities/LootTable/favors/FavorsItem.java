@@ -47,7 +47,7 @@ public class FavorsItem implements ItemGenerator {
       }
       
       favorsItem.addFavors(bPlayer);
-      event.getPlayer().sendMessage("§8 ■ §7You received §6" + favorsItem.amount + "✵ Favors §7from a §5Blighted Gemstone.");
+      event.getPlayer().sendMessage("§8 ■ §7You received §d" + favorsItem.amount + "✵ Favors §7from a §5Blighted Gemstone.");
       event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 100f, 0f);
       event.getPlayer().getInventory().remove(event.getItem());
       event.setCancelled(true);
@@ -81,7 +81,7 @@ public class FavorsItem implements ItemGenerator {
   @Override
   public ItemStack createItemStack() {
     ItemManager item = ItemsRegistry.BLIGHTED_ITEMS.get("BLIGHTED_GEMSTONE");
-    item.setLore("§7Favors trapped: §6" + amount + "✵", 6);
+    item.setLore("§7Favors trapped: §d" + amount + "✵", 6);
     ItemStack itemStack = item.toItemStack();
     
     ItemMeta meta = itemStack.getItemMeta();

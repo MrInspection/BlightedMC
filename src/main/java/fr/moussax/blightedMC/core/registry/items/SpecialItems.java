@@ -5,12 +5,13 @@ import fr.moussax.blightedMC.core.items.*;
 import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.core.items.rules.PreventPlacementRule;
+import fr.moussax.blightedMC.core.fishing.RodType;
 import org.bukkit.Material;
 
 public class SpecialItems implements ItemCategory {
   @Override
   public void registerItems() {
-    ItemManager blightedGemstone = new ItemManager("BLIGHTED_GEMSTONE", ItemType.MATERIAL, ItemRarity.SPECIAL, Material.PLAYER_HEAD, "Blighted Gemstone");
+    ItemManager blightedGemstone = new ItemManager("BLIGHTED_GEMSTONE", ItemType.UNCATEGORIZED, ItemRarity.SPECIAL, Material.PLAYER_HEAD, "Blighted Gemstone");
     blightedGemstone.addLore(
       "§7A gemstone tainted by §5shadow§7, tore",
       "§7from the §5remains §7of a fallen horror. ",
@@ -18,7 +19,7 @@ public class SpecialItems implements ItemCategory {
       "§dFavors §7awaiting one bold enough to",
       "§7claim them.",
       "",
-      "§7Favors trapped: §6???✵",
+      "§7Favors trapped: §d???✵",
       "",
       "§dRight click to consume!",
       "",
