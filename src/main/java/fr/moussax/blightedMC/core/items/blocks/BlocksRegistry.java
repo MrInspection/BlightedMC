@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.items.blocks;
 
-import fr.moussax.blightedMC.core.registry.blocks.BlightedCraftingTable;
+import fr.moussax.blightedMC.registry.blocks.BlightedCraftingTable;
 
 import java.util.HashMap;
 

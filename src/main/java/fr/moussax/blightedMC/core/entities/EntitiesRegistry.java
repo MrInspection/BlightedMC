@@ -1,10 +1,10 @@
 package fr.moussax.blightedMC.core.entities;
 
-import fr.moussax.blightedMC.core.registry.entities.Dummy;
+import fr.moussax.blightedMC.registry.entities.Dummy;
 import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntity;
 import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntitiesRegistry;
-import fr.moussax.blightedMC.core.registry.entities.bosses.RevenantHorror;
-import fr.moussax.blightedMC.core.registry.entities.bosses.TheAncientKnight;
+import fr.moussax.blightedMC.registry.entities.bosses.RevenantHorror;
+import fr.moussax.blightedMC.registry.entities.bosses.TheAncientKnight;
 
 import java.util.HashMap;
 import java.util.List;
