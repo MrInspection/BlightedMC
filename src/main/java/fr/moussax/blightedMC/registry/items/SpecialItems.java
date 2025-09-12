@@ -1,11 +1,10 @@
-package fr.moussax.blightedMC.core.registry.items;
+package fr.moussax.blightedMC.registry.items;
 
 import fr.moussax.blightedMC.core.entities.LootTable.favors.FavorsItem;
 import fr.moussax.blightedMC.core.items.*;
 import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.core.items.rules.PreventPlacementRule;
-import fr.moussax.blightedMC.core.fishing.RodType;
 import org.bukkit.Material;
 
 public class SpecialItems implements ItemCategory {

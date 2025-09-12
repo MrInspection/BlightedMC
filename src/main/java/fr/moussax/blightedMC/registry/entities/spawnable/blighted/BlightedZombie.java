@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.registry.entities.spawnable.blighted;
+package fr.moussax.blightedMC.registry.entities.spawnable.blighted;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.EntityNameTag;

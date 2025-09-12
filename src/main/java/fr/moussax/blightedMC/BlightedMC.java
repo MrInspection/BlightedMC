@@ -2,7 +2,7 @@ package fr.moussax.blightedMC;
 
 import fr.moussax.blightedMC.commands.CommandBuilder;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedMC.core.registry.RegistrySystem;
+import fr.moussax.blightedMC.registry.RegistrySystem;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BlightedMC extends JavaPlugin {

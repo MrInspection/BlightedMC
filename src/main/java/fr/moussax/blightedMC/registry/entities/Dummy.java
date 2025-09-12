@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.registry.entities;
+package fr.moussax.blightedMC.registry.entities;
 
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntityAttachment;

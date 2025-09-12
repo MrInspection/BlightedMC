@@ -1,11 +1,11 @@
-package fr.moussax.blightedMC.core.registry.items;
+package fr.moussax.blightedMC.registry.items;
 
 import fr.moussax.blightedMC.core.items.*;
 import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.core.items.rules.PreventInteractionRule;
 import fr.moussax.blightedMC.core.items.rules.PreventProjectileLaunchRule;
-import fr.moussax.blightedMC.core.registry.abilities.InstantTransmissionAbility;
+import fr.moussax.blightedMC.registry.abilities.InstantTransmissionAbility;
 import org.bukkit.Material;
 
 public class BlightedItems implements ItemCategory {

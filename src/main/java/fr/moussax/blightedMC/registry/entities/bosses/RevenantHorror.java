@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.registry.entities.bosses;
+package fr.moussax.blightedMC.registry.entities.bosses;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;

@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.registry.items;
+package fr.moussax.blightedMC.registry.items;
 
 import fr.moussax.blightedMC.core.items.*;
 import fr.moussax.blightedMC.core.items.ItemCategory;

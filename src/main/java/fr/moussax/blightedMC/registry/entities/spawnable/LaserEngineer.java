@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.registry.entities.spawnable;
+package fr.moussax.blightedMC.registry.entities.spawnable;
 
 import fr.moussax.blightedMC.core.entities.EntityAttributes;
 import fr.moussax.blightedMC.core.entities.LootTable.LootDropRarity;

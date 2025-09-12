@@ -1,7 +1,7 @@
-package fr.moussax.blightedMC.core.registry.armors;
+package fr.moussax.blightedMC.registry.armors;
 
 import fr.moussax.blightedMC.core.items.*;
-import fr.moussax.blightedMC.core.registry.abilities.RocketBootsAbility;
+import fr.moussax.blightedMC.registry.abilities.RocketBootsAbility;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
