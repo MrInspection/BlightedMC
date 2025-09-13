@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.registry.armors;
 
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.registry.abilities.HomodeusFlightAbility;
 import fr.moussax.blightedMC.core.items.*;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;

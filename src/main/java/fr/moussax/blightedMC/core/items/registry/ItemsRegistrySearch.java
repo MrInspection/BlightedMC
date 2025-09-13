@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.items;
+package fr.moussax.blightedMC.core.items.registry;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.menus.Menu;

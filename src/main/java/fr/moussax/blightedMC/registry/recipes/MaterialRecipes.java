@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.registry.recipes;
 
-import fr.moussax.blightedMC.core.items.ItemsRegistry;
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.crafting.BlightedShapedRecipe;
 import fr.moussax.blightedMC.core.items.crafting.ShapeEncoder;
 import fr.moussax.blightedMC.core.items.crafting.registry.RecipeCategory;

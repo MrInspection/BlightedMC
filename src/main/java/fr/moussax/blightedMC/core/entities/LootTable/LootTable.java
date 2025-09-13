@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.core.entities.LootTable;
 import fr.moussax.blightedMC.core.entities.LootTable.favors.FavorsItem;
 import fr.moussax.blightedMC.core.entities.LootTable.favors.FavorsLoot;
 import fr.moussax.blightedMC.core.entities.LootTable.favors.FavorsLootAdapter;
-import fr.moussax.blightedMC.core.items.ItemsRegistry;
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;

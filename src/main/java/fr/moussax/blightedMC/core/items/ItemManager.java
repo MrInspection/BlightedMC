@@ -1,7 +1,6 @@
 package fr.moussax.blightedMC.core.items;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.fishing.RodType;
 import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityExecutor;
 import fr.moussax.blightedMC.core.items.abilities.AbilityType;
@@ -23,18 +22,18 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fr.moussax.blightedMC.core.items.ItemsRegistry.BLIGHTED_ITEMS;
-import static fr.moussax.blightedMC.core.items.ItemsRegistry.ID_KEY;
+import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.BLIGHTED_ITEMS;
+import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.ID_KEY;
 
 /**
- * Manages custom items in the BlightedMC system.
- * <p>
- * Extends {@link ItemBuilder} to add item ID, rarity, type, abilities,
- * and rules for interaction and usage.
- * <p>
+ * Manages custom items in BlightedMC.
+ * Extends {@link ItemBuilder} to include item ID, rarity, type, abilities, and rules.
  * Handles ability triggering based on events and stores persistent data keys.
  */
 public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator {
+  public static final NamespacedKey ITEM_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "id");
+  public static final NamespacedKey ITEM_RARITY_KEY = new NamespacedKey(BlightedMC.getInstance(), "rarity");
+
   private final String itemId;
   private final ItemRarity itemRarity;
   private final ItemType itemType;
@@ -42,16 +41,7 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
 
   private final List<Ability> abilities = new ArrayList<>();
   private final List<ItemRule> rules = new ArrayList<>();
-  private RodType rodType = RodType.NORMAL_FISHING_ROD;
 
-  /**
-   * Constructs an ItemManager with basic parameters.
-   *
-   * @param itemId   unique identifier for the item
-   * @param type     item type/category
-   * @param rarity   rarity classification
-   * @param material base Bukkit material
-   */
   public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material) {
     super(material);
     this.itemId = itemId;
@@ -59,15 +49,6 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     this.itemRarity = rarity;
   }
 
-  /**
-   * Constructs an ItemManager with a display name.
-   *
-   * @param itemId      unique identifier for the item
-   * @param type        item type/category
-   * @param rarity      rarity classification
-   * @param material    base Bukkit material
-   * @param displayName display name for the item (colored by rarity)
-   */
   public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Nonnull String displayName) {
     super(material, rarity.getColorPrefix() + displayName);
     this.itemId = itemId;
@@ -75,15 +56,6 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     this.itemRarity = rarity;
   }
 
-  /**
-   * Constructs an ItemManager with amount.
-   *
-   * @param itemId   unique identifier for the item
-   * @param type     item type/category
-   * @param rarity   rarity classification
-   * @param material base Bukkit material
-   * @param amount   stack amount (positive)
-   */
   public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount) {
     super(material, amount);
     this.itemId = itemId;
@@ -91,16 +63,6 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     this.itemRarity = rarity;
   }
 
-  /**
-   * Constructs an ItemManager with amount and display name.
-   *
-   * @param itemId      unique identifier for the item
-   * @param type        item type/category
-   * @param rarity      rarity classification
-   * @param material    base Bukkit material
-   * @param amount      stack amount (positive)
-   * @param displayName display name for the item (colored by rarity)
-   */
   public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount, @Nonnull String displayName) {
     super(material, amount, rarity.getColorPrefix() + displayName);
     this.itemId = itemId;
@@ -108,11 +70,6 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     this.itemRarity = rarity;
   }
 
-  /**
-   * Constructs an ItemManager from an existing ItemStack.
-   *
-   * @param itemStack the base Bukkit ItemStack
-   */
   public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, ItemStack itemStack) {
     super(itemStack);
     this.itemId = itemId;
@@ -120,29 +77,14 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     this.itemRarity = rarity;
   }
 
-  /**
-   * Adds an ability to this item.
-   *
-   * @param ability the ability to add
-   */
   public void addAbility(Ability ability) {
     abilities.add(ability);
   }
 
-  /**
-   * Adds an item rule (usage/interaction restrictions).
-   *
-   * @param rule the rule to add
-   */
   public void addRule(ItemRule rule) {
     rules.add(rule);
   }
 
-  /**
-   * Returns all abilities attached to this item.
-   *
-   * @return list of abilities
-   */
   public List<Ability> getAbilities() {
     return abilities;
   }
@@ -162,12 +104,6 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     return fullSetBonus;
   }
 
-  /**
-   * Retrieves an ItemManager from a Bukkit ItemStack by reading the persistent item ID.
-   *
-   * @param itemStack the Bukkit ItemStack
-   * @return corresponding ItemManager or null if not found
-   */
   public static ItemManager fromItemStack(ItemStack itemStack) {
     if (itemStack == null || itemStack.getType().isAir()) return null;
 
@@ -181,15 +117,8 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     return BLIGHTED_ITEMS.get(itemId);
   }
 
-  /**
-   * Triggers all applicable abilities of this item for the player and event.
-   *
-   * @param blightedPlayer the player holding the item
-   * @param event          the event triggering abilities
-   */
   public void triggerAbilities(BlightedPlayer blightedPlayer, Event event) {
     for (Ability ability : abilities) {
-      // Check if the ability type matches the current event
       if (shouldTriggerAbility(ability, event)) {
         AbilityExecutor.execute(ability, blightedPlayer, event);
       }
@@ -202,21 +131,6 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     }
   }
 
-  public void setRodType(RodType type) {
-    this.rodType = type;
-  }
-
-  public RodType getRodType() {
-    return rodType;
-  }
-
-  /**
-   * Determines if an ability should trigger based on the event type.
-   *
-   * @param ability the ability to test
-   * @param event   the event being processed
-   * @return true if the ability should trigger
-   */
   private boolean shouldTriggerAbility(Ability ability, Event event) {
     if (event instanceof PlayerInteractEvent interactEvent) {
       Action action = interactEvent.getAction();
@@ -235,28 +149,6 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
       return rightClick || leftClick;
     }
     return true;
-  }
-
-  @Override
-  public ItemStack toItemStack() {
-    ItemStack item = super.toItemStack();
-
-    var meta = item.getItemMeta();
-    assert meta != null;
-    meta.getPersistentDataContainer().set(
-        new NamespacedKey(BlightedMC.getInstance(), "id"),
-        PersistentDataType.STRING,
-        itemId
-    );
-
-    meta.getPersistentDataContainer().set(
-        new NamespacedKey(BlightedMC.getInstance(), "rarity"),
-        PersistentDataType.STRING,
-        itemRarity.name()
-    );
-
-    item.setItemMeta(meta);
-    return item;
   }
 
   @Override
@@ -283,6 +175,23 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     return true;
   }
 
+  @Override
+  public ItemStack toItemStack() {
+    ItemStack item = super.toItemStack();
+
+    var meta = item.getItemMeta();
+    assert meta != null;
+    meta.getPersistentDataContainer().set(ITEM_ID_KEY, PersistentDataType.STRING, itemId);
+    meta.getPersistentDataContainer().set(ITEM_RARITY_KEY, PersistentDataType.STRING, itemRarity.name());
+    item.setItemMeta(meta);
+    return item;
+  }
+
+  @Override
+  public ItemStack createItemStack() {
+    return this.toItemStack();
+  }
+
   public String getItemId() {
     return itemId;
   }
@@ -293,10 +202,5 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
 
   public ItemType getItemType() {
     return itemType;
-  }
-
-  @Override
-  public ItemStack createItemStack() {
-    return this.toItemStack();
   }
 }

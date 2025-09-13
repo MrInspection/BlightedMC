@@ -1,6 +1,8 @@
-package fr.moussax.blightedMC.core.items;
+package fr.moussax.blightedMC.core.items.registry;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemCategory;
 import fr.moussax.blightedMC.registry.armors.ArmorRegistry;
 import fr.moussax.blightedMC.registry.blocks.BlockItemsRegistry;
 import fr.moussax.blightedMC.registry.items.BlightedItems;

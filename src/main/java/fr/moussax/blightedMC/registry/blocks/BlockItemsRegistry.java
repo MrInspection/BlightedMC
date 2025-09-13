@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.registry.blocks;
 
 import fr.moussax.blightedMC.core.items.*;
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import org.bukkit.Material;
 
 public class BlockItemsRegistry implements ItemCategory {

@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.registry.items;
 
 import fr.moussax.blightedMC.core.items.*;
 import fr.moussax.blightedMC.core.items.ItemCategory;
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.rules.PreventPlacementRule;
 import fr.moussax.blightedMC.core.items.rules.PreventProjectileLaunchRule;
 import org.bukkit.Material;
@@ -39,7 +40,7 @@ public class BlightedMaterials implements ItemCategory {
       "ENCHANTED_GHAST_TEAR", ItemType.MATERIAL, ItemRarity.UNCOMMON,
       Material.GHAST_TEAR, "Enchanted Ghast Tear"
     );
-    enchantedGhastTear.addLore(ItemRarity.RARE.getName());
+    enchantedGhastTear.addLore(ItemRarity.UNCOMMON.getName());
     enchantedGhastTear.addEnchantmentGlint();
     ItemsRegistry.addItem(enchantedGhastTear);
   }

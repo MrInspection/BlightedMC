@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.registry.blocks;
 
-import fr.moussax.blightedMC.core.items.ItemsRegistry;
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.blocks.BlightedBlock;
 import fr.moussax.blightedMC.core.items.crafting.menu.CraftingTableMenu;
 import org.bukkit.Material;

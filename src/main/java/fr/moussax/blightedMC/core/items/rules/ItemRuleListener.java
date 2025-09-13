@@ -1,9 +1,7 @@
 package fr.moussax.blightedMC.core.items.rules;
 
-import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemManager;
-import fr.moussax.blightedMC.core.items.ItemsRegistry;
-import org.bukkit.NamespacedKey;
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,10 +14,9 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-public class ItemRuleListener implements Listener {
+import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.ID_KEY;
 
-  private static final NamespacedKey ID_KEY =
-      new NamespacedKey(BlightedMC.getInstance(), "id");
+public class ItemRuleListener implements Listener {
 
   private ItemManager getManager(ItemStack stack) {
     if (stack == null || !stack.hasItemMeta()) return null;
@@ -34,6 +31,7 @@ public class ItemRuleListener implements Listener {
   }
 
   @EventHandler(ignoreCancelled = true)
+  @SuppressWarnings("UnstableApiUsage")
   public void onBlockPlace(BlockPlaceEvent event) {
     ItemManager manager = getManager(event.getItemInHand());
     if (manager == null) return;

@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.registry.items;
 import fr.moussax.blightedMC.core.items.*;
 import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityType;
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.rules.PreventInteractionRule;
 import fr.moussax.blightedMC.core.items.rules.PreventProjectileLaunchRule;
 import fr.moussax.blightedMC.registry.abilities.InstantTransmissionAbility;
@@ -21,7 +22,7 @@ public class BlightedItems implements ItemCategory {
     glimmeringEye.addLore(
       "§8Consumable Item",
       "",
-      "§5 Item Ability: Instant Transmission §d§lRIGHT CLICK ",
+      "§5 Ability: Instant Transmission §d§lRIGHT CLICK ",
       "§7 Teleport to the block you're looking at",
       "§7 up to §a40 §7blocks away.",
       "§8 Mana Cost: §35",
