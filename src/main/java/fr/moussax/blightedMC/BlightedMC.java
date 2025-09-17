@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC;
 
-import fr.moussax.blightedMC.commands.CommandBuilder;
+import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.registry.RegistrySystem;
 import org.bukkit.plugin.java.JavaPlugin;

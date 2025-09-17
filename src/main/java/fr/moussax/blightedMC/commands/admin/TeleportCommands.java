@@ -1,6 +1,6 @@
-package fr.moussax.blightedMC.commands.impl.admin;
+package fr.moussax.blightedMC.commands.admin;
 
-import fr.moussax.blightedMC.utils.MessageUtils;
+import fr.moussax.blightedMC.utils.formatting.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
 
-import static fr.moussax.blightedMC.utils.MessageUtils.*;
+import static fr.moussax.blightedMC.utils.formatting.MessageUtils.*;
 
 public class TeleportCommands implements CommandExecutor {
   @Override

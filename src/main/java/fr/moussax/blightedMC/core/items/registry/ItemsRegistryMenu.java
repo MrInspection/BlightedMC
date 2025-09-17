@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.core.items.registry;
 import fr.moussax.blightedMC.core.items.ItemManager;
 import fr.moussax.blightedMC.core.items.ItemType;
 import fr.moussax.blightedMC.core.menus.*;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.utils.formatting.Formatter;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

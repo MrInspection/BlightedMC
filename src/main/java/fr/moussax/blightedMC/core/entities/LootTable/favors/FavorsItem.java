@@ -6,7 +6,7 @@ import fr.moussax.blightedMC.core.items.ItemManager;
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
-import fr.moussax.blightedMC.utils.MessageUtils;
+import fr.moussax.blightedMC.utils.formatting.MessageUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.event.player.PlayerInteractEvent;

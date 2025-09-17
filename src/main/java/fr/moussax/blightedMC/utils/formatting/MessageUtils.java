@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.utils;
+package fr.moussax.blightedMC.utils.formatting;
 
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -120,6 +120,7 @@ public class MessageUtils {
    * @param actionText the string used by the click event (e.g., command or URL), or {@code null} if no action
    * @return a {@link TextComponent} with the given hover and optional click behavior
    */
+  @SuppressWarnings("deprecation")
   public static TextComponent createClickableText(String text, String hoverText, @Nullable ClickEvent.Action action, @Nullable String actionText) {
     TextComponent component = new TextComponent(text);
     component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverText).create()));

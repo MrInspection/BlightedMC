@@ -1,11 +1,11 @@
-package fr.moussax.blightedMC.commands.impl.admin;
+package fr.moussax.blightedMC.commands.admin;
 
-import fr.moussax.blightedMC.commands.CommandArgument;
+import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import fr.moussax.blightedMC.core.items.ItemManager;
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistryMenu;
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.menus.MenuManager;
-import fr.moussax.blightedMC.utils.MessageUtils;
+import fr.moussax.blightedMC.utils.formatting.MessageUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

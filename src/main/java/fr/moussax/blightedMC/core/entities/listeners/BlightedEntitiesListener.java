@@ -5,7 +5,7 @@ import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntityAttachment;
 import fr.moussax.blightedMC.core.entities.EntitiesRegistry;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;

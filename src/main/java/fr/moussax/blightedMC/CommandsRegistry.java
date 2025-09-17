@@ -1,9 +1,10 @@
-package fr.moussax.blightedMC.commands;
+package fr.moussax.blightedMC;
 
-import fr.moussax.blightedMC.commands.impl.CraftCommand;
-import fr.moussax.blightedMC.commands.impl.admin.*;
-import fr.moussax.blightedMC.commands.impl.testing.LaserCommand;
-import fr.moussax.blightedMC.commands.impl.testing.TestCommand;
+import fr.moussax.blightedMC.commands.CraftCommand;
+import fr.moussax.blightedMC.commands.admin.*;
+import fr.moussax.blightedMC.commands.testing.LaserCommand;
+import fr.moussax.blightedMC.commands.testing.TestCommand;
+import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 
 /**
  * Registry class responsible for registering all commands used in the plugin.

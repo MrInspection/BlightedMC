@@ -1,9 +1,9 @@
-package fr.moussax.blightedMC.commands;
+package fr.moussax.blightedMC.utils.commands;
 
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntitiesRegistry;
 import fr.moussax.blightedMC.core.items.ItemManager;
-import fr.moussax.blightedMC.core.items.ItemsRegistry;
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

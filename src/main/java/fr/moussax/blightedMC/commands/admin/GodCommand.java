@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.commands.impl.admin;
+package fr.moussax.blightedMC.commands.admin;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
 
-import static fr.moussax.blightedMC.utils.MessageUtils.*;
+import static fr.moussax.blightedMC.utils.formatting.MessageUtils.*;
 
 public class GodCommand implements CommandExecutor {
   @Override

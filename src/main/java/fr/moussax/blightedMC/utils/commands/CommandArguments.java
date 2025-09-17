@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.commands;
+package fr.moussax.blightedMC.utils.commands;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

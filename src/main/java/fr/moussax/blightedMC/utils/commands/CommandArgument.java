@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.commands;
+package fr.moussax.blightedMC.utils.commands;
 
 import java.lang.annotation.*;
 
@@ -10,4 +10,3 @@ public @interface CommandArgument {
   String[] after() default {};
   String[] suggestions();
 }
-

@@ -1,6 +1,6 @@
-package fr.moussax.blightedMC.commands.impl.admin;
+package fr.moussax.blightedMC.commands.admin;
 
-import fr.moussax.blightedMC.utils.MessageUtils;
+import fr.moussax.blightedMC.utils.formatting.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

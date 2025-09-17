@@ -7,7 +7,7 @@ import org.bukkit.Sound;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
-import static fr.moussax.blightedMC.utils.MessageUtils.warnSender;
+import static fr.moussax.blightedMC.utils.formatting.MessageUtils.warnSender;
 
 /**
  * Executes player abilities, handling cooldowns, mana, and activation.
