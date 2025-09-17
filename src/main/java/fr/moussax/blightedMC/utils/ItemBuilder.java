@@ -198,6 +198,7 @@ public class ItemBuilder {
     return addEnchantmentGlint(true);
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   public ItemBuilder addItemFlag(ItemFlag flag) {
     itemMeta.addItemFlags(flag);
     return this;
