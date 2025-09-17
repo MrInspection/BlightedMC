@@ -21,7 +21,7 @@ public class TheAncientKnight extends BlightedEntity {
 
   public TheAncientKnight() {
     super("The Ancient Knight", 250, 30, EntityType.ZOMBIE);
-    addAttribute(Attribute.SCALE, 6);
+    addAttribute(Attribute.SCALE, 4.5);
     setNameTagType(EntityNameTag.BOSS);
 
     armor = new ItemStack[]{
