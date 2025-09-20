@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.items.registry;
 
-import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemFactory;
 import fr.moussax.blightedMC.core.items.ItemType;
 import fr.moussax.blightedMC.core.menus.*;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
@@ -106,15 +106,15 @@ public class ItemsRegistryMenu {
 
   public static class BlightedItemsPaginatedMenu extends PaginatedMenu {
     private final Menu previousMenu;
-    private final List<ItemManager> items;
+    private final List<ItemFactory> items;
 
-    public BlightedItemsPaginatedMenu(Menu previousMenu, Predicate<ItemManager> filter, String title) {
+    public BlightedItemsPaginatedMenu(Menu previousMenu, Predicate<ItemFactory> filter, String title) {
       super(title, 54);
       this.previousMenu = previousMenu;
-      this.items = ItemsRegistry.BLIGHTED_ITEMS.values().stream().filter(filter).collect(Collectors.toList());
+      this.items = ItemsRegistry.REGISTERED_ITEMS.values().stream().filter(filter).collect(Collectors.toList());
     }
 
-    public BlightedItemsPaginatedMenu(ItemType.Category category, Menu previousMenu, Predicate<ItemManager> filter, String title) {
+    public BlightedItemsPaginatedMenu(ItemType.Category category, Menu previousMenu, Predicate<ItemFactory> filter, String title) {
       this(previousMenu, filter, title);
     }
 
@@ -127,7 +127,7 @@ public class ItemsRegistryMenu {
     @Override
     protected ItemStack getItem(Player player, int index) {
       if (index >= items.size()) return new ItemStack(Material.AIR);
-      ItemManager item = items.get(index);
+      ItemFactory item = items.get(index);
 
       ItemStack stack = item.toItemStack().clone();
       var meta = stack.getItemMeta();

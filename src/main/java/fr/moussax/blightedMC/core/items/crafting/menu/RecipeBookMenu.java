@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.items.crafting.menu;
 
-import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemFactory;
 import fr.moussax.blightedMC.core.items.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.core.items.crafting.BlightedShapedRecipe;
 import fr.moussax.blightedMC.core.items.crafting.BlightedShapelessRecipe;
@@ -197,9 +197,9 @@ public class RecipeBookMenu {
       }
     }
 
-    private BlightedRecipe findRecipeForItem(ItemManager itemManager) {
+    private BlightedRecipe findRecipeForItem(ItemFactory itemFactory) {
       for (BlightedRecipe recipe : BlightedRecipe.REGISTERED_RECIPES) {
-        if (recipe.getResult().equals(itemManager)) {
+        if (recipe.getResult().equals(itemFactory)) {
           return recipe;
         }
       }

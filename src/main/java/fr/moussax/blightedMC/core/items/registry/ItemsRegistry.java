@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.items.registry;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemFactory;
 import fr.moussax.blightedMC.core.items.ItemCategory;
 import fr.moussax.blightedMC.registry.armors.ArmorRegistry;
 import fr.moussax.blightedMC.registry.blocks.BlockItemsRegistry;
@@ -16,22 +16,22 @@ import java.util.List;
 import java.util.Map;
 
 public final class ItemsRegistry {
-  public static final Map<String, ItemManager> BLIGHTED_ITEMS = new HashMap<>();
+  public static final Map<String, ItemFactory> REGISTERED_ITEMS = new HashMap<>();
   public static final NamespacedKey ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "id");
 
   public static void clearItems() {
-    BLIGHTED_ITEMS.clear();
+    REGISTERED_ITEMS.clear();
   }
 
-  public static void addItem(ItemManager item) {
-    if (BLIGHTED_ITEMS.containsKey(item.getItemId())) {
+  public static void addItem(ItemFactory item) {
+    if (REGISTERED_ITEMS.containsKey(item.getItemId())) {
       throw new IllegalArgumentException("Duplicate item ID: " + item.getItemId());
     }
-    BLIGHTED_ITEMS.put(item.getItemId(), item);
+    REGISTERED_ITEMS.put(item.getItemId(), item);
   }
 
-  public static List<ItemManager> getAllItems() {
-    return List.copyOf(BLIGHTED_ITEMS.values());
+  public static List<ItemFactory> getAllItems() {
+    return List.copyOf(REGISTERED_ITEMS.values());
   }
 
   public static void initializeItems() {

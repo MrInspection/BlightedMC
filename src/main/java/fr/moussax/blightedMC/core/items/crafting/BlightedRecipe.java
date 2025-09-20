@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.items.crafting;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemFactory;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -23,7 +23,7 @@ public sealed abstract class BlightedRecipe
     permits BlightedShapedRecipe, BlightedShapelessRecipe {
 
   public static final Set<BlightedRecipe> REGISTERED_RECIPES = new HashSet<>();
-  public abstract ItemManager getResult();
+  public abstract ItemFactory getResult();
 
   /**
    * Returns the number of items produced by this recipe.

@@ -5,6 +5,7 @@ import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityExecutor;
 import fr.moussax.blightedMC.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.rules.ItemRule;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -22,15 +23,26 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.BLIGHTED_ITEMS;
+import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.REGISTERED_ITEMS;
 import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.ID_KEY;
 
 /**
- * Manages custom items in BlightedMC.
- * Extends {@link ItemBuilder} to include item ID, rarity, type, abilities, and rules.
- * Handles ability triggering based on events and stores persistent data keys.
+ * A factory for creating custom items in BlightedMC, extending {@link ItemBuilder}.
+ * <p>
+ * Allows adding item ID, rarity, type, abilities, rules, and full set bonuses.
+ * Provides methods to generate {@link ItemStack} instances with persistent data and
+ * handle ability triggering based on events.
+ *
+ * <p>Example:</p>
+ * <pre>{@code
+ * ItemFactory blazingSword = new ItemFactory("blazing_sword", ItemType.SWORD, ItemRarity.LEGENDARY, Material.DIAMOND_SWORD)
+ *      .setDisplayName("§cBlazing Sword")
+ *      .addAbility(new FireSlashAbility())
+ *      .addRule(new CannotPlaceOnGrassRule());
+ *      .addToRegistry();
+ * }</pre>
  */
-public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator {
+public class ItemFactory extends ItemBuilder implements ItemRule, ItemGenerator {
   public static final NamespacedKey ITEM_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "id");
   public static final NamespacedKey ITEM_RARITY_KEY = new NamespacedKey(BlightedMC.getInstance(), "rarity");
 
@@ -42,35 +54,35 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
   private final List<Ability> abilities = new ArrayList<>();
   private final List<ItemRule> rules = new ArrayList<>();
 
-  public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material) {
+  public ItemFactory(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material) {
     super(material);
     this.itemId = itemId;
     this.itemType = type;
     this.itemRarity = rarity;
   }
 
-  public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Nonnull String displayName) {
+  public ItemFactory(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Nonnull String displayName) {
     super(material, rarity.getColorPrefix() + displayName);
     this.itemId = itemId;
     this.itemType = type;
     this.itemRarity = rarity;
   }
 
-  public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount) {
+  public ItemFactory(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount) {
     super(material, amount);
     this.itemId = itemId;
     this.itemType = type;
     this.itemRarity = rarity;
   }
 
-  public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount, @Nonnull String displayName) {
+  public ItemFactory(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount, @Nonnull String displayName) {
     super(material, amount, rarity.getColorPrefix() + displayName);
     this.itemId = itemId;
     this.itemType = type;
     this.itemRarity = rarity;
   }
 
-  public ItemManager(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, ItemStack itemStack) {
+  public ItemFactory(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, ItemStack itemStack) {
     super(itemStack);
     this.itemId = itemId;
     this.itemType = type;
@@ -90,7 +102,7 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
   }
 
   @Override
-  public ItemManager setDisplayName(@Nonnull String displayName) {
+  public ItemFactory setDisplayName(@Nonnull String displayName) {
     String coloredName = itemRarity.getColorPrefix() + displayName;
     super.setDisplayName(coloredName);
     return this;
@@ -104,7 +116,7 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     return fullSetBonus;
   }
 
-  public static ItemManager fromItemStack(ItemStack itemStack) {
+  public static ItemFactory fromItemStack(ItemStack itemStack) {
     if (itemStack == null || itemStack.getType().isAir()) return null;
 
     var meta = itemStack.getItemMeta();
@@ -114,7 +126,7 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
     String itemId = container.get(ID_KEY, PersistentDataType.STRING);
     if (itemId == null) return null;
 
-    return BLIGHTED_ITEMS.get(itemId);
+    return REGISTERED_ITEMS.get(itemId);
   }
 
   public void triggerAbilities(BlightedPlayer blightedPlayer, Event event) {
@@ -149,6 +161,18 @@ public class ItemManager extends ItemBuilder implements ItemRule, ItemGenerator 
       return rightClick || leftClick;
     }
     return true;
+  }
+
+  /**
+   * Registers this item in the {@link ItemsRegistry}, making it available globally.
+   * Throws an exception if the item ID already exists.
+   *
+   * @return this {@code ItemFactory} instance for chaining.
+   */
+  @SuppressWarnings("UnusedReturnValue")
+  public ItemFactory addToRegistry() {
+    ItemsRegistry.addItem(this);
+    return this;
   }
 
   @Override

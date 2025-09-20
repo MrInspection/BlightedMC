@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.items.abilities;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemFactory;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -100,10 +100,6 @@ public class AbilityListener implements Listener {
     Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> checkArmorChange(e.getPlayer()), 1L);
   }
 
-  @EventHandler
-  public void onPlayerQuit(PlayerQuitEvent e) {
-    BlightedPlayer.removePlayer(e.getPlayer());
-  }
 
   @EventHandler
   public void onEntityDamage(EntityDamageByEntityEvent e) {
@@ -128,15 +124,15 @@ public class AbilityListener implements Listener {
       blightedPlayer = new BlightedPlayer(player);
     }
 
-    ItemManager itemManager = blightedPlayer.getEquippedItemManager();
-    if (itemManager == null || itemManager.getAbilities().isEmpty()) {
+    ItemFactory itemFactory = blightedPlayer.getEquippedItemManager();
+    if (itemFactory == null || itemFactory.getAbilities().isEmpty()) {
       return;
     }
 
     // Only trigger if the event matches the ability's trigger type
-    for (Ability ability : itemManager.getAbilities()) {
+    for (Ability ability : itemFactory.getAbilities()) {
       if (ability.type().matches(event)) {
-        itemManager.triggerAbilities(blightedPlayer, event);
+        itemFactory.triggerAbilities(blightedPlayer, event);
         break;
       }
     }
