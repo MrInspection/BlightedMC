@@ -35,9 +35,6 @@ import java.util.*;
  * }</pre>
  */
 public class ItemBuilder {
-  public static final NamespacedKey ATTRIBUTE_KEY =
-    new NamespacedKey(BlightedMC.getInstance(), "attribute");
-
   private final ItemStack item;
   private ItemMeta itemMeta;
 
@@ -216,15 +213,23 @@ public class ItemBuilder {
   }
 
   public ItemBuilder addAttributeModifier(@Nonnull Attribute attribute, @Nonnull AttributeModifier modifier) {
-    attributes.computeIfAbsent(attribute, k -> new ArrayList<>()).add(modifier);
+    if (itemMeta.getAttributeModifiers() != null) {
+      Collection<AttributeModifier> existingAttributeModifier = itemMeta.getAttributeModifiers().get(attribute);
+      for (AttributeModifier oldAttributeModifier : new ArrayList<>(existingAttributeModifier)) {
+        itemMeta.removeAttributeModifier(attribute, oldAttributeModifier);
+      }
+    }
+    itemMeta.addAttributeModifier(attribute, modifier);
     return this;
   }
 
-  @SuppressWarnings("UnstableApiUsage")
+  @SuppressWarnings({"UnstableApiUsage", "UnusedReturnValue"})
   public ItemBuilder addAttributeModifier(@Nonnull Attribute attribute,
                                           double amount, @Nonnull AttributeModifier.Operation operation,
                                           @Nonnull EquipmentSlotGroup slotGroup) {
-    AttributeModifier modifier = new AttributeModifier(ATTRIBUTE_KEY, amount, operation, slotGroup);
+
+    NamespacedKey attributeKey = new NamespacedKey(BlightedMC.getInstance(), UUID.randomUUID().toString());
+    AttributeModifier modifier = new AttributeModifier(attributeKey, amount, operation, slotGroup);
     return addAttributeModifier(attribute, modifier);
   }
 
@@ -234,8 +239,15 @@ public class ItemBuilder {
     }
 
     if (!attributes.isEmpty()) {
-      attributes.forEach((attr, mods) ->
-        mods.forEach(mod -> itemMeta.addAttributeModifier(attr, mod)));
+      attributes.forEach((attr, mods) -> {
+        if (itemMeta.getAttributeModifiers() != null) {
+          Collection<AttributeModifier> existingAttributeModifier = itemMeta.getAttributeModifiers().get(attr);
+          for (AttributeModifier oldAttributeModifier : new ArrayList<>(existingAttributeModifier)) {
+            itemMeta.removeAttributeModifier(attr, oldAttributeModifier);
+          }
+        }
+        mods.forEach(mod -> itemMeta.addAttributeModifier(attr, mod));
+      });
     }
 
     if (bannerPatterns != null && itemMeta instanceof BannerMeta bannerMeta) {
