@@ -36,7 +36,7 @@ public class LootTable {
    * @return this LootTable for chaining
    */
   public LootTable addLoot(String itemId, int min, int max, double dropChance, LootDropRarity rarity) {
-    ItemLoot itemLoot = new ItemLoot(ItemsRegistry.BLIGHTED_ITEMS.get(itemId).toItemStack(), min, max);
+    ItemLoot itemLoot = new ItemLoot(ItemsRegistry.REGISTERED_ITEMS.get(itemId).toItemStack(), min, max);
     lootEntries.add(new LootEntry(itemLoot, dropChance, rarity));
     return this;
   }
