@@ -23,11 +23,16 @@ public class PlayerDataHandler {
     this.gson = new GsonBuilder().setPrettyPrinting().create();
 
     if (!file.exists()) {
-      this.playerData = new PlayerData(playerName, playerId.toString(), 0);
+      this.playerData = new PlayerData(playerName, playerId.toString(), 0, 100.0);
       save();
     } else {
       load();
-      if(!playerData.getName().equals(playerName)) {
+      // Backward compatibility: initialize missing mana to full if absent (older files)
+      if (playerData.getMana() <= 0) {
+        playerData.setMana(100.0);
+        save();
+      }
+      if (!playerData.getName().equals(playerName)) {
         playerData.setName(playerName);
         save();
       }
@@ -40,6 +45,10 @@ public class PlayerDataHandler {
 
   public void setFavors(int favors) {
     playerData.setFavors(favors);
+  }
+
+  public void setMana(double mana) {
+    playerData.setMana(mana);
   }
 
   public void save() {

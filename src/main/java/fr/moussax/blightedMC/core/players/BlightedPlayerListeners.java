@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC.core.players;
 
-import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -19,7 +18,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.regex.Pattern;
+
+import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
 
 public class BlightedPlayerListeners implements Listener {
   @EventHandler
@@ -31,7 +32,7 @@ public class BlightedPlayerListeners implements Listener {
   @EventHandler
   public void onQuit(PlayerQuitEvent event) {
     BlightedPlayer player = BlightedPlayer.getBlightedPlayer(event.getPlayer());
-    if(player != null) {
+    if (player != null) {
       player.saveData();
       BlightedPlayer.removePlayer(event.getPlayer());
     }
@@ -47,11 +48,11 @@ public class BlightedPlayerListeners implements Listener {
 
   @EventHandler
   public void onPlayerDamage(EntityDamageByEntityEvent event) {
-    if(!(event.getEntity() instanceof Player damaged)) return;
+    if (!(event.getEntity() instanceof Player damaged)) return;
 
     if (event.getDamager() instanceof Arrow arrow) {
       if (!(arrow.getShooter() instanceof Player damager)) return;
-      if(damaged == damager) return;
+      if (damaged == damager) return;
 
       double targetHealth = damaged.getHealth() - event.getFinalDamage();
       if (targetHealth < 0) targetHealth = 0;
@@ -107,12 +108,26 @@ public class BlightedPlayerListeners implements Listener {
       }
       if (dist >= 55) {
         distanceSuffix = " from §c§l" + (int) dist + "§7 blocks away. It's probably the gaming chair";
-        victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 100, 0f);
+        victim.getWorld().playSound(victim.getLocation(), org.bukkit.Sound.ENTITY_ENDER_DRAGON_GROWL, 100, 0f);
+      }
+    }
+
+    String killerName = null;
+    if (killer != null) {
+      BlightedEntity blighted = BlightedEntitiesListener.getBlightedEntity(killer);
+      if (blighted != null) {
+        killerName = blighted.getName();
+      } else {
+        killerName = killer.getName();
       }
     }
 
     String cleanedMessage = vanillaDeathMessage.replaceFirst(" using .*$", "");
-    String rest = cleanedMessage.replaceFirst(Pattern.quote(victim.getName()), "");
-    event.setDeathMessage("§c ☠ §f" + victim.getName() + "§7" + rest + distanceSuffix + "§7.");
+    String rest = cleanedMessage.replaceFirst(java.util.regex.Pattern.quote(victim.getName()), "");
+    if (killerName != null) {
+      event.setDeathMessage("§c ☠ §f" + victim.getName() + "§7 was slain by " + killerName + distanceSuffix + "§7.");
+    } else {
+      event.setDeathMessage("§c ☠ §f" + victim.getName() + "§7" + rest + distanceSuffix + "§7.");
+    }
   }
 }
