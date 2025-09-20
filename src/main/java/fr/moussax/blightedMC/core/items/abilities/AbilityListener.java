@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.items.abilities;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemFactory;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -27,20 +27,20 @@ public class AbilityListener implements Listener {
     // Periodic armor refresh for all online players (every 2 seconds)
     Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(), () -> {
       for (Player player : Bukkit.getOnlinePlayers()) {
-        BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(player);
-        if (bp != null) ArmorManager.updatePlayerArmor(bp);
+        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        if (blightedPlayer != null) ArmorManager.updatePlayerArmor(blightedPlayer);
       }
     }, 0L, 40L);
   }
 
   private void checkArmorChange(Player player) {
-    BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(player);
-    if (bp == null) return;
-    ItemStack[] before = bp.getLastKnownArmor();
+    BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+    if (blightedPlayer == null) return;
+    ItemStack[] before = blightedPlayer.getLastKnownArmor();
     ItemStack[] after = player.getInventory().getArmorContents();
     if (hasArmorChanged(before, after)) {
-      ArmorManager.updatePlayerArmor(bp);
-      bp.setLastKnownArmor(after);
+      ArmorManager.updatePlayerArmor(blightedPlayer);
+      blightedPlayer.setLastKnownArmor(after);
     }
   }
 
@@ -100,10 +100,6 @@ public class AbilityListener implements Listener {
     Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> checkArmorChange(e.getPlayer()), 1L);
   }
 
-  @EventHandler
-  public void onPlayerQuit(PlayerQuitEvent e) {
-    BlightedPlayer.removePlayer(e.getPlayer());
-  }
 
   @EventHandler
   public void onEntityDamage(EntityDamageByEntityEvent e) {
@@ -116,27 +112,27 @@ public class AbilityListener implements Listener {
     new BukkitRunnable() {
       @Override
       public void run() {
-        BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(player);
-        if (bp != null) ArmorManager.updatePlayerArmor(bp);
+        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        if (blightedPlayer != null) ArmorManager.updatePlayerArmor(blightedPlayer);
       }
     }.runTaskLater(BlightedMC.getInstance(), 1);
   }
 
   private <T extends Event> void trigger(Player player, T event) {
-    BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(player);
-    if (bp == null) {
-      bp = new BlightedPlayer(player);
+    BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+    if (blightedPlayer == null) {
+      blightedPlayer = new BlightedPlayer(player);
     }
 
-    ItemManager itemManager = bp.getEquippedItemManager();
-    if (itemManager == null || itemManager.getAbilities().isEmpty()) {
+    ItemFactory itemFactory = blightedPlayer.getEquippedItemManager();
+    if (itemFactory == null || itemFactory.getAbilities().isEmpty()) {
       return;
     }
 
     // Only trigger if the event matches the ability's trigger type
-    for (Ability ability : itemManager.getAbilities()) {
-      if (ability.getType().matches(event)) {
-        itemManager.triggerAbilities(bp, event);
+    for (Ability ability : itemFactory.getAbilities()) {
+      if (ability.type().matches(event)) {
+        itemFactory.triggerAbilities(blightedPlayer, event);
         break;
       }
     }

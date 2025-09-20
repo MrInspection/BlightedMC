@@ -1,12 +1,12 @@
 package fr.moussax.blightedMC.core.items.rules;
 
-import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.items.ItemManager;
-import fr.moussax.blightedMC.core.items.ItemsRegistry;
-import org.bukkit.NamespacedKey;
+import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -14,12 +14,11 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
+import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.ID_KEY;
+
 public class ItemRuleListener implements Listener {
 
-  private static final NamespacedKey ID_KEY =
-      new NamespacedKey(BlightedMC.getInstance(), "id");
-
-  private ItemManager getManager(ItemStack stack) {
+  private ItemFactory getManager(ItemStack stack) {
     if (stack == null || !stack.hasItemMeta()) return null;
 
     var meta = stack.getItemMeta();
@@ -28,12 +27,13 @@ public class ItemRuleListener implements Listener {
     String id = meta.getPersistentDataContainer().get(ID_KEY, PersistentDataType.STRING);
     if (id == null) return null;
 
-    return ItemsRegistry.BLIGHTED_ITEMS.get(id);
+    return ItemsRegistry.REGISTERED_ITEMS.get(id);
   }
 
   @EventHandler(ignoreCancelled = true)
+  @SuppressWarnings("UnstableApiUsage")
   public void onBlockPlace(BlockPlaceEvent event) {
-    ItemManager manager = getManager(event.getItemInHand());
+    ItemFactory manager = getManager(event.getItemInHand());
     if (manager == null) return;
 
     if (!manager.canPlace(event, event.getItemInHand())) {
@@ -44,10 +44,18 @@ public class ItemRuleListener implements Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void onPlayerInteract(PlayerInteractEvent event) {
-    ItemManager manager = getManager(event.getItem());
-    if (manager == null) return;
+    ItemStack mainHand = event.getPlayer().getInventory().getItemInMainHand();
+    ItemStack offHand = event.getPlayer().getInventory().getItemInOffHand();
 
-    if (!manager.canInteract(event, event.getItem())) {
+    ItemFactory mainManager = getManager(mainHand);
+    ItemFactory offManager = getManager(offHand);
+
+    boolean cancel = false;
+
+    if (mainManager != null && !mainManager.canUse(event, mainHand)) cancel = true;
+    if (offManager != null && !offManager.canUse(event, offHand)) cancel = true;
+
+    if (cancel) {
       event.setCancelled(true);
     }
   }
@@ -55,7 +63,7 @@ public class ItemRuleListener implements Listener {
   @EventHandler(ignoreCancelled = true)
   public void onItemDrop(PlayerDropItemEvent event) {
     ItemStack dropped = event.getItemDrop().getItemStack();
-    ItemManager manager = getManager(dropped);
+    ItemFactory manager = getManager(dropped);
     if (manager == null) return;
 
     if (!manager.canUse(event, dropped)) {
@@ -65,7 +73,7 @@ public class ItemRuleListener implements Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void onItemConsume(PlayerItemConsumeEvent event) {
-    ItemManager manager = getManager(event.getItem());
+    ItemFactory manager = getManager(event.getItem());
     if (manager == null) return;
 
     if (!manager.canUse(event, event.getItem())) {
@@ -76,11 +84,35 @@ public class ItemRuleListener implements Listener {
   @EventHandler(ignoreCancelled = true)
   public void onInventoryClick(InventoryClickEvent event) {
     ItemStack current = event.getCurrentItem();
-    ItemManager manager = getManager(current);
+    ItemFactory manager = getManager(current);
     if (manager == null) return;
 
     if (!manager.canUse(event, current)) {
       event.setCancelled(true);
     }
   }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onProjectileLaunch(ProjectileLaunchEvent event) {
+    if (!(event.getEntity().getShooter() instanceof Player player)) return;
+
+    // Check both hands
+    ItemStack mainHand = player.getInventory().getItemInMainHand();
+    ItemStack offHand = player.getInventory().getItemInOffHand();
+
+    ItemFactory manager = getManager(mainHand);
+    if (manager == null) manager = getManager(offHand);
+
+    if (manager == null) return;
+
+    // Apply rule for all items that have PreventProjectileLaunchRule
+    if (!manager.canUse(event, mainHand) || !manager.canUse(event, offHand)) {
+      event.setCancelled(true);
+
+      // Remove cooldown to prevent client desync
+      if (mainHand != null) player.setCooldown(mainHand.getType(), 0);
+      if (offHand != null) player.setCooldown(offHand.getType(), 0);
+    }
+  }
+
 }

@@ -1,9 +1,8 @@
 package fr.moussax.blightedMC.core.players;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemFactory;
 import fr.moussax.blightedMC.core.items.ItemType;
-import fr.moussax.blightedMC.core.items.abilities.Bonuses;
 import fr.moussax.blightedMC.core.items.abilities.CooldownEntry;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.core.players.data.PlayerDataHandler;
@@ -13,175 +12,179 @@ import fr.moussax.blightedMC.core.players.managers.ManaManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
-import java.util.Arrays;
+import java.util.*;
 
 public class BlightedPlayer {
-  private static final HashMap<UUID, BlightedPlayer> players = new HashMap<>();
+  private static final Map<UUID, BlightedPlayer> players = new HashMap<>();
+  private static final double DEFAULT_MAX_MANA = 100.0;
+  private static final double DEFAULT_MANA_REGEN_RATE = 1.0;
+
   private final Player player;
-  private final UUID uuid;
+  private final UUID playerId;
   private final FavorsManager favors;
   private final PlayerDataHandler dataHandler;
   private final ActionBarManager actionBarManager;
-
-  // Full Set Bonus System:
-  public ItemManager helmet;
-  public ItemManager chestplate;
-  public ItemManager leggings;
-  public ItemManager boots;
-  public HashMap<Bonuses, Integer> bonuses = new HashMap<>();
-  public ArrayList<FullSetBonus> activeFullSetBonuses = new ArrayList<>();
-
   private final ManaManager manaManager;
-  private final ArrayList<CooldownEntry> cooldowns = new ArrayList<>();
+
+  private final List<FullSetBonus> activeFullSetBonuses = new ArrayList<>();
+  private final List<CooldownEntry> cooldowns = new ArrayList<>();
+  private final EnumMap<ItemType, ItemFactory> armorPieces = new EnumMap<>(ItemType.class);
+
   private ItemStack[] lastKnownArmor = new ItemStack[4];
+  private final BukkitTask actionBarTask;
 
-  public BlightedPlayer(Player player) {
+  public BlightedPlayer(@Nonnull Player player) {
     this.player = player;
-    this.uuid = player.getUniqueId();
-    this.dataHandler = new PlayerDataHandler(uuid, player.getName());
+    this.playerId = player.getUniqueId();
+    this.dataHandler = new PlayerDataHandler(playerId, player.getName());
 
-    int storedFavors = dataHandler.getPlayerData().getFavors();
     this.favors = new FavorsManager();
-    this.favors.setFavors(storedFavors);
-    this.manaManager = new ManaManager(100.0, 0.5);
-    this.actionBarManager = new ActionBarManager(this);
+    this.favors.setFavors(dataHandler.getPlayerData().getFavors());
 
-    players.put(uuid, this);
+    this.manaManager = new ManaManager(DEFAULT_MAX_MANA, DEFAULT_MANA_REGEN_RATE);
+    this.manaManager.setCurrentMana(dataHandler.getPlayerData().getMana());
+
+    this.actionBarManager = new ActionBarManager(this);
+    players.put(playerId, this);
+
+    this.actionBarTask = Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(),
+      actionBarManager::tick,
+      0L,
+      20L
+    );
 
     initializeFullSetBonuses();
-
-    Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(), actionBarManager::tick, 0L, 20L);
   }
 
-  public static BlightedPlayer getBlightedPlayer(Player player) {
+  public static BlightedPlayer getBlightedPlayer(@Nonnull Player player) {
     return players.get(player.getUniqueId());
   }
 
-  public ArrayList<CooldownEntry> getCooldowns() {
-    return cooldowns;
+  public static void removePlayer(@Nonnull Player player) {
+    BlightedPlayer blightedPlayer = players.remove(player.getUniqueId());
+    if (blightedPlayer != null) {
+      blightedPlayer.cleanup();
+    }
   }
 
-  public void addCooldown(CooldownEntry entry) {
+  private void cleanup() {
+    if (actionBarTask != null) {
+      actionBarTask.cancel();
+    }
+    clearActiveBonuses();
+    clearArmorPieces();
+  }
+
+  public List<CooldownEntry> getCooldowns() {
+    return Collections.unmodifiableList(cooldowns);
+  }
+
+  public void addCooldown(@Nonnull CooldownEntry entry) {
     cooldowns.add(entry);
   }
 
-  public void removeCooldown(CooldownEntry entry) {
+  public void removeCooldown(@Nonnull CooldownEntry entry) {
     cooldowns.remove(entry);
   }
 
   public void initializeFullSetBonuses() {
-    for(FullSetBonus bonus : activeFullSetBonuses) {
-      bonus.stopAbility();
-    }
+    clearActiveBonuses();
 
-    for(FullSetBonus bonus : activeFullSetBonuses) {
-      bonus.startAbility();
+    // Rebuild active bonuses based on equipped armor
+    for (ItemFactory piece : armorPieces.values()) {
+      if (piece == null) continue;
+
+      List<FullSetBonus> bonuses = Collections.singletonList(piece.getFullSetBonus());
+
+      for (FullSetBonus bonus : bonuses) {
+        addActiveBonus(bonus);
+      }
     }
   }
 
   public void clearArmorPieces() {
-    helmet = null;
-    chestplate = null;
-    leggings = null;
-    boots = null;
+    armorPieces.clear();
   }
 
-  public ItemManager getEquippedItemManager() {
+  public ItemFactory getEquippedItemManager() {
     ItemStack mainHandItem = player.getInventory().getItemInMainHand();
-    return ItemManager.fromItemStack(mainHandItem);
+    return ItemFactory.fromItemStack(mainHandItem);
   }
 
-  public ArrayList<FullSetBonus> getActiveFullSetBonuses() {
-    return activeFullSetBonuses;
+  public List<FullSetBonus> getActiveFullSetBonuses() {
+    return Collections.unmodifiableList(activeFullSetBonuses);
   }
 
-  public void addArmorPiece(ItemType type, ItemManager item) {
+  public void addArmorPiece(@Nonnull ItemType type, @Nonnull ItemFactory item) {
     setArmorPiece(type, item);
   }
 
   public void clearActiveBonuses() {
     for (FullSetBonus bonus : activeFullSetBonuses) {
-      bonus.stopAbility();
+      bonus.deactivate();
     }
     activeFullSetBonuses.clear();
   }
 
-  public void addActiveBonus(FullSetBonus bonus) {
+  public void addActiveBonus(@Nonnull FullSetBonus bonus) {
     activeFullSetBonuses.add(bonus);
-    bonus.startAbility();
+    bonus.activate();
   }
 
-  public void removeActiveBonus(FullSetBonus bonus) {
-    activeFullSetBonuses.remove(bonus);
-    bonus.stopAbility();
+  public void removeActiveBonus(@Nonnull FullSetBonus bonus) {
+    if (activeFullSetBonuses.remove(bonus)) {
+      bonus.deactivate();
+    }
   }
 
-  public void removeActiveBonusByClass(Class<? extends FullSetBonus> bonusClass) {
+  public void removeActiveBonusByClass(@Nonnull Class<? extends FullSetBonus> bonusClass) {
     activeFullSetBonuses.removeIf(bonus -> {
-      if (bonus.getClass().equals(bonusClass)) {
-        bonus.stopAbility();
+      if (bonusClass.isInstance(bonus)) {
+        bonus.deactivate();
         return true;
       }
       return false;
     });
   }
 
-  public void setArmorPiece(ItemType type, ItemManager itemManager) {
-    switch(type) {
-      case HELMET:
-        helmet = itemManager;
-        break;
-      case CHESTPLATE:
-        chestplate = itemManager;
-        break;
-      case LEGGINGS:
-        leggings = itemManager;
-        break;
-      case BOOTS:
-        boots = itemManager;
-        break;
-      default:
-        break;
-    }
+  public void setArmorPiece(@Nonnull ItemType type, ItemFactory itemFactory) {
+    armorPieces.put(type, itemFactory);
   }
 
-  public static void removePlayer(Player player) {
-    players.remove(player.getUniqueId());
+  public ItemFactory getArmorPiece(@Nonnull ItemType type) {
+    return armorPieces.get(type);
   }
 
   public Player getPlayer() {
     return player;
   }
 
-  public UUID getUUID() {
-    return uuid;
+  public UUID getPlayerId() {
+    return playerId;
   }
 
   public FavorsManager getFavors() {
     return favors;
   }
 
-  public FavorsManager addFavors(int value) {
+  public void addFavors(int value) {
+    if (value == 0) return;
     favors.addFavors(value);
     actionBarManager.tick();
-    return favors;
   }
 
-  public FavorsManager removeFavors(int value) {
+  public void removeFavors(int value) {
+    if (value == 0) return;
     favors.removeFavors(value);
     actionBarManager.tick();
-    return favors;
   }
 
-  public FavorsManager setFavors(int value) {
+  public void setFavors(int value) {
     favors.setFavors(value);
     actionBarManager.tick();
-    return favors;
   }
 
   public ManaManager getMana() {
@@ -195,15 +198,15 @@ public class BlightedPlayer {
 
   public void saveData() {
     dataHandler.setFavors(favors.getFavors());
+    dataHandler.setMana(manaManager.getCurrentMana());
     dataHandler.save();
   }
 
   public ItemStack[] getLastKnownArmor() {
-    return lastKnownArmor;
+    return Arrays.copyOf(lastKnownArmor, lastKnownArmor.length);
   }
 
-  public void setLastKnownArmor(ItemStack[] armor) {
-    if (armor == null) armor = new ItemStack[4];
+  public void setLastKnownArmor(@Nonnull ItemStack[] armor) {
     this.lastKnownArmor = Arrays.copyOf(armor, 4);
   }
 

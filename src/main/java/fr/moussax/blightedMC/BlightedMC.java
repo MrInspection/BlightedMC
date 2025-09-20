@@ -1,8 +1,9 @@
 package fr.moussax.blightedMC;
 
-import fr.moussax.blightedMC.commands.CommandBuilder;
+import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedMC.core.registry.RegistrySystem;
+import fr.moussax.blightedMC.registry.RegistrySystem;
+import org.bukkit.Chunk;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BlightedMC extends JavaPlugin {
@@ -24,7 +25,7 @@ public final class BlightedMC extends JavaPlugin {
     // by manually firing the chunk scan once on enabling.
     // This complements the runtime ChunkLoadEvent handler.
     getServer().getWorlds().forEach(world -> {
-      for (org.bukkit.Chunk chunk : world.getLoadedChunks()) {
+      for (Chunk chunk : world.getLoadedChunks()) {
         BlightedEntitiesListener.rehydrateChunk(chunk);
       }
     });

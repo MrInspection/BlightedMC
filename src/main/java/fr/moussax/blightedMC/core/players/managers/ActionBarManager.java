@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.players.managers;
 
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.utils.formatting.Formatter;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
@@ -70,7 +70,7 @@ public class ActionBarManager implements Runnable {
 
   private String getFavorsComponent() {
     int favors = player.getFavors().getFavors();
-    return "§6" + favors + "✵ Favors";
+    return "§d" + favors + "✵ Favors";
   }
 
   private String getManaComponent() {

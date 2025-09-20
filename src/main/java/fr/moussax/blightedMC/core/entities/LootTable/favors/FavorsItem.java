@@ -2,11 +2,11 @@ package fr.moussax.blightedMC.core.entities.LootTable.favors;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemGenerator;
-import fr.moussax.blightedMC.core.items.ItemManager;
-import fr.moussax.blightedMC.core.items.ItemsRegistry;
+import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
-import fr.moussax.blightedMC.utils.MessageUtils;
+import fr.moussax.blightedMC.utils.formatting.MessageUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -47,7 +47,7 @@ public class FavorsItem implements ItemGenerator {
       }
       
       favorsItem.addFavors(bPlayer);
-      event.getPlayer().sendMessage("§8 ■ §7You received §6" + favorsItem.amount + "✵ Favors §7from a §5Blighted Gemstone.");
+      event.getPlayer().sendMessage("§8 ■ §7You received §d" + favorsItem.amount + "✵ Favors §7from a §5Blighted Gemstone.");
       event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 100f, 0f);
       event.getPlayer().getInventory().remove(event.getItem());
       event.setCancelled(true);
@@ -80,8 +80,8 @@ public class FavorsItem implements ItemGenerator {
 
   @Override
   public ItemStack createItemStack() {
-    ItemManager item = ItemsRegistry.BLIGHTED_ITEMS.get("BLIGHTED_GEMSTONE");
-    item.setLore("§7Favors trapped: §6" + amount + "✵", 6);
+    ItemFactory item = ItemsRegistry.REGISTERED_ITEMS.get("BLIGHTED_GEMSTONE");
+    item.setLore("§7Favors trapped: §d" + amount + "✵", 6);
     ItemStack itemStack = item.toItemStack();
     
     ItemMeta meta = itemStack.getItemMeta();

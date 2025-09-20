@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.items.blocks;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemFactory;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -28,11 +28,11 @@ import java.util.Objects;
 public abstract class BlightedBlock {
 
   protected final Material material;
-  protected final ItemManager itemManager;
+  protected final ItemFactory itemFactory;
 
-  public BlightedBlock(@Nonnull Material material, ItemManager itemManager) {
+  public BlightedBlock(@Nonnull Material material, ItemFactory itemFactory) {
     this.material = material;
-    this.itemManager = itemManager;
+    this.itemFactory = itemFactory;
     BlocksRegistry.addBlock(this);
   }
 
@@ -153,7 +153,7 @@ public abstract class BlightedBlock {
       Bukkit.getScheduler().runTask(plugin, () -> {
         if (!loc.getBlock().getType().isAir()) return; // Block wasn't destroyed → skip
 
-        ItemStack drop = customBlock.onBreak(event, customBlock.itemManager.toItemStack());
+        ItemStack drop = customBlock.onBreak(event, customBlock.itemFactory.toItemStack());
         if (drop != null) {
           Objects.requireNonNull(loc.getWorld()).dropItemNaturally(loc, drop);
         }

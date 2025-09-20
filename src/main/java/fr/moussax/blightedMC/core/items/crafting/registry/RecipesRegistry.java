@@ -1,11 +1,11 @@
 package fr.moussax.blightedMC.core.items.crafting.registry;
 
-import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemFactory;
 import fr.moussax.blightedMC.core.items.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.core.items.crafting.BlightedShapedRecipe;
 import fr.moussax.blightedMC.core.items.crafting.BlightedShapelessRecipe;
 import fr.moussax.blightedMC.core.items.crafting.CraftingObject;
-import fr.moussax.blightedMC.core.registry.recipes.MaterialRecipes;
+import fr.moussax.blightedMC.registry.recipes.MaterialRecipes;
 
 import java.util.List;
 
@@ -39,11 +39,11 @@ public final class RecipesRegistry {
    * <p>
    * A shaped recipe requires a specific pattern of ingredients.
    *
-   * @param result  the resulting {@link ItemManager} item
+   * @param result  the resulting {@link ItemFactory} item
    * @param amount  the quantity of items to produce
    * @param pattern the list of {@link CraftingObject} representing the crafting grid pattern
    */
-  public static void addShapedRecipe(ItemManager result, int amount, List<CraftingObject> pattern) {
+  public static void addShapedRecipe(ItemFactory result, int amount, List<CraftingObject> pattern) {
     BlightedShapedRecipe shaped = new BlightedShapedRecipe(result, amount);
     shaped.setRecipe(pattern);
     add(shaped);
@@ -54,10 +54,10 @@ public final class RecipesRegistry {
    * <p>
    * A shapeless recipe allows the ingredients to be placed in any order.
    *
-   * @param result      the resulting {@link ItemManager} item
+   * @param result      the resulting {@link ItemFactory} item
    * @param ingredients the list of {@link CraftingObject} ingredients
    */
-  public static void addShapelessRecipe(ItemManager result, List<CraftingObject> ingredients) {
+  public static void addShapelessRecipe(ItemFactory result, List<CraftingObject> ingredients) {
     BlightedShapelessRecipe shapeless = new BlightedShapelessRecipe(result);
     for (CraftingObject ingredient : ingredients) {
       shapeless.addIngredient(ingredient);

@@ -1,8 +1,8 @@
 package fr.moussax.blightedMC.core.entities.spawning;
 
-import fr.moussax.blightedMC.core.registry.entities.spawnable.Boulder;
-import fr.moussax.blightedMC.core.registry.entities.spawnable.LaserEngineer;
-import fr.moussax.blightedMC.core.registry.entities.spawnable.blighted.BlightedZombie;
+import fr.moussax.blightedMC.registry.entities.spawnable.Boulder;
+import fr.moussax.blightedMC.registry.entities.spawnable.LaserEngineer;
+import fr.moussax.blightedMC.registry.entities.spawnable.blighted.BlightedZombie;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +38,5 @@ public final class SpawnableEntitiesRegistry {
 
     addEntity(new BlightedZombie());
     addEntity(new LaserEngineer());
-    addEntity(new Boulder());
   }
 }

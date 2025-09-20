@@ -5,8 +5,9 @@ import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntityAttachment;
 import fr.moussax.blightedMC.core.entities.EntitiesRegistry;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,6 +31,11 @@ public class BlightedEntitiesListener implements Listener {
   public static void registerEntity(LivingEntity entity, BlightedEntity blighted) {
     if (entity == null || blighted == null) return;
     BLIGHTED_ENTITIES.put(entity.getUniqueId(), blighted);
+  }
+
+  public static BlightedEntity getBlightedEntity(Entity entity) {
+    if (entity == null) return null;
+    return BLIGHTED_ENTITIES.get(entity.getUniqueId());
   }
 
   private double getRandomOffset() {
@@ -121,7 +127,8 @@ public class BlightedEntitiesListener implements Listener {
 
     if (blighted != null) {
       blighted.updateNameTag();
-      double newHealth = entity.getHealth() + event.getAmount();
+      double maxHealth = Objects.requireNonNull(entity.getAttribute(Attribute.MAX_HEALTH)).getValue();
+      double newHealth = Math.min(entity.getHealth() + event.getAmount(), maxHealth);
       for (EntityAttachment att : new ArrayList<>(blighted.attachments)) {
         if (att.entity() instanceof LivingEntity living && !living.isDead()) {
           living.setHealth(newHealth);
@@ -131,7 +138,8 @@ public class BlightedEntitiesListener implements Listener {
     } else if (attachment != null) {
       LivingEntity ownerEntity = attachment.owner().getEntity();
       if (ownerEntity != null && !ownerEntity.isDead()) {
-        double newHealth = entity.getHealth() + event.getAmount();
+        double maxHealth = Objects.requireNonNull(entity.getAttribute(Attribute.MAX_HEALTH)).getValue();
+        double newHealth = Math.min(entity.getHealth() + event.getAmount(), maxHealth);
         ownerEntity.setHealth(newHealth);
         entity.setHealth(newHealth);
         syncArmor((LivingEntity) attachment.entity(), ownerEntity);

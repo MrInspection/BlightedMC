@@ -99,12 +99,7 @@ public enum AbilityType {
         return true;
 
       // Sneak + click combinations
-      if (this.isSneak() && isSneaking
-        && ((this.isRightClick() && (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK))
-        || (this.isLeftClick() && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK))))
-        return true;
-
-      return false;
+      return this.isSneak() && toActions().contains(action);
     }
 
     if (event instanceof EntityDamageByEntityEvent) {

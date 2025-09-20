@@ -30,6 +30,10 @@ import java.util.*;
 import java.util.function.Supplier;
 
 public abstract class BlightedEntity implements Cloneable {
+  private static final String ENTITY_ID_KEY = "entityId";
+  private static final Map<Entity, EntityAttachment> ENTITY_ATTACHMENTS =
+    Collections.synchronizedMap(new WeakHashMap<>());
+
   protected String entityId;
   protected String name;
   protected EntityType entityType;
@@ -37,7 +41,6 @@ public abstract class BlightedEntity implements Cloneable {
 
   protected int maxHealth;
   protected int damage;
-  protected int trueDamage = 0;
   protected int defense;
   protected int droppedExp = 0;
   protected Map<Attribute, Double> attributes = new HashMap<>();
@@ -53,9 +56,6 @@ public abstract class BlightedEntity implements Cloneable {
   protected BarColor bossBarColor = BarColor.PURPLE;
   protected BarStyle bossBarStyle = BarStyle.SOLID;
 
-  private static final Map<Entity, EntityAttachment> ENTITY_ATTACHMENTS =
-    Collections.synchronizedMap(new WeakHashMap<>());
-
   public final Set<EntityAttachment> attachments = new HashSet<>();
 
   private List<EntityImmunityRule> immunityRules = new ArrayList<>();
@@ -63,16 +63,11 @@ public abstract class BlightedEntity implements Cloneable {
   private boolean runtimeInitialized = false;
 
   public BlightedEntity(String name, int maxHealth, EntityType entityType) {
-    this.name = name;
-    this.maxHealth = maxHealth;
-    this.entityType = entityType;
+    this(name, maxHealth, 1, 0, entityType);
   }
 
   public BlightedEntity(String name, int maxHealth, int damage, EntityType entityType) {
-    this.name = name;
-    this.damage = damage;
-    this.maxHealth = maxHealth;
-    this.entityType = entityType;
+    this(name, maxHealth, damage, 0, entityType);
   }
 
   public BlightedEntity(String name, int maxHealth, int damage, int defense, EntityType entityType) {
@@ -88,11 +83,7 @@ public abstract class BlightedEntity implements Cloneable {
     entity = (LivingEntity) Objects.requireNonNull(location.getWorld()).spawnEntity(location, entityType);
 
     PersistentDataContainer data = entity.getPersistentDataContainer();
-    data.set(
-      new NamespacedKey(BlightedMC.getPlugin(BlightedMC.class), "entityId"),
-      PersistentDataType.STRING,
-      getEntityId()
-    );
+    data.set(new NamespacedKey(BlightedMC.getInstance(), ENTITY_ID_KEY), PersistentDataType.STRING, getEntityId());
 
     setAttribute(Attribute.MAX_HEALTH, maxHealth);
     setAttribute(Attribute.ATTACK_DAMAGE, damage);
@@ -100,6 +91,7 @@ public abstract class BlightedEntity implements Cloneable {
     applyAttributes();
 
     entity.setHealth(maxHealth);
+    entity.setPersistent(true);
 
     applyEquipment();
     updateNameTag();
@@ -121,14 +113,11 @@ public abstract class BlightedEntity implements Cloneable {
   public void attachToExisting(LivingEntity existing) {
     this.entity = existing;
     initImmunityRules();
-
     updateNameTag();
     if (nameTagType == EntityNameTag.BOSS) {
       createBossBar();
     }
-
     BlightedEntitiesListener.registerEntity(existing, this);
-
     initRuntime();
   }
 
@@ -139,7 +128,7 @@ public abstract class BlightedEntity implements Cloneable {
   }
 
   public void kill() {
-    if (entity == null || entity.isDead()) return;
+    if (isNotAlive()) return;
     removeBossBar();
     removeAttachment();
     lifecycleTasks.cancelAll();
@@ -147,7 +136,7 @@ public abstract class BlightedEntity implements Cloneable {
   }
 
   public void damage(double amount) {
-    if (entity == null || entity.isDead()) return;
+    if (isNotAlive()) return;
     entity.damage(amount);
     updateNameTag();
   }
@@ -207,14 +196,14 @@ public abstract class BlightedEntity implements Cloneable {
   }
 
   public void updateNameTag() {
-    if (entity != null) entity.setCustomName(generateNameTag());
+    if (entity != null) entity.setCustomName(createNameTag());
     if (bossBar != null && nameTagType == EntityNameTag.BOSS) {
       bossBar.setTitle(getBossBarTitle());
       bossBar.setProgress(Math.max(0, Math.min(1, entity.getHealth() / (double) maxHealth)));
     }
   }
 
-  protected String generateNameTag() {
+  protected String createNameTag() {
     if (entity == null) return name;
     return nameTagType.format(name, entity.getHealth(), maxHealth);
   }
@@ -294,29 +283,27 @@ public abstract class BlightedEntity implements Cloneable {
 
   public static void unregisterAttachment(EntityAttachment attachment) {
     if (attachment == null) return;
-    try {
-      ENTITY_ATTACHMENTS.remove(attachment.entity());
-    } catch (Throwable ignored) {
-    }
-    try {
-      if (attachment.owner() != null) attachment.owner().attachments.remove(attachment);
-    } catch (Throwable ignored) {
-    }
+    ENTITY_ATTACHMENTS.remove(attachment.entity());
+    if (attachment.owner() != null) attachment.owner().attachments.remove(attachment);
   }
 
   private void removeAttachment() {
-    List<EntityAttachment> copy = new ArrayList<>(attachments);
-    for (EntityAttachment attachment : copy) {
-      try {
-        Entity entity = attachment.entity();
-        if (entity != null && !entity.isDead()) entity.remove();
-      } catch (Throwable ignored) {
-      }
-      try {
-        ENTITY_ATTACHMENTS.remove(attachment.entity());
-      } catch (Throwable ignored) {
-      }
+    for (EntityAttachment attachment : new ArrayList<>(attachments)) {
+      Entity entity = attachment.entity();
+      if (entity != null && !entity.isDead()) entity.remove();
+      ENTITY_ATTACHMENTS.remove(attachment.entity());
       attachments.remove(attachment);
+    }
+    attachments.clear();
+  }
+
+  public void killAllAttachments() {
+    for (EntityAttachment attachment : new ArrayList<>(attachments)) {
+      Entity entity = attachment.entity();
+      if (entity instanceof LivingEntity living && !living.isDead()) {
+        living.setHealth(0);
+      }
+      ENTITY_ATTACHMENTS.remove(entity);
     }
     attachments.clear();
   }
@@ -329,18 +316,8 @@ public abstract class BlightedEntity implements Cloneable {
     return ENTITY_ATTACHMENTS.containsKey(entity);
   }
 
-  public void killAllAttachments() {
-    for (EntityAttachment attachment : new ArrayList<>(attachments)) {
-      Entity entity = attachment.entity();
-      if (entity instanceof LivingEntity living && !living.isDead()) {
-        try {
-          living.setHealth(0);
-        } catch (Throwable ignored) {
-        }
-      }
-      ENTITY_ATTACHMENTS.remove(entity);
-    }
-    attachments.clear();
+  protected boolean isNotAlive() {
+    return entity == null || entity.isDead();
   }
 
   public LivingEntity getEntity() {
@@ -369,10 +346,6 @@ public abstract class BlightedEntity implements Cloneable {
 
   public void setDroppedExp(int droppedExp) {
     this.droppedExp = droppedExp;
-  }
-
-  public int getTrueDamage() {
-    return trueDamage;
   }
 
   public void setDamage(int damage) {
@@ -404,8 +377,8 @@ public abstract class BlightedEntity implements Cloneable {
 
       if (this.armor != null) {
         clone.armor = new ItemStack[this.armor.length];
-        for (int i = 0; i < this.armor.length; i++) {
-          clone.armor[i] = this.armor[i] != null ? this.armor[i].clone() : null;
+        for (int armorPiece = 0; armorPiece < this.armor.length; armorPiece++) {
+          clone.armor[armorPiece] = this.armor[armorPiece] != null ? this.armor[armorPiece].clone() : null;
         }
       } else {
         clone.armor = null;

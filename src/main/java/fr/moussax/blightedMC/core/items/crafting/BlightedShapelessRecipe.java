@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.items.crafting;
 
-import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemFactory;
 
 import java.util.*;
 
@@ -14,24 +14,24 @@ import java.util.*;
 public final class BlightedShapelessRecipe extends BlightedRecipe {
   private final List<CraftingObject> ingredientList = new ArrayList<>();
   private final Map<String, Integer> ingredientCountMap = new HashMap<>();
-  private final ItemManager resultItem;
+  private final ItemFactory resultItem;
 
   /**
    * Creates a new shapeless recipe with the given result item.
    *
    * @param resultItem the item produced by this recipe
    */
-  public BlightedShapelessRecipe(ItemManager resultItem) {
+  public BlightedShapelessRecipe(ItemFactory resultItem) {
     this.resultItem = resultItem;
   }
 
   /**
    * Returns the result of this recipe.
    *
-   * @return the {@link ItemManager} produced by the recipe
+   * @return the {@link ItemFactory} produced by the recipe
    */
   @Override
-  public ItemManager getResult() {
+  public ItemFactory getResult() {
     return resultItem;
   }
 
