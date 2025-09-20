@@ -5,7 +5,6 @@ import fr.moussax.blightedMC.core.entities.LootTable.LootDropRarity;
 import fr.moussax.blightedMC.core.entities.LootTable.LootTable;
 import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntity;
 import fr.moussax.blightedMC.core.entities.spawning.condition.BiomeCondition;
-import fr.moussax.blightedMC.core.entities.spawning.condition.ChanceCondition;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
@@ -250,6 +249,5 @@ public class LaserEngineer extends SpawnableEntity {
       Biome.DARK_FOREST,
       Biome.FLOWER_FOREST
     )));
-    addSpawnCondition(new ChanceCondition(0.2));
   }
 }

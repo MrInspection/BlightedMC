@@ -38,6 +38,5 @@ public final class SpawnableEntitiesRegistry {
 
     addEntity(new BlightedZombie());
     addEntity(new LaserEngineer());
-    addEntity(new Boulder());
   }
 }

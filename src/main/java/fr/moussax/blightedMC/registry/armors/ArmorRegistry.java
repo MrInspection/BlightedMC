@@ -13,7 +13,7 @@ import java.util.List;
 public class ArmorRegistry implements ItemCategory {
   @Override
   public void registerItems() {
-    ItemManager rocketBoots = new ItemManager("ROCKET_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS, "Rocket Boots");
+    ItemFactory rocketBoots = new ItemFactory("ROCKET_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS, "Rocket Boots");
     rocketBoots.setLeatherColor("#B02E26").setArmorTrim(TrimMaterial.QUARTZ, TrimPattern.BOLT);
     rocketBoots.addItemFlag(List.of(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ARMOR_TRIM));
     rocketBoots.addLore(
@@ -25,7 +25,6 @@ public class ArmorRegistry implements ItemCategory {
       ItemRarity.UNCOMMON.getName() + " BOOTS"
     );
     rocketBoots.setFullSetBonus(new RocketBootsAbility());
-
-    ItemsRegistry.addItem(rocketBoots);
+    rocketBoots.addToRegistry();
   }
 }

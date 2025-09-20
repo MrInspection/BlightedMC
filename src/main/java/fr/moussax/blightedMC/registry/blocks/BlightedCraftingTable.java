@@ -13,7 +13,7 @@ public class BlightedCraftingTable extends BlightedBlock {
   public static BlightedCraftingTable INSTANCE;
 
   public BlightedCraftingTable() {
-    super(Material.FLETCHING_TABLE, ItemsRegistry.BLIGHTED_ITEMS.get("BLIGHTED_CRAFTING_TABLE"));
+    super(Material.FLETCHING_TABLE, ItemsRegistry.REGISTERED_ITEMS.get("BLIGHTED_CRAFTING_TABLE"));
     INSTANCE = this;
   }
 

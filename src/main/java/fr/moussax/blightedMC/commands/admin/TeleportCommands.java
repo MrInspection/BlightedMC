@@ -17,7 +17,6 @@ import static fr.moussax.blightedMC.utils.formatting.MessageUtils.*;
 public class TeleportCommands implements CommandExecutor {
   @Override
   public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
-
     if(label.equalsIgnoreCase("tp") && sender instanceof Player player) {
       enforceAdminPermission(player);
 

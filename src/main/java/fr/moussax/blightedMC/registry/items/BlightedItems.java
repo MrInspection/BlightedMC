@@ -16,7 +16,7 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 public class BlightedItems implements ItemCategory {
   @Override
   public void registerItems() {
-    ItemManager glimmeringEye = new ItemManager(
+    ItemFactory glimmeringEye = new ItemFactory(
       "GLIMMERING_EYE",
       ItemType.UNCATEGORIZED,
       ItemRarity.RARE,
@@ -37,10 +37,9 @@ public class BlightedItems implements ItemCategory {
     glimmeringEye.addAbility(new Ability(new InstantTransmissionAbility(), "Instant Transmission", AbilityType.RIGHT_CLICK));
     glimmeringEye.addRule(new PreventInteractionRule());
     glimmeringEye.addRule(new PreventProjectileLaunchRule());
+    glimmeringEye.addToRegistry();
 
-    ItemsRegistry.addItem(glimmeringEye);
-
-    ItemManager ancientKnightSword = new ItemManager("ANCIENT_KNIGHT_SWORD", ItemType.LONGSWORD, ItemRarity.LEGENDARY, Material.NETHERITE_SWORD, "Ancient Knight's Sword");
+    ItemFactory ancientKnightSword = new ItemFactory("ANCIENT_KNIGHT_SWORD", ItemType.LONGSWORD, ItemRarity.LEGENDARY, Material.NETHERITE_SWORD, "Ancient Knight's Sword");
     ancientKnightSword.addLore(
       "",
       "§5 Ability: Ancient Knight's Slam  §d§lRIGHT CLICK ",
@@ -52,7 +51,9 @@ public class BlightedItems implements ItemCategory {
       ItemRarity.LEGENDARY.getName() + " LONGSWORD"
     );
 
-    ancientKnightSword.addAbility(new Ability(new KnightsSlamAbility(), "Knight's Slam", AbilityType.RIGHT_CLICK));
-    ItemsRegistry.addItem(ancientKnightSword);
+    ancientKnightSword.addAbility(new Ability(new KnightsSlamAbility(), "Ancient Knight's Slam", AbilityType.RIGHT_CLICK));
+    ancientKnightSword.addAttributeModifier(Attribute.ATTACK_DAMAGE, 10, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
+    ancientKnightSword.addAttributeModifier(Attribute.ATTACK_SPEED, 1.2, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
+    ancientKnightSword.addToRegistry();
   }
 }

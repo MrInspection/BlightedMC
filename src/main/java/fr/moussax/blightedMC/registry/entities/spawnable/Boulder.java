@@ -1,8 +1,10 @@
 package fr.moussax.blightedMC.registry.entities.spawnable;
 
 import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntity;
+import fr.moussax.blightedMC.core.entities.spawning.condition.*;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
+import org.bukkit.block.Biome;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -11,8 +13,10 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
+// FIXME : When player leave range zone while mob doing ability, ice blocks are not removed
 public class Boulder extends SpawnableEntity {
   private BukkitRunnable yeetAbilityTask;
 
@@ -251,6 +255,14 @@ public class Boulder extends SpawnableEntity {
 
   @Override
   protected void setupSpawnConditions() {
-    // no specific conditions
+    addSpawnCondition(new BiomeCondition(Set.of(
+      Biome.FOREST,
+      Biome.BIRCH_FOREST,
+      Biome.DARK_FOREST,
+      Biome.FLOWER_FOREST
+    )));
+    addSpawnCondition(new TimeCondition(true));
+    addSpawnCondition(new WeatherCondition(WeatherCondition.WeatherType.CLEAR));
+    addSpawnCondition(new YLevelCondition(50, 80));
   }
 }

@@ -6,14 +6,12 @@ import fr.moussax.blightedMC.core.entities.LootTable.LootTable;
 import fr.moussax.blightedMC.core.entities.LootTable.LootDropRarity;
 import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntity;
 import fr.moussax.blightedMC.core.entities.spawning.condition.BiomeCondition;
-import fr.moussax.blightedMC.core.entities.spawning.condition.ChanceCondition;
 import fr.moussax.blightedMC.core.entities.spawning.condition.TimeCondition;
 import fr.moussax.blightedMC.core.entities.spawning.condition.WeatherCondition;
 import fr.moussax.blightedMC.core.entities.spawning.condition.YLevelCondition;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -33,7 +31,7 @@ public class BlightedZombie extends SpawnableEntity {
   private boolean hasSpeedBoost = false;
 
   public BlightedZombie() {
-    super("BLIGHTED_ZOMBIE", "Zombie", 30, EntityType.ZOMBIE, 0.15);
+    super("BLIGHTED_ZOMBIE", "Zombie", 30, EntityType.ZOMBIE, 0.05);
     setNameTagType(EntityNameTag.BLIGHTED);
     setDamage(15);
     setDroppedExp(10);
@@ -98,7 +96,6 @@ public class BlightedZombie extends SpawnableEntity {
     if (hasSpeedBoost || entity == null) return;
 
     hasSpeedBoost = true;
-    entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 90f, 1f);
     equipSpeedArmor();
     entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 10, 2));
 
@@ -181,6 +178,5 @@ public class BlightedZombie extends SpawnableEntity {
     addSpawnCondition(new TimeCondition(true));
     addSpawnCondition(new WeatherCondition(WeatherCondition.WeatherType.CLEAR));
     addSpawnCondition(new YLevelCondition(50, 80));
-    addSpawnCondition(new ChanceCondition(0.5));
   }
 }

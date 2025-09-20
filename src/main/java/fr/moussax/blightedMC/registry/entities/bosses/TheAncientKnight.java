@@ -156,8 +156,9 @@ public class TheAncientKnight extends BlightedEntity {
         g.setAI(false);
         g.setCustomName("Dinnerbone");
         g.setCustomNameVisible(false);
-        g.addScoreboardTag("npc");
         g.setInvisible(true);
+        g.setInvulnerable(true);
+        g.setSilent(true);
         Objects.requireNonNull(g.getEquipment())
           .setItemInMainHand(new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack());
         g.setGravity(false);

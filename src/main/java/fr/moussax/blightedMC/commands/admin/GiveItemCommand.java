@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.commands.admin;
 
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
-import fr.moussax.blightedMC.core.items.ItemManager;
+import fr.moussax.blightedMC.core.items.ItemFactory;
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistryMenu;
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.menus.MenuManager;
@@ -27,7 +27,7 @@ public class GiveItemCommand implements CommandExecutor {
     }
 
     String itemId = args[0].toUpperCase();
-    ItemManager item = ItemsRegistry.BLIGHTED_ITEMS.get(itemId);
+    ItemFactory item = ItemsRegistry.REGISTERED_ITEMS.get(itemId);
     if (item == null) {
       MessageUtils.warnSender(player, "Unable to find item matching the ID: §4" + itemId +"§c.");
       return false;

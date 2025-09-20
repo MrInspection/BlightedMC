@@ -14,7 +14,7 @@ public class SpecialArmorRegistry implements ItemCategory {
   public void registerItems() {
     FullSetBonus homodeusFlightBonus = new HomodeusFlightAbility();
 
-    ItemManager homodeusHelmet = new ItemManager(
+    ItemFactory homodeusHelmet = new ItemFactory(
       "HOMODEUS_HELMET", ItemType.HELMET, ItemRarity.LEGENDARY, Material.LEATHER_HELMET, "Homodeus Helmet"
     );
     homodeusHelmet.addEnchantmentGlint();
@@ -33,7 +33,7 @@ public class SpecialArmorRegistry implements ItemCategory {
     homodeusHelmet.setFullSetBonus(homodeusFlightBonus);
     ItemsRegistry.addItem(homodeusHelmet);
 
-    ItemManager homodeusChestplate = new ItemManager(
+    ItemFactory homodeusChestplate = new ItemFactory(
       "HOMODEUS_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.LEGENDARY, Material.LEATHER_CHESTPLATE, "Homodeus Chestplate"
     );
     homodeusChestplate.addEnchantmentGlint();
@@ -52,7 +52,7 @@ public class SpecialArmorRegistry implements ItemCategory {
     homodeusChestplate.setFullSetBonus(homodeusFlightBonus);
     ItemsRegistry.addItem(homodeusChestplate);
 
-    ItemManager homodeusLeggings = new ItemManager(
+    ItemFactory homodeusLeggings = new ItemFactory(
       "HOMODEUS_LEGGINGS", ItemType.LEGGINGS, ItemRarity.LEGENDARY, Material.LEATHER_LEGGINGS, "Homodeus Leggings"
     );
     homodeusLeggings.addEnchantmentGlint();
@@ -71,7 +71,7 @@ public class SpecialArmorRegistry implements ItemCategory {
     homodeusLeggings.setFullSetBonus(homodeusFlightBonus);
     ItemsRegistry.addItem(homodeusLeggings);
 
-    ItemManager homodeusBoots = new ItemManager(
+    ItemFactory homodeusBoots = new ItemFactory(
       "HOMODEUS_BOOTS", ItemType.BOOTS, ItemRarity.LEGENDARY, Material.LEATHER_BOOTS, "Homodeus Boots"
     );
     homodeusBoots.addEnchantmentGlint();

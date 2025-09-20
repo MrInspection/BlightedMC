@@ -66,7 +66,7 @@ public class KnightsSlamAbility implements AbilityManager<PlayerInteractEvent> {
       }
 
       if (enemies > 0) {
-        player.getPlayer().sendMessage("§5 ■ §dYour §cKnight's Slam §dability hit §c" + enemies + "§d enem" + (enemies > 1 ? "ies" : "y") + " for §c" + abilityDamage + " §ddamage!");
+        player.getPlayer().sendMessage("§5 ■ §dYour §5Knight's Slam §dability hit §c" + enemies + "§d enem" + (enemies > 1 ? "ies" : "y") + " for §c" + abilityDamage + " §ddamage!");
       }
 
       this.runTaskLater(BlightedMC.getInstance(), 100);
@@ -79,14 +79,14 @@ public class KnightsSlamAbility implements AbilityManager<PlayerInteractEvent> {
       targetLocation.subtract(2, 1, 4);
       Objects.requireNonNull(world).spawnParticle(Particle.EXPLOSION_EMITTER, targetLocation, 1);
       world.playSound(targetLocation, Sound.BLOCK_ANVIL_LAND, 1f, 0f);
-      world.playSound(targetLocation, Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1f, 0.5f);
 
       giant = player.getPlayer().getWorld().spawn(targetLocation, Giant.class, g -> {
         g.setAI(false);
         g.setCustomName("Dinnerbone");
         g.setCustomNameVisible(false);
-        g.addScoreboardTag("npc");
         g.setInvisible(true);
+        g.setInvulnerable(true);
+        g.setSilent(true);
         Objects.requireNonNull(g.getEquipment()).setItemInMainHand(new ItemStack(Material.NETHERITE_SWORD));
         g.setGravity(false);
       });

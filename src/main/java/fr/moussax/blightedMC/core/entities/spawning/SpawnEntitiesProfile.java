@@ -10,6 +10,7 @@ import java.util.List;
 public class SpawnEntitiesProfile implements Cloneable {
   private final List<SpawnCondition> conditions = new ArrayList<>();
 
+  @SuppressWarnings("UnusedReturnValue")
   public SpawnEntitiesProfile addCondition(SpawnCondition condition) {
     conditions.add(condition);
     return this;
