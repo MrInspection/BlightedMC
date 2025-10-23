@@ -1,7 +1,6 @@
 package fr.moussax.blightedMC.registry.armors;
 
 import fr.moussax.blightedMC.core.items.*;
-import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.registry.abilities.RocketBootsAbility;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
@@ -13,7 +12,7 @@ import java.util.List;
 public class ArmorRegistry implements ItemCategory {
   @Override
   public void registerItems() {
-    ItemFactory rocketBoots = new ItemFactory("ROCKET_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS, "Rocket Boots");
+    ItemTemplate rocketBoots = new ItemTemplate("ROCKET_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS, "Rocket Boots");
     rocketBoots.setLeatherColor("#B02E26").setArmorTrim(TrimMaterial.QUARTZ, TrimPattern.BOLT);
     rocketBoots.addItemFlag(List.of(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ARMOR_TRIM));
     rocketBoots.addLore(

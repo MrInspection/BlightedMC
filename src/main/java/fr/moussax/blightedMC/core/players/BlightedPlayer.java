@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.players;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.items.ItemType;
 import fr.moussax.blightedMC.core.items.abilities.CooldownEntry;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
@@ -31,7 +31,7 @@ public class BlightedPlayer {
 
   private final List<FullSetBonus> activeFullSetBonuses = new ArrayList<>();
   private final List<CooldownEntry> cooldowns = new ArrayList<>();
-  private final EnumMap<ItemType, ItemFactory> armorPieces = new EnumMap<>(ItemType.class);
+  private final EnumMap<ItemType, ItemTemplate> armorPieces = new EnumMap<>(ItemType.class);
 
   private ItemStack[] lastKnownArmor = new ItemStack[4];
   private final BukkitTask actionBarTask;
@@ -94,7 +94,7 @@ public class BlightedPlayer {
     clearActiveBonuses();
 
     // Rebuild active bonuses based on equipped armor
-    for (ItemFactory piece : armorPieces.values()) {
+    for (ItemTemplate piece : armorPieces.values()) {
       if (piece == null) continue;
 
       List<FullSetBonus> bonuses = Collections.singletonList(piece.getFullSetBonus());
@@ -109,17 +109,17 @@ public class BlightedPlayer {
     armorPieces.clear();
   }
 
-  public ItemFactory getEquippedItemManager() {
+  public ItemTemplate getEquippedItemManager() {
     ItemStack mainHandItem = player.getInventory().getItemInMainHand();
-    return ItemFactory.fromItemStack(mainHandItem);
+    return ItemTemplate.fromItemStack(mainHandItem);
   }
 
   public List<FullSetBonus> getActiveFullSetBonuses() {
     return Collections.unmodifiableList(activeFullSetBonuses);
   }
 
-  public void addArmorPiece(@Nonnull ItemType type, @Nonnull ItemFactory item) {
-    setArmorPiece(type, item);
+  public void addArmorPiece(@Nonnull ItemType type, @Nonnull ItemTemplate itemTemplate) {
+    setArmorPiece(type, itemTemplate);
   }
 
   public void clearActiveBonuses() {
@@ -150,11 +150,11 @@ public class BlightedPlayer {
     });
   }
 
-  public void setArmorPiece(@Nonnull ItemType type, ItemFactory itemFactory) {
-    armorPieces.put(type, itemFactory);
+  public void setArmorPiece(@Nonnull ItemType type, ItemTemplate itemTemplate) {
+    armorPieces.put(type, itemTemplate);
   }
 
-  public ItemFactory getArmorPiece(@Nonnull ItemType type) {
+  public ItemTemplate getArmorPiece(@Nonnull ItemType type) {
     return armorPieces.get(type);
   }
 

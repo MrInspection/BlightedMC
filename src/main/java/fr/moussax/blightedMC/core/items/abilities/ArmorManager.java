@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.items.abilities;
 
-import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -11,15 +11,15 @@ public final class ArmorManager {
   private ArmorManager() {}
 
   public static void updatePlayerArmor(BlightedPlayer player) {
-    List<ItemFactory> equipped = getEquippedArmor(player.getPlayer());
+    List<ItemTemplate> equipped = getEquippedArmor(player.getPlayer());
 
     player.clearArmorPieces();
     Map<Class<? extends FullSetBonus>, Integer> bonusCount = new HashMap<>();
 
-    for (ItemFactory item : equipped) {
-      if (item == null) continue;
-      player.setArmorPiece(item.getItemType(), item);
-      FullSetBonus bonus = item.getFullSetBonus();
+    for (ItemTemplate itemTemplate : equipped) {
+      if (itemTemplate == null) continue;
+      player.setArmorPiece(itemTemplate.getItemType(), itemTemplate);
+      FullSetBonus bonus = itemTemplate.getFullSetBonus();
       if (bonus != null) {
         bonusCount.merge(bonus.getClass(), 1, Integer::sum);
       }
@@ -61,12 +61,12 @@ public final class ArmorManager {
     });
   }
 
-  private static List<ItemFactory> getEquippedArmor(Player player) {
+  private static List<ItemTemplate> getEquippedArmor(Player player) {
     var armor = player.getInventory().getArmorContents();
-    List<ItemFactory> managers = new ArrayList<>(armor.length);
+    List<ItemTemplate> managers = new ArrayList<>(armor.length);
     for (ItemStack item : armor) {
       if (item == null || item.getType().isAir()) continue;
-      ItemFactory manager = ItemFactory.fromItemStack(item);
+      ItemTemplate manager = ItemTemplate.fromItemStack(item);
       if (manager != null) managers.add(manager);
     }
     return managers;

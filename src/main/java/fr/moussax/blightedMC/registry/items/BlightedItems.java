@@ -1,9 +1,11 @@
 package fr.moussax.blightedMC.registry.items;
 
-import fr.moussax.blightedMC.core.items.*;
+import fr.moussax.blightedMC.core.items.ItemCategory;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
+import fr.moussax.blightedMC.core.items.ItemRarity;
+import fr.moussax.blightedMC.core.items.ItemType;
 import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityType;
-import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.rules.PreventInteractionRule;
 import fr.moussax.blightedMC.core.items.rules.PreventProjectileLaunchRule;
 import fr.moussax.blightedMC.registry.abilities.InstantTransmissionAbility;
@@ -16,7 +18,7 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 public class BlightedItems implements ItemCategory {
   @Override
   public void registerItems() {
-    ItemFactory glimmeringEye = new ItemFactory(
+    ItemTemplate glimmeringEye = new ItemTemplate(
       "GLIMMERING_EYE",
       ItemType.UNCATEGORIZED,
       ItemRarity.RARE,
@@ -39,7 +41,7 @@ public class BlightedItems implements ItemCategory {
     glimmeringEye.addRule(new PreventProjectileLaunchRule());
     glimmeringEye.addToRegistry();
 
-    ItemFactory ancientKnightSword = new ItemFactory("ANCIENT_KNIGHT_SWORD", ItemType.LONGSWORD, ItemRarity.LEGENDARY, Material.NETHERITE_SWORD, "Ancient Knight's Sword");
+    ItemTemplate ancientKnightSword = new ItemTemplate("ANCIENT_KNIGHT_SWORD", ItemType.LONGSWORD, ItemRarity.LEGENDARY, Material.NETHERITE_SWORD, "Ancient Knight's Sword");
     ancientKnightSword.addLore(
       "",
       "§5 Ability: Ancient Knight's Slam  §d§lRIGHT CLICK ",

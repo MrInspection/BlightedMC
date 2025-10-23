@@ -7,7 +7,7 @@ import org.bukkit.Material;
 public class BlockItemsRegistry implements ItemCategory {
   @Override
   public void registerItems() {
-    ItemFactory blightedCraftingTable = new ItemFactory(
+    ItemTemplate blightedCraftingTable = new ItemTemplate(
       "BLIGHTED_CRAFTING_TABLE",
       ItemType.BLOCK,
       ItemRarity.UNCOMMON,

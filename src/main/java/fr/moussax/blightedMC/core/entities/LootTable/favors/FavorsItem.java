@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.core.entities.LootTable.favors;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemGenerator;
-import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
@@ -80,9 +80,9 @@ public class FavorsItem implements ItemGenerator {
 
   @Override
   public ItemStack createItemStack() {
-    ItemFactory item = ItemsRegistry.REGISTERED_ITEMS.get("BLIGHTED_GEMSTONE");
-    item.setLore("§7Favors trapped: §d" + amount + "✵", 6);
-    ItemStack itemStack = item.toItemStack();
+    ItemTemplate itemTemplate = ItemsRegistry.REGISTERED_ITEMS.get("BLIGHTED_GEMSTONE");
+    itemTemplate.setLore("§7Favors trapped: §d" + amount + "✵", 6);
+    ItemStack itemStack = itemTemplate.toItemStack();
     
     ItemMeta meta = itemStack.getItemMeta();
     assert meta != null;

@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.items.registry;
 
-import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.items.ItemType;
 import fr.moussax.blightedMC.core.menus.*;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
@@ -106,30 +106,30 @@ public class ItemsRegistryMenu {
 
   public static class BlightedItemsPaginatedMenu extends PaginatedMenu {
     private final Menu previousMenu;
-    private final List<ItemFactory> items;
+    private final List<ItemTemplate> itemTemplates;
 
-    public BlightedItemsPaginatedMenu(Menu previousMenu, Predicate<ItemFactory> filter, String title) {
+    public BlightedItemsPaginatedMenu(Menu previousMenu, Predicate<ItemTemplate> filter, String title) {
       super(title, 54);
       this.previousMenu = previousMenu;
-      this.items = ItemsRegistry.REGISTERED_ITEMS.values().stream().filter(filter).collect(Collectors.toList());
+      this.itemTemplates = ItemsRegistry.REGISTERED_ITEMS.values().stream().filter(filter).collect(Collectors.toList());
     }
 
-    public BlightedItemsPaginatedMenu(ItemType.Category category, Menu previousMenu, Predicate<ItemFactory> filter, String title) {
+    public BlightedItemsPaginatedMenu(ItemType.Category category, Menu previousMenu, Predicate<ItemTemplate> filter, String title) {
       this(previousMenu, filter, title);
     }
 
     @Override
-    protected int getTotalItems(Player player) { return items.size(); }
+    protected int getTotalItems(Player player) { return itemTemplates.size(); }
 
     @Override
     protected int getItemsPerPage() { return 27; }
 
     @Override
     protected ItemStack getItem(Player player, int index) {
-      if (index >= items.size()) return new ItemStack(Material.AIR);
-      ItemFactory item = items.get(index);
+      if (index >= itemTemplates.size()) return new ItemStack(Material.AIR);
+      ItemTemplate itemTemplate = itemTemplates.get(index);
 
-      ItemStack stack = item.toItemStack().clone();
+      ItemStack stack = itemTemplate.toItemStack().clone();
       var meta = stack.getItemMeta();
       if (meta != null) {
         List<String> lore = Optional.ofNullable(meta.getLore()).orElse(new ArrayList<>());
@@ -150,7 +150,7 @@ public class ItemsRegistryMenu {
       int start = currentPage * getItemsPerPage();
       int end = Math.min(start + getItemsPerPage(), getTotalItems(player));
 
-      if (items.isEmpty()) {
+      if (itemTemplates.isEmpty()) {
         setItem(22, buildMenuItem(new ItemStack(Material.RED_STAINED_GLASS_PANE),
           "§cNo Items Found",
           List.of("§7No items match the criteria")), MenuItemInteraction.ANY_CLICK, (p, t) -> {});
@@ -187,7 +187,7 @@ public class ItemsRegistryMenu {
 
     @Override
     protected void onItemClick(Player player, int index, ClickType clickType) {
-      if (index < items.size()) player.getInventory().addItem(items.get(index).toItemStack());
+      if (index < itemTemplates.size()) player.getInventory().addItem(itemTemplates.get(index).toItemStack());
     }
   }
 

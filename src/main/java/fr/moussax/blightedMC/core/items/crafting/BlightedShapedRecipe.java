@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.items.crafting;
 
-import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
 
 import java.util.*;
 
@@ -11,7 +11,7 @@ import java.util.*;
  * The placement of ingredients matters, unlike shapeless recipes.
  */
 public final class BlightedShapedRecipe extends BlightedRecipe {
-  private final ItemFactory resultItem;
+  private final ItemTemplate resultItemTemplate;
   private final int resultAmount;
 
   /**
@@ -31,11 +31,11 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
   /**
    * Creates a new-shaped recipe with a given result item and output amount.
    *
-   * @param resultItem   the resulting custom item
+   * @param resultItemTemplate   the resulting custom item
    * @param resultAmount the number of items produced
    */
-  public BlightedShapedRecipe(ItemFactory resultItem, int resultAmount) {
-    this.resultItem = resultItem;
+  public BlightedShapedRecipe(ItemTemplate resultItemTemplate, int resultAmount) {
+    this.resultItemTemplate = resultItemTemplate;
     this.resultAmount = resultAmount;
   }
 
@@ -45,8 +45,8 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
    * @return the result item
    */
   @Override
-  public ItemFactory getResult() {
-    return resultItem;
+  public ItemTemplate getResult() {
+    return resultItemTemplate;
   }
 
   /**

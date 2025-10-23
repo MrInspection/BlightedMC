@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.items.abilities;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -14,7 +14,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -124,15 +123,15 @@ public class AbilityListener implements Listener {
       blightedPlayer = new BlightedPlayer(player);
     }
 
-    ItemFactory itemFactory = blightedPlayer.getEquippedItemManager();
-    if (itemFactory == null || itemFactory.getAbilities().isEmpty()) {
+    ItemTemplate itemTemplate = blightedPlayer.getEquippedItemManager();
+    if (itemTemplate == null || itemTemplate.getAbilities().isEmpty()) {
       return;
     }
 
     // Only trigger if the event matches the ability's trigger type
-    for (Ability ability : itemFactory.getAbilities()) {
+    for (Ability ability : itemTemplate.getAbilities()) {
       if (ability.type().matches(event)) {
-        itemFactory.triggerAbilities(blightedPlayer, event);
+        itemTemplate.triggerAbilities(blightedPlayer, event);
         break;
       }
     }

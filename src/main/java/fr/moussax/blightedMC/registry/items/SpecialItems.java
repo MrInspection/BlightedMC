@@ -10,7 +10,7 @@ import org.bukkit.Material;
 public class SpecialItems implements ItemCategory {
   @Override
   public void registerItems() {
-    ItemFactory blightedGemstone = new ItemFactory("BLIGHTED_GEMSTONE", ItemType.UNCATEGORIZED, ItemRarity.SPECIAL, Material.PLAYER_HEAD, "Blighted Gemstone");
+    ItemTemplate blightedGemstone = new ItemTemplate("BLIGHTED_GEMSTONE", ItemType.UNCATEGORIZED, ItemRarity.SPECIAL, Material.PLAYER_HEAD, "Blighted Gemstone");
     blightedGemstone.addLore(
       "§7A gemstone tainted by §5shadow§7, tore",
       "§7from the §5remains §7of a fallen horror. ",

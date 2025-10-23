@@ -27,7 +27,7 @@ import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.REGISTERED
 import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.ID_KEY;
 
 /**
- * A factory for creating custom items in BlightedMC, extending {@link ItemBuilder}.
+ * A class for creating custom items in BlightedMC, extending {@link ItemBuilder}.
  * <p>
  * Allows adding item ID, rarity, type, abilities, rules, and full set bonuses.
  * Provides methods to generate {@link ItemStack} instances with persistent data and
@@ -35,14 +35,14 @@ import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.ID_KEY;
  *
  * <p>Example:</p>
  * <pre>{@code
- * ItemFactory blazingSword = new ItemFactory("blazing_sword", ItemType.SWORD, ItemRarity.LEGENDARY, Material.DIAMOND_SWORD)
+ * ItemTemplate blazingSword = new ItemTemplate("blazing_sword", ItemType.SWORD, ItemRarity.LEGENDARY, Material.DIAMOND_SWORD)
  *      .setDisplayName("§cBlazing Sword")
  *      .addAbility(new FireSlashAbility())
  *      .addRule(new CannotPlaceOnGrassRule());
  *      .addToRegistry();
  * }</pre>
  */
-public class ItemFactory extends ItemBuilder implements ItemRule, ItemGenerator {
+public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator {
   public static final NamespacedKey ITEM_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "id");
   public static final NamespacedKey ITEM_RARITY_KEY = new NamespacedKey(BlightedMC.getInstance(), "rarity");
 
@@ -54,35 +54,35 @@ public class ItemFactory extends ItemBuilder implements ItemRule, ItemGenerator 
   private final List<Ability> abilities = new ArrayList<>();
   private final List<ItemRule> rules = new ArrayList<>();
 
-  public ItemFactory(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material) {
+  public ItemTemplate(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material) {
     super(material);
     this.itemId = itemId;
     this.itemType = type;
     this.itemRarity = rarity;
   }
 
-  public ItemFactory(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Nonnull String displayName) {
+  public ItemTemplate(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Nonnull String displayName) {
     super(material, rarity.getColorPrefix() + displayName);
     this.itemId = itemId;
     this.itemType = type;
     this.itemRarity = rarity;
   }
 
-  public ItemFactory(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount) {
+  public ItemTemplate(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount) {
     super(material, amount);
     this.itemId = itemId;
     this.itemType = type;
     this.itemRarity = rarity;
   }
 
-  public ItemFactory(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount, @Nonnull String displayName) {
+  public ItemTemplate(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount, @Nonnull String displayName) {
     super(material, amount, rarity.getColorPrefix() + displayName);
     this.itemId = itemId;
     this.itemType = type;
     this.itemRarity = rarity;
   }
 
-  public ItemFactory(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, ItemStack itemStack) {
+  public ItemTemplate(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, ItemStack itemStack) {
     super(itemStack);
     this.itemId = itemId;
     this.itemType = type;
@@ -102,7 +102,7 @@ public class ItemFactory extends ItemBuilder implements ItemRule, ItemGenerator 
   }
 
   @Override
-  public ItemFactory setDisplayName(@Nonnull String displayName) {
+  public ItemTemplate setDisplayName(@Nonnull String displayName) {
     String coloredName = itemRarity.getColorPrefix() + displayName;
     super.setDisplayName(coloredName);
     return this;
@@ -116,7 +116,7 @@ public class ItemFactory extends ItemBuilder implements ItemRule, ItemGenerator 
     return fullSetBonus;
   }
 
-  public static ItemFactory fromItemStack(ItemStack itemStack) {
+  public static ItemTemplate fromItemStack(ItemStack itemStack) {
     if (itemStack == null || itemStack.getType().isAir()) return null;
 
     var meta = itemStack.getItemMeta();
@@ -170,7 +170,7 @@ public class ItemFactory extends ItemBuilder implements ItemRule, ItemGenerator 
    * @return this {@code ItemFactory} instance for chaining.
    */
   @SuppressWarnings("UnusedReturnValue")
-  public ItemFactory addToRegistry() {
+  public ItemTemplate addToRegistry() {
     ItemsRegistry.addItem(this);
     return this;
   }

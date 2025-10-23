@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.items.rules;
 
-import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,7 +18,7 @@ import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.ID_KEY;
 
 public class ItemRuleListener implements Listener {
 
-  private ItemFactory getManager(ItemStack stack) {
+  private ItemTemplate getManager(ItemStack stack) {
     if (stack == null || !stack.hasItemMeta()) return null;
 
     var meta = stack.getItemMeta();
@@ -33,7 +33,7 @@ public class ItemRuleListener implements Listener {
   @EventHandler(ignoreCancelled = true)
   @SuppressWarnings("UnstableApiUsage")
   public void onBlockPlace(BlockPlaceEvent event) {
-    ItemFactory manager = getManager(event.getItemInHand());
+    ItemTemplate manager = getManager(event.getItemInHand());
     if (manager == null) return;
 
     if (!manager.canPlace(event, event.getItemInHand())) {
@@ -47,8 +47,8 @@ public class ItemRuleListener implements Listener {
     ItemStack mainHand = event.getPlayer().getInventory().getItemInMainHand();
     ItemStack offHand = event.getPlayer().getInventory().getItemInOffHand();
 
-    ItemFactory mainManager = getManager(mainHand);
-    ItemFactory offManager = getManager(offHand);
+    ItemTemplate mainManager = getManager(mainHand);
+    ItemTemplate offManager = getManager(offHand);
 
     boolean cancel = false;
 
@@ -63,7 +63,7 @@ public class ItemRuleListener implements Listener {
   @EventHandler(ignoreCancelled = true)
   public void onItemDrop(PlayerDropItemEvent event) {
     ItemStack dropped = event.getItemDrop().getItemStack();
-    ItemFactory manager = getManager(dropped);
+    ItemTemplate manager = getManager(dropped);
     if (manager == null) return;
 
     if (!manager.canUse(event, dropped)) {
@@ -73,7 +73,7 @@ public class ItemRuleListener implements Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void onItemConsume(PlayerItemConsumeEvent event) {
-    ItemFactory manager = getManager(event.getItem());
+    ItemTemplate manager = getManager(event.getItem());
     if (manager == null) return;
 
     if (!manager.canUse(event, event.getItem())) {
@@ -84,7 +84,7 @@ public class ItemRuleListener implements Listener {
   @EventHandler(ignoreCancelled = true)
   public void onInventoryClick(InventoryClickEvent event) {
     ItemStack current = event.getCurrentItem();
-    ItemFactory manager = getManager(current);
+    ItemTemplate manager = getManager(current);
     if (manager == null) return;
 
     if (!manager.canUse(event, current)) {
@@ -100,7 +100,7 @@ public class ItemRuleListener implements Listener {
     ItemStack mainHand = player.getInventory().getItemInMainHand();
     ItemStack offHand = player.getInventory().getItemInOffHand();
 
-    ItemFactory manager = getManager(mainHand);
+    ItemTemplate manager = getManager(mainHand);
     if (manager == null) manager = getManager(offHand);
 
     if (manager == null) return;

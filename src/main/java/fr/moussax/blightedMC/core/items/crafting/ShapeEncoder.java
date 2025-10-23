@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.items.crafting;
 
-import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
 import org.bukkit.Material;
 
 import java.util.ArrayList;
@@ -48,13 +48,13 @@ public class ShapeEncoder {
   }
 
   /**
-   * Binds a shape character to a custom item managed by {@link ItemFactory}.
+   * Binds a shape character to a custom item managed by {@link ItemTemplate}.
    *
    * @param key     the character representing the ingredient
    * @param manager the item manager for the custom item
    * @param amount  the quantity required
    */
-  public void bindKey(char key, ItemFactory manager, int amount) {
+  public void bindKey(char key, ItemTemplate manager, int amount) {
     keys.put(key, new CraftingObject(manager, amount));
   }
 

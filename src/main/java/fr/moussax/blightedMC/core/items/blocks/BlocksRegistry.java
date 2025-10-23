@@ -12,7 +12,7 @@ public final class BlocksRegistry {
   }
 
   public static void addBlock(BlightedBlock block) {
-    CUSTOM_BLOCKS.put(block.itemFactory.getItemId(), block);
+    CUSTOM_BLOCKS.put(block.itemTemplate.getItemId(), block);
   }
 
   public static void initializeBlocks() {

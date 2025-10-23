@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.commands.admin;
 
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
-import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistryMenu;
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.menus.MenuManager;
@@ -27,8 +27,8 @@ public class GiveItemCommand implements CommandExecutor {
     }
 
     String itemId = args[0].toUpperCase();
-    ItemFactory item = ItemsRegistry.REGISTERED_ITEMS.get(itemId);
-    if (item == null) {
+    ItemTemplate itemTemplate = ItemsRegistry.REGISTERED_ITEMS.get(itemId);
+    if (itemTemplate == null) {
       MessageUtils.warnSender(player, "Unable to find item matching the ID: §4" + itemId +"§c.");
       return false;
     }
@@ -43,10 +43,10 @@ public class GiveItemCommand implements CommandExecutor {
       }
     }
 
-    ItemStack stack = item.toItemStack().clone();
+    ItemStack stack = itemTemplate.toItemStack().clone();
     stack.setAmount(amount);
     player.getInventory().addItem(stack);
-    MessageUtils.informSender(player, "You receive §5" + amount + "x §d" + item.getItemId() + "§7.");
+    MessageUtils.informSender(player, "You receive §5" + amount + "x §d" + itemTemplate.getItemId() + "§7.");
     return true;
   }
 }

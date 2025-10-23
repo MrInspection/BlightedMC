@@ -1,15 +1,15 @@
 package fr.moussax.blightedMC.core.items.crafting;
 
-import fr.moussax.blightedMC.core.items.ItemFactory;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 /**
  * Represents an ingredient used in a crafting recipe, which can be either
- * a custom item managed by {@link ItemFactory} or a vanilla {@link Material}.
+ * a custom item managed by {@link ItemTemplate} or a vanilla {@link Material}.
  */
 public class CraftingObject {
-  private final ItemFactory manager;
+  private final ItemTemplate manager;
   private final ItemStack vanillaItem;
   private final int amount;
   private final String itemId;
@@ -17,10 +17,10 @@ public class CraftingObject {
   /**
    * Creates a crafting object representing a custom item.
    *
-   * @param manager the {@link ItemFactory} managing the custom item
+   * @param manager the {@link ItemTemplate} managing the custom item
    * @param amount  the required quantity
    */
-  public CraftingObject(ItemFactory manager, int amount) {
+  public CraftingObject(ItemTemplate manager, int amount) {
     this.manager = manager;
     this.vanillaItem = null;
     this.amount = amount;
@@ -41,11 +41,11 @@ public class CraftingObject {
   }
 
   /**
-   * Returns the {@link ItemFactory} if this is a custom item.
+   * Returns the {@link ItemTemplate} if this is a custom item.
    *
    * @return the item manager or {@code null} if this is a vanilla item
    */
-  public ItemFactory getManager() {
+  public ItemTemplate getManager() {
     return manager;
   }
 
