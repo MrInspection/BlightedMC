@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.entities.spawning.condition;
+package fr.moussax.blightedMC.core.entities.spawnable;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -16,4 +16,14 @@ public interface SpawnCondition {
    * @return true if spawning is permitted, false otherwise
    */
   boolean canSpawn(Location location, World world);
+
+  default SpawnCondition and(SpawnCondition other) {
+    return (loc, world) -> this.canSpawn(loc, world) && other.canSpawn(loc, world);
+  }
+  default SpawnCondition or(SpawnCondition other) {
+    return (loc, world) -> this.canSpawn(loc, world) || other.canSpawn(loc, world);
+  }
+  default SpawnCondition not() {
+    return (loc, world) -> !this.canSpawn(loc, world);
+  }
 }

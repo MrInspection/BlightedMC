@@ -1,13 +1,14 @@
-package fr.moussax.blightedMC.core.entities.spawning;
+package fr.moussax.blightedMC.core.entities.spawnable;
 
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
-import fr.moussax.blightedMC.core.entities.spawning.condition.SpawnCondition;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 
-public abstract class SpawnableEntity extends BlightedEntity implements Cloneable {
-  private SpawnEntitiesProfile spawnProfile;
+public abstract class SpawnableEntity extends BlightedEntity {
+  private SpawnableEntityProfile spawnProfile;
   private final double spawnChance;
   private final String entityId;
 
@@ -15,7 +16,7 @@ public abstract class SpawnableEntity extends BlightedEntity implements Cloneabl
     super(name, maxHealth, entityType);
     this.entityId = entityId;
     this.spawnChance = spawnChance;
-    this.spawnProfile = new SpawnEntitiesProfile();
+    this.spawnProfile = new SpawnableEntityProfile();
     setupSpawnConditions();
   }
 
@@ -40,8 +41,22 @@ public abstract class SpawnableEntity extends BlightedEntity implements Cloneabl
     return entityId;
   }
 
-  public SpawnEntitiesProfile getSpawnProfile() {
+  public SpawnableEntityProfile getSpawnProfile() {
     return spawnProfile;
+  }
+
+  /**
+   * Spawns this custom entity at a location using the default (CUSTOM) spawn reason.
+   */
+  public LivingEntity spawn(Location location) {
+    return spawn(location, CreatureSpawnEvent.SpawnReason.CUSTOM);
+  }
+
+  /**
+   * Spawns this custom entity at a location using the given spawn reason.
+   */
+  public LivingEntity spawn(Location location, CreatureSpawnEvent.SpawnReason reason) {
+    return super.spawn(location);
   }
 
   @Override
