@@ -1,6 +1,6 @@
-package fr.moussax.blightedMC.registry.items;
+package fr.moussax.blightedMC.gameplay.items;
 
-import fr.moussax.blightedMC.core.items.ItemCategory;
+import fr.moussax.blightedMC.core.items.ItemGroup;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.items.ItemRarity;
 import fr.moussax.blightedMC.core.items.ItemType;
@@ -8,16 +8,18 @@ import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.core.items.rules.PreventInteractionRule;
 import fr.moussax.blightedMC.core.items.rules.PreventProjectileLaunchRule;
-import fr.moussax.blightedMC.registry.abilities.InstantTransmissionAbility;
-import fr.moussax.blightedMC.registry.abilities.KnightsSlamAbility;
+import fr.moussax.blightedMC.gameplay.abilities.InstantTransmissionAbility;
+import fr.moussax.blightedMC.gameplay.abilities.KnightsSlamAbility;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlotGroup;
 
-public class BlightedItems implements ItemCategory {
+import java.util.List;
+
+public class BlightedItems implements ItemGroup {
   @Override
-  public void registerItems() {
+  public List<ItemTemplate> registerItems() {
     ItemTemplate glimmeringEye = new ItemTemplate(
       "GLIMMERING_EYE",
       ItemType.UNCATEGORIZED,
@@ -39,7 +41,6 @@ public class BlightedItems implements ItemCategory {
     glimmeringEye.addAbility(new Ability(new InstantTransmissionAbility(), "Instant Transmission", AbilityType.RIGHT_CLICK));
     glimmeringEye.addRule(new PreventInteractionRule());
     glimmeringEye.addRule(new PreventProjectileLaunchRule());
-    glimmeringEye.addToRegistry();
 
     ItemTemplate ancientKnightSword = new ItemTemplate("ANCIENT_KNIGHT_SWORD", ItemType.LONGSWORD, ItemRarity.LEGENDARY, Material.NETHERITE_SWORD, "Ancient Knight's Sword");
     ancientKnightSword.addLore(
@@ -56,6 +57,6 @@ public class BlightedItems implements ItemCategory {
     ancientKnightSword.addAbility(new Ability(new KnightsSlamAbility(), "Ancient Knight's Slam", AbilityType.RIGHT_CLICK));
     ancientKnightSword.addAttributeModifier(Attribute.ATTACK_DAMAGE, 10, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
     ancientKnightSword.addAttributeModifier(Attribute.ATTACK_SPEED, 1.2, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
-    ancientKnightSword.addToRegistry();
+    return List.of(glimmeringEye, ancientKnightSword);
   }
 }

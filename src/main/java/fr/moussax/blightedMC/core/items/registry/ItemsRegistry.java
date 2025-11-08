@@ -1,14 +1,14 @@
 package fr.moussax.blightedMC.core.items.registry;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.core.items.ItemGroup;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
-import fr.moussax.blightedMC.core.items.ItemCategory;
-import fr.moussax.blightedMC.registry.armors.ArmorRegistry;
-import fr.moussax.blightedMC.registry.blocks.BlockItemsRegistry;
-import fr.moussax.blightedMC.registry.items.BlightedItems;
-import fr.moussax.blightedMC.registry.items.BlightedMaterials;
-import fr.moussax.blightedMC.registry.armors.SpecialArmorRegistry;
-import fr.moussax.blightedMC.registry.items.SpecialItems;
+import fr.moussax.blightedMC.gameplay.armors.HomodeusArmor;
+import fr.moussax.blightedMC.gameplay.armors.RocketBoots;
+import fr.moussax.blightedMC.gameplay.blocks.BlockItemsRegistry;
+import fr.moussax.blightedMC.gameplay.items.BlightedItems;
+import fr.moussax.blightedMC.gameplay.items.BlightedMaterials;
+import fr.moussax.blightedMC.gameplay.items.SpecialItems;
 import org.bukkit.NamespacedKey;
 
 import java.util.HashMap;
@@ -37,16 +37,20 @@ public final class ItemsRegistry {
   public static void initializeItems() {
     clearItems();
 
-    List<ItemCategory> categories = List.of(
+    List<ItemGroup> categories = List.of(
       new BlightedMaterials(),
-      new SpecialArmorRegistry(),
-      new ArmorRegistry(),
+      new HomodeusArmor(),
+      new RocketBoots(),
       new BlockItemsRegistry(),
       new SpecialItems(),
       new BlightedItems()
     );
-    for (ItemCategory category : categories) {
-      category.registerItems();
+    for (ItemGroup category : categories) {
+      List<ItemTemplate> items = category.registerItems();
+      if (items == null) continue;
+      for (ItemTemplate item : items) {
+        addItem(item);
+      }
     }
   }
 }

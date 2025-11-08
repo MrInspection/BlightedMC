@@ -1,7 +1,10 @@
-package fr.moussax.blightedMC.registry.armors;
+package fr.moussax.blightedMC.gameplay.armors;
 
-import fr.moussax.blightedMC.core.items.*;
-import fr.moussax.blightedMC.registry.abilities.RocketBootsAbility;
+import fr.moussax.blightedMC.core.items.ItemGroup;
+import fr.moussax.blightedMC.core.items.ItemRarity;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
+import fr.moussax.blightedMC.core.items.ItemType;
+import fr.moussax.blightedMC.gameplay.abilities.RocketBootsAbility;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
@@ -9,9 +12,9 @@ import org.bukkit.inventory.meta.trim.TrimPattern;
 
 import java.util.List;
 
-public class ArmorRegistry implements ItemCategory {
+public class RocketBoots implements ItemGroup {
   @Override
-  public void registerItems() {
+  public List<ItemTemplate> registerItems() {
     ItemTemplate rocketBoots = new ItemTemplate("ROCKET_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS, "Rocket Boots");
     rocketBoots.setLeatherColor("#B02E26").setArmorTrim(TrimMaterial.QUARTZ, TrimPattern.BOLT);
     rocketBoots.addItemFlag(List.of(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ARMOR_TRIM));
@@ -24,6 +27,6 @@ public class ArmorRegistry implements ItemCategory {
       ItemRarity.UNCOMMON.getName() + " BOOTS"
     );
     rocketBoots.setFullSetBonus(new RocketBootsAbility());
-    rocketBoots.addToRegistry();
+    return List.of(rocketBoots);
   }
 }

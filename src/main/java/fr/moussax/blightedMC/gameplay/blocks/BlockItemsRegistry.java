@@ -1,12 +1,13 @@
-package fr.moussax.blightedMC.registry.blocks;
+package fr.moussax.blightedMC.gameplay.blocks;
 
 import fr.moussax.blightedMC.core.items.*;
-import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import org.bukkit.Material;
 
-public class BlockItemsRegistry implements ItemCategory {
+import java.util.List;
+
+public class BlockItemsRegistry implements ItemGroup {
   @Override
-  public void registerItems() {
+  public List<ItemTemplate> registerItems() {
     ItemTemplate blightedCraftingTable = new ItemTemplate(
       "BLIGHTED_CRAFTING_TABLE",
       ItemType.BLOCK,
@@ -26,6 +27,6 @@ public class BlockItemsRegistry implements ItemCategory {
       ItemRarity.UNCOMMON.getName() + " BLOCK"
     );
     blightedCraftingTable.addEnchantmentGlint();
-    ItemsRegistry.addItem(blightedCraftingTable);
+    return List.of(blightedCraftingTable);
   }
 }

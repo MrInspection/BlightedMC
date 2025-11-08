@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.registry.abilities;
+package fr.moussax.blightedMC.gameplay.abilities;
 
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
@@ -83,7 +83,7 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
     }
   }
 
-  private void applyDurabilityDamageToBoots(Player player, @Positive int damage) {
+  private void applyDurabilityDamageToBoots(Player player, @SuppressWarnings("SameParameterValue") @Positive int damage) {
     ItemStack boots = player.getInventory().getBoots();
     if (boots == null) return;
     if (!boots.hasItemMeta()) return;

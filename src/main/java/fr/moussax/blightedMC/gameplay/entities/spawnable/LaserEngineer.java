@@ -1,10 +1,10 @@
-package fr.moussax.blightedMC.registry.entities.spawnable;
+package fr.moussax.blightedMC.gameplay.entities.spawnable;
 
-import fr.moussax.blightedMC.core.entities.EntityAttributes;
-import fr.moussax.blightedMC.core.entities.LootTable.LootDropRarity;
-import fr.moussax.blightedMC.core.entities.LootTable.LootTable;
-import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntity;
-import fr.moussax.blightedMC.core.entities.spawning.condition.BiomeCondition;
+import fr.moussax.blightedMC.core.entities.EntityImmunities;
+import fr.moussax.blightedMC.core.entities.loot.LootDropRarity;
+import fr.moussax.blightedMC.core.entities.loot.LootTable;
+import fr.moussax.blightedMC.core.entities.spawnable.SpawnableEntity;
+import fr.moussax.blightedMC.core.entities.spawnable.SpawnConditions;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
@@ -18,10 +18,9 @@ import org.bukkit.util.Vector;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-@EntityAttributes(EntityAttributes.Attributes.PROJECTILE_IMMUNITY)
+@EntityImmunities(EntityImmunities.ImmunityType.PROJECTILE)
 public class LaserEngineer extends SpawnableEntity {
   private BukkitRunnable laserAbilityTask;
   private boolean isAttacking = false;
@@ -243,11 +242,13 @@ public class LaserEngineer extends SpawnableEntity {
 
   @Override
   protected void setupSpawnConditions() {
-    addSpawnCondition(new BiomeCondition(Set.of(
-      Biome.FOREST,
-      Biome.BIRCH_FOREST,
-      Biome.DARK_FOREST,
-      Biome.FLOWER_FOREST
-    )));
+    addSpawnCondition(
+      SpawnConditions.biome(
+        Biome.FOREST,
+        Biome.BIRCH_FOREST,
+        Biome.DARK_FOREST,
+        Biome.FLOWER_FOREST
+      )
+    );
   }
 }

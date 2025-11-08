@@ -5,7 +5,7 @@ import fr.moussax.blightedMC.core.items.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.core.items.crafting.BlightedShapedRecipe;
 import fr.moussax.blightedMC.core.items.crafting.BlightedShapelessRecipe;
 import fr.moussax.blightedMC.core.items.crafting.CraftingObject;
-import fr.moussax.blightedMC.registry.recipes.MaterialRecipes;
+import fr.moussax.blightedMC.gameplay.recipes.MaterialRecipes;
 
 import java.util.List;
 

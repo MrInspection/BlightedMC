@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.registry.recipes;
+package fr.moussax.blightedMC.gameplay.recipes;
 
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.crafting.BlightedShapedRecipe;

@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.registry.abilities;
+package fr.moussax.blightedMC.gameplay.abilities;
 
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;

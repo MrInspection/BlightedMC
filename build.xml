@@ -4,7 +4,8 @@
 <project name="BlightedMC" default="Build">
   <target name="Build">
     <jar
-        jarfile="C:\Users\mouss\OneDrive\Documents\Development\Minecraft Development\Minecraft Server - Spigot 1.21.8\plugins/${ant.project.name}.jar"
+        jarfile="C:\Users\mouss\OneDrive\Documents\Apps\Minecraft\Server\plugins/${ant.project.name}.jar"
         basedir="./target/classes/" includes="**/*"/>
   </target>
 </project>
+

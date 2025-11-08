@@ -1,17 +1,19 @@
-package fr.moussax.blightedMC.registry.armors;
+package fr.moussax.blightedMC.gameplay.armors;
 
-import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
-import fr.moussax.blightedMC.registry.abilities.HomodeusFlightAbility;
-import fr.moussax.blightedMC.core.items.*;
+import fr.moussax.blightedMC.core.items.ItemGroup;
+import fr.moussax.blightedMC.core.items.ItemRarity;
+import fr.moussax.blightedMC.core.items.ItemTemplate;
+import fr.moussax.blightedMC.core.items.ItemType;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
+import fr.moussax.blightedMC.gameplay.abilities.HomodeusFlightAbility;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 
 import java.util.List;
 
-public class SpecialArmorRegistry implements ItemCategory {
+public class HomodeusArmor implements ItemGroup {
   @Override
-  public void registerItems() {
+  public List<ItemTemplate> registerItems() {
     FullSetBonus homodeusFlightBonus = new HomodeusFlightAbility();
 
     ItemTemplate homodeusHelmet = new ItemTemplate(
@@ -31,7 +33,6 @@ public class SpecialArmorRegistry implements ItemCategory {
       ItemRarity.LEGENDARY.getName()
     );
     homodeusHelmet.setFullSetBonus(homodeusFlightBonus);
-    ItemsRegistry.addItem(homodeusHelmet);
 
     ItemTemplate homodeusChestplate = new ItemTemplate(
       "HOMODEUS_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.LEGENDARY, Material.LEATHER_CHESTPLATE, "Homodeus Chestplate"
@@ -50,7 +51,6 @@ public class SpecialArmorRegistry implements ItemCategory {
       ItemRarity.LEGENDARY.getName()
     );
     homodeusChestplate.setFullSetBonus(homodeusFlightBonus);
-    ItemsRegistry.addItem(homodeusChestplate);
 
     ItemTemplate homodeusLeggings = new ItemTemplate(
       "HOMODEUS_LEGGINGS", ItemType.LEGGINGS, ItemRarity.LEGENDARY, Material.LEATHER_LEGGINGS, "Homodeus Leggings"
@@ -69,7 +69,6 @@ public class SpecialArmorRegistry implements ItemCategory {
       ItemRarity.LEGENDARY.getName()
     );
     homodeusLeggings.setFullSetBonus(homodeusFlightBonus);
-    ItemsRegistry.addItem(homodeusLeggings);
 
     ItemTemplate homodeusBoots = new ItemTemplate(
       "HOMODEUS_BOOTS", ItemType.BOOTS, ItemRarity.LEGENDARY, Material.LEATHER_BOOTS, "Homodeus Boots"
@@ -88,6 +87,7 @@ public class SpecialArmorRegistry implements ItemCategory {
       ItemRarity.LEGENDARY.getName()
     );
     homodeusBoots.setFullSetBonus(homodeusFlightBonus);
-    ItemsRegistry.addItem(homodeusBoots);
+
+    return List.of(homodeusHelmet, homodeusChestplate, homodeusLeggings, homodeusBoots);
   }
 }

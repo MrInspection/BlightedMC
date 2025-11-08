@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.registry.blocks;
+package fr.moussax.blightedMC.gameplay.blocks;
 
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.blocks.BlightedBlock;

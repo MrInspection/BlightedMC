@@ -1,18 +1,17 @@
-package fr.moussax.blightedMC.registry;
+package fr.moussax.blightedMC.core;
 
-import fr.moussax.blightedMC.core.entities.EntitiesRegistry;
-import fr.moussax.blightedMC.core.entities.spawning.SpawnableEntitiesRegistry;
+import fr.moussax.blightedMC.core.entities.registry.EntitiesRegistry;
+import fr.moussax.blightedMC.core.entities.registry.SpawnableEntitiesRegistry;
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.blocks.BlocksRegistry;
 import fr.moussax.blightedMC.core.items.crafting.registry.RecipesRegistry;
 
-public final class RegistrySystem {
+public final class CoreRegistry {
 
   public static void initializeAllRegistries() {
     ItemsRegistry.initializeItems();
     BlocksRegistry.initializeBlocks();
     RecipesRegistry.initializeRecipes();
-    SpawnableEntitiesRegistry.initializeEntities();
     EntitiesRegistry.initializeEntities();
   }
 

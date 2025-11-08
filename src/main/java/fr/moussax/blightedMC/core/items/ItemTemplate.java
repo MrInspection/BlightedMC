@@ -5,7 +5,6 @@ import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityExecutor;
 import fr.moussax.blightedMC.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.items.rules.ItemRule;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -161,18 +160,6 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
       return rightClick || leftClick;
     }
     return true;
-  }
-
-  /**
-   * Registers this item in the {@link ItemsRegistry}, making it available globally.
-   * Throws an exception if the item ID already exists.
-   *
-   * @return this {@code ItemFactory} instance for chaining.
-   */
-  @SuppressWarnings("UnusedReturnValue")
-  public ItemTemplate addToRegistry() {
-    ItemsRegistry.addItem(this);
-    return this;
   }
 
   @Override

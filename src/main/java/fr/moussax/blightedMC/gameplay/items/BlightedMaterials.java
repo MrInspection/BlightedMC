@@ -1,14 +1,16 @@
-package fr.moussax.blightedMC.registry.items;
+package fr.moussax.blightedMC.gameplay.items;
 
 import fr.moussax.blightedMC.core.items.*;
-import fr.moussax.blightedMC.core.items.ItemCategory;
+import fr.moussax.blightedMC.core.items.ItemGroup;
 import fr.moussax.blightedMC.core.items.rules.PreventPlacementRule;
 import fr.moussax.blightedMC.core.items.rules.PreventProjectileLaunchRule;
 import org.bukkit.Material;
 
-public class BlightedMaterials implements ItemCategory {
+import java.util.List;
+
+public class BlightedMaterials implements ItemGroup {
   @Override
-  public void registerItems() {
+  public List<ItemTemplate> registerItems() {
 
     ItemTemplate enchantedIronIngot = new ItemTemplate(
       "ENCHANTED_IRON_INGOT", ItemType.MATERIAL, ItemRarity.UNCOMMON,
@@ -16,7 +18,6 @@ public class BlightedMaterials implements ItemCategory {
     );
     enchantedIronIngot.addEnchantmentGlint();
     enchantedIronIngot.addLore(ItemRarity.UNCOMMON.getName());
-    enchantedIronIngot.addToRegistry();
 
     ItemTemplate enchantedIronBlock = new ItemTemplate(
       "ENCHANTED_IRON_BLOCK", ItemType.MATERIAL, ItemRarity.RARE,
@@ -25,7 +26,6 @@ public class BlightedMaterials implements ItemCategory {
     enchantedIronBlock.addLore(ItemRarity.RARE.getName());
     enchantedIronBlock.addEnchantmentGlint();
     enchantedIronBlock.addRule(new PreventPlacementRule());
-    enchantedIronBlock.addToRegistry();
 
     ItemTemplate enchantedEnderPearl = new ItemTemplate(
       "ENCHANTED_ENDER_PEARL", ItemType.MATERIAL, ItemRarity.UNCOMMON,
@@ -34,7 +34,6 @@ public class BlightedMaterials implements ItemCategory {
     enchantedEnderPearl.addLore(ItemRarity.UNCOMMON.getName());
     enchantedEnderPearl.addEnchantmentGlint();
     enchantedEnderPearl.addRule(new PreventProjectileLaunchRule());
-    enchantedEnderPearl.addToRegistry();
 
     ItemTemplate enchantedGhastTear = new ItemTemplate(
       "ENCHANTED_GHAST_TEAR", ItemType.MATERIAL, ItemRarity.UNCOMMON,
@@ -42,6 +41,12 @@ public class BlightedMaterials implements ItemCategory {
     );
     enchantedGhastTear.addLore(ItemRarity.UNCOMMON.getName());
     enchantedGhastTear.addEnchantmentGlint();
-    enchantedGhastTear.addToRegistry();
+
+    return List.of(
+      enchantedIronIngot,
+      enchantedIronBlock,
+      enchantedEnderPearl,
+      enchantedGhastTear
+    );
   }
 }

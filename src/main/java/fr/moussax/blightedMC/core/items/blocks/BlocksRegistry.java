@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.items.blocks;
 
-import fr.moussax.blightedMC.registry.blocks.BlightedCraftingTable;
+import fr.moussax.blightedMC.gameplay.blocks.BlightedCraftingTable;
 
 import java.util.HashMap;
 
@@ -12,6 +12,10 @@ public final class BlocksRegistry {
   }
 
   public static void addBlock(BlightedBlock block) {
+    if (block == null || block.itemTemplate == null) {
+      System.err.println("[BlightedMC] Attempted to register a block with a null ItemTemplate. Skipping.");
+      return;
+    }
     CUSTOM_BLOCKS.put(block.itemTemplate.getItemId(), block);
   }
 
