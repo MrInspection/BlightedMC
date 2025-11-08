@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.commands.admin;
 
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
-import fr.moussax.blightedMC.core.entities.EntitiesRegistry;
+import fr.moussax.blightedMC.core.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.utils.formatting.MessageUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
