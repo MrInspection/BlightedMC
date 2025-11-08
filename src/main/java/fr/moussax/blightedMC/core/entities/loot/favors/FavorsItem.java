@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.entities.LootTable.favors;
+package fr.moussax.blightedMC.core.entities.loot.favors;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemGenerator;

@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.entities.LootTable;
+package fr.moussax.blightedMC.core.entities.loot;
 
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Location;

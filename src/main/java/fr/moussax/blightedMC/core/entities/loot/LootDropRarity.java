@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.entities.LootTable;
+package fr.moussax.blightedMC.core.entities.loot;
 
 public enum LootDropRarity {
   INSANE,              // < 0.03% Chance

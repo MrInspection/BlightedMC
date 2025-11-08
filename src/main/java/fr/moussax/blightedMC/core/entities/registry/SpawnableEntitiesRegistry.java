@@ -1,23 +1,21 @@
-package fr.moussax.blightedMC.core.entities.spawning;
+package fr.moussax.blightedMC.core.entities.registry;
 
-import fr.moussax.blightedMC.registry.entities.spawnable.Boulder;
-import fr.moussax.blightedMC.registry.entities.spawnable.LaserEngineer;
-import fr.moussax.blightedMC.registry.entities.spawnable.blighted.BlightedZombie;
+import fr.moussax.blightedMC.core.entities.spawnable.SpawnableEntity;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public final class SpawnableEntitiesRegistry {
-  public static final Map<String, SpawnableEntity> SPAWNABLE_ENTITIES = new HashMap<>();
+  private static final Map<String, SpawnableEntity> SPAWNABLE_ENTITIES = new HashMap<>();
 
   public static void clearEntities() {
     SPAWNABLE_ENTITIES.clear();
   }
 
-  public static void addEntity(SpawnableEntity entity) {
+  public static void registerSpawnableEntity(SpawnableEntity entity) {
     if (SPAWNABLE_ENTITIES.containsKey(entity.getEntityId())) {
-      throw new IllegalArgumentException("Duplicate entity ID: " + entity.getEntityId());
+      throw new IllegalArgumentException("Duplicate spawnable entity ID: " + entity.getEntityId());
     }
     SPAWNABLE_ENTITIES.put(entity.getEntityId(), entity);
   }
@@ -31,12 +29,5 @@ public final class SpawnableEntitiesRegistry {
     return SPAWNABLE_ENTITIES.values().stream()
       .map(SpawnableEntity::clone)
       .toList();
-  }
-
-  public static void initializeEntities() {
-    clearEntities();
-
-    addEntity(new BlightedZombie());
-    addEntity(new LaserEngineer());
   }
 }

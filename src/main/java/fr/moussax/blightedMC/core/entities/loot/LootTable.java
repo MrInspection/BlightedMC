@@ -1,8 +1,8 @@
-package fr.moussax.blightedMC.core.entities.LootTable;
+package fr.moussax.blightedMC.core.entities.loot;
 
-import fr.moussax.blightedMC.core.entities.LootTable.favors.FavorsItem;
-import fr.moussax.blightedMC.core.entities.LootTable.favors.FavorsLoot;
-import fr.moussax.blightedMC.core.entities.LootTable.favors.FavorsLootAdapter;
+import fr.moussax.blightedMC.core.entities.loot.favors.FavorsItem;
+import fr.moussax.blightedMC.core.entities.loot.favors.FavorsLoot;
+import fr.moussax.blightedMC.core.entities.loot.favors.FavorsLootAdapter;
 import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Location;
@@ -90,7 +90,7 @@ public class LootTable {
 
   /**
    * Generates a list of items that will be given to the player based on drop chances.
-   * This method determines which items will drop but doesn't actually drop them.
+   * This method determines which items will drop but doesn't drop them.
    *
    * @return list of DroppableConsumable items to give
    */

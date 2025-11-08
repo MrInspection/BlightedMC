@@ -1,6 +1,6 @@
-package fr.moussax.blightedMC.core.entities.LootTable.favors;
+package fr.moussax.blightedMC.core.entities.loot.favors;
 
-import fr.moussax.blightedMC.core.entities.LootTable.ItemLoot;
+import fr.moussax.blightedMC.core.entities.loot.ItemLoot;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
