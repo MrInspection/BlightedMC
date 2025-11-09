@@ -3,7 +3,7 @@ package fr.moussax.blightedMC;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.core.entities.listeners.SpawnableEntitiesListener;
 import fr.moussax.blightedMC.core.fishing.FishingListener;
-import fr.moussax.blightedMC.core.items.registry.ItemsRegistrySearch;
+import fr.moussax.blightedMC.core.items.registry.ItemDirectorySearch;
 import fr.moussax.blightedMC.core.items.abilities.AbilityListener;
 import fr.moussax.blightedMC.core.items.blocks.BlightedBlock;
 import fr.moussax.blightedMC.core.items.crafting.menu.CraftingTableListener;
@@ -29,7 +29,7 @@ public final class EventsRegistry {
     pm.registerEvents(new CraftingTableListener(), instance);
     pm.registerEvents(new ItemRuleListener(), instance);
     pm.registerEvents(new AbilityListener(), instance);
-    pm.registerEvents(new ItemsRegistrySearch(), instance);
+    pm.registerEvents(new ItemDirectorySearch(), instance);
     pm.registerEvents(new FishingListener(), instance);
   }
 

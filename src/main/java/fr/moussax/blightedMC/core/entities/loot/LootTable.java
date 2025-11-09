@@ -1,9 +1,9 @@
 package fr.moussax.blightedMC.core.entities.loot;
 
-import fr.moussax.blightedMC.core.entities.loot.favors.FavorsItem;
-import fr.moussax.blightedMC.core.entities.loot.favors.FavorsLoot;
-import fr.moussax.blightedMC.core.entities.loot.favors.FavorsLootAdapter;
-import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
+import fr.moussax.blightedMC.core.entities.loot.gems.GemsItem;
+import fr.moussax.blightedMC.core.entities.loot.gems.GemsLoot;
+import fr.moussax.blightedMC.core.entities.loot.gems.GemsLootAdapter;
+import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -36,7 +36,7 @@ public class LootTable {
    * @return this LootTable for chaining
    */
   public LootTable addLoot(String itemId, int min, int max, double dropChance, LootDropRarity rarity) {
-    ItemLoot itemLoot = new ItemLoot(ItemsRegistry.REGISTERED_ITEMS.get(itemId).toItemStack(), min, max);
+    ItemLoot itemLoot = new ItemLoot(ItemDirectory.getItem(itemId).toItemStack(), min, max);
     lootEntries.add(new LootEntry(itemLoot, dropChance, rarity));
     return this;
   }
@@ -59,16 +59,16 @@ public class LootTable {
   }
 
   /**
-   * Adds a Blighted Favors loot entry to the loot table.
+   * Adds a Blighted Gemstone loot entry to the loot table.
    *
-   * @param favors     number of favors contained
+   * @param gems       number of favors contained
    * @param dropChance probability to drop (0.0-1.0)
    * @param rarity     the drop rarity
    * @return this LootTable for chaining
    */
-  public LootTable addFavorsLoot(int favors, double dropChance, LootDropRarity rarity) {
-    FavorsLoot favorsLoot = new FavorsLoot(favors);
-    FavorsLootAdapter adapter = new FavorsLootAdapter(favorsLoot, new FavorsItem(favors).createItemStack());
+  public LootTable addGemsLoot(int gems, double dropChance, LootDropRarity rarity) {
+    GemsLoot favorsLoot = new GemsLoot(gems);
+    GemsLootAdapter adapter = new GemsLootAdapter(favorsLoot, new GemsItem(gems).createItemStack());
     lootEntries.add(new LootEntry(adapter, dropChance, rarity));
     return this;
   }

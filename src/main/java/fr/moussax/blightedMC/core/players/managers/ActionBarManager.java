@@ -4,10 +4,6 @@ import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
-import org.bukkit.attribute.Attribute;
-
-import java.util.Objects;
 
 /**
  * Manages the display of the action bar for a BlightedPlayer.
@@ -44,33 +40,19 @@ public class ActionBarManager implements Runnable {
       insufficientMana = false;
     }
     
-    String space = "     ";
-    String healthComponent = getHealthComponent();
-    String favorsComponent = space + getFavorsComponent();
-    String manaComponent = space + getManaComponent();
+    String separator = " §8- ";
+    String gemsComponent = getFavorsComponent();
+    String manaComponent = separator + getManaComponent();
 
     player.getPlayer().spigot().sendMessage(
         ChatMessageType.ACTION_BAR,
-        new TextComponent(healthComponent + favorsComponent + manaComponent)
+        new TextComponent("§8■ " + gemsComponent + manaComponent + " §8■")
     );
   }
 
-  private String getHealthComponent() {
-    double current = player.getPlayer().getHealth();
-    double absorption = player.getPlayer().getAbsorptionAmount() / 2;
-    double max = Objects.requireNonNull(Objects.requireNonNull(player.getPlayer()).getAttribute(Attribute.MAX_HEALTH)).getValue();
-    if (current > max) current = max;
-
-    if(absorption > 0) {
-      return ChatColor.GOLD + Formatter.formatDouble(current + absorption, 1) + "/" + Formatter.formatDouble(max, 1) + "❤";
-    }
-
-    return ChatColor.RED + Formatter.formatDouble(current, 1) + "/" + Formatter.formatDouble(max, 1) + "❤";
-  }
-
   private String getFavorsComponent() {
-    int favors = player.getFavors().getFavors();
-    return "§d" + favors + "✵ Favors";
+    int gems = player.getGems().getGems();
+    return "§7Gems: §e" + gems + "✵";
   }
 
   private String getManaComponent() {
@@ -79,6 +61,6 @@ public class ActionBarManager implements Runnable {
     }
     double current = player.getMana().getCurrentMana();
     double max = player.getMana().getMaxMana();
-    return "§b" + Formatter.formatDouble(current, 0) + "/" + Formatter.formatDouble(max, 0) + "✎ Mana";
+    return "§7Mana: §b" + Formatter.formatDouble(current, 0) + "§8/§b" + Formatter.formatDouble(max, 0);
   }
 }

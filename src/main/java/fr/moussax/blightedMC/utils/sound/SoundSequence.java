@@ -8,9 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public final class SoundSequence {
-  private final List<BlightedSound> sounds;
-
+public record SoundSequence(List<BlightedSound> sounds) {
   public SoundSequence(List<BlightedSound> sounds) {
     this.sounds = Collections.unmodifiableList(Objects.requireNonNull(sounds));
   }
@@ -23,10 +21,6 @@ public final class SoundSequence {
     for (BlightedSound sound : sounds) {
       sound.play(location);
     }
-  }
-
-  public List<BlightedSound> getSounds() {
-    return sounds;
   }
 
   public static final SoundSequence BOSS_SPAWN = new SoundSequence(

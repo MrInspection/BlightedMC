@@ -7,7 +7,9 @@ import org.bukkit.Sound;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
-import static fr.moussax.blightedMC.utils.formatting.MessageUtils.warnSender;
+import java.time.Instant;
+
+import static fr.moussax.blightedMC.utils.formatting.Formatter.warn;
 
 /**
  * Executes player abilities, handling cooldowns, mana, and activation.
@@ -29,7 +31,7 @@ public final class AbilityExecutor {
 
         String abilityName = ability.name();
         String timeText = String.format("%.0fs", remainingSeconds);
-        warnSender(player.getPlayer(), "§cYour §6" + abilityName + " §cability is on cooldown for §d" + timeText + "§c!");
+        warn(player.getPlayer(), "§cYour §6" + abilityName + " §cability is on cooldown for §d" + timeText + "§c!");
         if (event instanceof Cancellable c) c.setCancelled(true);
         return;
       }
@@ -85,11 +87,12 @@ public final class AbilityExecutor {
     return result.toString().trim();
   }
 
+  @SuppressWarnings("rawtypes")
   public static void startCooldown(BlightedPlayer blightedPlayer,
                                    Class<? extends AbilityManager> abilityManagerClass,
                                    AbilityType abilityType,
                                    int cooldownSeconds) {
-    CooldownEntry newEntry = new CooldownEntry(abilityManagerClass, abilityType, java.time.Instant.now().plusSeconds(cooldownSeconds));
+    CooldownEntry newEntry = new CooldownEntry(abilityManagerClass, abilityType, Instant.now().plusSeconds(cooldownSeconds));
 
     for (CooldownEntry entry : blightedPlayer.getCooldowns()) {
       if (entry.abilityManager().equals(abilityManagerClass) && entry.abilityType() == abilityType) return;

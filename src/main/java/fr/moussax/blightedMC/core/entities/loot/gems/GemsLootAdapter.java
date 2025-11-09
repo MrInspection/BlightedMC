@@ -1,16 +1,16 @@
-package fr.moussax.blightedMC.core.entities.loot.favors;
+package fr.moussax.blightedMC.core.entities.loot.gems;
 
 import fr.moussax.blightedMC.core.entities.loot.ItemLoot;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
-public class FavorsLootAdapter extends ItemLoot {
-  private final FavorsLoot favorsLoot;
+public class GemsLootAdapter extends ItemLoot {
+  private final GemsLoot gemsLoot;
 
-  public FavorsLootAdapter(FavorsLoot favors, ItemStack displayItem) {
+  public GemsLootAdapter(GemsLoot favors, ItemStack displayItem) {
     super(displayItem, favors.amount(), favors.amount());
-    this.favorsLoot = favors;
+    this.gemsLoot = favors;
   }
 
   @Override
@@ -20,11 +20,11 @@ public class FavorsLootAdapter extends ItemLoot {
 
   @Override
   public void consume(BlightedPlayer killer, Location dropLocation, boolean toPlayer, int amount) {
-    favorsLoot.consume(killer, dropLocation, toPlayer);
+    gemsLoot.consume(killer, dropLocation, toPlayer);
   }
 
   @Override
   public String name() {
-    return favorsLoot.name();
+    return gemsLoot.name();
   }
 }

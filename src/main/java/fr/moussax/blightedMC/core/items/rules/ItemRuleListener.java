@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.items.rules;
 
 import fr.moussax.blightedMC.core.items.ItemTemplate;
-import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
+import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,7 +14,7 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.ID_KEY;
+import static fr.moussax.blightedMC.core.items.registry.ItemDirectory.ID_KEY;
 
 public class ItemRuleListener implements Listener {
 
@@ -27,7 +27,7 @@ public class ItemRuleListener implements Listener {
     String id = meta.getPersistentDataContainer().get(ID_KEY, PersistentDataType.STRING);
     if (id == null) return null;
 
-    return ItemsRegistry.REGISTERED_ITEMS.get(id);
+    return ItemDirectory.getItem(id);
   }
 
   @EventHandler(ignoreCancelled = true)

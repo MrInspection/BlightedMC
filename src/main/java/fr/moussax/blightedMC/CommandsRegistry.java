@@ -20,7 +20,7 @@ public final class CommandsRegistry {
     // Admin Commands
     CommandBuilder.register("broadcast", new BroadcastCommand());
     CommandBuilder.register("spawncustommob", SpawnCustomMobCommand.class);
-    CommandBuilder.register("favors", FavorsCommand.class);
+    CommandBuilder.register("gems", GemsCommand.class);
     CommandBuilder.register("forcecommand", new ForceCommand());
     CommandBuilder.register("giveitem", GiveItemCommand.class);
     CommandBuilder.register("god", new GodCommand());

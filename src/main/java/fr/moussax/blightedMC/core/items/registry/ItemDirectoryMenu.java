@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class ItemsRegistryMenu {
+public class ItemDirectoryMenu {
   private static final int[] CATEGORY_SLOTS = {10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 40, 41, 42, 43};
   private static final int SEARCH_SLOT = 41;
   private static final int[] ITEM_SLOTS = CATEGORY_SLOTS;
@@ -101,7 +101,7 @@ public class ItemsRegistryMenu {
   private static void openSearchSign(Player player, Menu previousMenu) {
     player.closeInventory();
     player.sendMessage("§8 ■ §7Type your §f§lSEARCH INPUT §7into the chat:");
-    ItemsRegistrySearch.awaitingSearch.put(player.getUniqueId(), previousMenu);
+    ItemDirectorySearch.awaitingSearch.put(player.getUniqueId(), previousMenu);
   }
 
   public static class BlightedItemsPaginatedMenu extends PaginatedMenu {
@@ -111,7 +111,7 @@ public class ItemsRegistryMenu {
     public BlightedItemsPaginatedMenu(Menu previousMenu, Predicate<ItemTemplate> filter, String title) {
       super(title, 54);
       this.previousMenu = previousMenu;
-      this.itemTemplates = ItemsRegistry.REGISTERED_ITEMS.values().stream().filter(filter).collect(Collectors.toList());
+      this.itemTemplates = ItemDirectory.getAllItems().stream().filter(filter).collect(Collectors.toList());
     }
 
     public BlightedItemsPaginatedMenu(ItemType.Category category, Menu previousMenu, Predicate<ItemTemplate> filter, String title) {
