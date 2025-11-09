@@ -11,8 +11,8 @@ commands:
     description: Spawn a BlightedMC creature
   test:
     description: General testing command
-  favors:
-    description: Manage the Favors currency system
+  gems:
+    description: Manage the gems currency system
   laser:
     description: BlightedMC test command for lazer ability
   craft:
@@ -35,3 +35,5 @@ commands:
     description: Teleport all players to you
   tppos:
     description: Teleport to a position
+  fly:
+    description: Toggle fly mode for yourself or another player

@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.entities;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.entities.LootTable.LootTable;
+import fr.moussax.blightedMC.core.entities.loot.LootTable;
 import fr.moussax.blightedMC.core.entities.immunity.EntityImmunityRule;
 import fr.moussax.blightedMC.core.entities.immunity.FireImmunityRule;
 import fr.moussax.blightedMC.core.entities.immunity.MeleeImmunityRule;
@@ -58,8 +58,8 @@ public abstract class BlightedEntity implements Cloneable {
 
   public final Set<EntityAttachment> attachments = new HashSet<>();
 
-  private List<EntityImmunityRule> immunityRules = new ArrayList<>();
-  private LifecycleTaskManager lifecycleTasks = new LifecycleTaskManager();
+  private final List<EntityImmunityRule> immunityRules = new ArrayList<>();
+  private final LifecycleTaskManager lifecycleTasks = new LifecycleTaskManager();
   private boolean runtimeInitialized = false;
 
   public BlightedEntity(String name, int maxHealth, EntityType entityType) {
@@ -82,43 +82,52 @@ public abstract class BlightedEntity implements Cloneable {
     initImmunityRules();
     entity = (LivingEntity) Objects.requireNonNull(location.getWorld()).spawnEntity(location, entityType);
 
-    PersistentDataContainer data = entity.getPersistentDataContainer();
-    data.set(new NamespacedKey(BlightedMC.getInstance(), ENTITY_ID_KEY), PersistentDataType.STRING, getEntityId());
-
-    setAttribute(Attribute.MAX_HEALTH, maxHealth);
-    setAttribute(Attribute.ATTACK_DAMAGE, damage);
-    setAttribute(Attribute.ARMOR, defense);
-    applyAttributes();
-
-    entity.setHealth(maxHealth);
-    entity.setPersistent(true);
-
-    applyEquipment();
-    updateNameTag();
-
-    if (nameTagType != EntityNameTag.HIDDEN) {
-      entity.setCustomNameVisible(true);
-    }
-
-    if (nameTagType == EntityNameTag.BOSS) {
-      createBossBar();
-    }
+    persistEntityId();
+    configureAttributes();
+    configureEquipment();
+    configureDisplay();
 
     BlightedEntitiesListener.registerEntity(entity, this);
-
     initRuntime();
+
     return entity;
   }
 
   public void attachToExisting(LivingEntity existing) {
     this.entity = existing;
     initImmunityRules();
+    configureDisplay();
+    BlightedEntitiesListener.registerEntity(existing, this);
+    initRuntime();
+  }
+
+  private void persistEntityId() {
+    PersistentDataContainer data = entity.getPersistentDataContainer();
+    NamespacedKey key = new NamespacedKey(BlightedMC.getInstance(), ENTITY_ID_KEY);
+    data.set(key, PersistentDataType.STRING, getEntityId());
+  }
+
+  private void configureAttributes() {
+    setAttribute(Attribute.MAX_HEALTH, maxHealth);
+    setAttribute(Attribute.ATTACK_DAMAGE, damage);
+    setAttribute(Attribute.ARMOR, defense);
+    applyAttributes();
+    entity.setHealth(maxHealth);
+    entity.setPersistent(true);
+  }
+
+  private void configureEquipment() {
+    applyEquipment();
+  }
+
+  private void configureDisplay() {
     updateNameTag();
+    if (nameTagType != EntityNameTag.HIDDEN) {
+      entity.setCustomNameVisible(true);
+    }
     if (nameTagType == EntityNameTag.BOSS) {
       createBossBar();
     }
-    BlightedEntitiesListener.registerEntity(existing, this);
-    initRuntime();
   }
 
   protected final void initRuntime() {
@@ -130,7 +139,7 @@ public abstract class BlightedEntity implements Cloneable {
   public void kill() {
     if (isNotAlive()) return;
     removeBossBar();
-    removeAttachment();
+    removeAllAttachments();
     lifecycleTasks.cancelAll();
     entity.setHealth(0);
   }
@@ -147,25 +156,33 @@ public abstract class BlightedEntity implements Cloneable {
 
   protected void applyAttributes() {
     for (Map.Entry<Attribute, Double> entry : attributes.entrySet()) {
-      AttributeInstance instance = entity.getAttribute(entry.getKey());
-      if (instance != null) instance.setBaseValue(entry.getValue());
+      setAttribute(entry.getKey(), entry.getValue());
     }
   }
 
   private void setAttribute(Attribute attribute, double value) {
     AttributeInstance instance = entity.getAttribute(attribute);
-    if (instance != null) instance.setBaseValue(value);
+    if (instance != null) {
+      instance.setBaseValue(value);
+    }
   }
 
   protected void applyEquipment() {
     if (armor == null && itemInMainHand == null && itemInOffHand == null) return;
+
     EntityEquipment equipment = entity.getEquipment();
     if (equipment == null) return;
 
-    if (armor != null) equipment.setArmorContents(armor);
+    if (armor != null) {
+      equipment.setArmorContents(armor);
+    }
     equipment.setItemInMainHand(itemInMainHand);
     equipment.setItemInOffHand(itemInOffHand);
 
+    disableEquipmentDrops(equipment);
+  }
+
+  private void disableEquipmentDrops(EntityEquipment equipment) {
     equipment.setHelmetDropChance(0);
     equipment.setChestplateDropChance(0);
     equipment.setLeggingsDropChance(0);
@@ -175,32 +192,40 @@ public abstract class BlightedEntity implements Cloneable {
   }
 
   protected void initImmunityRules() {
-    EntityAttributes attribute = getClass().getAnnotation(EntityAttributes.class);
+    EntityImmunities attribute = getClass().getAnnotation(EntityImmunities.class);
     if (attribute == null) return;
 
-    for (EntityAttributes.Attributes a : attribute.value()) {
-      switch (a) {
-        case MELEE_IMMUNITY -> immunityRules.add(new MeleeImmunityRule());
-        case FIRE_IMMUNITY -> immunityRules.add(new FireImmunityRule());
-        case PROJECTILE_IMMUNITY -> immunityRules.add(new ProjectileImmunity());
-        default -> { /* ignore unimplemented attributes for now */ }
+    for (EntityImmunities.ImmunityType type : attribute.value()) {
+      switch (type) {
+        case MELEE -> immunityRules.add(new MeleeImmunityRule());
+        case FIRE -> immunityRules.add(new FireImmunityRule());
+        case PROJECTILE -> immunityRules.add(new ProjectileImmunity());
       }
     }
   }
 
   public boolean isImmuneTo(LivingEntity entity, EntityDamageEvent event) {
     for (EntityImmunityRule rule : immunityRules) {
-      if (rule.isImmune(entity, event)) return true;
+      if (rule.isImmune(entity, event)) {
+        return true;
+      }
     }
     return false;
   }
 
   public void updateNameTag() {
-    if (entity != null) entity.setCustomName(createNameTag());
-    if (bossBar != null && nameTagType == EntityNameTag.BOSS) {
-      bossBar.setTitle(getBossBarTitle());
-      bossBar.setProgress(Math.max(0, Math.min(1, entity.getHealth() / (double) maxHealth)));
+    if (entity != null) {
+      entity.setCustomName(createNameTag());
     }
+    updateBossBar();
+  }
+
+  private void updateBossBar() {
+    if (bossBar == null || nameTagType != EntityNameTag.BOSS) return;
+
+    bossBar.setTitle(getBossBarTitle());
+    double progress = Math.max(0, Math.min(1, entity.getHealth() / (double) maxHealth));
+    bossBar.setProgress(progress);
   }
 
   protected String createNameTag() {
@@ -210,6 +235,7 @@ public abstract class BlightedEntity implements Cloneable {
 
   protected void createBossBar() {
     if (bossBar != null) return;
+
     bossBar = Bukkit.createBossBar(getBossBarTitle(), bossBarColor, bossBarStyle);
     bossBar.setProgress(1.0);
     Bukkit.getOnlinePlayers().forEach(bossBar::addPlayer);
@@ -237,10 +263,10 @@ public abstract class BlightedEntity implements Cloneable {
   }
 
   public void removeBossBar() {
-    if (bossBar != null) {
-      bossBar.removeAll();
-      bossBar = null;
-    }
+    if (bossBar == null) return;
+
+    bossBar.removeAll();
+    bossBar = null;
   }
 
   public void dropLoot(Location location, BlightedPlayer player) {
@@ -250,12 +276,20 @@ public abstract class BlightedEntity implements Cloneable {
 
   protected final void addRepeatingTask(Supplier<BukkitRunnable> factory, long delayTicks, long periodTicks) {
     lifecycleTasks.addRepeatingTask(factory, delayTicks, periodTicks);
-    if (entity != null && !entity.isDead() && runtimeInitialized) lifecycleTasks.scheduleLast();
+    if (canScheduleTask()) {
+      lifecycleTasks.scheduleLast();
+    }
   }
 
   protected final void addDelayedTask(Supplier<BukkitRunnable> factory, long delayTicks) {
     lifecycleTasks.addDelayedTask(factory, delayTicks);
-    if (entity != null && !entity.isDead() && runtimeInitialized) lifecycleTasks.scheduleLast();
+    if (canScheduleTask()) {
+      lifecycleTasks.scheduleLast();
+    }
+  }
+
+  private boolean canScheduleTask() {
+    return entity != null && !entity.isDead() && runtimeInitialized;
   }
 
   public static void addAttachment(EntityAttachment attachment) {
@@ -264,46 +298,50 @@ public abstract class BlightedEntity implements Cloneable {
     ENTITY_ATTACHMENTS.put(attachment.entity(), attachment);
     attachment.owner().attachments.add(attachment);
 
-    try {
-      Entity e = attachment.entity();
-      if (e instanceof LivingEntity living) {
-        EntityEquipment eq = living.getEquipment();
-        if (eq != null) {
-          eq.setHelmetDropChance(0);
-          eq.setChestplateDropChance(0);
-          eq.setLeggingsDropChance(0);
-          eq.setBootsDropChance(0);
-          eq.setItemInMainHandDropChance(0);
-          eq.setItemInOffHandDropChance(0);
-        }
-      }
-    } catch (Throwable ignored) {
+    if (attachment.entity() instanceof LivingEntity living) {
+      disableAttachmentEquipmentDrops(living);
     }
+  }
+
+  private static void disableAttachmentEquipmentDrops(LivingEntity living) {
+    EntityEquipment equipment = living.getEquipment();
+    if (equipment == null) return;
+
+    equipment.setHelmetDropChance(0);
+    equipment.setChestplateDropChance(0);
+    equipment.setLeggingsDropChance(0);
+    equipment.setBootsDropChance(0);
+    equipment.setItemInMainHandDropChance(0);
+    equipment.setItemInOffHandDropChance(0);
   }
 
   public static void unregisterAttachment(EntityAttachment attachment) {
     if (attachment == null) return;
+
     ENTITY_ATTACHMENTS.remove(attachment.entity());
-    if (attachment.owner() != null) attachment.owner().attachments.remove(attachment);
+    if (attachment.owner() != null) {
+      attachment.owner().attachments.remove(attachment);
+    }
   }
 
-  private void removeAttachment() {
+  private void removeAllAttachments() {
     for (EntityAttachment attachment : new ArrayList<>(attachments)) {
-      Entity entity = attachment.entity();
-      if (entity != null && !entity.isDead()) entity.remove();
-      ENTITY_ATTACHMENTS.remove(attachment.entity());
-      attachments.remove(attachment);
+      Entity attachmentEntity = attachment.entity();
+      if (attachmentEntity != null && !attachmentEntity.isDead()) {
+        attachmentEntity.remove();
+      }
+      ENTITY_ATTACHMENTS.remove(attachmentEntity);
     }
     attachments.clear();
   }
 
   public void killAllAttachments() {
     for (EntityAttachment attachment : new ArrayList<>(attachments)) {
-      Entity entity = attachment.entity();
-      if (entity instanceof LivingEntity living && !living.isDead()) {
+      Entity attachmentEntity = attachment.entity();
+      if (attachmentEntity instanceof LivingEntity living && !living.isDead()) {
         living.setHealth(0);
       }
-      ENTITY_ATTACHMENTS.remove(entity);
+      ENTITY_ATTACHMENTS.remove(attachmentEntity);
     }
     attachments.clear();
   }
@@ -370,26 +408,29 @@ public abstract class BlightedEntity implements Cloneable {
       clone.runtimeInitialized = false;
 
       clone.attributes = new HashMap<>(this.attributes);
-      clone.immunityRules = new ArrayList<>(this.immunityRules);
-      clone.lifecycleTasks = new LifecycleTaskManager();
-
       clone.attachments.clear();
 
-      if (this.armor != null) {
-        clone.armor = new ItemStack[this.armor.length];
-        for (int armorPiece = 0; armorPiece < this.armor.length; armorPiece++) {
-          clone.armor[armorPiece] = this.armor[armorPiece] != null ? this.armor[armorPiece].clone() : null;
-        }
-      } else {
-        clone.armor = null;
-      }
-
-      clone.itemInMainHand = this.itemInMainHand != null ? this.itemInMainHand.clone() : null;
-      clone.itemInOffHand = this.itemInOffHand != null ? this.itemInOffHand.clone() : null;
+      clone.armor = cloneArmor();
+      clone.itemInMainHand = cloneItem(this.itemInMainHand);
+      clone.itemInOffHand = cloneItem(this.itemInOffHand);
 
       return clone;
     } catch (CloneNotSupportedException e) {
       throw new RuntimeException("Failed to clone BlightedEntity", e);
     }
+  }
+
+  private ItemStack[] cloneArmor() {
+    if (this.armor == null) return null;
+
+    ItemStack[] clonedArmor = new ItemStack[this.armor.length];
+    for (int i = 0; i < this.armor.length; i++) {
+      clonedArmor[i] = cloneItem(this.armor[i]);
+    }
+    return clonedArmor;
+  }
+
+  private ItemStack cloneItem(ItemStack item) {
+    return item != null ? item.clone() : null;
   }
 }

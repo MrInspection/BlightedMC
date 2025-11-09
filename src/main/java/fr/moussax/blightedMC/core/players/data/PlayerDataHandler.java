@@ -44,7 +44,7 @@ public class PlayerDataHandler {
   }
 
   public void setFavors(int favors) {
-    playerData.setFavors(favors);
+    playerData.setGems(favors);
   }
 
   public void setMana(double mana) {

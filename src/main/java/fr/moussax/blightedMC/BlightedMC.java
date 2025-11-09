@@ -2,7 +2,7 @@ package fr.moussax.blightedMC;
 
 import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedMC.registry.RegistrySystem;
+import fr.moussax.blightedMC.core.CoreRegistry;
 import org.bukkit.Chunk;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,7 +14,7 @@ public final class BlightedMC extends JavaPlugin {
   public void onEnable() {
     instance = this;
 
-    RegistrySystem.initializeAllRegistries();
+    CoreRegistry.initializeAllRegistries();
     eventsRegistry = new EventsRegistry();
     eventsRegistry.initializeListeners();
 
@@ -37,7 +37,7 @@ public final class BlightedMC extends JavaPlugin {
     if (eventsRegistry != null && eventsRegistry.getBlockListener() != null) {
       eventsRegistry.getBlockListener().saveData();
     }
-    RegistrySystem.clearAllRegistries();
+    CoreRegistry.clearAllRegistries();
   }
 
   public static BlightedMC getInstance() {

@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
 
-import static fr.moussax.blightedMC.utils.formatting.MessageUtils.*;
+import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 
 public class GodCommand implements CommandExecutor {
   @Override
@@ -23,7 +23,7 @@ public class GodCommand implements CommandExecutor {
 
     Player target = Bukkit.getPlayerExact(args[0]);
     if (target == null) {
-      warnSender(player, "Unable to find the player §4" + args[0] + "§c.");
+      warn(player, "Unable to find the player §4" + args[0] + "§c.");
       return false;
     }
     toggleTargetGodMode(player, target);
@@ -33,10 +33,10 @@ public class GodCommand implements CommandExecutor {
   private void toggleGodMode(Player p) {
     if (p.isInvulnerable()) {
       p.setInvulnerable(false);
-      informSender(p, "You are no longer in §f§lGOD §7mode.");
+      inform(p, "You are no longer in §f§lGOD §7mode.");
     } else {
       p.setInvulnerable(true);
-      informSender(p, "You are now in §f§lGOD §7mode.");
+      inform(p, "You are now in §f§lGOD §7mode.");
     }
   }
 
@@ -50,9 +50,9 @@ public class GodCommand implements CommandExecutor {
 
     toggleGodMode(target);
     if (isInvulnerable) {
-      informSender(sender, "You disabled §f§lGOD §7mode for §d" + target.getName() + "§7.");
+      inform(sender, "You disabled §f§lGOD §7mode for §d" + target.getName() + "§7.");
     } else {
-      informSender(sender, "You enabled §f§lGOD §7mode for §d" + target.getName() + "§7.");
+      inform(sender, "You enabled §f§lGOD §7mode for §d" + target.getName() + "§7.");
     }
   }
 }

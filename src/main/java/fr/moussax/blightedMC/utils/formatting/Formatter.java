@@ -1,26 +1,70 @@
 package fr.moussax.blightedMC.utils.formatting;
 
+import jdk.jfr.Experimental;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.ChatColor;
+import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.Collections;
+import java.util.List;
 
-public class Formatter {
-  private static final DecimalFormat decimalFormat = new DecimalFormat("#,###");
+import static com.google.common.base.Strings.repeat;
 
-  public static String capitalize(String s) {
-    return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+/**
+ * Unified utility class for text formatting, number formatting, and player messaging.
+ *
+ * <p>Provides methods for:
+ * <ul>
+ *   <li>String formatting (capitalization, enum names, time)</li>
+ *   <li>Number formatting (decimals, compact notation, Roman numerals)</li>
+ *   <li>Player messaging (info, warnings, admin checks)</li>
+ *   <li>Interactive chat components (clickable, hoverable text)</li>
+ * </ul>
+ */
+public final class Formatter {
+  private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###");
+  private static final String ADMIN_PERMISSION = "blightedmc.admin";
+  private static final String INFO_PREFIX = "§8 ■ §7";
+  private static final String WARN_PREFIX = "§4 ■ §c";
+
+  private Formatter() {}
+
+  // ==================== STRING FORMATTING ====================
+
+  /**
+   * Capitalizes the first letter of a string and lowercases the rest.
+   *
+   * @param text the string to capitalize
+   * @return capitalized string
+   */
+  @Nonnull
+  public static String capitalize(@Nonnull String text) {
+    if (text.isEmpty()) {
+      return text;
+    }
+    return text.substring(0, 1).toUpperCase() + text.substring(1).toLowerCase();
   }
 
   /**
-   * Converts an UPPER_CASE_UNDERSCORE string into a capitalized space-separated string.
-   * Example: "RANGED_WEAPON" -> "Ranged Weapon".
+   * Converts UPPER_CASE_UNDERSCORE format to Title Case with spaces.
    *
-   * @param input the string to format
-   * @return the formatted string, or the original if null or empty
+   * @param input the enum-style string to format
+   * @return formatted string (e.g., "RANGED_WEAPON" → "Ranged Weapon")
    */
-  public static String formatEnumName(String input) {
+  @Nonnull
+  public static String formatEnumName(@Nullable String input) {
     if (input == null || input.isEmpty()) {
-      return input;
+      return input != null ? input : "";
     }
 
     String[] words = input.split("_");
@@ -38,63 +82,228 @@ public class Formatter {
     return formatted.toString();
   }
 
-
   /**
-   * Formats a double to a string with a specified number of decimal places.
-   * ex) 1.97349873, 3 -> "1.973"
-   * @param v1 double to format
-   * @param decimalPlaces number of decimal places
-   * @return formatted string
+   * Formats time in seconds to "mm:ss" format.
+   *
+   * @param timeInSeconds time in seconds
+   * @return formatted time string (e.g., 123 → "02:03")
    */
-  public static String formatDouble(double v1, int decimalPlaces) {
-    String format = "%." + decimalPlaces + "f";
-    return String.format(format, v1).replace(".0", "");
-  }
-
-  public static String formatDecimalCSV(double v1) {
-    return decimalFormat.format(v1);
-  }
-
-  public static String compactNumber(int var1) {
-    String[] units = {"", "K", "M", "B"};
-    int unitIndex = 0;
-
-    double value = var1;
-    while (value >= 1000 && unitIndex < units.length - 1) {
-      value /= 1000;
-      unitIndex++;
-    }
-
-    BigDecimal numberBigDecimal = new BigDecimal(value);
-    numberBigDecimal = numberBigDecimal.setScale(1, RoundingMode.HALF_EVEN);
-    String formattedValue = numberBigDecimal.stripTrailingZeros().toPlainString();
-
-    return formattedValue + units[unitIndex];
-  }
-
-  /**
-   * Formats a time in seconds to a string in the format "mm:ss"
-   * Example: xxx -> "02:03"
-   * @param time time in seconds
-   * @return formatted time string
-   */
-  public static String formatTime(long time) {
-    long minutes = time / 60;
-    long seconds = time % 60;
+  @Nonnull
+  public static String formatTime(long timeInSeconds) {
+    long minutes = timeInSeconds / 60;
+    long seconds = timeInSeconds % 60;
     return String.format("%02d:%02d", minutes, seconds);
   }
 
-  public static String toRomanNumeral(int number) {
-    if (number <= 0 || number > 3999) {
-      throw new IllegalArgumentException("Number out of range for Roman numerals");
+  // ==================== NUMBER FORMATTING ====================
+
+  /**
+   * Formats a double to a string with specified decimal places.
+   *
+   * @param value the value to format
+   * @param decimalPlaces number of decimal places
+   * @return formatted string (e.g., 1.97349873, 3 → "1.973")
+   */
+  @Nonnull
+  public static String formatDouble(double value, int decimalPlaces) {
+    String format = "%." + decimalPlaces + "f";
+    return String.format(format, value).replace(".0", "");
+  }
+
+  /**
+   * Formats a double with comma separators.
+   *
+   * @param value the value to format
+   * @return formatted string with commas (e.g., 1234.56 → "1,235")
+   */
+  @Nonnull
+  public static String formatDecimalWithCommas(double value) {
+    return DECIMAL_FORMAT.format(value);
+  }
+
+  /**
+   * Compacts large numbers into abbreviated format (K, M, B).
+   *
+   * @param value the number to compact
+   * @return compact notation (e.g., 1500 → "1.5K", 2000000 → "2M")
+   */
+  @Nonnull
+  public static String compactNumber(int value) {
+    String[] units = {"", "K", "M", "B"};
+    int unitIndex = 0;
+
+    double compactValue = value;
+    while (compactValue >= 1000 && unitIndex < units.length - 1) {
+      compactValue /= 1000;
+      unitIndex++;
     }
 
-    String[] M = {"", "M", "MM", "MMM"};
-    String[] C = {"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
-    String[] X = {"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
-    String[] I = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+    BigDecimal decimal = new BigDecimal(compactValue);
+    decimal = decimal.setScale(1, RoundingMode.HALF_EVEN);
+    String formatted = decimal.stripTrailingZeros().toPlainString();
 
-    return M[number / 1000] + C[(number % 1000) / 100] + X[(number % 100) / 10] + I[number % 10];
+    return formatted + units[unitIndex];
+  }
+
+  /**
+   * Converts an integer to Roman numeral representation.
+   *
+   * @param number the number to convert (1-3999)
+   * @return Roman numeral string
+   * @throws IllegalArgumentException if the number is out of the valid range
+   */
+  @Nonnull
+  public static String toRomanNumeral(int number) {
+    if (number <= 0 || number > 3999) {
+      throw new IllegalArgumentException("Number out of range for Roman numerals: " + number);
+    }
+
+    String[] thousands = {"", "M", "MM", "MMM"};
+    String[] hundreds = {"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+    String[] tens = {"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+    String[] ones = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+
+    return thousands[number / 1000]
+      + hundreds[(number % 1000) / 100]
+      + tens[(number % 100) / 10]
+      + ones[number % 10];
+  }
+
+  // ==================== PLAYER MESSAGING ====================
+
+  /**
+   * Sends informational messages to a command sender with a gray prefix.
+   *
+   * @param sender the recipient
+   * @param messages list of messages to send
+   */
+  public static void inform(@Nonnull CommandSender sender, @Nonnull List<String> messages) {
+    messages.forEach(message -> sender.sendMessage(INFO_PREFIX + message));
+  }
+
+  /**
+   * Sends informational messages to a command sender.
+   *
+   * @param sender the recipient
+   * @param messages messages to send (no prefix applied)
+   */
+  public static void inform(@Nonnull CommandSender sender, @Nonnull String... messages) {
+    for (String message : messages) {
+      sender.sendMessage(message);
+    }
+  }
+
+  /**
+   * Sends a single informational message to a command sender.
+   *
+   * @param sender the recipient
+   * @param message the message to send
+   */
+  public static void inform(@Nonnull CommandSender sender, @Nonnull String message) {
+    inform(sender, Collections.singletonList(message));
+  }
+
+  /**
+   * Sends warning messages to a command sender with red prefix and error sound.
+   *
+   * @param sender the recipient
+   * @param messages list of warning messages
+   */
+  public static void warn(@Nonnull CommandSender sender, @Nonnull List<String> messages) {
+    if (sender instanceof Player player) {
+      player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 100f, 0.5f);
+    }
+    messages.forEach(message -> sender.sendMessage(WARN_PREFIX + message));
+  }
+
+  /**
+   * Sends warning messages to a command sender with error sound.
+   *
+   * @param sender the recipient
+   * @param messages warning messages (no prefix applied)
+   */
+  public static void warn(@Nonnull CommandSender sender, @Nonnull String... messages) {
+    if (sender instanceof Player player) {
+      player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 100f, 0.5f);
+    }
+    for (String message : messages) {
+      sender.sendMessage(message);
+    }
+  }
+
+  /**
+   * Sends a single warning message to a command sender.
+   *
+   * @param sender the recipient
+   * @param message the warning message
+   */
+  public static void warn(@Nonnull CommandSender sender, @Nonnull String message) {
+    warn(sender, Collections.singletonList(message));
+  }
+
+  /**
+   * Verifies admin permission for a player.
+   *
+   * <p>Requires both operator status and the admin permission.
+   * Sends a warning message if the check fails.
+   *
+   * @param player the player to check
+   * @return {@code true} if player has admin permission
+   */
+  public static boolean enforceAdminPermission(@Nonnull Player player) {
+    if (!player.isOp() || !player.hasPermission(ADMIN_PERMISSION)) {
+      warn(player, "You must be an §4ADMIN §cto use this command.");
+      return false;
+    }
+    return true;
+  }
+
+  // ==================== INTERACTIVE COMPONENTS ====================
+
+  /**
+   * Creates an interactive text component with hover and optional click action.
+   *
+   * @param text the visible text
+   * @param hoverText text displayed on hover
+   * @param clickAction the click action type (or {@code null})
+   * @param clickValue the value for the click action (or {@code null})
+   * @return configured text component
+   */
+  @SuppressWarnings("deprecation")
+  @Nonnull
+  public static TextComponent createInteractiveText(
+    @Nonnull String text,
+    @Nonnull String hoverText,
+    @Nullable ClickEvent.Action clickAction,
+    @Nullable String clickValue
+  ) {
+    TextComponent component = new TextComponent(text);
+    component.setHoverEvent(new HoverEvent(
+      HoverEvent.Action.SHOW_TEXT,
+      new ComponentBuilder(hoverText).create()
+    ));
+
+    if (clickAction != null && clickValue != null) {
+      component.setClickEvent(new ClickEvent(clickAction, clickValue));
+    }
+
+    return component;
+  }
+
+  /**
+   * Creates a progress bar string representation.
+   *
+   * @param percent the current progress value
+   * @param max the maximum number of segments in the bar
+   * @param bar the value each segment represents
+   * @return formatted progress bar string
+   */
+  public static String createProgressBar(double percent, double max, double bar) {
+    double filledBars = percent / bar;
+    double emptyBars = max - filledBars;
+
+    if(filledBars > max) filledBars = max;
+
+    return ChatColor.DARK_GREEN + repeat("-", (int) filledBars) + ChatColor.WHITE + repeat("-", (int) emptyBars);
   }
 }
-

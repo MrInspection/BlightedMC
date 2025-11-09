@@ -5,7 +5,7 @@ import fr.moussax.blightedMC.core.items.abilities.Ability;
 import fr.moussax.blightedMC.core.items.abilities.AbilityExecutor;
 import fr.moussax.blightedMC.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
+import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
 import fr.moussax.blightedMC.core.items.rules.ItemRule;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -22,9 +22,9 @@ import org.checkerframework.checker.index.qual.Positive;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.REGISTERED_ITEMS;
-import static fr.moussax.blightedMC.core.items.registry.ItemsRegistry.ID_KEY;
+import static fr.moussax.blightedMC.core.items.registry.ItemDirectory.ID_KEY;
 
 /**
  * A class for creating custom items in BlightedMC, extending {@link ItemBuilder}.
@@ -49,6 +49,7 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
   private final String itemId;
   private final ItemRarity itemRarity;
   private final ItemType itemType;
+  private boolean isUnstackable;
   private FullSetBonus fullSetBonus;
 
   private final List<Ability> abilities = new ArrayList<>();
@@ -108,6 +109,12 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
     return this;
   }
 
+  @SuppressWarnings({"unused", "UnusedReturnValue"})
+  public ItemTemplate isUnstackable() {
+    this.isUnstackable = true;
+    return this;
+  }
+
   public void setFullSetBonus(FullSetBonus bonus) {
     this.fullSetBonus = bonus;
   }
@@ -126,7 +133,7 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
     String itemId = container.get(ID_KEY, PersistentDataType.STRING);
     if (itemId == null) return null;
 
-    return REGISTERED_ITEMS.get(itemId);
+    return ItemDirectory.getItem(itemId);
   }
 
   public void triggerAbilities(BlightedPlayer blightedPlayer, Event event) {
@@ -163,18 +170,6 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
     return true;
   }
 
-  /**
-   * Registers this item in the {@link ItemsRegistry}, making it available globally.
-   * Throws an exception if the item ID already exists.
-   *
-   * @return this {@code ItemFactory} instance for chaining.
-   */
-  @SuppressWarnings("UnusedReturnValue")
-  public ItemTemplate addToRegistry() {
-    ItemsRegistry.addItem(this);
-    return this;
-  }
-
   @Override
   public boolean canPlace(BlockPlaceEvent event, ItemStack itemStack) {
     for (ItemRule rule : rules) {
@@ -207,6 +202,12 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
     assert meta != null;
     meta.getPersistentDataContainer().set(ITEM_ID_KEY, PersistentDataType.STRING, itemId);
     meta.getPersistentDataContainer().set(ITEM_RARITY_KEY, PersistentDataType.STRING, itemRarity.name());
+
+    if (isUnstackable) {
+      NamespacedKey unstackableKey = new NamespacedKey(BlightedMC.getInstance(), "unstackable");
+      meta.getPersistentDataContainer().set(unstackableKey, PersistentDataType.STRING, UUID.randomUUID().toString());
+    }
+
     item.setItemMeta(meta);
     return item;
   }

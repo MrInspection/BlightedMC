@@ -7,7 +7,7 @@ import fr.moussax.blightedMC.core.items.abilities.CooldownEntry;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.core.players.data.PlayerDataHandler;
 import fr.moussax.blightedMC.core.players.managers.ActionBarManager;
-import fr.moussax.blightedMC.core.players.managers.FavorsManager;
+import fr.moussax.blightedMC.core.players.managers.GemsManager;
 import fr.moussax.blightedMC.core.players.managers.ManaManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -24,7 +24,7 @@ public class BlightedPlayer {
 
   private final Player player;
   private final UUID playerId;
-  private final FavorsManager favors;
+  private final GemsManager gems;
   private final PlayerDataHandler dataHandler;
   private final ActionBarManager actionBarManager;
   private final ManaManager manaManager;
@@ -41,8 +41,8 @@ public class BlightedPlayer {
     this.playerId = player.getUniqueId();
     this.dataHandler = new PlayerDataHandler(playerId, player.getName());
 
-    this.favors = new FavorsManager();
-    this.favors.setFavors(dataHandler.getPlayerData().getFavors());
+    this.gems = new GemsManager();
+    this.gems.setGems(dataHandler.getPlayerData().getGems());
 
     this.manaManager = new ManaManager(DEFAULT_MAX_MANA, DEFAULT_MANA_REGEN_RATE);
     this.manaManager.setCurrentMana(dataHandler.getPlayerData().getMana());
@@ -166,24 +166,24 @@ public class BlightedPlayer {
     return playerId;
   }
 
-  public FavorsManager getFavors() {
-    return favors;
+  public GemsManager getGems() {
+    return gems;
   }
 
   public void addFavors(int value) {
     if (value == 0) return;
-    favors.addFavors(value);
+    gems.addGems(value);
     actionBarManager.tick();
   }
 
   public void removeFavors(int value) {
     if (value == 0) return;
-    favors.removeFavors(value);
+    gems.removeGems(value);
     actionBarManager.tick();
   }
 
-  public void setFavors(int value) {
-    favors.setFavors(value);
+  public void setGems(int value) {
+    gems.setGems(value);
     actionBarManager.tick();
   }
 
@@ -197,7 +197,7 @@ public class BlightedPlayer {
   }
 
   public void saveData() {
-    dataHandler.setFavors(favors.getFavors());
+    dataHandler.setFavors(gems.getGems());
     dataHandler.setMana(manaManager.getCurrentMana());
     dataHandler.save();
   }
