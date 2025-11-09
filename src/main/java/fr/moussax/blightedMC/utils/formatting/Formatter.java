@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC.utils.formatting;
 
-import jdk.jfr.Experimental;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -37,7 +36,8 @@ public final class Formatter {
   private static final String INFO_PREFIX = "§8 ■ §7";
   private static final String WARN_PREFIX = "§4 ■ §c";
 
-  private Formatter() {}
+  private Formatter() {
+  }
 
   // ==================== STRING FORMATTING ====================
 
@@ -64,7 +64,7 @@ public final class Formatter {
   @Nonnull
   public static String formatEnumName(@Nullable String input) {
     if (input == null || input.isEmpty()) {
-      return input != null ? input : "";
+      return "";
     }
 
     String[] words = input.split("_");
@@ -100,14 +100,17 @@ public final class Formatter {
   /**
    * Formats a double to a string with specified decimal places.
    *
-   * @param value the value to format
+   * @param value         the value to format
    * @param decimalPlaces number of decimal places
    * @return formatted string (e.g., 1.97349873, 3 → "1.973")
    */
   @Nonnull
   public static String formatDouble(double value, int decimalPlaces) {
+    if (decimalPlaces == 0 || value == Math.floor(value)) {
+      return String.format("%.0f", value);
+    }
     String format = "%." + decimalPlaces + "f";
-    return String.format(format, value).replace(".0", "");
+    return String.format(format, value).replaceAll("\\.?0+$", "");
   }
 
   /**
@@ -174,7 +177,7 @@ public final class Formatter {
   /**
    * Sends informational messages to a command sender with a gray prefix.
    *
-   * @param sender the recipient
+   * @param sender   the recipient
    * @param messages list of messages to send
    */
   public static void inform(@Nonnull CommandSender sender, @Nonnull List<String> messages) {
@@ -184,7 +187,7 @@ public final class Formatter {
   /**
    * Sends informational messages to a command sender.
    *
-   * @param sender the recipient
+   * @param sender   the recipient
    * @param messages messages to send (no prefix applied)
    */
   public static void inform(@Nonnull CommandSender sender, @Nonnull String... messages) {
@@ -196,7 +199,7 @@ public final class Formatter {
   /**
    * Sends a single informational message to a command sender.
    *
-   * @param sender the recipient
+   * @param sender  the recipient
    * @param message the message to send
    */
   public static void inform(@Nonnull CommandSender sender, @Nonnull String message) {
@@ -206,7 +209,7 @@ public final class Formatter {
   /**
    * Sends warning messages to a command sender with red prefix and error sound.
    *
-   * @param sender the recipient
+   * @param sender   the recipient
    * @param messages list of warning messages
    */
   public static void warn(@Nonnull CommandSender sender, @Nonnull List<String> messages) {
@@ -219,7 +222,7 @@ public final class Formatter {
   /**
    * Sends warning messages to a command sender with error sound.
    *
-   * @param sender the recipient
+   * @param sender   the recipient
    * @param messages warning messages (no prefix applied)
    */
   public static void warn(@Nonnull CommandSender sender, @Nonnull String... messages) {
@@ -234,7 +237,7 @@ public final class Formatter {
   /**
    * Sends a single warning message to a command sender.
    *
-   * @param sender the recipient
+   * @param sender  the recipient
    * @param message the warning message
    */
   public static void warn(@Nonnull CommandSender sender, @Nonnull String message) {
@@ -263,10 +266,10 @@ public final class Formatter {
   /**
    * Creates an interactive text component with hover and optional click action.
    *
-   * @param text the visible text
-   * @param hoverText text displayed on hover
+   * @param text        the visible text
+   * @param hoverText   text displayed on hover
    * @param clickAction the click action type (or {@code null})
-   * @param clickValue the value for the click action (or {@code null})
+   * @param clickValue  the value for the click action (or {@code null})
    * @return configured text component
    */
   @SuppressWarnings("deprecation")
@@ -294,15 +297,15 @@ public final class Formatter {
    * Creates a progress bar string representation.
    *
    * @param percent the current progress value
-   * @param max the maximum number of segments in the bar
-   * @param bar the value each segment represents
+   * @param max     the maximum number of segments in the bar
+   * @param bar     the value each segment represents
    * @return formatted progress bar string
    */
   public static String createProgressBar(double percent, double max, double bar) {
     double filledBars = percent / bar;
     double emptyBars = max - filledBars;
 
-    if(filledBars > max) filledBars = max;
+    if (filledBars > max) filledBars = max;
 
     return ChatColor.DARK_GREEN + repeat("-", (int) filledBars) + ChatColor.WHITE + repeat("-", (int) emptyBars);
   }

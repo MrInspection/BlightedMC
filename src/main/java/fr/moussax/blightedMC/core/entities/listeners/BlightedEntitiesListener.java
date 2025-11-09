@@ -54,6 +54,9 @@ public class BlightedEntitiesListener implements Listener {
       }
     } finally {
       processingDamageEntityIds.get().remove(entity.getUniqueId());
+      if (processingDamageEntityIds.get().isEmpty()) {
+        processingDamageEntityIds.remove();
+      }
     }
   }
 
@@ -200,7 +203,8 @@ public class BlightedEntitiesListener implements Listener {
 
     try {
       BlightedEntity.unregisterAttachment(attachment);
-    } catch (Throwable ignored) {}
+    } catch (Throwable ignored) {
+    }
 
     event.getDrops().clear();
     event.setDroppedExp(0);
@@ -254,14 +258,14 @@ public class BlightedEntitiesListener implements Listener {
     try {
       return prototype.getClass().getDeclaredConstructor().newInstance();
     } catch (Exception ex) {
-      return prototype;
+      return prototype.clone();
     }
   }
 
   private static void syncAttachmentsHealthAndArmor(BlightedEntity instance, LivingEntity owner) {
     for (EntityAttachment attachment : new ArrayList<>(instance.attachments)) {
       if (attachment.entity() instanceof LivingEntity living && !living.isDead()) {
-        living.setHealth(instance.getMaxHealth());
+        living.setHealth(owner.getHealth());
         syncArmor(living, owner);
       }
     }

@@ -20,12 +20,12 @@ public record GemsItem(int amount) implements ItemGenerator {
     ItemMeta meta = itemStack.getItemMeta();
     assert meta != null;
     Integer value = meta.getPersistentDataContainer()
-      .get(new NamespacedKey(BlightedMC.getInstance(), "favorsValue"), PersistentDataType.INTEGER);
+      .get(new NamespacedKey(BlightedMC.getInstance(), "gemsValue"), PersistentDataType.INTEGER);
     this(value != null ? value : 1);
   }
 
   public void addFavors(BlightedPlayer player) {
-    player.addFavors(amount);
+    player.addGems(amount);
   }
 
   public static class BlightedGemstoneAbility implements AbilityManager<PlayerInteractEvent> {
@@ -37,7 +37,7 @@ public record GemsItem(int amount) implements ItemGenerator {
       GemsItem gemsItem = new GemsItem(event.getItem());
 
       if (gemsItem.amount <= 0) {
-        Formatter.warn(event.getPlayer(), "This gemstone doesn't have any favors to redeem.");
+        Formatter.warn(event.getPlayer(), "This gemstone doesn't have any gems to redeem.");
         return false;
       }
 
@@ -77,9 +77,9 @@ public record GemsItem(int amount) implements ItemGenerator {
   public ItemStack createItemStack() {
     ItemTemplate itemTemplate = ItemDirectory.getItem("BLIGHTED_GEMSTONE");
     if (itemTemplate == null) {
-      throw new IllegalStateException("BLIGHTED_GEMSTONE is not registered. Ensure ItemDirectory.initializeItems() runs before creating Favors items.");
+      throw new IllegalStateException("BLIGHTED_GEMSTONE is not registered. Ensure ItemDirectory.initializeItems() runs before creating Gems items.");
     }
-    itemTemplate.setLore("§7Favors trapped: §d" + amount + "✵", 6);
+    itemTemplate.setLore("§7Gems trapped: §d" + amount + "✵", 6);
     ItemStack itemStack = itemTemplate.toItemStack();
 
     ItemMeta meta = itemStack.getItemMeta();

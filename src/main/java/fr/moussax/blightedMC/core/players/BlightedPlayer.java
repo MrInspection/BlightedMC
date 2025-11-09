@@ -170,13 +170,13 @@ public class BlightedPlayer {
     return gems;
   }
 
-  public void addFavors(int value) {
+  public void addGems(int value) {
     if (value == 0) return;
     gems.addGems(value);
     actionBarManager.tick();
   }
 
-  public void removeFavors(int value) {
+  public void removeGems(int value) {
     if (value == 0) return;
     gems.removeGems(value);
     actionBarManager.tick();
@@ -197,7 +197,7 @@ public class BlightedPlayer {
   }
 
   public void saveData() {
-    dataHandler.setFavors(gems.getGems());
+    dataHandler.setGems(gems.getGems());
     dataHandler.setMana(manaManager.getCurrentMana());
     dataHandler.save();
   }

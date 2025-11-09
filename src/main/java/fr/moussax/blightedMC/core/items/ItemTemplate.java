@@ -39,7 +39,6 @@ import static fr.moussax.blightedMC.core.items.registry.ItemDirectory.ID_KEY;
  *      .setDisplayName("§cBlazing Sword")
  *      .addAbility(new FireSlashAbility())
  *      .addRule(new CannotPlaceOnGrassRule());
- *      .addToRegistry();
  * }</pre>
  */
 public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator {

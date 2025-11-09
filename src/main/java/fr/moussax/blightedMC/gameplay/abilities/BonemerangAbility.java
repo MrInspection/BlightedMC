@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
   private static final NamespacedKey UUID_KEY = new NamespacedKey("blightedmc", "bonemerang_uuid");
-  private static final Map<UUID, Map<String, Long>> cooldowns = new WeakHashMap<>();
+  private static final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
 
   private static final int OUTBOUND_TICKS = 13;
   private static final int RETURN_TICKS = 13;

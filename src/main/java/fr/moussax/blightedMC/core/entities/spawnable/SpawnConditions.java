@@ -21,7 +21,7 @@ public final class SpawnConditions {
   }
 
   public static SpawnCondition skyExposed() {
-    return (loc, world) -> world.getHighestBlockYAt(loc) == loc.getBlockY();
+    return (loc, world) -> world.getHighestBlockYAt(loc) < loc.getBlockY();
   }
 
   public static SpawnCondition notInWater() {

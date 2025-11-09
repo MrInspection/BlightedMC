@@ -43,7 +43,7 @@ public class PlayerDataHandler {
     return playerData;
   }
 
-  public void setFavors(int favors) {
+  public void setGems(int favors) {
     playerData.setGems(favors);
   }
 

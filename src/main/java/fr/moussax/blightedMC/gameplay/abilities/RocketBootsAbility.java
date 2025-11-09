@@ -64,7 +64,7 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
       event.setCancelled(true);
       p.setAllowFlight(false);
       p.setVelocity(p.getLocation().getDirection().setY(0.5).multiply(1.25));
-      applyDurabilityDamageToBoots(p, 1);
+      applyDurabilityDamageToBoots(p);
       p.getWorld().spawnParticle(Particle.CLOUD, p.getLocation(), 12, 0.2, 0.05, 0.2, 0.001);
       p.getWorld().playSound(p.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 60f, 0f);
     }
@@ -83,7 +83,9 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
     }
   }
 
-  private void applyDurabilityDamageToBoots(Player player, @SuppressWarnings("SameParameterValue") @Positive int damage) {
+  private void applyDurabilityDamageToBoots(Player player) {
+    int damage = 1;
+
     ItemStack boots = player.getInventory().getBoots();
     if (boots == null) return;
     if (!boots.hasItemMeta()) return;

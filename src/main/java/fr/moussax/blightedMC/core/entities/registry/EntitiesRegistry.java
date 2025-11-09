@@ -17,6 +17,7 @@ public final class EntitiesRegistry {
 
   public static void clearEntities() {
     ENTITIES.clear();
+    SpawnableEntitiesRegistry.clearEntities();
   }
 
   public static void registerEntity(BlightedEntity entity) {
