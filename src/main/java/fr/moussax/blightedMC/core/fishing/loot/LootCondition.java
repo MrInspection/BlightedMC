@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.fishing.LootTable;
+package fr.moussax.blightedMC.core.fishing.loot;
 
 import org.bukkit.World;
 import org.bukkit.block.Biome;

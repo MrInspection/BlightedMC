@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.fishing.LootTable;
+package fr.moussax.blightedMC.core.fishing.loot;
 
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;

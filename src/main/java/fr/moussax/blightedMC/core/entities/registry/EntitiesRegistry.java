@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.core.entities.registry;
 
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnableEntity;
+import fr.moussax.blightedMC.gameplay.entities.Dummy;
 import fr.moussax.blightedMC.gameplay.entities.bosses.RevenantHorror;
 import fr.moussax.blightedMC.gameplay.entities.bosses.TheAncientKnight;
 import fr.moussax.blightedMC.gameplay.entities.spawnable.LaserEngineer;
@@ -47,6 +48,7 @@ public final class EntitiesRegistry {
     registerEntity(new RevenantHorror());
     registerEntity(new BlightedZombie());
     registerEntity(new LaserEngineer());
+    registerEntity(new Dummy());
     Log.info(REGISTRY_PREFIX,  "Registered " + ENTITIES.size() + " entities.");
   }
 }

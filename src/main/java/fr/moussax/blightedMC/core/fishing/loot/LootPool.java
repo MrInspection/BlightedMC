@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.fishing.LootTable;
+package fr.moussax.blightedMC.core.fishing.loot;
 
 import java.util.ArrayList;
 import java.util.List;
