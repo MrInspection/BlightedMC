@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.gameplay.blocks;
 
-import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
+import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
 import fr.moussax.blightedMC.core.items.blocks.BlightedBlock;
 import fr.moussax.blightedMC.core.items.crafting.menu.CraftingTableMenu;
 import org.bukkit.Material;
@@ -13,7 +13,7 @@ public class BlightedCraftingTable extends BlightedBlock {
   public static BlightedCraftingTable INSTANCE;
 
   public BlightedCraftingTable() {
-    super(Material.FLETCHING_TABLE, ItemsRegistry.REGISTERED_ITEMS.get("BLIGHTED_CRAFTING_TABLE"));
+    super(Material.FLETCHING_TABLE, ItemDirectory.getItem("BLIGHTED_CRAFTING_TABLE"));
     INSTANCE = this;
   }
 

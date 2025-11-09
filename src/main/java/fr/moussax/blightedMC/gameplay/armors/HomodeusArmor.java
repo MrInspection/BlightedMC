@@ -1,19 +1,20 @@
 package fr.moussax.blightedMC.gameplay.armors;
 
-import fr.moussax.blightedMC.core.items.ItemGroup;
 import fr.moussax.blightedMC.core.items.ItemRarity;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.items.ItemType;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
+import fr.moussax.blightedMC.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.gameplay.abilities.HomodeusFlightAbility;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 
 import java.util.List;
 
-public class HomodeusArmor implements ItemGroup {
+public class HomodeusArmor implements ItemRegistry {
+
   @Override
-  public List<ItemTemplate> registerItems() {
+  public List<ItemTemplate> defineItems() {
     FullSetBonus homodeusFlightBonus = new HomodeusFlightAbility();
 
     ItemTemplate homodeusHelmet = new ItemTemplate(
@@ -88,6 +89,6 @@ public class HomodeusArmor implements ItemGroup {
     );
     homodeusBoots.setFullSetBonus(homodeusFlightBonus);
 
-    return List.of(homodeusHelmet, homodeusChestplate, homodeusLeggings, homodeusBoots);
+    return ItemRegistry.add(List.of(homodeusHelmet, homodeusChestplate, homodeusLeggings, homodeusBoots));
   }
 }

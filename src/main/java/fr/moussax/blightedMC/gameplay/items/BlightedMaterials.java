@@ -1,16 +1,17 @@
 package fr.moussax.blightedMC.gameplay.items;
 
 import fr.moussax.blightedMC.core.items.*;
-import fr.moussax.blightedMC.core.items.ItemGroup;
+import fr.moussax.blightedMC.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.core.items.rules.PreventPlacementRule;
 import fr.moussax.blightedMC.core.items.rules.PreventProjectileLaunchRule;
 import org.bukkit.Material;
 
 import java.util.List;
 
-public class BlightedMaterials implements ItemGroup {
+public class BlightedMaterials implements ItemRegistry {
+
   @Override
-  public List<ItemTemplate> registerItems() {
+  public List<ItemTemplate> defineItems() {
 
     ItemTemplate enchantedIronIngot = new ItemTemplate(
       "ENCHANTED_IRON_INGOT", ItemType.MATERIAL, ItemRarity.UNCOMMON,
@@ -42,11 +43,6 @@ public class BlightedMaterials implements ItemGroup {
     enchantedGhastTear.addLore(ItemRarity.UNCOMMON.getName());
     enchantedGhastTear.addEnchantmentGlint();
 
-    return List.of(
-      enchantedIronIngot,
-      enchantedIronBlock,
-      enchantedEnderPearl,
-      enchantedGhastTear
-    );
+    return ItemRegistry.add(List.of(enchantedIronIngot, enchantedIronBlock, enchantedEnderPearl, enchantedGhastTear));
   }
 }

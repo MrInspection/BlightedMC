@@ -160,7 +160,7 @@ public class BlightedZombie extends SpawnableEntity {
     return new LootTable()
       .setMaxDrop(2)
       .addLoot(Material.ROTTEN_FLESH, 1, 3, 1, LootDropRarity.COMMON)
-      .addFavorsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
+      .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
   }
 
   @Override
