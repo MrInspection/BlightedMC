@@ -11,8 +11,8 @@ commands:
     description: Spawn a BlightedMC creature
   test:
     description: General testing command
-  favors:
-    description: Manage the Favors currency system
+  gems:
+    description: Manage the gems currency system
   laser:
     description: BlightedMC test command for lazer ability
   craft:

@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.commands.admin;
 
-import fr.moussax.blightedMC.utils.formatting.MessageUtils;
+import fr.moussax.blightedMC.utils.formatting.CommandInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -9,19 +9,16 @@ import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
 
+import static fr.moussax.blightedMC.utils.formatting.Formatter.enforceAdminPermission;
+
 public class BroadcastCommand implements CommandExecutor {
   @Override
   public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
     if (!label.equalsIgnoreCase("broadcast") || !(sender instanceof Player player)) return false;
-    MessageUtils.enforceAdminPermission(player);
+    enforceAdminPermission(player);
 
     if (args.length == 0) {
-      MessageUtils.informSender(player,
-        " ",
-        "§8 ■ §7Usage: §6/§rbroadcast §6<§fmessage§6>",
-        "§8 ■ §7Description: §eBroadcast a message to the server.",
-        " "
-      );
+      CommandInfo.sendUsage(player, "Broadcast a message to the server", "broadcast", "<message>");
       return false;
     }
 

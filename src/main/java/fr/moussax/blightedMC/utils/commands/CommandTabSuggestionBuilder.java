@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.utils.commands;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
-import fr.moussax.blightedMC.core.items.registry.ItemsRegistry;
+import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -65,7 +65,7 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
         }
 
         if (suggestions.size() == 1 && suggestions.getFirst().equals("$items")) {
-          return ItemsRegistry.getAllItems().stream()
+          return ItemDirectory.getAllItems().stream()
             .map(ItemTemplate::getItemId)
             .toList();
         }

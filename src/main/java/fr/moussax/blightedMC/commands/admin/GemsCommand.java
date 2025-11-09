@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.commands.admin;
 
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
-import fr.moussax.blightedMC.utils.formatting.MessageUtils;
+import fr.moussax.blightedMC.utils.formatting.CommandInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,25 +11,27 @@ import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
 
+import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
+
 @CommandArgument(suggestions = {"add", "remove", "set", "reset", "resetall", "giveall", "help"})
 @CommandArgument(position = 1, after = {"add", "remove", "set", "reset"}, suggestions = {"$players"})
-public class FavorsCommand implements CommandExecutor {
+public class GemsCommand implements CommandExecutor {
 
   @Override
   public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
-    if (!label.equalsIgnoreCase("favors") || !(sender instanceof Player player)) return false;
-    MessageUtils.enforceAdminPermission(player);
+    if (!label.equalsIgnoreCase("gems") || !(sender instanceof Player player)) return false;
+    enforceAdminPermission(player);
 
     if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
-      player.sendMessage(" ");
-      player.sendMessage("§8 ■ §6/§ffavors §6add §6<§fplayer§6> §6[§famount§6] §8- §7Give favors to a player.");
-      player.sendMessage("§8 ■ §6/§ffavors §6remove §6<§fplayer§6> §6[§famount§6] §8- §7Take favors from a player.");
-      player.sendMessage("§8 ■ §6/§ffavors §6set §6<§fplayer§6> §6[§famount§6] §8- §7Set favors for a player.");
-      player.sendMessage("§8 ■ §6/§ffavors §6reset §6<§fplayer§6> §8- §7Reset favors for a player.");
-      player.sendMessage("§8 ■ §6/§ffavors §6giveall §6[§famount§6] §8- §7Favors for everyone.");
-      player.sendMessage("§8 ■ §6/§ffavors §6resetall §8- §7Reset §eeveryone§7's balance.");
-      player.sendMessage("§8 ■ §6/§ffavors §6help §8- §7Prints this help message.");
-      player.sendMessage(" ");
+      CommandInfo.sendCommands(player, "COMMANDS", "Gems Currency",
+        CommandInfo.Entry.of("Give gems to a player.", "gems", "add", "<player>", "[amount]"),
+        CommandInfo.Entry.of("Take gems from a player.", "gems", "remove", "<player>", "[amount]"),
+        CommandInfo.Entry.of("Set gems for a player.", "gems", "set", "<player>", "[amount]"),
+        CommandInfo.Entry.of("Reset gems for a player.", "gems", "reset", "<player>"),
+        CommandInfo.Entry.of("Give gems to everyone.", "gems", "giveall", "[amount]"),
+        CommandInfo.Entry.of("Reset everyone’s balance.", "gems", "resetall"),
+        CommandInfo.Entry.of("Prints this help message.", "gems", "help")
+      );
       return false;
     }
 
@@ -53,7 +55,7 @@ public class FavorsCommand implements CommandExecutor {
         return handleGiveAll(player, args);
       }
       default -> {
-        MessageUtils.warnSender(player, "Unknown §4favors §csubcommand.");
+        warn(player, "Unknown §4favors §csubcommand.");
         return false;
       }
     }
@@ -61,18 +63,16 @@ public class FavorsCommand implements CommandExecutor {
 
   private boolean handleModify(Player sender, String[] args, boolean add) {
     if (args.length < 3) {
-      MessageUtils.informSender(sender,
-        " ",
-        "§8 ■ §7Usage: §6/§ffavors §6" + (add ? "add" : "remove") + " §6<§fplayer§6> §6[§famount§6]",
-        "§8 ■ §7Description: §e" + (add ? "Add" : "Remove") + " favors to a player",
-        " "
+      CommandInfo.sendUsage(sender,
+        (add ? "Add" : "Remove") + " gems to a player.",
+        "gems", (add ? "add" : "remove"), "<player>", "[amount]"
       );
       return false;
     }
 
     Player target = Bukkit.getPlayerExact(args[1]);
     if (target == null) {
-      MessageUtils.warnSender(sender, "Unable to find the player §4" + args[1] + "§c.");
+      warn(sender, "Unable to find the player §4" + args[1] + "§c.");
       return false;
     }
 
@@ -80,7 +80,7 @@ public class FavorsCommand implements CommandExecutor {
     try {
       amount = Integer.parseInt(args[2]);
     } catch (NumberFormatException e) {
-      MessageUtils.warnSender(sender, "Amount must be a positive number.");
+      warn(sender, "Amount must be a positive number.");
       return false;
     }
 
@@ -102,17 +102,15 @@ public class FavorsCommand implements CommandExecutor {
 
   private boolean handleSet(Player sender, String[] args) {
     if (args.length < 3) {
-      MessageUtils.informSender(sender,
-        " ", "§8 ■ §7Usage: §6/§ffavors §6set §6<§fplayer§6> §6[§famount§6]",
-        "§8 ■ §7Description: §eSet the favors balance of a player",
-        " "
+      CommandInfo.sendUsage(sender, "Set gems for a player.",
+        "gems", "set", "<player>", "[amount]"
       );
       return false;
     }
 
     Player target = Bukkit.getPlayerExact(args[1]);
     if (target == null) {
-      MessageUtils.warnSender(sender, "Unable to find the player §4" + args[1] + "§c.");
+      warn(sender, "Unable to find the player §4" + args[1] + "§c.");
       return false;
     }
 
@@ -120,11 +118,11 @@ public class FavorsCommand implements CommandExecutor {
     try {
       amount = Integer.parseInt(args[2]);
     } catch (NumberFormatException e) {
-      MessageUtils.warnSender(sender, "Amount must be a positive number.");
+      warn(sender, "Amount must be a positive number.");
       return false;
     }
 
-    BlightedPlayer.getBlightedPlayer(target).setFavors(amount);
+    BlightedPlayer.getBlightedPlayer(target).setGems(amount);
     sender.sendMessage("§8 ■ §7You have set §d" + target.getName() + "§7's favors balance to §d" + amount + "§7.");
     target.sendMessage("§8 ■ §7You favors has been set to §d" + amount + "§7.");
     return true;
@@ -132,21 +130,19 @@ public class FavorsCommand implements CommandExecutor {
 
   private boolean handleReset(Player sender, String[] args) {
     if (args.length < 2) {
-      MessageUtils.informSender(sender, " ",
-        "§8 ■ §7Usage: §6/§ffavors §6reset §6<§fplayer§6>",
-        "§8 ■ §7Description: §eReset the favors balance of a player",
-        " "
+      CommandInfo.sendUsage(sender, "Reset gems for a player.",
+        "gems", "reset", "<player>"
       );
       return false;
     }
 
     Player target = Bukkit.getPlayerExact(args[1]);
     if (target == null) {
-      MessageUtils.warnSender(sender, "Unable to find the player §4" + args[1] + "§c.");
+      warn(sender, "Unable to find the player §4" + args[1] + "§c.");
       return false;
     }
 
-    BlightedPlayer.getBlightedPlayer(target).setFavors(0);
+    BlightedPlayer.getBlightedPlayer(target).setGems(0);
     sender.sendMessage("§8 ■ §7You have reset §d" + target.getName() + "§7's favors.");
     return true;
   }
@@ -154,7 +150,7 @@ public class FavorsCommand implements CommandExecutor {
   private boolean handleResetAll(Player sender) {
     Bukkit.getOnlinePlayers().forEach(player -> {
       BlightedPlayer bPlayer = BlightedPlayer.getBlightedPlayer(player);
-      bPlayer.setFavors(0);
+      bPlayer.setGems(0);
     });
     sender.sendMessage("§8 ■ §7All online players favor have been reset to §d0§7.");
     return true;
@@ -162,12 +158,8 @@ public class FavorsCommand implements CommandExecutor {
 
   private boolean handleGiveAll(Player sender, String[] args) {
     if (args.length < 2) {
-      MessageUtils.informSender(sender,
-        " ",
-        "§8 ■ §7Usage: §6/§ffavors §6reset §6<§fplayer§6>",
-        "§8 ■ §7Description: §eGive all online players favors.",
-        " "
-      );
+
+      CommandInfo.sendUsage(sender, "Give all online players favors.", "gems", "giveall", "[amount]");
       return false;
     }
 
@@ -175,7 +167,7 @@ public class FavorsCommand implements CommandExecutor {
     try {
       amount = Integer.parseInt(args[1]);
     } catch (NumberFormatException e) {
-      MessageUtils.warnSender(sender, "Amount must be a positive number.");
+      warn(sender, "Amount must be a positive number.");
       return false;
     }
 
@@ -185,7 +177,7 @@ public class FavorsCommand implements CommandExecutor {
       player.sendMessage("§8 ■ §7You received §d" + amount + " §7favors.");
     });
 
-    MessageUtils.informSender(sender, "§8 ■ §7You gave §d" + amount + " §7favors to all §donline §7players.");
+    inform(sender, "§8 ■ §7You gave §d" + amount + " §7favors to all §donline §7players.");
     return true;
   }
 }

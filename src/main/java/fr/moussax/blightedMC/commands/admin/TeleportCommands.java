@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.commands.admin;
 
-import fr.moussax.blightedMC.utils.formatting.MessageUtils;
+import fr.moussax.blightedMC.utils.formatting.CommandInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
 
-import static fr.moussax.blightedMC.utils.formatting.MessageUtils.*;
+import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 
 public class TeleportCommands implements CommandExecutor {
   @Override
@@ -21,28 +21,23 @@ public class TeleportCommands implements CommandExecutor {
       enforceAdminPermission(player);
 
       if(args.length == 0) {
-        MessageUtils.informSender(sender,
-          "",
-          "§8 ■ §7Usage: §6/§rtp §6<§fplayer§6>",
-          "§8 ■ §7Description: §eTeleport to a player.",
-          ""
-        );
+        CommandInfo.sendUsage(player, "Teleport to a player.", "tp", "<player>");
         return false;
       }
 
       Player target = Bukkit.getPlayerExact(args[0]);
       if(target == null) {
-        warnSender(player, "Unable to find the player §4" + args[0] + "§c.");
+        warn(player, "Unable to find the player §4" + args[0] + "§c.");
         return false;
       }
 
       if(target.equals(player)) {
-        warnSender(player, "You cannot teleport to yourself.");
+        warn(player, "You cannot teleport to yourself.");
         return false;
       }
 
       player.teleport(target.getLocation());
-      informSender(player, "Teleporting to §d" + target.getName() + "§7.");
+      inform(player, "Teleporting to §d" + target.getName() + "§7.");
       return true;
     }
 
@@ -50,28 +45,23 @@ public class TeleportCommands implements CommandExecutor {
       enforceAdminPermission(player);
 
       if(args.length == 0) {
-        MessageUtils.informSender(sender,
-          "",
-          "§8 ■ §7Usage: §6/§rtphere §6<§fplayer§6>",
-          "§8 ■ §7Description: §eTeleport a player to you.",
-          ""
-        );
+        CommandInfo.sendUsage(player, "Teleport a player to you.", "tphere", "<player>");
         return false;
       }
 
       Player target = Bukkit.getPlayerExact(args[0]);
       if(target == null) {
-        warnSender(player, "Unable to find the player §4" + args[0] + "§c.");
+        warn(player, "Unable to find the player §4" + args[0] + "§c.");
         return false;
       }
 
       if(target.equals(player)) {
-        warnSender(player, "You cannot teleport yourself to yourself.");
+        warn(player, "You cannot teleport yourself to yourself.");
         return false;
       }
 
       target.teleport(player.getLocation());
-      informSender(player, "Teleported §d" + target.getName() + "§7 to you.");
+      inform(player, "Teleported §d" + target.getName() + "§7 to you.");
       return true;
     }
 
@@ -82,14 +72,14 @@ public class TeleportCommands implements CommandExecutor {
         target.teleport(player.getLocation());
       }
 
-      informSender(player, "Teleporting all players to you...");
+      inform(player, "Teleporting all players to you...");
       return true;
     }
 
     if (label.equalsIgnoreCase("tppos") && sender instanceof Player player) {
       enforceAdminPermission(player);
       if (args.length < 3) {
-        MessageUtils.informSender(sender,
+        inform(sender,
           "",
           "§8 ■ §7Usage: §6/§rtppos §6<§fx§6> <§fy§6> <§fz§6> <§fplayer§6> [§fworld§6]",
           "§8 ■ §7Description: §eTeleport a player to a specific position.",
@@ -108,7 +98,7 @@ public class TeleportCommands implements CommandExecutor {
         if (args.length >= 4) {
           target = Bukkit.getPlayerExact(args[3]);
           if (target == null) {
-            warnSender(player, "Target player not found.");
+            warn(player, "Target player not found.");
             return false;
           }
         } else {
@@ -122,12 +112,12 @@ public class TeleportCommands implements CommandExecutor {
             case "THE_END" -> world = Bukkit.getWorld("world_the_end");
             case "OVERWORLD" -> world = Bukkit.getWorld("world");
             default -> {
-              warnSender(player, "Invalid world. Use OVERWORLD, NETHER, or THE_END.");
+              warn(player, "Invalid world. Use OVERWORLD, NETHER, or THE_END.");
               return false;
             }
           }
           if (world == null) {
-            warnSender(player, "World not found on the server.");
+            warn(player, "World not found on the server.");
             return false;
           }
         } else {
@@ -145,16 +135,16 @@ public class TeleportCommands implements CommandExecutor {
         target.teleport(location);
 
         if (target.equals(player)) {
-          informSender(player, "§7Teleported to position §d(" + x + ", " + y + ", " + z + ") §7in §f§l" + displayWorldName);
+          inform(player, "§7Teleported to position §d(" + x + ", " + y + ", " + z + ") §7in §f§l" + displayWorldName);
           player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 0.75f);
         } else {
-          informSender(player, "§7Teleported §d" + target.getName() + " §7to position §d(" + x + ", " + y + ", " + z + ") §7in §f§l" + displayWorldName);
-          informSender(target, "§7Teleported to position §d(" + x + ", " + y + ", " + z + ") §7in §f§l" + displayWorldName);
+          inform(player, "§7Teleported §d" + target.getName() + " §7to position §d(" + x + ", " + y + ", " + z + ") §7in §f§l" + displayWorldName);
+          inform(target, "§7Teleported to position §d(" + x + ", " + y + ", " + z + ") §7in §f§l" + displayWorldName);
           player.playSound(target.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 0.75f);
         }
         return true;
       } catch (NumberFormatException e) {
-        warnSender(player, "Invalid coordinates. Please provide valid numbers.");
+        warn(player, "Invalid coordinates. Please provide valid numbers.");
         return false;
       }
     }
