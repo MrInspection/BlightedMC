@@ -17,7 +17,7 @@ import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 public class SpawnCustomMobCommand implements CommandExecutor {
   public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
     if (!label.equalsIgnoreCase("spawncustommob") || !(sender instanceof Player player)) return false;
-    enforceAdminPermission(player);
+    if (!enforceAdminPermission(player)) return false;
 
     if (args.length == 0) {
       CommandInfo.sendUsage(player, "Summon a custom mob", "spawncustommob", "<entity>");
@@ -36,7 +36,7 @@ public class SpawnCustomMobCommand implements CommandExecutor {
       inform(player, "You summoned §d" + entity.getName() + "§7.");
       return true;
     } catch (Exception e) {
-      warn(player, "Unable to spawn to");
+      warn(player, "Unable to spawn the entity §4" + entity.getName() + "§c.");
       return false;
     }
   }

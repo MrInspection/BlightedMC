@@ -24,7 +24,7 @@ public class LoopCommand implements CommandExecutor {
   @Override
   public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
     if (!label.equalsIgnoreCase("loop") || !(sender instanceof Player player)) return false;
-    enforceAdminPermission(player);
+    if (!enforceAdminPermission(player)) return false;
 
     if (args.length < 3) {
       CommandInfo.sendUsage(player, "Bulk execute a command",
