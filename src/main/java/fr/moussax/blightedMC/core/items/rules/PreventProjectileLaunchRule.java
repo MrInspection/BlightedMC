@@ -7,6 +7,6 @@ import org.bukkit.inventory.ItemStack;
 public class PreventProjectileLaunchRule implements ItemRule {
   @Override
   public boolean canUse(Event event, ItemStack itemStack) {
-    return !(event instanceof ProjectileLaunchEvent);
+    return event instanceof ProjectileLaunchEvent;
   }
 }

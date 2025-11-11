@@ -7,6 +7,7 @@ import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
 import fr.moussax.blightedMC.core.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
+import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -21,7 +22,7 @@ public record GemsItem(int amount) implements ItemGenerator {
     assert meta != null;
     Integer value = meta.getPersistentDataContainer()
       .get(new NamespacedKey(BlightedMC.getInstance(), "gemsValue"), PersistentDataType.INTEGER);
-    this(value != null ? value : 1);
+    this(value != null ? value : 0);
   }
 
   public void addFavors(BlightedPlayer player) {
@@ -43,7 +44,7 @@ public record GemsItem(int amount) implements ItemGenerator {
 
       gemsItem.addFavors(bPlayer);
       event.getPlayer().sendMessage("§8 ■ §7You received §d" + gemsItem.amount + "✵ Gems §7from a §5Blighted Gemstone.");
-      event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 100f, 0f);
+      SoundSequence.BLIGHTED_GEMSTONE_CONSUME.play(event.getPlayer().getLocation());
       event.getPlayer().getInventory().remove(event.getItem());
       event.setCancelled(true);
       return true;
@@ -79,7 +80,7 @@ public record GemsItem(int amount) implements ItemGenerator {
     if (itemTemplate == null) {
       throw new IllegalStateException("BLIGHTED_GEMSTONE is not registered. Ensure ItemDirectory.initializeItems() runs before creating Gems items.");
     }
-    itemTemplate.setLore("§7Gems trapped: §d" + amount + "✵", 6);
+    itemTemplate.setLore("§8 Gems: §d" + this.amount + "✵", 7);
     ItemStack itemStack = itemTemplate.toItemStack();
 
     ItemMeta meta = itemStack.getItemMeta();

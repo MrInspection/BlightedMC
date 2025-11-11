@@ -36,7 +36,7 @@ public class ItemRuleListener implements Listener {
     ItemTemplate manager = getManager(event.getItemInHand());
     if (manager == null) return;
 
-    if (!manager.canPlace(event, event.getItemInHand())) {
+    if (manager.canPlace(event, event.getItemInHand())) {
       event.setCancelled(true);
       event.getPlayer().updateInventory(); // Prevent ghost block
     }
@@ -52,8 +52,8 @@ public class ItemRuleListener implements Listener {
 
     boolean cancel = false;
 
-    if (mainManager != null && !mainManager.canUse(event, mainHand)) cancel = true;
-    if (offManager != null && !offManager.canUse(event, offHand)) cancel = true;
+    if (mainManager != null && mainManager.canUse(event, mainHand)) cancel = true;
+    if (offManager != null && offManager.canUse(event, offHand)) cancel = true;
 
     if (cancel) {
       event.setCancelled(true);
@@ -66,7 +66,7 @@ public class ItemRuleListener implements Listener {
     ItemTemplate manager = getManager(dropped);
     if (manager == null) return;
 
-    if (!manager.canUse(event, dropped)) {
+    if (manager.canUse(event, dropped)) {
       event.setCancelled(true);
     }
   }
@@ -76,7 +76,7 @@ public class ItemRuleListener implements Listener {
     ItemTemplate manager = getManager(event.getItem());
     if (manager == null) return;
 
-    if (!manager.canUse(event, event.getItem())) {
+    if (manager.canUse(event, event.getItem())) {
       event.setCancelled(true);
     }
   }
@@ -87,7 +87,7 @@ public class ItemRuleListener implements Listener {
     ItemTemplate manager = getManager(current);
     if (manager == null) return;
 
-    if (!manager.canUse(event, current)) {
+    if (manager.canUse(event, current)) {
       event.setCancelled(true);
     }
   }
@@ -106,7 +106,7 @@ public class ItemRuleListener implements Listener {
     if (manager == null) return;
 
     // Apply rule for all items that have PreventProjectileLaunchRule
-    if (!manager.canUse(event, mainHand) || !manager.canUse(event, offHand)) {
+    if (manager.canUse(event, mainHand) || manager.canUse(event, offHand)) {
       event.setCancelled(true);
 
       // Remove cooldown to prevent client desync

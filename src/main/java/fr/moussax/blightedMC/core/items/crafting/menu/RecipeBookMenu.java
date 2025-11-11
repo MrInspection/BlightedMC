@@ -94,7 +94,8 @@ public class RecipeBookMenu {
           close();
           p.openInventory(CraftingTableMenu.createInventory());
         });
-        setItem(50, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {});
+        setItem(50, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+        });
       }
 
       if (end < totalItems) {
@@ -147,11 +148,12 @@ public class RecipeBookMenu {
         setupShapelessRecipeGrid(shapelessRecipe);
       }
 
-      setItem(23, new ItemBuilder(Material.FLETCHING_TABLE, "§aBlighted Crafting Table")
-        .addLore("§7Craft this recipe by using a", "§7blighted crafting table.")
+      setItem(23, new ItemBuilder(Material.ENCHANTING_TABLE, "§dBlighted Workbench")
+        .addLore("§7Craft this recipe by using a", "§7blighted workbench.")
         .toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
       });
-      setItem(25, recipe.getResult().toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {});
+      setItem(25, recipe.getResult().toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+      });
     }
 
     private void setupShapedRecipeGrid(BlightedShapedRecipe shapedRecipe) {
@@ -221,4 +223,4 @@ public class RecipeBookMenu {
       fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
     }
   }
-} 
+}

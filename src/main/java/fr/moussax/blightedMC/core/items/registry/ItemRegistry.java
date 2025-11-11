@@ -6,32 +6,29 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
- * Interface for registering custom items into the {@link ItemDirectory}.
- *
- * <p>Implementations define items via {@link #defineItems()}, which returns a list
- * of {@link ItemTemplate} instances. Items are automatically registered to the central
- * directory using the {@link #add} helper methods.
- *
- * <p>For single items, use {@link #add(ItemTemplate)}:
+ * Defines a contract for registering custom {@link ItemTemplate} instances into the global {@link ItemDirectory}.
+ * <p>
+ * Implementations are responsible for creating and returning their items via {@link #defineItems()}.
+ * Items can be added individually or in batches using the provided {@link #add(ItemTemplate)} and {@link #add(List)} helpers.
+ * <p>
+ * Example for a single item:
  * <pre>{@code
- * public class Bonemerang implements ItemRegistry {
+ * public class BonemerangRegistry implements ItemRegistry {
  *   @Override
  *   public List<ItemTemplate> defineItems() {
- *     ItemTemplate bonemerang = new ItemTemplate("BONEMERANG", ItemType.BOW, ...);
- *     bonemerang.addLore("...");
- *     bonemerang.addAbility(...);
+ *     ItemTemplate bonemerang = new ItemTemplate("BONEMERANG", ItemType.BOW, ItemRarity.LEGENDARY, Material.BOW);
+ *     bonemerang.addAbility(new BonemerangAbility());
  *     return ItemRegistry.add(bonemerang);
  *   }
  * }
  * }</pre>
- *
- * <p>For multiple items, use {@link #add(List)}:
+ * Example for multiple items:
  * <pre>{@code
- * public class WeaponSet implements ItemRegistry {
+ * public class WeaponSetRegistry implements ItemRegistry {
  *   @Override
  *   public List<ItemTemplate> defineItems() {
- *     ItemTemplate sword = new ItemTemplate("FIRE_SWORD", ...);
- *     ItemTemplate axe = new ItemTemplate("ICE_AXE", ...);
+ *     ItemTemplate sword = new ItemTemplate("FIRE_SWORD", ItemType.SWORD, ItemRarity.EPIC, Material.DIAMOND_SWORD);
+ *     ItemTemplate axe = new ItemTemplate("ICE_AXE", ItemType.AXE, ItemRarity.EPIC, Material.DIAMOND_AXE);
  *     return ItemRegistry.add(List.of(sword, axe));
  *   }
  * }
@@ -39,17 +36,17 @@ import java.util.List;
  */
 public interface ItemRegistry {
   /**
-   * Defines and registers items for this registry.
+   * Defines and registers all custom items for this registry implementation.
    *
-   * @return list of registered item templates
+   * @return a list containing the registered item templates
    */
   List<ItemTemplate> defineItems();
 
   /**
-   * Registers a single item to the {@link ItemDirectory}.
+   * Registers a single {@link ItemTemplate} into the {@link ItemDirectory}.
    *
    * @param item the item template to register
-   * @return singleton list containing the registered item
+   * @return a singleton list containing the registered item
    */
   static List<ItemTemplate> add(@Nonnull ItemTemplate item) {
     ItemDirectory.addItem(item);
@@ -57,9 +54,9 @@ public interface ItemRegistry {
   }
 
   /**
-   * Registers multiple items to the {@link ItemDirectory}.
+   * Registers multiple {@link ItemTemplate} instances into the {@link ItemDirectory}.
    *
-   * @param items the list of item templates to register
+   * @param items list of item templates to register
    * @return the same list of registered items
    */
   static List<ItemTemplate> add(@Nonnull List<ItemTemplate> items) {

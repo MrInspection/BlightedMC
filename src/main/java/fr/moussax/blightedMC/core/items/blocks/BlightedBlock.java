@@ -70,9 +70,7 @@ public abstract class BlightedBlock {
       // 2) TileState Persistent fallback
       BlockState state = block.getState();
       if (!(state instanceof TileState tile)) return null;
-
       PersistentDataContainer pdc = tile.getPersistentDataContainer();
-      if (pdc == null) return null; // Prevent NPE
 
       if (pdc.has(key, PersistentDataType.STRING)) {
         String id = pdc.get(key, PersistentDataType.STRING);
@@ -165,9 +163,7 @@ public abstract class BlightedBlock {
         BlockState state = block.getState();
         if (state instanceof TileState tile) {
           PersistentDataContainer pdc = tile.getPersistentDataContainer();
-          if (pdc != null) {
-            pdc.remove(key);
-          }
+          pdc.remove(key);
           tile.update(true);
         }
       });

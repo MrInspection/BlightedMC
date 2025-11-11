@@ -7,7 +7,6 @@ import fr.moussax.blightedMC.core.items.blocks.BlocksRegistry;
 import fr.moussax.blightedMC.core.items.crafting.registry.RecipesRegistry;
 
 public final class CoreRegistry {
-
   public static void initializeAllRegistries() {
     ItemDirectory.initializeItems();
     BlocksRegistry.initializeBlocks();

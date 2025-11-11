@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.gameplay.armors.HomodeusArmor;
 import fr.moussax.blightedMC.gameplay.armors.RocketBoots;
-import fr.moussax.blightedMC.gameplay.blocks.BlockItemsRegistry;
+import fr.moussax.blightedMC.gameplay.blocks.BlocksDirectory;
 import fr.moussax.blightedMC.gameplay.items.*;
 import org.bukkit.NamespacedKey;
 
@@ -41,7 +41,8 @@ public final class ItemDirectory {
     new KnightsSword().defineItems();
     new HomodeusArmor().defineItems();
     new RocketBoots().defineItems();
-    new BlockItemsRegistry().defineItems();
+    new BlocksDirectory().defineItems();
+    new Hyperion().defineItems();
   }
 
   /**

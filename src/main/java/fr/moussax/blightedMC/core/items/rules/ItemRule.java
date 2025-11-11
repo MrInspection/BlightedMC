@@ -6,46 +6,49 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * Represents a rule that defines the conditions under which a custom item can be used.
+ * Defines behavioral restrictions for custom items in BlightedMC.
  * <p>
- * Implementations can override the default methods to restrict placing, interacting,
- * or using specific items in the game.
+ * Implementations of this interface allow developers to control when and how
+ * a specific item can be placed, interacted with, or used in events.
+ * <p>
+ * All methods have permissive defaults ({@code true}) and can be selectively overridden.
  */
 public interface ItemRule {
 
   /**
-   * Checks whether the specified item can be placed as a block.
+   * Determines whether the item can be placed as a block.
    *
-   * @param event     the {@link BlockPlaceEvent} triggered by the placement
-   * @param itemStack the item stack being placed
-   * @return {@code true} if the item can be placed, {@code false} to cancel placement
+   * @param event     the {@link BlockPlaceEvent} representing the placement action
+   * @param itemStack the item being placed
+   * @return {@code true} to allow placement, {@code false} to cancel it
    */
   default boolean canPlace(BlockPlaceEvent event, ItemStack itemStack) {
-    return true;
+    return false;
   }
 
   /**
-   * Checks whether the specified item can interact with the world (right/left click).
+   * Determines whether the item can interact with the environment,
+   * typically triggered by right or left-click actions.
    *
-   * @param event     the {@link PlayerInteractEvent} triggered by the interaction
-   * @param itemStack the item stack used for interaction
-   * @return {@code true} if the interaction is allowed, {@code false} to prevent it
+   * @param event     the {@link PlayerInteractEvent} representing the interaction
+   * @param itemStack the item being used to interact
+   * @return {@code true} to allow interaction, {@code false} to prevent it
    */
   default boolean canInteract(PlayerInteractEvent event, ItemStack itemStack) {
     return true;
   }
 
   /**
-   * Checks whether the specified item can be used in a general context.
+   * Determines whether the item can be used in a general event context.
    * <p>
-   * This is a generic fallback rule for other item-related events that are not
-   * block placement or direct interaction.
+   * This applies to non-standard interactions, such as custom plugin events
+   * or indirect uses not covered by placement or interaction rules.
    *
-   * @param event     the {@link Event} representing the item usage context
-   * @param itemStack the item stack being used
-   * @return {@code true} if the item can be used, {@code false} otherwise
+   * @param event     the {@link Event} representing the usage context
+   * @param itemStack the item being used
+   * @return {@code true} to allow usage, {@code false} otherwise
    */
   default boolean canUse(Event event, ItemStack itemStack) {
-    return true;
+    return false;
   }
 }

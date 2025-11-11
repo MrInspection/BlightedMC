@@ -22,11 +22,8 @@ public class CraftingTableMenu {
     inv.setItem(22, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());
     inv.setItem(23, RECIPE_REQUIRED());
     inv.setItem(24, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());
-    inv.setItem(25, new ItemBuilder(Material.KNOWLEDGE_BOOK, "§aBlighted Blueprints")
-      .addLore("§7Ideas bounds in warped hide, each page",
-        "§7whispers a path from thought to creation.",
-        "§7Without them, blighted crafting collapses",
-        "§7into ruin.", "", "§eClick to view!")
+    inv.setItem(25, new ItemBuilder(Material.WRITTEN_BOOK, "§dBlighted Recipe Book")
+      .addLore("§7A tainted tome that holds", "§7secrets of §5blighted §7items.", "", "§eClick to view!")
       .toItemStack()
     );
     inv.setItem(26, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());
