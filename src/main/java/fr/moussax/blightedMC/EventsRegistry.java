@@ -10,6 +10,7 @@ import fr.moussax.blightedMC.core.items.crafting.menu.CraftingTableListener;
 import fr.moussax.blightedMC.core.items.rules.ItemRuleListener;
 import fr.moussax.blightedMC.core.menus.MenuListener;
 import fr.moussax.blightedMC.core.players.BlightedPlayerListeners;
+import fr.moussax.blightedMC.gameplay.abilities.WitherImpactAbility;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
@@ -31,6 +32,7 @@ public final class EventsRegistry {
     pm.registerEvents(new AbilityListener(), instance);
     pm.registerEvents(new ItemDirectorySearch(), instance);
     pm.registerEvents(new FishingListener(), instance);
+    pm.registerEvents(new WitherImpactAbility(), instance);
   }
 
   public BlightedBlock.BlightedBlockListener getBlockListener() {
