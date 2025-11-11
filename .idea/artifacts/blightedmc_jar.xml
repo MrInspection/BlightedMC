@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="blightedmc:jar">
-    <output-path>$USER_HOME$/OneDrive/Documents/Development/Minecraft Development/Minecraft Server - Spigot 1.21.8/plugins</output-path>
+  <artifact type="jar" build-on-make="true" name="BlightedMC:jar">
+    <output-path>$USER_HOME$/OneDrive/Documents/Apps/Minecraft/Server/plugins</output-path>
     <root id="archive" name="blightedmc.jar">
       <element id="module-output" name="blightedmc" />
     </root>

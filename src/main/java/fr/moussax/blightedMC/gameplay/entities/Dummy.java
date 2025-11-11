@@ -6,18 +6,17 @@ import fr.moussax.blightedMC.core.entities.EntityNameTag;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.ZombieHorse;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 
+import java.security.Guard;
 import java.util.Objects;
 
 public class Dummy extends BlightedEntity {
   public Dummy() {
-    super("Dummy", 40, 6, EntityType.HUSK);
-    setDroppedExp(15);
-    setNameTagType(EntityNameTag.BLIGHTED);
+    super("Drowned Jockey", 60, 10, EntityType.DROWNED);
+    setDroppedExp(20);
+    setNameTagType(EntityNameTag.SMALL_NUMBER);
   }
 
   @Override
@@ -27,12 +26,12 @@ public class Dummy extends BlightedEntity {
 
   @Override
   protected void applyEquipment() {
-    this.itemInMainHand = new ItemStack(Material.IRON_HOE);
+    this.itemInMainHand = new ItemStack(Material.TRIDENT);
     this.armor = new ItemStack[]{
-      new ItemStack(Material.IRON_BOOTS),
-      new ItemStack(Material.IRON_LEGGINGS),
-      new ItemStack(Material.IRON_CHESTPLATE),
-      new ItemStack(Material.IRON_HELMET)
+      new ItemStack(Material.COPPER_BOOTS),
+      new ItemStack(Material.LEATHER_LEGGINGS),
+      new ItemStack(Material.COPPER_CHESTPLATE),
+      new ItemStack(Material.COPPER_HELMET)
     };
     super.applyEquipment();
   }
@@ -41,18 +40,17 @@ public class Dummy extends BlightedEntity {
   public LivingEntity spawn(Location location) {
     LivingEntity mob = super.spawn(location);
 
-    ZombieHorse horse = (ZombieHorse) Objects.requireNonNull(location.getWorld()).spawnEntity(location, EntityType.ZOMBIE_HORSE);
-    horse.setCustomName("§8Dummy's Steed");
-    horse.setCustomNameVisible(true);
-    horse.setTamed(true);
+    Turtle guardian = (Turtle) Objects.requireNonNull(location.getWorld()).spawnEntity(location, EntityType.TURTLE);
+    guardian.setCustomName("§8Dummy's Steed");
+    guardian.setCustomNameVisible(true);
 
-    Objects.requireNonNull(horse.getAttribute(Attribute.MAX_HEALTH)).setBaseValue(maxHealth);
-    horse.setHealth(maxHealth);
+    Objects.requireNonNull(guardian.getAttribute(Attribute.MAX_HEALTH)).setBaseValue(maxHealth);
+    guardian.setHealth(maxHealth);
 
     mob.leaveVehicle();
-    horse.addPassenger(mob);
+    guardian.addPassenger(mob);
 
-    EntityAttachment attachment = new EntityAttachment(horse, this);
+    EntityAttachment attachment = new EntityAttachment(guardian, this);
     addAttachment(attachment);
 
     return mob;

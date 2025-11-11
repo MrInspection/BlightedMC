@@ -10,7 +10,7 @@ public record GemsLoot(int amount) implements DroppableConsumable {
   @Override
   public void consume(BlightedPlayer killer, Location dropLocation, boolean toPlayer) {
     if(toPlayer) {
-      killer.addFavors(amount);
+      killer.addGems(amount);
     } else {
       Objects.requireNonNull(dropLocation.getWorld()).dropItemNaturally(dropLocation, new GemsItem(amount).createItemStack());
     }

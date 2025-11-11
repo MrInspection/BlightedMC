@@ -3,14 +3,11 @@ package fr.moussax.blightedMC.utils.sound;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public record SoundSequence(List<BlightedSound> sounds) {
   public SoundSequence(List<BlightedSound> sounds) {
-    this.sounds = Collections.unmodifiableList(Objects.requireNonNull(sounds));
+    this.sounds = List.copyOf(Objects.requireNonNull(sounds));
   }
 
   public SoundSequence(BlightedSound... sounds) {

@@ -20,7 +20,7 @@ public class GemsCommand implements CommandExecutor {
   @Override
   public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
     if (!label.equalsIgnoreCase("gems") || !(sender instanceof Player player)) return false;
-    enforceAdminPermission(player);
+    if (!enforceAdminPermission(player)) return false;
 
     if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
       CommandInfo.sendCommands(player, "COMMANDS", "Gems Currency",
@@ -55,7 +55,7 @@ public class GemsCommand implements CommandExecutor {
         return handleGiveAll(player, args);
       }
       default -> {
-        warn(player, "Unknown §4favors §csubcommand.");
+        warn(player, "Unknown §4gems §csubcommand.");
         return false;
       }
     }
@@ -87,15 +87,15 @@ public class GemsCommand implements CommandExecutor {
     BlightedPlayer bPlayer = BlightedPlayer.getBlightedPlayer(target);
 
     if (add) {
-      bPlayer.addFavors(amount);
-      sender.sendMessage("§8 ■ §7You gave §d" + amount + " §7favors to §d" + target.getName() + "§7.");
-      target.sendMessage("§8 ■ §7You received §d" + amount + " §7favors.");
+      bPlayer.addGems(amount);
+      sender.sendMessage("§8 ■ §7You gave §d" + amount + " §7gems to §d" + target.getName() + "§7.");
+      target.sendMessage("§8 ■ §7You received §d" + amount + " §7gems.");
       return true;
     }
 
-    bPlayer.removeFavors(amount);
-    sender.sendMessage("§8 ■ §7You removed §d" + amount + " §7favors from §d" + target.getName() + "§7.");
-    target.sendMessage("§8 ■ §7You lost §d" + amount + " §7favors.");
+    bPlayer.removeGems(amount);
+    sender.sendMessage("§8 ■ §7You removed §d" + amount + " §7gems from §d" + target.getName() + "§7.");
+    target.sendMessage("§8 ■ §7You lost §d" + amount + " §7gems.");
 
     return true;
   }
@@ -123,8 +123,8 @@ public class GemsCommand implements CommandExecutor {
     }
 
     BlightedPlayer.getBlightedPlayer(target).setGems(amount);
-    sender.sendMessage("§8 ■ §7You have set §d" + target.getName() + "§7's favors balance to §d" + amount + "§7.");
-    target.sendMessage("§8 ■ §7You favors has been set to §d" + amount + "§7.");
+    sender.sendMessage("§8 ■ §7You have set §d" + target.getName() + "§7's gems balance to §d" + amount + "§7.");
+    target.sendMessage("§8 ■ §7You gems has been set to §d" + amount + "§7.");
     return true;
   }
 
@@ -143,7 +143,7 @@ public class GemsCommand implements CommandExecutor {
     }
 
     BlightedPlayer.getBlightedPlayer(target).setGems(0);
-    sender.sendMessage("§8 ■ §7You have reset §d" + target.getName() + "§7's favors.");
+    sender.sendMessage("§8 ■ §7You have reset §d" + target.getName() + "§7's gems.");
     return true;
   }
 
@@ -159,7 +159,7 @@ public class GemsCommand implements CommandExecutor {
   private boolean handleGiveAll(Player sender, String[] args) {
     if (args.length < 2) {
 
-      CommandInfo.sendUsage(sender, "Give all online players favors.", "gems", "giveall", "[amount]");
+      CommandInfo.sendUsage(sender, "Give all online players gems.", "gems", "giveall", "[amount]");
       return false;
     }
 
@@ -173,11 +173,11 @@ public class GemsCommand implements CommandExecutor {
 
     Bukkit.getOnlinePlayers().forEach(player -> {
       BlightedPlayer bPlayer = BlightedPlayer.getBlightedPlayer(player);
-      bPlayer.addFavors(amount);
-      player.sendMessage("§8 ■ §7You received §d" + amount + " §7favors.");
+      bPlayer.addGems(amount);
+      player.sendMessage("§8 ■ §7You received §d" + amount + " §7gems.");
     });
 
-    inform(sender, "§8 ■ §7You gave §d" + amount + " §7favors to all §donline §7players.");
+    inform(sender, "§8 ■ §7You gave §d" + amount + " §7gems to all §donline §7players.");
     return true;
   }
 }

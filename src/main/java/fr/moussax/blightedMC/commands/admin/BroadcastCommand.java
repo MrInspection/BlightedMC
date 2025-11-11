@@ -15,7 +15,7 @@ public class BroadcastCommand implements CommandExecutor {
   @Override
   public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
     if (!label.equalsIgnoreCase("broadcast") || !(sender instanceof Player player)) return false;
-    enforceAdminPermission(player);
+    if (!enforceAdminPermission(player)) return false;
 
     if (args.length == 0) {
       CommandInfo.sendUsage(player, "Broadcast a message to the server", "broadcast", "<message>");

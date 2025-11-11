@@ -198,8 +198,9 @@ public class ItemDirectoryMenu {
       super(previousMenu,
         item -> {
           if (item.getItemId().toLowerCase().contains(searchTerm.toLowerCase())) return true;
-          item.getItemMeta().getDisplayName();
-          return item.getItemMeta().getDisplayName().toLowerCase().contains(searchTerm.toLowerCase());
+
+          var meta = item.getItemMeta();
+          return meta != null && meta.getDisplayName().toLowerCase().contains(searchTerm.toLowerCase());
         },
         "§rSearch: " + searchTerm);
       this.searchTerm = searchTerm.toLowerCase();

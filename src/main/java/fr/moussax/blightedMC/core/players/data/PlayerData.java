@@ -6,10 +6,10 @@ public class PlayerData {
   private int gems;
   private double mana;
 
-  public PlayerData(String name, String uuid, int favors, double mana) {
+  public PlayerData(String name, String uuid, int gems, double mana) {
     this.name = name;
     this.uuid = uuid;
-    this.gems = favors;
+    this.gems = gems;
     this.mana = mana;
   }
 

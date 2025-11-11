@@ -20,7 +20,7 @@ public class KaboomCommand implements CommandExecutor {
   @Override
   public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
     if (!label.equalsIgnoreCase("kaboom") || !(sender instanceof Player player)) return false;
-    enforceAdminPermission(player);
+    if (!enforceAdminPermission(player)) return false;
 
     if(args.length == 0) {
       return launchAllPlayers(player);

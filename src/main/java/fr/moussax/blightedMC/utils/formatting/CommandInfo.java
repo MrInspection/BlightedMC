@@ -100,6 +100,10 @@ public final class CommandInfo {
    */
   @Nonnull
   public static List<String> buildCommandUsageHelp(@Nonnull String description, @Nonnull String... usage) {
+    if (usage.length == 0) {
+      throw new IllegalArgumentException("Usage tokens cannot be null or empty");
+    }
+
     List<String> lines = new ArrayList<>();
     lines.add(" ");
     lines.add("§r    " + HEADER_COLOR + "HELP " + SEPARATOR_COLOR + "| " + DESCRIPTION_COLOR + "Command Information");
@@ -163,6 +167,9 @@ public final class CommandInfo {
     @Nonnull String description,
     @Nonnull String... usage
   ) {
+    if (usage.length == 0) {
+      throw new IllegalArgumentException("Usage tokens cannot be null or empty");
+    }
     buildCommandUsageHelp(description, usage).forEach(player::sendMessage);
   }
 

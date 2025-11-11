@@ -33,6 +33,7 @@ public final class ItemDirectory {
    * This method must be called during plugin startup before any items are referenced.
    */
   public static void initializeItems() {
+    clearItems();
     new BlightedGemstone().defineItems();
     new BlightedMaterials().defineItems();
     new Bonemerang().defineItems();
