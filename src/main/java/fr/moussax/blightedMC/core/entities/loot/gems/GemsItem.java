@@ -9,23 +9,22 @@ import fr.moussax.blightedMC.core.players.BlightedPlayer;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 public record GemsItem(int amount) implements ItemGenerator {
-
   public GemsItem(ItemStack itemStack) {
     ItemMeta meta = itemStack.getItemMeta();
     assert meta != null;
-    Integer value = meta.getPersistentDataContainer()
-      .get(new NamespacedKey(BlightedMC.getInstance(), "gemsValue"), PersistentDataType.INTEGER);
-    this(value != null ? value : 0);
+
+    Integer value = meta.getPersistentDataContainer().get(
+      new NamespacedKey(BlightedMC.getInstance(), "gems"), PersistentDataType.INTEGER);
+    this(value != null ? value : 1);
   }
 
-  public void addFavors(BlightedPlayer player) {
+  public void addGems(BlightedPlayer player) {
     player.addGems(amount);
   }
 
@@ -34,7 +33,7 @@ public record GemsItem(int amount) implements ItemGenerator {
     @Override
     public boolean triggerAbility(PlayerInteractEvent event) {
       if (event.getItem() == null) return false;
-      BlightedPlayer bPlayer = BlightedPlayer.getBlightedPlayer(event.getPlayer());
+      BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(event.getPlayer());
       GemsItem gemsItem = new GemsItem(event.getItem());
 
       if (gemsItem.amount <= 0) {
@@ -42,7 +41,7 @@ public record GemsItem(int amount) implements ItemGenerator {
         return false;
       }
 
-      gemsItem.addFavors(bPlayer);
+      gemsItem.addGems(blightedPlayer);
       event.getPlayer().sendMessage("§8 ■ §7You received §d" + gemsItem.amount + "✵ Gems §7from a §5Blighted Gemstone.");
       SoundSequence.BLIGHTED_GEMSTONE_CONSUME.play(event.getPlayer().getLocation());
       event.getPlayer().getInventory().remove(event.getItem());
@@ -77,15 +76,17 @@ public record GemsItem(int amount) implements ItemGenerator {
   @Override
   public ItemStack createItemStack() {
     ItemTemplate itemTemplate = ItemDirectory.getItem("BLIGHTED_GEMSTONE");
+
     if (itemTemplate == null) {
       throw new IllegalStateException("BLIGHTED_GEMSTONE is not registered. Ensure ItemDirectory.initializeItems() runs before creating Gems items.");
     }
+
     itemTemplate.setLore("§8 Gems: §d" + this.amount + "✵", 7);
     ItemStack itemStack = itemTemplate.toItemStack();
 
     ItemMeta meta = itemStack.getItemMeta();
     assert meta != null;
-    meta.getPersistentDataContainer().set(new NamespacedKey(BlightedMC.getInstance(), "favorsValue"), PersistentDataType.INTEGER, amount);
+    meta.getPersistentDataContainer().set(new NamespacedKey(BlightedMC.getInstance(), "gems"), PersistentDataType.INTEGER, amount);
     itemStack.setItemMeta(meta);
 
     return itemStack;

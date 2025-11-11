@@ -67,8 +67,8 @@ public class LootTable {
    * @return this LootTable for chaining
    */
   public LootTable addGemsLoot(int gems, double dropChance, LootDropRarity rarity) {
-    GemsLoot favorsLoot = new GemsLoot(gems);
-    GemsLootAdapter adapter = new GemsLootAdapter(favorsLoot, new GemsItem(gems).createItemStack());
+    GemsLoot gemsLoot = new GemsLoot(gems);
+    GemsLootAdapter adapter = new GemsLootAdapter(gemsLoot, new GemsItem(gems).createItemStack());
     lootEntries.add(new LootEntry(adapter, dropChance, rarity));
     return this;
   }

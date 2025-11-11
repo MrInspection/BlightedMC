@@ -125,7 +125,7 @@ public class CraftingTableListener implements Listener {
 
     if (!canAddToCursor(cursorItem, resultItem)) return;
 
-    if (cursorItem != null && cursorItem.getType() != Material.AIR) {
+    if (cursorItem.getType() != Material.AIR) {
       cursorItem.setAmount(cursorItem.getAmount() + resultItem.getAmount());
       player.setItemOnCursor(cursorItem);
     } else {

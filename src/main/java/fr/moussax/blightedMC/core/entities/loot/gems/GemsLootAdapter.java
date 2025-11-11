@@ -8,9 +8,9 @@ import org.bukkit.inventory.ItemStack;
 public class GemsLootAdapter extends ItemLoot {
   private final GemsLoot gemsLoot;
 
-  public GemsLootAdapter(GemsLoot favors, ItemStack displayItem) {
-    super(displayItem, favors.amount(), favors.amount());
-    this.gemsLoot = favors;
+  public GemsLootAdapter(GemsLoot gems, ItemStack displayItem) {
+    super(displayItem, gems.amount(), gems.amount());
+    this.gemsLoot = gems;
   }
 
   @Override
