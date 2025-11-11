@@ -32,7 +32,7 @@ public class KnightsSlamAbility implements AbilityManager<PlayerInteractEvent> {
 
   @Override
   public int getManaCost() {
-    return 60;
+    return 90;
   }
 
   @Override

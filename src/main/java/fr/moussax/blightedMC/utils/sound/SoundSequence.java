@@ -46,4 +46,19 @@ public record SoundSequence(List<BlightedSound> sounds) {
     new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.3f, 16),
     new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.4f, 18)
   );
+
+  public static final SoundSequence BLIGHTED_GEMSTONE_CONSUME = new SoundSequence(
+    new BlightedSound(Sound.BLOCK_AMETHYST_BLOCK_BREAK, 1.0F, 0.0F, 0L),
+    new BlightedSound(Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0F, 0.1F, 2L),
+    new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 0.2F, 4L),
+    new BlightedSound(Sound.BLOCK_AMETHYST_BLOCK_BREAK, 1.0F, 0.3F, 6L),
+    new BlightedSound(Sound.ENTITY_EVOKER_CAST_SPELL, 1.0F, 0.4F, 8L),
+    new BlightedSound(Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0F, 0.5F, 10L),
+    new BlightedSound(Sound.BLOCK_AMETHYST_BLOCK_BREAK, 1.0F, 0.6F, 12L),
+    new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 0.7F, 14L),
+    new BlightedSound(Sound.ENTITY_EVOKER_CAST_SPELL, 1.0F, 0.8F, 16L),
+    new BlightedSound(Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0F, 0.9F, 18L),
+    new BlightedSound(Sound.BLOCK_AMETHYST_BLOCK_BREAK, 1.0F, 1.0F, 20L),
+    new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.1F, 22L)
+  );
 }

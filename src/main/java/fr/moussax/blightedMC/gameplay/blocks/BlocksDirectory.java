@@ -6,27 +6,28 @@ import org.bukkit.Material;
 
 import java.util.List;
 
-public class BlockItemsRegistry implements ItemRegistry {
+public class BlocksDirectory implements ItemRegistry {
 
   @Override
   public List<ItemTemplate> defineItems() {
     ItemTemplate blightedCraftingTable = new ItemTemplate(
-      "BLIGHTED_CRAFTING_TABLE",
+      "BLIGHTED_WORKBENCH",
       ItemType.BLOCK,
       ItemRarity.UNCOMMON,
-      Material.FLETCHING_TABLE,
-      "Blighted Crafting Table"
+      Material.ENCHANTING_TABLE,
+      "Blighted Workbench"
     );
 
     blightedCraftingTable.addLore(
+      "§8Placeable Block",
       "",
-      "§7 Forged in the aberrant halls of the §5Blighted ",
-      "§5 Mansion §7by the §4Redstone Engineers§7, this table ",
-      "§7 bends matter and magic alike. It feeds on",
-      "§7 lingering blight to forge §fadvanced materials",
-      "§7 no mundane workbench can hold.",
+      "§7 Forged §beons ago §7in the §5Voidling Edges§7,",
+      "§7 this workbench thrums with §5blighted energy§7, ",
+      "§7 twisting §dmatter§7 and §dmagic§7 alike to forge",
+      "§7 items beyond the reach of ordinary",
+      "§7 crafting tables.",
       "",
-      ItemRarity.UNCOMMON.getName() + " BLOCK"
+      ItemRarity.RARE.getName() + " BLOCK"
     );
     blightedCraftingTable.addEnchantmentGlint();
 

@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
-public class InstantTransmissionAbility implements AbilityManager<PlayerInteractEvent> {
+public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
   private static final int MAX_DISTANCE = 40;
 
   @Override
@@ -53,7 +53,7 @@ public class InstantTransmissionAbility implements AbilityManager<PlayerInteract
     var direction = eyeLocation.getDirection();
 
     RayTraceResult traceResult = player.getWorld().rayTraceBlocks(
-      eyeLocation, direction, InstantTransmissionAbility.MAX_DISTANCE, FluidCollisionMode.NEVER, true
+      eyeLocation, direction, VoidStepAbility.MAX_DISTANCE, FluidCollisionMode.NEVER, true
     );
 
     if (traceResult != null && traceResult.getHitBlock() != null) {
@@ -74,7 +74,7 @@ public class InstantTransmissionAbility implements AbilityManager<PlayerInteract
     }
 
     // fallback: max distance point in the air
-    Vector maxVec = direction.normalize().multiply(InstantTransmissionAbility.MAX_DISTANCE);
+    Vector maxVec = direction.normalize().multiply(VoidStepAbility.MAX_DISTANCE);
     Location inAir = eyeLocation.add(maxVec);
 
     // allow teleport if the space is clear

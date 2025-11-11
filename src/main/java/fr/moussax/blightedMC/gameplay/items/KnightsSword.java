@@ -17,22 +17,22 @@ import java.util.List;
 public class KnightsSword implements ItemRegistry {
   @Override
   public List<ItemTemplate> defineItems() {
-    ItemTemplate ancientKnightSword = new ItemTemplate("ANCIENT_KNIGHT_SWORD", ItemType.LONGSWORD, ItemRarity.LEGENDARY, Material.NETHERITE_SWORD, "Ancient Knight's Sword");
-    ancientKnightSword.addLore(
+    ItemTemplate knightSword = new ItemTemplate("ANCIENT_KNIGHT_SWORD", ItemType.LONGSWORD, ItemRarity.LEGENDARY, Material.NETHERITE_SWORD, "Knight's Sword");
+    knightSword.addLore(
       "",
-      "§5 Ability: Ancient Knight's Slam  §d§lRIGHT CLICK ",
-      "§7 Slam your sword into the ground dealing",
-      "§c 50 §7damage to nearby enemies.",
-      "§8 Mana Cost: §360",
+      "§5 Ability: Knight's Slam  §d§lRIGHT CLICK ",
+      "§7 Slam your sword into the ground dealing ",
+      "§7 §c50 §7damage to nearby enemies.",
+      "§8 Mana Cost: §390",
       "§8 Cooldown: §a30s",
       "",
       ItemRarity.LEGENDARY.getName() + " LONGSWORD"
     );
 
-    ancientKnightSword.addAbility(new Ability(new KnightsSlamAbility(), "Ancient Knight's Slam", AbilityType.RIGHT_CLICK));
-    ancientKnightSword.addAttributeModifier(Attribute.ATTACK_DAMAGE, 10, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
-    ancientKnightSword.addAttributeModifier(Attribute.ATTACK_SPEED, 1.2, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
+    knightSword.addAbility(new Ability(new KnightsSlamAbility(), "Knight's Slam", AbilityType.RIGHT_CLICK));
+    knightSword.addAttributeModifier(Attribute.ATTACK_DAMAGE, 10, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
+    knightSword.addAttributeModifier(Attribute.ATTACK_SPEED, 1.2, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
 
-    return ItemRegistry.add(ancientKnightSword);
+    return ItemRegistry.add(knightSword);
   }
 }

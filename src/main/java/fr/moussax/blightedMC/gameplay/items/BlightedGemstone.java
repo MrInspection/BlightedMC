@@ -15,15 +15,16 @@ public class BlightedGemstone implements ItemRegistry {
   public List<ItemTemplate> defineItems() {
     ItemTemplate blightedGemstone = new ItemTemplate("BLIGHTED_GEMSTONE", ItemType.UNCATEGORIZED, ItemRarity.SPECIAL, Material.PLAYER_HEAD, "Blighted Gemstone");
     blightedGemstone.addLore(
-      "§7A gemstone tainted by §5shadow§7, tore",
-      "§7from the §5remains §7of a fallen horror. ",
-      "§7Its core pulses with sealed §dBlighted",
-      "§dGems §7awaiting one bold enough to",
-      "§7claim them.",
+      "§8Consumable Item",
       "",
-      "§7Gems trapped: §6???✵",
+      "§7 A gemstone §5corrupted§7 by shadow,",
+      "§7 stolen from the heart of a §5fallen",
+      "§5 abomination§7. Within its core lie §dGems ",
+      "§7 sealed and waiting for a daring",
+      "§7 hand to claim them.",
+      "§8 Gems: §d50✵",
       "",
-      "§dRight click to consume!",
+      "§d Right click to consume!",
       "",
       ItemRarity.SPECIAL.getName()
     );
