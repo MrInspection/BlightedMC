@@ -6,7 +6,6 @@ import fr.moussax.blightedMC.core.menus.Menu;
 import fr.moussax.blightedMC.core.menus.MenuManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,87 +22,110 @@ import java.util.*;
 
 public class CraftingTableListener implements Listener {
 
+  private static final String CRAFTING_MENU_TITLE = "§rCraft Items";
   private static final int OUTPUT_SLOT = 23;
+  private static final int RECIPE_BOOK_SLOT = 25;
+  private static final int CLOSE_BUTTON_SLOT = 49;
   private static final int[] INPUT_SLOTS = {10, 11, 12, 19, 20, 21, 28, 29, 30};
+  private static final int[] INDICATOR_SLOTS_LEFT = {45, 46, 47, 48};
+  private static final int[] INDICATOR_SLOTS_RIGHT = {50, 51, 52, 53};
+  private static final int SCHEDULED_UPDATE_DELAY = 1;
 
   @EventHandler
   public void onDrag(InventoryDragEvent event) {
-    if (!event.getView().getTitle().equals("§rCraft Items")) return;
-    Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(),
-      () -> updateOutput(event.getView().getTopInventory()), 1);
+    if (isCraftingMenu(event.getView().getTitle())) return;
+    scheduleOutputUpdate(event.getView().getTopInventory());
   }
 
   @EventHandler
   public void onClick(InventoryClickEvent event) {
-    if (!event.getView().getTitle().equals("§rCraft Items")) return;
+    if (isCraftingMenu(event.getView().getTitle())) return;
+
     Inventory topInventory = event.getView().getTopInventory();
     Player player = (Player) event.getWhoClicked();
+    int rawSlot = event.getRawSlot();
 
-    // Close button
-    if (event.getSlot() == 49) {
-      event.setCancelled(true);
-      player.closeInventory();
-      return;
-    }
-
-    // Recipe Book button (slot 25)
-    if (event.getSlot() == 25) {
-      event.setCancelled(true);
-      player.closeInventory();
-      MenuManager.openMenu(
-        new RecipeBookMenu.RecipeListMenu(
-          new Menu("Crafting Table", 54) {
-            @Override
-            public void build(Player p) {
-            }
-          }
-        ), player);
-      return;
-    }
-
-    // Only handle clicks in our custom crafting inventory
-    if (event.getClickedInventory() != null && event.getClickedInventory().equals(topInventory)) {
-      int slot = event.getSlot();
-
-      // Prevent taking decorative slots
-      if (!isInputSlot(slot) && slot != OUTPUT_SLOT) {
-        event.setCancelled(true);
+    if (rawSlot < topInventory.getSize()) {
+      if (handleGuiButtonClick(event, player, rawSlot)) {
         return;
       }
-
-      // Handle crafting output click
-      if (slot == OUTPUT_SLOT) {
-        BlightedRecipe recipe = getMatchingRecipe(topInventory);
-        if (recipe == null) {
-          event.setCancelled(true);
-          return;
-        }
-
-        // Handle shift-click (craft max)
-        if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
-          event.setCancelled(true);
-          craftMaximum(recipe, topInventory, player);
-        } else {
-          // Single click behaves like vanilla
-          event.setCancelled(true);
-          craftOnce(recipe, topInventory, player);
-        }
-      }
     }
 
-    // Schedule output update after the click
-    Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(),
-      () -> updateOutput(topInventory), 1);
+    if (event.getClickedInventory() != null && event.getClickedInventory().equals(topInventory)) {
+      handleCraftingInventoryClick(event, topInventory, player);
+    }
+
+    scheduleOutputUpdate(topInventory);
+  }
+
+  @EventHandler
+  public void onInteract(PlayerInteractEvent event) {
+    if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+    if (event.getClickedBlock() == null) return;
+    if (event.getClickedBlock().getType() != Material.CRAFTING_TABLE) return;
+
+    event.getPlayer().openInventory(CraftingTableMenu.createInventory());
+  }
+
+  @EventHandler
+  public void onClose(InventoryCloseEvent event) {
+    if (isCraftingMenu(event.getView().getTitle())) return;
+    returnItemsToPlayer(event);
+  }
+
+  private boolean handleGuiButtonClick(InventoryClickEvent event, Player player, int slot) {
+    if (slot == CLOSE_BUTTON_SLOT) {
+      event.setCancelled(true);
+      player.closeInventory();
+      return true;
+    }
+
+    if (slot == RECIPE_BOOK_SLOT) {
+      event.setCancelled(true);
+      player.closeInventory();
+      openRecipeBook(player);
+      return true;
+    }
+
+    return false;
+  }
+
+  private void handleCraftingInventoryClick(InventoryClickEvent event, Inventory topInventory, Player player) {
+    int slot = event.getSlot();
+
+    if (!isInputSlot(slot) && slot != OUTPUT_SLOT) {
+      event.setCancelled(true);
+      return;
+    }
+
+    if (slot == OUTPUT_SLOT) {
+      handleOutputSlotClick(event, topInventory, player);
+    }
+  }
+
+  private void handleOutputSlotClick(InventoryClickEvent event, Inventory inventory, Player player) {
+    BlightedRecipe recipe = getMatchingRecipe(inventory);
+    if (recipe == null) {
+      event.setCancelled(true);
+      return;
+    }
+
+    event.setCancelled(true);
+
+    if (isShiftClick(event.getClick())) {
+      craftMaximum(recipe, inventory, player);
+    } else {
+      craftOnce(recipe, inventory, player);
+    }
   }
 
   private void craftOnce(BlightedRecipe recipe, Inventory inventory, Player player) {
-    ItemStack resultItem = getResultItem(recipe, inventory);
+    ItemStack resultItem = getResultItem(recipe);
     ItemStack cursorItem = player.getItemOnCursor();
 
-    // Combine with cursor if same type
+    if (!canAddToCursor(cursorItem, resultItem)) return;
+
     if (cursorItem != null && cursorItem.getType() != Material.AIR) {
-      if (!cursorItem.isSimilar(resultItem) || cursorItem.getAmount() + resultItem.getAmount() > cursorItem.getMaxStackSize())
-        return;
       cursorItem.setAmount(cursorItem.getAmount() + resultItem.getAmount());
       player.setItemOnCursor(cursorItem);
     } else {
@@ -117,126 +139,200 @@ public class CraftingTableListener implements Listener {
     int maximumCraftCount = getMaxCraftCount(recipe, inventory);
     if (maximumCraftCount <= 0) return;
 
-    ItemStack resultItem = getResultItem(recipe, inventory);
+    ItemStack resultItem = getResultItem(recipe);
     resultItem.setAmount(resultItem.getAmount() * maximumCraftCount);
 
-    HashMap<Integer, ItemStack> leftoverItems = player.getInventory().addItem(resultItem);
-    leftoverItems.values().forEach(item -> player.getWorld().dropItemNaturally(player.getLocation(), item));
+    Map<Integer, ItemStack> leftoverItems = player.getInventory().addItem(resultItem);
+    dropLeftoverItems(player, leftoverItems);
 
     consumeIngredients(recipe, inventory, maximumCraftCount);
   }
 
   private void consumeIngredients(BlightedRecipe recipe, Inventory inventory, int times) {
     if (recipe instanceof BlightedShapedRecipe shapedRecipe) {
-      List<CraftingObject> recipePattern = shapedRecipe.getRecipe();
-      for (int i = 0; i < INPUT_SLOTS.length; i++) {
-        CraftingObject craftingObject = recipePattern.get(i);
-        if (craftingObject == null) continue;
-        ItemStack stack = inventory.getItem(INPUT_SLOTS[i]);
-        if (stack == null || stack.getType() == Material.AIR) continue;
-        stack.setAmount(stack.getAmount() - craftingObject.getAmount() * times);
-        if (stack.getAmount() <= 0) inventory.setItem(INPUT_SLOTS[i], null);
-      }
+      consumeShapedIngredients(shapedRecipe, inventory, times);
     } else if (recipe instanceof BlightedShapelessRecipe shapelessRecipe) {
-      Map<String, Integer> requiredCounts = shapelessRecipe.getIngredientCountMap();
-      for (int slot : INPUT_SLOTS) {
-        ItemStack stack = inventory.getItem(slot);
-        if (stack == null || stack.getType() == Material.AIR) continue;
-        String itemIdentifier = getItemId(stack);
-        if (!requiredCounts.containsKey(itemIdentifier)) continue;
-        int totalToRemove = requiredCounts.get(itemIdentifier) * times;
-        int removedNow = Math.min(totalToRemove, stack.getAmount());
-        stack.setAmount(stack.getAmount() - removedNow);
-        if (stack.getAmount() <= 0) inventory.setItem(slot, null);
-        requiredCounts.put(itemIdentifier, totalToRemove - removedNow);
+      consumeShapelessIngredients(shapelessRecipe, inventory, times);
+    }
+  }
+
+  private void consumeShapedIngredients(BlightedShapedRecipe recipe, Inventory inventory, int times) {
+    List<CraftingObject> recipePattern = recipe.getRecipe();
+
+    for (int i = 0; i < INPUT_SLOTS.length; i++) {
+      CraftingObject craftingObject = recipePattern.get(i);
+      if (craftingObject == null) continue;
+
+      ItemStack stack = inventory.getItem(INPUT_SLOTS[i]);
+      if (stack == null || stack.getType() == Material.AIR) continue;
+
+      int newAmount = stack.getAmount() - (craftingObject.getAmount() * times);
+      if (newAmount <= 0) {
+        inventory.setItem(INPUT_SLOTS[i], null);
+      } else {
+        stack.setAmount(newAmount);
       }
+    }
+  }
+
+  private void consumeShapelessIngredients(BlightedShapelessRecipe recipe, Inventory inventory, int times) {
+    Map<String, Integer> remainingRequired = new HashMap<>(recipe.getIngredientCountMap());
+
+    remainingRequired.replaceAll((i, v) -> remainingRequired.get(i) * times);
+
+    for (int slot : INPUT_SLOTS) {
+      ItemStack stack = inventory.getItem(slot);
+      if (stack == null || stack.getType() == Material.AIR) continue;
+
+      String itemIdentifier = getItemId(stack);
+      if (!remainingRequired.containsKey(itemIdentifier)) continue;
+
+      int toRemove = Math.min(remainingRequired.get(itemIdentifier), stack.getAmount());
+      int newAmount = stack.getAmount() - toRemove;
+
+      if (newAmount <= 0) {
+        inventory.setItem(slot, null);
+      } else {
+        stack.setAmount(newAmount);
+      }
+
+      remainingRequired.put(itemIdentifier, remainingRequired.get(itemIdentifier) - toRemove);
     }
   }
 
   private int getMaxCraftCount(BlightedRecipe recipe, Inventory inventory) {
     if (recipe instanceof BlightedShapedRecipe shapedRecipe) {
-      int maxCrafts = Integer.MAX_VALUE;
-      List<CraftingObject> recipePattern = shapedRecipe.getRecipe();
-      for (int i = 0; i < INPUT_SLOTS.length; i++) {
-        CraftingObject craftingObject = recipePattern.get(i);
-        if (craftingObject == null) continue;
-        ItemStack stack = inventory.getItem(INPUT_SLOTS[i]);
-        if (stack == null || stack.getType() == Material.AIR) return 0;
-        maxCrafts = Math.min(maxCrafts, stack.getAmount() / craftingObject.getAmount());
-      }
-      return maxCrafts == Integer.MAX_VALUE ? 0 : maxCrafts;
+      return getMaxCraftCountForShaped(shapedRecipe, inventory);
     }
 
     if (recipe instanceof BlightedShapelessRecipe shapelessRecipe) {
-      Map<String, Integer> requiredItems = shapelessRecipe.getIngredientCountMap();
-      Map<String, Integer> availableItems = new HashMap<>();
-      for (int slot : INPUT_SLOTS) {
-        ItemStack stack = inventory.getItem(slot);
-        if (stack == null || stack.getType() == Material.AIR) continue;
-        String itemIdentifier = getItemId(stack);
-        availableItems.merge(itemIdentifier, stack.getAmount(), Integer::sum);
-      }
-
-      int maxCrafts = Integer.MAX_VALUE;
-      for (var entry : requiredItems.entrySet()) {
-        int available = availableItems.getOrDefault(entry.getKey(), 0);
-        if (available < entry.getValue()) return 0;
-        maxCrafts = Math.min(maxCrafts, available / entry.getValue());
-      }
-      return maxCrafts == Integer.MAX_VALUE ? 0 : maxCrafts;
+      return getMaxCraftCountForShapeless(shapelessRecipe, inventory);
     }
+
     return 0;
+  }
+
+  private int getMaxCraftCountForShaped(BlightedShapedRecipe recipe, Inventory inventory) {
+    int maxCrafts = Integer.MAX_VALUE;
+    List<CraftingObject> recipePattern = recipe.getRecipe();
+
+    for (int i = 0; i < INPUT_SLOTS.length; i++) {
+      CraftingObject craftingObject = recipePattern.get(i);
+      if (craftingObject == null) continue;
+
+      ItemStack stack = inventory.getItem(INPUT_SLOTS[i]);
+      if (stack == null || stack.getType() == Material.AIR) return 0;
+
+      maxCrafts = Math.min(maxCrafts, stack.getAmount() / craftingObject.getAmount());
+    }
+
+    return maxCrafts == Integer.MAX_VALUE ? 0 : maxCrafts;
+  }
+
+  private int getMaxCraftCountForShapeless(BlightedShapelessRecipe recipe, Inventory inventory) {
+    Map<String, Integer> requiredItems = recipe.getIngredientCountMap();
+    Map<String, Integer> availableItems = collectAvailableItems(inventory);
+
+    int maxCrafts = Integer.MAX_VALUE;
+
+    for (Map.Entry<String, Integer> entry : requiredItems.entrySet()) {
+      int available = availableItems.getOrDefault(entry.getKey(), 0);
+      if (available < entry.getValue()) return 0;
+
+      maxCrafts = Math.min(maxCrafts, available / entry.getValue());
+    }
+
+    return maxCrafts == Integer.MAX_VALUE ? 0 : maxCrafts;
+  }
+
+  private Map<String, Integer> collectAvailableItems(Inventory inventory) {
+    Map<String, Integer> availableItems = new HashMap<>();
+
+    for (int slot : INPUT_SLOTS) {
+      ItemStack stack = inventory.getItem(slot);
+      if (stack == null || stack.getType() == Material.AIR) continue;
+
+      String itemIdentifier = getItemId(stack);
+      availableItems.merge(itemIdentifier, stack.getAmount(), Integer::sum);
+    }
+
+    return availableItems;
   }
 
   private void updateOutput(Inventory inventory) {
     BlightedRecipe recipe = getMatchingRecipe(inventory);
+    updateOutputSlot(inventory, recipe);
+    updateRecipeIndicators(inventory, recipe);
+  }
 
-    // Update output slot
+  private void updateOutputSlot(Inventory inventory, BlightedRecipe recipe) {
     if (recipe == null) {
       inventory.setItem(OUTPUT_SLOT, CraftingTableMenu.RECIPE_REQUIRED());
-    } else {
-      ItemStack previewItem = getResultItem(recipe, inventory);
-
-      // Add the custom preview lore
-      List<String> lore = Objects.requireNonNull(previewItem.getItemMeta()).getLore();
-      if (lore == null) lore = new ArrayList<>();
-      lore.add("§8§m----------------");
-      lore.add("§7This is the item you are crafting.");
-      var meta = previewItem.getItemMeta();
-      meta.setLore(lore);
-      previewItem.setItemMeta(meta);
-
-      inventory.setItem(OUTPUT_SLOT, previewItem);
+      return;
     }
 
-    ItemStack indicator = (recipe == null)
-      ? CraftingTableMenu.VALID_RECIPE_INDICATOR(false)
-      : CraftingTableMenu.VALID_RECIPE_INDICATOR(true);
+    ItemStack previewItem = getResultItem(recipe);
+    addPreviewLore(previewItem);
+    inventory.setItem(OUTPUT_SLOT, previewItem);
+  }
 
-    for (int slot = 45; slot < 49; slot++) {
+  private void addPreviewLore(ItemStack item) {
+    var meta = item.getItemMeta();
+    if (meta == null) return;
+
+    List<String> lore = meta.getLore();
+    if (lore == null) lore = new ArrayList<>();
+
+    lore.add("§8§m----------------");
+    lore.add("§7This is the item you are crafting.");
+    meta.setLore(lore);
+    item.setItemMeta(meta);
+  }
+
+  private void updateRecipeIndicators(Inventory inventory, BlightedRecipe recipe) {
+    ItemStack indicator = CraftingTableMenu.VALID_RECIPE_INDICATOR(recipe != null);
+
+    for (int slot : INDICATOR_SLOTS_LEFT) {
       inventory.setItem(slot, indicator);
     }
-    for (int slot = 50; slot < 54; slot++) {
+    for (int slot : INDICATOR_SLOTS_RIGHT) {
       inventory.setItem(slot, indicator);
+    }
+  }
+
+  private void returnItemsToPlayer(InventoryCloseEvent event) {
+    Player player = (Player) event.getPlayer();
+
+    for (int slot : INPUT_SLOTS) {
+      ItemStack item = event.getView().getItem(slot);
+      if (item == null || item.getType() == Material.AIR) continue;
+
+      Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+      dropLeftoverItems(player, leftover);
     }
   }
 
   private BlightedRecipe getMatchingRecipe(Inventory inventory) {
     List<ItemStack> craftingGrid = new ArrayList<>();
-    for (int slot : INPUT_SLOTS) craftingGrid.add(inventory.getItem(slot));
+    for (int slot : INPUT_SLOTS) {
+      craftingGrid.add(inventory.getItem(slot));
+    }
+
     Set<BlightedRecipe> matchingRecipes = BlightedRecipe.findMatchingRecipes(craftingGrid);
     return matchingRecipes.isEmpty() ? null : matchingRecipes.iterator().next();
   }
 
-  private ItemStack getResultItem(BlightedRecipe recipe, Inventory inventory) {
-    ItemStack item = recipe.getResult().toItemStack();
+  private ItemStack getResultItem(BlightedRecipe recipe) {
+    ItemStack item = recipe.getResult().toItemStack().clone();
     int amount = recipe.getAmount() > 0 ? recipe.getAmount() : 1;
     item.setAmount(amount);
     return item;
   }
 
   private boolean isInputSlot(int slot) {
-    for (int inputSlot : INPUT_SLOTS) if (inputSlot == slot) return true;
+    for (int inputSlot : INPUT_SLOTS) {
+      if (inputSlot == slot) return true;
+    }
     return false;
   }
 
@@ -244,27 +340,43 @@ public class CraftingTableListener implements Listener {
     return "vanilla:" + stack.getType().name().toLowerCase();
   }
 
-  @EventHandler
-  public void onInteract(PlayerInteractEvent event) {
-    if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-    if (event.getClickedBlock() == null || event.getClickedBlock().getType() != Material.CRAFTING_TABLE) return;
-    event.getPlayer().openInventory(CraftingTableMenu.createInventory());
+  private boolean canAddToCursor(ItemStack cursorItem, ItemStack resultItem) {
+    if (cursorItem == null || cursorItem.getType() == Material.AIR) return true;
+
+    return cursorItem.isSimilar(resultItem)
+      && cursorItem.getAmount() + resultItem.getAmount() <= cursorItem.getMaxStackSize();
   }
 
-  @EventHandler
-  public void onClose(InventoryCloseEvent event) {
-    if (!event.getView().getTitle().equals("§rCraft Items")) return;
+  private boolean isShiftClick(ClickType clickType) {
+    return clickType == ClickType.SHIFT_LEFT || clickType == ClickType.SHIFT_RIGHT;
+  }
 
-    for (int slot : INPUT_SLOTS) {
-      ItemStack item = event.getView().getItem(slot);
-      if (item == null || item.getType() == Material.AIR) continue;
+  private void dropLeftoverItems(Player player, Map<Integer, ItemStack> leftoverItems) {
+    leftoverItems.values().forEach(item ->
+      player.getWorld().dropItemNaturally(player.getLocation(), item)
+    );
+  }
 
-      Player player = (Player) event.getPlayer();
-      if (player.getInventory().firstEmpty() != -1) {
-        player.getInventory().addItem(item);
-      } else {
-        player.getWorld().spawn(player.getLocation(), Item.class, worldItem -> worldItem.setItemStack(item));
-      }
-    }
+  private void openRecipeBook(Player player) {
+    MenuManager.openMenu(
+      new RecipeBookMenu.RecipeListMenu(
+        new Menu("Crafting Table", 54) {
+          @Override
+          public void build(Player p) {}
+        }
+      ), player
+    );
+  }
+
+  private void scheduleOutputUpdate(Inventory inventory) {
+    Bukkit.getScheduler().runTaskLater(
+      BlightedMC.getInstance(),
+      () -> updateOutput(inventory),
+      SCHEDULED_UPDATE_DELAY
+    );
+  }
+
+  private boolean isCraftingMenu(String title) {
+    return !CRAFTING_MENU_TITLE.equals(title);
   }
 }
