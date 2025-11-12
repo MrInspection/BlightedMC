@@ -27,7 +27,7 @@ public class BlightedZombie extends SpawnableEntity {
   private boolean hasSpeedBoost = false;
 
   public BlightedZombie() {
-    super("BLIGHTED_ZOMBIE", "Zombie", 30, EntityType.ZOMBIE, 0.05);
+    super("BLIGHTED_ZOMBIE", "Blighted Zombie", 30, EntityType.ZOMBIE, 0.05);
     setNameTagType(EntityNameTag.BLIGHTED);
     setDamage(15);
     setDroppedExp(10);
@@ -55,6 +55,19 @@ public class BlightedZombie extends SpawnableEntity {
       speedAbilityTask = task;
       return task;
     }, 100L, 200L);
+  }
+
+  @Override
+  protected void setupSpawnConditions() {
+    addSpawnCondition(
+      SpawnConditions.biome(Biome.FOREST, Biome.BIRCH_FOREST, Biome.DARK_FOREST, Biome.FLOWER_FOREST, Biome.SAVANNA)
+        .and(SpawnConditions.nightTime())
+        .and(SpawnConditions.clearWeather())
+        .and(SpawnConditions.minY(50))
+        .and(SpawnConditions.maxY(80))
+        .and(SpawnConditions.skyExposed())
+        .and(SpawnConditions.notInWater())
+    );
   }
 
   @Override
@@ -93,7 +106,7 @@ public class BlightedZombie extends SpawnableEntity {
 
     hasSpeedBoost = true;
     equipSpeedArmor();
-    entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 10, 2));
+    entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 200, 2));
 
     new BukkitRunnable() {
       @Override
@@ -101,15 +114,14 @@ public class BlightedZombie extends SpawnableEntity {
         hasSpeedBoost = false;
         equipNormalArmor();
       }
-    }.runTaskLater(BlightedMC.getInstance(), 20 * 10);
+    }.runTaskLater(BlightedMC.getInstance(), 200);
   }
 
   private void stopSpeedAbility() {
     if (speedAbilityTask != null) {
       try {
         speedAbilityTask.cancel();
-      } catch (IllegalStateException ignored) {
-      }
+      } catch (IllegalStateException ignored) {}
       speedAbilityTask = null;
     }
     hasSpeedBoost = false;
@@ -145,14 +157,10 @@ public class BlightedZombie extends SpawnableEntity {
     if (!(entity instanceof Zombie zombie)) return;
 
     Objects.requireNonNull(zombie.getEquipment()).setChestplate(
-      new ItemBuilder(Material.LEATHER_CHESTPLATE)
-        .setLeatherColor("#81CFE2")
-        .toItemStack()
+      new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherColor("#81CFE2").toItemStack()
     );
     zombie.getEquipment().setHelmet(
-      new ItemBuilder(Material.LEATHER_HELMET)
-        .setLeatherColor("#81CFE2")
-        .toItemStack()
+      new ItemBuilder(Material.LEATHER_HELMET).setLeatherColor("#81CFE2").toItemStack()
     );
   }
 
@@ -161,22 +169,5 @@ public class BlightedZombie extends SpawnableEntity {
       .setMaxDrop(2)
       .addLoot(Material.ROTTEN_FLESH, 1, 3, 1, LootDropRarity.COMMON)
       .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
-  }
-
-  @Override
-  protected void setupSpawnConditions() {
-    addSpawnCondition(
-      SpawnConditions.biome(
-        Biome.FOREST,
-        Biome.BIRCH_FOREST,
-        Biome.DARK_FOREST,
-        Biome.FLOWER_FOREST
-      )
-      .and((loc, world) -> world.getTime() > 13000 && world.getTime() < 23000) // night time check
-      .and((loc, world) -> !world.hasStorm()) // clear weather
-      .and(SpawnConditions.minY(50).and(SpawnConditions.maxY(80)))
-      .and(SpawnConditions.skyExposed())
-      .and(SpawnConditions.notInWater())
-    );
   }
 }
