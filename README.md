@@ -4,7 +4,7 @@ BlightedMC is a open-source project inspired by Hypixel Skyblock for some core m
 
 
 > [!IMPORTANT]
-> This project is still under development, the entire gameplay isn't finished yet.
+> This project is still under development, the entire gameplay isn't finished yet. The current state of the project is to polish the core APIs elements and squash bugs.
 
 ### Why This Project Exists
 
@@ -12,11 +12,17 @@ This project exists for a single reason, Minecraft isn't difficult enough. I pla
 
 This project is also a way for me to practice in java with design patterns, efficient code, etc... I'm mainly a web developer, but Java is one of my first programming language. I don't usually code a lot in java, so this project will help me do that, in a fun manner.
 
-### Features:
-* Custom crafting system
+### Features (Core APIs):
+
+* Custom Crafting System + Recipe Book
+* Custom Creatures and Custom Spawnable Creatures w/ powerful API
+* Custom Item System w/ item abilities, full set bonuses, cooldown management, etc...
+* Custom fishing system
 * Custom mobs creation system
-* Custom items creation system w/ full set bonus & item abilities
-* Some fun commands and some OP commands (not to abuse, can crash a server)
+* Custom menu creation system
+
+> [!INFO]
+> I'm planning to creature 2-3 core API elements before creating all the gameplay mechanics. Right now you can test all those elements in game by checking the `/giveitem` command to open the in-game items directory.
 
 ### Development Environment
 
