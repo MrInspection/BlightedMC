@@ -2,46 +2,69 @@ package fr.moussax.blightedMC.core.entities.spawnable;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.checkerframework.checker.index.qual.Positive;
-
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpawnableEntityProfile implements Cloneable {
-  private final List<SpawnCondition> conditions = new ArrayList<>();
-  private double weight = 1.0;
-  private int minGroup = 1, maxGroup = 1;
-  private double spawnChance = 1.0;
+/**
+ * Represents a profile defining the spawning conditions for a specific type of entity.
+ * <p>
+ * A {@code SpawnableEntityProfile} holds a list of {@link SpawnCondition} instances,
+ * each representing an independent rule that must be satisfied for spawning to occur.
+ * The {@link #canSpawn(Location, World)} method evaluates all conditions and returns
+ * {@code true} only if every condition passes.
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * SpawnableEntityProfile profile = new SpawnableEntityProfile();
+ * profile.addCondition(SpawnConditions.biome(Biome.PLAINS));
+ * profile.addCondition(SpawnConditions.nightTime());
+ * profile.addCondition(SpawnConditions.notInWater());
+ *
+ * boolean canSpawn = profile.canSpawn(location, world);
+ * }</pre>
+ */
+public class SpawnableEntityProfile {
+  private final List<SpawnCondition> conditions;
 
-  @SuppressWarnings("UnusedReturnValue")
-  public SpawnableEntityProfile addCondition(SpawnCondition condition) {
+  /**
+   * Creates an empty spawnable entity profile with no conditions.
+   * All spawns will be allowed until conditions are added.
+   */
+  public SpawnableEntityProfile() {
+    this.conditions = new ArrayList<>();
+  }
+
+  /**
+   * Internal constructor used to create deep copies of profiles.
+   *
+   * @param conditions the list of conditions to copy
+   */
+  private SpawnableEntityProfile(List<SpawnCondition> conditions) {
+    this.conditions = new ArrayList<>(conditions);
+  }
+
+  /**
+   * Adds a new {@link SpawnCondition} to this profile.
+   * <p>
+   * Multiple conditions are combined with a logical AND,
+   * meaning all must pass for the entity to spawn.
+   *
+   * @param condition the condition to add
+   */
+  public void addCondition(SpawnCondition condition) {
     conditions.add(condition);
-    return this;
   }
 
-  public SpawnableEntityProfile spawnChance(double chance) {
-    this.spawnChance = chance;
-    return this;
-  }
-
-  public SpawnableEntityProfile weight(@Positive double weight) {
-    if (weight < 0.00) {
-      throw new IllegalArgumentException("Weight cannot be negative: " + weight);
-    }
-    this.weight = weight;
-    return this;
-  }
-
-  public SpawnableEntityProfile groupSize(@Positive int min, int max) {
-    if (max < min) {
-      throw new IllegalArgumentException("Invalid group size: min=" + min + ", max=" + max);
-    }
-    this.minGroup = min;
-    this.maxGroup = max;
-    return this;
-  }
-
+  /**
+   * Checks if an entity with this profile can spawn at the given location and world.
+   * <p>
+   * The check iterates through all registered conditions and fails fast
+   * when any condition returns {@code false}.
+   *
+   * @param location the location to test
+   * @param world    the world in which the entity would spawn
+   * @return {@code true} if all conditions pass, {@code false} otherwise
+   */
   public boolean canSpawn(Location location, World world) {
     for (SpawnCondition condition : conditions) {
       if (!condition.canSpawn(location, world)) {
@@ -51,31 +74,23 @@ public class SpawnableEntityProfile implements Cloneable {
     return true;
   }
 
-  public double getWeight() {
-    return weight;
+  /**
+   * Returns the number of registered spawn conditions.
+   *
+   * @return the total number of conditions
+   */
+  public int getConditionCount() {
+    return conditions.size();
   }
 
-  public int getMinGroup() {
-    return minGroup;
-  }
-
-  public int getMaxGroup() {
-    return maxGroup;
-  }
-
-  public double getSpawnChance() {
-    return spawnChance;
-  }
-
-  @Override
-  public SpawnableEntityProfile clone() {
-    try {
-      SpawnableEntityProfile clone = (SpawnableEntityProfile) super.clone();
-      clone.conditions.clear();
-      clone.conditions.addAll(this.conditions);
-      return clone;
-    } catch (CloneNotSupportedException e) {
-      throw new RuntimeException("Failed to clone SpawnableEntityProfile", e);
-    }
+  /**
+   * Creates a deep copy of this spawnable entity profile.
+   * <p>
+   * The copied profile will contain the same conditions but as a separate list instance.
+   *
+   * @return a new {@link SpawnableEntityProfile} with identical conditions
+   */
+  public SpawnableEntityProfile deepCopy() {
+    return new SpawnableEntityProfile(this.conditions);
   }
 }

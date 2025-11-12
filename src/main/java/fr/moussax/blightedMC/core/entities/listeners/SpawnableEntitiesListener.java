@@ -2,10 +2,10 @@ package fr.moussax.blightedMC.core.entities.listeners;
 
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.core.entities.registry.SpawnableEntitiesRegistry;
-import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
@@ -15,57 +15,45 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class SpawnableEntitiesListener implements Listener {
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onCreatureSpawn(CreatureSpawnEvent event) {
-    if (!isEligibleSpawnReason(event.getSpawnReason())) {
+    CreatureSpawnEvent.SpawnReason reason = event.getSpawnReason();
+    if (reason != CreatureSpawnEvent.SpawnReason.NATURAL &&
+      reason != CreatureSpawnEvent.SpawnReason.REINFORCEMENTS) {
       return;
     }
 
-    Location spawnLocation = event.getLocation();
-    World world = spawnLocation.getWorld();
+    Location location = event.getLocation();
+    World world = location.getWorld();
     if (world == null) return;
 
-    List<SpawnableEntity> eligibleEntities = getEligibleEntities(spawnLocation, world);
-    if (eligibleEntities.isEmpty()) return;
-
-    SpawnableEntity selectedEntity = selectRandomEntity(eligibleEntities);
-    if (selectedEntity == null) return;
-
-    spawnCustomEntity(selectedEntity, spawnLocation);
-    event.setCancelled(true);
-  }
-
-  private boolean isEligibleSpawnReason(CreatureSpawnEvent.SpawnReason reason) {
-    return reason == CreatureSpawnEvent.SpawnReason.NATURAL
-      || reason == CreatureSpawnEvent.SpawnReason.REINFORCEMENTS;
-  }
-
-  private List<SpawnableEntity> getEligibleEntities(Location location, World world) {
     List<SpawnableEntity> eligible = new ArrayList<>();
-    List<SpawnableEntity> allEntities = SpawnableEntitiesRegistry.getAllEntities();
-
-    for (SpawnableEntity entity : allEntities) {
+    for (SpawnableEntity entity : SpawnableEntitiesRegistry.getAllEntities()) {
       if (entity.canSpawnAt(location, world)) {
         eligible.add(entity);
       }
     }
-    return eligible;
-  }
 
-  private SpawnableEntity selectRandomEntity(List<SpawnableEntity> eligibleEntities) {
-    for (SpawnableEntity entity : eligibleEntities) {
-      if (ThreadLocalRandom.current().nextDouble() <= entity.getSpawnChance()) {
-        return entity;
-      }
+    if (eligible.isEmpty()) return;
+
+    double totalChance = 0.0;
+    for (SpawnableEntity entity : eligible) {
+      totalChance += entity.getSpawnChance();
     }
-    return null;
-  }
+    totalChance = Math.min(totalChance, 1.0);
 
-  private void spawnCustomEntity(SpawnableEntity entity, Location location) {
-    try {
-      entity.spawn(location);
-    } catch (Exception e) {
-      Log.error("Failed to spawn custom entity " + entity.getEntityId() + ": " + e.getMessage());
+    if (ThreadLocalRandom.current().nextDouble() >= totalChance) return;
+
+    double roll = ThreadLocalRandom.current().nextDouble() * totalChance;
+    double cumulative = 0.0;
+
+    for (SpawnableEntity entity : eligible) {
+      cumulative += entity.getSpawnChance();
+      if (roll < cumulative) {
+        event.setCancelled(true);
+        entity.spawn(location, CreatureSpawnEvent.SpawnReason.CUSTOM);
+        return;
+      }
     }
   }
 }
