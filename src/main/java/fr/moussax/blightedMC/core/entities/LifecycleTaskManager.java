@@ -8,37 +8,78 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Per-entity lifecycle task manager. Allows registering repeating and delayed tasks
- * that are automatically scheduled on entity spawn/attach and canceled on kill.
+ * Manages the lifecycle-bound tasks associated with a {@link fr.moussax.blightedMC.core.entities.BlightedEntity}.
+ * <p>
+ * This class allows entities to register both delayed and repeating tasks that
+ * automatically start when the entity is initialized and stop when it is destroyed.
+ * All tasks are stored as {@link BukkitRunnable} instances and are tied to the plugin’s scheduler.
+ * <p>
+ * Tasks registered through this manager are:
+ * <ul>
+ *   <li>Executed using the {@link BlightedMC} plugin instance</li>
+ *   <li>Automatically cancelable when the entity is killed or detached</li>
+ *   <li>Reschedulable via {@link #scheduleAll()} or {@link #scheduleLast()}</li>
+ * </ul>
  */
 public final class LifecycleTaskManager {
+
+  /** Holds all registered scheduled tasks for the associated entity. */
   private final List<ScheduledTask> tasks = new ArrayList<>();
 
+  /**
+   * Adds a repeating task that executes periodically for the entity lifecycle.
+   *
+   * @param factory     supplier creating a new {@link BukkitRunnable} instance
+   * @param delayTicks  initial delay before the first execution, in ticks
+   * @param periodTicks interval between consecutive runs, in ticks
+   */
   public void addRepeatingTask(Supplier<BukkitRunnable> factory, long delayTicks, long periodTicks) {
     tasks.add(new ScheduledTask(factory, delayTicks, periodTicks, true));
   }
 
+  /**
+   * Adds a delayed one-time task that runs once after the given delay.
+   *
+   * @param factory    supplier creating a new {@link BukkitRunnable} instance
+   * @param delayTicks delay before execution, in ticks
+   */
   public void addDelayedTask(Supplier<BukkitRunnable> factory, long delayTicks) {
     tasks.add(new ScheduledTask(factory, delayTicks, 0L, false));
   }
 
+  /**
+   * Schedules all registered tasks. This is typically invoked
+   * during the entity’s runtime initialization phase.
+   */
   public void scheduleAll() {
     for (ScheduledTask task : tasks) {
       task.schedule();
     }
   }
 
+  /**
+   * Schedules only the most recently added task.
+   * Useful for adding new runtime behaviors dynamically.
+   */
   public void scheduleLast() {
     if (tasks.isEmpty()) return;
     tasks.getLast().schedule();
   }
 
+  /**
+   * Cancels all currently running scheduled tasks associated with the entity.
+   * This should be invoked during entity destruction or kill.
+   */
   public void cancelAll() {
     for (ScheduledTask task : tasks) {
       task.cancel();
     }
   }
 
+  /**
+   * Represents a scheduled Bukkit task bound to an entity’s lifecycle.
+   * Handles its own scheduling, cancellation, and re-initialization logic.
+   */
   private static final class ScheduledTask {
     private final Supplier<BukkitRunnable> factory;
     private final long delayTicks;
@@ -46,6 +87,14 @@ public final class LifecycleTaskManager {
     private final boolean repeating;
     private BukkitRunnable current;
 
+    /**
+     * Constructs a new scheduled task definition.
+     *
+     * @param factory     the runnable supplier
+     * @param delayTicks  delay before first execution
+     * @param periodTicks interval between runs (ignored for non-repeating)
+     * @param repeating   whether this task repeats
+     */
     private ScheduledTask(Supplier<BukkitRunnable> factory, long delayTicks, long periodTicks, boolean repeating) {
       this.factory = factory;
       this.delayTicks = delayTicks;
@@ -53,6 +102,10 @@ public final class LifecycleTaskManager {
       this.repeating = repeating;
     }
 
+    /**
+     * Starts or restarts this task on the Bukkit scheduler.
+     * Cancels any previous instance before scheduling a new one.
+     */
     private void schedule() {
       cancel();
       current = factory.get();
@@ -63,6 +116,10 @@ public final class LifecycleTaskManager {
       }
     }
 
+    /**
+     * Cancels the currently running task instance, if active.
+     * Ignores cancellation errors due to already terminated tasks.
+     */
     private void cancel() {
       if (current != null) {
         try {
