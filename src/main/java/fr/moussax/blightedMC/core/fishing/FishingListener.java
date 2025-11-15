@@ -1,8 +1,9 @@
 package fr.moussax.blightedMC.core.fishing;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.fishing.environment.EndFishing;
 import fr.moussax.blightedMC.core.fishing.environment.OverworldFishing;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -14,7 +15,7 @@ import java.util.Random;
 
 public class FishingListener implements Listener {
   private static final Random RANDOM = new Random();
-  private static final double CUSTOM_LOOT_CHANCE = 0.50; // 50% chance for custom loot, 50% for vanilla
+  private static final double CUSTOM_LOOT_CHANCE = BlightedMC.getInstance().getSettings().getCustomLootChance();
 
   @EventHandler
   public void onPlayerFishing(PlayerFishEvent event) {

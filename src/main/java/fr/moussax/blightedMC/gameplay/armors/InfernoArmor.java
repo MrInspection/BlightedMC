@@ -1,4 +1,13 @@
 package fr.moussax.blightedMC.gameplay.armors;
 
-public class InfernoArmor {
+import fr.moussax.blightedMC.core.items.ItemTemplate;
+import fr.moussax.blightedMC.core.items.registry.ItemRegistry;
+
+import java.util.List;
+
+public class InfernoArmor implements ItemRegistry {
+  @Override
+  public List<ItemTemplate> defineItems() {
+    return List.of();
+  }
 }

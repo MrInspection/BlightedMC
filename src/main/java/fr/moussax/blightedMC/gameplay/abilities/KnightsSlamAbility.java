@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.gameplay.abilities;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.abilities.AbilityManager;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;

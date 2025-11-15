@@ -1,14 +1,14 @@
-package fr.moussax.blightedMC.core.players;
+package fr.moussax.blightedMC.core.player;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.items.ItemType;
 import fr.moussax.blightedMC.core.items.abilities.CooldownEntry;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.core.players.data.PlayerDataHandler;
-import fr.moussax.blightedMC.core.players.managers.ActionBarManager;
-import fr.moussax.blightedMC.core.players.managers.GemsManager;
-import fr.moussax.blightedMC.core.players.managers.ManaManager;
+import fr.moussax.blightedMC.server.database.PlayerDataHandler;
+import fr.moussax.blightedMC.core.managers.ActionBarManager;
+import fr.moussax.blightedMC.core.managers.GemsManager;
+import fr.moussax.blightedMC.core.managers.ManaManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -18,13 +18,14 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 public class BlightedPlayer {
+  private static BlightedMC instance = BlightedMC.getInstance();
   private static final Map<UUID, BlightedPlayer> players = new HashMap<>();
-  private static final double DEFAULT_MAX_MANA = 100.0;
-  private static final double DEFAULT_MANA_REGEN_RATE = 1.0;
+  private static final double DEFAULT_MAX_MANA = instance.getSettings().getDefaultMaxMana();
+  private static final double DEFAULT_MANA_REGEN_RATE = instance.getSettings().getDefaultManaRegenerationRate();
 
   private final Player player;
   private final UUID playerId;
-  private final GemsManager gems;
+  private final GemsManager gemsManager;
   private final PlayerDataHandler dataHandler;
   private final ActionBarManager actionBarManager;
   private final ManaManager manaManager;
@@ -41,11 +42,11 @@ public class BlightedPlayer {
     this.playerId = player.getUniqueId();
     this.dataHandler = new PlayerDataHandler(playerId, player.getName());
 
-    this.gems = new GemsManager();
-    this.gems.setGems(dataHandler.getPlayerData().getGems());
+    this.gemsManager = new GemsManager();
+    this.gemsManager.setGems(dataHandler.getGems());
 
     this.manaManager = new ManaManager(DEFAULT_MAX_MANA, DEFAULT_MANA_REGEN_RATE);
-    this.manaManager.setCurrentMana(dataHandler.getPlayerData().getMana());
+    this.manaManager.setCurrentMana(dataHandler.getMana());
 
     this.actionBarManager = new ActionBarManager(this);
     players.put(playerId, this);
@@ -167,23 +168,23 @@ public class BlightedPlayer {
   }
 
   public GemsManager getGems() {
-    return gems;
+    return gemsManager;
   }
 
   public void addGems(int value) {
     if (value == 0) return;
-    gems.addGems(value);
+    gemsManager.addGems(value);
     actionBarManager.tick();
   }
 
   public void removeGems(int value) {
     if (value == 0) return;
-    gems.removeGems(value);
+    gemsManager.removeGems(value);
     actionBarManager.tick();
   }
 
   public void setGems(int value) {
-    gems.setGems(value);
+    gemsManager.setGems(value);
     actionBarManager.tick();
   }
 
@@ -197,7 +198,7 @@ public class BlightedPlayer {
   }
 
   public void saveData() {
-    dataHandler.setGems(gems.getGems());
+    dataHandler.setGems(gemsManager.getGems());
     dataHandler.setMana(manaManager.getCurrentMana());
     dataHandler.save();
   }

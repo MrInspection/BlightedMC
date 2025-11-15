@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.core.entities.loot.gems.GemsItem;
 import fr.moussax.blightedMC.core.entities.loot.gems.GemsLoot;
 import fr.moussax.blightedMC.core.entities.loot.gems.GemsLootAdapter;
 import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;

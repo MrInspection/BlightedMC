@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.players;
+package fr.moussax.blightedMC.core.player;
 
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Arrow;

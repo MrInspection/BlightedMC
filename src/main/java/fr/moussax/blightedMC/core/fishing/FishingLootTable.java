@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.core.fishing;
 import fr.moussax.blightedMC.core.fishing.loot.LootContext;
 import fr.moussax.blightedMC.core.fishing.loot.LootEntry;
 import fr.moussax.blightedMC.core.fishing.loot.LootPool;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;

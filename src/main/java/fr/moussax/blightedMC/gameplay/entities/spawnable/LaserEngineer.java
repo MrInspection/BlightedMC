@@ -5,7 +5,7 @@ import fr.moussax.blightedMC.core.entities.loot.LootDropRarity;
 import fr.moussax.blightedMC.core.entities.loot.LootTable;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnConditions;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
 import org.bukkit.block.Biome;

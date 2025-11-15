@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.gameplay.abilities;
 
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -15,7 +15,6 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.checkerframework.checker.index.qual.Positive;
 
 import java.util.concurrent.ThreadLocalRandom;
 

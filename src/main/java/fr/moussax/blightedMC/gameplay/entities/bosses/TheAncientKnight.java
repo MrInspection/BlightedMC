@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.gameplay.entities.bosses;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntityNameTag;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;

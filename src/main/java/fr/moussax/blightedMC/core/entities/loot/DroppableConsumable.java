@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.entities.loot;
 
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.Location;
 
 public interface DroppableConsumable {

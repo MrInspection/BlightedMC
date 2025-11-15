@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.core.players.managers;
+package fr.moussax.blightedMC.core.managers;
 
 import org.checkerframework.checker.index.qual.Positive;
 

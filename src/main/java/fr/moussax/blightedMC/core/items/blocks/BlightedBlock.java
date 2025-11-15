@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.core.items.blocks;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
+import fr.moussax.blightedMC.server.BlightedFiles;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -51,7 +52,7 @@ public abstract class BlightedBlock {
     private final YamlConfiguration dataConfig;
 
     public BlightedBlockListener() {
-      dataFile = new File(plugin.getDataFolder(), "blighted_blocks.yml");
+      dataFile = BlightedFiles.CUSTOM_BLOCKS.getFile();
       dataConfig = YamlConfiguration.loadConfiguration(dataFile);
       loadData();
     }

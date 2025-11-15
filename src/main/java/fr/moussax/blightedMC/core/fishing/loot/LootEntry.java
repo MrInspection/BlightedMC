@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.fishing.loot;
 
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;

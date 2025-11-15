@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.items.abilities;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.event.Cancellable;

@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.fishing.loot;
 
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 

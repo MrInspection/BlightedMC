@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.gameplay.abilities;
 
 import fr.moussax.blightedMC.core.items.abilities.AbilityManager;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.BlightedMC;
 import org.bukkit.*;
 import org.bukkit.entity.*;
@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
-  private static final NamespacedKey UUID_KEY = new NamespacedKey("blightedmc", "bonemerang_uuid");
+  private static final NamespacedKey UUID_KEY = new NamespacedKey(BlightedMC.getInstance(), "bonemerang_uuid");
   private static final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
 
   private static final int OUTBOUND_TICKS = 13;
@@ -209,7 +209,7 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
 
   private void damageNearbyEntities(ArmorStand projectile, Player player) {
     for (Entity entity : projectile.getNearbyEntities(COLLISION_RADIUS, 1, COLLISION_RADIUS)) {
-      if (entity instanceof Damageable damageable && entity != player && entity instanceof LivingEntity) {
+      if (entity != player && entity instanceof LivingEntity damageable) {
         damageable.damage(DAMAGE_AMOUNT, player);
       }
     }

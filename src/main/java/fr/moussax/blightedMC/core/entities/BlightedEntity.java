@@ -7,7 +7,7 @@ import fr.moussax.blightedMC.core.entities.immunity.FireImmunityRule;
 import fr.moussax.blightedMC.core.entities.immunity.MeleeImmunityRule;
 import fr.moussax.blightedMC.core.entities.immunity.ProjectileImmunity;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;

@@ -7,7 +7,7 @@ import fr.moussax.blightedMC.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
 import fr.moussax.blightedMC.core.items.rules.ItemRule;
-import fr.moussax.blightedMC.core.players.BlightedPlayer;
+import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
