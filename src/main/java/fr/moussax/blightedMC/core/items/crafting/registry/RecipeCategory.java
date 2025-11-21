@@ -8,12 +8,12 @@ package fr.moussax.blightedMC.core.items.crafting.registry;
  * such as material upgrades, weapon crafting, or utility items.
  */
 public interface RecipeCategory {
-  /**
-   * Registers all recipes that belong to this category.
-   * <p>
-   * Implementations should define all the custom recipes
-   * relevant to the category and register them using
-   * {@link RecipesRegistry}.
-   */
-  void registerRecipes();
+    /**
+     * Registers all recipes that belong to this category.
+     * <p>
+     * Implementations should define all the custom recipes
+     * relevant to the category and register them using
+     * {@link RecipesRegistry}.
+     */
+    void registerRecipes();
 }

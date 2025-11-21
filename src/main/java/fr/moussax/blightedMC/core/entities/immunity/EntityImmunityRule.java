@@ -11,12 +11,12 @@ import org.bukkit.event.entity.EntityDamageEvent;
  */
 public interface EntityImmunityRule {
 
-  /**
-   * Determines whether the specified entity is immune to the given damage event.
-   *
-   * @param livingEntity the entity that may be affected by the event
-   * @param event        the damage event to check
-   * @return {@code true} if the entity is immune to this damage event, {@code false} otherwise
-   */
-  boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event);
+    /**
+     * Determines whether the specified entity is immune to the given damage event.
+     *
+     * @param livingEntity the entity that may be affected by the event
+     * @param event        the damage event to check
+     * @return {@code true} if the entity is immune to this damage event, {@code false} otherwise
+     */
+    boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event);
 }

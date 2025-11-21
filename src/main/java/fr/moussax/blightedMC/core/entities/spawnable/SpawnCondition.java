@@ -24,47 +24,47 @@ import org.bukkit.World;
  */
 @FunctionalInterface
 public interface SpawnCondition {
-  /**
-   * Determines whether an entity can spawn at the specified location in the given world.
-   *
-   * @param location the target spawn location
-   * @param world the world in which spawning is attempted
-   * @return {@code true} if spawning is allowed, {@code false} otherwise
-   */
-  boolean canSpawn(Location location, World world);
+    /**
+     * Determines whether an entity can spawn at the specified location in the given world.
+     *
+     * @param location the target spawn location
+     * @param world    the world in which spawning is attempted
+     * @return {@code true} if spawning is allowed, {@code false} otherwise
+     */
+    boolean canSpawn(Location location, World world);
 
-  /**
-   * Combines this condition with another using logical AND.
-   * <p>
-   * The resulting condition is true only if both conditions are true.
-   *
-   * @param other the other condition to combine with
-   * @return a new {@link SpawnCondition} representing the logical AND
-   */
-  default SpawnCondition and(SpawnCondition other) {
-    return (loc, world) -> this.canSpawn(loc, world) && other.canSpawn(loc, world);
-  }
+    /**
+     * Combines this condition with another using logical AND.
+     * <p>
+     * The resulting condition is true only if both conditions are true.
+     *
+     * @param other the other condition to combine with
+     * @return a new {@link SpawnCondition} representing the logical AND
+     */
+    default SpawnCondition and(SpawnCondition other) {
+        return (loc, world) -> this.canSpawn(loc, world) && other.canSpawn(loc, world);
+    }
 
-  /**
-   * Combines this condition with another using logical OR.
-   * <p>
-   * The resulting condition is true if at least one condition is true.
-   *
-   * @param other the other condition to combine with
-   * @return a new {@link SpawnCondition} representing the logical OR
-   */
-  default SpawnCondition or(SpawnCondition other) {
-    return (loc, world) -> this.canSpawn(loc, world) || other.canSpawn(loc, world);
-  }
+    /**
+     * Combines this condition with another using logical OR.
+     * <p>
+     * The resulting condition is true if at least one condition is true.
+     *
+     * @param other the other condition to combine with
+     * @return a new {@link SpawnCondition} representing the logical OR
+     */
+    default SpawnCondition or(SpawnCondition other) {
+        return (loc, world) -> this.canSpawn(loc, world) || other.canSpawn(loc, world);
+    }
 
-  /**
-   * Negates this spawn condition.
-   * <p>
-   * The resulting condition is true if and only if this one is false.
-   *
-   * @return a new {@link SpawnCondition} representing the logical negation
-   */
-  default SpawnCondition not() {
-    return (loc, world) -> !this.canSpawn(loc, world);
-  }
+    /**
+     * Negates this spawn condition.
+     * <p>
+     * The resulting condition is true if and only if this one is false.
+     *
+     * @return a new {@link SpawnCondition} representing the logical negation
+     */
+    default SpawnCondition not() {
+        return (loc, world) -> !this.canSpawn(loc, world);
+    }
 }

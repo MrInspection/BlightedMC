@@ -11,15 +11,15 @@ import org.bukkit.event.Event;
  * @param <T> the type of {@link Event} that triggers the ability
  */
 public interface AbilityManager<T extends Event> {
-  boolean triggerAbility(T event);
+    boolean triggerAbility(T event);
 
-  int getCooldownSeconds();
+    int getCooldownSeconds();
 
-  int getManaCost();
+    int getManaCost();
 
-  boolean canTrigger(BlightedPlayer player);
+    boolean canTrigger(BlightedPlayer player);
 
-  void start(BlightedPlayer player);
+    void start(BlightedPlayer player);
 
-  void stop(BlightedPlayer player);
+    void stop(BlightedPlayer player);
 }

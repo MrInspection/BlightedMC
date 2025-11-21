@@ -6,25 +6,25 @@ import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 public class GemsLootAdapter extends ItemLoot {
-  private final GemsLoot gemsLoot;
+    private final GemsLoot gemsLoot;
 
-  public GemsLootAdapter(GemsLoot gems, ItemStack displayItem) {
-    super(displayItem, gems.amount(), gems.amount());
-    this.gemsLoot = gems;
-  }
+    public GemsLootAdapter(GemsLoot gems, ItemStack displayItem) {
+        super(displayItem, gems.amount(), gems.amount());
+        this.gemsLoot = gems;
+    }
 
-  @Override
-  public int generateAmount() {
-    return 1; 
-  }
+    @Override
+    public int generateAmount() {
+        return 1;
+    }
 
-  @Override
-  public void consume(BlightedPlayer killer, Location dropLocation, boolean toPlayer, int amount) {
-    gemsLoot.consume(killer, dropLocation, toPlayer);
-  }
+    @Override
+    public void consume(BlightedPlayer killer, Location dropLocation, boolean toPlayer, int amount) {
+        gemsLoot.consume(killer, dropLocation, toPlayer);
+    }
 
-  @Override
-  public String name() {
-    return gemsLoot.name();
-  }
+    @Override
+    public String name() {
+        return gemsLoot.name();
+    }
 }

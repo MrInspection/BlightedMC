@@ -12,22 +12,22 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ItemDirectorySearch implements Listener {
-  public static final ConcurrentHashMap<UUID, Menu> awaitingSearch = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<UUID, Menu> awaitingSearch = new ConcurrentHashMap<>();
 
-  @EventHandler
-  public void onChat(AsyncPlayerChatEvent event) {
-    UUID uuid = event.getPlayer().getUniqueId();
-    if (awaitingSearch.containsKey(uuid)) {
-      event.setCancelled(true);
-      String search = event.getMessage().trim();
-      Menu previousMenu = awaitingSearch.remove(uuid);
-      Bukkit.getScheduler().runTask(BlightedMC.getInstance(), () -> {
-        if (!search.isEmpty()) {
-          MenuManager.openMenu(new ItemDirectoryMenu.SearchResultsPaginatedMenu(search, previousMenu), event.getPlayer());
-        } else {
-          MenuManager.openMenu(previousMenu, event.getPlayer());
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        if (awaitingSearch.containsKey(uuid)) {
+            event.setCancelled(true);
+            String search = event.getMessage().trim();
+            Menu previousMenu = awaitingSearch.remove(uuid);
+            Bukkit.getScheduler().runTask(BlightedMC.getInstance(), () -> {
+                if (!search.isEmpty()) {
+                    MenuManager.openMenu(new ItemDirectoryMenu.SearchResultsPaginatedMenu(search, previousMenu), event.getPlayer());
+                } else {
+                    MenuManager.openMenu(previousMenu, event.getPlayer());
+                }
+            });
         }
-      });
     }
-  }
 }

@@ -19,104 +19,112 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RocketBootsAbility implements FullSetBonus, Listener {
-  private BlightedPlayer player;
+    private BlightedPlayer player;
 
-  @Override
-  public void startAbilityEffect() {
-    if (player == null) return;
-    Player p = player.getPlayer();
-    if (p == null) return;
-    p.setAllowFlight(true);
-  }
-
-  @Override
-  public void stopAbilityEffect() {
-    if (player == null) return;
-    Player p = player.getPlayer();
-    if (p == null) return;
-    p.setAllowFlight(false);
-  }
-
-  @Override
-  public int getPieces() { return 1; }
-
-  @Override
-  public int getMaxPieces() { return 1; }
-
-  @Override
-  public void setPlayer(BlightedPlayer player) { this.player = player; }
-
-  @Override
-  public BlightedPlayer getAbilityOwner() { return this.player; }
-
-  @EventHandler
-  public void onPlayerToggleFlight(PlayerToggleFlightEvent event) {
-    var p = event.getPlayer();
-    
-    if (isAbilityOwner(p)) {
-      return;
+    @Override
+    public void startAbilityEffect() {
+        if (player == null) return;
+        Player p = player.getPlayer();
+        if (p == null) return;
+        p.setAllowFlight(true);
     }
-    
-    if(p.getGameMode() == GameMode.CREATIVE) return;
 
-    if(!p.isFlying()) {
-      event.setCancelled(true);
-      p.setAllowFlight(false);
-      p.setVelocity(p.getLocation().getDirection().setY(0.5).multiply(1.25));
-      applyDurabilityDamageToBoots(p);
-      p.getWorld().spawnParticle(Particle.CLOUD, p.getLocation(), 12, 0.2, 0.05, 0.2, 0.001);
-      p.getWorld().playSound(p.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 60f, 0f);
+    @Override
+    public void stopAbilityEffect() {
+        if (player == null) return;
+        Player p = player.getPlayer();
+        if (p == null) return;
+        p.setAllowFlight(false);
     }
-  }
 
-  @EventHandler
-  public void onPlayerLand(PlayerMoveEvent event) {
-    Player p = event.getPlayer();
-    
-    if (isAbilityOwner(p)) {
-      return;
+    @Override
+    public int getPieces() {
+        return 1;
     }
-    
-    if(((Entity) p).isOnGround()) {
-      p.setAllowFlight(true);
+
+    @Override
+    public int getMaxPieces() {
+        return 1;
     }
-  }
 
-  private void applyDurabilityDamageToBoots(Player player) {
-    int damage = 1;
+    @Override
+    public void setPlayer(BlightedPlayer player) {
+        this.player = player;
+    }
 
-    ItemStack boots = player.getInventory().getBoots();
-    if (boots == null) return;
-    if (!boots.hasItemMeta()) return;
+    @Override
+    public BlightedPlayer getAbilityOwner() {
+        return this.player;
+    }
 
-    ItemMeta meta = boots.getItemMeta();
-    if (!(meta instanceof Damageable damageable)) return;
+    @EventHandler
+    public void onPlayerToggleFlight(PlayerToggleFlightEvent event) {
+        var p = event.getPlayer();
 
-    int unbreakingLevel = boots.getEnchantmentLevel(Enchantment.UNBREAKING);
-
-    int appliedDamage = 0;
-    for (int i = 0; i < damage; i++) {
-      if (unbreakingLevel > 0) {
-        double skipChance = (double) unbreakingLevel / (unbreakingLevel + 1);
-        if (ThreadLocalRandom.current().nextDouble() < skipChance) {
-          continue; // durability loss skipped
+        if (isAbilityOwner(p)) {
+            return;
         }
-      }
-      appliedDamage++;
+
+        if (p.getGameMode() == GameMode.CREATIVE) return;
+
+        if (!p.isFlying()) {
+            event.setCancelled(true);
+            p.setAllowFlight(false);
+            p.setVelocity(p.getLocation().getDirection().setY(0.5).multiply(1.25));
+            applyDurabilityDamageToBoots(p);
+            p.getWorld().spawnParticle(Particle.CLOUD, p.getLocation(), 12, 0.2, 0.05, 0.2, 0.001);
+            p.getWorld().playSound(p.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 60f, 0f);
+        }
     }
 
-    if (appliedDamage <= 0) return;
+    @EventHandler
+    public void onPlayerLand(PlayerMoveEvent event) {
+        Player p = event.getPlayer();
 
-    int currentDamage = damageable.getDamage();
-    int maxDurability = boots.getType().getMaxDurability();
+        if (isAbilityOwner(p)) {
+            return;
+        }
 
-    int durabilityDamage = currentDamage + appliedDamage;
-    if (durabilityDamage >= maxDurability) {
-      player.getInventory().setBoots(null);
-      player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
-    } else {
-      damageable.setDamage(durabilityDamage);
-      boots.setItemMeta(meta);
+        if (((Entity) p).isOnGround()) {
+            p.setAllowFlight(true);
+        }
     }
-  }
+
+    private void applyDurabilityDamageToBoots(Player player) {
+        int damage = 1;
+
+        ItemStack boots = player.getInventory().getBoots();
+        if (boots == null) return;
+        if (!boots.hasItemMeta()) return;
+
+        ItemMeta meta = boots.getItemMeta();
+        if (!(meta instanceof Damageable damageable)) return;
+
+        int unbreakingLevel = boots.getEnchantmentLevel(Enchantment.UNBREAKING);
+
+        int appliedDamage = 0;
+        for (int i = 0; i < damage; i++) {
+            if (unbreakingLevel > 0) {
+                double skipChance = (double) unbreakingLevel / (unbreakingLevel + 1);
+                if (ThreadLocalRandom.current().nextDouble() < skipChance) {
+                    continue; // durability loss skipped
+                }
+            }
+            appliedDamage++;
+        }
+
+        if (appliedDamage <= 0) return;
+
+        int currentDamage = damageable.getDamage();
+        int maxDurability = boots.getType().getMaxDurability();
+
+        int durabilityDamage = currentDamage + appliedDamage;
+        if (durabilityDamage >= maxDurability) {
+            player.getInventory().setBoots(null);
+            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
+        } else {
+            damageable.setDamage(durabilityDamage);
+            boots.setItemMeta(meta);
+        }
+    }
 }

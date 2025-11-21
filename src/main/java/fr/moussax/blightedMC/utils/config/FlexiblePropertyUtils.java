@@ -14,37 +14,38 @@ import java.util.Map;
  */
 public class FlexiblePropertyUtils extends PropertyUtils {
 
-  private static String normalize(String name) {
-    if (name == null) return null;
-    return name.replace("_", "")
-      .replace("-", "")
-      .replace(" ", "")
-      .toLowerCase(Locale.ROOT);
-  }
-
-  @Override
-  public Property getProperty(Class<?> type, String name) {
-    try {
-      return super.getProperty(type, name);
-    } catch (Exception ignored) {}
-
-    Map<String, Property> combined = new HashMap<>();
-    combined.putAll(getPropertiesMap(type, BeanAccess.FIELD));
-    combined.putAll(getPropertiesMap(type, BeanAccess.PROPERTY));
-
-    for (Map.Entry<String, Property> e : combined.entrySet()) {
-      if (e.getKey().equalsIgnoreCase(name)) {
-        return e.getValue();
-      }
+    private static String normalize(String name) {
+        if (name == null) return null;
+        return name.replace("_", "")
+                .replace("-", "")
+                .replace(" ", "")
+                .toLowerCase(Locale.ROOT);
     }
 
-    String target = normalize(name);
-    for (Map.Entry<String, Property> e : combined.entrySet()) {
-      if (normalize(e.getKey()).equals(target)) {
-        return e.getValue();
-      }
-    }
+    @Override
+    public Property getProperty(Class<?> type, String name) {
+        try {
+            return super.getProperty(type, name);
+        } catch (Exception ignored) {
+        }
 
-    return super.getProperty(type, name);
-  }
+        Map<String, Property> combined = new HashMap<>();
+        combined.putAll(getPropertiesMap(type, BeanAccess.FIELD));
+        combined.putAll(getPropertiesMap(type, BeanAccess.PROPERTY));
+
+        for (Map.Entry<String, Property> e : combined.entrySet()) {
+            if (e.getKey().equalsIgnoreCase(name)) {
+                return e.getValue();
+            }
+        }
+
+        String target = normalize(name);
+        for (Map.Entry<String, Property> e : combined.entrySet()) {
+            if (normalize(e.getKey()).equals(target)) {
+                return e.getValue();
+            }
+        }
+
+        return super.getProperty(type, name);
+    }
 }

@@ -10,8 +10,9 @@ import org.bukkit.block.Biome;
  * Contains information about the player, the biome, and the world environment
  * at the time of the loot roll.
  *
- * @param player the player triggering the loot
- * @param biome the biome where the loot is generated
+ * @param player      the player triggering the loot
+ * @param biome       the biome where the loot is generated
  * @param environment the world environment where the loot is generated
  */
-public record LootContext(BlightedPlayer player, Biome biome, World.Environment environment) { }
+public record LootContext(BlightedPlayer player, Biome biome, World.Environment environment) {
+}

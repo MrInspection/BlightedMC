@@ -10,13 +10,13 @@ import org.bukkit.inventory.ItemStack;
  * Placement is always disallowed. Interaction is blocked when right-clicking a block.
  */
 public class PreventPlacementRule implements ItemRule {
-  @Override
-  public boolean canPlace(BlockPlaceEvent event, ItemStack itemStack) {
-    return true; // FORBIDDEN
-  }
-  
-  @Override
-  public boolean canInteract(PlayerInteractEvent event, ItemStack itemStack) {
-    return event.getAction() != Action.RIGHT_CLICK_BLOCK;
-  }
+    @Override
+    public boolean canPlace(BlockPlaceEvent event, ItemStack itemStack) {
+        return true; // FORBIDDEN
+    }
+
+    @Override
+    public boolean canInteract(PlayerInteractEvent event, ItemStack itemStack) {
+        return event.getAction() != Action.RIGHT_CLICK_BLOCK;
+    }
 }

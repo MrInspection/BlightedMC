@@ -6,7 +6,9 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Repeatable(CommandArguments.class)
 public @interface CommandArgument {
-  int position() default 0;
-  String[] after() default {};
-  String[] suggestions();
+    int position() default 0;
+
+    String[] after() default {};
+
+    String[] suggestions();
 }

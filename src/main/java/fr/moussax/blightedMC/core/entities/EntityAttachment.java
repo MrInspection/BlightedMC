@@ -12,4 +12,5 @@ import org.bukkit.entity.Entity;
  * @param entity the Bukkit {@link Entity} that is attached to the owner
  * @param owner  the {@link BlightedEntity} that owns or controls the attached entity
  */
-public record EntityAttachment(Entity entity, BlightedEntity owner) { }
+public record EntityAttachment(Entity entity, BlightedEntity owner) {
+}

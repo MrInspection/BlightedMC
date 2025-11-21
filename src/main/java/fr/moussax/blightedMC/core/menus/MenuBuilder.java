@@ -7,44 +7,44 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MenuBuilder {
-  private final String title;
-  private final int size;
-  private final Map<Integer, Menu.MenuSlot> slots = new HashMap<>();
+    private final String title;
+    private final int size;
+    private final Map<Integer, Menu.MenuSlot> slots = new HashMap<>();
 
-  public MenuBuilder(String title, int size) {
-    this.title = title;
-    this.size = size;
-  }
-
-  public MenuBuilder setItem(int slot, ItemStack item, MenuItemInteraction interaction, MenuAction action) {
-    slots.put(slot, new Menu.MenuSlot(item, interaction, action));
-    return this;
-  }
-
-  public MenuBuilder setItem(int slot, MenuElementPreset preset, MenuItemInteraction interaction, MenuAction action) {
-    return setItem(slot, preset.getItem(), interaction, action);
-  }
-
-  public MenuBuilder fillEmptyWith(MenuElementPreset preset) {
-    for (int i = 0; i < size; i++) {
-      if (!slots.containsKey(i)) {
-        setItem(i, preset.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
-        });
-      }
+    public MenuBuilder(String title, int size) {
+        this.title = title;
+        this.size = size;
     }
-    return this;
-  }
 
-  public Menu build() {
-    return new Menu(title, size) {
-      @Override
-      public void build(Player player) {
-        this.slots.putAll(slots);
-      }
-    };
-  }
+    public MenuBuilder setItem(int slot, ItemStack item, MenuItemInteraction interaction, MenuAction action) {
+        slots.put(slot, new Menu.MenuSlot(item, interaction, action));
+        return this;
+    }
 
-  public void open(Player player) {
-    MenuManager.openMenu(build(), player);
-  }
+    public MenuBuilder setItem(int slot, MenuElementPreset preset, MenuItemInteraction interaction, MenuAction action) {
+        return setItem(slot, preset.getItem(), interaction, action);
+    }
+
+    public MenuBuilder fillEmptyWith(MenuElementPreset preset) {
+        for (int i = 0; i < size; i++) {
+            if (!slots.containsKey(i)) {
+                setItem(i, preset.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                });
+            }
+        }
+        return this;
+    }
+
+    public Menu build() {
+        return new Menu(title, size) {
+            @Override
+            public void build(Player player) {
+                this.slots.putAll(slots);
+            }
+        };
+    }
+
+    public void open(Player player) {
+        MenuManager.openMenu(build(), player);
+    }
 }

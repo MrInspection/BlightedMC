@@ -10,26 +10,26 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 public class OverworldFishing {
-  public static FishingLootTable create() {
-    return FishingLootTable.builder()
-      .setEntityRollChance(0.30)
-      .addEntities(
-        LootEntry.blightedEntity(new Dummy(), 1.0)
-          .withCatchMessage("§b§l NICE CATCH! §7You caught a §3Dummy§7!"),
+    public static FishingLootTable create() {
+        return FishingLootTable.builder()
+                .setEntityRollChance(0.30)
+                .addEntities(
+                        LootEntry.blightedEntity(new Dummy(), 1.0)
+                                .withCatchMessage("§b§l NICE CATCH! §7You caught a §3Dummy§7!"),
 
-        LootEntry.entity(EntityType.DROWNED, 1.0, LootCondition.biome(Biome.DEEP_OCEAN))
-          .withCatchMessage("§d§l RARE CATCH! §7You caught a §bDrowned§7!"),
+                        LootEntry.entity(EntityType.DROWNED, 1.0, LootCondition.biome(Biome.DEEP_OCEAN))
+                                .withCatchMessage("§d§l RARE CATCH! §7You caught a §bDrowned§7!"),
 
-        LootEntry.entity(EntityType.GUARDIAN, 0.5, LootCondition.biome(Biome.DEEP_OCEAN))
-          .withCatchMessage("§6§l EPIC CATCH! §7You caught a §2Guardian§7!")
-      )
-      .addItems(
-        LootEntry.item(new ItemStack(Material.IRON_INGOT, 2), 60.0),
-        LootEntry.item(new ItemStack(Material.GOLD_INGOT), 30.0),
-        LootEntry.item(new ItemStack(Material.SPYGLASS), 15.0),
-        LootEntry.item(new ItemStack(Material.SPONGE), 10.0),
-        LootEntry.item(new ItemStack(Material.SOUL_CAMPFIRE, 3), 5.0)
-      )
-      .build();
-  }
+                        LootEntry.entity(EntityType.GUARDIAN, 0.5, LootCondition.biome(Biome.DEEP_OCEAN))
+                                .withCatchMessage("§6§l EPIC CATCH! §7You caught a §2Guardian§7!")
+                )
+                .addItems(
+                        LootEntry.item(new ItemStack(Material.IRON_INGOT, 2), 60.0),
+                        LootEntry.item(new ItemStack(Material.GOLD_INGOT), 30.0),
+                        LootEntry.item(new ItemStack(Material.SPYGLASS), 15.0),
+                        LootEntry.item(new ItemStack(Material.SPONGE), 10.0),
+                        LootEntry.item(new ItemStack(Material.SOUL_CAMPFIRE, 3), 5.0)
+                )
+                .build();
+    }
 }

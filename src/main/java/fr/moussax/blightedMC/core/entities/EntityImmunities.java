@@ -27,12 +27,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EntityImmunities {
-  ImmunityType[] value();
+    ImmunityType[] value();
 
-  enum ImmunityType {
-    MELEE,
-    PROJECTILE,
-    FIRE,
-    MAGIC,
-  }
+    enum ImmunityType {
+        MELEE,
+        PROJECTILE,
+        FIRE,
+        MAGIC,
+    }
 }

@@ -14,21 +14,21 @@ import java.util.List;
 
 public class RocketBoots implements ItemRegistry {
 
-  @Override
-  public List<ItemTemplate> defineItems() {
-    ItemTemplate rocketBoots = new ItemTemplate("ROCKET_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS, "Rocket Boots");
-    rocketBoots.setLeatherColor("#B02E26").setArmorTrim(TrimMaterial.QUARTZ, TrimPattern.BOLT);
-    rocketBoots.addItemFlag(List.of(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ARMOR_TRIM));
-    rocketBoots.addLore(
-      "",
-      "§5 Ability: Double Jump",
-      "§7 Allows you to double jump while ",
-      "§7 being on the ground.",
-      "",
-      ItemRarity.UNCOMMON.getName() + " BOOTS"
-    );
-    rocketBoots.setFullSetBonus(new RocketBootsAbility());
+    @Override
+    public List<ItemTemplate> defineItems() {
+        ItemTemplate rocketBoots = new ItemTemplate("ROCKET_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS, "Rocket Boots");
+        rocketBoots.setLeatherColor("#B02E26").setArmorTrim(TrimMaterial.QUARTZ, TrimPattern.BOLT);
+        rocketBoots.addItemFlag(List.of(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ARMOR_TRIM));
+        rocketBoots.addLore(
+                "",
+                "§5 Ability: Double Jump",
+                "§7 Allows you to double jump while ",
+                "§7 being on the ground.",
+                "",
+                ItemRarity.UNCOMMON.getName() + " BOOTS"
+        );
+        rocketBoots.setFullSetBonus(new RocketBootsAbility());
 
-    return ItemRegistry.add(rocketBoots);
-  }
+        return ItemRegistry.add(rocketBoots);
+    }
 }

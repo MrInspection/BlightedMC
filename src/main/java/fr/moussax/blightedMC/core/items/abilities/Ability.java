@@ -12,4 +12,5 @@ import org.bukkit.event.Event;
  * @param name    the unique identifier
  * @param type    the ability's behavior type
  */
-public record Ability(AbilityManager<? extends Event> manager, String name, AbilityType type) { }
+public record Ability(AbilityManager<? extends Event> manager, String name, AbilityType type) {
+}

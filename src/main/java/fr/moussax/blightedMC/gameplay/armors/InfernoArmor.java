@@ -6,8 +6,8 @@ import fr.moussax.blightedMC.core.items.registry.ItemRegistry;
 import java.util.List;
 
 public class InfernoArmor implements ItemRegistry {
-  @Override
-  public List<ItemTemplate> defineItems() {
-    return List.of();
-  }
+    @Override
+    public List<ItemTemplate> defineItems() {
+        return List.of();
+    }
 }

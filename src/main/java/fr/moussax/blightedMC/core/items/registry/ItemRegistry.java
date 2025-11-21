@@ -35,32 +35,32 @@ import java.util.List;
  * }</pre>
  */
 public interface ItemRegistry {
-  /**
-   * Defines and registers all custom items for this registry implementation.
-   *
-   * @return a list containing the registered item templates
-   */
-  List<ItemTemplate> defineItems();
+    /**
+     * Defines and registers all custom items for this registry implementation.
+     *
+     * @return a list containing the registered item templates
+     */
+    List<ItemTemplate> defineItems();
 
-  /**
-   * Registers a single {@link ItemTemplate} into the {@link ItemDirectory}.
-   *
-   * @param item the item template to register
-   * @return a singleton list containing the registered item
-   */
-  static List<ItemTemplate> add(@Nonnull ItemTemplate item) {
-    ItemDirectory.addItem(item);
-    return List.of(item);
-  }
+    /**
+     * Registers a single {@link ItemTemplate} into the {@link ItemDirectory}.
+     *
+     * @param item the item template to register
+     * @return a singleton list containing the registered item
+     */
+    static List<ItemTemplate> add(@Nonnull ItemTemplate item) {
+        ItemDirectory.addItem(item);
+        return List.of(item);
+    }
 
-  /**
-   * Registers multiple {@link ItemTemplate} instances into the {@link ItemDirectory}.
-   *
-   * @param items list of item templates to register
-   * @return the same list of registered items
-   */
-  static List<ItemTemplate> add(@Nonnull List<ItemTemplate> items) {
-    items.forEach(ItemDirectory::addItem);
-    return items;
-  }
+    /**
+     * Registers multiple {@link ItemTemplate} instances into the {@link ItemDirectory}.
+     *
+     * @param items list of item templates to register
+     * @return the same list of registered items
+     */
+    static List<ItemTemplate> add(@Nonnull List<ItemTemplate> items) {
+        items.forEach(ItemDirectory::addItem);
+        return items;
+    }
 }
