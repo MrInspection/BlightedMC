@@ -6,10 +6,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class BlightedDatabase {
+public class PluginDatabase {
     private final Connection connection;
 
-    public BlightedDatabase(@Nonnull String path) throws SQLException {
+    public PluginDatabase(@Nonnull String path) throws SQLException {
         this.connection = DriverManager.getConnection("jdbc:sqlite:" + path);
         initializeSchema();
     }
@@ -31,15 +31,14 @@ public class BlightedDatabase {
 
     private void initializeSchema() throws SQLException {
         try (Statement statement = connection.createStatement()) {
-            statement.execute(
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS players (
+                        uuid TEXT PRIMARY KEY,
+                        name TEXT NOT NULL,
+                        gems INTEGER NOT NULL DEFAULT 0,
+                        mana REAL NOT NULL DEFAULT 0
+                    )
                     """
-                            CREATE TABLE IF NOT EXISTS players (
-                                uuid TEXT PRIMARY KEY,
-                                name TEXT NOT NULL,
-                                gems INTEGER NOT NULL DEFAULT 0,
-                                mana REAL NOT NULL DEFAULT 0
-                            )
-                            """
             );
         }
     }

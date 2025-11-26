@@ -31,7 +31,7 @@ public enum EntityNameTag {
     private static String toShortNumber(double value) {
         if (value >= 1_000_000_000) return String.format("%.1fB", value / 1_000_000_000);
         if (value >= 1_000_000) return String.format("%.1fM", value / 1_000_000);
-        if (value >= 1_000) return String.format("%.1fK", value / 1_000);
+        if (value >= 1_000) return String.format("%.1fk", value / 1_000);
         return String.valueOf((int) value);
     }
 }

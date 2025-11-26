@@ -1,6 +1,6 @@
-package fr.moussax.blightedMC.server.config;
+package fr.moussax.blightedMC.server;
 
-public class ServerSettings {
+public class PluginSettings {
     private double defaultMaxMana;
     private double defaultManaRegenerationRate;
     private double defaultPlayerHealth;
@@ -23,7 +23,7 @@ public class ServerSettings {
         return customLootChance;
     }
 
-    public boolean isBannersOnJoin() {
+    public boolean hasBannersOnJoin() {
         return bannersOnJoin;
     }
 }

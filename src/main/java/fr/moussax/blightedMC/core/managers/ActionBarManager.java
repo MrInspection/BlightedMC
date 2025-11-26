@@ -40,19 +40,19 @@ public class ActionBarManager implements Runnable {
             insufficientMana = false;
         }
 
-        String separator = " §8- ";
+        String separator = "     ";
         String gemsComponent = getFavorsComponent();
         String manaComponent = separator + getManaComponent();
 
         player.getPlayer().spigot().sendMessage(
                 ChatMessageType.ACTION_BAR,
-                new TextComponent("§8■ " + gemsComponent + manaComponent + " §8■")
+                new TextComponent(gemsComponent + manaComponent)
         );
     }
 
     private String getFavorsComponent() {
-        int gems = player.getGems().getGems();
-        return "§7Gems: §e" + gems + "✵";
+        int gems = player.getGemsManager().getGems();
+        return "§d" + Formatter.formatDecimalWithCommas(gems) + "✵ Gems";
     }
 
     private String getManaComponent() {
@@ -61,6 +61,6 @@ public class ActionBarManager implements Runnable {
         }
         double current = player.getMana().getCurrentMana();
         double max = player.getMana().getMaxMana();
-        return "§7Mana: §b" + Formatter.formatDouble(current, 0) + "§8/§b" + Formatter.formatDouble(max, 0);
+        return "§b" + Formatter.formatDouble(current, 0) + "/" + Formatter.formatDouble(max, 0) + "✎ Mana";
     }
 }

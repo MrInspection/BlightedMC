@@ -7,7 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 
-public enum BlightedFiles {
+public enum PluginFiles {
     CONFIG("config.yml"),
     DATABASE("blighted.db"),
     CUSTOM_BLOCKS("custom_blocks.yml");
@@ -15,7 +15,7 @@ public enum BlightedFiles {
     private final String fileName;
     private final File dataFolder;
 
-    BlightedFiles(String fileName) {
+    PluginFiles(String fileName) {
         this.fileName = fileName;
         this.dataFolder = BlightedMC.getInstance().getDataFolder();
     }

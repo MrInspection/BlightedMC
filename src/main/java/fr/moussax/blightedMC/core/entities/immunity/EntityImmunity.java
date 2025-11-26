@@ -9,7 +9,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
  * Implementations of this interface define conditions under which a {@link LivingEntity}
  * should ignore a given {@link EntityDamageEvent}.
  */
-public interface EntityImmunityRule {
+public interface EntityImmunity {
 
     /**
      * Determines whether the specified entity is immune to the given damage event.

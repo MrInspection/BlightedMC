@@ -2,9 +2,10 @@ package fr.moussax.blightedMC;
 
 import fr.moussax.blightedMC.core.CoreRegistry;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedMC.server.BlightedFiles;
-import fr.moussax.blightedMC.server.config.ServerSettings;
-import fr.moussax.blightedMC.server.database.BlightedDatabase;
+import fr.moussax.blightedMC.moderator.ModManager;
+import fr.moussax.blightedMC.server.PluginFiles;
+import fr.moussax.blightedMC.server.PluginSettings;
+import fr.moussax.blightedMC.server.database.PluginDatabase;
 import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 import fr.moussax.blightedMC.utils.config.FlexiblePropertyUtils;
 import fr.moussax.blightedMC.utils.debug.Log;
@@ -21,11 +22,14 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
 
 public final class BlightedMC extends JavaPlugin {
     private static BlightedMC instance;
-    private ServerSettings settings;
-    private BlightedDatabase database;
+    private PluginSettings settings;
+    private PluginDatabase database;
     private EventsRegistry eventsRegistry;
 
     @Override
@@ -33,24 +37,24 @@ public final class BlightedMC extends JavaPlugin {
         instance = this;
 
         getLogger().info("Initializing BlightedMC plugin...");
-        String config = BlightedFiles.CONFIG.getFileName();
+        String config = PluginFiles.CONFIG.getFileName();
         saveResourcesAs(config, config);
 
-        try (final Reader reader = Files.newBufferedReader(BlightedFiles.CONFIG.getFile().toPath(), StandardCharsets.UTF_8)) {
+        try (final Reader reader = Files.newBufferedReader(PluginFiles.CONFIG.getFile().toPath(), StandardCharsets.UTF_8)) {
             final CustomClassLoaderConstructor constructor = new CustomClassLoaderConstructor(getClassLoader(), new LoaderOptions());
             constructor.setPropertyUtils(new FlexiblePropertyUtils());
 
             final Yaml yaml = new Yaml(constructor);
             yaml.setBeanAccess(BeanAccess.FIELD);
 
-            settings = yaml.loadAs(reader, ServerSettings.class);
+            settings = yaml.loadAs(reader, PluginSettings.class);
             getLogger().info("Successfully loaded the configuration file.");
         } catch (IOException e) {
             Log.error(e.getMessage());
         }
 
         try {
-            database = new BlightedDatabase(getDataFolder().getAbsolutePath() + "/" + BlightedFiles.DATABASE.getFileName());
+            database = new PluginDatabase(getDataFolder().getAbsolutePath() + "/" + PluginFiles.DATABASE.getFileName());
             getLogger().info("Successfully connected to the database.");
         } catch (SQLException e) {
             Log.debug(e.getMessage());
@@ -126,11 +130,11 @@ public final class BlightedMC extends JavaPlugin {
         }
     }
 
-    public ServerSettings getSettings() {
+    public PluginSettings getSettings() {
         return settings;
     }
 
-    public BlightedDatabase getDatabase() {
+    public PluginDatabase getDatabase() {
         return database;
     }
 

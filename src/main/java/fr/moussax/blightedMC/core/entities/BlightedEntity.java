@@ -1,9 +1,9 @@
 package fr.moussax.blightedMC.core.entities;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.entities.immunity.EntityImmunityRule;
-import fr.moussax.blightedMC.core.entities.immunity.FireImmunityRule;
-import fr.moussax.blightedMC.core.entities.immunity.MeleeImmunityRule;
+import fr.moussax.blightedMC.core.entities.immunity.EntityImmunity;
+import fr.moussax.blightedMC.core.entities.immunity.FireImmunity;
+import fr.moussax.blightedMC.core.entities.immunity.MeleeImmunity;
 import fr.moussax.blightedMC.core.entities.immunity.ProjectileImmunity;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.core.entities.loot.LootTable;
@@ -76,7 +76,7 @@ public abstract class BlightedEntity implements Cloneable {
     protected BarStyle bossBarStyle = BarStyle.SOLID;
 
     public final Set<EntityAttachment> attachments = new HashSet<>();
-    private final List<EntityImmunityRule> immunityRules = new ArrayList<>();
+    private final List<EntityImmunity> immunities = new ArrayList<>();
     private final LifecycleTaskManager lifecycleTasks = new LifecycleTaskManager();
 
     /**
@@ -311,7 +311,7 @@ public abstract class BlightedEntity implements Cloneable {
     /**
      * Initializes immunity rules for this entity based on the {@link EntityImmunities} annotation.
      * <p>
-     * Converts declared immunity types into concrete {@link EntityImmunityRule} instances.
+     * Converts declared immunity types into concrete {@link EntityImmunity} instances.
      */
     protected void initImmunityRules() {
         EntityImmunities attribute = getClass().getAnnotation(EntityImmunities.class);
@@ -319,9 +319,9 @@ public abstract class BlightedEntity implements Cloneable {
 
         for (EntityImmunities.ImmunityType type : attribute.value()) {
             switch (type) {
-                case MELEE -> immunityRules.add(new MeleeImmunityRule());
-                case FIRE -> immunityRules.add(new FireImmunityRule());
-                case PROJECTILE -> immunityRules.add(new ProjectileImmunity());
+                case MELEE -> immunities.add(new MeleeImmunity());
+                case FIRE -> immunities.add(new FireImmunity());
+                case PROJECTILE -> immunities.add(new ProjectileImmunity());
             }
         }
     }
@@ -334,7 +334,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return {@code true} if the damage should be ignored (entity is immune), {@code false} otherwise
      */
     public boolean isImmuneTo(LivingEntity entity, EntityDamageEvent event) {
-        for (EntityImmunityRule rule : immunityRules) {
+        for (EntityImmunity rule : immunities) {
             if (rule.isImmune(entity, event)) {
                 return true;
             }
