@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * Base class for BlightedMC crafting recipes.
  * <p>
- * Subclasses provide concrete recipe types (shaped and shapeless) and this class
+ * Subclasses provide concrete recipe types (shaped and shapeless), and this class
  * supplies common utilities for registration and matching against a 3×3 crafting grid.
  *
  * <ul>
@@ -21,14 +21,14 @@ import java.util.*;
  * </ul>
  */
 public sealed abstract class BlightedRecipe
-        permits BlightedShapedRecipe, BlightedShapelessRecipe {
+    permits BlightedShapedRecipe, BlightedShapelessRecipe {
 
     public static final Set<BlightedRecipe> REGISTERED_RECIPES = new HashSet<>();
 
     public abstract ItemTemplate getResult();
 
     /**
-     * Returns the amount of items produced by this recipe.
+     * Returns the number of items produced by this recipe.
      *
      * @return produced item quantity
      */
@@ -54,7 +54,7 @@ public sealed abstract class BlightedRecipe
      */
     public static Set<BlightedRecipe> findMatchingRecipes(List<ItemStack> craftingGrid) {
         boolean isEmpty = craftingGrid.stream()
-                .allMatch(item -> item == null || item.getType() == Material.AIR);
+            .allMatch(item -> item == null || item.getType() == Material.AIR);
         if (isEmpty) return Collections.emptySet();
 
         List<String> craftingGridItemIds = extractItemIds(craftingGrid);
@@ -65,9 +65,9 @@ public sealed abstract class BlightedRecipe
 
             boolean isMatch = switch (recipe) {
                 case BlightedShapedRecipe shapedRecipe ->
-                        matchesShapedRecipe(shapedRecipe, craftingGrid, craftingGridItemIds);
+                    matchesShapedRecipe(shapedRecipe, craftingGrid, craftingGridItemIds);
                 case BlightedShapelessRecipe shapelessRecipe ->
-                        matchesShapelessRecipe(shapelessRecipe, craftingGrid, craftingGridItemIds);
+                    matchesShapelessRecipe(shapelessRecipe, craftingGrid, craftingGridItemIds);
             };
 
             if (isMatch) matchingRecipes.add(recipe);
@@ -99,8 +99,8 @@ public sealed abstract class BlightedRecipe
             }
 
             String customItemId = Objects.requireNonNull(stack.getItemMeta())
-                    .getPersistentDataContainer()
-                    .get(new NamespacedKey(BlightedMC.getInstance(), "id"), PersistentDataType.STRING);
+                .getPersistentDataContainer()
+                .get(new NamespacedKey(BlightedMC.getInstance(), "id"), PersistentDataType.STRING);
 
             // Vanilla item ID format
             itemIdsInGrid.add(Objects.requireNonNullElseGet(customItemId, () -> "vanilla:" + stack.getType().name().toLowerCase(Locale.ROOT)));

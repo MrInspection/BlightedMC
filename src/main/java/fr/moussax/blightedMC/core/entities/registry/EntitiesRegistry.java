@@ -40,8 +40,8 @@ public final class EntitiesRegistry {
 
     public static List<BlightedEntity> getAllEntities() {
         return ENTITIES.values().stream()
-                .map(BlightedEntity::clone)
-                .toList();
+            .map(BlightedEntity::clone)
+            .toList();
     }
 
     public static void initializeEntities() {

@@ -22,9 +22,9 @@ public class CraftingTableMenu {
         inv.setItem(22, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());
         inv.setItem(23, RECIPE_REQUIRED());
         inv.setItem(24, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());
-        inv.setItem(25, new ItemBuilder(Material.WRITTEN_BOOK, "§dBlighted Recipe Book")
-                .addLore("§7A tainted tome that holds", "§7secrets of §5blighted §7items.", "", "§eClick to view!")
-                .toItemStack()
+        inv.setItem(25, new ItemBuilder(Material.KNOWLEDGE_BOOK, "§6Crafting Recipes")
+            .addLore("§7A tainted book that holds", "§7secrets of §5blighted §7items.", "", "§eClick to view!")
+            .toItemStack()
         );
         inv.setItem(26, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());
         inv.setItem(27, MenuElementPreset.EMPTY_SLOT_FILLER.getItem());
@@ -47,14 +47,14 @@ public class CraftingTableMenu {
     }
 
     public static ItemStack VALID_RECIPE_INDICATOR(boolean isValid) {
-        return new ItemBuilder(isValid ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE, "§r").toItemStack();
+        return new ItemBuilder(isValid ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE, "§r").setHideTooltip(true).toItemStack();
     }
 
     public static ItemStack RECIPE_REQUIRED() {
         return new ItemBuilder(Material.BARRIER, "§cRecipe Required")
-                .addLore(
-                        "§7Add items for a valid recipe in",
-                        "§7the crafting grid to the left."
-                ).toItemStack();
+            .addLore(
+                "§7Add items for a valid recipe in",
+                "§7the crafting grid to the left."
+            ).toItemStack();
     }
 }

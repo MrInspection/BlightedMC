@@ -9,6 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
@@ -70,9 +71,9 @@ public class FishingLootTable {
      */
     private LootContext createContext(BlightedPlayer player) {
         return new LootContext(
-                player,
-                player.getPlayer().getLocation().getBlock().getBiome(),
-                player.getPlayer().getWorld().getEnvironment()
+            player,
+            Objects.requireNonNull(player.getPlayer()).getLocation().getBlock().getBiome(),
+            player.getPlayer().getWorld().getEnvironment()
         );
     }
 

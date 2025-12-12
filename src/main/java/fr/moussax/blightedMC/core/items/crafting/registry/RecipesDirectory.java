@@ -22,8 +22,8 @@ import java.util.List;
  * <p>
  * This class cannot be instantiated.
  */
-public final class RecipesRegistry {
-    private RecipesRegistry() {
+public final class RecipesDirectory {
+    private RecipesDirectory() {
     }
 
     /**
@@ -85,11 +85,9 @@ public final class RecipesRegistry {
     public static void initializeRecipes() {
         clearRecipes();
 
-        List<RecipeCategory> categories = List.of(
-                new MaterialRecipes()
-        );
-        for (RecipeCategory category : categories) {
-            category.registerRecipes();
+        List<RecipeRegistry> categories = List.of(new MaterialRecipes());
+        for (RecipeRegistry category : categories) {
+            category.defineRecipes();
         }
     }
 }

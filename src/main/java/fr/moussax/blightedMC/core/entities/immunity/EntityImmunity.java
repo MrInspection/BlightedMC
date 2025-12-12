@@ -9,6 +9,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
  * Implementations of this interface define conditions under which a {@link LivingEntity}
  * should ignore a given {@link EntityDamageEvent}.
  */
+@FunctionalInterface
 public interface EntityImmunity {
 
     /**

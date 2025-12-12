@@ -45,8 +45,8 @@ public class ActionBarManager implements Runnable {
         String manaComponent = separator + getManaComponent();
 
         player.getPlayer().spigot().sendMessage(
-                ChatMessageType.ACTION_BAR,
-                new TextComponent(gemsComponent + manaComponent)
+            ChatMessageType.ACTION_BAR,
+            new TextComponent(gemsComponent + manaComponent)
         );
     }
 

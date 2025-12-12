@@ -121,7 +121,7 @@ public class LootEntry {
      */
     public ItemStack createItem(BlightedPlayer player) {
         if (catchMessage != null) {
-            player.getPlayer().sendMessage(catchMessage);
+            Objects.requireNonNull(player.getPlayer()).sendMessage(catchMessage);
         }
         return item;
     }
@@ -146,7 +146,7 @@ public class LootEntry {
         }
 
         if (spawned != null && catchMessage != null) {
-            player.getPlayer().sendMessage(catchMessage);
+            Objects.requireNonNull(player.getPlayer()).sendMessage(catchMessage);
         }
 
         return spawned;

@@ -81,8 +81,8 @@ public class LootPool {
         if (randomizer.nextDouble() > rollChance) return Optional.empty();
 
         List<LootEntry> validEntries = entries.stream()
-                .filter(entry -> entry.meetsCondition(context))
-                .toList();
+            .filter(entry -> entry.meetsCondition(context))
+            .toList();
 
         if (validEntries.isEmpty()) return Optional.empty();
 

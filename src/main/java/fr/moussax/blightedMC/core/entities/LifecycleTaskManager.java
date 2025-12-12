@@ -70,7 +70,7 @@ public final class LifecycleTaskManager {
 
     /**
      * Cancels all currently running scheduled tasks associated with the entity.
-     * This should be invoked during entity destruction or kill.
+     * This should be invoked during entity destruction or killing.
      */
     public void cancelAll() {
         for (ScheduledTask task : tasks) {

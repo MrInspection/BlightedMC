@@ -25,11 +25,11 @@ public class ItemDirectoryMenu {
 
     private static ItemBuilder hideAllItemFlags(ItemBuilder builder) {
         return builder.addItemFlag(List.of(
-                ItemFlag.HIDE_ATTRIBUTES,
-                ItemFlag.HIDE_UNBREAKABLE,
-                ItemFlag.HIDE_ENCHANTS,
-                ItemFlag.HIDE_DESTROYS,
-                ItemFlag.HIDE_PLACED_ON
+            ItemFlag.HIDE_ATTRIBUTES,
+            ItemFlag.HIDE_UNBREAKABLE,
+            ItemFlag.HIDE_ENCHANTS,
+            ItemFlag.HIDE_DESTROYS,
+            ItemFlag.HIDE_PLACED_ON
         ));
     }
 
@@ -56,13 +56,13 @@ public class ItemDirectoryMenu {
                 ItemType.Category category = categories.get(i);
                 ItemStack item = buildMenuItem(getCategoryIcon(category), "§b" + formatCategoryName(category), getCategoryLore(category));
                 setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (p, t) -> MenuManager.openMenu(
-                        new BlightedItemsPaginatedMenu(category, this,
-                                itemObj -> itemObj.getItemType() != null && itemObj.getItemType().getCategory() == category,
-                                "§r" + Formatter.formatEnumName(category.name()) + " Items"), p));
+                    new BlightedItemsPaginatedMenu(category, this,
+                        itemObj -> itemObj.getItemType() != null && itemObj.getItemType().getCategory() == category,
+                        "§r" + Formatter.formatEnumName(category.name()) + " Items"), p));
             }
 
             setItem(SEARCH_SLOT, buildMenuItem(new ItemStack(Material.BIRCH_SIGN), "§eSearch Items", List.of("§7Click to search for items!")),
-                    MenuItemInteraction.ANY_CLICK, (p, t) -> openSearchSign(p, this));
+                MenuItemInteraction.ANY_CLICK, (p, t) -> openSearchSign(p, this));
             setItem(40, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
         }
 
@@ -161,14 +161,14 @@ public class ItemDirectoryMenu {
 
             if (itemTemplates.isEmpty()) {
                 setItem(22, buildMenuItem(new ItemStack(Material.RED_STAINED_GLASS_PANE),
-                        "§cNo Items Found",
-                        List.of("§7No items match the criteria")), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                    "§cNo Items Found",
+                    List.of("§7No items match the criteria")), MenuItemInteraction.ANY_CLICK, (p, t) -> {
                 });
             } else {
                 for (int slotIdx = 0, i = start; i < end && slotIdx < ITEM_SLOTS.length; i++, slotIdx++) {
                     final int idx = i;
                     setItem(ITEM_SLOTS[slotIdx], getItem(player, idx), MenuItemInteraction.ANY_CLICK,
-                            (p, t) -> onItemClick(p, idx, t));
+                        (p, t) -> onItemClick(p, idx, t));
                 }
             }
             setNavigation();
@@ -211,13 +211,13 @@ public class ItemDirectoryMenu {
 
         public SearchResultsPaginatedMenu(String searchTerm, Menu previousMenu) {
             super(previousMenu,
-                    item -> {
-                        if (item.getItemId().toLowerCase().contains(searchTerm.toLowerCase())) return true;
+                item -> {
+                    if (item.getItemId().toLowerCase().contains(searchTerm.toLowerCase())) return true;
 
-                        var meta = item.getItemMeta();
-                        return meta != null && meta.getDisplayName().toLowerCase().contains(searchTerm.toLowerCase());
-                    },
-                    "§rSearch: " + searchTerm);
+                    var meta = item.getItemMeta();
+                    return meta != null && meta.getDisplayName().toLowerCase().contains(searchTerm.toLowerCase());
+                },
+                "§rSearch: " + searchTerm);
             this.searchTerm = searchTerm.toLowerCase();
         }
     }

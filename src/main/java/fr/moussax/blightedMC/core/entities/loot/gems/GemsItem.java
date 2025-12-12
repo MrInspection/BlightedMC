@@ -20,7 +20,7 @@ public record GemsItem(int amount) implements ItemGenerator {
         assert meta != null;
 
         Integer value = meta.getPersistentDataContainer().get(
-                new NamespacedKey(BlightedMC.getInstance(), "gems"), PersistentDataType.INTEGER);
+            new NamespacedKey(BlightedMC.getInstance(), "gems"), PersistentDataType.INTEGER);
         this(value != null ? value : 1);
     }
 
@@ -81,7 +81,7 @@ public record GemsItem(int amount) implements ItemGenerator {
             throw new IllegalStateException("BLIGHTED_GEMSTONE is not registered. Ensure ItemDirectory.initializeItems() runs before creating Gems items.");
         }
 
-        itemTemplate.setLore("§8 Gems: §d" + this.amount + "✵", 7);
+        itemTemplate.setLore(7, "§8 Gems: §d" + this.amount + "✵");
         ItemStack itemStack = itemTemplate.toItemStack();
 
         ItemMeta meta = itemStack.getItemMeta();

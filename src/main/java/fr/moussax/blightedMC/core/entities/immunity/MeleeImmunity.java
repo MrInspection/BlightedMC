@@ -7,6 +7,6 @@ public class MeleeImmunity implements EntityImmunity {
     @Override
     public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
         return event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK ||
-                event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK;
+            event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK;
     }
 }
