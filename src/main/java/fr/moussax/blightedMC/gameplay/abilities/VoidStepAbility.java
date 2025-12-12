@@ -70,7 +70,7 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
         var direction = eyeLocation.getDirection();
 
         RayTraceResult traceResult = player.getWorld().rayTraceBlocks(
-                eyeLocation, direction, VoidStepAbility.MAX_DISTANCE, FluidCollisionMode.NEVER, true
+            eyeLocation, direction, VoidStepAbility.MAX_DISTANCE, FluidCollisionMode.NEVER, true
         );
 
         if (traceResult != null && traceResult.getHitBlock() != null) {
@@ -78,10 +78,10 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
 
             // always land on top of the block
             Location topOfBlock = new Location(
-                    player.getWorld(),
-                    hitBlock.getX() + 0.5,
-                    hitBlock.getY() + 1.0,
-                    hitBlock.getZ() + 0.5
+                player.getWorld(),
+                hitBlock.getX() + 0.5,
+                hitBlock.getY() + 1.0,
+                hitBlock.getZ() + 0.5
             );
 
             if (isSafeTeleportationLocation(topOfBlock)) return topOfBlock;

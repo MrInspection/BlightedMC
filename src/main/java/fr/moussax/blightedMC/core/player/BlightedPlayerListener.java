@@ -1,8 +1,14 @@
 package fr.moussax.blightedMC.core.player;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedMC.utils.ItemBuilder;
+import org.bukkit.DyeColor;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.banner.Pattern;
+import org.bukkit.block.banner.PatternType;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -14,16 +20,32 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.projectiles.ProjectileSource;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
-public class BlightedPlayerListeners implements Listener {
+public class BlightedPlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        if (!player.hasPlayedBefore() && BlightedMC.getInstance().getSettings().hasBannersOnJoin()) {
+            PlayerInventory inv = player.getInventory();
+            inv.setHelmet(new ItemBuilder(Material.BLACK_BANNER, "§dBlighted Banner")
+                .addBannerPatterns(List.of(
+                    new Pattern(DyeColor.PURPLE, PatternType.CURLY_BORDER),
+                    new Pattern(DyeColor.BLACK, PatternType.BRICKS),
+                    new Pattern(DyeColor.BLACK, PatternType.SMALL_STRIPES),
+                    new Pattern(DyeColor.BLACK, PatternType.GUSTER),
+                    new Pattern(DyeColor.PURPLE, PatternType.CIRCLE),
+                    new Pattern(DyeColor.BLACK, PatternType.FLOW))
+                ).addItemFlag(ItemFlag.HIDE_BANNER_PATTERNS)
+                .addLore("§7An eerie looking banner.")
+                .toItemStack());
+        }
+
         new BlightedPlayer(event.getPlayer());
         event.setJoinMessage("§8 ■ §f" + event.getPlayer().getName() + " §7joined the SMP.");
     }
@@ -59,12 +81,8 @@ public class BlightedPlayerListeners implements Listener {
             double maxHealth = Objects.requireNonNull(damaged.getAttribute(Attribute.MAX_HEALTH)).getValue();
             double percentage = (targetHealth > 0) ? (targetHealth / maxHealth) * 100.0 : 0.0;
             String colorPrefix = percentage <= 20 ? "§c" : (percentage <= 50 ? "§e" : "§a");
-
-            damager.sendMessage(
-                    "§c \uD83C\uDFF9 §f" + damaged.getName() +
-                            " §7is now at " +
-                            colorPrefix + (int) targetHealth + "❤" + "§7."
-            );
+            String formattedMessage = "§c \uD83C\uDFF9 §f" + damaged.getName() + " §7is now at " + colorPrefix + (int) targetHealth + "❤" + "§7.";
+            damager.sendMessage(formattedMessage);
         }
     }
 

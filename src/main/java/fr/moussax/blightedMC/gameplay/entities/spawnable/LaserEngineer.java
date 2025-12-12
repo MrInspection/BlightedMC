@@ -41,15 +41,15 @@ public class LaserEngineer extends SpawnableEntity {
         setDroppedExp(6);
 
         setLootTable(new LootTable().setMaxDrop(2)
-                .addLoot(Material.ROTTEN_FLESH, 1, 3, 0.90, LootDropRarity.COMMON)
-                .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY)
+            .addLoot(Material.ROTTEN_FLESH, 1, 3, 0.90, LootDropRarity.COMMON)
+            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY)
         );
 
         armor = new ItemStack[]{
-                new ItemBuilder(Material.LEATHER_BOOTS).setLeatherColor("#737775").addEnchantmentGlint().setUnbreakable(true).toItemStack(),
-                new ItemBuilder(Material.LEATHER_LEGGINGS).setLeatherColor("#7D807E").setUnbreakable(true).toItemStack(),
-                new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherColor("#7D807E").setUnbreakable(true).toItemStack(),
-                new ItemBuilder(Material.OBSERVER).toItemStack()
+            new ItemBuilder(Material.LEATHER_BOOTS).setLeatherColor("#737775").addEnchantmentGlint().setUnbreakable(true).toItemStack(),
+            new ItemBuilder(Material.LEATHER_LEGGINGS).setLeatherColor("#7D807E").setUnbreakable(true).toItemStack(),
+            new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherColor("#7D807E").setUnbreakable(true).toItemStack(),
+            new ItemBuilder(Material.OBSERVER).toItemStack()
         };
 
         addRepeatingTask(() -> {
@@ -63,10 +63,10 @@ public class LaserEngineer extends SpawnableEntity {
                     }
 
                     List<Player> nearbyPlayers = self.getNearbyEntities(LASER_RANGE, LASER_RANGE, LASER_RANGE)
-                            .stream()
-                            .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-                            .map(e -> (Player) e)
-                            .toList();
+                        .stream()
+                        .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+                        .map(e -> (Player) e)
+                        .toList();
 
                     if (nearbyPlayers.isEmpty()) {
                         if (isAttacking) {
@@ -79,7 +79,7 @@ public class LaserEngineer extends SpawnableEntity {
                     // If in attack mode
                     if (isAttacking) {
                         if (attackTarget == null || !attackTarget.isOnline() || attackTarget.getWorld() != self.getWorld()
-                                || attackTarget.getLocation().distance(self.getLocation()) > LASER_RANGE) {
+                            || attackTarget.getLocation().distance(self.getLocation()) > LASER_RANGE) {
                             // Lost target
                             isAttacking = false;
                             attackTicksRemaining = 0;
@@ -115,30 +115,30 @@ public class LaserEngineer extends SpawnableEntity {
 
         if (isActive) {
             Objects.requireNonNull(zombie.getEquipment()).setChestplate(
-                    new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                            .setLeatherColor("#7D807E")
-                            .setArmorTrim(TrimMaterial.RESIN, TrimPattern.SNOUT)
-                            .addEnchantmentGlint()
-                            .setUnbreakable(true)
-                            .toItemStack()
+                new ItemBuilder(Material.LEATHER_CHESTPLATE)
+                    .setLeatherColor("#7D807E")
+                    .setArmorTrim(TrimMaterial.RESIN, TrimPattern.SNOUT)
+                    .addEnchantmentGlint()
+                    .setUnbreakable(true)
+                    .toItemStack()
             );
             zombie.getEquipment().setHelmet(
-                    new ItemBuilder(Material.PLAYER_HEAD)
-                            .setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzhiYjdjZDFkMThjNWI2MWU5ZjA4OTBhZjQ5MjllZTdjN2FiOTUyZWUyYjZlYWJlMzM3ZTlmMGI0ZWM4MzVkNCJ9fX0=")
-                            .toItemStack()
+                new ItemBuilder(Material.PLAYER_HEAD)
+                    .setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzhiYjdjZDFkMThjNWI2MWU5ZjA4OTBhZjQ5MjllZTdjN2FiOTUyZWUyYjZlYWJlMzM3ZTlmMGI0ZWM4MzVkNCJ9fX0=")
+                    .toItemStack()
             );
             return;
         }
 
         Objects.requireNonNull(zombie.getEquipment()).setHelmet(
-                new ItemBuilder(Material.OBSERVER).toItemStack()
+            new ItemBuilder(Material.OBSERVER).toItemStack()
         );
         zombie.getEquipment().setChestplate(
-                new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                        .setLeatherColor("#7D807E")
-                        .addEnchantmentGlint()
-                        .setUnbreakable(true)
-                        .toItemStack()
+            new ItemBuilder(Material.LEATHER_CHESTPLATE)
+                .setLeatherColor("#7D807E")
+                .addEnchantmentGlint()
+                .setUnbreakable(true)
+                .toItemStack()
         );
     }
 
@@ -198,10 +198,10 @@ public class LaserEngineer extends SpawnableEntity {
                     }
 
                     List<Player> nearbyPlayers = self.getNearbyEntities(LASER_RANGE, LASER_RANGE, LASER_RANGE)
-                            .stream()
-                            .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-                            .map(e -> (Player) e)
-                            .toList();
+                        .stream()
+                        .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+                        .map(e -> (Player) e)
+                        .toList();
 
                     if (nearbyPlayers.isEmpty()) {
                         if (clone.isAttacking) {
@@ -213,8 +213,8 @@ public class LaserEngineer extends SpawnableEntity {
 
                     if (clone.isAttacking) {
                         if (clone.attackTarget == null || !clone.attackTarget.isOnline() ||
-                                clone.attackTarget.getWorld() != self.getWorld() ||
-                                clone.attackTarget.getLocation().distance(self.getLocation()) > LASER_RANGE) {
+                            clone.attackTarget.getWorld() != self.getWorld() ||
+                            clone.attackTarget.getLocation().distance(self.getLocation()) > LASER_RANGE) {
                             clone.isAttacking = false;
                             clone.attackTicksRemaining = 0;
                             clone.switchArmorMode(false);
@@ -246,12 +246,12 @@ public class LaserEngineer extends SpawnableEntity {
     @Override
     protected void setupSpawnConditions() {
         addSpawnCondition(
-                SpawnConditions.biome(
-                        Biome.FOREST,
-                        Biome.BIRCH_FOREST,
-                        Biome.DARK_FOREST,
-                        Biome.FLOWER_FOREST
-                )
+            SpawnConditions.biome(
+                Biome.FOREST,
+                Biome.BIRCH_FOREST,
+                Biome.DARK_FOREST,
+                Biome.FLOWER_FOREST
+            )
         );
     }
 }

@@ -8,9 +8,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -39,16 +39,13 @@ public final class Formatter {
     private Formatter() {
     }
 
-    // ==================== STRING FORMATTING ====================
-
     /**
      * Capitalizes the first letter of a string and lowercases the rest.
      *
      * @param text the string to capitalize
      * @return capitalized string
      */
-    @Nonnull
-    public static String capitalize(@Nonnull String text) {
+    public static String capitalize(String text) {
         if (text.isEmpty()) {
             return text;
         }
@@ -61,7 +58,6 @@ public final class Formatter {
      * @param input the enum-style string to format
      * @return formatted string (e.g., "RANGED_WEAPON" → "Ranged Weapon")
      */
-    @Nonnull
     public static String formatEnumName(@Nullable String input) {
         if (input == null || input.isEmpty()) {
             return "";
@@ -73,7 +69,7 @@ public final class Formatter {
         for (int i = 0; i < words.length; i++) {
             String word = words[i].toLowerCase();
             formatted.append(Character.toUpperCase(word.charAt(0)))
-                    .append(word.substring(1));
+                .append(word.substring(1));
             if (i < words.length - 1) {
                 formatted.append(' ');
             }
@@ -88,14 +84,12 @@ public final class Formatter {
      * @param timeInSeconds time in seconds
      * @return formatted time string (e.g., 123 → "02:03")
      */
-    @Nonnull
+
     public static String formatTime(long timeInSeconds) {
         long minutes = timeInSeconds / 60;
         long seconds = timeInSeconds % 60;
         return String.format("%02d:%02d", minutes, seconds);
     }
-
-    // ==================== NUMBER FORMATTING ====================
 
     /**
      * Formats a double to a string with specified decimal places.
@@ -104,7 +98,7 @@ public final class Formatter {
      * @param decimalPlaces number of decimal places
      * @return formatted string (e.g., 1.97349873, 3 → "1.973")
      */
-    @Nonnull
+
     public static String formatDouble(double value, int decimalPlaces) {
         if (decimalPlaces == 0 || value == Math.floor(value)) {
             return String.format("%.0f", value);
@@ -119,7 +113,7 @@ public final class Formatter {
      * @param value the value to format
      * @return formatted string with commas (e.g., 1234.56 → "1,235")
      */
-    @Nonnull
+
     public static String formatDecimalWithCommas(double value) {
         return DECIMAL_FORMAT.format(value);
     }
@@ -130,9 +124,9 @@ public final class Formatter {
      * @param value the number to compact
      * @return compact notation (e.g., 1500 → "1.5K", 2000000 → "2M")
      */
-    @Nonnull
+
     public static String compactNumber(int value) {
-        String[] units = {"", "K", "M", "B"};
+        String[] units = {"", "k", "M", "B"};
         int unitIndex = 0;
 
         double compactValue = value;
@@ -155,7 +149,7 @@ public final class Formatter {
      * @return Roman numeral string
      * @throws IllegalArgumentException if the number is out of the valid range
      */
-    @Nonnull
+
     public static String toRomanNumeral(int number) {
         if (number <= 0 || number > 3999) {
             throw new IllegalArgumentException("Number out of range for Roman numerals: " + number);
@@ -167,12 +161,10 @@ public final class Formatter {
         String[] ones = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
 
         return thousands[number / 1000]
-                + hundreds[(number % 1000) / 100]
-                + tens[(number % 100) / 10]
-                + ones[number % 10];
+            + hundreds[(number % 1000) / 100]
+            + tens[(number % 100) / 10]
+            + ones[number % 10];
     }
-
-    // ==================== PLAYER MESSAGING ====================
 
     /**
      * Sends informational messages to a command sender with a gray prefix.
@@ -180,7 +172,7 @@ public final class Formatter {
      * @param sender   the recipient
      * @param messages list of messages to send
      */
-    public static void inform(@Nonnull CommandSender sender, @Nonnull List<String> messages) {
+    public static void inform(CommandSender sender, @NonNull List<String> messages) {
         messages.forEach(message -> sender.sendMessage(INFO_PREFIX + message));
     }
 
@@ -190,7 +182,7 @@ public final class Formatter {
      * @param sender   the recipient
      * @param messages messages to send (no prefix applied)
      */
-    public static void inform(@Nonnull CommandSender sender, @Nonnull String... messages) {
+    public static void inform(@NonNull CommandSender sender, @NonNull String... messages) {
         for (String message : messages) {
             sender.sendMessage(message);
         }
@@ -202,7 +194,7 @@ public final class Formatter {
      * @param sender  the recipient
      * @param message the message to send
      */
-    public static void inform(@Nonnull CommandSender sender, @Nonnull String message) {
+    public static void inform(@NonNull CommandSender sender, @NonNull String message) {
         inform(sender, Collections.singletonList(message));
     }
 
@@ -212,7 +204,7 @@ public final class Formatter {
      * @param sender   the recipient
      * @param messages list of warning messages
      */
-    public static void warn(@Nonnull CommandSender sender, @Nonnull List<String> messages) {
+    public static void warn(@NonNull CommandSender sender, @NonNull List<String> messages) {
         if (sender instanceof Player player) {
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 100f, 0.5f);
         }
@@ -225,7 +217,7 @@ public final class Formatter {
      * @param sender   the recipient
      * @param messages warning messages (no prefix applied)
      */
-    public static void warn(@Nonnull CommandSender sender, @Nonnull String... messages) {
+    public static void warn(@NonNull CommandSender sender, @NonNull String... messages) {
         if (sender instanceof Player player) {
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 100f, 0.5f);
         }
@@ -240,7 +232,7 @@ public final class Formatter {
      * @param sender  the recipient
      * @param message the warning message
      */
-    public static void warn(@Nonnull CommandSender sender, @Nonnull String message) {
+    public static void warn(@NonNull CommandSender sender, @NonNull String message) {
         warn(sender, Collections.singletonList(message));
     }
 
@@ -253,15 +245,13 @@ public final class Formatter {
      * @param player the player to check
      * @return {@code true} if player has admin permission
      */
-    public static boolean enforceAdminPermission(@Nonnull Player player) {
+    public static boolean enforceAdminPermission(@NonNull Player player) {
         if (!player.isOp() || !player.hasPermission(ADMIN_PERMISSION)) {
             warn(player, "You must be an §4ADMIN §cto use this command.");
             return false;
         }
         return true;
     }
-
-    // ==================== INTERACTIVE COMPONENTS ====================
 
     /**
      * Creates an interactive text component with hover and optional click action.
@@ -273,17 +263,11 @@ public final class Formatter {
      * @return configured text component
      */
     @SuppressWarnings("deprecation")
-    @Nonnull
-    public static TextComponent createInteractiveText(
-            @Nonnull String text,
-            @Nonnull String hoverText,
-            @Nullable ClickEvent.Action clickAction,
-            @Nullable String clickValue
-    ) {
+    public static TextComponent createInteractiveText(String text, String hoverText, ClickEvent.Action clickAction, String clickValue) {
         TextComponent component = new TextComponent(text);
         component.setHoverEvent(new HoverEvent(
-                HoverEvent.Action.SHOW_TEXT,
-                new ComponentBuilder(hoverText).create()
+            HoverEvent.Action.SHOW_TEXT,
+            new ComponentBuilder(hoverText).create()
         ));
 
         if (clickAction != null && clickValue != null) {

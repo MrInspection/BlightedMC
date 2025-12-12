@@ -16,13 +16,13 @@ public class Bonemerang implements ItemRegistry {
     public List<ItemTemplate> defineItems() {
         ItemTemplate bonemerang = new ItemTemplate("BONEMERANG", ItemType.BOW, ItemRarity.EPIC, Material.BONE, "Bonemerang");
         bonemerang.addLore(
-                "",
-                "§5 Ability: Swing  §d§lRIGHT CLICK",
-                "§7 Throw the bone forward, slicing",
-                "§7 through foes, dealing §c12 §7damage ",
-                "§7 before returning to you.",
-                "",
-                ItemRarity.EPIC.getName() + " BOW"
+            "",
+            "§5 Ability: Swing  §d§lRIGHT CLICK",
+            "§7 Throw the bone forward, slicing",
+            "§7 through foes, dealing §c12 §7damage ",
+            "§7 before returning to you.",
+            "",
+            ItemRarity.EPIC.getName() + " BOW"
         );
         bonemerang.addAbility(new Ability(new BonemerangAbility(), "Swing", AbilityType.RIGHT_CLICK));
         bonemerang.addEnchantmentGlint();

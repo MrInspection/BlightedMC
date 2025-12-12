@@ -34,10 +34,10 @@ public class BlightedZombie extends SpawnableEntity {
         setLootTable(createLootTable());
 
         armor = new ItemStack[]{
-                new ItemStack(Material.AIR),
-                new ItemStack(Material.AIR),
-                new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherColor("#81CFE2").toItemStack(),
-                new ItemBuilder(Material.LEATHER_HELMET).setLeatherColor("#81CFE2").toItemStack()
+            new ItemStack(Material.AIR),
+            new ItemStack(Material.AIR),
+            new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherColor("#81CFE2").toItemStack(),
+            new ItemBuilder(Material.LEATHER_HELMET).setLeatherColor("#81CFE2").toItemStack()
         };
 
         addRepeatingTask(() -> {
@@ -60,13 +60,13 @@ public class BlightedZombie extends SpawnableEntity {
     @Override
     protected void setupSpawnConditions() {
         addSpawnCondition(
-                SpawnConditions.biome(Biome.FOREST, Biome.BIRCH_FOREST, Biome.DARK_FOREST, Biome.FLOWER_FOREST, Biome.SAVANNA)
-                        .and(SpawnConditions.nightTime())
-                        .and(SpawnConditions.clearWeather())
-                        .and(SpawnConditions.minY(50))
-                        .and(SpawnConditions.maxY(80))
-                        .and(SpawnConditions.skyExposed())
-                        .and(SpawnConditions.notInWater())
+            SpawnConditions.biome(Biome.FOREST, Biome.BIRCH_FOREST, Biome.DARK_FOREST, Biome.FLOWER_FOREST, Biome.SAVANNA)
+                .and(SpawnConditions.nightTime())
+                .and(SpawnConditions.clearWeather())
+                .and(SpawnConditions.minY(50))
+                .and(SpawnConditions.maxY(80))
+                .and(SpawnConditions.skyExposed())
+                .and(SpawnConditions.notInWater())
         );
     }
 
@@ -141,16 +141,16 @@ public class BlightedZombie extends SpawnableEntity {
         if (!(entity instanceof Zombie zombie)) return;
 
         Objects.requireNonNull(zombie.getEquipment()).setChestplate(
-                new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                        .setLeatherColor("#81CFE2")
-                        .setArmorTrim(TrimMaterial.DIAMOND, TrimPattern.FLOW)
-                        .toItemStack()
+            new ItemBuilder(Material.LEATHER_CHESTPLATE)
+                .setLeatherColor("#81CFE2")
+                .setArmorTrim(TrimMaterial.DIAMOND, TrimPattern.FLOW)
+                .toItemStack()
         );
         zombie.getEquipment().setHelmet(
-                new ItemBuilder(Material.LEATHER_HELMET)
-                        .setLeatherColor("#81CFE2")
-                        .setArmorTrim(TrimMaterial.DIAMOND, TrimPattern.FLOW)
-                        .toItemStack()
+            new ItemBuilder(Material.LEATHER_HELMET)
+                .setLeatherColor("#81CFE2")
+                .setArmorTrim(TrimMaterial.DIAMOND, TrimPattern.FLOW)
+                .toItemStack()
         );
     }
 
@@ -158,17 +158,17 @@ public class BlightedZombie extends SpawnableEntity {
         if (!(entity instanceof Zombie zombie)) return;
 
         Objects.requireNonNull(zombie.getEquipment()).setChestplate(
-                new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherColor("#81CFE2").toItemStack()
+            new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherColor("#81CFE2").toItemStack()
         );
         zombie.getEquipment().setHelmet(
-                new ItemBuilder(Material.LEATHER_HELMET).setLeatherColor("#81CFE2").toItemStack()
+            new ItemBuilder(Material.LEATHER_HELMET).setLeatherColor("#81CFE2").toItemStack()
         );
     }
 
     private LootTable createLootTable() {
         return new LootTable()
-                .setMaxDrop(2)
-                .addLoot(Material.ROTTEN_FLESH, 1, 3, 1, LootDropRarity.COMMON)
-                .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
+            .setMaxDrop(2)
+            .addLoot(Material.ROTTEN_FLESH, 1, 3, 1, LootDropRarity.COMMON)
+            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
     }
 }

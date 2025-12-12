@@ -53,10 +53,10 @@ public class KnightsSlamAbility implements AbilityManager<PlayerInteractEvent> {
 
         private KnightSword(Location location, BlightedPlayer player) {
             List<Entity> entities = Objects.requireNonNull(location.getWorld())
-                    .getNearbyEntities(location, 4, 4, 4).stream()
-                    .filter(entity -> entity instanceof LivingEntity && !(entity instanceof ArmorStand))
-                    .filter(entity -> !entity.equals(player.getPlayer()))
-                    .toList();
+                .getNearbyEntities(location, 4, 4, 4).stream()
+                .filter(entity -> entity instanceof LivingEntity && !(entity instanceof ArmorStand))
+                .filter(entity -> !entity.equals(player.getPlayer()))
+                .toList();
 
             double abilityDamage = 50;
             int enemies = 0;

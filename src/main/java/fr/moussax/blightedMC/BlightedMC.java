@@ -2,7 +2,6 @@ package fr.moussax.blightedMC;
 
 import fr.moussax.blightedMC.core.CoreRegistry;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedMC.moderator.ModManager;
 import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
 import fr.moussax.blightedMC.server.database.PluginDatabase;
@@ -17,14 +16,10 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
-import javax.annotation.Nonnull;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
 
 public final class BlightedMC extends JavaPlugin {
     private static BlightedMC instance;
@@ -92,7 +87,7 @@ public final class BlightedMC extends JavaPlugin {
         });
     }
 
-    private void saveResourcesAs(@Nonnull String resourcePath, String destinationPath) {
+    private void saveResourcesAs(String resourcePath, String destinationPath) {
         if (resourcePath.isEmpty()) throw new IllegalArgumentException("Resource path cannot be null or empty.");
 
         InputStream in = getResource(resourcePath);

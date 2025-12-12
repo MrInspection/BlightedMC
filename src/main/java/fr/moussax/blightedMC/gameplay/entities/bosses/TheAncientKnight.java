@@ -25,10 +25,10 @@ public class TheAncientKnight extends BlightedEntity {
         setNameTagType(EntityNameTag.BOSS);
 
         armor = new ItemStack[]{
-                new ItemStack(Material.NETHERITE_BOOTS),
-                new ItemStack(Material.NETHERITE_LEGGINGS),
-                new ItemStack(Material.NETHERITE_CHESTPLATE),
-                new ItemStack(Material.NETHERITE_HELMET)
+            new ItemStack(Material.NETHERITE_BOOTS),
+            new ItemStack(Material.NETHERITE_LEGGINGS),
+            new ItemStack(Material.NETHERITE_CHESTPLATE),
+            new ItemStack(Material.NETHERITE_HELMET)
         };
 
         itemInMainHand = new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack();
@@ -44,9 +44,9 @@ public class TheAncientKnight extends BlightedEntity {
                     }
 
                     List<Player> nearbyPlayers = entity.getNearbyEntities(20, 20, 20).stream()
-                            .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-                            .map(e -> (Player) e)
-                            .toList();
+                        .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+                        .map(e -> (Player) e)
+                        .toList();
                     if (nearbyPlayers.isEmpty()) return;
 
                     BlightedPlayer target = BlightedPlayer.getBlightedPlayer(nearbyPlayers.getFirst());
@@ -80,9 +80,9 @@ public class TheAncientKnight extends BlightedEntity {
                     }
 
                     List<Player> nearbyPlayers = clone.entity.getNearbyEntities(20, 20, 20).stream()
-                            .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-                            .map(e -> (Player) e)
-                            .toList();
+                        .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+                        .map(e -> (Player) e)
+                        .toList();
                     if (nearbyPlayers.isEmpty()) return;
 
                     BlightedPlayer target = BlightedPlayer.getBlightedPlayer(nearbyPlayers.getFirst());
@@ -160,7 +160,7 @@ public class TheAncientKnight extends BlightedEntity {
                 g.setInvulnerable(true);
                 g.setSilent(true);
                 Objects.requireNonNull(g.getEquipment())
-                        .setItemInMainHand(new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack());
+                    .setItemInMainHand(new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack());
                 g.setGravity(false);
             });
         }
@@ -168,7 +168,7 @@ public class TheAncientKnight extends BlightedEntity {
         @Override
         public void run() {
             if (giant.entity == null || giant.entity.isDead()
-                    || blightedPlayer.getPlayer() == null || !blightedPlayer.getPlayer().isOnline()) {
+                || blightedPlayer.getPlayer() == null || !blightedPlayer.getPlayer().isOnline()) {
                 cancel();
                 return;
             }
@@ -176,7 +176,7 @@ public class TheAncientKnight extends BlightedEntity {
             if (runTime == 0) {
                 location = blightedPlayer.getPlayer().getLocation();
                 Objects.requireNonNull(location.getWorld())
-                        .playSound(location, Sound.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, 1f, 0.75f);
+                    .playSound(location, Sound.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, 1f, 0.75f);
             }
 
             if (runTime < 90) {
@@ -194,13 +194,13 @@ public class TheAncientKnight extends BlightedEntity {
                 if (sword != null && !sword.isDead()) sword.teleport(swordLocation);
 
                 Objects.requireNonNull(location.getWorld())
-                        .spawnParticle(Particle.EXPLOSION_EMITTER, location, 1);
+                    .spawnParticle(Particle.EXPLOSION_EMITTER, location, 1);
 
                 List<Player> nearbyPlayers = location.getWorld()
-                        .getNearbyEntities(location, 6, 6, 6).stream()
-                        .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-                        .map(e -> (Player) e)
-                        .toList();
+                    .getNearbyEntities(location, 6, 6, 6).stream()
+                    .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+                    .map(e -> (Player) e)
+                    .toList();
 
                 for (Player nearbyPlayer : nearbyPlayers) {
                     BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(nearbyPlayer);

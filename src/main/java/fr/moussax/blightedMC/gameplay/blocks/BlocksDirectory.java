@@ -13,26 +13,26 @@ public class BlocksDirectory implements ItemRegistry {
     @Override
     public List<ItemTemplate> defineItems() {
         ItemTemplate blightedCraftingTable = new ItemTemplate(
-                "BLIGHTED_WORKBENCH",
-                ItemType.BLOCK,
-                ItemRarity.UNCOMMON,
-                Material.ENCHANTING_TABLE,
-                "Blighted Workbench"
+            "BLIGHTED_WORKBENCH",
+            ItemType.BLOCK,
+            ItemRarity.UNCOMMON,
+            Material.ENCHANTING_TABLE,
+            "Blighted Workbench"
         );
 
         blightedCraftingTable.addLore(
-                "§8Placeable Block",
-                "",
-                "§7 Forged §beons ago §7in the §5Voidling Edges§7,",
-                "§7 this workbench thrums with §5blighted energy§7, ",
-                "§7 twisting §dmatter§7 and §dmagic§7 alike to forge",
-                "§7 items beyond the reach of ordinary",
-                "§7 crafting tables.",
-                "",
-                ItemRarity.RARE.getName() + " BLOCK"
+            "§8Placeable Block",
+            "",
+            "§7 Forged §beons ago §7in the §5Voidling Edges§7,",
+            "§7 this workbench thrums with §5blighted energy§7, ",
+            "§7 twisting §dmatter§7 and §dmagic§7 alike to forge",
+            "§7 items beyond the reach of ordinary",
+            "§7 crafting tables.",
+            "",
+            ItemRarity.UNCOMMON.getName() + " BLOCK"
         );
-        blightedCraftingTable.addEnchantmentGlint();
 
+        blightedCraftingTable.addEnchantmentGlint();
         return ItemRegistry.add(blightedCraftingTable);
     }
 }

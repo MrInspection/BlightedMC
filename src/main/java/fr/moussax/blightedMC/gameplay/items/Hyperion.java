@@ -20,14 +20,14 @@ public class Hyperion implements ItemRegistry {
         hyperion.setUnbreakable(true).addItemFlag(List.of(ItemFlag.HIDE_UNBREAKABLE));
         hyperion.addItemFlag(ItemFlag.HIDE_UNBREAKABLE);
         hyperion.addLore(
-                "",
-                "§5 Ability: Wither Impact  §d§lRIGHT CLICK",
-                "§7 Teleport §a10 §7blocks ahead of you. Then dealing §c15,000 ",
-                "§7 damage to nearby enemies. Also applies the wither",
-                "§7 shield scroll reducing damage taken and granting",
-                "§7 an §6absorption §7shield for §e5 §7seconds.",
-                "",
-                ItemRarity.LEGENDARY.getName() + " SWORD"
+            "",
+            "§5 Ability: Wither Impact  §d§lRIGHT CLICK",
+            "§7 Teleport §a10 §7blocks ahead of you. Then dealing §c15,000 ",
+            "§7 damage to nearby enemies. Also applies the wither",
+            "§7 shield scroll reducing damage taken and granting",
+            "§7 an §6absorption §7shield for §e5 §7seconds.",
+            "",
+            ItemRarity.LEGENDARY.getName() + " SWORD"
         );
         hyperion.addAbility(new Ability(new WitherImpactAbility(), "Whither Impact", AbilityType.RIGHT_CLICK));
         return ItemRegistry.add(hyperion);

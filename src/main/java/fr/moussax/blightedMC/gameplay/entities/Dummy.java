@@ -29,10 +29,10 @@ public class Dummy extends BlightedEntity {
     protected void applyEquipment() {
         this.itemInMainHand = new ItemStack(Material.TRIDENT);
         this.armor = new ItemStack[]{
-                new ItemStack(Material.COPPER_BOOTS),
-                new ItemStack(Material.LEATHER_LEGGINGS),
-                new ItemStack(Material.COPPER_CHESTPLATE),
-                new ItemStack(Material.COPPER_HELMET)
+            new ItemStack(Material.COPPER_BOOTS),
+            new ItemStack(Material.LEATHER_LEGGINGS),
+            new ItemStack(Material.COPPER_CHESTPLATE),
+            new ItemStack(Material.COPPER_HELMET)
         };
         super.applyEquipment();
     }

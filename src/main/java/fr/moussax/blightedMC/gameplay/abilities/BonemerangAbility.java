@@ -95,7 +95,7 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
 
     private void setItemCooldown(Player player, String uuid, int seconds) {
         cooldowns.computeIfAbsent(player.getUniqueId(), k -> new ConcurrentHashMap<>())
-                .put(uuid, System.currentTimeMillis() + (seconds * 1000L));
+            .put(uuid, System.currentTimeMillis() + (seconds * 1000L));
     }
 
     private String getOrAssignItemUuid(ItemStack item) {
@@ -132,9 +132,9 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
 
     private void launchProjectile(Player player, ItemStack toRestore) {
         ArmorStand projectile = player.getWorld().spawn(
-                player.getLocation().add(0, SPAWN_HEIGHT_OFFSET, 0),
-                ArmorStand.class,
-                this::configureArmorStand
+            player.getLocation().add(0, SPAWN_HEIGHT_OFFSET, 0),
+            ArmorStand.class,
+            this::configureArmorStand
         );
 
         player.playSound(player.getLocation(), Sound.BLOCK_BONE_BLOCK_BREAK, 2.0f, 1.75f);
@@ -200,17 +200,17 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
 
     private void updateProjectilePosition(ArmorStand projectile, Player player, Vector direction, boolean returning) {
         Vector movement = returning
-                ? player.getLocation().subtract(projectile.getLocation()).toVector().normalize().multiply(PROJECTILE_SPEED)
-                : direction.clone().multiply(PROJECTILE_SPEED);
+            ? player.getLocation().subtract(projectile.getLocation()).toVector().normalize().multiply(PROJECTILE_SPEED)
+            : direction.clone().multiply(PROJECTILE_SPEED);
 
         projectile.teleport(projectile.getLocation().add(movement));
     }
 
     private void updateProjectileRotation(ArmorStand projectile, int tick) {
         projectile.setRightArmPose(new EulerAngle(
-                0,
-                Math.toRadians(90 + (ROTATION_SPEED * tick)),
-                0
+            0,
+            Math.toRadians(90 + (ROTATION_SPEED * tick)),
+            0
         ));
     }
 
@@ -243,7 +243,7 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
         Map<Integer, ItemStack> leftovers = inventory.addItem(original);
         if (!leftovers.isEmpty()) {
             leftovers.values().forEach(item ->
-                    player.getWorld().dropItemNaturally(player.getLocation(), item)
+                player.getWorld().dropItemNaturally(player.getLocation(), item)
             );
         }
     }

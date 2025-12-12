@@ -55,26 +55,26 @@ public class RevenantHorror extends BlightedEntity {
     protected void applyEquipment() {
         this.itemInMainHand = new ItemBuilder(Material.DIAMOND_HOE).addEnchantmentGlint().toItemStack();
         this.armor = new ItemStack[]{
-                new ItemBuilder(Material.DIAMOND_BOOTS).addEnchantmentGlint().toItemStack(),
-                new ItemBuilder(Material.CHAINMAIL_LEGGINGS).addEnchantmentGlint().toItemStack(),
-                new ItemBuilder(Material.DIAMOND_CHESTPLATE).addEnchantmentGlint().toItemStack(),
-                new ItemBuilder(Material.PLAYER_HEAD).setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDhiZWUyM2I1YzcyNmFlOGUzZDAyMWU4YjRmNzUyNTYxOWFiMTAyYTRlMDRiZTk4M2I2MTQxNDM0OWFhYWM2NyJ9fX0=").toItemStack(),
+            new ItemBuilder(Material.DIAMOND_BOOTS).addEnchantmentGlint().toItemStack(),
+            new ItemBuilder(Material.CHAINMAIL_LEGGINGS).addEnchantmentGlint().toItemStack(),
+            new ItemBuilder(Material.DIAMOND_CHESTPLATE).addEnchantmentGlint().toItemStack(),
+            new ItemBuilder(Material.PLAYER_HEAD).setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDhiZWUyM2I1YzcyNmFlOGUzZDAyMWU4YjRmNzUyNTYxOWFiMTAyYTRlMDRiZTk4M2I2MTQxNDM0OWFhYWM2NyJ9fX0=").toItemStack(),
         };
         super.applyEquipment();
     }
 
     private void performLifeDrain() {
         double newHealth = Math.min(
-                entity.getHealth() + getDamage(),
-                Objects.requireNonNull(entity.getAttribute(Attribute.MAX_HEALTH)).getBaseValue()
+            entity.getHealth() + getDamage(),
+            Objects.requireNonNull(entity.getAttribute(Attribute.MAX_HEALTH)).getBaseValue()
         );
         entity.setHealth(newHealth);
         updateNameTag();
 
         entity.getWorld().spawnParticle(
-                Particle.HEART,
-                entity.getLocation().add(0, entity.getEyeHeight() / 2, 0),
-                8, 0.5, 0.5, 0.5
+            Particle.HEART,
+            entity.getLocation().add(0, entity.getEyeHeight() / 2, 0),
+            8, 0.5, 0.5, 0.5
         );
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1f, 0.7f);
     }
@@ -111,16 +111,16 @@ public class RevenantHorror extends BlightedEntity {
     private void equipEnrage() {
         if (entity instanceof Zombie zombie) {
             Objects.requireNonNull(zombie.getEquipment()).setChestplate(
-                    new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                            .setLeatherColor("#FF4B4B")
-                            .toItemStack()
+                new ItemBuilder(Material.LEATHER_CHESTPLATE)
+                    .setLeatherColor("#FF4B4B")
+                    .toItemStack()
             );
         }
     }
 
     private void equipNormal(Zombie zombie) {
         Objects.requireNonNull(zombie.getEquipment()).setChestplate(
-                new ItemBuilder(Material.DIAMOND_CHESTPLATE).addEnchantmentGlint().toItemStack()
+            new ItemBuilder(Material.DIAMOND_CHESTPLATE).addEnchantmentGlint().toItemStack()
         );
     }
 

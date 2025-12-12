@@ -10,7 +10,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 
 /**
@@ -53,27 +52,27 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
      * @return a list of matching suggestions, or an empty list if none apply
      */
     @Override
-    public List<String> onTabComplete(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String label, @Nonnull String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         for (var entry : rules.entrySet()) {
             if (entry.getKey().matches(args)) {
                 List<String> suggestions = entry.getValue();
 
                 if (suggestions.size() == 1 && suggestions.getFirst().equals("$players")) {
                     return Bukkit.getOnlinePlayers().stream()
-                            .map(Player::getName)
-                            .toList();
+                        .map(Player::getName)
+                        .toList();
                 }
 
                 if (suggestions.size() == 1 && suggestions.getFirst().equals("$items")) {
                     return ItemDirectory.getAllItems().stream()
-                            .map(ItemTemplate::getItemId)
-                            .toList();
+                        .map(ItemTemplate::getItemId)
+                        .toList();
                 }
 
                 if (suggestions.size() == 1 && suggestions.getFirst().equals("$entities")) {
                     return EntitiesRegistry.getAllEntities().stream()
-                            .map(BlightedEntity::getEntityId)
-                            .toList();
+                        .map(BlightedEntity::getEntityId)
+                        .toList();
                 }
 
                 return suggestions;
