@@ -17,6 +17,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,7 +156,7 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
     }
 
     @Override
-    public ItemTemplate setDisplayName(String displayName) {
+    public ItemTemplate setDisplayName(@NonNull String displayName) {
         String coloredName = itemRarity.getColorPrefix() + displayName;
         super.setDisplayName(coloredName);
         return this;

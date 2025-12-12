@@ -17,9 +17,9 @@ public class FlexiblePropertyUtils extends PropertyUtils {
     private static String normalize(String name) {
         if (name == null) return null;
         return name.replace("_", "")
-                .replace("-", "")
-                .replace(" ", "")
-                .toLowerCase(Locale.ROOT);
+            .replace("-", "")
+            .replace(" ", "")
+            .toLowerCase(Locale.ROOT);
     }
 
     @Override

@@ -8,8 +8,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
-
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 
@@ -18,8 +17,8 @@ public class KaboomCommand implements CommandExecutor {
     private static final float LAUNCH_HEIGHT = 10.55f;
 
     @Override
-    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
-        if (!label.equalsIgnoreCase("kaboom") || !(sender instanceof Player player)) return false;
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
+        if (!(label.equalsIgnoreCase("kaboom") && sender instanceof Player player)) return false;
         if (!enforceAdminPermission(player)) return false;
 
         if (args.length == 0) {
