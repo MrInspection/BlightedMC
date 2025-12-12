@@ -17,9 +17,8 @@ import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
-import org.checkerframework.checker.index.qual.Positive;
+import org.jspecify.annotations.NonNull;
 
-import javax.annotation.Nonnull;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -68,7 +67,7 @@ public class ItemBuilder {
      * @param material the material type
      * @throws IllegalStateException if the material has no ItemMeta
      */
-    public ItemBuilder(@Nonnull Material material) {
+    public ItemBuilder(@NonNull Material material) {
         this(new ItemStack(material));
     }
 
@@ -80,7 +79,7 @@ public class ItemBuilder {
      * @throws IllegalArgumentException if amount is outside valid range
      * @throws IllegalStateException    if the material has no ItemMeta
      */
-    public ItemBuilder(@Nonnull Material material, @Positive int amount) {
+    public ItemBuilder(Material material, int amount) {
         this(new ItemStack(material, validateAmount(material, amount)));
     }
 
@@ -91,7 +90,7 @@ public class ItemBuilder {
      * @param displayName the display name
      * @throws IllegalStateException if the material has no ItemMeta
      */
-    public ItemBuilder(@Nonnull Material material, @Nonnull String displayName) {
+    public ItemBuilder(@NonNull Material material, @NonNull String displayName) {
         this(new ItemStack(material));
         this.itemMeta.setDisplayName(displayName);
     }
@@ -105,7 +104,7 @@ public class ItemBuilder {
      * @throws IllegalArgumentException if amount is outside valid range
      * @throws IllegalStateException    if the material has no ItemMeta
      */
-    public ItemBuilder(@Nonnull Material material, @Positive int amount, @Nonnull String displayName) {
+    public ItemBuilder(@NonNull Material material, int amount, @NonNull String displayName) {
         this(new ItemStack(material, validateAmount(material, amount)));
         this.itemMeta.setDisplayName(displayName);
     }
@@ -117,7 +116,7 @@ public class ItemBuilder {
      * @param itemStack the source item stack
      * @throws IllegalStateException if the item has no ItemMeta
      */
-    public ItemBuilder(@Nonnull ItemStack itemStack) {
+    public ItemBuilder(@NonNull ItemStack itemStack) {
         this.item = itemStack.clone();
         ItemMeta meta = this.item.getItemMeta();
 
@@ -139,10 +138,10 @@ public class ItemBuilder {
     /**
      * Sets the display name of the item.
      *
-     * @param displayName the display name, supports color codes
+     * @param displayName the display name supports color codes
      * @return this builder
      */
-    public ItemBuilder setDisplayName(@Nonnull String displayName) {
+    public ItemBuilder setDisplayName(@NonNull String displayName) {
         this.itemMeta.setDisplayName(displayName);
         return this;
     }
@@ -154,7 +153,7 @@ public class ItemBuilder {
      * @return this builder
      * @throws IllegalArgumentException if amount is outside valid range
      */
-    public ItemBuilder setAmount(@Positive int amount) {
+    public ItemBuilder setAmount(int amount) {
         item.setAmount(validateAmount(item.getType(), amount));
         return this;
     }
@@ -202,7 +201,7 @@ public class ItemBuilder {
      * @param playerId the player's UUID
      * @return this builder
      */
-    public ItemBuilder setSkullOwner(@Nonnull UUID playerId) {
+    public ItemBuilder setSkullOwner(@NonNull UUID playerId) {
         item.setType(Material.PLAYER_HEAD);
         this.skullOwnerUUID = playerId;
         this.base64Texture = null;
@@ -217,7 +216,7 @@ public class ItemBuilder {
      * @return this builder
      * @see <a href="https://minecraft-heads.com/custom-heads">Minecraft Heads – Custom Textures</a>
      */
-    public ItemBuilder setCustomSkullTexture(@Nonnull String base64Texture) {
+    public ItemBuilder setCustomSkullTexture(@NonNull String base64Texture) {
         item.setType(Material.PLAYER_HEAD);
         this.base64Texture = base64Texture;
         this.skullOwnerUUID = null;
@@ -232,7 +231,7 @@ public class ItemBuilder {
      * @return this builder
      * @throws IllegalArgumentException if a hex format is invalid
      */
-    public ItemBuilder setLeatherColor(@Nonnull String hex) {
+    public ItemBuilder setLeatherColor(@NonNull String hex) {
         this.leatherColor = fromHex(hex);
         return this;
     }
@@ -245,9 +244,29 @@ public class ItemBuilder {
      * @param pattern  the trim pattern
      * @return this builder
      */
-    public ItemBuilder setArmorTrim(@Nonnull TrimMaterial material, @Nonnull TrimPattern pattern) {
+    public ItemBuilder setArmorTrim(@NonNull TrimMaterial material, @NonNull TrimPattern pattern) {
         this.armorTrim = new ArmorTrim(material, pattern);
         return this;
+    }
+
+    /**
+     * Sets whether to hide the entire item tooltip (name, lore, etc.).
+     *
+     * @param hideTooltip true to hide the tooltip completely
+     * @return this builder
+     */
+    public ItemBuilder setHideTooltip(boolean hideTooltip) {
+        itemMeta.setHideTooltip(hideTooltip);
+        return this;
+    }
+
+    /**
+     * Hide the entire item tooltip (name, lore, etc.).
+     *
+     * @return this builder
+     */
+    public ItemBuilder setHideTooltip() {
+        return setHideTooltip(true);
     }
 
     /**
@@ -295,7 +314,7 @@ public class ItemBuilder {
      * @throws IndexOutOfBoundsException if the index is invalid
      */
     @SuppressWarnings("UnusedReturnValue")
-    public ItemBuilder setLore(String line, int index) {
+    public ItemBuilder setLore(int index, String line) {
         List<String> lore = itemMeta.getLore();
         if (lore == null || index < 0 || index >= lore.size()) {
             throw new IndexOutOfBoundsException("Invalid lore index: " + index);
@@ -412,7 +431,7 @@ public class ItemBuilder {
      * @param modifier  the attribute modifier
      * @return this builder
      */
-    public ItemBuilder addAttributeModifier(@Nonnull Attribute attribute, @Nonnull AttributeModifier modifier) {
+    public ItemBuilder addAttributeModifier(Attribute attribute, AttributeModifier modifier) {
         if (itemMeta.getAttributeModifiers() != null) {
             Collection<AttributeModifier> existingAttributeModifier = itemMeta.getAttributeModifiers().get(attribute);
             for (AttributeModifier oldAttributeModifier : new ArrayList<>(existingAttributeModifier)) {
@@ -434,9 +453,9 @@ public class ItemBuilder {
      * @return this builder
      */
     @SuppressWarnings({"UnstableApiUsage", "UnusedReturnValue"})
-    public ItemBuilder addAttributeModifier(@Nonnull Attribute attribute,
-                                            double amount, @Nonnull AttributeModifier.Operation operation,
-                                            @Nonnull EquipmentSlotGroup slotGroup) {
+    public ItemBuilder addAttributeModifier(Attribute attribute,
+                                            double amount, AttributeModifier.Operation operation,
+                                            EquipmentSlotGroup slotGroup) {
 
         NamespacedKey attributeKey = new NamespacedKey(BlightedMC.getInstance(), UUID.randomUUID().toString());
         AttributeModifier modifier = new AttributeModifier(attributeKey, amount, operation, slotGroup);
@@ -541,7 +560,7 @@ public class ItemBuilder {
      * @param meta the skull meta to modify
      * @param uuid the player's UUID
      */
-    private static void applyOwner(@Nonnull SkullMeta meta, @Nonnull UUID uuid) {
+    private static void applyOwner(SkullMeta meta, UUID uuid) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(uuid);
         meta.setOwningPlayer(target);
     }
@@ -554,11 +573,11 @@ public class ItemBuilder {
      * @param base64Texture the base64-encoded texture JSON
      * @throws IllegalArgumentException if the texture URL is invalid
      */
-    private static void applyTexture(@Nonnull SkullMeta meta, @Nonnull String base64Texture) {
+    private static void applyTexture(SkullMeta meta, String base64Texture) {
         String json = new String(Base64.getDecoder().decode(base64Texture), StandardCharsets.UTF_8);
         JsonObject object = JsonParser.parseString(json)
-                .getAsJsonObject().getAsJsonObject("textures")
-                .getAsJsonObject("SKIN");
+            .getAsJsonObject().getAsJsonObject("textures")
+            .getAsJsonObject("SKIN");
 
         String url = object.get("url").getAsString();
 
@@ -583,7 +602,7 @@ public class ItemBuilder {
      * @return Bukkit Color
      * @throws IllegalArgumentException if the hex is invalid
      */
-    private static Color fromHex(@Nonnull String hex) {
+    private static Color fromHex(String hex) {
         if (!hex.matches("^#?[0-9a-fA-F]{6}$")) {
             throw new IllegalArgumentException("Invalid hex color: " + hex);
         }
