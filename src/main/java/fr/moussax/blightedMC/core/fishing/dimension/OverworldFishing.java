@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.core.fishing.dimension;
 import fr.moussax.blightedMC.core.fishing.FishingLootTable;
 import fr.moussax.blightedMC.core.fishing.loot.LootCondition;
 import fr.moussax.blightedMC.core.fishing.loot.LootEntry;
-import fr.moussax.blightedMC.gameplay.entities.Dummy;
+import fr.moussax.blightedMC.game.entities.Dummy;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;

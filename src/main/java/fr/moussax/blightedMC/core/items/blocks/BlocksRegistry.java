@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.items.blocks;
 
-import fr.moussax.blightedMC.gameplay.blocks.BlightedWorkbench;
+import fr.moussax.blightedMC.game.blocks.BlightedWorkbench;
 import fr.moussax.blightedMC.utils.debug.Log;
 
 import java.util.HashMap;

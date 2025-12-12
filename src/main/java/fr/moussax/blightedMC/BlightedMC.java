@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC;
 
-import fr.moussax.blightedMC.core.CoreRegistry;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
@@ -57,7 +56,7 @@ public final class BlightedMC extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
         }
 
-        CoreRegistry.initializeAllRegistries();
+        GlobalRegistry.initializeAllRegistries();
         eventsRegistry = new EventsRegistry();
         eventsRegistry.initializeListeners();
 
@@ -72,7 +71,7 @@ public final class BlightedMC extends JavaPlugin {
         if (eventsRegistry != null && eventsRegistry.getBlockListener() != null) {
             eventsRegistry.getBlockListener().saveData();
         }
-        CoreRegistry.clearAllRegistries();
+        GlobalRegistry.clearAllRegistries();
     }
 
     /**

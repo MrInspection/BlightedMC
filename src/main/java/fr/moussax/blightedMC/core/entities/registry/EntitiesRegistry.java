@@ -2,11 +2,11 @@ package fr.moussax.blightedMC.core.entities.registry;
 
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.gameplay.entities.Dummy;
-import fr.moussax.blightedMC.gameplay.entities.bosses.RevenantHorror;
-import fr.moussax.blightedMC.gameplay.entities.bosses.TheAncientKnight;
-import fr.moussax.blightedMC.gameplay.entities.spawnable.BlightedZombie;
-import fr.moussax.blightedMC.gameplay.entities.spawnable.LaserEngineer;
+import fr.moussax.blightedMC.game.entities.Dummy;
+import fr.moussax.blightedMC.game.entities.bosses.RevenantHorror;
+import fr.moussax.blightedMC.game.entities.bosses.TheAncientKnight;
+import fr.moussax.blightedMC.game.entities.spawnable.BlightedZombie;
+import fr.moussax.blightedMC.game.entities.spawnable.LaserEngineer;
 import fr.moussax.blightedMC.utils.debug.Log;
 
 import java.util.HashMap;

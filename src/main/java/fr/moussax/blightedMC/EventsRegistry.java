@@ -10,7 +10,7 @@ import fr.moussax.blightedMC.core.items.registry.ItemDirectorySearch;
 import fr.moussax.blightedMC.core.items.rules.ItemRuleListener;
 import fr.moussax.blightedMC.core.menus.MenuListener;
 import fr.moussax.blightedMC.core.player.BlightedPlayerListener;
-import fr.moussax.blightedMC.gameplay.abilities.WitherImpactAbility;
+import fr.moussax.blightedMC.game.abilities.WitherImpactAbility;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 

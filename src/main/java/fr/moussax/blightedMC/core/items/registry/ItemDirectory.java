@@ -2,10 +2,10 @@ package fr.moussax.blightedMC.core.items.registry;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
-import fr.moussax.blightedMC.gameplay.armors.HomodeusArmor;
-import fr.moussax.blightedMC.gameplay.armors.RocketBoots;
-import fr.moussax.blightedMC.gameplay.blocks.BlocksDirectory;
-import fr.moussax.blightedMC.gameplay.items.*;
+import fr.moussax.blightedMC.game.armors.HomodeusArmor;
+import fr.moussax.blightedMC.game.armors.RocketBoots;
+import fr.moussax.blightedMC.game.blocks.BlocksDirectory;
+import fr.moussax.blightedMC.game.items.*;
 import org.bukkit.NamespacedKey;
 
 import java.util.HashMap;
