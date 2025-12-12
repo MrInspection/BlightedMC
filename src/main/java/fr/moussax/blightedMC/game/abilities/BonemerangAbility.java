@@ -31,7 +31,7 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
     private static final int RETURN_TICKS = 13;
     private static final double PROJECTILE_SPEED = 1.16;
     private static final double COLLISION_RADIUS = 1.15;
-    private static final double DAMAGE_AMOUNT = 16.0;
+    private static final double DAMAGE_AMOUNT = 12.0;
     private static final double SPAWN_HEIGHT_OFFSET = 1.1;
     private static final double ROTATION_SPEED = 35.0;
 

@@ -18,6 +18,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public abstract class BlightedBlock {
     protected final Material material;
     protected final ItemTemplate itemTemplate;
 
-    public BlightedBlock(Material material, ItemTemplate itemTemplate) {
+    public BlightedBlock(@NonNull Material material, @NonNull ItemTemplate itemTemplate) {
         this.material = material;
         this.itemTemplate = itemTemplate;
         BlocksRegistry.addBlock(this);

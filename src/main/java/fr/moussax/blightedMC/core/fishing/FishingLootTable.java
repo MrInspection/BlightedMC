@@ -66,14 +66,16 @@ public class FishingLootTable {
     /**
      * Creates a new loot context for the specified player.
      *
-     * @param player the player for which to create the context
+     * @param blightedPlayer the player for which to create the context
      * @return a new LootContext
      */
-    private LootContext createContext(BlightedPlayer player) {
+    private LootContext createContext(BlightedPlayer blightedPlayer) {
+        var player = Objects.requireNonNull(blightedPlayer.getPlayer());
+
         return new LootContext(
-            player,
-            Objects.requireNonNull(player.getPlayer()).getLocation().getBlock().getBiome(),
-            player.getPlayer().getWorld().getEnvironment()
+            blightedPlayer,
+            player.getLocation().getBlock().getBiome(),
+            player.getWorld().getEnvironment()
         );
     }
 

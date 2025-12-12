@@ -447,16 +447,24 @@ public class ForgeMenu extends Menu {
     private void removeInventoryItems(Player player, CraftingObject ingredient) {
         String requiredId = ingredient.getId();
         int remainingToRemove = ingredient.getAmount();
+        ItemStack[] contents = player.getInventory().getContents();
 
-        for (ItemStack item : player.getInventory().getContents()) {
+        for (int slot = 0; slot < contents.length; slot++) {
+            ItemStack item = contents[slot];
             if (item == null || item.getType() == Material.AIR || remainingToRemove <= 0) continue;
 
             String currentId = extractItemId(item, requiredId);
             if (!currentId.equals(requiredId)) continue;
 
             int amountToDeduct = Math.min(item.getAmount(), remainingToRemove);
-            item.setAmount(item.getAmount() - amountToDeduct);
+            int newAmount = item.getAmount() - amountToDeduct;
             remainingToRemove -= amountToDeduct;
+
+            if (newAmount <= 0) {
+                player.getInventory().setItem(slot, null);
+            } else {
+                item.setAmount(newAmount);
+            }
         }
     }
 }

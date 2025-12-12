@@ -1,13 +1,13 @@
 package fr.moussax.blightedMC.core.items.crafting;
 
-import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
+
+import static fr.moussax.blightedMC.core.items.ItemTemplate.ITEM_ID_KEY;
 
 /**
  * Base class for BlightedMC crafting recipes.
@@ -98,9 +98,8 @@ public sealed abstract class BlightedRecipe
                 continue;
             }
 
-            String customItemId = Objects.requireNonNull(stack.getItemMeta())
-                .getPersistentDataContainer()
-                .get(new NamespacedKey(BlightedMC.getInstance(), "id"), PersistentDataType.STRING);
+            var meta = stack.getItemMeta();
+            String customItemId = meta == null ? null : meta.getPersistentDataContainer().get(ITEM_ID_KEY, PersistentDataType.STRING);
 
             // Vanilla item ID format
             itemIdsInGrid.add(Objects.requireNonNullElseGet(customItemId, () -> "vanilla:" + stack.getType().name().toLowerCase(Locale.ROOT)));

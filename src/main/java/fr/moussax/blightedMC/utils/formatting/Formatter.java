@@ -122,7 +122,7 @@ public final class Formatter {
      * Compacts large numbers into abbreviated format (K, M, B).
      *
      * @param value the number to compact
-     * @return compact notation (e.g., 1500 → "1.5K", 2000000 → "2M")
+     * @return compact notation (e.g., 1500 → "1.5k", 2_000_000 → "2M")
      */
 
     public static String compactNumber(int value) {

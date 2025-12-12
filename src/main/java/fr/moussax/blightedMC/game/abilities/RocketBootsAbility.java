@@ -61,7 +61,7 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
     public void onPlayerToggleFlight(PlayerToggleFlightEvent event) {
         var p = event.getPlayer();
 
-        if (isAbilityOwner(p)) {
+        if (!isAbilityOwner(p)) {
             return;
         }
 
@@ -81,7 +81,7 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
     public void onPlayerLand(PlayerMoveEvent event) {
         Player p = event.getPlayer();
 
-        if (isAbilityOwner(p)) {
+        if (!isAbilityOwner(p)) {
             return;
         }
 

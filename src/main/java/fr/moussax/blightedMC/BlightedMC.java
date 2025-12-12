@@ -89,35 +89,23 @@ public final class BlightedMC extends JavaPlugin {
     private void saveResourcesAs(String resourcePath, String destinationPath) {
         if (resourcePath.isEmpty()) throw new IllegalArgumentException("Resource path cannot be null or empty.");
 
-        InputStream in = getResource(resourcePath);
-        if (in == null) throw new IllegalArgumentException("Resource cannot be found at path: " + resourcePath);
+        try (InputStream in = getResource(resourcePath)) {
+            if (in == null) throw new IllegalArgumentException("Resource cannot be found at path: " + resourcePath);
 
-        if (!getDataFolder().exists() && !getDataFolder().mkdirs()) {
-            getLogger().severe("Unable to create data folder.");
-        }
+            if (!getDataFolder().exists() && !getDataFolder().mkdirs()) {
+                getLogger().severe("Unable to create data folder.");
+            }
 
-        File outputFile = new File(getDataFolder(), destinationPath);
+            File outputFile = new File(getDataFolder(), destinationPath);
 
-        try {
+            try (OutputStream out = new FileOutputStream(outputFile)) {
+                in.transferTo(out);
+            }
+
             if (!outputFile.exists()) {
-                getLogger().info("The " + resourcePath + " file does not exist! Creating it...");
-
-                OutputStream out = new FileOutputStream(outputFile);
-                byte[] buffer = new byte[1024];
-                int n;
-
-                while ((n = in.read(buffer)) >= 0) {
-                    out.write(buffer, 0, n);
-                }
-
-                out.close();
-                in.close();
-
-                if (!outputFile.exists()) {
-                    getLogger().severe("Unable to copy the file.");
-                } else {
-                    getLogger().info("Successfully created the " + resourcePath + " file.");
-                }
+                getLogger().severe("Unable to copy the file.");
+            } else {
+                getLogger().info("Successfully created the " + resourcePath + " file.");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
