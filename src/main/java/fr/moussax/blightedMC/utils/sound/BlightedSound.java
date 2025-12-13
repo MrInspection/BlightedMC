@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.utils.sound;
 import fr.moussax.blightedMC.utils.Utilities;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
@@ -25,7 +26,7 @@ public record BlightedSound(Sound sound, float volume, float pitch, long delay) 
      *
      * @param location the location where the sound should be played
      */
-    public void play(Location location) {
+    public void play(@NonNull Location location) {
         Utilities.delay(() -> Objects.requireNonNull(location.getWorld())
             .playSound(location, sound, volume, pitch), delay);
     }
