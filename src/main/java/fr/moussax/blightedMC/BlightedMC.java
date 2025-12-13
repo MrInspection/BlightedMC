@@ -30,7 +30,6 @@ public final class BlightedMC extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        Log.setIncludeTimestamp(false);
         Log.info("Plugin", "Initializing BlightedMC plugin...");
         String config = PluginFiles.CONFIG.getFileName();
         saveResourcesAs(config, config);

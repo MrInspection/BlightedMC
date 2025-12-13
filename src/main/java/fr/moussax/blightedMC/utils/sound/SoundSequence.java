@@ -74,29 +74,29 @@ public record SoundSequence(List<BlightedSound> sounds) {
     );
 
     public static final SoundSequence XP_PICKUP = new SoundSequence(
-        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.5f, 0),
-        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.6f, 2),
-        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.7f, 4),
-        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.8f, 6),
-        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.9f, 8),
-        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.0f, 10),
-        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.1f, 12),
-        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.2f, 14),
-        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.3f, 16),
-        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.4f, 18)
+        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.5f, 0L),
+        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.6f, 2L),
+        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.7f, 4L),
+        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.8f, 6L),
+        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.9f, 8L),
+        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.0f, 10L),
+        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.1f, 12L),
+        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.2f, 14L),
+        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.3f, 16L),
+        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.4f, 18L)
     );
 
     public static final SoundSequence BLIGHTED_GEMSTONE_CONSUME = new SoundSequence(
-        new BlightedSound(Sound.BLOCK_POINTED_DRIPSTONE_HIT, 1.0F, 0.5F, 0L),
-        new BlightedSound(Sound.BLOCK_POINTED_DRIPSTONE_HIT, 1.0F, 0.7F, 3L),
-        new BlightedSound(Sound.BLOCK_POINTED_DRIPSTONE_HIT, 1.0F, 1.0F, 6L),
-        new BlightedSound(Sound.BLOCK_POINTED_DRIPSTONE_HIT, 1.0F, 1.4F, 9L),
-        new BlightedSound(Sound.BLOCK_POINTED_DRIPSTONE_HIT, 1.0F, 1.8F, 12L),
-        new BlightedSound(Sound.BLOCK_VAULT_OPEN_SHUTTER, 1.0F, 1.2F, 14L),
-        new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_BREAK, 1.0F, 0.9F, 18L),
-        new BlightedSound(Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 1.5F, 1.2F, 18L),
-        new BlightedSound(Sound.ENTITY_GLOW_ITEM_FRAME_ADD_ITEM, 1.0F, 1.5F, 20L),
-        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 2.0F, 22L)
+        new BlightedSound(Sound.BLOCK_POINTED_DRIPSTONE_HIT, 1.0f, 0.5f, 0L),
+        new BlightedSound(Sound.BLOCK_POINTED_DRIPSTONE_HIT, 1.0f, 0.7f, 3L),
+        new BlightedSound(Sound.BLOCK_POINTED_DRIPSTONE_HIT, 1.0f, 1.0f, 6L),
+        new BlightedSound(Sound.BLOCK_POINTED_DRIPSTONE_HIT, 1.0f, 1.4f, 9L),
+        new BlightedSound(Sound.BLOCK_POINTED_DRIPSTONE_HIT, 1.0f, 1.8f, 12L),
+        new BlightedSound(Sound.BLOCK_VAULT_OPEN_SHUTTER, 1.0f, 1.2f, 14L),
+        new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_BREAK, 1.0f, 0.9f, 18L),
+        new BlightedSound(Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 1.5f, 1.2f, 18L),
+        new BlightedSound(Sound.ENTITY_GLOW_ITEM_FRAME_ADD_ITEM, 1.0f, 1.5f, 20L),
+        new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 2.0f, 22L)
     );
 
     public static final SoundSequence FORGE_ITEM = new SoundSequence(
