@@ -33,7 +33,6 @@ public abstract class BlightedBlock {
     public BlightedBlock(@NonNull Material material, @NonNull ItemTemplate itemTemplate) {
         this.material = material;
         this.itemTemplate = itemTemplate;
-        BlocksRegistry.addBlock(this);
     }
 
     public void onPlace(BlockPlaceEvent event) {

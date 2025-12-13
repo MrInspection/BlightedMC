@@ -6,6 +6,7 @@ import fr.moussax.blightedMC.core.items.crafting.BlightedShapedRecipe;
 import fr.moussax.blightedMC.core.items.crafting.BlightedShapelessRecipe;
 import fr.moussax.blightedMC.core.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.game.recipes.MaterialRecipes;
+import fr.moussax.blightedMC.utils.debug.Log;
 
 import java.util.List;
 
@@ -82,12 +83,13 @@ public final class RecipesDirectory {
      * </ul>
      * This method first clears all previously registered recipes.
      */
+    private static final List<RecipeRegistry> REGISTRIES = List.of(
+            new MaterialRecipes()
+    );
+
     public static void initializeRecipes() {
         clearRecipes();
-
-        List<RecipeRegistry> categories = List.of(new MaterialRecipes());
-        for (RecipeRegistry category : categories) {
-            category.defineRecipes();
-        }
+        REGISTRIES.forEach(RecipeRegistry::defineRecipes);
+        Log.success("RecipesDirectory", "Registered " + BlightedRecipe.REGISTERED_RECIPES.size() + " custom recipes.");
     }
 }

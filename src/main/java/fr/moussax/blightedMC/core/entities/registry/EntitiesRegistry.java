@@ -44,14 +44,17 @@ public final class EntitiesRegistry {
             .toList();
     }
 
+    private static final List<BlightedEntity> DEFAULT_ENTITIES = List.of(
+        new TheAncientKnight(),
+        new RevenantHorror(),
+        new BlightedZombie(),
+        new LaserEngineer(),
+        new Dummy()
+    );
+
     public static void initializeEntities() {
         clearEntities();
-
-        registerEntity(new TheAncientKnight());
-        registerEntity(new RevenantHorror());
-        registerEntity(new BlightedZombie());
-        registerEntity(new LaserEngineer());
-        registerEntity(new Dummy());
-        Log.info(REGISTRY_PREFIX, "Registered " + ENTITIES.size() + " entities.");
+        DEFAULT_ENTITIES.forEach(EntitiesRegistry::registerEntity);
+        Log.success("EntitiesRegistry", "Registered " + ENTITIES.size() + " entities.");
     }
 }
