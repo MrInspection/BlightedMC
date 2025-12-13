@@ -94,6 +94,7 @@ public final class BlightedMC extends JavaPlugin {
 
             if (!getDataFolder().exists() && !getDataFolder().mkdirs()) {
                 Log.error("Config", "Unable to create data folder.");
+                throw new IllegalStateException("Failed to create plugin data folder.");
             }
 
             File outputFile = new File(getDataFolder(), destinationPath);
@@ -102,11 +103,7 @@ public final class BlightedMC extends JavaPlugin {
                 in.transferTo(out);
             }
 
-            if (!outputFile.exists()) {
-                Log.error("Config", "Unable to copy the file.");
-            } else {
-                Log.success("Config", "Successfully created the " + resourcePath + " file.");
-            }
+            Log.success("Config", "Successfully created the " + resourcePath + " file.");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

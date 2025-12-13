@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.utils.sound;
 
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +33,7 @@ public record SoundSequence(List<BlightedSound> sounds) {
      *
      * @param sounds sounds to include in the sequence
      */
-    public SoundSequence(BlightedSound... sounds) {
+    public SoundSequence(@NonNull BlightedSound... sounds) {
         this(Arrays.asList(sounds));
     }
 
