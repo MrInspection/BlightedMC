@@ -129,7 +129,7 @@ public class BlightedEntitiesListener implements Listener {
     private boolean shouldPreventDeath(BlightedEntity blighted, double remainingHealth) {
         if (remainingHealth > 0) return false;
         return blighted.attachments.stream()
-                .anyMatch(att -> att.entity() instanceof LivingEntity living && !living.isDead());
+            .anyMatch(att -> att.entity() instanceof LivingEntity living && !living.isDead());
     }
 
     private void scheduleNameTagUpdate(BlightedEntity blighted, LivingEntity entity) {

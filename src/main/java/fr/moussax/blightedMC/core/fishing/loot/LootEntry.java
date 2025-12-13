@@ -116,12 +116,13 @@ public class LootEntry {
     /**
      * Creates the item for the player and sends any catch message.
      *
-     * @param player the player receiving the item
+     * @param blightedPlayer the player receiving the item
      * @return the created ItemStack
      */
-    public ItemStack createItem(BlightedPlayer player) {
+    public ItemStack createItem(BlightedPlayer blightedPlayer) {
+        var player = Objects.requireNonNull(blightedPlayer.getPlayer());
         if (catchMessage != null) {
-            player.getPlayer().sendMessage(catchMessage);
+            player.sendMessage(catchMessage);
         }
         return item;
     }
@@ -129,12 +130,12 @@ public class LootEntry {
     /**
      * Spawns the entity at the given location with the given velocity and sends any catch message.
      *
-     * @param player   the player triggering the spawn
-     * @param location the location to spawn the entity
-     * @param velocity the velocity to apply
+     * @param blightedPlayer the player triggering the spawn
+     * @param location       the location to spawn the entity
+     * @param velocity       the velocity to apply
      * @return the spawned entity, or null if none
      */
-    public LivingEntity spawnEntity(BlightedPlayer player, Location location, Vector velocity) {
+    public LivingEntity spawnEntity(BlightedPlayer blightedPlayer, Location location, Vector velocity) {
         LivingEntity spawned = null;
 
         if (entityType != null) {
@@ -145,10 +146,10 @@ public class LootEntry {
             spawned.setVelocity(velocity);
         }
 
+        var player = Objects.requireNonNull(blightedPlayer.getPlayer());
         if (spawned != null && catchMessage != null) {
-            player.getPlayer().sendMessage(catchMessage);
+            player.sendMessage(catchMessage);
         }
-
         return spawned;
     }
 

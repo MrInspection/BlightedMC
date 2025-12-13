@@ -2,11 +2,11 @@ package fr.moussax.blightedMC.core.entities.registry;
 
 import fr.moussax.blightedMC.core.entities.BlightedEntity;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.gameplay.entities.Dummy;
-import fr.moussax.blightedMC.gameplay.entities.bosses.RevenantHorror;
-import fr.moussax.blightedMC.gameplay.entities.bosses.TheAncientKnight;
-import fr.moussax.blightedMC.gameplay.entities.spawnable.BlightedZombie;
-import fr.moussax.blightedMC.gameplay.entities.spawnable.LaserEngineer;
+import fr.moussax.blightedMC.game.entities.Dummy;
+import fr.moussax.blightedMC.game.entities.bosses.RevenantHorror;
+import fr.moussax.blightedMC.game.entities.bosses.TheAncientKnight;
+import fr.moussax.blightedMC.game.entities.spawnable.BlightedZombie;
+import fr.moussax.blightedMC.game.entities.spawnable.LaserEngineer;
 import fr.moussax.blightedMC.utils.debug.Log;
 
 import java.util.HashMap;
@@ -40,18 +40,21 @@ public final class EntitiesRegistry {
 
     public static List<BlightedEntity> getAllEntities() {
         return ENTITIES.values().stream()
-                .map(BlightedEntity::clone)
-                .toList();
+            .map(BlightedEntity::clone)
+            .toList();
     }
+
+    private static final List<BlightedEntity> DEFAULT_ENTITIES = List.of(
+        new TheAncientKnight(),
+        new RevenantHorror(),
+        new BlightedZombie(),
+        new LaserEngineer(),
+        new Dummy()
+    );
 
     public static void initializeEntities() {
         clearEntities();
-
-        registerEntity(new TheAncientKnight());
-        registerEntity(new RevenantHorror());
-        registerEntity(new BlightedZombie());
-        registerEntity(new LaserEngineer());
-        registerEntity(new Dummy());
-        Log.info(REGISTRY_PREFIX, "Registered " + ENTITIES.size() + " entities.");
+        DEFAULT_ENTITIES.forEach(EntitiesRegistry::registerEntity);
+        Log.success("EntitiesRegistry", "Registered " + ENTITIES.size() + " entities.");
     }
 }

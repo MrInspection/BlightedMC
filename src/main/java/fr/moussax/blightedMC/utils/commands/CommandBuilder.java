@@ -71,7 +71,7 @@ public final class CommandBuilder {
             cmd.setExecutor(executor);
 
             if (commandClass.isAnnotationPresent(CommandArgument.class)
-                    || commandClass.isAnnotationPresent(CommandArguments.class)) {
+                || commandClass.isAnnotationPresent(CommandArguments.class)) {
                 cmd.setTabCompleter(new CommandTabSuggestionBuilder(commandClass));
             }
         } catch (ReflectiveOperationException e) {

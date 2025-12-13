@@ -17,9 +17,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.checkerframework.checker.index.qual.Positive;
+import org.jspecify.annotations.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -58,7 +57,7 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
      * @param rarity   the item rarity
      * @param material the base material
      */
-    public ItemTemplate(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material) {
+    public ItemTemplate(String itemId, ItemType type, ItemRarity rarity, Material material) {
         super(material);
         this.itemId = itemId;
         this.itemType = type;
@@ -74,7 +73,7 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
      * @param material    the base material
      * @param displayName the item display name
      */
-    public ItemTemplate(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Nonnull String displayName) {
+    public ItemTemplate(String itemId, ItemType type, ItemRarity rarity, Material material, String displayName) {
         super(material, rarity.getColorPrefix() + displayName);
         this.itemId = itemId;
         this.itemType = type;
@@ -90,7 +89,7 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
      * @param material the base material
      * @param amount   the item stack size
      */
-    public ItemTemplate(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount) {
+    public ItemTemplate(String itemId, ItemType type, ItemRarity rarity, Material material, int amount) {
         super(material, amount);
         this.itemId = itemId;
         this.itemType = type;
@@ -107,7 +106,7 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
      * @param amount      the stack size
      * @param displayName the item display name
      */
-    public ItemTemplate(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, @Nonnull Material material, @Positive int amount, @Nonnull String displayName) {
+    public ItemTemplate(String itemId, ItemType type, ItemRarity rarity, Material material, int amount, String displayName) {
         super(material, amount, rarity.getColorPrefix() + displayName);
         this.itemId = itemId;
         this.itemType = type;
@@ -122,7 +121,7 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
      * @param rarity    the item rarity
      * @param itemStack the source item stack
      */
-    public ItemTemplate(@Nonnull String itemId, @Nonnull ItemType type, @Nonnull ItemRarity rarity, ItemStack itemStack) {
+    public ItemTemplate(String itemId, ItemType type, ItemRarity rarity, ItemStack itemStack) {
         super(itemStack);
         this.itemId = itemId;
         this.itemType = type;
@@ -157,7 +156,7 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
     }
 
     @Override
-    public ItemTemplate setDisplayName(@Nonnull String displayName) {
+    public ItemTemplate setDisplayName(@NonNull String displayName) {
         String coloredName = itemRarity.getColorPrefix() + displayName;
         super.setDisplayName(coloredName);
         return this;
@@ -241,10 +240,10 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
             }
 
             boolean rightClick = abilityType.isRightClick() &&
-                    (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK);
+                (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK);
 
             boolean leftClick = abilityType.isLeftClick() &&
-                    (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK);
+                (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK);
 
             return rightClick || leftClick;
         }

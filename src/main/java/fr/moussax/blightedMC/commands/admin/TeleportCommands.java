@@ -9,61 +9,15 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 
 public class TeleportCommands implements CommandExecutor {
+
     @Override
-    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
         switch (sender) {
-            case Player player when label.equalsIgnoreCase("tp") -> {
-                if (!enforceAdminPermission(player)) return false;
-
-                if (args.length == 0) {
-                    CommandInfo.sendUsage(player, "Teleport to a player.", "tp", "<player>");
-                    return false;
-                }
-
-                Player target = Bukkit.getPlayerExact(args[0]);
-                if (target == null) {
-                    warn(player, "Unable to find the player §4" + args[0] + "§c.");
-                    return false;
-                }
-
-                if (target.equals(player)) {
-                    warn(player, "You cannot teleport to yourself.");
-                    return false;
-                }
-
-                player.teleport(target.getLocation());
-                inform(player, "Teleporting to §d" + target.getName() + "§7.");
-                return true;
-            }
-            case Player player when label.equalsIgnoreCase("tphere") -> {
-                if (!enforceAdminPermission(player)) return false;
-
-                if (args.length == 0) {
-                    CommandInfo.sendUsage(player, "Teleport a player to you.", "tphere", "<player>");
-                    return false;
-                }
-
-                Player target = Bukkit.getPlayerExact(args[0]);
-                if (target == null) {
-                    warn(player, "Unable to find the player §4" + args[0] + "§c.");
-                    return false;
-                }
-
-                if (target.equals(player)) {
-                    warn(player, "You cannot teleport yourself to yourself.");
-                    return false;
-                }
-
-                target.teleport(player.getLocation());
-                inform(player, "Teleported §d" + target.getName() + "§7 to you.");
-                return true;
-            }
             case Player player when label.equalsIgnoreCase("tpall") -> {
                 if (!enforceAdminPermission(player)) return false;
 
@@ -78,8 +32,8 @@ public class TeleportCommands implements CommandExecutor {
                 if (!enforceAdminPermission(player)) return false;
                 if (args.length < 3) {
                     CommandInfo.sendUsage(player,
-                            "Teleport a player to a specific position. World options: NETHER, OVERWORLD, THE_END",
-                            "tppos", "<x>", "<y>", "<z>", "<player>", "[world]"
+                        "Teleport a player to a specific position. World options: NETHER, OVERWORLD, THE_END",
+                        "tppos", "<x>", "<y>", "<z>", "<player>", "[world]"
                     );
                     return false;
                 }

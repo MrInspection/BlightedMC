@@ -27,7 +27,7 @@ public final class SpawnableEntitiesRegistry {
 
     public static List<SpawnableEntity> getAllEntities() {
         return SPAWNABLE_ENTITIES.values().stream()
-                .map(SpawnableEntity::clone)
-                .toList();
+            .map(SpawnableEntity::clone)
+            .toList();
     }
 }

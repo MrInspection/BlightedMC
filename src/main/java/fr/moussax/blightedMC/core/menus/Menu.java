@@ -6,8 +6,8 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -106,8 +106,9 @@ public abstract class Menu implements InventoryHolder {
     /**
      * {@inheritDoc}
      */
-    @Nonnull
+
     @Override
+    @NonNull
     public Inventory getInventory() {
         return inventory;
     }
@@ -130,7 +131,31 @@ public abstract class Menu implements InventoryHolder {
      * Closes the menu for the current player.
      */
     public void close() {
-        currentPlayer.closeInventory();
+        if (currentPlayer != null) {
+            currentPlayer.closeInventory();
+        }
+    }
+
+    /**
+     * Refreshes the menu for the specified player.
+     *
+     * <p>This method clears all existing slots, rebuilds the menu content
+     * by calling {@link #build(Player)}, updates all items in the inventory,
+     * and forces the player's client to refresh its view of the inventory.</p>
+     *
+     * @param player the player for whom the menu should be refreshed
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    protected void refresh(Player player) {
+        slots.clear();
+        build(player);
+        for (int i = 0; i < size; i++) {
+            MenuSlot slot = slots.get(i);
+            inventory.setItem(i, slot != null ? slot.item : null);
+        }
+        if (player != null) {
+            player.updateInventory();
+        }
     }
 
     /**

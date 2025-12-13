@@ -2,7 +2,6 @@ package fr.moussax.blightedMC.server.database;
 
 import fr.moussax.blightedMC.BlightedMC;
 
-import javax.annotation.Nonnull;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,8 +15,9 @@ public class PlayerDataHandler {
 
     private int gems;
     private double mana;
+    private int forgeFuel;
 
-    public PlayerDataHandler(@Nonnull UUID playerId, @Nonnull String playerName) {
+    public PlayerDataHandler(UUID playerId, String playerName) {
         this.playerId = playerId;
         this.playerName = playerName;
         this.connection = BlightedMC.getInstance().getDatabase().getConnection();
@@ -33,6 +33,10 @@ public class PlayerDataHandler {
         return mana;
     }
 
+    public int getForgeFuel() {
+        return forgeFuel;
+    }
+
     public void setGems(int gems) {
         this.gems = gems;
     }
@@ -41,21 +45,27 @@ public class PlayerDataHandler {
         this.mana = mana;
     }
 
+    public void setForgeFuel(int forgeFuel) {
+        this.forgeFuel = forgeFuel;
+    }
+
     public void save() {
         String query = """
-                INSERT INTO players (uuid, name, gems, mana)
-                VALUES (?, ?, ?, ?)
-                ON CONFLICT(uuid) DO UPDATE SET
-                  name = excluded.name,
-                  gems = excluded.gems,
-                  mana = excluded.mana
-                """;
+            INSERT INTO players (uuid, name, gems, mana, forge_fuel)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(uuid) DO UPDATE SET
+              name = excluded.name,
+              gems = excluded.gems,
+              mana = excluded.mana,
+              forge_fuel = excluded.forge_fuel
+            """;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, playerId.toString());
             statement.setString(2, playerName);
             statement.setInt(3, gems);
             statement.setDouble(4, mana);
+            statement.setInt(5, forgeFuel);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to save player data to database.", e);
@@ -63,7 +73,7 @@ public class PlayerDataHandler {
     }
 
     private void load() {
-        String query = "SELECT name, gems, mana FROM players WHERE uuid = ?";
+        String query = "SELECT name, gems, mana, forge_fuel FROM players WHERE uuid = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, playerId.toString());
@@ -72,6 +82,7 @@ public class PlayerDataHandler {
                 if (resultSet.next()) {
                     this.gems = resultSet.getInt("gems");
                     this.mana = resultSet.getDouble("mana");
+                    this.forgeFuel = resultSet.getInt("forge_fuel");
 
                     String storedName = resultSet.getString("name");
                     if (!storedName.equals(playerName)) {
@@ -80,6 +91,7 @@ public class PlayerDataHandler {
                 } else {
                     this.gems = 0;
                     this.mana = 100.0;
+                    this.forgeFuel = 0;
                     save();
                 }
             }

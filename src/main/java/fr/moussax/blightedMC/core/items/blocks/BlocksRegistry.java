@@ -1,12 +1,17 @@
 package fr.moussax.blightedMC.core.items.blocks;
 
-import fr.moussax.blightedMC.gameplay.blocks.BlightedWorkbench;
+import fr.moussax.blightedMC.game.blocks.BlightedWorkbench;
 import fr.moussax.blightedMC.utils.debug.Log;
 
 import java.util.HashMap;
+import java.util.List;
 
 public final class BlocksRegistry {
     public static final HashMap<String, BlightedBlock> CUSTOM_BLOCKS = new HashMap<>();
+
+    private static List<BlightedBlock> createBlocks() {
+        return List.of(new BlightedWorkbench());
+    }
 
     public static void clearBlocks() {
         CUSTOM_BLOCKS.clear();
@@ -22,8 +27,7 @@ public final class BlocksRegistry {
 
     public static void initializeBlocks() {
         clearBlocks();
-
-        // Register custom placeable blocks here
-        new BlightedWorkbench();
+        createBlocks().forEach(BlocksRegistry::addBlock);
+        Log.success("BlocksRegistry", "Registered " + CUSTOM_BLOCKS.size() + " custom blocks.");
     }
 }

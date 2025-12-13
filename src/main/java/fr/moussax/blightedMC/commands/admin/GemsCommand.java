@@ -9,8 +9,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import javax.annotation.Nonnull;
-
 import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 
 @CommandArgument(suggestions = {"add", "remove", "set", "reset", "resetall", "giveall", "help"})
@@ -18,19 +16,19 @@ import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 public class GemsCommand implements CommandExecutor {
 
     @Override
-    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
-        if (!label.equalsIgnoreCase("gems") || !(sender instanceof Player player)) return false;
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (!(label.equalsIgnoreCase("gems") && sender instanceof Player player)) return false;
         if (!enforceAdminPermission(player)) return false;
 
         if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
             CommandInfo.sendCommands(player, "COMMANDS", "Gems Currency",
-                    CommandInfo.Entry.of("Give gems to a player.", "gems", "add", "<player>", "[amount]"),
-                    CommandInfo.Entry.of("Take gems from a player.", "gems", "remove", "<player>", "[amount]"),
-                    CommandInfo.Entry.of("Set gems for a player.", "gems", "set", "<player>", "[amount]"),
-                    CommandInfo.Entry.of("Reset gems for a player.", "gems", "reset", "<player>"),
-                    CommandInfo.Entry.of("Give gems to everyone.", "gems", "giveall", "[amount]"),
-                    CommandInfo.Entry.of("Reset everyone’s balance.", "gems", "resetall"),
-                    CommandInfo.Entry.of("Prints this help message.", "gems", "help")
+                CommandInfo.Entry.of("Give gems to a player.", "gems", "add", "<player>", "[amount]"),
+                CommandInfo.Entry.of("Take gems from a player.", "gems", "remove", "<player>", "[amount]"),
+                CommandInfo.Entry.of("Set gems for a player.", "gems", "set", "<player>", "[amount]"),
+                CommandInfo.Entry.of("Reset gems for a player.", "gems", "reset", "<player>"),
+                CommandInfo.Entry.of("Give gems to everyone.", "gems", "giveall", "[amount]"),
+                CommandInfo.Entry.of("Reset everyone’s balance.", "gems", "resetall"),
+                CommandInfo.Entry.of("Prints this help message.", "gems", "help")
             );
             return false;
         }
@@ -64,8 +62,8 @@ public class GemsCommand implements CommandExecutor {
     private boolean handleModify(Player sender, String[] args, boolean add) {
         if (args.length < 3) {
             CommandInfo.sendUsage(sender,
-                    (add ? "Add" : "Remove") + " gems to a player.",
-                    "gems", (add ? "add" : "remove"), "<player>", "[amount]"
+                (add ? "Add" : "Remove") + " gems to a player.",
+                "gems", (add ? "add" : "remove"), "<player>", "[amount]"
             );
             return false;
         }
@@ -103,7 +101,7 @@ public class GemsCommand implements CommandExecutor {
     private boolean handleSet(Player sender, String[] args) {
         if (args.length < 3) {
             CommandInfo.sendUsage(sender, "Set gems for a player.",
-                    "gems", "set", "<player>", "[amount]"
+                "gems", "set", "<player>", "[amount]"
             );
             return false;
         }
@@ -131,7 +129,7 @@ public class GemsCommand implements CommandExecutor {
     private boolean handleReset(Player sender, String[] args) {
         if (args.length < 2) {
             CommandInfo.sendUsage(sender, "Reset gems for a player.",
-                    "gems", "reset", "<player>"
+                "gems", "reset", "<player>"
             );
             return false;
         }

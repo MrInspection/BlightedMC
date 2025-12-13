@@ -2,10 +2,11 @@ package fr.moussax.blightedMC.core.items.registry;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
-import fr.moussax.blightedMC.gameplay.armors.HomodeusArmor;
-import fr.moussax.blightedMC.gameplay.armors.RocketBoots;
-import fr.moussax.blightedMC.gameplay.blocks.BlocksDirectory;
-import fr.moussax.blightedMC.gameplay.items.*;
+import fr.moussax.blightedMC.game.armors.HomodeusArmor;
+import fr.moussax.blightedMC.game.armors.RocketBoots;
+import fr.moussax.blightedMC.game.blocks.BlocksDirectory;
+import fr.moussax.blightedMC.game.items.*;
+import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.NamespacedKey;
 
 import java.util.HashMap;
@@ -26,6 +27,18 @@ public final class ItemDirectory {
     private static final Map<String, ItemTemplate> REGISTERED_ITEMS = new HashMap<>();
     public static final NamespacedKey ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "id");
 
+    private static final List<ItemRegistry> REGISTRIES = List.of(
+        new BlightedGemstone(),
+        new BlightedMaterials(),
+        new Bonemerang(),
+        new GlimmeringEye(),
+        new KnightsSword(),
+        new HomodeusArmor(),
+        new RocketBoots(),
+        new BlocksDirectory(),
+        new Hyperion()
+    );
+
     private ItemDirectory() {
     }
 
@@ -35,15 +48,8 @@ public final class ItemDirectory {
      */
     public static void initializeItems() {
         clearItems();
-        new BlightedGemstone().defineItems();
-        new BlightedMaterials().defineItems();
-        new Bonemerang().defineItems();
-        new GlimmeringEye().defineItems();
-        new KnightsSword().defineItems();
-        new HomodeusArmor().defineItems();
-        new RocketBoots().defineItems();
-        new BlocksDirectory().defineItems();
-        new Hyperion().defineItems();
+        REGISTRIES.forEach(ItemRegistry::defineItems);
+        Log.success("ItemDirectory", "Registered " + REGISTERED_ITEMS.size() + " custom items.");
     }
 
     /**

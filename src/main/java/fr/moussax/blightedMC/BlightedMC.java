@@ -1,8 +1,6 @@
 package fr.moussax.blightedMC;
 
-import fr.moussax.blightedMC.core.CoreRegistry;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedMC.moderator.ModManager;
 import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
 import fr.moussax.blightedMC.server.database.PluginDatabase;
@@ -17,14 +15,10 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
-import javax.annotation.Nonnull;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
 
 public final class BlightedMC extends JavaPlugin {
     private static BlightedMC instance;
@@ -36,7 +30,7 @@ public final class BlightedMC extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        getLogger().info("Initializing BlightedMC plugin...");
+        Log.info("Plugin", "Initializing BlightedMC plugin...");
         String config = PluginFiles.CONFIG.getFileName();
         saveResourcesAs(config, config);
 
@@ -48,21 +42,21 @@ public final class BlightedMC extends JavaPlugin {
             yaml.setBeanAccess(BeanAccess.FIELD);
 
             settings = yaml.loadAs(reader, PluginSettings.class);
-            getLogger().info("Successfully loaded the configuration file.");
+            Log.success("Config", "Successfully loaded the configuration file.");
         } catch (IOException e) {
             Log.error(e.getMessage());
         }
 
         try {
             database = new PluginDatabase(getDataFolder().getAbsolutePath() + "/" + PluginFiles.DATABASE.getFileName());
-            getLogger().info("Successfully connected to the database.");
+            Log.success("Database", "Successfully connected to the database.");
         } catch (SQLException e) {
             Log.debug(e.getMessage());
-            getLogger().severe("Unable to connect to the database.");
+            Log.error("Database", "Unable to connect to the database.");
             Bukkit.getPluginManager().disablePlugin(this);
         }
 
-        CoreRegistry.initializeAllRegistries();
+        GlobalRegistry.initializeAllRegistries();
         eventsRegistry = new EventsRegistry();
         eventsRegistry.initializeListeners();
 
@@ -77,7 +71,7 @@ public final class BlightedMC extends JavaPlugin {
         if (eventsRegistry != null && eventsRegistry.getBlockListener() != null) {
             eventsRegistry.getBlockListener().saveData();
         }
-        CoreRegistry.clearAllRegistries();
+        GlobalRegistry.clearAllRegistries();
     }
 
     /**
@@ -92,39 +86,24 @@ public final class BlightedMC extends JavaPlugin {
         });
     }
 
-    private void saveResourcesAs(@Nonnull String resourcePath, String destinationPath) {
+    private void saveResourcesAs(String resourcePath, String destinationPath) {
         if (resourcePath.isEmpty()) throw new IllegalArgumentException("Resource path cannot be null or empty.");
 
-        InputStream in = getResource(resourcePath);
-        if (in == null) throw new IllegalArgumentException("Resource cannot be found at path: " + resourcePath);
+        try (InputStream in = getResource(resourcePath)) {
+            if (in == null) throw new IllegalArgumentException("Resource cannot be found at path: " + resourcePath);
 
-        if (!getDataFolder().exists() && !getDataFolder().mkdirs()) {
-            getLogger().severe("Unable to create data folder.");
-        }
-
-        File outputFile = new File(getDataFolder(), destinationPath);
-
-        try {
-            if (!outputFile.exists()) {
-                getLogger().info("The " + resourcePath + " file does not exist! Creating it...");
-
-                OutputStream out = new FileOutputStream(outputFile);
-                byte[] buffer = new byte[1024];
-                int n;
-
-                while ((n = in.read(buffer)) >= 0) {
-                    out.write(buffer, 0, n);
-                }
-
-                out.close();
-                in.close();
-
-                if (!outputFile.exists()) {
-                    getLogger().severe("Unable to copy the file.");
-                } else {
-                    getLogger().info("Successfully created the " + resourcePath + " file.");
-                }
+            if (!getDataFolder().exists() && !getDataFolder().mkdirs()) {
+                Log.error("Config", "Unable to create data folder.");
+                throw new IllegalStateException("Failed to create plugin data folder.");
             }
+
+            File outputFile = new File(getDataFolder(), destinationPath);
+
+            try (OutputStream out = new FileOutputStream(outputFile)) {
+                in.transferTo(out);
+            }
+
+            Log.success("Config", "Successfully created the " + resourcePath + " file.");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

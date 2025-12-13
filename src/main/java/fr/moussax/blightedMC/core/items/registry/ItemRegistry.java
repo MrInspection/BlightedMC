@@ -2,7 +2,6 @@ package fr.moussax.blightedMC.core.items.registry;
 
 import fr.moussax.blightedMC.core.items.ItemTemplate;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -34,6 +33,7 @@ import java.util.List;
  * }
  * }</pre>
  */
+@FunctionalInterface
 public interface ItemRegistry {
     /**
      * Defines and registers all custom items for this registry implementation.
@@ -48,7 +48,7 @@ public interface ItemRegistry {
      * @param item the item template to register
      * @return a singleton list containing the registered item
      */
-    static List<ItemTemplate> add(@Nonnull ItemTemplate item) {
+    static List<ItemTemplate> add(ItemTemplate item) {
         ItemDirectory.addItem(item);
         return List.of(item);
     }
@@ -59,7 +59,7 @@ public interface ItemRegistry {
      * @param items list of item templates to register
      * @return the same list of registered items
      */
-    static List<ItemTemplate> add(@Nonnull List<ItemTemplate> items) {
+    static List<ItemTemplate> add(List<ItemTemplate> items) {
         items.forEach(ItemDirectory::addItem);
         return items;
     }

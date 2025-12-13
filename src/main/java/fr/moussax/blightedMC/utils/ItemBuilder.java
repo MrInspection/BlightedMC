@@ -8,34 +8,30 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.EquipmentSlotGroup;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
+import org.bukkit.inventory.meta.components.EquippableComponent;
+import org.bukkit.inventory.meta.components.FoodComponent;
+import org.bukkit.inventory.meta.components.JukeboxPlayableComponent;
+import org.bukkit.inventory.meta.components.ToolComponent;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
-import org.checkerframework.checker.index.qual.Positive;
+import org.jspecify.annotations.NonNull;
 
-import javax.annotation.Nonnull;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
- * Utility builder for constructing and customizing {@link ItemStack} instances fluently.
- * <p>
- * This class centralizes item customization in Bukkit/Spigot environments, including:
- * <ul>
- *   <li>Display name, lore, and durability</li>
- *   <li>Enchantments and item flags</li>
- *   <li>Unbreakable state and glint effects</li>
- *   <li>Leather armor coloring and armor trims</li>
- *   <li>Banner patterns and attribute modifiers</li>
- *   <li>Player heads and custom skull textures via base64</li>
- * </ul>
+ * Fluent builder for creating and customizing {@link ItemStack} instances.
+ *
+ * <p>Supports display name, lore, durability, enchantments, item flags,
+ * unbreakable state, glint, leather colors, armor trims, banner patterns,
+ * attributes, and player skulls with custom textures.</p>
  *
  * <p>All methods return {@code this} for fluent chaining.</p>
  *
@@ -68,7 +64,7 @@ public class ItemBuilder {
      * @param material the material type
      * @throws IllegalStateException if the material has no ItemMeta
      */
-    public ItemBuilder(@Nonnull Material material) {
+    public ItemBuilder(@NonNull Material material) {
         this(new ItemStack(material));
     }
 
@@ -80,7 +76,7 @@ public class ItemBuilder {
      * @throws IllegalArgumentException if amount is outside valid range
      * @throws IllegalStateException    if the material has no ItemMeta
      */
-    public ItemBuilder(@Nonnull Material material, @Positive int amount) {
+    public ItemBuilder(Material material, int amount) {
         this(new ItemStack(material, validateAmount(material, amount)));
     }
 
@@ -91,7 +87,7 @@ public class ItemBuilder {
      * @param displayName the display name
      * @throws IllegalStateException if the material has no ItemMeta
      */
-    public ItemBuilder(@Nonnull Material material, @Nonnull String displayName) {
+    public ItemBuilder(@NonNull Material material, @NonNull String displayName) {
         this(new ItemStack(material));
         this.itemMeta.setDisplayName(displayName);
     }
@@ -105,7 +101,7 @@ public class ItemBuilder {
      * @throws IllegalArgumentException if amount is outside valid range
      * @throws IllegalStateException    if the material has no ItemMeta
      */
-    public ItemBuilder(@Nonnull Material material, @Positive int amount, @Nonnull String displayName) {
+    public ItemBuilder(@NonNull Material material, int amount, @NonNull String displayName) {
         this(new ItemStack(material, validateAmount(material, amount)));
         this.itemMeta.setDisplayName(displayName);
     }
@@ -117,7 +113,7 @@ public class ItemBuilder {
      * @param itemStack the source item stack
      * @throws IllegalStateException if the item has no ItemMeta
      */
-    public ItemBuilder(@Nonnull ItemStack itemStack) {
+    public ItemBuilder(@NonNull ItemStack itemStack) {
         this.item = itemStack.clone();
         ItemMeta meta = this.item.getItemMeta();
 
@@ -139,23 +135,44 @@ public class ItemBuilder {
     /**
      * Sets the display name of the item.
      *
-     * @param displayName the display name, supports color codes
+     * @param displayName the display name supports color codes
      * @return this builder
      */
-    public ItemBuilder setDisplayName(@Nonnull String displayName) {
+    public ItemBuilder setDisplayName(@NonNull String displayName) {
         this.itemMeta.setDisplayName(displayName);
         return this;
     }
 
     /**
      * Sets the stack size of the item.
+     * Checks against the custom max stack size component if present,
+     * otherwise falls back to the material's default.
      *
      * @param amount the stack size
      * @return this builder
-     * @throws IllegalArgumentException if amount is outside valid range
+     * @throws IllegalArgumentException if the amount is outside the effective range
      */
-    public ItemBuilder setAmount(@Positive int amount) {
-        item.setAmount(validateAmount(item.getType(), amount));
+    public ItemBuilder setAmount(int amount) {
+        int effectiveMax = itemMeta.hasMaxStackSize()
+            ? itemMeta.getMaxStackSize()
+            : item.getType().getMaxStackSize();
+
+        if (amount < 1 || amount > effectiveMax) {
+            throw new IllegalArgumentException("Amount must be between 1 and " + effectiveMax);
+        }
+
+        item.setAmount(amount);
+        return this;
+    }
+
+    /**
+     * Sets the maximum stack size for this item.
+     *
+     * @param size the maximum number of items that can be stacked together
+     * @return this builder
+     */
+    public ItemBuilder setMaxStackSize(int size) {
+        itemMeta.setMaxStackSize(size);
         return this;
     }
 
@@ -185,6 +202,17 @@ public class ItemBuilder {
     }
 
     /**
+     * Sets the rarity of this item.
+     *
+     * @param rarity the {@link ItemRarity} to assign to the item
+     * @return this builder
+     */
+    public ItemBuilder setRarity(ItemRarity rarity) {
+        itemMeta.setRarity(rarity);
+        return this;
+    }
+
+    /**
      * Sets whether the item is unbreakable.
      *
      * @param unbreakable true to make unbreakable
@@ -196,58 +224,46 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets the skull owner by player UUID.
-     * Automatically converts the item to PLAYER_HEAD.
+     * Enables or disables fire resistance for this item.
      *
-     * @param playerId the player's UUID
+     * @param fireResistant true to make the item fire-resistant, false otherwise
      * @return this builder
      */
-    public ItemBuilder setSkullOwner(@Nonnull UUID playerId) {
-        item.setType(Material.PLAYER_HEAD);
-        this.skullOwnerUUID = playerId;
-        this.base64Texture = null;
+    @SuppressWarnings("deprecation")
+    public ItemBuilder setFireResistant(boolean fireResistant) {
+        itemMeta.setFireResistant(fireResistant);
         return this;
     }
 
     /**
-     * Sets a custom skull texture using base64-encoded texture data.
-     * Automatically converts the item to PLAYER_HEAD.
+     * Adds or removes the glider capability (elytra) from this item.
      *
-     * @param base64Texture the base64-encoded texture JSON
+     * @param glider true to add the glider capability, false to remove it
      * @return this builder
-     * @see <a href="https://minecraft-heads.com/custom-heads">Minecraft Heads – Custom Textures</a>
      */
-    public ItemBuilder setCustomSkullTexture(@Nonnull String base64Texture) {
-        item.setType(Material.PLAYER_HEAD);
-        this.base64Texture = base64Texture;
-        this.skullOwnerUUID = null;
+    public ItemBuilder setGlider(boolean glider) {
+        itemMeta.setGlider(glider);
         return this;
     }
 
     /**
-     * Sets the leather armor color from a hex string.
-     * Only applies to leather armor pieces and horse armor.
+     * Sets whether to hide the entire item tooltip (name, lore, etc.).
      *
-     * @param hex the hex color code with or without "#"
+     * @param hideTooltip true to hide the tooltip completely
      * @return this builder
-     * @throws IllegalArgumentException if a hex format is invalid
      */
-    public ItemBuilder setLeatherColor(@Nonnull String hex) {
-        this.leatherColor = fromHex(hex);
+    public ItemBuilder setHideTooltip(boolean hideTooltip) {
+        itemMeta.setHideTooltip(hideTooltip);
         return this;
     }
 
     /**
-     * Sets the armor trim for the item.
-     * Only applies to armor pieces.
+     * Hide the entire item tooltip (name, lore, etc.).
      *
-     * @param material the trim material
-     * @param pattern  the trim pattern
      * @return this builder
      */
-    public ItemBuilder setArmorTrim(@Nonnull TrimMaterial material, @Nonnull TrimPattern pattern) {
-        this.armorTrim = new ArmorTrim(material, pattern);
-        return this;
+    public ItemBuilder setHideTooltip() {
+        return setHideTooltip(true);
     }
 
     /**
@@ -295,7 +311,7 @@ public class ItemBuilder {
      * @throws IndexOutOfBoundsException if the index is invalid
      */
     @SuppressWarnings("UnusedReturnValue")
-    public ItemBuilder setLore(String line, int index) {
+    public ItemBuilder setLore(int index, String line) {
         List<String> lore = itemMeta.getLore();
         if (lore == null || index < 0 || index >= lore.size()) {
             throw new IndexOutOfBoundsException("Invalid lore index: " + index);
@@ -342,30 +358,24 @@ public class ItemBuilder {
     }
 
     /**
-     * Adds or removes the enchantment glint effect.
-     * Uses Unbreaking I with HIDE_ENCHANTS flag.
+     * Adds or removes the enchantment glint visual effect.
      *
-     * @param add true to add glint, false to remove
+     * @param glint true to add the glint effect, false to remove it
      * @return this builder
      */
-    public ItemBuilder addEnchantmentGlint(boolean add) {
-        if (add) {
-            addEnchantment(Enchantment.UNBREAKING, 1);
-            addItemFlag(ItemFlag.HIDE_ENCHANTS);
-        } else {
-            enchantments.remove(Enchantment.UNBREAKING);
-            itemMeta.removeItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
+    public ItemBuilder setEnchantmentGlint(boolean glint) {
+        itemMeta.setEnchantmentGlintOverride(glint);
         return this;
     }
 
     /**
-     * Adds the enchantment glint effect.
+     * Adds the enchantment glint visual effect.
+     * Convenience method equivalent to {@code setEnchantmentGlint(true)}.
      *
      * @return this builder
      */
     public ItemBuilder addEnchantmentGlint() {
-        return addEnchantmentGlint(true);
+        return setEnchantmentGlint(true);
     }
 
     /**
@@ -393,18 +403,6 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets the banner patterns for the item.
-     * Only applies to banners.
-     *
-     * @param patterns the banner patterns
-     * @return this builder
-     */
-    public ItemBuilder addBannerPatterns(List<Pattern> patterns) {
-        this.bannerPatterns = patterns;
-        return this;
-    }
-
-    /**
      * Adds or replaces an attribute modifier for the specified attribute.
      * Removes existing modifiers for the attribute before adding the new one.
      *
@@ -412,7 +410,7 @@ public class ItemBuilder {
      * @param modifier  the attribute modifier
      * @return this builder
      */
-    public ItemBuilder addAttributeModifier(@Nonnull Attribute attribute, @Nonnull AttributeModifier modifier) {
+    public ItemBuilder addAttributeModifier(Attribute attribute, AttributeModifier modifier) {
         if (itemMeta.getAttributeModifiers() != null) {
             Collection<AttributeModifier> existingAttributeModifier = itemMeta.getAttributeModifiers().get(attribute);
             for (AttributeModifier oldAttributeModifier : new ArrayList<>(existingAttributeModifier)) {
@@ -434,13 +432,158 @@ public class ItemBuilder {
      * @return this builder
      */
     @SuppressWarnings({"UnstableApiUsage", "UnusedReturnValue"})
-    public ItemBuilder addAttributeModifier(@Nonnull Attribute attribute,
-                                            double amount, @Nonnull AttributeModifier.Operation operation,
-                                            @Nonnull EquipmentSlotGroup slotGroup) {
+    public ItemBuilder addAttributeModifier(Attribute attribute,
+                                            double amount, AttributeModifier.Operation operation,
+                                            EquipmentSlotGroup slotGroup) {
 
         NamespacedKey attributeKey = new NamespacedKey(BlightedMC.getInstance(), UUID.randomUUID().toString());
         AttributeModifier modifier = new AttributeModifier(attributeKey, amount, operation, slotGroup);
         return addAttributeModifier(attribute, modifier);
+    }
+
+    /**
+     * Sets the leather armor color from a hex string.
+     * Only applies to leather armor pieces and horse armor.
+     *
+     * @param hex the hex color code with or without "#"
+     * @return this builder
+     * @throws IllegalArgumentException if a hex format is invalid
+     */
+    public ItemBuilder setLeatherColor(@NonNull String hex) {
+        this.leatherColor = fromHex(hex);
+        return this;
+    }
+
+    /**
+     * Sets the armor trim for the item.
+     * Only applies to armor pieces.
+     *
+     * @param material the trim material
+     * @param pattern  the trim pattern
+     * @return this builder
+     */
+    public ItemBuilder setArmorTrim(@NonNull TrimMaterial material, @NonNull TrimPattern pattern) {
+        this.armorTrim = new ArmorTrim(material, pattern);
+        return this;
+    }
+
+    /**
+     * Sets the skull owner by player UUID.
+     * Automatically converts the item to PLAYER_HEAD.
+     *
+     * @param playerId the player's UUID
+     * @return this builder
+     */
+    public ItemBuilder setSkullOwner(@NonNull UUID playerId) {
+        item.setType(Material.PLAYER_HEAD);
+        this.skullOwnerUUID = playerId;
+        this.base64Texture = null;
+        return this;
+    }
+
+    /**
+     * Sets a custom skull texture using base64-encoded texture data.
+     * Automatically converts the item to PLAYER_HEAD.
+     *
+     * @param base64Texture the base64-encoded texture JSON
+     * @return this builder
+     * @see <a href="https://minecraft-heads.com/custom-heads">Minecraft Heads – Custom Textures</a>
+     */
+    public ItemBuilder setCustomSkullTexture(@NonNull String base64Texture) {
+        item.setType(Material.PLAYER_HEAD);
+        this.base64Texture = base64Texture;
+        this.skullOwnerUUID = null;
+        return this;
+    }
+
+    /**
+     * Sets the banner patterns for the item.
+     * Only applies to banners.
+     *
+     * @param patterns the banner patterns
+     * @return this builder
+     */
+    public ItemBuilder addBannerPatterns(List<Pattern> patterns) {
+        this.bannerPatterns = patterns;
+        return this;
+    }
+
+    /**
+     * Configures the {@link EquippableComponent} of this item.
+     * Allows direct modification of equippable properties such as slot, dispensability,
+     * or equip sound via the provided consumer.
+     *
+     * @param consumer modifier applied to the equippable component
+     * @return this builder
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    public ItemBuilder editEquippable(Consumer<EquippableComponent> consumer) {
+        EquippableComponent equippable = itemMeta.getEquippable();
+        consumer.accept(equippable);
+        itemMeta.setEquippable(equippable);
+        return this;
+    }
+
+    /**
+     * Adds a non-equippable configuration to this item.
+     * This prevents the item from being equipped in armor slots or via dispensers.
+     *
+     * @return this builder
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    public ItemBuilder addNotEquippable() {
+        return editEquippable(equippable -> {
+            equippable.setSlot(EquipmentSlot.HAND);
+            equippable.setDispensable(false);
+        });
+    }
+
+    /**
+     * Configures the {@link JukeboxPlayableComponent} of this item.
+     * Allows making the item playable in a jukebox and customizing its playback
+     * behavior via the provided consumer.
+     *
+     * @param consumer modifier applied to the jukebox-playable component
+     * @return this builder
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    public ItemBuilder editJukeboxPlayable(Consumer<JukeboxPlayableComponent> consumer) {
+        JukeboxPlayableComponent jukebox = itemMeta.getJukeboxPlayable();
+        consumer.accept(jukebox);
+        itemMeta.setJukeboxPlayable(jukebox);
+        return this;
+    }
+
+    /**
+     * Configures the {@link FoodComponent} of this item.
+     * Allows customization of food-related properties such as nutrition,
+     * saturation, or effects via the provided consumer.
+     *
+     * @param consumer modifier applied to the food component
+     * @return this builder
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    public ItemBuilder editFood(Consumer<FoodComponent> consumer) {
+        FoodComponent food = itemMeta.getFood();
+        consumer.accept(food);
+        itemMeta.setFood(food);
+        return this;
+    }
+
+    /**
+     * Configures the {@link ToolComponent} of this item.
+     * Allows customization of tool-related properties such as mining speed,
+     * correct blocks, or damage behavior via the provided consumer.
+     *
+     * @param consumer modifier applied to the tool component
+     * @return this builder
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    public ItemBuilder editTool(Consumer<ToolComponent> consumer) {
+        ToolComponent tool = itemMeta.getTool();
+        consumer.accept(tool);
+        itemMeta.setTool(tool);
+        return this;
     }
 
     /**
@@ -449,42 +592,12 @@ public class ItemBuilder {
      * @return customized item stack
      */
     public ItemStack toItemStack() {
-        if (!enchantments.isEmpty()) {
-            enchantments.forEach((enchantment, level) -> itemMeta.addEnchant(enchantment, level, true));
-        }
-
-        if (!attributes.isEmpty()) {
-            attributes.forEach((attr, mods) -> {
-                if (itemMeta.getAttributeModifiers() != null) {
-                    Collection<AttributeModifier> existingAttributeModifier = itemMeta.getAttributeModifiers().get(attr);
-                    for (AttributeModifier oldAttributeModifier : new ArrayList<>(existingAttributeModifier)) {
-                        itemMeta.removeAttributeModifier(attr, oldAttributeModifier);
-                    }
-                }
-                mods.forEach(mod -> itemMeta.addAttributeModifier(attr, mod));
-            });
-        }
-
-        if (bannerPatterns != null && itemMeta instanceof BannerMeta bannerMeta) {
-            bannerMeta.setPatterns(bannerPatterns);
-            item.setItemMeta(bannerMeta);
-        }
-
-        if (isLeatherDyeable(item.getType()) && itemMeta instanceof LeatherArmorMeta lam && leatherColor != null) {
-            lam.setColor(leatherColor);
-        }
-
-        if (armorTrim != null && itemMeta instanceof ArmorMeta armorMeta) {
-            armorMeta.setTrim(armorTrim);
-        }
-
-        if (item.getType() == Material.PLAYER_HEAD && itemMeta instanceof SkullMeta skullMeta) {
-            if (skullOwnerUUID != null) {
-                applyOwner(skullMeta, skullOwnerUUID);
-            } else if (base64Texture != null) {
-                applyTexture(skullMeta, base64Texture);
-            }
-        }
+        applyEnchantments();
+        applyAttributes();
+        applyBannerPatterns();
+        applyArmorTrim();
+        applyLeatherColor();
+        applySkullProperties();
 
         item.setItemMeta(itemMeta);
         return item;
@@ -535,13 +648,66 @@ public class ItemBuilder {
         return Collections.unmodifiableList(bannerPatterns);
     }
 
+    // ========================================
+    // Private Helper Methods
+    // ========================================
+
+    private void applyEnchantments() {
+        if (!enchantments.isEmpty()) {
+            enchantments.forEach((enchantment, level) -> itemMeta.addEnchant(enchantment, level, true));
+        }
+    }
+
+    private void applyAttributes() {
+        if (!attributes.isEmpty()) {
+            attributes.forEach((attr, mods) -> {
+                if (itemMeta.getAttributeModifiers() != null) {
+                    Collection<AttributeModifier> existingAttributeModifier = itemMeta.getAttributeModifiers().get(attr);
+                    for (AttributeModifier oldAttributeModifier : new ArrayList<>(existingAttributeModifier)) {
+                        itemMeta.removeAttributeModifier(attr, oldAttributeModifier);
+                    }
+                }
+                mods.forEach(mod -> itemMeta.addAttributeModifier(attr, mod));
+            });
+        }
+    }
+
+    private void applyBannerPatterns() {
+        if (bannerPatterns != null && itemMeta instanceof BannerMeta bannerMeta) {
+            bannerMeta.setPatterns(bannerPatterns);
+            item.setItemMeta(bannerMeta);
+        }
+    }
+
+    private void applyArmorTrim() {
+        if (armorTrim != null && itemMeta instanceof ArmorMeta armorMeta) {
+            armorMeta.setTrim(armorTrim);
+        }
+    }
+
+    private void applyLeatherColor() {
+        if (isLeatherDyeable(item.getType()) && itemMeta instanceof LeatherArmorMeta lam && leatherColor != null) {
+            lam.setColor(leatherColor);
+        }
+    }
+
+    private void applySkullProperties() {
+        if (item.getType() == Material.PLAYER_HEAD && itemMeta instanceof SkullMeta skullMeta) {
+            if (skullOwnerUUID != null) {
+                applyOwner(skullMeta, skullOwnerUUID);
+            } else if (base64Texture != null) {
+                applyTexture(skullMeta, base64Texture);
+            }
+        }
+    }
+
     /**
      * Applies the skull owner to the provided SkullMeta.
      *
      * @param meta the skull meta to modify
      * @param uuid the player's UUID
      */
-    private static void applyOwner(@Nonnull SkullMeta meta, @Nonnull UUID uuid) {
+    private static void applyOwner(SkullMeta meta, UUID uuid) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(uuid);
         meta.setOwningPlayer(target);
     }
@@ -554,11 +720,11 @@ public class ItemBuilder {
      * @param base64Texture the base64-encoded texture JSON
      * @throws IllegalArgumentException if the texture URL is invalid
      */
-    private static void applyTexture(@Nonnull SkullMeta meta, @Nonnull String base64Texture) {
+    private static void applyTexture(SkullMeta meta, String base64Texture) {
         String json = new String(Base64.getDecoder().decode(base64Texture), StandardCharsets.UTF_8);
         JsonObject object = JsonParser.parseString(json)
-                .getAsJsonObject().getAsJsonObject("textures")
-                .getAsJsonObject("SKIN");
+            .getAsJsonObject().getAsJsonObject("textures")
+            .getAsJsonObject("SKIN");
 
         String url = object.get("url").getAsString();
 
@@ -583,7 +749,7 @@ public class ItemBuilder {
      * @return Bukkit Color
      * @throws IllegalArgumentException if the hex is invalid
      */
-    private static Color fromHex(@Nonnull String hex) {
+    private static Color fromHex(String hex) {
         if (!hex.matches("^#?[0-9a-fA-F]{6}$")) {
             throw new IllegalArgumentException("Invalid hex color: " + hex);
         }

@@ -25,24 +25,24 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jspecify.annotations.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Supplier;
 
 /**
  * Base class for custom plugin-managed entities ("blighted" entities).
  * <p>
- * Encapsulates configuration and runtime behaviour for entities controlled by the plugin:
+ * Encapsulates configuration and runtime behavior for entities controlled by the plugin:
  * identity, attributes, equipment, display (name tag / boss bar), loot, immunity rules,
- * lifecycle-scheduled tasks and attachments. Handles spawning, attaching to existing entities,
- * cloning and basic damage/kill operations.
+ * lifecycle-scheduled tasks, and attachments. Handles spawning, attaching to existing entities,
+ * cloning, and basic damage/kill operations.
  *
  * <p>Typical responsibilities:
  * <ul>
  *   <li>Create and configure an underlying {@link LivingEntity} when {@link #spawn(Location)} is invoked.</li>
  *   <li>Persist an entity identifier in the entity's {@link PersistentDataContainer}.</li>
- *   <li>Apply configured attributes and equipment, and manage display (name tag, boss bar).</li>
+ *   <li>Apply configured attributes and equipment and manage display (name tag, boss bar).</li>
  *   <li>Provide utility for scheduled lifecycle tasks and entity attachments.</li>
  * </ul>
  *
@@ -51,7 +51,7 @@ import java.util.function.Supplier;
 public abstract class BlightedEntity implements Cloneable {
     private static final String ENTITY_ID_KEY = "entityId";
     private static final Map<Entity, EntityAttachment> ENTITY_ATTACHMENTS =
-            Collections.synchronizedMap(new WeakHashMap<>());
+        Collections.synchronizedMap(new WeakHashMap<>());
 
     protected String entityId;
     protected String name;
@@ -85,13 +85,13 @@ public abstract class BlightedEntity implements Cloneable {
     private boolean runtimeInitialized = false;
 
     /**
-     * Constructs a basic BlightedEntity with name, health and type.
+     * Constructs a basic BlightedEntity with name, health, and type.
      *
      * @param name       the display name
      * @param maxHealth  maximum health value
      * @param entityType underlying Bukkit entity type
      */
-    public BlightedEntity(@Nonnull String name, int maxHealth, EntityType entityType) {
+    public BlightedEntity(@NonNull String name, int maxHealth, EntityType entityType) {
         this(name, maxHealth, 1, 0, entityType);
     }
 
@@ -103,7 +103,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param damage     base damage value
      * @param entityType underlying Bukkit entity type
      */
-    public BlightedEntity(@Nonnull String name, int maxHealth, int damage, EntityType entityType) {
+    public BlightedEntity(String name, int maxHealth, int damage, EntityType entityType) {
         this(name, maxHealth, damage, 0, entityType);
     }
 
@@ -128,7 +128,7 @@ public abstract class BlightedEntity implements Cloneable {
      * Spawns the configured entity at the specified location.
      * <p>
      * The method initializes immunity rules, creates the entity, persists the identifier,
-     * applies attributes/equipment/display and registers listeners and runtime tasks.
+     * applies attributes/equipment/display, and registers listeners and runtime tasks.
      *
      * @param location the spawn location
      * @return the spawned {@link LivingEntity}
@@ -176,7 +176,7 @@ public abstract class BlightedEntity implements Cloneable {
     /**
      * Applies configured attributes to the spawned entity and sets initial health.
      * <p>
-     * Sets MAX_HEALTH, ATTACK_DAMAGE and ARMOR attributes and marks entity persistent.
+     * Sets MAX_HEALTH, ATTACK_DAMAGE, and ARMOR attributes and marks entity persistent.
      */
     private void configureAttributes() {
         setAttribute(Attribute.MAX_HEALTH, maxHealth);
@@ -221,7 +221,7 @@ public abstract class BlightedEntity implements Cloneable {
     /**
      * Immediately kills the underlying entity and cancels lifecycle tasks.
      * <p>
-     * Removes boss bar and attachments prior to setting health to zero.
+     * Removes boss bar and attachments before setting health to zero.
      */
     public void kill() {
         if (isNotAlive()) return;
@@ -344,7 +344,7 @@ public abstract class BlightedEntity implements Cloneable {
 
     /**
      * Updates the custom name tag of the entity and its boss bar progress/title.
-     * Safe to call when entity is null (no-op).
+     * Safe to call when an entity is null (no-op).
      */
     public void updateNameTag() {
         if (entity != null) {
@@ -630,7 +630,7 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     /**
-     * Sets the name tag display type used for formatting and boss behaviour.
+     * Sets the name tag display type used for formatting and boss behavior.
      *
      * @param nameTagType the name tag type to use
      */
@@ -687,7 +687,7 @@ public abstract class BlightedEntity implements Cloneable {
      * Produces a deep-ish clone of this {@link BlightedEntity} instance.
      * <p>
      * The returned clone has entity/bossbar/runtime state reset and copies of
-     * attributes, attachments list, armor and hand items.
+     * attributes, attachments list, armor, and hand items.
      *
      * @return cloned entity configuration
      */

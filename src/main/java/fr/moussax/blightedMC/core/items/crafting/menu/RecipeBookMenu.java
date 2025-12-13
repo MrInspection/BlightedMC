@@ -17,22 +17,22 @@ import java.util.List;
 public class RecipeBookMenu {
 
     private static final int[] RECIPE_SLOTS = {
-            10, 11, 12, 13, 14, 15, 16,
-            19, 20, 21, 22, 23, 24, 25,
-            28, 29, 30, 31, 32, 33, 34,
-            37, 38, 40, 41, 42, 43
+        10, 11, 12, 13, 14, 15, 16,
+        19, 20, 21, 22, 23, 24, 25,
+        28, 29, 30, 31, 32, 33, 34,
+        37, 38, 40, 41, 42, 43
     };
 
     private static final int[] FILLER_SLOTS = {
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-            17, 18, 26, 27, 35, 36, 44,
-            45, 46, 47, 51, 52, 53
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        17, 18, 26, 27, 35, 36, 44,
+        45, 46, 47, 51, 52, 53
     };
 
     private static final int[] CRAFTING_GRID_SLOTS = {
-            10, 11, 12,
-            19, 20, 21,
-            28, 29, 30
+        10, 11, 12,
+        19, 20, 21,
+        28, 29, 30
     };
 
     private static final int WORKBENCH_SLOT = 23;
@@ -104,7 +104,7 @@ public class RecipeBookMenu {
             for (int i = start; i < end && recipeIndex < RECIPE_SLOTS.length; i++) {
                 final int itemIndex = i;
                 setItem(RECIPE_SLOTS[recipeIndex], getItem(player, itemIndex), MenuItemInteraction.ANY_CLICK,
-                        (p, t) -> onItemClick(p, itemIndex, t));
+                    (p, t) -> onItemClick(p, itemIndex, t));
                 recipeIndex++;
             }
         }
@@ -175,8 +175,8 @@ public class RecipeBookMenu {
             }
 
             setItem(WORKBENCH_SLOT, new ItemBuilder(Material.ENCHANTING_TABLE, "§dBlighted Workbench")
-                    .addLore("§7Craft this recipe by using a", "§7blighted workbench.")
-                    .toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                .addLore("§7Craft this recipe by using a", "§7blighted workbench.")
+                .toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
             });
 
             ItemStack resultItem = recipe.getResult().toItemStack().clone();
@@ -255,9 +255,9 @@ public class RecipeBookMenu {
 
         private void setupNavigation() {
             setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK,
-                    (p, t) -> MenuManager.openMenu(previousMenu, p));
+                (p, t) -> MenuManager.openMenu(previousMenu, p));
             setItem(CLOSE_BUTTON_SLOT, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK,
-                    (p, t) -> close());
+                (p, t) -> close());
             fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
         }
     }

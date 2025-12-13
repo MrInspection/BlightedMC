@@ -77,10 +77,10 @@ public enum AbilityType {
             if (this.isSneak() && !isSneaking) return false;
 
             if (!this.isSneak() && isSneaking
-                    && this != SNEAK
-                    && this != SNEAK_RIGHT_CLICK
-                    && this != SNEAK_LEFT_CLICK
-                    && this != SNEAK_LEFT_OR_RIGHT_CLICK)
+                && this != SNEAK
+                && this != SNEAK_RIGHT_CLICK
+                && this != SNEAK_LEFT_CLICK
+                && this != SNEAK_LEFT_OR_RIGHT_CLICK)
                 return false;
 
             if (this.isRightClick() && (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK))
@@ -91,11 +91,11 @@ public enum AbilityType {
 
             // Special case for SNEAK only (no click)
             if (this == SNEAK && isSneaking
-                    && (action == Action.PHYSICAL
-                    || action == Action.RIGHT_CLICK_AIR
-                    || action == Action.RIGHT_CLICK_BLOCK
-                    || action == Action.LEFT_CLICK_AIR
-                    || action == Action.LEFT_CLICK_BLOCK))
+                && (action == Action.PHYSICAL
+                || action == Action.RIGHT_CLICK_AIR
+                || action == Action.RIGHT_CLICK_BLOCK
+                || action == Action.LEFT_CLICK_AIR
+                || action == Action.LEFT_CLICK_BLOCK))
                 return true;
 
             // Sneak + click combinations

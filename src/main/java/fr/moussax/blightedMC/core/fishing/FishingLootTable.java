@@ -9,6 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
@@ -65,14 +66,16 @@ public class FishingLootTable {
     /**
      * Creates a new loot context for the specified player.
      *
-     * @param player the player for which to create the context
+     * @param blightedPlayer the player for which to create the context
      * @return a new LootContext
      */
-    private LootContext createContext(BlightedPlayer player) {
+    private LootContext createContext(BlightedPlayer blightedPlayer) {
+        var player = Objects.requireNonNull(blightedPlayer.getPlayer());
+
         return new LootContext(
-                player,
-                player.getPlayer().getLocation().getBlock().getBiome(),
-                player.getPlayer().getWorld().getEnvironment()
+            blightedPlayer,
+            player.getLocation().getBlock().getBiome(),
+            player.getWorld().getEnvironment()
         );
     }
 

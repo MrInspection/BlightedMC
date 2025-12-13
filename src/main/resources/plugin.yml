@@ -13,8 +13,6 @@ commands:
     description: General testing command
   gems:
     description: Manage the gems currency system
-  laser:
-    description: BlightedMC test command for lazer ability
   craft:
     description: Open the BlightedMC custom crafting table
   loop:
@@ -27,13 +25,11 @@ commands:
     description: Open or give yourself a custom item
   god:
     description: Toggle god mode for yourself or another player
-  tp:
-    description: Teleport to a player or location
-  tphere:
-    description: Teleport another player to you
   tpall:
     description: Teleport all players to you
   tppos:
     description: Teleport to a position
   fly:
     description: Toggle fly mode for yourself or another player
+  forge:
+    description: Forge command

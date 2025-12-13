@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC;
 
 import fr.moussax.blightedMC.commands.CraftCommand;
+import fr.moussax.blightedMC.commands.ForgeCommand;
 import fr.moussax.blightedMC.commands.admin.*;
 import fr.moussax.blightedMC.commands.testing.TestCommand;
 import fr.moussax.blightedMC.utils.commands.CommandBuilder;
@@ -16,6 +17,7 @@ public final class CommandsRegistry {
 
     public static void registerAll() {
         CommandBuilder.register("craft", new CraftCommand());
+        CommandBuilder.register("forge", new ForgeCommand());
         CommandBuilder.register("test", new TestCommand());
 
         // Admin Commands
@@ -27,8 +29,6 @@ public final class CommandsRegistry {
         CommandBuilder.register("god", new GodCommand());
         CommandBuilder.register("kaboom", new KaboomCommand());
         CommandBuilder.register("loop", new LoopCommand());
-        CommandBuilder.register("tp", new TeleportCommands());
-        CommandBuilder.register("tphere", new TeleportCommands());
         CommandBuilder.register("tpall", new TeleportCommands());
         CommandBuilder.register("tppos", new TeleportCommands());
         CommandBuilder.register("fly", new FlyCommand());

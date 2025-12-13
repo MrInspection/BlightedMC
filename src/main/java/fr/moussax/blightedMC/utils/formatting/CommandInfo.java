@@ -1,8 +1,8 @@
 package fr.moussax.blightedMC.utils.formatting;
 
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +42,7 @@ public final class CommandInfo {
      * @param tokens      command tokens (base command followed by arguments)
      * @param description human-readable description of the command
      */
-    public record Entry(@Nonnull List<String> tokens, @Nonnull String description) {
+    public record Entry(List<String> tokens, String description) {
         public Entry {
             if (tokens.isEmpty()) {
                 throw new IllegalArgumentException("Command tokens cannot be empty");
@@ -56,7 +56,7 @@ public final class CommandInfo {
          * @param tokens      command tokens (first token is the base command)
          * @return new command entry
          */
-        public static Entry of(@Nonnull String description, @Nonnull String... tokens) {
+        public static Entry of(String description, String... tokens) {
             return new Entry(Arrays.asList(tokens), description);
         }
     }
@@ -69,11 +69,11 @@ public final class CommandInfo {
      * @param entries     command entries to display
      * @return list of formatted message lines
      */
-    @Nonnull
+
     public static List<String> buildHelpLines(
-            @Nonnull String title,
-            @Nonnull String description,
-            @Nonnull List<Entry> entries
+        String title,
+        String description,
+        List<Entry> entries
     ) {
         List<String> lines = new ArrayList<>();
         lines.add(" ");
@@ -99,8 +99,8 @@ public final class CommandInfo {
      * @param description command description
      * @return list of formatted message lines
      */
-    @Nonnull
-    public static List<String> buildCommandUsageHelp(@Nonnull String description, @Nonnull String... usage) {
+
+    public static List<String> buildCommandUsageHelp(String description, String... usage) {
         if (usage.length == 0) {
             throw new IllegalArgumentException("Usage tokens cannot be null or empty");
         }
@@ -131,10 +131,10 @@ public final class CommandInfo {
      * @param entries     command entries to display
      */
     public static void sendCommands(
-            @Nonnull Player player,
-            @Nonnull String title,
-            @Nonnull String description,
-            @Nonnull List<Entry> entries
+        Player player,
+        String title,
+        String description,
+        List<Entry> entries
     ) {
         buildHelpLines(title, description, entries).forEach(player::sendMessage);
     }
@@ -148,10 +148,10 @@ public final class CommandInfo {
      * @param entries     command entries to display
      */
     public static void sendCommands(
-            @Nonnull Player player,
-            @Nonnull String title,
-            @Nonnull String description,
-            @Nonnull Entry... entries
+        Player player,
+        String title,
+        String description,
+        Entry... entries
     ) {
         sendCommands(player, title, description, Arrays.asList(entries));
     }
@@ -164,9 +164,9 @@ public final class CommandInfo {
      * @param usage       command usage tokens (base command followed by arguments)
      */
     public static void sendUsage(
-            @Nonnull Player player,
-            @Nonnull String description,
-            @Nonnull String... usage
+        Player player,
+        @NonNull String description,
+        @NonNull String... usage
     ) {
         if (usage.length == 0) {
             throw new IllegalArgumentException("Usage tokens cannot be null or empty");
@@ -174,7 +174,7 @@ public final class CommandInfo {
         buildCommandUsageHelp(description, usage).forEach(player::sendMessage);
     }
 
-    private static String formatCommandEntry(@Nonnull Entry entry) {
+    private static String formatCommandEntry(@NonNull Entry entry) {
         StringBuilder builder = new StringBuilder(BULLET);
         builder.append(INNER_COLOR).append(stripColorCodes(entry.tokens.getFirst()));
 
@@ -186,11 +186,11 @@ public final class CommandInfo {
         return builder.toString();
     }
 
-    private static String stripColorCodes(@Nonnull String token) {
+    private static String stripColorCodes(@NonNull String token) {
         return token.replaceAll("§.", "");
     }
 
-    private static String formatToken(@Nonnull String token) {
+    private static String formatToken(@NonNull String token) {
         if (token.startsWith("<") && token.endsWith(">")) {
             return formatParameter(token, '<', '>');
         }
@@ -200,7 +200,7 @@ public final class CommandInfo {
         return PARAM_COLOR + stripColorCodes(token);
     }
 
-    private static String formatParameter(@Nonnull String token, char open, char close) {
+    private static String formatParameter(@NonNull String token, char open, char close) {
         String inner = token.substring(1, token.length() - 1);
         return PARAM_COLOR + open + INNER_COLOR + inner + PARAM_COLOR + close;
     }

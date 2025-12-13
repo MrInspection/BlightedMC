@@ -19,7 +19,7 @@ public class SpawnableEntitiesListener implements Listener {
     public void onCreatureSpawn(CreatureSpawnEvent event) {
         CreatureSpawnEvent.SpawnReason reason = event.getSpawnReason();
         if (reason != CreatureSpawnEvent.SpawnReason.NATURAL &&
-                reason != CreatureSpawnEvent.SpawnReason.REINFORCEMENTS) {
+            reason != CreatureSpawnEvent.SpawnReason.REINFORCEMENTS) {
             return;
         }
 

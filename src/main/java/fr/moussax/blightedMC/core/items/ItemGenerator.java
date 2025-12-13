@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
  * Implementations define how a specific item should be instantiated and configured,
  * typically used by item templates or factories to create consistent custom items.
  */
+@FunctionalInterface
 public interface ItemGenerator {
 
     /**

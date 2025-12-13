@@ -101,9 +101,9 @@ public final class AbilityExecutor {
         blightedPlayer.addCooldown(newEntry);
 
         Bukkit.getScheduler().runTaskLater(
-                BlightedMC.getInstance(),
-                () -> blightedPlayer.removeCooldown(newEntry),
-                cooldownSeconds * 20L
+            BlightedMC.getInstance(),
+            () -> blightedPlayer.removeCooldown(newEntry),
+            cooldownSeconds * 20L
         );
     }
 }

@@ -347,7 +347,7 @@ public class CraftingTableListener implements Listener {
         if (cursorItem == null || cursorItem.getType() == Material.AIR) return true;
 
         return cursorItem.isSimilar(resultItem)
-                && cursorItem.getAmount() + resultItem.getAmount() <= cursorItem.getMaxStackSize();
+            && cursorItem.getAmount() + resultItem.getAmount() <= cursorItem.getMaxStackSize();
     }
 
     private boolean isShiftClick(ClickType clickType) {
@@ -356,27 +356,27 @@ public class CraftingTableListener implements Listener {
 
     private void dropLeftoverItems(Player player, Map<Integer, ItemStack> leftoverItems) {
         leftoverItems.values().forEach(item ->
-                player.getWorld().dropItemNaturally(player.getLocation(), item)
+            player.getWorld().dropItemNaturally(player.getLocation(), item)
         );
     }
 
     private void openRecipeBook(Player player) {
         MenuManager.openMenu(
-                new RecipeBookMenu.RecipeListMenu(
-                        new Menu("Crafting Table", 54) {
-                            @Override
-                            public void build(Player p) {
-                            }
-                        }
-                ), player
+            new RecipeBookMenu.RecipeListMenu(
+                new Menu("Crafting Table", 54) {
+                    @Override
+                    public void build(Player p) {
+                    }
+                }
+            ), player
         );
     }
 
     private void scheduleOutputUpdate(Inventory inventory) {
         Bukkit.getScheduler().runTaskLater(
-                BlightedMC.getInstance(),
-                () -> updateOutput(inventory),
-                SCHEDULED_UPDATE_DELAY
+            BlightedMC.getInstance(),
+            () -> updateOutput(inventory),
+            SCHEDULED_UPDATE_DELAY
         );
     }
 

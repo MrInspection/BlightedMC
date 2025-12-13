@@ -42,7 +42,7 @@ public abstract class SpawnableEntity extends BlightedEntity {
      * Constructs a new spawnable entity.
      *
      * @param entityId    unique identifier for this entity type
-     * @param name        display name of the entity
+     * @param name        display the name of the entity
      * @param maxHealth   maximum health value
      * @param entityType  Bukkit {@link EntityType} of the underlying entity
      * @param spawnChance probability of spawning (0.0–1.0)

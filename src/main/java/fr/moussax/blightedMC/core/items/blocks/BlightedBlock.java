@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.core.items.blocks;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
-import fr.moussax.blightedMC.server.BlightedFiles;
+import fr.moussax.blightedMC.server.PluginFiles;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -18,8 +18,8 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jspecify.annotations.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -30,10 +30,9 @@ public abstract class BlightedBlock {
     protected final Material material;
     protected final ItemTemplate itemTemplate;
 
-    public BlightedBlock(@Nonnull Material material, ItemTemplate itemTemplate) {
+    public BlightedBlock(@NonNull Material material, @NonNull ItemTemplate itemTemplate) {
         this.material = material;
         this.itemTemplate = itemTemplate;
-        BlocksRegistry.addBlock(this);
     }
 
     public void onPlace(BlockPlaceEvent event) {
@@ -56,7 +55,7 @@ public abstract class BlightedBlock {
         private final YamlConfiguration dataConfig;
 
         public BlightedBlockListener() {
-            dataFile = BlightedFiles.CUSTOM_BLOCKS.getFile();
+            dataFile = PluginFiles.CUSTOM_BLOCKS.getFile();
             dataConfig = YamlConfiguration.loadConfiguration(dataFile);
             loadData();
         }
@@ -204,9 +203,9 @@ public abstract class BlightedBlock {
 
         private String serializeLocation(Location loc) {
             return Objects.requireNonNull(loc.getWorld()).getName() + ";" +
-                    loc.getBlockX() + ";" +
-                    loc.getBlockY() + ";" +
-                    loc.getBlockZ();
+                loc.getBlockX() + ";" +
+                loc.getBlockY() + ";" +
+                loc.getBlockZ();
         }
 
         private Location deserializeLocation(String key) {
@@ -215,9 +214,9 @@ public abstract class BlightedBlock {
             World world = Bukkit.getWorld(parts[0]);
             if (world == null) return null;
             return new Location(world,
-                    Integer.parseInt(parts[1]),
-                    Integer.parseInt(parts[2]),
-                    Integer.parseInt(parts[3]));
+                Integer.parseInt(parts[1]),
+                Integer.parseInt(parts[2]),
+                Integer.parseInt(parts[3]));
         }
     }
 }

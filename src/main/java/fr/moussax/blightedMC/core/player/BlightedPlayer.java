@@ -14,7 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 
 public class BlightedPlayer {
@@ -36,8 +35,9 @@ public class BlightedPlayer {
 
     private ItemStack[] lastKnownArmor = new ItemStack[4];
     private final BukkitTask actionBarTask;
+    private int forgeFuel;
 
-    public BlightedPlayer(@Nonnull Player player) {
+    public BlightedPlayer(Player player) {
         this.player = player;
         this.playerId = player.getUniqueId();
         this.dataHandler = new PlayerDataHandler(playerId, player.getName());
@@ -47,24 +47,25 @@ public class BlightedPlayer {
 
         this.manaManager = new ManaManager(DEFAULT_MAX_MANA, DEFAULT_MANA_REGEN_RATE);
         this.manaManager.setCurrentMana(dataHandler.getMana());
+        this.forgeFuel = dataHandler.getForgeFuel();
 
         this.actionBarManager = new ActionBarManager(this);
         players.put(playerId, this);
 
         this.actionBarTask = Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(),
-                actionBarManager::tick,
-                0L,
-                20L
+            actionBarManager::tick,
+            0L,
+            20L
         );
 
         initializeFullSetBonuses();
     }
 
-    public static BlightedPlayer getBlightedPlayer(@Nonnull Player player) {
+    public static BlightedPlayer getBlightedPlayer(Player player) {
         return players.get(player.getUniqueId());
     }
 
-    public static void removePlayer(@Nonnull Player player) {
+    public static void removePlayer(Player player) {
         BlightedPlayer blightedPlayer = players.remove(player.getUniqueId());
         if (blightedPlayer != null) {
             blightedPlayer.cleanup();
@@ -83,11 +84,11 @@ public class BlightedPlayer {
         return Collections.unmodifiableList(cooldowns);
     }
 
-    public void addCooldown(@Nonnull CooldownEntry entry) {
+    public void addCooldown(CooldownEntry entry) {
         cooldowns.add(entry);
     }
 
-    public void removeCooldown(@Nonnull CooldownEntry entry) {
+    public void removeCooldown(CooldownEntry entry) {
         cooldowns.remove(entry);
     }
 
@@ -119,7 +120,7 @@ public class BlightedPlayer {
         return Collections.unmodifiableList(activeFullSetBonuses);
     }
 
-    public void addArmorPiece(@Nonnull ItemType type, @Nonnull ItemTemplate itemTemplate) {
+    public void addArmorPiece(ItemType type, ItemTemplate itemTemplate) {
         setArmorPiece(type, itemTemplate);
     }
 
@@ -130,18 +131,18 @@ public class BlightedPlayer {
         activeFullSetBonuses.clear();
     }
 
-    public void addActiveBonus(@Nonnull FullSetBonus bonus) {
+    public void addActiveBonus(FullSetBonus bonus) {
         activeFullSetBonuses.add(bonus);
         bonus.activate();
     }
 
-    public void removeActiveBonus(@Nonnull FullSetBonus bonus) {
+    public void removeActiveBonus(FullSetBonus bonus) {
         if (activeFullSetBonuses.remove(bonus)) {
             bonus.deactivate();
         }
     }
 
-    public void removeActiveBonusByClass(@Nonnull Class<? extends FullSetBonus> bonusClass) {
+    public void removeActiveBonusByClass(Class<? extends FullSetBonus> bonusClass) {
         activeFullSetBonuses.removeIf(bonus -> {
             if (bonusClass.isInstance(bonus)) {
                 bonus.deactivate();
@@ -151,11 +152,11 @@ public class BlightedPlayer {
         });
     }
 
-    public void setArmorPiece(@Nonnull ItemType type, ItemTemplate itemTemplate) {
+    public void setArmorPiece(ItemType type, ItemTemplate itemTemplate) {
         armorPieces.put(type, itemTemplate);
     }
 
-    public ItemTemplate getArmorPiece(@Nonnull ItemType type) {
+    public ItemTemplate getArmorPiece(ItemType type) {
         return armorPieces.get(type);
     }
 
@@ -167,7 +168,7 @@ public class BlightedPlayer {
         return playerId;
     }
 
-    public GemsManager getGems() {
+    public GemsManager getGemsManager() {
         return gemsManager;
     }
 
@@ -192,7 +193,23 @@ public class BlightedPlayer {
         return manaManager;
     }
 
-    public void addItemToInventory(@Nonnull ItemStack item) {
+    public int getForgeFuel() {
+        return forgeFuel;
+    }
+
+    public void addForgeFuel(int amount) {
+        this.forgeFuel += amount;
+    }
+
+    public void removeForgeFuel(int amount) {
+        this.forgeFuel = Math.max(0, this.forgeFuel - amount);
+    }
+
+    public void setForgeFuel(int amount) {
+        this.forgeFuel = amount;
+    }
+
+    public void addItemToInventory(ItemStack item) {
         if (item.getType().isAir()) return;
         player.getInventory().addItem(item);
     }
@@ -200,6 +217,7 @@ public class BlightedPlayer {
     public void saveData() {
         dataHandler.setGems(gemsManager.getGems());
         dataHandler.setMana(manaManager.getCurrentMana());
+        dataHandler.setForgeFuel(forgeFuel);
         dataHandler.save();
     }
 
@@ -207,7 +225,7 @@ public class BlightedPlayer {
         return Arrays.copyOf(lastKnownArmor, lastKnownArmor.length);
     }
 
-    public void setLastKnownArmor(@Nonnull ItemStack[] armor) {
+    public void setLastKnownArmor(ItemStack[] armor) {
         this.lastKnownArmor = Arrays.copyOf(armor, 4);
     }
 

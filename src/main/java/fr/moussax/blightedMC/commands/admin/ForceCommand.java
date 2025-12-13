@@ -8,21 +8,22 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 
 import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 
 public class ForceCommand implements CommandExecutor {
+
     @Override
-    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
-        if (!label.equalsIgnoreCase("forcecommand") || !(sender instanceof Player player)) return false;
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
+        if (!(label.equalsIgnoreCase("forcecommand") && sender instanceof Player player)) return false;
         if (!enforceAdminPermission(player)) return false;
 
         if (args.length < 2) {
             CommandInfo.sendUsage(player, "Force a player to execute a command",
-                    "forcecommand", "<player>", "[command]");
+                "forcecommand", "<player>", "[command]");
             return false;
         }
 
@@ -45,10 +46,10 @@ public class ForceCommand implements CommandExecutor {
 
         TextComponent message = new TextComponent("§8 ■ §7You forced §d" + target.getName() + "§7 to execute a ");
         TextComponent commandWord = createInteractiveText(
-                "§f§lCOMMAND",
-                "§7Click to fill §dcommand §7in chat",
-                ClickEvent.Action.SUGGEST_COMMAND,
-                "/" + commandToExecute
+            "§f§lCOMMAND",
+            "§7Click to fill §dcommand §7in chat",
+            ClickEvent.Action.SUGGEST_COMMAND,
+            "/" + commandToExecute
         );
         TextComponent afterCommand = new TextComponent("§7.");
 

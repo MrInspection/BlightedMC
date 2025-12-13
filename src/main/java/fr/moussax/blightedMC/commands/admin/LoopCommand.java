@@ -9,8 +9,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 
 import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
@@ -22,13 +22,13 @@ public class LoopCommand implements CommandExecutor {
     private static final int MAX_DELAY_TICKS = 180;
 
     @Override
-    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
-        if (!label.equalsIgnoreCase("loop") || !(sender instanceof Player player)) return false;
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
+        if (!(label.equalsIgnoreCase("loop") && sender instanceof Player player)) return false;
         if (!enforceAdminPermission(player)) return false;
 
         if (args.length < 3) {
             CommandInfo.sendUsage(player, "Bulk execute a command",
-                    "loop", "[" + MIN_AMOUNT + "-" + MAX_AMOUNT + "]", "[" + MIN_DELAY_TICKS + "-" + MAX_DELAY_TICKS + "]", "<command>");
+                "loop", "[" + MIN_AMOUNT + "-" + MAX_AMOUNT + "]", "[" + MIN_DELAY_TICKS + "-" + MAX_DELAY_TICKS + "]", "<command>");
             return false;
         }
 
@@ -67,10 +67,10 @@ public class LoopCommand implements CommandExecutor {
 
         TextComponent message = new TextComponent("\n§8 ■ §7Looping your §f");
         TextComponent commandWord = createInteractiveText(
-                "§f§lCOMMAND",
-                "§7Click to fill §dcommand §7in chat",
-                ClickEvent.Action.SUGGEST_COMMAND,
-                "/" + commandToExecute
+            "§f§lCOMMAND",
+            "§7Click to fill §dcommand §7in chat",
+            ClickEvent.Action.SUGGEST_COMMAND,
+            "/" + commandToExecute
         );
         TextComponent afterCommand = new TextComponent(" §7with §d" + delay + " tick§7 delay. §d(Repeat " + amount + "x)\n");
 

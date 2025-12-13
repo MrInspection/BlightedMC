@@ -1,8 +1,8 @@
 package fr.moussax.blightedMC.core.fishing;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.fishing.environment.EndFishing;
-import fr.moussax.blightedMC.core.fishing.environment.OverworldFishing;
+import fr.moussax.blightedMC.core.fishing.dimension.EndFishing;
+import fr.moussax.blightedMC.core.fishing.dimension.OverworldFishing;
 import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.World;
