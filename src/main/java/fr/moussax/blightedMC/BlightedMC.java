@@ -30,7 +30,8 @@ public final class BlightedMC extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        getLogger().info("Initializing BlightedMC plugin...");
+        Log.setIncludeTimestamp(false);
+        Log.info("Plugin", "Initializing BlightedMC plugin...");
         String config = PluginFiles.CONFIG.getFileName();
         saveResourcesAs(config, config);
 
@@ -42,17 +43,17 @@ public final class BlightedMC extends JavaPlugin {
             yaml.setBeanAccess(BeanAccess.FIELD);
 
             settings = yaml.loadAs(reader, PluginSettings.class);
-            getLogger().info("Successfully loaded the configuration file.");
+            Log.success("Config", "Successfully loaded the configuration file.");
         } catch (IOException e) {
             Log.error(e.getMessage());
         }
 
         try {
             database = new PluginDatabase(getDataFolder().getAbsolutePath() + "/" + PluginFiles.DATABASE.getFileName());
-            getLogger().info("Successfully connected to the database.");
+            Log.success("Database", "Successfully connected to the database.");
         } catch (SQLException e) {
             Log.debug(e.getMessage());
-            getLogger().severe("Unable to connect to the database.");
+            Log.error("Database", "Unable to connect to the database.");
             Bukkit.getPluginManager().disablePlugin(this);
         }
 
@@ -93,7 +94,7 @@ public final class BlightedMC extends JavaPlugin {
             if (in == null) throw new IllegalArgumentException("Resource cannot be found at path: " + resourcePath);
 
             if (!getDataFolder().exists() && !getDataFolder().mkdirs()) {
-                getLogger().severe("Unable to create data folder.");
+                Log.error("Config", "Unable to create data folder.");
             }
 
             File outputFile = new File(getDataFolder(), destinationPath);
@@ -103,9 +104,9 @@ public final class BlightedMC extends JavaPlugin {
             }
 
             if (!outputFile.exists()) {
-                getLogger().severe("Unable to copy the file.");
+                Log.error("Config", "Unable to copy the file.");
             } else {
-                getLogger().info("Successfully created the " + resourcePath + " file.");
+                Log.success("Config", "Successfully created the " + resourcePath + " file.");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

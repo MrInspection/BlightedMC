@@ -18,7 +18,7 @@ public final class Log {
     private static final String LOG_ERROR_COLOR = "\u001B[31m";
     private static final String LOG_DEBUG_COLOR = "\u001B[1;35m";
 
-    private static boolean includeTimestamp = true;
+    private static boolean includeTimestamp = false;
 
     private Log() {
     }
