@@ -31,6 +31,7 @@ public class BlightedGemstone implements ItemRegistry {
             ItemRarity.SPECIAL.getName()
         );
 
+        blightedGemstone.addNotEquippable();
         blightedGemstone.setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM2MjM1MjFjODExMWFkMjllOWRjZjdhY2M1NjA4NWE5YWIwN2RhNzMyZDE1MTg5NzZhZWU2MWQwYjNlM2JkNiJ9fX0=");
         blightedGemstone.addRule(new PreventPlacementRule());
         blightedGemstone.addAbility(new Ability(new GemsItem.BlightedGemstoneAbility(), "Consume Gems", AbilityType.RIGHT_CLICK));
