@@ -10,6 +10,7 @@ import fr.moussax.blightedMC.core.menus.MenuItemInteraction;
 import fr.moussax.blightedMC.core.menus.MenuManager;
 import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
+import fr.moussax.blightedMC.utils.Utilities;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.Material;
@@ -34,6 +35,7 @@ public class ForgeMenu extends Menu {
     private static final int[] GRID_SLOTS = {19, 20, 21, 28, 29, 30, 37, 38, 39};
     private static final int[] SACRIFICED_ITEM_INDICATOR_SLOTS = {10, 11, 12, 13};
     private static final int[] FORGED_ITEM_INDICATOR_SLOTS = {15, 16};
+    private static final int ITEM_INDICATOR = 23;
     private static final int MAXIMUM_FORGE_FUEL = 50000;
 
     private final ForgeRecipe recipe;
@@ -43,7 +45,7 @@ public class ForgeMenu extends Menu {
     /**
      * Creates a forge menu for a specific recipe with a previous menu reference.
      *
-     * @param recipe the forge recipe to display
+     * @param recipe       the forge recipe to display
      * @param previousMenu the menu to return to after closing
      */
     public ForgeMenu(ForgeRecipe recipe, Menu previousMenu) {
@@ -98,6 +100,8 @@ public class ForgeMenu extends Menu {
         ItemBuilder recipeSlot = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE, "§cLocked Slot");
         if (recipe == null) {
             recipeSlot.addLore("§7Select a recipe to view", "§7the required materials.");
+        } else {
+            recipeSlot.addLore("§7This slot isn't used for", "§7the selected recipe.");
         }
 
         ItemStack gridItem = recipeSlot.toItemStack();
@@ -194,7 +198,7 @@ public class ForgeMenu extends Menu {
     private void setupStatusPanes() {
         Material indicator = determineIndicatorMaterial();
 
-        ItemStack sacrificedItemPane = new ItemBuilder(indicator, "§6Items to Sacrifice")
+        ItemStack sacrificedItemPane = new ItemBuilder(indicator, "§6Items to Process")
             .addLore("§7The materials required to forge", "§7the item are displayed in this side.")
             .toItemStack();
 
@@ -214,7 +218,7 @@ public class ForgeMenu extends Menu {
             });
         }
 
-        setItem(23, pane, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        setItem(ITEM_INDICATOR, pane, MenuItemInteraction.ANY_CLICK, (_, _) -> {
         });
 
         ItemStack forgeIcon = new ItemBuilder(Material.BLAST_FURNACE, "§dBlighted Forge")
@@ -246,12 +250,14 @@ public class ForgeMenu extends Menu {
         } else {
             builder.setDisplayName("§aConfirm")
                 .addLore(canForge ? "§eClick to confirm!" : "§cYou don't have the required items!")
-                .addEnchantmentGlint(canForge);
+                .setEnchantmentGlint(canForge);
         }
 
         setItem(32, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, _) -> {
             if (recipe != null && canForge) {
                 forgeItem(p);
+            } else {
+                p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
             }
         });
     }
@@ -359,7 +365,7 @@ public class ForgeMenu extends Menu {
         int availableSpace = MAXIMUM_FORGE_FUEL - currentFuel;
 
         if (availableSpace <= 0) {
-            player.sendMessage("§cYour forge is already full!");
+            Formatter.warn(player, "§cYour forge is already full!");
             return;
         }
 
@@ -419,23 +425,97 @@ public class ForgeMenu extends Menu {
     }
 
     private void forgeItem(Player player) {
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-
-        if (blightedPlayer.getForgeFuel() < recipe.fuelCost()) {
-            Formatter.warn(player, "Not enough fuel!");
+        checkRequirements(player);
+        if (!canForge) {
+            Formatter.warn(player, "Not enough resources!");
+            super.refresh(player);
             return;
         }
+        this.canForge = false;
+
+        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
 
         consumeIngredients(player);
         blightedPlayer.removeForgeFuel(recipe.fuelCost());
         blightedPlayer.saveData();
 
-        ItemStack result = recipe.result().toItemStack().clone();
-        result.setAmount(recipe.amount());
-        player.getInventory().addItem(result);
-
+        // Play the synced sound sequence
         SoundSequence.FORGE_ITEM.play(player.getLocation());
-        super.refresh(player);
+
+        // --- Animation Sequence (Synced to Sound Ticks) ---
+
+        // 0L - 6L: Winding Up (Left side fills Yellow)
+        Utilities.delay(() -> setStatusSlot(10, Material.YELLOW_STAINED_GLASS_PANE), 0L);
+        Utilities.delay(() -> setStatusSlot(11, Material.YELLOW_STAINED_GLASS_PANE), 2L);
+        Utilities.delay(() -> setStatusSlot(12, Material.YELLOW_STAINED_GLASS_PANE), 4L);
+        Utilities.delay(() -> setStatusSlot(13, Material.YELLOW_STAINED_GLASS_PANE), 6L);
+
+        // 8L - 14L: Heating Up (Left turns Orange, Right side fills Orange)
+        Utilities.delay(() -> updateStatusPanes(Material.ORANGE_STAINED_GLASS_PANE, SACRIFICED_ITEM_INDICATOR_SLOTS), 8L);
+        Utilities.delay(() -> setStatusSlot(15, Material.ORANGE_STAINED_GLASS_PANE), 10L);
+        Utilities.delay(() -> setStatusSlot(16, Material.ORANGE_STAINED_GLASS_PANE), 12L);
+        Utilities.delay(() -> setStatusSlot(ITEM_INDICATOR, Material.ORANGE_STAINED_GLASS_PANE), 14L);
+
+        // 16L: IMPACT (Everything flashes RED)
+        Utilities.delay(() -> {
+            updateStatusPanes(Material.RED_STAINED_GLASS_PANE, SACRIFICED_ITEM_INDICATOR_SLOTS);
+            updateStatusPanes(Material.RED_STAINED_GLASS_PANE, FORGED_ITEM_INDICATOR_SLOTS);
+            setStatusSlot(ITEM_INDICATOR, Material.RED_STAINED_GLASS_PANE);
+        }, 16L);
+
+        // 18L: SUCCESS (Everything turns LIME)
+        Utilities.delay(() -> {
+            updateStatusPanes(Material.LIME_STAINED_GLASS_PANE, SACRIFICED_ITEM_INDICATOR_SLOTS);
+            updateStatusPanes(Material.LIME_STAINED_GLASS_PANE, FORGED_ITEM_INDICATOR_SLOTS);
+            setStatusSlot(ITEM_INDICATOR, Material.LIME_STAINED_GLASS_PANE);
+        }, 18L);
+
+        // 20L: Finish & Give Item
+        Utilities.delay(() -> {
+            ItemStack result = recipe.result().toItemStack().clone();
+            result.setAmount(recipe.amount());
+
+            if (player.isOnline()) {
+                HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(result);
+                if (!leftover.isEmpty()) {
+                    for (ItemStack item : leftover.values()) {
+                        player.getWorld().dropItem(player.getLocation(), item);
+                    }
+                }
+                // Refresh to reset UI for next craft
+                if (player.getOpenInventory().getTopInventory().getHolder() instanceof ForgeMenu) {
+                    super.refresh(player);
+                }
+            }
+        }, 22L);
+    }
+
+    /**
+     * Updates a specific array of slots with a glass pane color.
+     */
+    private void updateStatusPanes(Material material, int[] slots) {
+        if (!(inventory.getHolder() instanceof ForgeMenu)) return;
+
+        ItemStack pane = new ItemBuilder(material, "§6Forging...")
+            .setHideTooltip()
+            .toItemStack();
+
+        for (int slot : slots) {
+            inventory.setItem(slot, pane);
+        }
+    }
+
+    /**
+     * Updates a single slot with a glass pane color.
+     */
+    private void setStatusSlot(int slot, Material material) {
+        if (!(inventory.getHolder() instanceof ForgeMenu)) return;
+
+        ItemStack pane = new ItemBuilder(material, "§6Forging...")
+            .setHideTooltip()
+            .toItemStack();
+
+        inventory.setItem(slot, pane);
     }
 
     private void consumeIngredients(Player player) {
