@@ -35,15 +35,17 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
     private static final int NEXT_BUTTON_SLOT = 50;
 
     private final Menu previousMenu;
+    private final List<AncientRitual> cachedRituals;
 
     public RitualsDirectoryMenu(Menu previousMenu) {
         super("Ancient Rituals", 54);
         this.previousMenu = previousMenu;
+        this.cachedRituals = new ArrayList<>(AncientRitual.REGISTRY);
     }
 
     @Override
     protected int getTotalItems(Player player) {
-        return AncientRitual.REGISTRY.size();
+        return cachedRituals.size();
     }
 
     @Override
@@ -53,12 +55,11 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
 
     @Override
     protected ItemStack getItem(Player player, int index) {
-        List<AncientRitual> rituals = new ArrayList<>(AncientRitual.REGISTRY);
-        if (index >= rituals.size()) {
+        if (index >= cachedRituals.size()) {
             return new ItemStack(Material.AIR);
         }
 
-        AncientRitual ritual = rituals.get(index);
+        AncientRitual ritual = cachedRituals.get(index);
         return buildRiteDisplayItem(ritual);
     }
 
@@ -77,12 +78,11 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
 
     @Override
     protected void onItemClick(Player player, int index, org.bukkit.event.inventory.ClickType clickType) {
-        List<AncientRitual> rituals = new ArrayList<>(AncientRitual.REGISTRY);
-        if (index >= rituals.size()) {
+        if (index >= cachedRituals.size()) {
             return;
         }
 
-        AncientRitual rite = rituals.get(index);
+        AncientRitual rite = cachedRituals.get(index);
         MenuManager.openMenu(new RitualAltarMenu(rite, this), player);
     }
 
@@ -138,11 +138,10 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
     }
 
     private void populateRiteSlots(Player player, int start, int end) {
-        List<AncientRitual> rituals = new ArrayList<>(AncientRitual.REGISTRY);
         int riteIndex = 0;
 
         for (int i = start; i < end && riteIndex < RECIPE_SLOTS.length; i++) {
-            if (i >= rituals.size()) {
+            if (i >= cachedRituals.size()) {
                 break;
             }
 

@@ -43,15 +43,17 @@ public class RecipeBookMenu {
 
     public static class RecipeListMenu extends PaginatedMenu {
         private final Menu previousMenu;
+        private final List<BlightedRecipe> cachedRecipes;
 
         public RecipeListMenu(Menu previousMenu) {
             super("§rBlighted Recipe Book", 54);
             this.previousMenu = previousMenu;
+            this.cachedRecipes = new ArrayList<>(BlightedRecipe.REGISTERED_RECIPES);
         }
 
         @Override
         protected int getTotalItems(Player player) {
-            return BlightedRecipe.REGISTERED_RECIPES.size();
+            return cachedRecipes.size();
         }
 
         @Override
@@ -61,10 +63,9 @@ public class RecipeBookMenu {
 
         @Override
         protected ItemStack getItem(Player player, int index) {
-            List<BlightedRecipe> recipes = new ArrayList<>(BlightedRecipe.REGISTERED_RECIPES);
-            if (index >= recipes.size()) return new ItemStack(Material.AIR);
+            if (index >= cachedRecipes.size()) return new ItemStack(Material.AIR);
 
-            BlightedRecipe recipe = recipes.get(index);
+            BlightedRecipe recipe = cachedRecipes.get(index);
             ItemStack resultItem = recipe.getResult().toItemStack().clone();
 
             var meta = resultItem.getItemMeta();
@@ -130,10 +131,9 @@ public class RecipeBookMenu {
 
         @Override
         protected void onItemClick(Player player, int index, org.bukkit.event.inventory.ClickType clickType) {
-            List<BlightedRecipe> recipes = new ArrayList<>(BlightedRecipe.REGISTERED_RECIPES);
-            if (index >= recipes.size()) return;
+            if (index >= cachedRecipes.size()) return;
 
-            MenuManager.openMenu(new RecipeDetailMenu(recipes.get(index), this), player);
+            MenuManager.openMenu(new RecipeDetailMenu(cachedRecipes.get(index), this), player);
         }
     }
 

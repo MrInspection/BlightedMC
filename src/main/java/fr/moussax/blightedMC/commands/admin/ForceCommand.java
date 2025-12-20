@@ -39,11 +39,9 @@ public class ForceCommand implements CommandExecutor {
         }
 
         String commandToExecute = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-        if (commandToExecute.startsWith("/")) {
-            commandToExecute = commandToExecute.substring(1);
-        }
+        commandToExecute = commandToExecute.replaceFirst("^[/\\s]+", "");
 
-        if (commandToExecute.startsWith("forcecommand")) {
+        if (commandToExecute.equals("forcecommand") || commandToExecute.startsWith("forcecommand ")) {
             warn(player, "You can't force a player to use the §4forcecommand§c.");
             return false;
         }

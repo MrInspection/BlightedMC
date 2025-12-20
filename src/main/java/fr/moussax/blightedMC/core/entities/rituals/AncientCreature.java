@@ -15,10 +15,12 @@ public abstract class AncientCreature extends BlightedEntity {
 
     public AncientCreature(String name, int maxHealth, int damage, EntityType entityType) {
         super(name, maxHealth, damage, entityType);
+        this.nameTagType = EntityNameTag.ANCIENT;
     }
 
     public AncientCreature(String name, int maxHealth, int damage, int defense, EntityType entityType) {
         super(name, maxHealth, damage, defense, entityType);
+        this.nameTagType = EntityNameTag.ANCIENT;
     }
 
     @Override

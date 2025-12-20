@@ -41,6 +41,7 @@ public class ForgeRecipesMenu extends PaginatedMenu {
     private static final int NEXT_BUTTON_SLOT = 50;
 
     private final Menu previousMenu;
+    private final List<ForgeRecipe> cachedRecipes;
 
     /**
      * Constructs a ForgeRecipesMenu.
@@ -50,11 +51,12 @@ public class ForgeRecipesMenu extends PaginatedMenu {
     public ForgeRecipesMenu(Menu previousMenu) {
         super("Forge Recipes", 54);
         this.previousMenu = previousMenu;
+        this.cachedRecipes = new ArrayList<>(ForgeRecipe.REGISTRY);
     }
 
     @Override
     protected int getTotalItems(Player player) {
-        return ForgeRecipe.REGISTRY.size();
+        return cachedRecipes.size();
     }
 
     @Override
@@ -64,12 +66,11 @@ public class ForgeRecipesMenu extends PaginatedMenu {
 
     @Override
     protected ItemStack getItem(Player player, int index) {
-        List<ForgeRecipe> recipes = new ArrayList<>(ForgeRecipe.REGISTRY);
-        if (index >= recipes.size()) {
+        if (index >= cachedRecipes.size()) {
             return new ItemStack(Material.AIR);
         }
 
-        ForgeRecipe recipe = recipes.get(index);
+        ForgeRecipe recipe = cachedRecipes.get(index);
         return buildRecipeDisplayItem(recipe);
     }
 
@@ -87,12 +88,11 @@ public class ForgeRecipesMenu extends PaginatedMenu {
 
     @Override
     protected void onItemClick(Player player, int index, ClickType clickType) {
-        List<ForgeRecipe> recipes = new ArrayList<>(ForgeRecipe.REGISTRY);
-        if (index >= recipes.size()) {
+        if (index >= cachedRecipes.size()) {
             return;
         }
 
-        ForgeRecipe recipe = recipes.get(index);
+        ForgeRecipe recipe = cachedRecipes.get(index);
         MenuManager.openMenu(new ForgeMenu(recipe, this), player);
     }
 
@@ -135,11 +135,10 @@ public class ForgeRecipesMenu extends PaginatedMenu {
 
 
     private void populateRecipeSlots(Player player, int start, int end) {
-        List<ForgeRecipe> recipes = new ArrayList<>(ForgeRecipe.REGISTRY);
         int recipeIndex = 0;
 
         for (int i = start; i < end && recipeIndex < RECIPE_SLOTS.length; i++) {
-            if (i >= recipes.size()) {
+            if (i >= cachedRecipes.size()) {
                 break;
             }
 

@@ -6,12 +6,13 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
 public class RitualAnimations {
 
-    public static void playRiteAnimation(BlightedMC instance, Location spawnLoc, Runnable onAnimationComplete) {
+    public static void playRiteAnimation(BlightedMC instance, Location spawnLoc, @NonNull Runnable onAnimationComplete) {
         new BukkitRunnable() {
             int tick = 0;
 
