@@ -184,7 +184,9 @@ public abstract class BlightedEntity implements Cloneable {
         setAttribute(Attribute.ARMOR, defense);
         applyAttributes();
         entity.setHealth(maxHealth);
+
         entity.setPersistent(true);
+        entity.setRemoveWhenFarAway(false);
     }
 
     /**
