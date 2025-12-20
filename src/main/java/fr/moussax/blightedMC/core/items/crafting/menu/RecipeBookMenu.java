@@ -88,15 +88,8 @@ public class RecipeBookMenu {
 
             clearInventory();
             populateRecipeSlots(player, start, end);
-            populateFillerSlots();
+            fillSlots(FILLER_SLOTS, MenuElementPreset.EMPTY_SLOT_FILLER);
             setupNavigationButtons(player, end);
-        }
-
-        private void clearInventory() {
-            for (int i = 0; i < size; i++) {
-                setItem(i, new ItemStack(Material.AIR), MenuItemInteraction.ANY_CLICK, (p, t) -> {
-                });
-            }
         }
 
         private void populateRecipeSlots(Player player, int start, int end) {
@@ -106,13 +99,6 @@ public class RecipeBookMenu {
                 setItem(RECIPE_SLOTS[recipeIndex], getItem(player, itemIndex), MenuItemInteraction.ANY_CLICK,
                     (p, t) -> onItemClick(p, itemIndex, t));
                 recipeIndex++;
-            }
-        }
-
-        private void populateFillerSlots() {
-            for (int slot : FILLER_SLOTS) {
-                setItem(slot, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
-                });
             }
         }
 
@@ -258,7 +244,7 @@ public class RecipeBookMenu {
                 (p, t) -> MenuManager.openMenu(previousMenu, p));
             setItem(CLOSE_BUTTON_SLOT, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK,
                 (p, t) -> close());
-            fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
+            fillSlots(FILLER_SLOTS, MenuElementPreset.EMPTY_SLOT_FILLER);
         }
     }
 }
