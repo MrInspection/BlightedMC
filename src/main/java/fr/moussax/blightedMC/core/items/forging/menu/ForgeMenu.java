@@ -20,13 +20,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Defines the interactive forge menu for players.
- *
- * <p>The menu displays a forge recipe, checks ingredient and fuel requirements,
- * allows inserting fuel, and performs the forging operation. Integrates with
- * the player's inventory and provides status via GUI indicators.</p>
- */
 public class ForgeMenu extends Menu {
     private static final int[] GRID_SLOTS = {19, 20, 21, 28, 29, 30, 37, 38, 39};
     private static final int[] REQUIRED_ITEM_INDICATOR_SLOTS = {10, 11, 12, 13};
@@ -37,39 +30,23 @@ public class ForgeMenu extends Menu {
     private final ForgeRecipe recipe;
     private final Menu previousMenu;
     private boolean canForge = false;
+    private boolean isForging = false;
 
-    /**
-     * Creates a forge menu for a specific recipe with a previous menu reference.
-     *
-     * @param recipe       the forge recipe to display
-     * @param previousMenu the menu to return to after closing
-     */
     public ForgeMenu(ForgeRecipe recipe, Menu previousMenu) {
         super("Forge Item", 54);
         this.recipe = recipe;
         this.previousMenu = previousMenu;
     }
 
-    /**
-     * Creates a forge menu for a specific recipe without a previous menu.
-     *
-     * @param recipe the forge recipe to display
-     */
     public ForgeMenu(ForgeRecipe recipe) {
         super("Forge Item", 54);
         this.recipe = recipe;
         previousMenu = null;
     }
 
-    /**
-     * Builds the GUI for the player including grid, background,
-     * status indicators, result display, and action buttons.
-     *
-     * @param player the player viewing the menu
-     */
     @Override
     public void build(Player player) {
-        if (recipe != null) {
+        if (recipe != null && !isForging) {
             checkRequirements(player);
         }
 
@@ -93,8 +70,7 @@ public class ForgeMenu extends Menu {
             recipeSlot.addLore("§7This slot isn't used for", "§7the selected recipe.");
         }
 
-        ItemStack gridItem = recipeSlot.toItemStack();
-        fillSlots(GRID_SLOTS, gridItem);
+        fillSlots(GRID_SLOTS, recipeSlot.toItemStack());
     }
 
     private void setupResultDisplay() {
@@ -102,15 +78,13 @@ public class ForgeMenu extends Menu {
             ItemStack noRecipe = new ItemBuilder(Material.BARRIER, "§cRecipe Required")
                 .addLore("§7Select a recipe from the", "§7recipe book to start forging.")
                 .toItemStack();
-            setItem(25, noRecipe, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-            });
+            setItem(25, noRecipe, MenuItemInteraction.ANY_CLICK, (_, _) -> {});
             return;
         }
 
         ItemStack result = recipe.getForgedItem().toItemStack().clone();
         result.setAmount(recipe.getForgedAmount());
-        setItem(25, result, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-        });
+        setItem(25, result, MenuItemInteraction.ANY_CLICK, (_, _) -> {});
     }
 
     private void checkRequirements(Player player) {
@@ -151,8 +125,7 @@ public class ForgeMenu extends Menu {
         for (int i = 0; i < recipe.getIngredients().size() && i < GRID_SLOTS.length; i++) {
             CraftingObject ingredient = recipe.getIngredients().get(i);
             ItemStack displayItem = createDisplayItem(ingredient);
-            setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-            });
+            setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (_, _) -> {});
         }
     }
 
@@ -175,25 +148,20 @@ public class ForgeMenu extends Menu {
             .addLore("§7The item you will create", "§7with the required materials.")
             .toItemStack();
 
-        ItemStack pane = new ItemBuilder(indicator, "§r").setHideTooltip().toItemStack();
-
         fillSlots(REQUIRED_ITEM_INDICATOR_SLOTS, sacrificedItemPane);
         fillSlots(FORGED_ITEM_INDICATOR_SLOTS, forgedItemPane);
 
-        setItem(ITEM_INDICATOR, pane, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-        });
+        setItem(ITEM_INDICATOR, new ItemBuilder(indicator, "§r").setHideTooltip().toItemStack(), MenuItemInteraction.ANY_CLICK, (_, _) -> {});
 
         ItemStack forgeIcon = new ItemBuilder(Material.BLAST_FURNACE, "§dBlighted Forge")
             .addLore("§7Combine materials to forge ", "§7items beyond the reach of", "§7ordinary furnaces.")
             .toItemStack();
-        setItem(14, forgeIcon, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-        });
+        setItem(14, forgeIcon, MenuItemInteraction.ANY_CLICK, (_, _) -> {});
     }
 
     private Material determineIndicatorMaterial() {
-        if (recipe == null) {
-            return Material.WHITE_STAINED_GLASS_PANE;
-        }
+        if (recipe == null) return Material.WHITE_STAINED_GLASS_PANE;
+        if (isForging) return Material.ORANGE_STAINED_GLASS_PANE;
         return canForge ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
     }
 
@@ -209,6 +177,8 @@ public class ForgeMenu extends Menu {
         if (recipe == null) {
             builder.setDisplayName("§aForge Item")
                 .addLore("§7Select a recipe from the", "§7Recipe Book to start forging.");
+        } else if (isForging) {
+            builder.setDisplayName("§6Forging...");
         } else {
             builder.setDisplayName("§aConfirm")
                 .addLore(canForge ? "§eClick to confirm!" : "§cYou don't have the required items!")
@@ -216,6 +186,8 @@ public class ForgeMenu extends Menu {
         }
 
         setItem(32, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, _) -> {
+            if (isForging) return;
+
             if (recipe != null && canForge) {
                 forgeItem(p);
             } else {
@@ -238,10 +210,8 @@ public class ForgeMenu extends Menu {
         int currentFuel = blightedPlayer.getForgeFuel();
         int requiredFuel = recipe != null ? recipe.getFuelCost() : 0;
 
-        setItem(34, createFuelMeter(currentFuel, requiredFuel), MenuItemInteraction.ANY_CLICK, (_, _) -> {
-        });
-        setItem(51, createFuelGuide(), MenuItemInteraction.ANY_CLICK, (_, _) -> {
-        });
+        setItem(34, createFuelMeter(currentFuel, requiredFuel), MenuItemInteraction.ANY_CLICK, (_, _) -> {});
+        setItem(51, createFuelGuide(), MenuItemInteraction.ANY_CLICK, (_, _) -> {});
         setItem(53, createInsertFuelButton(player), MenuItemInteraction.ANY_CLICK, (p, _) -> handleFuelInsertion(blightedPlayer));
     }
 
@@ -322,6 +292,7 @@ public class ForgeMenu extends Menu {
 
     private void handleFuelInsertion(BlightedPlayer blightedPlayer) {
         Player player = blightedPlayer.getPlayer();
+        if (player == null) return;
 
         int currentFuel = blightedPlayer.getForgeFuel();
         int availableSpace = MAXIMUM_FORGE_FUEL - currentFuel;
@@ -337,9 +308,9 @@ public class ForgeMenu extends Menu {
             blightedPlayer.addForgeFuel(addedFuel);
             blightedPlayer.saveData();
             player.playSound(player.getLocation(), Sound.ITEM_BUCKET_FILL_LAVA, 1f, 0f);
-            super.refresh(player);
+            refresh(player);
         } else {
-            Formatter.warn(player, "No fuel found in inventory!");
+            Formatter.warn(player, "No suitable fuel found in inventory!");
         }
     }
 
@@ -357,28 +328,21 @@ public class ForgeMenu extends Menu {
             int remainingSpace = availableSpace - totalAdded;
             if (remainingSpace <= 0) break;
 
+            if (fuelPerItem > remainingSpace) continue;
             int stackAmount = item.getAmount();
 
-            // consume as many full items as fit
-            int fullItemsThatFit = remainingSpace / fuelPerItem;
-            int consumeFull = Math.min(stackAmount, fullItemsThatFit);
-            if (consumeFull > 0) {
-                totalAdded += consumeFull * fuelPerItem;
-                stackAmount -= consumeFull;
-            }
+            int itemsToConsume = Math.min(stackAmount, remainingSpace / fuelPerItem);
 
-            // if there's still space but no full item would fit, allow consuming one item to top up
-            remainingSpace = availableSpace - totalAdded;
-            if (remainingSpace > 0 && stackAmount > 0) {
-                totalAdded = availableSpace; // top up (partially allowed)
-                stackAmount -= 1;
-            }
+            if (itemsToConsume > 0) {
+                totalAdded += itemsToConsume * fuelPerItem;
 
-            if (stackAmount > 0) {
-                item.setAmount(stackAmount);
-                player.getInventory().setItem(slot, item);
-            } else {
-                player.getInventory().setItem(slot, null);
+                int newAmount = stackAmount - itemsToConsume;
+                if (newAmount > 0) {
+                    item.setAmount(newAmount);
+                    player.getInventory().setItem(slot, item);
+                } else {
+                    player.getInventory().setItem(slot, null);
+                }
             }
 
             if (totalAdded >= availableSpace) break;
@@ -387,12 +351,16 @@ public class ForgeMenu extends Menu {
     }
 
     private void forgeItem(Player player) {
+        if (isForging) return;
+
         checkRequirements(player);
         if (!canForge) {
             Formatter.warn(player, "Not enough resources!");
-            super.refresh(player);
+            refresh(player);
             return;
         }
+
+        this.isForging = true;
         this.canForge = false;
 
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
@@ -401,7 +369,10 @@ public class ForgeMenu extends Menu {
         blightedPlayer.removeForgeFuel(recipe.getFuelCost());
         blightedPlayer.saveData();
 
+        refresh(player);
         SoundSequence.FORGE_ITEM.play(player.getLocation());
+        refresh(player);
+
         Utilities.delay(() -> setStatusSlot(10, Material.YELLOW_STAINED_GLASS_PANE), 0L);
         Utilities.delay(() -> setStatusSlot(11, Material.YELLOW_STAINED_GLASS_PANE), 2L);
         Utilities.delay(() -> setStatusSlot(12, Material.YELLOW_STAINED_GLASS_PANE), 4L);
@@ -427,24 +398,23 @@ public class ForgeMenu extends Menu {
             ItemStack result = recipe.getForgedItem().toItemStack().clone();
             result.setAmount(recipe.getForgedAmount());
 
-            if (player.isOnline()) {
-                HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(result);
+            Player p = getPlayer();
+            if (p != null && p.isOnline()) {
+                HashMap<Integer, ItemStack> leftover = p.getInventory().addItem(result);
                 if (!leftover.isEmpty()) {
                     for (ItemStack item : leftover.values()) {
-                        player.getWorld().dropItem(player.getLocation(), item);
+                        p.getWorld().dropItem(p.getLocation(), item);
                     }
                 }
-                // Refresh to reset UI for next craft
-                if (player.getOpenInventory().getTopInventory().getHolder() instanceof ForgeMenu) {
-                    super.refresh(player);
+
+                this.isForging = false;
+                if (p.getOpenInventory().getTopInventory().getHolder() instanceof ForgeMenu) {
+                    refresh(p);
                 }
             }
         }, 22L);
     }
 
-    /**
-     * Updates a specific array of slots with a glass pane color.
-     */
     private void updateStatusPanes(Material material, int[] slots) {
         if (!(inventory.getHolder() instanceof ForgeMenu)) return;
 
@@ -457,9 +427,6 @@ public class ForgeMenu extends Menu {
         }
     }
 
-    /**
-     * Updates a single slot with a glass pane color.
-     */
     private void setStatusSlot(int slot, Material material) {
         if (!(inventory.getHolder() instanceof ForgeMenu)) return;
 
