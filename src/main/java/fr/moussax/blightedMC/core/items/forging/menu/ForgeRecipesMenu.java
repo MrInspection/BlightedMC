@@ -3,15 +3,16 @@ package fr.moussax.blightedMC.core.items.forging.menu;
 import fr.moussax.blightedMC.core.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.core.items.forging.ForgeRecipe;
 import fr.moussax.blightedMC.core.menus.*;
+import fr.moussax.blightedMC.utils.Utilities;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Paginated menu displaying all registered forge recipes.
@@ -53,7 +54,7 @@ public class ForgeRecipesMenu extends PaginatedMenu {
 
     @Override
     protected int getTotalItems(Player player) {
-        return ForgeRecipe.REGISTERED_RECIPES.size();
+        return ForgeRecipe.REGISTRY.size();
     }
 
     @Override
@@ -63,7 +64,7 @@ public class ForgeRecipesMenu extends PaginatedMenu {
 
     @Override
     protected ItemStack getItem(Player player, int index) {
-        List<ForgeRecipe> recipes = new ArrayList<>(ForgeRecipe.REGISTERED_RECIPES);
+        List<ForgeRecipe> recipes = new ArrayList<>(ForgeRecipe.REGISTRY);
         if (index >= recipes.size()) {
             return new ItemStack(Material.AIR);
         }
@@ -80,13 +81,13 @@ public class ForgeRecipesMenu extends PaginatedMenu {
 
         clearInventory();
         populateRecipeSlots(player, start, end);
-        populateFillerSlots();
+        fillSlots(FILLER_SLOTS, MenuElementPreset.EMPTY_SLOT_FILLER);
         setupNavigationButtons(player, end);
     }
 
     @Override
-    protected void onItemClick(Player player, int index, org.bukkit.event.inventory.ClickType clickType) {
-        List<ForgeRecipe> recipes = new ArrayList<>(ForgeRecipe.REGISTERED_RECIPES);
+    protected void onItemClick(Player player, int index, ClickType clickType) {
+        List<ForgeRecipe> recipes = new ArrayList<>(ForgeRecipe.REGISTRY);
         if (index >= recipes.size()) {
             return;
         }
@@ -96,8 +97,8 @@ public class ForgeRecipesMenu extends PaginatedMenu {
     }
 
     private ItemStack buildRecipeDisplayItem(ForgeRecipe recipe) {
-        ItemStack resultItem = recipe.result().toItemStack().clone();
-        resultItem.setAmount(recipe.amount());
+        ItemStack resultItem = recipe.getForgedItem().toItemStack().clone();
+        resultItem.setAmount(recipe.getForgedAmount());
 
         ItemMeta meta = resultItem.getItemMeta();
         if (meta == null) {
@@ -120,34 +121,21 @@ public class ForgeRecipesMenu extends PaginatedMenu {
         lore.add("");
         lore.add(" §7Items required:");
 
-        for (CraftingObject ingredient : recipe.ingredients()) {
-            String ingredientName = extractIngredientName(ingredient);
+        for (CraftingObject ingredient : recipe.getIngredients()) {
+            String ingredientName = Utilities.extractIngredientName(ingredient);
             lore.add(" §8‣ " + ingredientName + " §8x" + ingredient.getAmount());
         }
 
         lore.add("");
-        lore.add(" §8Consumes §6🪣 " + Formatter.formatDecimalWithCommas(recipe.fuelCost()) + " mB ");
+        lore.add(" §8Consumes §6🪣 " + Formatter.formatDecimalWithCommas(recipe.getFuelCost()) + " mB ");
         lore.add(" §8of fuel to forge.");
         lore.add("");
         lore.add("§eClick to select!");
     }
 
-    private String extractIngredientName(CraftingObject ingredient) {
-        if (ingredient.isCustom()) {
-            return Objects.requireNonNull(ingredient.getManager().toItemStack().getItemMeta()).getDisplayName();
-        }
-        return "§f" + Formatter.formatEnumName(ingredient.getVanillaItem().getType().name());
-    }
-
-    private void clearInventory() {
-        for (int i = 0; i < size; i++) {
-            setItem(i, new ItemStack(Material.AIR), MenuItemInteraction.ANY_CLICK, (_, _) -> {
-            });
-        }
-    }
 
     private void populateRecipeSlots(Player player, int start, int end) {
-        List<ForgeRecipe> recipes = new ArrayList<>(ForgeRecipe.REGISTERED_RECIPES);
+        List<ForgeRecipe> recipes = new ArrayList<>(ForgeRecipe.REGISTRY);
         int recipeIndex = 0;
 
         for (int i = start; i < end && recipeIndex < RECIPE_SLOTS.length; i++) {
@@ -159,14 +147,6 @@ public class ForgeRecipesMenu extends PaginatedMenu {
             setItem(RECIPE_SLOTS[recipeIndex], getItem(player, itemIndex), MenuItemInteraction.ANY_CLICK,
                 (p, t) -> onItemClick(p, itemIndex, t));
             recipeIndex++;
-        }
-    }
-
-    private void populateFillerSlots() {
-        ItemStack filler = MenuElementPreset.EMPTY_SLOT_FILLER.getItem();
-        for (int slot : FILLER_SLOTS) {
-            setItem(slot, filler, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-            });
         }
     }
 

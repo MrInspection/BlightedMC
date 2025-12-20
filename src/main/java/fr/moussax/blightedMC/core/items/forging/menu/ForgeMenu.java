@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC.core.items.forging.menu;
 
-import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.core.items.forging.ForgeFuel;
 import fr.moussax.blightedMC.core.items.forging.ForgeRecipe;
@@ -14,26 +13,23 @@ import fr.moussax.blightedMC.utils.Utilities;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Represents the interactive forge menu for players.
- * <p>
- * Allows viewing a forge recipe, checking ingredient and fuel requirements,
- * inserting fuel, and performing the forging operation. Integrates with
- * the player's inventory and displays status using GUI indicators.
- * </p>
+ * Defines the interactive forge menu for players.
+ *
+ * <p>The menu displays a forge recipe, checks ingredient and fuel requirements,
+ * allows inserting fuel, and performs the forging operation. Integrates with
+ * the player's inventory and provides status via GUI indicators.</p>
  */
 public class ForgeMenu extends Menu {
     private static final int[] GRID_SLOTS = {19, 20, 21, 28, 29, 30, 37, 38, 39};
-    private static final int[] SACRIFICED_ITEM_INDICATOR_SLOTS = {10, 11, 12, 13};
+    private static final int[] REQUIRED_ITEM_INDICATOR_SLOTS = {10, 11, 12, 13};
     private static final int[] FORGED_ITEM_INDICATOR_SLOTS = {15, 16};
     private static final int ITEM_INDICATOR = 23;
     private static final int MAXIMUM_FORGE_FUEL = 50000;
@@ -77,7 +73,7 @@ public class ForgeMenu extends Menu {
             checkRequirements(player);
         }
 
-        setupBackground();
+        fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
         setupGrid();
 
         if (recipe != null) {
@@ -89,13 +85,6 @@ public class ForgeMenu extends Menu {
         setupActionButtons(player);
     }
 
-    private void setupBackground() {
-        for (int i = 0; i < size; i++) {
-            setItem(i, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), MenuItemInteraction.ANY_CLICK, (_, _) -> {
-            });
-        }
-    }
-
     private void setupGrid() {
         ItemBuilder recipeSlot = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE, "§cLocked Slot");
         if (recipe == null) {
@@ -105,10 +94,7 @@ public class ForgeMenu extends Menu {
         }
 
         ItemStack gridItem = recipeSlot.toItemStack();
-        for (int slot : GRID_SLOTS) {
-            setItem(slot, gridItem, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-            });
-        }
+        fillSlots(GRID_SLOTS, gridItem);
     }
 
     private void setupResultDisplay() {
@@ -121,8 +107,8 @@ public class ForgeMenu extends Menu {
             return;
         }
 
-        ItemStack result = recipe.result().toItemStack().clone();
-        result.setAmount(recipe.amount());
+        ItemStack result = recipe.getForgedItem().toItemStack().clone();
+        result.setAmount(recipe.getForgedAmount());
         setItem(25, result, MenuItemInteraction.ANY_CLICK, (_, _) -> {
         });
     }
@@ -134,14 +120,14 @@ public class ForgeMenu extends Menu {
         boolean hasAllIngredients = requiredCounts.entrySet().stream()
             .allMatch(entry -> hasEnoughIngredient(player, entry.getKey(), entry.getValue()));
 
-        boolean hasSufficientFuel = blightedPlayer.getForgeFuel() >= recipe.fuelCost();
+        boolean hasSufficientFuel = blightedPlayer.getForgeFuel() >= recipe.getFuelCost();
 
         this.canForge = hasAllIngredients && hasSufficientFuel;
     }
 
     private Map<String, Integer> aggregateRequirements() {
         Map<String, Integer> counts = new HashMap<>();
-        for (CraftingObject ingredient : recipe.ingredients()) {
+        for (CraftingObject ingredient : recipe.getIngredients()) {
             String id = ingredient.getId();
             counts.put(id, counts.getOrDefault(id, 0) + ingredient.getAmount());
         }
@@ -153,7 +139,7 @@ public class ForgeMenu extends Menu {
         for (ItemStack item : player.getInventory().getContents()) {
             if (item == null || item.getType() == Material.AIR) continue;
 
-            String currentId = extractItemId(item, itemId);
+            String currentId = Utilities.resolveItemId(item, itemId);
             if (currentId.equals(itemId)) {
                 count += item.getAmount();
             }
@@ -161,26 +147,9 @@ public class ForgeMenu extends Menu {
         return count >= requiredAmount;
     }
 
-    private String extractItemId(ItemStack item, String targetId) {
-        if (targetId.startsWith("vanilla:")) {
-            return "vanilla:" + item.getType().name();
-        }
-
-        var meta = item.getItemMeta();
-        if (meta == null) {
-            return "vanilla:" + item.getType().name();
-        }
-
-        String customId = meta.getPersistentDataContainer().get(
-            new NamespacedKey(BlightedMC.getInstance(), "id"),
-            PersistentDataType.STRING
-        );
-        return customId != null ? customId : "vanilla:" + item.getType().name();
-    }
-
     private void displayRequiredIngredients() {
-        for (int i = 0; i < recipe.ingredients().size() && i < GRID_SLOTS.length; i++) {
-            CraftingObject ingredient = recipe.ingredients().get(i);
+        for (int i = 0; i < recipe.getIngredients().size() && i < GRID_SLOTS.length; i++) {
+            CraftingObject ingredient = recipe.getIngredients().get(i);
             ItemStack displayItem = createDisplayItem(ingredient);
             setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (_, _) -> {
             });
@@ -208,15 +177,8 @@ public class ForgeMenu extends Menu {
 
         ItemStack pane = new ItemBuilder(indicator, "§r").setHideTooltip().toItemStack();
 
-        for (int slot : SACRIFICED_ITEM_INDICATOR_SLOTS) {
-            setItem(slot, sacrificedItemPane, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-            });
-        }
-
-        for (int slot : FORGED_ITEM_INDICATOR_SLOTS) {
-            setItem(slot, forgedItemPane, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-            });
-        }
+        fillSlots(REQUIRED_ITEM_INDICATOR_SLOTS, sacrificedItemPane);
+        fillSlots(FORGED_ITEM_INDICATOR_SLOTS, forgedItemPane);
 
         setItem(ITEM_INDICATOR, pane, MenuItemInteraction.ANY_CLICK, (_, _) -> {
         });
@@ -274,7 +236,7 @@ public class ForgeMenu extends Menu {
     private void setupFuelButtons(Player player) {
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
         int currentFuel = blightedPlayer.getForgeFuel();
-        int requiredFuel = recipe != null ? recipe.fuelCost() : 0;
+        int requiredFuel = recipe != null ? recipe.getFuelCost() : 0;
 
         setItem(34, createFuelMeter(currentFuel, requiredFuel), MenuItemInteraction.ANY_CLICK, (_, _) -> {
         });
@@ -436,44 +398,34 @@ public class ForgeMenu extends Menu {
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
 
         consumeIngredients(player);
-        blightedPlayer.removeForgeFuel(recipe.fuelCost());
+        blightedPlayer.removeForgeFuel(recipe.getFuelCost());
         blightedPlayer.saveData();
 
-        // Play the synced sound sequence
         SoundSequence.FORGE_ITEM.play(player.getLocation());
-
-        // --- Animation Sequence (Synced to Sound Ticks) ---
-
-        // 0L - 6L: Winding Up (Left side fills Yellow)
         Utilities.delay(() -> setStatusSlot(10, Material.YELLOW_STAINED_GLASS_PANE), 0L);
         Utilities.delay(() -> setStatusSlot(11, Material.YELLOW_STAINED_GLASS_PANE), 2L);
         Utilities.delay(() -> setStatusSlot(12, Material.YELLOW_STAINED_GLASS_PANE), 4L);
         Utilities.delay(() -> setStatusSlot(13, Material.YELLOW_STAINED_GLASS_PANE), 6L);
-
-        // 8L - 14L: Heating Up (Left turns Orange, Right side fills Orange)
-        Utilities.delay(() -> updateStatusPanes(Material.ORANGE_STAINED_GLASS_PANE, SACRIFICED_ITEM_INDICATOR_SLOTS), 8L);
+        Utilities.delay(() -> updateStatusPanes(Material.ORANGE_STAINED_GLASS_PANE, REQUIRED_ITEM_INDICATOR_SLOTS), 8L);
         Utilities.delay(() -> setStatusSlot(15, Material.ORANGE_STAINED_GLASS_PANE), 10L);
         Utilities.delay(() -> setStatusSlot(16, Material.ORANGE_STAINED_GLASS_PANE), 12L);
         Utilities.delay(() -> setStatusSlot(ITEM_INDICATOR, Material.ORANGE_STAINED_GLASS_PANE), 14L);
 
-        // 16L: IMPACT (Everything flashes RED)
         Utilities.delay(() -> {
-            updateStatusPanes(Material.RED_STAINED_GLASS_PANE, SACRIFICED_ITEM_INDICATOR_SLOTS);
+            updateStatusPanes(Material.RED_STAINED_GLASS_PANE, REQUIRED_ITEM_INDICATOR_SLOTS);
             updateStatusPanes(Material.RED_STAINED_GLASS_PANE, FORGED_ITEM_INDICATOR_SLOTS);
             setStatusSlot(ITEM_INDICATOR, Material.RED_STAINED_GLASS_PANE);
         }, 16L);
 
-        // 18L: SUCCESS (Everything turns LIME)
         Utilities.delay(() -> {
-            updateStatusPanes(Material.LIME_STAINED_GLASS_PANE, SACRIFICED_ITEM_INDICATOR_SLOTS);
+            updateStatusPanes(Material.LIME_STAINED_GLASS_PANE, REQUIRED_ITEM_INDICATOR_SLOTS);
             updateStatusPanes(Material.LIME_STAINED_GLASS_PANE, FORGED_ITEM_INDICATOR_SLOTS);
             setStatusSlot(ITEM_INDICATOR, Material.LIME_STAINED_GLASS_PANE);
         }, 18L);
 
-        // 20L: Finish & Give Item
         Utilities.delay(() -> {
-            ItemStack result = recipe.result().toItemStack().clone();
-            result.setAmount(recipe.amount());
+            ItemStack result = recipe.getForgedItem().toItemStack().clone();
+            result.setAmount(recipe.getForgedAmount());
 
             if (player.isOnline()) {
                 HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(result);
@@ -519,32 +471,8 @@ public class ForgeMenu extends Menu {
     }
 
     private void consumeIngredients(Player player) {
-        for (CraftingObject ingredient : recipe.ingredients()) {
-            removeInventoryItems(player, ingredient);
-        }
-    }
-
-    private void removeInventoryItems(Player player, CraftingObject ingredient) {
-        String requiredId = ingredient.getId();
-        int remainingToRemove = ingredient.getAmount();
-        ItemStack[] contents = player.getInventory().getContents();
-
-        for (int slot = 0; slot < contents.length; slot++) {
-            ItemStack item = contents[slot];
-            if (item == null || item.getType() == Material.AIR || remainingToRemove <= 0) continue;
-
-            String currentId = extractItemId(item, requiredId);
-            if (!currentId.equals(requiredId)) continue;
-
-            int amountToDeduct = Math.min(item.getAmount(), remainingToRemove);
-            int newAmount = item.getAmount() - amountToDeduct;
-            remainingToRemove -= amountToDeduct;
-
-            if (newAmount <= 0) {
-                player.getInventory().setItem(slot, null);
-            } else {
-                item.setAmount(newAmount);
-            }
+        for (CraftingObject ingredient : recipe.getIngredients()) {
+            Utilities.consumeItemsFromInventory(player, ingredient);
         }
     }
 }
