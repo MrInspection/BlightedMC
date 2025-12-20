@@ -8,23 +8,28 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Base class for interactive inventory menus.
  *
  * <p>Menus display items in slots and handle player interactions
- * through {@link MenuItemInteraction} and {@link MenuAction}.</p>
+ * through {@link MenuItemInteraction} and {@link MenuAction}.
+ * Slots can be set individually, in bulk, or filled automatically for empty slots.
+ * This provides flexibility for creating complex, interactive inventory layouts.</p>
  *
- * <p>Extend this class and implement {@link #build(Player)} to define the menu layout.</p>
+ * <p>Extend this class and implement {@link #build(Player)} to define
+ * the menu layout and behavior for players.</p>
  */
 public abstract class Menu implements InventoryHolder {
     protected final String title;
     protected final int size;
     protected final Map<Integer, MenuSlot> slots = new HashMap<>();
     protected Inventory inventory;
-    protected Player currentPlayer;
+    protected UUID viewerId;
 
     /**
      * Creates a new menu.
@@ -48,64 +53,137 @@ public abstract class Menu implements InventoryHolder {
     /**
      * Opens the menu for a player.
      *
-     * <p>Clears existing slots, rebuilds content,
-     * sets items, and registers the menu in {@link MenuRouter}.</p>
+     * <p>Clears existing slots, rebuilds content, sets items, and
+     * registers the menu in {@link MenuRouter}.</p>
      *
      * @param player target player
      */
     public void open(Player player) {
-        this.currentPlayer = player;
+        this.viewerId = player.getUniqueId();
+
         slots.clear();
         build(player);
-        for (int i = 0; i < size; i++) {
-            MenuSlot slot = slots.get(i);
-            inventory.setItem(i, slot != null ? slot.item : null);
+
+        inventory.clear();
+        for (Map.Entry<Integer, MenuSlot> entry : slots.entrySet()) {
+            inventory.setItem(entry.getKey(), entry.getValue().item);
         }
+
         player.openInventory(inventory);
         MenuRouter.setCurrentMenu(player, this);
     }
 
     /**
-     * Places an item in a slot with an action.
+     * Safely retrieves the player currently viewing this menu.
+     *
+     * @return the player, or null if they are offline
+     */
+    protected Player getPlayer() {
+        return viewerId != null ? Bukkit.getPlayer(viewerId) : null;
+    }
+
+    /**
+     * Places an item in a slot with an associated action.
      *
      * @param slot        slot index
      * @param item        displayed item
      * @param interaction triggering interaction
-     * @param action      action to execute
+     * @param action      action to execute when clicked
      */
     public void setItem(int slot, ItemStack item, MenuItemInteraction interaction, MenuAction action) {
         slots.put(slot, new MenuSlot(item, interaction, action));
     }
 
     /**
-     * Places a preset item in a slot with an action.
+     * Places a preset item in a slot with an associated action.
      *
      * @param slot        slot index
      * @param preset      displayed preset item
      * @param interaction triggering interaction
-     * @param action      action to execute
+     * @param action      action to execute when clicked
      */
     public void setItem(int slot, MenuElementPreset preset, MenuItemInteraction interaction, MenuAction action) {
         setItem(slot, preset.getItem(), interaction, action);
     }
 
     /**
-     * Fills empty slots with a preset item.
+     * Fills the specified slots with an ItemStack.
      *
-     * @param preset item preset
+     * @param slots       slot indices to fill
+     * @param item        item to place
+     * @param interaction interaction type for each slot
      */
-    public void fillEmptyWith(MenuElementPreset preset) {
-        for (int i = 0; i < size; i++) {
-            if (!slots.containsKey(i)) {
-                setItem(i, preset.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+    public void fillSlots(int[] slots, ItemStack item, MenuItemInteraction interaction) {
+        for (int slot : slots) {
+            setItem(slot, item, interaction, (player, type) -> {
+            });
+        }
+    }
+
+    /**
+     * Fills the specified slots with a MenuElementPreset.
+     *
+     * @param slots       slot indices to fill
+     * @param preset      preset item
+     * @param interaction interaction type for each slot
+     */
+    public void fillSlots(int[] slots, MenuElementPreset preset, MenuItemInteraction interaction) {
+        for (int slot : slots) {
+            setItem(slot, preset, interaction, (player, type) -> {
+            });
+        }
+    }
+
+    /**
+     * Fills the specified slots with an ItemStack using ANY_CLICK.
+     *
+     * @param slots slot indices to fill
+     * @param item  item to place
+     */
+    public void fillSlots(int[] slots, ItemStack item) {
+        fillSlots(slots, item, MenuItemInteraction.ANY_CLICK);
+    }
+
+    /**
+     * Fills the specified slots with a MenuElementPreset using ANY_CLICK.
+     *
+     * @param slots  slot indices to fill
+     * @param preset preset item
+     */
+    public void fillSlots(int[] slots, MenuElementPreset preset) {
+        fillSlots(slots, preset.getItem(), MenuItemInteraction.ANY_CLICK);
+    }
+
+    /**
+     * Fills all empty slots in the menu with a specific ItemStack.
+     *
+     * @param item item to fill empty slots
+     */
+    public void fillEmptyWith(ItemStack item) {
+        for (int slot = 0; slot < size; slot++) {
+            if (!slots.containsKey(slot)) {
+                setItem(slot, item, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                 });
             }
         }
     }
 
     /**
-     * {@inheritDoc}
+     * Fills all empty slots in the menu with a preset item.
+     *
+     * @param preset preset item to fill empty slots
      */
+    public void fillEmptyWith(MenuElementPreset preset) {
+        fillEmptyWith(preset.getItem());
+    }
+
+    /**
+     * Clears all items from the visual inventory and resets internal slot mappings.
+     */
+    public void clearInventory() {
+        inventory.clear();
+        slots.clear();
+    }
 
     @Override
     @NonNull
@@ -115,47 +193,49 @@ public abstract class Menu implements InventoryHolder {
 
     /**
      * Opens a submenu for the current player.
+     *
+     * @param submenu submenu to open
      */
     public void openSubMenu(Menu submenu) {
-        submenu.open(currentPlayer);
+        Player player = getPlayer();
+        if (player != null) submenu.open(player);
     }
 
     /**
      * Returns to the previous menu via {@link MenuRouter}.
      */
     public void goBack() {
-        MenuRouter.goBack(currentPlayer);
+        Player player = getPlayer();
+        if (player != null) MenuRouter.goBack(player);
     }
 
     /**
      * Closes the menu for the current player.
      */
     public void close() {
-        if (currentPlayer != null) {
-            currentPlayer.closeInventory();
-        }
+        Player player = getPlayer();
+        if (player != null) player.closeInventory();
     }
 
     /**
-     * Refreshes the menu for the specified player.
+     * Refreshes the menu for a specific player without closing the inventory window.
      *
-     * <p>This method clears all existing slots, rebuilds the menu content
-     * by calling {@link #build(Player)}, updates all items in the inventory,
-     * and forces the player's client to refresh its view of the inventory.</p>
+     * <p>This clears existing slots, rebuilds the menu by calling {@link #build(Player)},
+     * updates the inventory, and preserves the cursor position.</p>
      *
-     * @param player the player for whom the menu should be refreshed
+     * @param player player to refresh
      */
     @SuppressWarnings("UnstableApiUsage")
     protected void refresh(Player player) {
         slots.clear();
         build(player);
-        for (int i = 0; i < size; i++) {
-            MenuSlot slot = slots.get(i);
-            inventory.setItem(i, slot != null ? slot.item : null);
+        inventory.clear();
+
+        for (Map.Entry<Integer, MenuSlot> entry : slots.entrySet()) {
+            inventory.setItem(entry.getKey(), entry.getValue().item);
         }
-        if (player != null) {
-            player.updateInventory();
-        }
+
+        player.updateInventory();
     }
 
     /**
@@ -163,14 +243,14 @@ public abstract class Menu implements InventoryHolder {
      */
     public static class MenuSlot {
         public final ItemStack item;
-        private final Map<MenuItemInteraction, MenuAction> actions = new HashMap<>();
+        private final Map<MenuItemInteraction, MenuAction> actions = new EnumMap<>(MenuItemInteraction.class);
 
         /**
          * Creates a new menu slot.
          *
          * @param item        displayed item
          * @param interaction triggering interaction
-         * @param action      executed action
+         * @param action      action executed on click
          */
         public MenuSlot(ItemStack item, MenuItemInteraction interaction, MenuAction action) {
             this.item = item;
