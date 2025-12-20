@@ -221,7 +221,7 @@ public class RitualAltarMenu extends Menu {
 
     private void handleFinalImpact(Location loc) {
         if (ritual.getSummonedCreature() != null) {
-            Bukkit.broadcastMessage("§5 ☤ §dThe §c" + ritual.getSummonedCreature().getName() + " §dhas been summoned by §f" + currentPlayer.getName() + "§d.");
+            Bukkit.broadcastMessage("§5 ☤ §dThe §c" + ritual.getSummonedCreature().getName() + " §dhas been summoned by §f" + getPlayer().getName() + "§d.");
             ritual.getSummonedCreature().clone().spawn(loc);
         }
     }

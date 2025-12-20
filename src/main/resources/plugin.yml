@@ -33,3 +33,5 @@ commands:
     description: Toggle fly mode for yourself or another player
   forge:
     description: Forge command
+  altar:
+    description: Altar command

@@ -175,7 +175,7 @@ public class GemsCommand implements CommandExecutor {
             player.sendMessage("§8 ■ §7You received §d" + amount + " §7gems.");
         });
 
-        inform(sender, "§8 ■ §7You gave §d" + amount + " §7gems to all §donline §7players.");
+        inform(sender, "You gave §d" + amount + " §7gems to all §donline §7players.");
         return true;
     }
 }
