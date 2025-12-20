@@ -232,6 +232,18 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     /**
+     * Called when this entity dies.
+     * <p>
+     * Intended for subclass-specific death behavior.
+     * The default implementation does nothing.
+     *
+     * @param location death location
+     */
+    public void onDeath(Location location) {
+        // Default implementation does nothing
+    }
+
+    /**
      * Applies damage to the underlying entity and updates the display.
      *
      * @param amount amount of damage to apply

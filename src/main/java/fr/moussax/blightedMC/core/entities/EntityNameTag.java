@@ -5,6 +5,7 @@ public enum EntityNameTag {
     DEFAULT,
     BLIGHTED,
     SMALL_NUMBER,
+    ANCIENT,
     BOSS;
 
     /**
@@ -22,6 +23,7 @@ public enum EntityNameTag {
         return switch (this) {
             case HIDDEN -> "";
             case BOSS -> "§d﴾ §5" + name + " " + colorPrefix + toShortNumber(health) + "§c❤ §d﴿";
+            case ANCIENT -> "§4⚚ " + name + " " + colorPrefix + toShortNumber(health) + "§c❤";
             case BLIGHTED -> "§5" + name + " §d" + (int) health + "§r/§5" + maxHealth + "§c❤";
             case SMALL_NUMBER -> "§c" + name + " " + colorPrefix + toShortNumber(health) + "§c❤";
             case DEFAULT -> "§c" + name + " " + colorPrefix + (int) health + "§8/§a" + maxHealth + "§c❤";

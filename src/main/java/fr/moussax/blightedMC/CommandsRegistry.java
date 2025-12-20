@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC;
 
+import fr.moussax.blightedMC.commands.AltarCommand;
 import fr.moussax.blightedMC.commands.CraftCommand;
 import fr.moussax.blightedMC.commands.ForgeCommand;
 import fr.moussax.blightedMC.commands.admin.*;
@@ -16,6 +17,7 @@ public final class CommandsRegistry {
     }
 
     public static void registerAll() {
+        CommandBuilder.register("altar", new AltarCommand());
         CommandBuilder.register("craft", new CraftCommand());
         CommandBuilder.register("forge", new ForgeCommand());
         CommandBuilder.register("test", new TestCommand());
