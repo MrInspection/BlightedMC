@@ -4,51 +4,48 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
-
 /**
- * A menu that supports automatic pagination for large item collections.
+ * Abstract base class for menus that support automatic pagination for large item collections.
  *
- * <p>Only a subset of items is displayed per page, with navigation buttons
- * for previous/next pages and a close button.</p>
- *
- * <p>Extend this class to implement a paginated menu by defining
- * {@link #getTotalItems(Player)} and {@link #getItem(Player, int)}.</p>
+ * <p>Displays a subset of items per page, with navigation buttons (Previous/Next) and a Close button.
+ * Extend this class and implement {@link #getTotalItems(Player)} and {@link #getItem(Player, int)}
+ * to provide the item collection.</p>
  */
 public abstract class PaginatedMenu extends Menu {
     protected int currentPage = 0;
     protected int totalItems = 0;
 
     /**
-     * Creates a paginated menu.
+     * Creates a new paginated menu.
      *
      * @param title menu title
-     * @param size  inventory size (multiple of 9)
+     * @param size  inventory size (must be multiple of 9)
      */
     public PaginatedMenu(String title, int size) {
         super(title, size);
     }
 
     /**
-     * Returns the total number of items to paginate.
+     * Returns the total number of items to paginate for the given player.
      *
      * @param player player viewing the menu
-     * @return total item count
+     * @return total number of items
      */
     protected abstract int getTotalItems(Player player);
 
     /**
-     * Returns the total number of items to paginate.
+     * Returns the {@link ItemStack} representing the item at the specified global index.
      *
      * @param player player viewing the menu
-     * @return total item count
+     * @param index  global item index (not page-relative)
+     * @return item to display at this index
      */
-
     protected abstract ItemStack getItem(Player player, int index);
 
     /**
      * Returns the number of items displayed per page.
      *
-     * <p>Default is {@code size - 9}, reserving the bottom row for navigation.</p>
+     * <p>By default, all slots except the bottom row are used for items.</p>
      *
      * @return number of items per page
      */
@@ -70,38 +67,44 @@ public abstract class PaginatedMenu extends Menu {
     @Override
     public void build(Player player) {
         totalItems = getTotalItems(player);
+
         int start = currentPage * getItemsPerPage();
         int end = Math.min(start + getItemsPerPage(), totalItems);
+
         int slotIndex = 0;
         for (int i = start; i < end; i++) {
             final int itemIndex = i;
             setItem(slotIndex++, getItem(player, itemIndex), MenuItemInteraction.ANY_CLICK, (p, t) -> onItemClick(p, itemIndex, t));
         }
-        // Navigation
+
+        // Navigation buttons
         if (currentPage > 0) {
             setItem(size - 9, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                 currentPage--;
                 MenuManager.openMenu(this, p);
             });
         }
+
         if (end < totalItems) {
             setItem(size - 1, MenuElementPreset.NEXT_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                 currentPage++;
                 MenuManager.openMenu(this, p);
             });
         }
+
         setItem(size - 5, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
-        fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
     }
 
     /**
      * Called when a player clicks an item in the paginated list.
      *
-     * @param player    clicking player
-     * @param index     global item index
+     * <p>Subclasses should override this to define specific behavior for item clicks.</p>
+     *
+     * @param player    player who clicked the item
+     * @param index     global index of the clicked item
      * @param clickType type of click
      */
     protected void onItemClick(Player player, int index, ClickType clickType) {
-        // Override in subclasses to handle item clicks
+        // Default: no action. Override in subclasses.
     }
 }

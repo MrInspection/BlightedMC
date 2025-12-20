@@ -225,7 +225,7 @@ public class BlightedEntitiesListener implements Listener {
         Player killer = dead.getKiller();
         BlightedPlayer player = (killer != null) ? BlightedPlayer.getBlightedPlayer(killer) : null;
         blighted.dropLoot(dead.getLocation(), player);
-
+        blighted.onDeath(dead.getLocation());
         BLIGHTED_ENTITIES.remove(dead.getUniqueId());
 
         event.getDrops().clear();

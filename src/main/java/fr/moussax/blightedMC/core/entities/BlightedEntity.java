@@ -184,7 +184,9 @@ public abstract class BlightedEntity implements Cloneable {
         setAttribute(Attribute.ARMOR, defense);
         applyAttributes();
         entity.setHealth(maxHealth);
+
         entity.setPersistent(true);
+        entity.setRemoveWhenFarAway(false);
     }
 
     /**
@@ -229,6 +231,18 @@ public abstract class BlightedEntity implements Cloneable {
         removeAllAttachments();
         lifecycleTasks.cancelAll();
         entity.setHealth(0);
+    }
+
+    /**
+     * Called when this entity dies.
+     * <p>
+     * Intended for subclass-specific death behavior.
+     * The default implementation does nothing.
+     *
+     * @param location death location
+     */
+    public void onDeath(Location location) {
+        // Default implementation does nothing
     }
 
     /**

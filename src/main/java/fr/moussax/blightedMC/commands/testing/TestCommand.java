@@ -1,6 +1,8 @@
 package fr.moussax.blightedMC.commands.testing;
 
+import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.sound.SoundSequence;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,7 +17,7 @@ public class TestCommand implements CommandExecutor {
         if (!(label.equalsIgnoreCase("test") && sender instanceof Player player)) return false;
 
         if (args.length == 0) {
-            inform(player, "@params: §dXP, SLAYER_BOSS, BOSS_1, BOSS_2, GEMSTONE");
+            inform(player, "@params: §dXP, SLAYER_BOSS, BOSS, BOSS_DEFEAT, GEMSTONE");
             return false;
         }
 
@@ -23,6 +25,7 @@ public class TestCommand implements CommandExecutor {
             SoundSequence.BLIGHTED_GEMSTONE_CONSUME.play(player.getLocation());
 
             inform(player, "Executing §dGEMSTONE §7sound sequence test.");
+            player.getInventory().addItem(new ItemBuilder(Material.PLAYER_HEAD).setSkullOwner(player.getUniqueId()).toItemStack());
             return true;
         }
 
@@ -34,14 +37,20 @@ public class TestCommand implements CommandExecutor {
         }
 
         if (args[0].equalsIgnoreCase("SLAYER_BOSS")) {
-            SoundSequence.SLAYER_BOSS_SPAWN.play(player.getLocation());
+            SoundSequence.SLAYER_MOB_SPAWN.play(player.getLocation());
             inform(player, "Executing §dSLAYER_BOSS_SPAWN §7sound sequence test.");
             return true;
         }
 
-        if (args[0].equalsIgnoreCase("BOSS_1")) {
-            SoundSequence.BLIGHTED_BOSS_SPAWN.play(player.getLocation());
-            inform(player, "Executing §dBLIGHTED_BOSS (v1) §7sound sequence test.");
+        if (args[0].equalsIgnoreCase("BOSS")) {
+            SoundSequence.ANCIENT_MOB_SPAWN.play(player.getLocation());
+            inform(player, "Executing §dBLIGHTED_BOSS §7sound sequence test.");
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("BOSS_DEFEAT")) {
+            SoundSequence.ANCIENT_MOB_DEFEAT.play(player.getLocation());
+            inform(player, "Executing §dBLIGHTED_DEFEAT §7sound sequence test.");
             return true;
         }
         return false;

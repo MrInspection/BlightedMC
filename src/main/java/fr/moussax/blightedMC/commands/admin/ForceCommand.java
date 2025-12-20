@@ -39,7 +39,9 @@ public class ForceCommand implements CommandExecutor {
         }
 
         String commandToExecute = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-        if (commandToExecute.startsWith("forcecommand ")) {
+        commandToExecute = commandToExecute.replaceFirst("^[/\\s]+", "");
+
+        if (commandToExecute.equalsIgnoreCase("forcecommand") || commandToExecute.toLowerCase().startsWith("forcecommand ")) {
             warn(player, "You can't force a player to use the §4forcecommand§c.");
             return false;
         }
@@ -51,6 +53,7 @@ public class ForceCommand implements CommandExecutor {
             ClickEvent.Action.SUGGEST_COMMAND,
             "/" + commandToExecute
         );
+
         TextComponent afterCommand = new TextComponent("§7.");
 
         message.addExtra(commandWord);

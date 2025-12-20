@@ -1,28 +1,22 @@
-package fr.moussax.blightedMC.core.items.forging.menu;
+package fr.moussax.blightedMC.core.entities.rituals.menu;
 
+import fr.moussax.blightedMC.core.entities.rituals.AncientRitual;
 import fr.moussax.blightedMC.core.items.crafting.CraftingObject;
-import fr.moussax.blightedMC.core.items.forging.ForgeRecipe;
 import fr.moussax.blightedMC.core.menus.*;
+import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-/**
- * Paginated menu displaying all registered forge recipes.
- * <p>
- * Allows players to browse available forge recipes, view required ingredients
- * and fuel cost, and select a recipe to open the {@link ForgeMenu} for forging.
- * Navigation buttons for paging, closing, and returning to a previous menu are included.
- * </p>
- */
-public class ForgeRecipesMenu extends PaginatedMenu {
+public class RitualsDirectoryMenu extends PaginatedMenu {
+
     private static final int[] RECIPE_SLOTS = {
         10, 11, 12, 13, 14, 15, 16,
         19, 20, 21, 22, 23, 24, 25,
@@ -41,22 +35,17 @@ public class ForgeRecipesMenu extends PaginatedMenu {
     private static final int NEXT_BUTTON_SLOT = 50;
 
     private final Menu previousMenu;
-    private final List<ForgeRecipe> cachedRecipes;
+    private final List<AncientRitual> cachedRituals;
 
-    /**
-     * Constructs a ForgeRecipesMenu.
-     *
-     * @param previousMenu the menu to return to when pressing back
-     */
-    public ForgeRecipesMenu(Menu previousMenu) {
-        super("Forge Recipes", 54);
+    public RitualsDirectoryMenu(Menu previousMenu) {
+        super("Ancient Rituals", 54);
         this.previousMenu = previousMenu;
-        this.cachedRecipes = new ArrayList<>(ForgeRecipe.REGISTRY);
+        this.cachedRituals = new ArrayList<>(AncientRitual.REGISTRY);
     }
 
     @Override
     protected int getTotalItems(Player player) {
-        return cachedRecipes.size();
+        return cachedRituals.size();
     }
 
     @Override
@@ -66,12 +55,12 @@ public class ForgeRecipesMenu extends PaginatedMenu {
 
     @Override
     protected ItemStack getItem(Player player, int index) {
-        if (index >= cachedRecipes.size()) {
+        if (index >= cachedRituals.size()) {
             return new ItemStack(Material.AIR);
         }
 
-        ForgeRecipe recipe = cachedRecipes.get(index);
-        return buildRecipeDisplayItem(recipe);
+        AncientRitual ritual = cachedRituals.get(index);
+        return buildRiteDisplayItem(ritual);
     }
 
     @Override
@@ -80,29 +69,40 @@ public class ForgeRecipesMenu extends PaginatedMenu {
         int start = currentPage * getItemsPerPage();
         int end = Math.min(start + getItemsPerPage(), totalItems);
 
-        clearInventory();
-        populateRecipeSlots(player, start, end);
+        populateRiteSlots(player, start, end);
         fillSlots(FILLER_SLOTS, MenuElementPreset.EMPTY_SLOT_FILLER);
         setupNavigationButtons(player, end);
+
+        fillEmptyWith(new ItemStack(Material.AIR));
     }
 
     @Override
-    protected void onItemClick(Player player, int index, ClickType clickType) {
-        if (index >= cachedRecipes.size()) {
+    protected void onItemClick(Player player, int index, org.bukkit.event.inventory.ClickType clickType) {
+        if (index >= cachedRituals.size()) {
             return;
         }
 
-        ForgeRecipe recipe = cachedRecipes.get(index);
-        MenuManager.openMenu(new ForgeMenu(recipe, this), player);
+        AncientRitual rite = cachedRituals.get(index);
+        MenuManager.openMenu(new RitualAltarMenu(rite, this), player);
     }
 
-    private ItemStack buildRecipeDisplayItem(ForgeRecipe recipe) {
-        ItemStack resultItem = recipe.getForgedItem().toItemStack().clone();
-        resultItem.setAmount(recipe.getForgedAmount());
+    private ItemStack buildRiteDisplayItem(AncientRitual ritual) {
+        ItemStack summoningItem = ritual.getSummoningItem().clone();
 
-        ItemMeta meta = resultItem.getItemMeta();
+        // If the result item doesn't have a display name, use the entity name if possible
+        if (!summoningItem.hasItemMeta() || !Objects.requireNonNull(summoningItem.getItemMeta()).hasDisplayName()) {
+            ItemBuilder builder = new ItemBuilder(summoningItem);
+            if (ritual.getSummonedCreature() != null) {
+                builder.setDisplayName("§5" + ritual.getSummonedCreature().getName());
+            } else {
+                builder.setDisplayName("§5Unknown Ritual");
+            }
+            summoningItem = builder.toItemStack();
+        }
+
+        ItemMeta meta = summoningItem.getItemMeta();
         if (meta == null) {
-            return resultItem;
+            return summoningItem;
         }
 
         List<String> lore = meta.getLore();
@@ -110,42 +110,45 @@ public class ForgeRecipesMenu extends PaginatedMenu {
             lore = new ArrayList<>();
         }
 
-        appendRecipeLore(lore, recipe);
+        appendRiteLore(lore, ritual);
         meta.setLore(lore);
-        resultItem.setItemMeta(meta);
+        summoningItem.setItemMeta(meta);
 
-        return resultItem;
+        return summoningItem;
     }
 
-    private void appendRecipeLore(List<String> lore, ForgeRecipe recipe) {
+    private void appendRiteLore(List<String> lore, AncientRitual ritual) {
         lore.add("");
-        lore.add(" §7Items required:");
+        lore.add(" §7Offerings required: ");
 
-        for (CraftingObject ingredient : recipe.getIngredients()) {
-            String ingredientName = Utilities.extractIngredientName(ingredient);
-            lore.add(" §8‣ " + ingredientName + " §8x" + ingredient.getAmount());
+        for (CraftingObject offering : ritual.getOfferings()) {
+            String offeringName = Utilities.extractIngredientName(offering);
+            lore.add(" §8‣ " + offeringName + " §8x" + offering.getAmount());
         }
 
-        lore.add("");
-        lore.add(" §8Consumes §6🪣 " + Formatter.formatDecimalWithCommas(recipe.getFuelCost()) + " mB ");
-        lore.add(" §8of fuel to forge.");
+        if (ritual.getGemstoneCost() > 0) {
+            lore.add(" §8‣ §d" + Formatter.formatDecimalWithCommas(ritual.getGemstoneCost()) + " Gems");
+        }
+        if (ritual.getExperienceLevelCost() > 0) {
+            lore.add(" §8‣ §3" + Formatter.formatDecimalWithCommas(ritual.getExperienceLevelCost()) + " XP Level");
+        }
+
         lore.add("");
         lore.add("§eClick to select!");
     }
 
+    private void populateRiteSlots(Player player, int start, int end) {
+        int riteIndex = 0;
 
-    private void populateRecipeSlots(Player player, int start, int end) {
-        int recipeIndex = 0;
-
-        for (int i = start; i < end && recipeIndex < RECIPE_SLOTS.length; i++) {
-            if (i >= cachedRecipes.size()) {
+        for (int i = start; i < end && riteIndex < RECIPE_SLOTS.length; i++) {
+            if (i >= cachedRituals.size()) {
                 break;
             }
 
             final int itemIndex = i;
-            setItem(RECIPE_SLOTS[recipeIndex], getItem(player, itemIndex), MenuItemInteraction.ANY_CLICK,
+            setItem(RECIPE_SLOTS[riteIndex], getItem(player, itemIndex), MenuItemInteraction.ANY_CLICK,
                 (p, t) -> onItemClick(p, itemIndex, t));
-            recipeIndex++;
+            riteIndex++;
         }
     }
 

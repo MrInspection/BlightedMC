@@ -1,23 +1,23 @@
 package fr.moussax.blightedMC.core.items.forging;
 
-import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
+import fr.moussax.blightedMC.utils.Utilities;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Utility class for handling forge fuels.
- * <p>
- * Maps specific items (vanilla or custom) to fuel values used in forging.
- * Provides methods to query total fuel, per-item fuel, and fuel validity.
- * </p>
+ * Provides utility methods for managing forge fuels.
+ *
+ * <p>Maintains a mapping of specific items (vanilla or custom) to their fuel values
+ * used in forging. Supports querying the fuel provided by a single item or an entire
+ * stack, and checking whether an item is valid fuel.</p>
+ *
+ * <p>All methods are static and the class is non-instantiable.</p>
  */
-public class ForgeFuel {
-
-    /** Mapping of item IDs to fuel amounts. */
+public final class ForgeFuel {
     private static final Map<String, Integer> FORGE_FUELS = new HashMap<>();
 
     static {
@@ -31,19 +31,18 @@ public class ForgeFuel {
         FORGE_FUELS.put("PLASMA_LAVA_BUCKET", 50000);
     }
 
+    private ForgeFuel() {}
+
     /**
      * Returns the total fuel provided by the given item stack.
      *
      * @param item the item stack to evaluate
      * @return total fuel amount (fuel per item * item quantity)
      */
-    public static int getFuelAmount(ItemStack item) {
-        if (item == null || item.getType() == Material.AIR) return 0;
+    public static int getFuelAmount(@NonNull ItemStack item) {
+        if (item.getType() == Material.AIR) return 0;
 
-        String id = getCustomId(item);
-        if (id == null) {
-            id = "vanilla:" + item.getType().name();
-        }
+        String id = Utilities.resolveItemId(item, "");
 
         return FORGE_FUELS.getOrDefault(id, 0) * item.getAmount();
     }
@@ -54,27 +53,11 @@ public class ForgeFuel {
      * @param item the item stack to evaluate
      * @return fuel amount for a single item
      */
-    public static int getFuelPerItem(ItemStack item) {
-        if (item == null || item.getType() == Material.AIR) return 0;
+    public static int getFuelPerItem(@NonNull ItemStack item) {
+        if (item.getType() == Material.AIR) return 0;
 
-        String id = getCustomId(item);
-        if (id == null) {
-            id = "vanilla:" + item.getType().name();
-        }
-
+        String id = Utilities.resolveItemId(item, "");
         return FORGE_FUELS.getOrDefault(id, 0);
-    }
-
-    /**
-     * Retrieves the custom item ID from the item's persistent data.
-     *
-     * @param item the item stack
-     * @return custom ID if present, otherwise {@code null}
-     */
-    private static String getCustomId(ItemStack item) {
-        if (item.getItemMeta() == null) return null;
-        return item.getItemMeta().getPersistentDataContainer().get(
-            ItemDirectory.ID_KEY, PersistentDataType.STRING);
     }
 
     /**

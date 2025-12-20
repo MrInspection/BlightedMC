@@ -5,66 +5,64 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.UUID;
 
 /**
- * Handles menu navigation and history for players.
+ * Handles the navigation and history of opened menus for each player.
  *
- * <p>Each player has a stack of menus representing their navigation history.
- * The top of the stack is the currently opened menu.</p>
+ * <p>This class maintains a stack of menus per player to allow
+ * going back to the previous menu and clearing menu history.</p>
  */
 public class MenuRouter {
-    private static final Map<Player, Stack<Menu>> history = new HashMap<>();
+    private static final Map<UUID, Stack<Menu>> history = new HashMap<>();
 
     /**
-     * Registers the given menu as the current menu for the player.
-     * Adds it to the player's navigation history.
+     * Registers the currently opened menu for a player.
      *
-     * @param player the player
-     * @param menu   the menu to set as current
+     * <p>If the player already has a menu stack, the new menu is pushed
+     * onto it. Otherwise, a new stack is created.</p>
+     *
+     * @param player the player opening the menu
+     * @param menu   the menu to register as current
      */
     public static void setCurrentMenu(Player player, Menu menu) {
-        history.computeIfAbsent(player, k -> new Stack<>()).push(menu);
+        history.computeIfAbsent(player.getUniqueId(), k -> new Stack<>()).push(menu);
     }
 
     /**
-     * Goes back to the previous menu in the player's history.
-     * <ul>
-     *   <li>If there is a previous menu, it is opened.</li>
-     *   <li>If no previous menu exists, the inventory is closed
-     *       and the history is cleared.</li>
-     * </ul>
+     * Navigates back to the previous menu for the player.
      *
-     * @param player the player
+     * <p>If the player has no previous menu, their inventory is closed.
+     * Otherwise, the previous menu in the stack is reopened.</p>
+     *
+     * @param player the player navigating back
      */
     public static void goBack(Player player) {
-        Stack<Menu> stack = history.get(player);
-        if (stack == null || stack.size() <= 1) {
+        Stack<Menu> stack = history.get(player.getUniqueId());
+        if (stack == null || stack.isEmpty()) {
             player.closeInventory();
-            if (stack != null) stack.clear();
             return;
         }
+
         stack.pop();
-        stack.peek().open(player);
+
+        if (stack.isEmpty()) {
+            player.closeInventory();
+            history.remove(player.getUniqueId());
+        } else {
+            stack.peek().open(player);
+        }
     }
 
     /**
-     * Returns the currently opened menu for the player.
+     * Clears the menu history for a specific player.
      *
-     * @param player the player
-     * @return the current menu, or {@code null} if none
-     */
-    public static Menu getCurrent(Player player) {
-        Stack<Menu> stack = history.get(player);
-        return (stack == null || stack.isEmpty()) ? null : stack.peek();
-    }
-
-    /**
-     * Clears the player's menu history.
+     * <p>After calling this, {@link #goBack(Player)} will immediately close the inventory
+     * if called for the same player.</p>
      *
-     * @param player the player
+     * @param player the player whose menu history should be cleared
      */
     public static void clearHistory(Player player) {
-        Stack<Menu> stack = history.get(player);
-        if (stack != null) stack.clear();
+        history.remove(player.getUniqueId());
     }
 }

@@ -43,15 +43,17 @@ public class RecipeBookMenu {
 
     public static class RecipeListMenu extends PaginatedMenu {
         private final Menu previousMenu;
+        private final List<BlightedRecipe> cachedRecipes;
 
         public RecipeListMenu(Menu previousMenu) {
             super("§rBlighted Recipe Book", 54);
             this.previousMenu = previousMenu;
+            this.cachedRecipes = new ArrayList<>(BlightedRecipe.REGISTERED_RECIPES);
         }
 
         @Override
         protected int getTotalItems(Player player) {
-            return BlightedRecipe.REGISTERED_RECIPES.size();
+            return cachedRecipes.size();
         }
 
         @Override
@@ -61,10 +63,9 @@ public class RecipeBookMenu {
 
         @Override
         protected ItemStack getItem(Player player, int index) {
-            List<BlightedRecipe> recipes = new ArrayList<>(BlightedRecipe.REGISTERED_RECIPES);
-            if (index >= recipes.size()) return new ItemStack(Material.AIR);
+            if (index >= cachedRecipes.size()) return new ItemStack(Material.AIR);
 
-            BlightedRecipe recipe = recipes.get(index);
+            BlightedRecipe recipe = cachedRecipes.get(index);
             ItemStack resultItem = recipe.getResult().toItemStack().clone();
 
             var meta = resultItem.getItemMeta();
@@ -88,15 +89,8 @@ public class RecipeBookMenu {
 
             clearInventory();
             populateRecipeSlots(player, start, end);
-            populateFillerSlots();
+            fillSlots(FILLER_SLOTS, MenuElementPreset.EMPTY_SLOT_FILLER);
             setupNavigationButtons(player, end);
-        }
-
-        private void clearInventory() {
-            for (int i = 0; i < size; i++) {
-                setItem(i, new ItemStack(Material.AIR), MenuItemInteraction.ANY_CLICK, (p, t) -> {
-                });
-            }
         }
 
         private void populateRecipeSlots(Player player, int start, int end) {
@@ -106,13 +100,6 @@ public class RecipeBookMenu {
                 setItem(RECIPE_SLOTS[recipeIndex], getItem(player, itemIndex), MenuItemInteraction.ANY_CLICK,
                     (p, t) -> onItemClick(p, itemIndex, t));
                 recipeIndex++;
-            }
-        }
-
-        private void populateFillerSlots() {
-            for (int slot : FILLER_SLOTS) {
-                setItem(slot, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
-                });
             }
         }
 
@@ -144,10 +131,9 @@ public class RecipeBookMenu {
 
         @Override
         protected void onItemClick(Player player, int index, org.bukkit.event.inventory.ClickType clickType) {
-            List<BlightedRecipe> recipes = new ArrayList<>(BlightedRecipe.REGISTERED_RECIPES);
-            if (index >= recipes.size()) return;
+            if (index >= cachedRecipes.size()) return;
 
-            MenuManager.openMenu(new RecipeDetailMenu(recipes.get(index), this), player);
+            MenuManager.openMenu(new RecipeDetailMenu(cachedRecipes.get(index), this), player);
         }
     }
 
@@ -258,7 +244,7 @@ public class RecipeBookMenu {
                 (p, t) -> MenuManager.openMenu(previousMenu, p));
             setItem(CLOSE_BUTTON_SLOT, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK,
                 (p, t) -> close());
-            fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
+            fillSlots(FILLER_SLOTS, MenuElementPreset.EMPTY_SLOT_FILLER);
         }
     }
 }

@@ -48,7 +48,7 @@ public record SoundSequence(List<BlightedSound> sounds) {
         }
     }
 
-    public static final SoundSequence SLAYER_BOSS_SPAWN = new SoundSequence(
+    public static final SoundSequence SLAYER_MOB_SPAWN = new SoundSequence(
         new BlightedSound(Sound.ENTITY_BREEZE_WIND_BURST, 1.0f, 2.0f, 1L),
         new BlightedSound(Sound.ENTITY_BREEZE_WIND_BURST, 1.0f, 1.8f, 4L),
         new BlightedSound(Sound.BLOCK_VAULT_OPEN_SHUTTER, 1.5f, 1.5f, 7L),
@@ -63,7 +63,7 @@ public record SoundSequence(List<BlightedSound> sounds) {
         new BlightedSound(Sound.ENTITY_WITHER_SPAWN, 1.0f, 1.2f, 28L)
     );
 
-    public static final SoundSequence BLIGHTED_BOSS_SPAWN = new SoundSequence(
+    public static final SoundSequence ANCIENT_MOB_SPAWN = new SoundSequence(
         new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_OMINOUS_ACTIVATE, 1.0f, 0.6f, 0L),
         new BlightedSound(Sound.BLOCK_END_PORTAL_SPAWN, 1.0f, 0.5f, 0L),
         new BlightedSound(Sound.ENTITY_WARDEN_EMERGE, 1.0f, 0.7f, 20L),
@@ -72,6 +72,21 @@ public record SoundSequence(List<BlightedSound> sounds) {
         new BlightedSound(Sound.ENTITY_ENDER_DRAGON_GROWL, 2.0f, 0.6f, 60L),
         new BlightedSound(Sound.ITEM_MACE_SMASH_GROUND_HEAVY, 1.5f, 1.0f, 60L),
         new BlightedSound(Sound.ITEM_TRIDENT_THUNDER, 1.0f, 0.7f, 60L)
+    );
+
+    public static final SoundSequence ANCIENT_MOB_DEFEAT = new SoundSequence(
+        new BlightedSound(Sound.ENTITY_WARDEN_DEATH, 1.0f, 0.7f, 0L),
+        new BlightedSound(Sound.ITEM_MACE_SMASH_GROUND_HEAVY, 1.5f, 0.8f, 0L),
+        new BlightedSound(Sound.ITEM_TRIDENT_THUNDER, 1.5f, 0.7f, 0L),
+        new BlightedSound(Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.6f, 0L),
+        new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_BREAK, 1.5f, 0.6f, 20L),
+        new BlightedSound(Sound.BLOCK_GLASS_BREAK, 2.0f, 0.5f, 20L),
+        new BlightedSound(Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 1.0f, 0.8f, 40L),
+        new BlightedSound(Sound.PARTICLE_SOUL_ESCAPE, 2.0f, 0.6f, 45L),
+        new BlightedSound(Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.2f, 60L),
+        new BlightedSound(Sound.BLOCK_VAULT_ACTIVATE, 1.0f, 1.2f, 60L),
+        new BlightedSound(Sound.BLOCK_BEACON_POWER_SELECT, 1.0f, 2.0f, 60L),
+        new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_EJECT_ITEM, 1.0f, 1.0f, 60L)
     );
 
     public static final SoundSequence XP_PICKUP = new SoundSequence(
