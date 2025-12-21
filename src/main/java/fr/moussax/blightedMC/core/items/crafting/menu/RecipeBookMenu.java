@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecipeBookMenu {
-
     private static final int[] RECIPE_SLOTS = {
         10, 11, 12, 13, 14, 15, 16,
         19, 20, 21, 22, 23, 24, 25,
@@ -244,7 +243,7 @@ public class RecipeBookMenu {
                 (p, t) -> MenuManager.openMenu(previousMenu, p));
             setItem(CLOSE_BUTTON_SLOT, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK,
                 (p, t) -> close());
-            fillSlots(FILLER_SLOTS, MenuElementPreset.EMPTY_SLOT_FILLER);
+            fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
         }
     }
 }
