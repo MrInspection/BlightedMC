@@ -127,12 +127,11 @@ public class ForgeRecipesMenu extends PaginatedMenu {
         }
 
         lore.add("");
-        lore.add(" §8Consumes §6🪣 " + Formatter.formatDecimalWithCommas(recipe.getFuelCost()) + " mB ");
-        lore.add(" §8of fuel to forge.");
+        lore.add(" §8Consumes §6🪣 " + Formatter.formatDecimalWithCommas(recipe.getFuelCost()) + " mB §8of ");
+        lore.add(" §8thermal fuel to forge.");
         lore.add("");
         lore.add("§eClick to select!");
     }
-
 
     private void populateRecipeSlots(Player player, int start, int end) {
         int recipeIndex = 0;

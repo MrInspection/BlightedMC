@@ -27,8 +27,8 @@ public final class ForgeFuel {
         FORGE_FUELS.put("vanilla:LAVA_BUCKET", 1000);
         FORGE_FUELS.put("ENCHANTED_COAL", 3000);
         FORGE_FUELS.put("ENCHANTED_LAVA_BUCKET", 10000);
-        FORGE_FUELS.put("MAGMA_LAVA_BUCKET", 20000);
-        FORGE_FUELS.put("PLASMA_LAVA_BUCKET", 50000);
+        FORGE_FUELS.put("MAGMA_BUCKET", 20000);
+        FORGE_FUELS.put("PLASMA_BUCKET", 50000);
     }
 
     private ForgeFuel() {}

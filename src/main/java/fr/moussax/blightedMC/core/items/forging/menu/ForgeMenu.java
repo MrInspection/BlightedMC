@@ -78,13 +78,15 @@ public class ForgeMenu extends Menu {
             ItemStack noRecipe = new ItemBuilder(Material.BARRIER, "§cRecipe Required")
                 .addLore("§7Select a recipe from the", "§7recipe book to start forging.")
                 .toItemStack();
-            setItem(25, noRecipe, MenuItemInteraction.ANY_CLICK, (_, _) -> {});
+            setItem(25, noRecipe, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+            });
             return;
         }
 
         ItemStack result = recipe.getForgedItem().toItemStack().clone();
         result.setAmount(recipe.getForgedAmount());
-        setItem(25, result, MenuItemInteraction.ANY_CLICK, (_, _) -> {});
+        setItem(25, result, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        });
     }
 
     private void checkRequirements(Player player) {
@@ -125,7 +127,8 @@ public class ForgeMenu extends Menu {
         for (int i = 0; i < recipe.getIngredients().size() && i < GRID_SLOTS.length; i++) {
             CraftingObject ingredient = recipe.getIngredients().get(i);
             ItemStack displayItem = createDisplayItem(ingredient);
-            setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (_, _) -> {});
+            setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+            });
         }
     }
 
@@ -151,12 +154,14 @@ public class ForgeMenu extends Menu {
         fillSlots(REQUIRED_ITEM_INDICATOR_SLOTS, sacrificedItemPane);
         fillSlots(FORGED_ITEM_INDICATOR_SLOTS, forgedItemPane);
 
-        setItem(ITEM_INDICATOR, new ItemBuilder(indicator, "§r").setHideTooltip().toItemStack(), MenuItemInteraction.ANY_CLICK, (_, _) -> {});
+        setItem(ITEM_INDICATOR, new ItemBuilder(indicator, "§r").setHideTooltip().toItemStack(), MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        });
 
         ItemStack forgeIcon = new ItemBuilder(Material.BLAST_FURNACE, "§dBlighted Forge")
             .addLore("§7Combine materials to forge ", "§7items beyond the reach of", "§7ordinary furnaces.")
             .toItemStack();
-        setItem(14, forgeIcon, MenuItemInteraction.ANY_CLICK, (_, _) -> {});
+        setItem(14, forgeIcon, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        });
     }
 
     private Material determineIndicatorMaterial() {
@@ -180,8 +185,13 @@ public class ForgeMenu extends Menu {
         } else if (isForging) {
             builder.setDisplayName("§6Forging...");
         } else {
-            builder.setDisplayName("§aConfirm")
-                .addLore(canForge ? "§eClick to confirm!" : "§cYou don't have the required items!")
+            builder.setDisplayName("§aConfirm process").addLore("", " §7Cost: ");
+            for (CraftingObject ingredient : recipe.getIngredients()) {
+                builder.addLore(" §8‣ " + Utilities.extractIngredientName(ingredient) + " §8x" + ingredient.getAmount());
+            }
+
+            builder.addLore("");
+            builder.addLore(canForge ? "§eClick to confirm!" : "§cYou don't have the required items!")
                 .setEnchantmentGlint(canForge);
         }
 
@@ -210,8 +220,10 @@ public class ForgeMenu extends Menu {
         int currentFuel = blightedPlayer.getForgeFuel();
         int requiredFuel = recipe != null ? recipe.getFuelCost() : 0;
 
-        setItem(34, createFuelMeter(currentFuel, requiredFuel), MenuItemInteraction.ANY_CLICK, (_, _) -> {});
-        setItem(51, createFuelGuide(), MenuItemInteraction.ANY_CLICK, (_, _) -> {});
+        setItem(34, createFuelMeter(currentFuel, requiredFuel), MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        });
+        setItem(51, createFuelGuide(), MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        });
         setItem(53, createInsertFuelButton(player), MenuItemInteraction.ANY_CLICK, (p, _) -> handleFuelInsertion(blightedPlayer));
     }
 
@@ -226,9 +238,9 @@ public class ForgeMenu extends Menu {
         ItemBuilder builder = new ItemBuilder(Material.CAMPFIRE, "§6Fuel Meter")
             .addLore(
                 "§r " + Formatter.createProgressBar(currentFuel, barLength, valuePerSegment) + " §e" + formattedCurrent + "§6/§e" + formattedMax + " mB ", "",
-                " §7Fill your forge with §c🔥 heat fuel §7like",
-                " §7§fLava Bucket§7, to power the forge",
-                " §7and craft advanced items."
+                " §7Fill your forge with §c🔥 thermal fuel §7like",
+                " §7§fLava Bucket§7, to power the forge and",
+                " §7craft advanced items."
             );
 
         if (recipe != null) {
@@ -246,7 +258,7 @@ public class ForgeMenu extends Menu {
     }
 
     private ItemStack createFuelGuide() {
-        return new ItemBuilder(Material.BLAZE_POWDER, "§6Forge Fuel")
+        return new ItemBuilder(Material.BLAZE_POWDER, "§6Thermal Fuel")
             .addLore(
                 "§8Measured in millibuckets (mB)", "", " §7There are various types of §6Fuel",
                 " §7that you can use to power your Forge. ",
@@ -259,8 +271,8 @@ public class ForgeMenu extends Menu {
                 "   §8‣ §fLava Bucket §8- §61,000 mB",
                 "   §8‣ §eEnchanted Coal §8- §63,000 mB",
                 "   §8‣ §bEnchanted Lava Bucket §8- §610,000 mB ",
-                "   §8‣ §dMagma Lava Bucket §8- §620,000 mB",
-                "   §8‣ §cPlasma Lava Bucket §8- §650,000 mB",
+                "   §8‣ §dMagma Bucket §8- §620,000 mB",
+                "   §8‣ §cPlasma Bucket §8- §650,000 mB",
                 ""
             )
             .addEnchantmentGlint()
@@ -310,7 +322,7 @@ public class ForgeMenu extends Menu {
             player.playSound(player.getLocation(), Sound.ITEM_BUCKET_FILL_LAVA, 1f, 0f);
             refresh(player);
         } else {
-            Formatter.warn(player, "No suitable fuel found in inventory!");
+            Formatter.warn(player, "No suitable fuel found in your inventory!");
         }
     }
 

@@ -36,7 +36,8 @@ public final class ItemDirectory {
         new HomodeusArmor(),
         new RocketBoots(),
         new BlocksDirectory(),
-        new Hyperion()
+        new Hyperion(),
+        new ThermalFuels()
     );
 
     private ItemDirectory() {

@@ -8,12 +8,13 @@ import org.bukkit.Material;
 public class ForgeRecipes {
     public static void initialize() {
         new ForgeRecipe.Builder()
-            .forgedItem(ItemDirectory.getItem("ENCHANTED_IRON_INGOT"))
+            .forgedItem(ItemDirectory.getItem("PLASMA_BUCKET"))
             .forgedAmount(1)
-            .fuelCost(100)
+            .fuelCost(10000)
             .ingredients(
-                new CraftingObject(Material.DIAMOND, 1),
-                new CraftingObject(ItemDirectory.getItem("ENCHANTED_IRON_BLOCK"), 1)
+                new CraftingObject(ItemDirectory.getItem("MAGMA_BUCKET"), 1),
+                new CraftingObject(ItemDirectory.getItem("MAGMA_BUCKET"), 1),
+                new CraftingObject(Material.NETHER_STAR, 1)
             )
             .build();
     }
