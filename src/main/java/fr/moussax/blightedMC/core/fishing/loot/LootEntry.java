@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.fishing.loot;
 
-import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -22,15 +22,15 @@ public class LootEntry {
     private final LootCondition condition;
     private final ItemStack item;
     private final EntityType entityType;
-    private final BlightedEntity blightedEntity;
+    private final AbstractBlightedEntity abstractBlightedEntity;
     private String catchMessage;
 
-    private LootEntry(double weight, LootCondition condition, ItemStack item, EntityType entityType, BlightedEntity blightedEntity) {
+    private LootEntry(double weight, LootCondition condition, ItemStack item, EntityType entityType, AbstractBlightedEntity abstractBlightedEntity) {
         this.weight = weight;
         this.condition = condition != null ? condition : LootCondition.alwaysTrue();
         this.item = item;
         this.entityType = entityType;
-        this.blightedEntity = blightedEntity;
+        this.abstractBlightedEntity = abstractBlightedEntity;
     }
 
     /**
@@ -82,24 +82,24 @@ public class LootEntry {
     /**
      * Creates a loot entry representing a custom BlightedEntity with no specific condition.
      *
-     * @param blightedEntity the BlightedEntity to spawn
+     * @param abstractBlightedEntity the BlightedEntity to spawn
      * @param weight         the weight for random selection
      * @return a new LootEntry
      */
-    public static LootEntry blightedEntity(BlightedEntity blightedEntity, double weight) {
-        return new LootEntry(weight, null, null, null, blightedEntity);
+    public static LootEntry blightedEntity(AbstractBlightedEntity abstractBlightedEntity, double weight) {
+        return new LootEntry(weight, null, null, null, abstractBlightedEntity);
     }
 
     /**
      * Creates a loot entry representing a custom BlightedEntity with a condition.
      *
-     * @param blightedEntity the BlightedEntity to spawn
+     * @param abstractBlightedEntity the BlightedEntity to spawn
      * @param weight         the weight for random selection
      * @param condition      the condition for this loot entry
      * @return a new LootEntry
      */
-    public static LootEntry blightedEntity(BlightedEntity blightedEntity, double weight, LootCondition condition) {
-        return new LootEntry(weight, condition, null, null, blightedEntity);
+    public static LootEntry blightedEntity(AbstractBlightedEntity abstractBlightedEntity, double weight, LootCondition condition) {
+        return new LootEntry(weight, condition, null, null, abstractBlightedEntity);
     }
 
     /**
@@ -141,8 +141,8 @@ public class LootEntry {
         if (entityType != null) {
             spawned = (LivingEntity) Objects.requireNonNull(location.getWorld()).spawnEntity(location.add(velocity), entityType);
             spawned.setVelocity(velocity);
-        } else if (blightedEntity != null) {
-            spawned = blightedEntity.clone().spawn(location.add(velocity));
+        } else if (abstractBlightedEntity != null) {
+            spawned = abstractBlightedEntity.clone().spawn(location.add(velocity));
             spawned.setVelocity(velocity);
         }
 
@@ -174,7 +174,7 @@ public class LootEntry {
      * @return true if this entry represents an entity (Bukkit or Blighted)
      */
     public boolean isEntity() {
-        return entityType != null || blightedEntity != null;
+        return entityType != null || abstractBlightedEntity != null;
     }
 
     /**
@@ -201,8 +201,8 @@ public class LootEntry {
     /**
      * @return the BlightedEntity associated with this entry, if any
      */
-    public BlightedEntity getBlightedEntity() {
-        return blightedEntity;
+    public AbstractBlightedEntity getBlightedEntity() {
+        return abstractBlightedEntity;
     }
 
     /**

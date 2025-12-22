@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.entities.listeners;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntityAttachment;
 import fr.moussax.blightedMC.core.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.core.player.BlightedPlayer;
@@ -29,15 +29,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.*;
 
 public class BlightedEntitiesListener implements Listener {
-    private static final Map<UUID, BlightedEntity> BLIGHTED_ENTITIES = new HashMap<>();
+    private static final Map<UUID, AbstractBlightedEntity> BLIGHTED_ENTITIES = new HashMap<>();
     private final ThreadLocal<Set<UUID>> processingDamageEntityIds = ThreadLocal.withInitial(HashSet::new);
 
-    public static void registerEntity(LivingEntity entity, BlightedEntity blighted) {
+    public static void registerEntity(LivingEntity entity, AbstractBlightedEntity blighted) {
         if (entity == null || blighted == null) return;
         BLIGHTED_ENTITIES.put(entity.getUniqueId(), blighted);
     }
 
-    public static BlightedEntity getBlightedEntity(Entity entity) {
+    public static AbstractBlightedEntity getBlightedEntity(Entity entity) {
         if (entity == null) return null;
         return BLIGHTED_ENTITIES.get(entity.getUniqueId());
     }
@@ -50,13 +50,13 @@ public class BlightedEntitiesListener implements Listener {
         processingDamageEntityIds.get().add(entity.getUniqueId());
 
         try {
-            EntityAttachment attachment = BlightedEntity.getAttachment(entity);
+            EntityAttachment attachment = AbstractBlightedEntity.getAttachment(entity);
             if (attachment != null) {
                 handleAttachmentDamage(attachment, event);
                 return;
             }
 
-            BlightedEntity blighted = BLIGHTED_ENTITIES.get(entity.getUniqueId());
+            AbstractBlightedEntity blighted = BLIGHTED_ENTITIES.get(entity.getUniqueId());
             if (blighted != null) {
                 handleBlightedEntityDamage(blighted, entity, event);
             }
@@ -76,7 +76,7 @@ public class BlightedEntitiesListener implements Listener {
         syncArmor((LivingEntity) attachment.entity(), ownerEntity);
     }
 
-    private void handleBlightedEntityDamage(BlightedEntity blighted, LivingEntity entity, EntityDamageEvent event) {
+    private void handleBlightedEntityDamage(AbstractBlightedEntity blighted, LivingEntity entity, EntityDamageEvent event) {
         forwardDamageToAttachments(blighted, event);
 
         if (event instanceof EntityDamageByEntityEvent damageByEntity) {
@@ -104,7 +104,7 @@ public class BlightedEntitiesListener implements Listener {
         scheduleNameTagUpdate(blighted, entity);
     }
 
-    private void forwardDamageToAttachments(BlightedEntity blighted, EntityDamageEvent event) {
+    private void forwardDamageToAttachments(AbstractBlightedEntity blighted, EntityDamageEvent event) {
         LivingEntity entity = (LivingEntity) event.getEntity();
         for (EntityAttachment attachment : new ArrayList<>(blighted.attachments)) {
             if (attachment.entity() instanceof LivingEntity living && !living.isDead()) {
@@ -114,7 +114,7 @@ public class BlightedEntitiesListener implements Listener {
         }
     }
 
-    private boolean handleImmunity(BlightedEntity blighted, LivingEntity entity, EntityDamageByEntityEvent event) {
+    private boolean handleImmunity(AbstractBlightedEntity blighted, LivingEntity entity, EntityDamageByEntityEvent event) {
         if (!blighted.isImmuneTo(entity, event)) return false;
 
         event.setCancelled(true);
@@ -126,13 +126,13 @@ public class BlightedEntitiesListener implements Listener {
         return true;
     }
 
-    private boolean shouldPreventDeath(BlightedEntity blighted, double remainingHealth) {
+    private boolean shouldPreventDeath(AbstractBlightedEntity blighted, double remainingHealth) {
         if (remainingHealth > 0) return false;
         return blighted.attachments.stream()
             .anyMatch(att -> att.entity() instanceof LivingEntity living && !living.isDead());
     }
 
-    private void scheduleNameTagUpdate(BlightedEntity blighted, LivingEntity entity) {
+    private void scheduleNameTagUpdate(AbstractBlightedEntity blighted, LivingEntity entity) {
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -147,13 +147,13 @@ public class BlightedEntitiesListener implements Listener {
     public void onEntityHeal(EntityRegainHealthEvent event) {
         if (!(event.getEntity() instanceof LivingEntity entity)) return;
 
-        EntityAttachment attachment = BlightedEntity.getAttachment(entity);
+        EntityAttachment attachment = AbstractBlightedEntity.getAttachment(entity);
         if (attachment != null) {
             handleAttachmentHeal(attachment, entity, event);
             return;
         }
 
-        BlightedEntity blighted = BLIGHTED_ENTITIES.get(entity.getUniqueId());
+        AbstractBlightedEntity blighted = BLIGHTED_ENTITIES.get(entity.getUniqueId());
         if (blighted != null) {
             handleBlightedEntityHeal(blighted, entity, event);
         }
@@ -169,7 +169,7 @@ public class BlightedEntitiesListener implements Listener {
         syncArmor(entity, ownerEntity);
     }
 
-    private void handleBlightedEntityHeal(BlightedEntity blighted, LivingEntity entity, EntityRegainHealthEvent event) {
+    private void handleBlightedEntityHeal(AbstractBlightedEntity blighted, LivingEntity entity, EntityRegainHealthEvent event) {
         blighted.updateNameTag();
         double newHealth = calculateNewHealth(entity, event.getAmount());
 
@@ -189,14 +189,14 @@ public class BlightedEntitiesListener implements Listener {
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         LivingEntity dead = event.getEntity();
-        EntityAttachment attachment = BlightedEntity.getAttachment(dead);
+        EntityAttachment attachment = AbstractBlightedEntity.getAttachment(dead);
 
         if (attachment != null) {
             handleAttachmentDeath(attachment, event);
             return;
         }
 
-        BlightedEntity blighted = BLIGHTED_ENTITIES.get(dead.getUniqueId());
+        AbstractBlightedEntity blighted = BLIGHTED_ENTITIES.get(dead.getUniqueId());
         if (blighted != null) {
             handleBlightedEntityDeath(blighted, dead, event);
         }
@@ -210,7 +210,7 @@ public class BlightedEntitiesListener implements Listener {
         }
 
         try {
-            BlightedEntity.unregisterAttachment(attachment);
+            AbstractBlightedEntity.unregisterAttachment(attachment);
         } catch (Throwable ignored) {
         }
 
@@ -218,7 +218,7 @@ public class BlightedEntitiesListener implements Listener {
         event.setDroppedExp(0);
     }
 
-    private void handleBlightedEntityDeath(BlightedEntity blighted, LivingEntity dead, EntityDeathEvent event) {
+    private void handleBlightedEntityDeath(AbstractBlightedEntity blighted, LivingEntity dead, EntityDeathEvent event) {
         blighted.killAllAttachments();
         blighted.removeBossBar();
 
@@ -252,17 +252,17 @@ public class BlightedEntitiesListener implements Listener {
             String entityId = pdc.get(key, PersistentDataType.STRING);
             if (entityId == null || entityId.isEmpty()) continue;
 
-            BlightedEntity prototype = EntitiesRegistry.getEntity(entityId);
+            AbstractBlightedEntity prototype = EntitiesRegistry.getEntity(entityId);
             if (prototype == null) continue;
 
-            BlightedEntity instance = createInstance(prototype);
+            AbstractBlightedEntity instance = createInstance(prototype);
             instance.attachToExisting(living);
 
             syncAttachmentsHealthAndArmor(instance, living);
         }
     }
 
-    private static BlightedEntity createInstance(BlightedEntity prototype) {
+    private static AbstractBlightedEntity createInstance(AbstractBlightedEntity prototype) {
         try {
             return prototype.getClass().getDeclaredConstructor().newInstance();
         } catch (Exception ex) {
@@ -270,7 +270,7 @@ public class BlightedEntitiesListener implements Listener {
         }
     }
 
-    private static void syncAttachmentsHealthAndArmor(BlightedEntity instance, LivingEntity owner) {
+    private static void syncAttachmentsHealthAndArmor(AbstractBlightedEntity instance, LivingEntity owner) {
         for (EntityAttachment attachment : new ArrayList<>(instance.attachments)) {
             if (attachment.entity() instanceof LivingEntity living && !living.isDead()) {
                 living.setHealth(owner.getHealth());

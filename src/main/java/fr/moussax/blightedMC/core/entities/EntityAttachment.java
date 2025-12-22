@@ -3,14 +3,14 @@ package fr.moussax.blightedMC.core.entities;
 import org.bukkit.entity.Entity;
 
 /**
- * Represents an attachment relationship between a Minecraft entity and its owning {@link BlightedEntity}.
+ * Represents a managed attachment between a Minecraft {@link Entity} and its owning {@link AbstractBlightedEntity}.
  * <p>
- * This record is used to track entities that are logically tied to a parent entity,
- * such as minions, summoned creatures, or auxiliary objects. Attachments are automatically
- * managed by the owning entity for lifecycle events like spawn and death.
+ * Attachments are entities logically tied to a parent entity, such as minions, summoned creatures,
+ * or auxiliary objects. The owning entity automatically manages attachments for lifecycle events
+ * like spawning, death, and removal.
  *
- * @param entity the Bukkit {@link Entity} that is attached to the owner
- * @param owner  the {@link BlightedEntity} that owns or controls the attached entity
+ * @param entity the attached Bukkit {@link Entity}
+ * @param owner  the {@link AbstractBlightedEntity} that controls this attachment
  */
-public record EntityAttachment(Entity entity, BlightedEntity owner) {
+public record EntityAttachment(Entity entity, AbstractBlightedEntity owner) {
 }

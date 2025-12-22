@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.game.entities;
 
-import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntityAttachment;
 import fr.moussax.blightedMC.core.entities.EntityNameTag;
 import org.bukkit.Location;
@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
 
-public class Dummy extends BlightedEntity {
+public class Dummy extends AbstractBlightedEntity {
     public Dummy() {
         super("Drowned Jockey", 60, 10, EntityType.DROWNED);
         setDroppedExp(20);

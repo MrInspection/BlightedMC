@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.utils.commands;
 
-import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.core.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
@@ -19,7 +19,7 @@ import java.util.*;
  * Supports special placeholders:
  * <ul>
  *   <li><b>$players</b> – Suggests all online players.</li>
- *   <li><b>$entities</b> – Suggests all registered {@link BlightedEntity} IDs.</li>
+ *   <li><b>$entities</b> – Suggests all registered {@link AbstractBlightedEntity} IDs.</li>
  * </ul>
  */
 public class CommandTabSuggestionBuilder implements TabCompleter {
@@ -71,7 +71,7 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
 
                 if (suggestions.size() == 1 && suggestions.getFirst().equals("$entities")) {
                     return EntitiesRegistry.getAllEntities().stream()
-                        .map(BlightedEntity::getEntityId)
+                        .map(AbstractBlightedEntity::getEntityId)
                         .toList();
                 }
 

@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.game.entities.bosses;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -17,7 +17,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.List;
 import java.util.Objects;
 
-public class RevenantHorror extends BlightedEntity {
+public class RevenantHorror extends AbstractBlightedEntity {
     private boolean inEnrageState = false;
     private BukkitRunnable abilityRunnable;
 

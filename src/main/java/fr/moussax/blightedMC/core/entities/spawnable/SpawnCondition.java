@@ -4,67 +4,51 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 /**
- * Functional interface defining a condition that determines whether an entity
- * can spawn at a given {@link Location} in a {@link World}.
+ * Predicate defining whether an entity may spawn at a given {@link Location}
+ * in a {@link World}.
  * <p>
- * Spawn conditions can be composed using logical operations:
- * <ul>
- *   <li>{@link #and(SpawnCondition)} — requires both conditions to be true</li>
- *   <li>{@link #or(SpawnCondition)} — requires at least one condition to be true</li>
- *   <li>{@link #not()} — inverts the result of the condition</li>
- * </ul>
- * <p>
- * Example:
+ * Spawn conditions are composable via logical operations:
+ * {@link #and(SpawnCondition)}, {@link #or(SpawnCondition)}, and {@link #not()}.
+ *
+ * <p>Example:
  * <pre>{@code
  * SpawnCondition nearSurface = (loc, world) -> loc.getBlockY() > 60;
- * SpawnCondition notInNether = (loc, world) -> world.getEnvironment() != World.Environment.NETHER;
+ * SpawnCondition notNether = (loc, world) ->
+ *     world.getEnvironment() != World.Environment.NETHER;
  *
- * SpawnCondition validSpawn = nearSurface.and(notInNether);
+ * SpawnCondition validSpawn = nearSurface.and(notNether);
  * }</pre>
  */
 @FunctionalInterface
 public interface SpawnCondition {
-    /**
-     * Determines whether an entity can spawn at the specified location in the given world.
-     *
-     * @param location the target spawn location
-     * @param world    the world in which spawning is attempted
-     * @return {@code true} if spawning is allowed, {@code false} otherwise
-     */
-    boolean canSpawn(Location location, World world);
 
     /**
-     * Combines this condition with another using logical AND.
-     * <p>
-     * The resulting condition is true only if both conditions are true.
+     * Evaluates whether spawning is allowed at the given location.
      *
-     * @param other the other condition to combine with
-     * @return a new {@link SpawnCondition} representing the logical AND
+     * @param location target spawn location
+     * @param world    target world
+     * @return {@code true} if spawning is permitted
+     */
+    boolean testCanSpawnAt(Location location, World world);
+
+    /**
+     * Returns a condition that passes only if both conditions pass.
      */
     default SpawnCondition and(SpawnCondition other) {
-        return (loc, world) -> this.canSpawn(loc, world) && other.canSpawn(loc, world);
+        return (location, world) -> this.testCanSpawnAt(location, world) && other.testCanSpawnAt(location, world);
     }
 
     /**
-     * Combines this condition with another using logical OR.
-     * <p>
-     * The resulting condition is true if at least one condition is true.
-     *
-     * @param other the other condition to combine with
-     * @return a new {@link SpawnCondition} representing the logical OR
+     * Returns a condition that passes if either condition passes.
      */
     default SpawnCondition or(SpawnCondition other) {
-        return (loc, world) -> this.canSpawn(loc, world) || other.canSpawn(loc, world);
+        return (location, world) -> this.testCanSpawnAt(location, world) || other.testCanSpawnAt(location, world);
     }
 
     /**
-     * Negates this spawn condition.
-     * <p>
-     * The resulting condition is true if and only if this one is false.
-     *
-     * @return a new {@link SpawnCondition} representing the logical negation
+     * Returns the logical negation of this condition.
      */
     default SpawnCondition not() {
-        return (loc, world) -> !this.canSpawn(loc, world);
+        return (location, world) -> !this.testCanSpawnAt(location, world);
     }
 }

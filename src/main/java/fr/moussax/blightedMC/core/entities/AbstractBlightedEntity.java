@@ -31,24 +31,28 @@ import java.util.*;
 import java.util.function.Supplier;
 
 /**
- * Base class for custom plugin-managed entities ("blighted" entities).
+ * Base abstraction for plugin-managed entities.
  * <p>
- * Encapsulates configuration and runtime behavior for entities controlled by the plugin:
- * identity, attributes, equipment, display (name tag / boss bar), loot, immunity rules,
- * lifecycle-scheduled tasks, and attachments. Handles spawning, attaching to existing entities,
- * cloning, and basic damage/kill operations.
+ * Encapsulates configuration and runtime behavior for custom entities:
+ * identity, attributes, equipment, display (name tag / boss bar), loot,
+ * immunities, lifecycle tasks, and attachments.
  *
- * <p>Typical responsibilities:
- * <ul>
- *   <li>Create and configure an underlying {@link LivingEntity} when {@link #spawn(Location)} is invoked.</li>
- *   <li>Persist an entity identifier in the entity's {@link PersistentDataContainer}.</li>
- *   <li>Apply configured attributes and equipment and manage display (name tag, boss bar).</li>
- *   <li>Provide utility for scheduled lifecycle tasks and entity attachments.</li>
- * </ul>
+ * <p>Typical usage:
+ * <pre>{@code
+ * public class BlightedZombie extends AbstractBlightedEntity {
+ *     public BlightedZombie() {
+ *         super("Blighted Zombie", 40, EntityType.ZOMBIE);
+ *         setDamage(6);
+ *         setDefense(2);
+ *         setLootTable(new ZombieLootTable());
+ *     }
+ * }
  *
- * <p>Subclasses may extend and configure attributes, equipment, immunities and loot tables prior to spawn.
+ * BlightedEntity zombie = new BlightedZombie();
+ * zombie.spawn(location);
+ * }</pre>
  */
-public abstract class BlightedEntity implements Cloneable {
+public abstract class AbstractBlightedEntity implements Cloneable {
     private static final String ENTITY_ID_KEY = "entityId";
     private static final Map<Entity, EntityAttachment> ENTITY_ATTACHMENTS =
         Collections.synchronizedMap(new WeakHashMap<>());
@@ -91,7 +95,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param maxHealth  maximum health value
      * @param entityType underlying Bukkit entity type
      */
-    public BlightedEntity(@NonNull String name, int maxHealth, EntityType entityType) {
+    public AbstractBlightedEntity(@NonNull String name, int maxHealth, EntityType entityType) {
         this(name, maxHealth, 1, 0, entityType);
     }
 
@@ -103,7 +107,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param damage     base damage value
      * @param entityType underlying Bukkit entity type
      */
-    public BlightedEntity(String name, int maxHealth, int damage, EntityType entityType) {
+    public AbstractBlightedEntity(String name, int maxHealth, int damage, EntityType entityType) {
         this(name, maxHealth, damage, 0, entityType);
     }
 
@@ -116,7 +120,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param defense    base defense/armor
      * @param entityType underlying Bukkit entity type
      */
-    public BlightedEntity(String name, int maxHealth, int damage, int defense, EntityType entityType) {
+    public AbstractBlightedEntity(String name, int maxHealth, int damage, int defense, EntityType entityType) {
         this.name = name;
         this.maxHealth = maxHealth;
         this.damage = damage;
@@ -698,7 +702,7 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     /**
-     * Produces a deep-ish clone of this {@link BlightedEntity} instance.
+     * Produces a deep-ish clone of this {@link AbstractBlightedEntity} instance.
      * <p>
      * The returned clone has entity/bossbar/runtime state reset and copies of
      * attributes, attachments list, armor, and hand items.
@@ -706,9 +710,9 @@ public abstract class BlightedEntity implements Cloneable {
      * @return cloned entity configuration
      */
     @Override
-    public BlightedEntity clone() {
+    public AbstractBlightedEntity clone() {
         try {
-            BlightedEntity clone = (BlightedEntity) super.clone();
+            AbstractBlightedEntity clone = (AbstractBlightedEntity) super.clone();
 
             clone.entity = null;
             clone.bossBar = null;

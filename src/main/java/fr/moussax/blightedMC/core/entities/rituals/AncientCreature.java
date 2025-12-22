@@ -1,13 +1,13 @@
 package fr.moussax.blightedMC.core.entities.rituals;
 
-import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.jspecify.annotations.NonNull;
 
-public abstract class AncientCreature extends BlightedEntity {
+public abstract class AncientCreature extends AbstractBlightedEntity {
     public AncientCreature(@NonNull String name, int maxHealth, EntityType entityType) {
         super(name, maxHealth, entityType);
         this.nameTagType = EntityNameTag.ANCIENT;

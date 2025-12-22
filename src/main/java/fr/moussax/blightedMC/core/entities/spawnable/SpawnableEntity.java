@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.core.entities.spawnable;
 
-import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
@@ -8,96 +8,72 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 /**
- * Represents a custom entity that can spawn in the world based on specific conditions.
+ * Defines spawning rules and probability for a blighted entity type.
  * <p>
- * A {@code SpawnableEntity} extends {@link BlightedEntity} and introduces spawning logic,
- * including configurable {@link SpawnCondition}s and spawn chance probability.
+ * Acts as a spawn definition layered on top of {@link AbstractBlightedEntity},
+ * providing spawn conditions and spawn probability while delegating
+ * runtime entity behavior to the base implementation.
  *
- * <p>Concrete implementations must define spawn conditions by overriding
- * {@link #setupSpawnConditions()}, typically using utility methods from
- * {@link SpawnConditions} to control where and when the entity may appear.
- *
- * <p>Example:</p>
- * <pre>{@code
- * public class BlightedZombie extends SpawnableEntity {
- *   public BlightedZombie() {
- *     super("BLIGHTED_ZOMBIE", "Blighted Zombie", 40, EntityType.ZOMBIE, 0.2);
- *   }
- *
- *   @Override
- *   protected void setupSpawnConditions() {
- *     addSpawnCondition(SpawnConditions.biome(Biome.PLAINS, Biome.FOREST));
- *     addSpawnCondition(SpawnConditions.nightTime());
- *     addSpawnCondition(SpawnConditions.notInWater());
- *   }
- * }
- * }</pre>
+ * <p>Subclasses define their spawn rules by overriding
+ * {@link #defineSpawnConditions()}.
  */
-public abstract class SpawnableEntity extends BlightedEntity {
+public abstract class SpawnableEntity extends AbstractBlightedEntity {
     private final String entityId;
-    private final double spawnChance;
-    private SpawnableEntityProfile spawnProfile;
+    private final double spawnProbability;
+    private SpawnProfile spawnProfile;
 
     /**
-     * Constructs a new spawnable entity.
+     * Creates a spawn definition for a blighted entity type.
      *
-     * @param entityId    unique identifier for this entity type
-     * @param name        display the name of the entity
+     * @param entityId    unique identifier for the entity type
+     * @param name        display name
      * @param maxHealth   maximum health value
-     * @param entityType  Bukkit {@link EntityType} of the underlying entity
-     * @param spawnChance probability of spawning (0.0–1.0)
+     * @param entityType  underlying Bukkit {@link EntityType}
+     * @param probability spawn probability in the range {@code [0.0, 1.0]}
      */
-    protected SpawnableEntity(String entityId, String name, int maxHealth, EntityType entityType, double spawnChance) {
+    protected SpawnableEntity(String entityId, String name, int maxHealth, EntityType entityType, double probability) {
         super(name, maxHealth, entityType);
         this.entityId = entityId;
-        this.spawnChance = spawnChance;
-        this.spawnProfile = new SpawnableEntityProfile();
-        setupSpawnConditions();
+        this.spawnProbability = probability;
+        this.spawnProfile = new SpawnProfile();
+        defineSpawnConditions();
     }
 
     /**
-     * Defines the spawn conditions specific to this entity type.
-     * <p>
-     * This method must be implemented by subclasses and typically calls
-     * {@link #addSpawnCondition(SpawnCondition)} several times.
+     * Defines the spawn conditions for this entity type.
+     * Called during construction.
      */
-    protected abstract void setupSpawnConditions();
+    protected abstract void defineSpawnConditions();
 
     /**
-     * Adds a new spawn condition to this entity’s profile.
+     * Adds a spawn condition to this definition.
      *
-     * @param condition the {@link SpawnCondition} to add
+     * @param condition spawn condition to add
      */
-    protected void addSpawnCondition(SpawnCondition condition) {
-        spawnProfile.addCondition(condition);
+    protected void addCondition(SpawnCondition condition) {
+        spawnProfile.addSpawnCondition(condition);
     }
 
     /**
-     * Checks if the entity can spawn at the given location in the specified world.
-     * <p>
-     * All registered conditions must be satisfied for spawning to be allowed.
+     * Evaluates whether this entity type may spawn at the given location.
      *
-     * @param location the location to check
-     * @param world    the world context
-     * @return {@code true} if spawning is allowed, {@code false} otherwise
+     * @param location target location
+     * @param world    target world
+     * @return {@code true} if spawning is permitted
      */
     public boolean canSpawnAt(Location location, World world) {
         return spawnProfile.canSpawn(location, world);
     }
 
     /**
-     * Returns the probability of this entity spawning.
-     *
-     * @return spawn chance between 0.0 and 1.0
+     * @return spawn probability in the range {@code [0.0, 1.0]}
      */
-    public double getSpawnChance() {
-        return spawnChance;
+    public double getSpawnProbability() {
+        return spawnProbability;
     }
 
     /**
-     * Returns the total number of registered spawn conditions.
-     *
-     * @return the number of conditions
+     * @return total number of registered spawn conditions
      */
     public int getConditionCount() {
         return spawnProfile.getConditionCount();
@@ -109,10 +85,11 @@ public abstract class SpawnableEntity extends BlightedEntity {
     }
 
     /**
-     * Spawns the entity at the given location with {@link CreatureSpawnEvent.SpawnReason#CUSTOM}.
+     * Spawns a runtime instance of this entity type at the given location
+     * using {@link CreatureSpawnEvent.SpawnReason#CUSTOM}.
      *
-     * @param location the spawn location
-     * @return the spawned {@link LivingEntity}
+     * @param location spawn location
+     * @return spawned {@link LivingEntity}
      */
     @Override
     public LivingEntity spawn(Location location) {
@@ -120,25 +97,25 @@ public abstract class SpawnableEntity extends BlightedEntity {
     }
 
     /**
-     * Spawns the entity at the given location with the specified spawn reason.
+     * Spawns a runtime instance of this entity type at the given location.
      *
-     * @param location the spawn location
-     * @param reason   the reason for the spawn event
-     * @return the spawned {@link LivingEntity}
+     * @param location spawn location
+     * @param reason   spawn event reason
+     * @return spawned {@link LivingEntity}
      */
     public LivingEntity spawn(Location location, CreatureSpawnEvent.SpawnReason reason) {
         return super.spawn(location);
     }
 
     /**
-     * Creates a deep copy of this spawnable entity, including its spawn conditions.
+     * Creates a copy of this spawn definition, including its spawn conditions.
      *
-     * @return a cloned instance of this {@link SpawnableEntity}
+     * @return copied {@link SpawnableEntity} definition
      */
     @Override
     public SpawnableEntity clone() {
         SpawnableEntity cloned = (SpawnableEntity) super.clone();
-        cloned.spawnProfile = this.spawnProfile.deepCopy();
+        cloned.spawnProfile = this.spawnProfile.copy();
         return cloned;
     }
 }
