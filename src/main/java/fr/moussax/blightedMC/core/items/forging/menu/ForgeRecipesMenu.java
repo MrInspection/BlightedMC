@@ -52,6 +52,11 @@ public class ForgeRecipesMenu extends PaginatedMenu {
         super("Forge Recipes", 54);
         this.previousMenu = previousMenu;
         this.cachedRecipes = new ArrayList<>(ForgeRecipe.REGISTRY);
+        this.cachedRecipes.sort((r1, r2) -> {
+            String name1 = r1.getForgedItem().getDisplayName();
+            String name2 = r2.getForgedItem().getDisplayName();
+            return (name1 != null ? name1 : "").compareTo(name2 != null ? name2 : "");
+        });
     }
 
     @Override
