@@ -209,16 +209,13 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         if (nameTagType != EntityNameTag.HIDDEN) {
             entity.setCustomNameVisible(true);
         }
-        if (nameTagType == EntityNameTag.BOSS) {
-            createBossBar();
-        }
     }
 
     /**
      * Initializes runtime scheduling tasks if not already initialized.
      * Safe to call multiple times; scheduling occurs once.
      */
-    protected final void initRuntime() {
+    private void initRuntime() {
         if (runtimeInitialized) return;
         runtimeInitialized = true;
         lifecycleTasks.scheduleAll();
@@ -246,6 +243,18 @@ public abstract class AbstractBlightedEntity implements Cloneable {
      * @param location death location
      */
     public void onDeath(Location location) {
+        // Default implementation does nothing
+    }
+
+    /**
+     * Called when the entity takes damage.
+     * <p>
+     * Intended for subclass-specific damage handling behavior.
+     * The default implementation does nothing.
+     *
+     * @param event the damage event
+     */
+    public void onDamageTaken(EntityDamageEvent event) {
         // Default implementation does nothing
     }
 
@@ -699,6 +708,10 @@ public abstract class AbstractBlightedEntity implements Cloneable {
      */
     public int getMaxHealth() {
         return maxHealth;
+    }
+
+    public int getDamage() {
+        return damage;
     }
 
     /**

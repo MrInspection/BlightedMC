@@ -86,6 +86,8 @@ public class BlightedEntitiesListener implements Listener {
             }
         }
 
+        blighted.onDamageTaken(event);
+
         double damage = event.getFinalDamage();
         double remainingHealth = entity.getHealth() + entity.getAbsorptionAmount() - damage;
 
