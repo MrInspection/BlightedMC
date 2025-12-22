@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
@@ -28,6 +29,16 @@ public class ItemRuleListener implements Listener {
         if (id == null) return null;
 
         return ItemDirectory.getItem(id);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBucketEmpty(PlayerBucketEmptyEvent event) {
+        ItemTemplate manager = getManager(event.getItemStack());
+        if (manager == null) return;
+
+        if (manager.canUse(event, event.getItemStack())) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -114,5 +125,4 @@ public class ItemRuleListener implements Listener {
             if (offHand != null) player.setCooldown(offHand.getType(), 0);
         }
     }
-
 }
