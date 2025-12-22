@@ -727,7 +727,7 @@ public abstract class AbstractBlightedEntity implements Cloneable {
 
             return clone;
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("Failed to clone BlightedEntity", e);
+            throw new RuntimeException("Failed to clone AbstractBlightedEntity", e);
         }
     }
 

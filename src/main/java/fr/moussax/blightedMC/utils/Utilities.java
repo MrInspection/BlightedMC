@@ -119,14 +119,11 @@ public class Utilities {
      * @return The nearest valid player, or null if none are found.
      */
     public static Player getNearestPlayer(@NonNull Entity source, double range) {
-        source.getWorld();
-
         Player nearest = null;
         double nearestDistanceSquared = range * range;
 
         for (Player player : source.getWorld().getPlayers()) {
             if (player.getGameMode() == org.bukkit.GameMode.SPECTATOR || player.getGameMode() == org.bukkit.GameMode.CREATIVE) continue;
-            if (!player.getWorld().equals(source.getWorld())) continue;
 
             double distanceSquared = player.getLocation().distanceSquared(source.getLocation());
             if (distanceSquared <= nearestDistanceSquared) {

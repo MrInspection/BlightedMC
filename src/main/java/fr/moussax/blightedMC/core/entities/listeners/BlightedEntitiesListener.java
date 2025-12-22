@@ -5,6 +5,7 @@ import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntityAttachment;
 import fr.moussax.blightedMC.core.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.core.player.BlightedPlayer;
+import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.Chunk;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -264,9 +265,10 @@ public class BlightedEntitiesListener implements Listener {
 
     private static AbstractBlightedEntity createInstance(AbstractBlightedEntity prototype) {
         try {
-            return prototype.getClass().getDeclaredConstructor().newInstance();
-        } catch (Exception ex) {
             return prototype.clone();
+        } catch (Exception exception) {
+            Log.error("ENTITIES_LISTENER", "Failed to create instance of " + prototype.getEntityId() + " entity with following error: " + exception.getMessage());
+            throw new RuntimeException("Entity instantiation failed", exception);
         }
     }
 

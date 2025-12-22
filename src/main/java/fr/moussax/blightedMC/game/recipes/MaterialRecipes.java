@@ -64,13 +64,13 @@ public final class MaterialRecipes implements RecipeRegistry {
         enchantedLavaBucketRecipe.setRecipe(encoder7.encodeCraftingRecipe());
 
         ShapeEncoder encoder8 = new ShapeEncoder("aaa", "bcb", " b ");
-        encoder7.bindKey('a', Material.MAGMA_BLOCK, 64);
-        encoder7.bindKey('b', ItemDirectory.getItem("ENCHANTED_IRON_INGOT"), 4);
-        encoder7.bindKey('c', ItemDirectory.getItem("ENCHANTED_LAVA_BUCKET"), 1);
+        encoder8.bindKey('a', Material.MAGMA_BLOCK, 64);
+        encoder8.bindKey('b', ItemDirectory.getItem("ENCHANTED_IRON_INGOT"), 4);
+        encoder8.bindKey('c', ItemDirectory.getItem("ENCHANTED_LAVA_BUCKET"), 1);
         BlightedShapedRecipe magmaBucketRecipe = new BlightedShapedRecipe(
             ItemDirectory.getItem("MAGMA_BUCKET"), 1
         );
-        magmaBucketRecipe.setRecipe(encoder7.encodeCraftingRecipe());
+        magmaBucketRecipe.setRecipe(encoder8.encodeCraftingRecipe());
 
         ShapeEncoder encoder9 = new ShapeEncoder(" a ", "bcb", "ddd");
         encoder9.bindKey('a', Material.BOOK, 1);

@@ -20,64 +20,63 @@ public sealed abstract class BlightedCreature extends SpawnableEntity
     permits BlightedBogged, BlightedDrowned, BlightedHusk, BlightedParched, BlightedPiglin,
     BlightedSkeleton, BlightedStray, BlightedWitherSkeleton, BlightedZombie, BlightedZombifiedPiglin {
 
-    private final double enrageThreshold = 0.50;
+    private static final double ENRAGE_THRESHOLD = 0.50;
+
     protected boolean isEnraged;
-    private BukkitRunnable abilityRunnable;
     private int particleTicks = 0;
 
     protected BlightedCreature(String entityId, String name, EntityType entityType) {
         super(entityId, name, 30, entityType, 0.04);
         setNameTagType(EntityNameTag.BLIGHTED);
+        setupDefaultArmor();
+        setupEnrageTask();
+    }
 
+    private void setupDefaultArmor() {
         armor = new ItemStack[]{
             new ItemStack(Material.AIR),
             new ItemStack(Material.AIR),
             new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherColor("#B584D4").toItemStack(),
             new ItemBuilder(Material.LEATHER_HELMET).setLeatherColor("#A565C9").toItemStack()
         };
+    }
 
-        addRepeatingTask(() -> {
-            BukkitRunnable task = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (entity == null || entity.isDead()) {
-                        cancel();
-                        return;
-                    }
-
-                    if (!isEnraged) {
-                        checkHealthAndEnrage();
-                        return;
-                    }
-
-                    if (++particleTicks >= 5) {
-                        playEnrageParticles();
-                        particleTicks = 0;
-                    }
+    private void setupEnrageTask() {
+        addRepeatingTask(() -> new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (entity == null || entity.isDead()) {
+                    cancel();
+                    return;
                 }
-            };
-            abilityRunnable = task;
-            return task;
+
+                if (!isEnraged) {
+                    checkHealthAndEnrage();
+                } else if (++particleTicks >= 5) {
+                    playEnrageParticles();
+                    particleTicks = 0;
+                }
+            }
         }, 1L, 1L);
     }
 
     protected abstract void onEnrage(LivingEntity entity);
 
     private void checkHealthAndEnrage() {
-        if (entity == null || isEnraged) return;
+        if (entity == null) return;
 
-        double maxHealth = Objects.requireNonNull(entity.getAttribute(Attribute.MAX_HEALTH)).getValue();
-        if (entity.getHealth() / maxHealth <= enrageThreshold) {
+        double maxHealth = Objects.requireNonNull(entity
+            .getAttribute(Attribute.MAX_HEALTH)).getValue();
+
+        if (entity.getHealth() / maxHealth <= ENRAGE_THRESHOLD) {
             triggerEnrage();
         }
     }
 
-    public void triggerEnrage() {
+    private void triggerEnrage() {
         isEnraged = true;
-
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.5f);
         equipEnragedArmor(entity.getEquipment());
-
         onEnrage(entity);
     }
 
@@ -86,8 +85,16 @@ public sealed abstract class BlightedCreature extends SpawnableEntity
 
         equipment.setBoots(new ItemBuilder(Material.IRON_BOOTS).setUnbreakable(true).toItemStack());
         equipment.setLeggings(new ItemBuilder(Material.IRON_LEGGINGS).setUnbreakable(true).toItemStack());
-        equipment.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE).addEnchantment(Enchantment.PROTECTION, 1).setLeatherColor("#B74355").setUnbreakable(true).toItemStack());
-        equipment.setHelmet(new ItemBuilder(Material.LEATHER_HELMET).addEnchantment(Enchantment.PROTECTION, 1).setLeatherColor("#B53C45").setUnbreakable(true).toItemStack());
+        equipment.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
+            .addEnchantment(Enchantment.PROTECTION, 1)
+            .setLeatherColor("#B74355")
+            .setUnbreakable(true)
+            .toItemStack());
+        equipment.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
+            .addEnchantment(Enchantment.PROTECTION, 1)
+            .setLeatherColor("#B53C45")
+            .setUnbreakable(true)
+            .toItemStack());
     }
 
     private void playEnrageParticles() {
@@ -95,33 +102,11 @@ public sealed abstract class BlightedCreature extends SpawnableEntity
     }
 
     @Override
-    public SpawnableEntity clone() {
+    public BlightedCreature clone() {
         BlightedCreature clone = (BlightedCreature) super.clone();
         clone.isEnraged = false;
         clone.particleTicks = 0;
-
-        clone.addRepeatingTask(() -> {
-            BukkitRunnable task = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (clone.entity == null || clone.entity.isDead()) {
-                        cancel();
-                        return;
-                    }
-                    if (!clone.isEnraged) {
-                        clone.checkHealthAndEnrage();
-                        return;
-                    }
-
-                    if (++clone.particleTicks >= 5) {
-                        clone.playEnrageParticles();
-                        clone.particleTicks = 0;
-                    }
-                }
-            };
-            clone.abilityRunnable = task;
-            return task;
-        }, 1L, 1L);
+        clone.setupEnrageTask();
         return clone;
     }
 }
