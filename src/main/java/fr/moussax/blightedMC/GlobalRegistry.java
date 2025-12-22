@@ -6,6 +6,7 @@ import fr.moussax.blightedMC.core.items.blocks.BlocksRegistry;
 import fr.moussax.blightedMC.core.items.crafting.registry.RecipesDirectory;
 import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
 import fr.moussax.blightedMC.game.recipes.ForgeRecipes;
+import fr.moussax.blightedMC.game.rituals.RitualsRegistry;
 
 public final class GlobalRegistry {
     public static void initializeAllRegistries() {
@@ -14,6 +15,7 @@ public final class GlobalRegistry {
         RecipesDirectory.initializeRecipes();
         ForgeRecipes.initialize();
         EntitiesRegistry.initializeEntities();
+        RitualsRegistry.registerRituals();
     }
 
     public static void clearAllRegistries() {
