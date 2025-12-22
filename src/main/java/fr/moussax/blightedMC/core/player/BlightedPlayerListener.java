@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.core.player;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.DyeColor;
@@ -131,7 +131,7 @@ public class BlightedPlayerListener implements Listener {
 
         String killerName = null;
         if (killer != null) {
-            BlightedEntity blighted = BlightedEntitiesListener.getBlightedEntity(killer);
+            AbstractBlightedEntity blighted = BlightedEntitiesListener.getBlightedEntity(killer);
             if (blighted != null) {
                 killerName = blighted.getName();
             } else {

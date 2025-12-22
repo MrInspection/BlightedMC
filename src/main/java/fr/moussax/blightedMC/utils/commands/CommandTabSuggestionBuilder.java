@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.utils.commands;
 
-import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.core.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.items.registry.ItemDirectory;
@@ -9,6 +9,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -19,7 +20,7 @@ import java.util.*;
  * Supports special placeholders:
  * <ul>
  *   <li><b>$players</b> – Suggests all online players.</li>
- *   <li><b>$entities</b> – Suggests all registered {@link BlightedEntity} IDs.</li>
+ *   <li><b>$entities</b> – Suggests all registered {@link AbstractBlightedEntity} IDs.</li>
  * </ul>
  */
 public class CommandTabSuggestionBuilder implements TabCompleter {
@@ -52,30 +53,32 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
      * @return a list of matching suggestions, or an empty list if none apply
      */
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
         for (var entry : rules.entrySet()) {
             if (entry.getKey().matches(args)) {
                 List<String> suggestions = entry.getValue();
+                List<String> candidates;
 
                 if (suggestions.size() == 1 && suggestions.getFirst().equals("$players")) {
-                    return Bukkit.getOnlinePlayers().stream()
+                    candidates = Bukkit.getOnlinePlayers().stream()
                         .map(Player::getName)
                         .toList();
-                }
-
-                if (suggestions.size() == 1 && suggestions.getFirst().equals("$items")) {
-                    return ItemDirectory.getAllItems().stream()
+                } else if (suggestions.size() == 1 && suggestions.getFirst().equals("$items")) {
+                    candidates = ItemDirectory.getAllItems().stream()
                         .map(ItemTemplate::getItemId)
                         .toList();
-                }
-
-                if (suggestions.size() == 1 && suggestions.getFirst().equals("$entities")) {
-                    return EntitiesRegistry.getAllEntities().stream()
-                        .map(BlightedEntity::getEntityId)
+                } else if (suggestions.size() == 1 && suggestions.getFirst().equals("$entities")) {
+                    candidates = EntitiesRegistry.getAllEntities().stream()
+                        .map(AbstractBlightedEntity::getEntityId)
                         .toList();
+                } else {
+                    candidates = suggestions;
                 }
 
-                return suggestions;
+                List<String> result = new ArrayList<>();
+                org.bukkit.util.StringUtil.copyPartialMatches(args[args.length - 1], candidates, result);
+                Collections.sort(result);
+                return result;
             }
         }
         return Collections.emptyList();

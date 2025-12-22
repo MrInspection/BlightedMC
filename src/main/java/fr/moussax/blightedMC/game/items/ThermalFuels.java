@@ -5,7 +5,6 @@ import fr.moussax.blightedMC.core.items.ItemTemplate;
 import fr.moussax.blightedMC.core.items.ItemType;
 import fr.moussax.blightedMC.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.core.items.rules.PreventFluidPlacementRule;
-import fr.moussax.blightedMC.core.items.rules.PreventPlacementRule;
 import org.bukkit.Material;
 
 import java.util.List;
@@ -30,7 +29,7 @@ public class ThermalFuels implements ItemRegistry {
             "ENCHANTED_LAVA_BUCKET", ItemType.MATERIAL, ItemRarity.RARE, Material.LAVA_BUCKET, "Enchanted Lava Bucket"
         );
         enchantedLavaBucket.addEnchantmentGlint();
-        enchantedLavaBucket.addRule(new PreventPlacementRule());
+        enchantedLavaBucket.addRule(new PreventFluidPlacementRule());
         enchantedLavaBucket.addLore(
             "§8Thermal Fuel", "",
             " §7Enriched lava capable of ",

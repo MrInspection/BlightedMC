@@ -48,6 +48,11 @@ public class RecipeBookMenu {
             super("§rBlighted Recipe Book", 54);
             this.previousMenu = previousMenu;
             this.cachedRecipes = new ArrayList<>(BlightedRecipe.REGISTERED_RECIPES);
+            this.cachedRecipes.sort((r1, r2) -> {
+                String name1 = r1.getResult().getDisplayName();
+                String name2 = r2.getResult().getDisplayName();
+                return (name1 != null ? name1 : "").compareTo(name2 != null ? name2 : "");
+            });
         }
 
         @Override

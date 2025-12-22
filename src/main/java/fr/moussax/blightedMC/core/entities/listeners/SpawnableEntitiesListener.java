@@ -38,7 +38,7 @@ public class SpawnableEntitiesListener implements Listener {
 
         double totalChance = 0.0;
         for (SpawnableEntity entity : eligible) {
-            totalChance += entity.getSpawnChance();
+            totalChance += entity.getSpawnProbability();
         }
         totalChance = Math.min(totalChance, 1.0);
 
@@ -48,7 +48,7 @@ public class SpawnableEntitiesListener implements Listener {
         double cumulative = 0.0;
 
         for (SpawnableEntity entity : eligible) {
-            cumulative += entity.getSpawnChance();
+            cumulative += entity.getSpawnProbability();
             if (roll < cumulative) {
                 event.setCancelled(true);
                 entity.spawn(location, CreatureSpawnEvent.SpawnReason.CUSTOM);

@@ -177,6 +177,18 @@ public class ItemBuilder {
     }
 
     /**
+     * Allows direct modification of the ItemMeta via a Consumer.
+     * Useful for accessing specific meta types without casting manually.
+     *
+     * @param consumer the consumer to modify the ItemMeta
+     * @return this builder
+     */
+    public ItemBuilder setItemMeta(Consumer<ItemMeta> consumer) {
+        consumer.accept(this.itemMeta);
+        return this;
+    }
+
+    /**
      * Replaces the current ItemMeta with the provided one.
      *
      * @param itemMeta the new item meta

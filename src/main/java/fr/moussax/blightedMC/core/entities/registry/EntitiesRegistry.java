@@ -1,12 +1,13 @@
 package fr.moussax.blightedMC.core.entities.registry;
 
-import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.game.entities.Dummy;
+import fr.moussax.blightedMC.game.entities.bosses.Goldor;
 import fr.moussax.blightedMC.game.entities.bosses.RevenantHorror;
 import fr.moussax.blightedMC.game.entities.bosses.TheAncientKnight;
-import fr.moussax.blightedMC.game.entities.spawnable.BlightedZombie;
 import fr.moussax.blightedMC.game.entities.spawnable.LaserEngineer;
+import fr.moussax.blightedMC.game.entities.spawnable.blighted.*;
 import fr.moussax.blightedMC.utils.debug.Log;
 
 import java.util.HashMap;
@@ -15,14 +16,14 @@ import java.util.Map;
 
 public final class EntitiesRegistry {
     private static final String REGISTRY_PREFIX = "EntitiesRegistry";
-    private static final Map<String, BlightedEntity> ENTITIES = new HashMap<>();
+    private static final Map<String, AbstractBlightedEntity> ENTITIES = new HashMap<>();
 
     public static void clearEntities() {
         ENTITIES.clear();
         SpawnableEntitiesRegistry.clearEntities();
     }
 
-    public static void registerEntity(BlightedEntity entity) {
+    public static void registerEntity(AbstractBlightedEntity entity) {
         if (ENTITIES.containsKey(entity.getEntityId())) {
             throw new IllegalArgumentException("Duplicate entity ID: " + entity.getEntityId());
         }
@@ -33,23 +34,33 @@ public final class EntitiesRegistry {
         }
     }
 
-    public static BlightedEntity getEntity(String entityId) {
-        BlightedEntity prototype = ENTITIES.get(entityId);
+    public static AbstractBlightedEntity getEntity(String entityId) {
+        AbstractBlightedEntity prototype = ENTITIES.get(entityId);
         return prototype != null ? prototype.clone() : null;
     }
 
-    public static List<BlightedEntity> getAllEntities() {
+    public static List<AbstractBlightedEntity> getAllEntities() {
         return ENTITIES.values().stream()
-            .map(BlightedEntity::clone)
+            .map(AbstractBlightedEntity::clone)
             .toList();
     }
 
-    private static final List<BlightedEntity> DEFAULT_ENTITIES = List.of(
+    private static final List<AbstractBlightedEntity> DEFAULT_ENTITIES = List.of(
         new TheAncientKnight(),
         new RevenantHorror(),
+        new BlightedBogged(),
+        new BlightedDrowned(),
+        new BlightedHusk(),
+        new BlightedParched(),
+        new BlightedPiglin(),
+        new BlightedSkeleton(),
+        new BlightedStray(),
+        new BlightedWitherSkeleton(),
         new BlightedZombie(),
+        new BlightedZombifiedPiglin(),
         new LaserEngineer(),
-        new Dummy()
+        new Dummy(),
+        new Goldor()
     );
 
     public static void initializeEntities() {

@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.game.entities.bosses;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.entities.BlightedEntity;
+import fr.moussax.blightedMC.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class TheAncientKnight extends BlightedEntity {
+public class TheAncientKnight extends AbstractBlightedEntity {
     private BukkitRunnable abilityRunnable;
     public ArrayList<StabPlayer> swords = new ArrayList<>();
 

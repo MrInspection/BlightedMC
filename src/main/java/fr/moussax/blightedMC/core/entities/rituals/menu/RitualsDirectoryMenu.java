@@ -41,6 +41,11 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
         super("Ancient Rituals", 54);
         this.previousMenu = previousMenu;
         this.cachedRituals = new ArrayList<>(AncientRitual.REGISTRY);
+        this.cachedRituals.sort((r1, r2) -> {
+            String name1 = r1.getSummonedCreature() != null ? r1.getSummonedCreature().getName() : "Unknown Ritual";
+            String name2 = r2.getSummonedCreature() != null ? r2.getSummonedCreature().getName() : "Unknown Ritual";
+            return name1.compareTo(name2);
+        });
     }
 
     @Override

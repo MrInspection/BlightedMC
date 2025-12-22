@@ -8,12 +8,10 @@ import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Represents a loot table capable of generating item drops for entities.
@@ -54,6 +52,22 @@ public class LootTable {
     public LootTable addLoot(Material material, int min, int max, double dropChance, LootDropRarity rarity) {
         ItemStack stack = new ItemStack(material);
         ItemLoot itemLoot = new ItemLoot(stack, min, max);
+        lootEntries.add(new LootEntry(itemLoot, dropChance, rarity));
+        return this;
+    }
+
+    /**
+     * Adds a specific ItemStack to the loot table.
+     *
+     * @param item       the ItemStack to drop
+     * @param min        minimum drop quantity
+     * @param max        maximum drop quantity
+     * @param dropChance probability to drop (0.0-1.0)
+     * @param rarity     the drop rarity
+     * @return this LootTable for chaining
+     */
+    public LootTable addLoot(ItemStack item, int min, int max, double dropChance, LootDropRarity rarity) {
+        ItemLoot itemLoot = new ItemLoot(item, min, max);
         lootEntries.add(new LootEntry(itemLoot, dropChance, rarity));
         return this;
     }
@@ -123,11 +137,20 @@ public class LootTable {
      * @param killer   the player who killed the entity (can be null)
      */
     public void dropLoot(Location location, BlightedPlayer killer) {
+        int lootingLevel = 0;
+        if (killer != null && killer.getPlayer() != null) {
+            ItemStack weapon = killer.getPlayer().getInventory().getItemInMainHand();
+            if (weapon.hasItemMeta() && Objects.requireNonNull(weapon.getItemMeta()).hasEnchant(Enchantment.LOOTING)) {
+                lootingLevel = weapon.getItemMeta().getEnchantLevel(Enchantment.LOOTING);
+            }
+        }
+
         List<LootEntry> successfulDrops = new ArrayList<>();
 
         // First pass: determine which items will drop
         for (LootEntry entry : lootEntries) {
-            if (randomizer.nextDouble() <= entry.dropChance) {
+            double adjustedChance = entry.rarity.applyLooting(entry.dropChance, lootingLevel);
+            if (randomizer.nextDouble() <= adjustedChance) {
                 successfulDrops.add(entry);
             }
         }
@@ -209,6 +232,5 @@ public class LootTable {
      * @param dropChance the probability to drop (0.0-1.0)
      * @param rarity     the drop rarity
      */
-    private record LootEntry(ItemLoot item, double dropChance, LootDropRarity rarity) {
-    }
+    private record LootEntry(ItemLoot item, double dropChance, LootDropRarity rarity) { }
 }

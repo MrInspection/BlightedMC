@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.game.entities.spawnable;
 import fr.moussax.blightedMC.core.entities.EntityImmunities;
 import fr.moussax.blightedMC.core.entities.loot.LootDropRarity;
 import fr.moussax.blightedMC.core.entities.loot.LootTable;
-import fr.moussax.blightedMC.core.entities.spawnable.SpawnConditions;
+import fr.moussax.blightedMC.core.entities.spawnable.SpawnConditionFactory;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -244,9 +244,9 @@ public class LaserEngineer extends SpawnableEntity {
     }
 
     @Override
-    protected void setupSpawnConditions() {
-        addSpawnCondition(
-            SpawnConditions.biome(
+    protected void defineSpawnConditions() {
+        addCondition(
+            SpawnConditionFactory.biome(
                 Biome.FOREST,
                 Biome.BIRCH_FOREST,
                 Biome.DARK_FOREST,

@@ -117,6 +117,11 @@ public class ItemDirectoryMenu {
             super(title, 54);
             this.previousMenu = previousMenu;
             this.itemTemplates = ItemDirectory.getAllItems().stream().filter(filter).collect(Collectors.toList());
+            this.itemTemplates.sort((i1, i2) -> {
+                String name1 = i1.getDisplayName();
+                String name2 = i2.getDisplayName();
+                return (name1 != null ? name1 : "").compareTo(name2 != null ? name2 : "");
+            });
         }
 
         public BlightedItemsPaginatedMenu(ItemType.Category category, Menu previousMenu, Predicate<ItemTemplate> filter, String title) {

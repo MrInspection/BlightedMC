@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Manages the lifecycle-bound tasks associated with a {@link fr.moussax.blightedMC.core.entities.BlightedEntity}.
+ * Manages the lifecycle-bound tasks associated with a {@link AbstractBlightedEntity}.
  * <p>
  * This class allows entities to register both delayed and repeating tasks that
  * automatically start when the entity is initialized and stop when it is destroyed.

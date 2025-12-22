@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies the damage immunities for a {@link BlightedEntity}.
+ * Specifies the damage immunities for a {@link AbstractBlightedEntity}.
  *
  * <p>Entities annotated with this annotation will automatically be immune
  * to the specified damage types. Immunity rules are initialized during
@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * @see BlightedEntity#initImmunityRules()
+ * @see AbstractBlightedEntity#initImmunityRules()
  * @see ImmunityType
  */
 @Target(ElementType.TYPE)

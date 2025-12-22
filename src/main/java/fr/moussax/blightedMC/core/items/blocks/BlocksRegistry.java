@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.core.items.blocks;
 
+import fr.moussax.blightedMC.game.blocks.BlightedForge;
 import fr.moussax.blightedMC.game.blocks.BlightedWorkbench;
 import fr.moussax.blightedMC.utils.debug.Log;
 
@@ -10,7 +11,10 @@ public final class BlocksRegistry {
     public static final HashMap<String, BlightedBlock> CUSTOM_BLOCKS = new HashMap<>();
 
     private static List<BlightedBlock> createBlocks() {
-        return List.of(new BlightedWorkbench());
+        return List.of(
+            new BlightedWorkbench(),
+            new BlightedForge()
+        );
     }
 
     public static void clearBlocks() {
