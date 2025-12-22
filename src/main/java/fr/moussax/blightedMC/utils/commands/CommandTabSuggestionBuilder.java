@@ -9,6 +9,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -52,30 +53,32 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
      * @return a list of matching suggestions, or an empty list if none apply
      */
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
         for (var entry : rules.entrySet()) {
             if (entry.getKey().matches(args)) {
                 List<String> suggestions = entry.getValue();
+                List<String> candidates;
 
                 if (suggestions.size() == 1 && suggestions.getFirst().equals("$players")) {
-                    return Bukkit.getOnlinePlayers().stream()
+                    candidates = Bukkit.getOnlinePlayers().stream()
                         .map(Player::getName)
                         .toList();
-                }
-
-                if (suggestions.size() == 1 && suggestions.getFirst().equals("$items")) {
-                    return ItemDirectory.getAllItems().stream()
+                } else if (suggestions.size() == 1 && suggestions.getFirst().equals("$items")) {
+                    candidates = ItemDirectory.getAllItems().stream()
                         .map(ItemTemplate::getItemId)
                         .toList();
-                }
-
-                if (suggestions.size() == 1 && suggestions.getFirst().equals("$entities")) {
-                    return EntitiesRegistry.getAllEntities().stream()
+                } else if (suggestions.size() == 1 && suggestions.getFirst().equals("$entities")) {
+                    candidates = EntitiesRegistry.getAllEntities().stream()
                         .map(AbstractBlightedEntity::getEntityId)
                         .toList();
+                } else {
+                    candidates = suggestions;
                 }
 
-                return suggestions;
+                List<String> result = new ArrayList<>();
+                org.bukkit.util.StringUtil.copyPartialMatches(args[args.length - 1], candidates, result);
+                Collections.sort(result);
+                return result;
             }
         }
         return Collections.emptyList();
