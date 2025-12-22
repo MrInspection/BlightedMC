@@ -8,6 +8,8 @@ import fr.moussax.blightedMC.game.entities.bosses.RevenantHorror;
 import fr.moussax.blightedMC.game.entities.bosses.TheAncientKnight;
 import fr.moussax.blightedMC.game.entities.spawnable.LaserEngineer;
 import fr.moussax.blightedMC.game.entities.spawnable.blighted.*;
+import fr.moussax.blightedMC.game.entities.spawnable.powerful.Endersent;
+import fr.moussax.blightedMC.game.entities.spawnable.Watchling;
 import fr.moussax.blightedMC.utils.debug.Log;
 
 import java.util.HashMap;
@@ -60,7 +62,9 @@ public final class EntitiesRegistry {
         new BlightedZombifiedPiglin(),
         new LaserEngineer(),
         new Dummy(),
-        new Goldor()
+        new Goldor(),
+        new Endersent(),
+        new Watchling()
     );
 
     public static void initializeEntities() {
