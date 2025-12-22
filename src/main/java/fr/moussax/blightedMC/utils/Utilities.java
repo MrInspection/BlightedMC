@@ -4,6 +4,7 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.core.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -64,7 +65,8 @@ public class Utilities {
             return "vanilla:" + item.getType().name();
         }
 
-        String customId = meta.getPersistentDataContainer().get(ITEM_ID_KEY, PersistentDataType.STRING);
+        NamespacedKey itemIdKey = ITEM_ID_KEY;
+        String customId = meta.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
         return customId != null ? customId : "vanilla:" + item.getType().name();
     }
 
@@ -123,7 +125,8 @@ public class Utilities {
         double nearestDistanceSquared = range * range;
 
         for (Player player : source.getWorld().getPlayers()) {
-            if (player.getGameMode() == org.bukkit.GameMode.SPECTATOR || player.getGameMode() == org.bukkit.GameMode.CREATIVE) continue;
+            if (player.getGameMode() == org.bukkit.GameMode.SPECTATOR || player.getGameMode() == org.bukkit.GameMode.CREATIVE)
+                continue;
 
             double distanceSquared = player.getLocation().distanceSquared(source.getLocation());
             if (distanceSquared <= nearestDistanceSquared) {
