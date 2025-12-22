@@ -54,6 +54,20 @@ public final class SpawnConditionFactory {
     }
 
     /**
+     * Requires the block light (from torches, lava, etc.) to be at most {@code max}.
+     */
+    public static SpawnCondition maxBlockLight(int max) {
+        return (loc, world) -> loc.getBlock().getLightFromBlocks() <= max;
+    }
+
+    /**
+     * Requires the light level (block + sky) to be at most {@code max}.
+     */
+    public static SpawnCondition maxLightLevel(int max) {
+        return (loc, world) -> loc.getBlock().getLightLevel() <= max;
+    }
+
+    /**
      * Requires the spawn location to be directly exposed to the sky.
      */
     public static SpawnCondition skyExposed() {
@@ -63,7 +77,7 @@ public final class SpawnConditionFactory {
     /**
      * Disallows spawning in liquid blocks.
      */
-    public static SpawnCondition notInWater() {
+    public static SpawnCondition notInLiquid() {
         return (loc, world) -> !loc.getBlock().isLiquid();
     }
 

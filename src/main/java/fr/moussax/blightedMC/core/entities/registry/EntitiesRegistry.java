@@ -7,7 +7,7 @@ import fr.moussax.blightedMC.game.entities.bosses.Goldor;
 import fr.moussax.blightedMC.game.entities.bosses.RevenantHorror;
 import fr.moussax.blightedMC.game.entities.bosses.TheAncientKnight;
 import fr.moussax.blightedMC.game.entities.spawnable.LaserEngineer;
-import fr.moussax.blightedMC.game.entities.spawnable.blighted.BlightedZombie;
+import fr.moussax.blightedMC.game.entities.spawnable.blighted.*;
 import fr.moussax.blightedMC.utils.debug.Log;
 
 import java.util.HashMap;
@@ -48,7 +48,16 @@ public final class EntitiesRegistry {
     private static final List<AbstractBlightedEntity> DEFAULT_ENTITIES = List.of(
         new TheAncientKnight(),
         new RevenantHorror(),
+        new BlightedBogged(),
+        new BlightedDrowned(),
+        new BlightedHusk(),
+        new BlightedParched(),
+        new BlightedPiglin(),
+        new BlightedSkeleton(),
+        new BlightedStray(),
+        new BlightedWitherSkeleton(),
         new BlightedZombie(),
+        new BlightedZombifiedPiglin(),
         new LaserEngineer(),
         new Dummy(),
         new Goldor()

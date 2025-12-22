@@ -16,17 +16,17 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Objects;
 
-public sealed abstract class BlightedFaction extends SpawnableEntity
+public sealed abstract class BlightedCreature extends SpawnableEntity
     permits BlightedBogged, BlightedDrowned, BlightedHusk, BlightedParched, BlightedPiglin,
     BlightedSkeleton, BlightedStray, BlightedWitherSkeleton, BlightedZombie, BlightedZombifiedPiglin {
 
-    protected boolean isEnraged;
     private final double enrageThreshold = 0.50;
+    protected boolean isEnraged;
     private BukkitRunnable abilityRunnable;
     private int particleTicks = 0;
 
-    protected BlightedFaction(String entityId, String name, int maxHealth, EntityType entityType) {
-        super(entityId, name, maxHealth, entityType, 0.30);
+    protected BlightedCreature(String entityId, String name, EntityType entityType) {
+        super(entityId, name, 30, entityType, 0.04);
         setNameTagType(EntityNameTag.BLIGHTED);
 
         armor = new ItemStack[]{
@@ -96,7 +96,7 @@ public sealed abstract class BlightedFaction extends SpawnableEntity
 
     @Override
     public SpawnableEntity clone() {
-        BlightedFaction clone = (BlightedFaction) super.clone();
+        BlightedCreature clone = (BlightedCreature) super.clone();
         clone.isEnraged = false;
         clone.particleTicks = 0;
 
