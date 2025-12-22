@@ -10,8 +10,10 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 import java.util.Objects;
 
@@ -27,8 +29,8 @@ public final class BlightedStray extends BlightedCreature {
     private LootTable createLootTable() {
         ItemStack slownessArrow = new ItemBuilder(Material.TIPPED_ARROW)
             .setItemMeta(meta -> {
-                if (meta instanceof org.bukkit.inventory.meta.PotionMeta potionMeta) {
-                    potionMeta.setBasePotionType(org.bukkit.potion.PotionType.SLOWNESS);
+                if (meta instanceof PotionMeta potionMeta) {
+                    potionMeta.setBasePotionType(PotionType.SLOWNESS);
                 }
             })
             .toItemStack();

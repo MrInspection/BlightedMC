@@ -3,14 +3,18 @@ package fr.moussax.blightedMC.game.entities.spawnable.blighted;
 import fr.moussax.blightedMC.core.entities.loot.LootDropRarity;
 import fr.moussax.blightedMC.core.entities.loot.LootTable;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnConditionFactory;
+import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.generator.structure.Structure;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import java.util.Objects;
 
 public final class BlightedZombifiedPiglin extends BlightedCreature {
     public BlightedZombifiedPiglin() {
@@ -34,6 +38,9 @@ public final class BlightedZombifiedPiglin extends BlightedCreature {
     protected void onEnrage(LivingEntity entity) {
         entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PotionEffect.INFINITE_DURATION, 1));
         entity.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, PotionEffect.INFINITE_DURATION, 0));
+        Objects.requireNonNull(entity.getEquipment()).setItemInMainHand(
+            new ItemBuilder(Material.GOLDEN_SWORD).addEnchantment(Enchantment.FIRE_ASPECT, 1).toItemStack()
+        );
     }
 
     @Override
