@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.core.entities.spawnable;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,10 +17,10 @@ import java.util.List;
  * <p>Example:
  * <pre>{@code
  * SpawnProfile profile = new SpawnProfile();
- * profile.addCondition(SpawnConditions.biome(Biome.PLAINS));
- * profile.addCondition(SpawnConditions.nightTime());
+ * profile.addSpawnCondition(SpawnConditionFactory.biome(Biome.PLAINS));
+ * profile.addSpawnCondition(SpawnConditionFactory.nightTime());
  *
- * boolean allowed = profile.canSpawnAt(location, world);
+ * boolean allowed = profile.canSpawn(location, world);
  * }</pre>
  */
 public class SpawnProfile {
@@ -46,7 +47,7 @@ public class SpawnProfile {
      * Adds a spawn condition.
      * All conditions must pass for spawning to be allowed.
      */
-    public void addSpawnCondition(SpawnCondition condition) {
+    public void addSpawnCondition(@NonNull SpawnCondition condition) {
         conditions.add(condition);
     }
 

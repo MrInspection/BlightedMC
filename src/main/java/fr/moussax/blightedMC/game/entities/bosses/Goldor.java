@@ -20,17 +20,15 @@ import java.util.List;
 
 public class Goldor extends AncientCreature {
 
-    private final List<Giant> orbitingSwords = new ArrayList<>();
-    private final List<SwordProjectile> activeProjectiles = new ArrayList<>();
+    private List<Giant> orbitingSwords = new ArrayList<>();
+    private List<SwordProjectile> activeProjectiles = new ArrayList<>();
     private BukkitRunnable abilityRunnable;
 
-    // Configuration
     private static final int SWORD_COUNT = 3;
-    private static final double ORBIT_RADIUS = 3; // Closer to boss (was 5.5)
-    private static final double ORBIT_SPEED = 0.12; // Slower rotation (was 0.12)
-    private static final double GIANT_HAND_HEIGHT_OFFSET = 7.5; // Aligns Giant's hand with Boss
+    private static final double ORBIT_RADIUS = 3;
+    private static final double ORBIT_SPEED = 0.12;
+    private static final double GIANT_HAND_HEIGHT_OFFSET = 7.5;
 
-    // Runtime State
     private double currentAngle = 0.0;
 
     public Goldor() {
@@ -41,41 +39,40 @@ public class Goldor extends AncientCreature {
         addAttribute(Attribute.KNOCKBACK_RESISTANCE, 1.0);
         addAttribute(Attribute.SCALE, 1.2);
 
-        // --- SINGLE MAIN TASK ---
-        addRepeatingTask(() -> {
-            abilityRunnable = new BukkitRunnable() {
+        setupAbilityTask(this);
+    }
+
+    private void setupAbilityTask(Goldor instance) {
+        instance.addRepeatingTask(() -> {
+            instance.abilityRunnable = new BukkitRunnable() {
                 private int tickCounter = 0;
 
                 @Override
                 public void run() {
-                    if (entity == null || entity.isDead()) {
-                        stopAbility();
+                    if (instance.entity == null || instance.entity.isDead()) {
+                        instance.stopAbility();
                         cancel();
                         return;
                     }
 
-                    // 1. Initial Spawn check
-                    if (orbitingSwords.isEmpty() && tickCounter == 0) {
-                        spawnSwords();
+                    if (instance.orbitingSwords.isEmpty() && tickCounter == 0) {
+                        instance.spawnSwords();
                     }
 
-                    // 2. Passive: Update Orbit Positions
-                    performOrbit();
+                    instance.performOrbit();
 
-                    // 3. Ability: Throw Sword (Every 4 seconds = 80 ticks)
                     if (tickCounter > 0 && tickCounter % 80 == 0) {
-                        performThrowAbility();
+                        instance.performThrowAbility();
                     }
 
-                    // 4. Passive: Regen Swords (Every 1 second)
                     if (tickCounter % 20 == 0) {
-                        regenerateSwords();
+                        instance.regenerateSwords();
                     }
 
                     tickCounter++;
                 }
             };
-            return abilityRunnable;
+            return instance.abilityRunnable;
         }, 0L, 1L);
     }
 
@@ -98,7 +95,10 @@ public class Goldor extends AncientCreature {
 
     private void stopAbility() {
         if (abilityRunnable != null && !abilityRunnable.isCancelled()) {
-            try { abilityRunnable.cancel(); } catch (Exception ignored) {}
+            try {
+                abilityRunnable.cancel();
+            } catch (Exception ignored) {
+            }
             abilityRunnable = null;
         }
 
@@ -162,11 +162,6 @@ public class Goldor extends AncientCreature {
             double z = Math.sin(offsetAngle) * ORBIT_RADIUS;
 
             Location target = center.clone().add(x, 0, z);
-
-            // ADJUSTMENT: Yaw calculation
-            // Removing "- 90" makes the Giant face the tangent of the circle.
-            // Since the sword is in the right hand, it points radially outward.
-            // This aligns the blade edge with the Wither (perpendicular plane).
             float yaw = (float) Math.toDegrees(Math.atan2(z, x));
             target.setYaw(yaw);
             target.setPitch(0);
@@ -182,7 +177,7 @@ public class Goldor extends AncientCreature {
         Player target = Utilities.getNearestPlayer(entity, 40);
         if (target == null) return;
 
-        Giant sword = orbitingSwords.remove(0);
+        Giant sword = orbitingSwords.removeFirst();
         activeProjectiles.add(new SwordProjectile(sword, target));
 
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1f, 0.5f);
@@ -195,52 +190,18 @@ public class Goldor extends AncientCreature {
         }
     }
 
-    // --- CLONING ---
-
     @Override
     public Goldor clone() {
         Goldor clone = (Goldor) super.clone();
 
         clone.abilityRunnable = null;
-        clone.orbitingSwords.clear();
-        clone.activeProjectiles.clear();
+        clone.orbitingSwords = new ArrayList<>();
+        clone.activeProjectiles = new ArrayList<>();
 
-        clone.addRepeatingTask(() -> {
-            clone.abilityRunnable = new BukkitRunnable() {
-                private int tickCounter = 0;
-
-                @Override
-                public void run() {
-                    if (clone.entity == null || clone.entity.isDead()) {
-                        clone.stopAbility();
-                        cancel();
-                        return;
-                    }
-
-                    if (clone.orbitingSwords.isEmpty() && tickCounter == 0) {
-                        clone.spawnSwords();
-                    }
-
-                    clone.performOrbit();
-
-                    if (tickCounter > 0 && tickCounter % 80 == 0) {
-                        clone.performThrowAbility();
-                    }
-
-                    if (tickCounter % 20 == 0) {
-                        clone.regenerateSwords();
-                    }
-
-                    tickCounter++;
-                }
-            };
-            return clone.abilityRunnable;
-        }, 0L, 1L);
+        setupAbilityTask(clone);
 
         return clone;
     }
-
-    // --- INNER CLASS: PROJECTILE ---
 
     private class SwordProjectile extends BukkitRunnable {
         private final Giant sword;
@@ -275,7 +236,8 @@ public class Goldor extends AncientCreature {
             for (Entity e : sword.getWorld().getNearbyEntities(effectLoc, 2.0, 2.0, 2.0)) {
                 if (e instanceof LivingEntity victim
                     && !victim.getUniqueId().equals(entity.getUniqueId())
-                    && !victim.equals(sword)) {
+                    && !victim.equals(sword)
+                    && !(victim instanceof Giant)) {
 
                     victim.damage(30, entity);
                     explode();
