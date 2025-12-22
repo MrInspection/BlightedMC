@@ -19,20 +19,33 @@ public class BlocksDirectory implements ItemRegistry {
             Material.ENCHANTING_TABLE,
             "Blighted Workbench"
         );
-
         blightedCraftingTable.addLore(
             "§8Placeable Block",
             "",
-            "§7 Forged §beons ago §7in the §5Voidling Edges§7,",
-            "§7 this workbench thrums with §5blighted energy§7, ",
-            "§7 twisting §dmatter§7 and §dmagic§7 alike to forge",
-            "§7 items beyond the reach of ordinary",
-            "§7 crafting tables.",
+            " §7A crafting table infused with ",
+            " §5blighted energy §7capable",
+            " §7of weaving forbidden magic",
+            " §7into physical form.",
             "",
             ItemRarity.UNCOMMON.getName() + " BLOCK"
         );
-
         blightedCraftingTable.addEnchantmentGlint();
-        return ItemRegistry.add(blightedCraftingTable);
+
+        ItemTemplate blightedForge = new ItemTemplate(
+            "BLIGHTED_FORGE", ItemType.BLOCK, ItemRarity.RARE, Material.BLAST_FURNACE, "Blighted Forge"
+        );
+        blightedForge.addLore(
+            "§8Placeable Machine",
+            "",
+            " §7An industrial crucible powered by ",
+            " §5blighted energy§7, designed to fuse ",
+            " §7magic and metal under heat",
+            " §7intolerable to mortal craft.",
+            "",
+            ItemRarity.RARE.getName() + " MACHINE"
+        );
+        blightedForge.addEnchantmentGlint();
+
+        return ItemRegistry.add(List.of(blightedCraftingTable, blightedForge));
     }
 }

@@ -82,6 +82,17 @@ public final class MaterialRecipes implements RecipeRegistry {
         );
         blightedCraftingTable.setRecipe(encoder9.encodeCraftingRecipe());
 
+        ShapeEncoder encoder10 = new ShapeEncoder("aba", "cdc", "aea");
+        encoder10.bindKey('a', Material.IRON_BLOCK, 1);
+        encoder10.bindKey('b', Material.BLAST_FURNACE, 1);
+        encoder10.bindKey('c', ItemDirectory.getItem("ENCHANTED_COAL"), 2);
+        encoder10.bindKey('d', Material.LAVA_BUCKET, 1);
+        encoder10.bindKey('e', ItemDirectory.getItem("BLIGHTED_WORKBENCH"), 1);
+        BlightedShapedRecipe blightedForgeRecipe = new BlightedShapedRecipe(
+            ItemDirectory.getItem("BLIGHTED_FORGE"), 1
+        );
+        blightedForgeRecipe.setRecipe(encoder10.encodeCraftingRecipe());
+
         RecipesDirectory.add(
             enchantedIronIngotRecipe,
             enchantedIronBlockRecipe,
@@ -91,7 +102,8 @@ public final class MaterialRecipes implements RecipeRegistry {
             enchantedCoalRecipe,
             enchantedLavaBucketRecipe,
             magmaBucketRecipe,
-            blightedCraftingTable
+            blightedCraftingTable,
+            blightedForgeRecipe
         );
     }
 }

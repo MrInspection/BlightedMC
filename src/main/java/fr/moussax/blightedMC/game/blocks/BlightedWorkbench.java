@@ -12,11 +12,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 public class BlightedWorkbench extends BlightedBlock {
-    public static BlightedWorkbench INSTANCE;
 
     public BlightedWorkbench() {
         super(Material.ENCHANTING_TABLE, ItemDirectory.getItem("BLIGHTED_WORKBENCH"));
-        INSTANCE = this;
     }
 
     @Override

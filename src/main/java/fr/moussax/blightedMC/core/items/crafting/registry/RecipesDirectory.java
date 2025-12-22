@@ -36,6 +36,12 @@ public final class RecipesDirectory {
         recipe.addRecipe();
     }
 
+    public static void add(BlightedShapedRecipe... recipes) {
+        for (BlightedShapedRecipe recipe : recipes) {
+            recipe.addRecipe();
+        }
+    }
+
     /**
      * Creates and registers a shaped crafting recipe.
      * <p>
