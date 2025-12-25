@@ -36,7 +36,6 @@ public class GlimmeringEye implements ItemRegistry {
         );
         glimmeringEye.addEnchantmentGlint();
         glimmeringEye.addAbility(new Ability(new VoidStepAbility(), "Voidstep", AbilityType.RIGHT_CLICK));
-        glimmeringEye.addRule(new PreventInteractionRule());
         glimmeringEye.addRule(new PreventProjectileLaunchRule());
 
         return ItemRegistry.add(glimmeringEye);
