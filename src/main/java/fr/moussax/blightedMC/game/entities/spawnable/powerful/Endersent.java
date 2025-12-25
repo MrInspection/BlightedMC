@@ -2,6 +2,8 @@ package fr.moussax.blightedMC.game.entities.spawnable.powerful;
 
 import fr.moussax.blightedMC.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedMC.core.entities.loot.LootDropRarity;
+import fr.moussax.blightedMC.core.entities.loot.LootTable;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnConditionFactory;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.game.entities.spawnable.Watchling;
@@ -12,10 +14,7 @@ import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomStrollLand;
 import net.minecraft.world.entity.ai.goal.target.PathfinderGoalNearestAttackableTarget;
 import net.minecraft.world.entity.monster.EntityEnderman;
 import net.minecraft.world.entity.player.EntityHuman;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.v1_21_R7.entity.CraftMob;
@@ -43,17 +42,27 @@ public class Endersent extends SpawnableEntity {
     private static final long SMASH_COOLDOWN = 5000;
 
     public Endersent() {
-        super("ENDERSENT", "Endersent", 150, EntityType.ENDERMAN, 0.002);
+        super("ENDERSENT", "Endersent", 200, EntityType.ENDERMAN, 0.002);
         setDamage(20);
         setDroppedExp(40);
 
-        addAttribute(Attribute.FOLLOW_RANGE, 30);
+        addAttribute(Attribute.FOLLOW_RANGE, 50);
         addAttribute(Attribute.SCALE, 1.6);
         addAttribute(Attribute.KNOCKBACK_RESISTANCE, 1.0);
         addAttribute(Attribute.MOVEMENT_SPEED, 0.25);
 
+        setLootTable(createLootTable());
         setNameTagType(EntityNameTag.BOSS);
         setupBehavior();
+    }
+
+    private LootTable createLootTable() {
+        return new LootTable()
+            .setMaxDrop(2)
+            .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, LootDropRarity.COMMON)
+            .addLoot(Material.ENDER_EYE, 1, 3, 0.31, LootDropRarity.UNCOMMON)
+            .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, LootDropRarity.RARE)
+            .addGemsLoot(30, 0.03, LootDropRarity.EXTRAORDINARY);
     }
 
     private void setupBehavior() {
@@ -217,7 +226,7 @@ public class Endersent extends SpawnableEntity {
 
     @Override
     protected void defineSpawnConditions() {
-        addCondition(SpawnConditionFactory.biome(Biome.THE_END));
+        addCondition(SpawnConditionFactory.biome(Biome.END_MIDLANDS));
     }
 
     @Override

@@ -6,10 +6,12 @@ import fr.moussax.blightedMC.game.entities.Dummy;
 import fr.moussax.blightedMC.game.entities.bosses.Goldor;
 import fr.moussax.blightedMC.game.entities.bosses.RevenantHorror;
 import fr.moussax.blightedMC.game.entities.bosses.TheAncientKnight;
+import fr.moussax.blightedMC.game.entities.spawnable.Illusioner;
 import fr.moussax.blightedMC.game.entities.spawnable.LaserEngineer;
 import fr.moussax.blightedMC.game.entities.spawnable.blighted.*;
 import fr.moussax.blightedMC.game.entities.spawnable.powerful.Endersent;
 import fr.moussax.blightedMC.game.entities.spawnable.Watchling;
+import fr.moussax.blightedMC.game.entities.spawnable.powerful.VoidlingDefender;
 import fr.moussax.blightedMC.utils.debug.Log;
 
 import java.util.HashMap;
@@ -64,7 +66,9 @@ public final class EntitiesRegistry {
         new Dummy(),
         new Goldor(),
         new Endersent(),
-        new Watchling()
+        new Watchling(),
+        new Illusioner(),
+        new VoidlingDefender()
     );
 
     public static void initializeEntities() {

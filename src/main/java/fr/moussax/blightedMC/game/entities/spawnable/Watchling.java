@@ -1,5 +1,7 @@
 package fr.moussax.blightedMC.game.entities.spawnable;
 
+import fr.moussax.blightedMC.core.entities.loot.LootDropRarity;
+import fr.moussax.blightedMC.core.entities.loot.LootTable;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnConditionFactory;
 import fr.moussax.blightedMC.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -10,6 +12,7 @@ import net.minecraft.world.entity.ai.goal.target.PathfinderGoalNearestAttackable
 import net.minecraft.world.entity.monster.EntityEnderman;
 import net.minecraft.world.entity.player.EntityHuman;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
@@ -18,6 +21,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.bukkit.generator.structure.Structure;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Random;
@@ -29,13 +33,22 @@ public class Watchling extends SpawnableEntity {
     private final Random random = new Random();
 
     public Watchling() {
-        super("WATCHLING", "§dWatchling", 16, EntityType.ENDERMAN, 0.001);
+        super("WATCHLING", "§dWatchling", 20, EntityType.ENDERMAN, 0.001);
         addAttribute(Attribute.SCALE, 0.7);
         addAttribute(Attribute.MOVEMENT_SPEED, 0.35);
-        addAttribute(Attribute.FOLLOW_RANGE, 24.0);
-        setDamage(8);
+        addAttribute(Attribute.FOLLOW_RANGE, 50);
+        setDamage(10);
         setDroppedExp(10);
+
+        setLootTable(createLootTable());
         setupBehavior();
+    }
+
+    private LootTable createLootTable() {
+        return new LootTable()
+            .setMaxDrop(2)
+            .addLoot(Material.ENDER_PEARL, 1, 2, 1.0, LootDropRarity.COMMON)
+            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
     }
 
     private void setupBehavior() {
@@ -136,7 +149,10 @@ public class Watchling extends SpawnableEntity {
 
     @Override
     protected void defineSpawnConditions() {
-        addCondition(SpawnConditionFactory.biome(Biome.END_BARRENS));
+        addCondition(SpawnConditionFactory
+            .biome(Biome.END_BARRENS, Biome.END_MIDLANDS)
+            .or(SpawnConditionFactory.insideStructure(Structure.END_CITY))
+        );
     }
 
     @Override
