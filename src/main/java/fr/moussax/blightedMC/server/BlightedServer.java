@@ -19,7 +19,7 @@ public final class BlightedServer {
     }
 
     public void configureServer() {
-        Log.debug("SERVER", "Configuring server...");
+        Log.info("Server", "Configuring server...");
         for (World world : Bukkit.getWorlds()) {
             world.setDifficulty(Difficulty.HARD);
             world.setGameRule(GameRule.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0);

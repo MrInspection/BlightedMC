@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
  * Rule that prevents placing the item entirely and restricts interaction.
  * Placement is always disallowed. Interaction is blocked when right-clicking a block.
  */
-public class PreventPlacementRule implements ItemRule {
+public final class PreventPlacementRule implements ItemRule {
     @Override
     public boolean canPlace(BlockPlaceEvent event, ItemStack itemStack) {
         return true; // FORBIDDEN
