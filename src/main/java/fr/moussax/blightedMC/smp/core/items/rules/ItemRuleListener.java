@@ -33,10 +33,20 @@ public class ItemRuleListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBucketEmpty(PlayerBucketEmptyEvent event) {
-        ItemTemplate manager = getManager(event.getItemStack());
-        if (manager == null) return;
+        Player player = event.getPlayer();
 
-        if (manager.canUse(event, event.getItemStack())) {
+        ItemStack itemInMainHand = player.getInventory().getItemInMainHand();
+        ItemStack itemInOffHand = player.getInventory().getItemInOffHand();
+
+        ItemTemplate mainManager = getManager(itemInMainHand);
+        ItemTemplate offManager = getManager(itemInOffHand);
+
+        if(mainManager != null && mainManager.canUse(event, itemInMainHand)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if(offManager != null && offManager.canUse(event, itemInOffHand)) {
             event.setCancelled(true);
         }
     }

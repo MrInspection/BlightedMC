@@ -4,7 +4,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class PreventFluidPlacementRule implements ItemRule {
+public final class PreventBucketInteractionsRule implements ItemRule {
     @Override
     public boolean canUse(Event event, ItemStack itemStack) {
         return event instanceof PlayerBucketEmptyEvent;

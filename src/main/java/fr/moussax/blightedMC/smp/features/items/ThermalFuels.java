@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.smp.core.items.ItemRarity;
 import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.smp.core.items.rules.PreventFluidPlacementRule;
+import fr.moussax.blightedMC.smp.core.items.rules.PreventBucketInteractionsRule;
 import org.bukkit.Material;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class ThermalFuels implements ItemRegistry {
             "ENCHANTED_LAVA_BUCKET", ItemType.MATERIAL, ItemRarity.RARE, Material.LAVA_BUCKET, "Enchanted Lava Bucket"
         );
         enchantedLavaBucket.addEnchantmentGlint();
-        enchantedLavaBucket.addRule(new PreventFluidPlacementRule());
+        enchantedLavaBucket.addRule(new PreventBucketInteractionsRule());
         enchantedLavaBucket.addLore(
             "§8Thermal Fuel", "",
             " §7Enriched lava capable of ",
@@ -43,7 +43,7 @@ public class ThermalFuels implements ItemRegistry {
             "MAGMA_BUCKET", ItemType.MATERIAL, ItemRarity.EPIC, Material.LAVA_BUCKET, "Magma Bucket"
         );
         magmaBucket.addEnchantmentGlint();
-        magmaBucket.addRule(new PreventFluidPlacementRule());
+        magmaBucket.addRule(new PreventBucketInteractionsRule());
         magmaBucket.addLore(
             "§8Thermal Fuel", "",
             " §7A superheated amalgam of ",
@@ -57,7 +57,7 @@ public class ThermalFuels implements ItemRegistry {
             "PLASMA_BUCKET", ItemType.MATERIAL, ItemRarity.LEGENDARY, Material.LAVA_BUCKET, "Plasma Bucket"
         );
         plasmaBucket.addEnchantmentGlint();
-        plasmaBucket.addRule(new PreventFluidPlacementRule());
+        plasmaBucket.addRule(new PreventBucketInteractionsRule());
         plasmaBucket.addLore(
             "§8Thermal Fuel", "",
             " §7Stable ionized matter containing ",
