@@ -42,7 +42,7 @@ public class SpawnableEntitiesListener implements Listener {
         }
         totalChance = Math.min(totalChance, 1.0);
 
-        if (ThreadLocalRandom.current().nextDouble() >= totalChance) return;
+        if (ThreadLocalRandom.current().nextDouble() > totalChance) return;
 
         double roll = ThreadLocalRandom.current().nextDouble() * totalChance;
         double cumulative = 0.0;
