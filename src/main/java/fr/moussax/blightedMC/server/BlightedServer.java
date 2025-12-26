@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.server;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.*;
 

@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.commands.admin;
 
-import fr.moussax.blightedMC.core.player.BlightedPlayer;
+import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import fr.moussax.blightedMC.utils.formatting.CommandInfo;
 import org.bukkit.Bukkit;

@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.utils.commands;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.CommandsRegistry;
+import fr.moussax.blightedMC.registry.CommandsRegistry;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;

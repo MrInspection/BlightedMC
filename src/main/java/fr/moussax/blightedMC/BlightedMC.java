@@ -1,5 +1,7 @@
 package fr.moussax.blightedMC;
 
+import fr.moussax.blightedMC.registry.EventsRegistry;
+import fr.moussax.blightedMC.registry.GlobalRegistry;
 import fr.moussax.blightedMC.server.BlightedServer;
 import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;

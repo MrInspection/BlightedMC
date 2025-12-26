@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.utils;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.core.items.crafting.CraftingObject;
+import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -14,7 +14,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
-import static fr.moussax.blightedMC.core.items.ItemTemplate.ITEM_ID_KEY;
+import static fr.moussax.blightedMC.smp.core.items.ItemTemplate.ITEM_ID_KEY;
 
 /**
  * Utility class providing general-purpose helper methods for the BlightedMC plugin.

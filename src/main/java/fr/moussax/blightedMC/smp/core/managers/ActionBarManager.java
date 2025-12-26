@@ -1,0 +1,66 @@
+package fr.moussax.blightedMC.smp.core.managers;
+
+import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
+import fr.moussax.blightedMC.utils.formatting.Formatter;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+
+/**
+ * Manages the display of the action bar for a BlightedPlayer.
+ * <p>
+ * Periodically updates health, favors, and mana information,
+ * including handling insufficient mana warnings.
+ */
+public class ActionBarManager implements Runnable {
+    private final BlightedPlayer player;
+    private boolean insufficientMana = false;
+    private long insufficientManaStartTime = 0;
+    private static final long INSUFFICIENT_MANA_DURATION = 1000; // 1 second in milliseconds
+
+    public ActionBarManager(BlightedPlayer player) {
+        this.player = player;
+    }
+
+    public void setInsufficientMana(boolean insufficient) {
+        this.insufficientMana = insufficient;
+        if (insufficient) {
+            this.insufficientManaStartTime = System.currentTimeMillis();
+        }
+    }
+
+    @Override
+    public void run() {
+        tick();
+    }
+
+    public void tick() {
+        player.getMana().regenerateMana();
+
+        if (insufficientMana && System.currentTimeMillis() - insufficientManaStartTime > INSUFFICIENT_MANA_DURATION) {
+            insufficientMana = false;
+        }
+
+        String separator = "     ";
+        String gemsComponent = getFavorsComponent();
+        String manaComponent = separator + getManaComponent();
+
+        player.getPlayer().spigot().sendMessage(
+            ChatMessageType.ACTION_BAR,
+            new TextComponent(gemsComponent + manaComponent)
+        );
+    }
+
+    private String getFavorsComponent() {
+        int gems = player.getGemsManager().getGems();
+        return "§d" + Formatter.formatDecimalWithCommas(gems) + "✵ Gems";
+    }
+
+    private String getManaComponent() {
+        if (insufficientMana) {
+            return "§c§lNOT ENOUGH MANA!";
+        }
+        double current = player.getMana().getCurrentMana();
+        double max = player.getMana().getMaxMana();
+        return "§b" + Formatter.formatDouble(current, 0) + "/" + Formatter.formatDouble(max, 0) + "✎ Mana";
+    }
+}
