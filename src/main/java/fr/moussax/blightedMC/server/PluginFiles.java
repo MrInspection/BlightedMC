@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public enum PluginFiles {
     CONFIG("config.yml"),
-    DATABASE("blighted.db"),
+    DATABASE("blighted_database.db"),
     CUSTOM_BLOCKS("custom_blocks.yml");
 
     private final String fileName;
