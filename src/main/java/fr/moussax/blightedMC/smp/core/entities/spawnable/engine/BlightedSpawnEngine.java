@@ -44,8 +44,6 @@ public class BlightedSpawnEngine extends BukkitRunnable {
 
         for (Player player : cachedPlayers) {
             World world = player.getWorld();
-            if (world.getEnvironment() != World.Environment.NORMAL) continue;
-
             Chunk playerChunk = player.getLocation().getChunk();
 
             for (int i = 0; i < CHUNKS_PER_PLAYER_PER_TICK; i++) {
@@ -55,13 +53,12 @@ public class BlightedSpawnEngine extends BukkitRunnable {
                 int offsetX = (int) Math.round(distance * Math.cos(angle));
                 int offsetZ = (int) Math.round(distance * Math.sin(angle));
 
-                Chunk chunk = world.getChunkAt(
-                    playerChunk.getX() + offsetX,
-                    playerChunk.getZ() + offsetZ
-                );
+                int targetChunkX = playerChunk.getX() + offsetX;
+                int targetChunkZ = playerChunk.getZ() + offsetZ;
 
-                if (!chunk.isLoaded()) continue;
+                if (!world.isChunkLoaded(targetChunkX, targetChunkZ)) continue;
 
+                Chunk chunk = world.getChunkAt(targetChunkX, targetChunkZ);
                 attemptSpawnInChunk(chunk, world, random);
             }
         }
