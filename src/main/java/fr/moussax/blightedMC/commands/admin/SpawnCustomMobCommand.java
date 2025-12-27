@@ -25,7 +25,7 @@ public class SpawnCustomMobCommand implements CommandExecutor {
             return false;
         }
 
-        AbstractBlightedEntity entity = EntitiesRegistry.getEntity(args[0].toUpperCase());
+        AbstractBlightedEntity entity = EntitiesRegistry.get(args[0].toUpperCase());
 
         if (entity == null) {
             warn(player, "Unable to find §4" + args[0].toUpperCase() + " §cin the registry.");
