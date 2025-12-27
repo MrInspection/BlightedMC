@@ -17,7 +17,6 @@ public class ShapedRecipeBuilder {
     private final BlightedItem result;
     private final int amount;
     private ShapeEncoder encoder;
-    private Character attributeSourceKey = null;
 
     private ShapedRecipeBuilder(BlightedItem result, int amount) {
         this.result = result;
