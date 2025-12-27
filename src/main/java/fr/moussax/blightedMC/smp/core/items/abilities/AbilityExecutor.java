@@ -31,7 +31,7 @@ public final class AbilityExecutor {
 
                 String abilityName = ability.name();
                 String timeText = String.format("%.0fs", remainingSeconds);
-                warn(player.getPlayer(), "§cYour §6" + abilityName + " §cability is on cooldown for §d" + timeText + "§c!");
+                warn(player.getPlayer(), "§cYour §f" + abilityName + " §cability is on cooldown for §d" + timeText + "§c!");
                 if (event instanceof Cancellable c) c.setCancelled(true);
                 return;
             }

@@ -1,8 +1,8 @@
 package fr.moussax.blightedMC.commands.admin;
 
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemDirectory;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemDirectoryMenu;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
+import fr.moussax.blightedMC.smp.core.items.registry.menu.ItemRegistryMenu;
 import fr.moussax.blightedMC.smp.core.menus.MenuManager;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import org.bukkit.command.Command;
@@ -23,13 +23,13 @@ public class GiveItemCommand implements CommandExecutor {
         if (!enforceAdminPermission(player)) return false;
 
         if (args.length == 0) {
-            MenuManager.openMenu(new ItemDirectoryMenu.ItemCategoriesMenu(), player);
+            MenuManager.openMenu(new ItemRegistryMenu.ItemCategoriesMenu(), player);
             return true;
         }
 
         String itemId = args[0].toUpperCase();
-        ItemTemplate itemTemplate = ItemDirectory.getItem(itemId);
-        if (itemTemplate == null) {
+        BlightedItem blightedItem = ItemRegistry.getItem(itemId);
+        if (blightedItem == null) {
             warn(player, "Unable to find item matching the ID: §4" + itemId + "§c.");
             return false;
         }
@@ -44,10 +44,10 @@ public class GiveItemCommand implements CommandExecutor {
             }
         }
 
-        ItemStack stack = itemTemplate.toItemStack().clone();
+        ItemStack stack = blightedItem.toItemStack().clone();
         stack.setAmount(amount);
         player.getInventory().addItem(stack);
-        inform(player, "You receive §5" + amount + "x §d" + itemTemplate.getItemId() + "§7.");
+        inform(player, "You receive §5" + amount + "x §d" + blightedItem.getItemId() + "§7.");
         return true;
     }
 }

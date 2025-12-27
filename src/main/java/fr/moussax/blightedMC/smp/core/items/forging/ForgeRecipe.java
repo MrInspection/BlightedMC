@@ -1,31 +1,31 @@
 package fr.moussax.blightedMC.smp.core.items.forging;
 
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
+import org.bukkit.Material;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Defines a forge recipe describing how an item is produced via forging.
- *
- * <p>A recipe specifies the resulting item template, output amount,
- * required ingredients, and fuel cost. All instances are automatically
- * registered in {@link #REGISTRY} upon creation.</p>
+ * Represents a forging recipe in BlightedMC.
+ * <p>
+ * A forge recipe defines the output item, quantity, required ingredients,
+ * and fuel cost. Instances are intended to be created via
+ * {@link Builder}, which provides a fluent interface for recipe construction.
  */
 public final class ForgeRecipe {
 
-    /**
-     * Global set of all registered forge recipes.
-     */
-    public static final Set<ForgeRecipe> REGISTRY = new HashSet<>();
-
-    private final ItemTemplate forgedItem;
+    private final BlightedItem forgedItem;
     private final int forgedAmount;
     private final List<CraftingObject> ingredients;
     private final int fuelCost;
 
     private ForgeRecipe(
-        ItemTemplate forgedItem,
+        BlightedItem forgedItem,
         int amount,
         List<CraftingObject> ingredients,
         int fuelCost
@@ -34,85 +34,88 @@ public final class ForgeRecipe {
         this.forgedAmount = amount;
         this.ingredients = ingredients;
         this.fuelCost = fuelCost;
-
-        REGISTRY.add(this);
     }
 
     /**
-     * @return the item produced by this recipe
+     * Returns the item produced by this forge recipe.
+     *
+     * @return the resulting BlightedItem
      */
-    public ItemTemplate getForgedItem() {
+    public BlightedItem getForgedItem() {
         return forgedItem;
     }
 
     /**
-     * @return the number of items produced by this recipe
+     * Returns the quantity of items produced.
+     *
+     * @return number of items produced
      */
     public int getForgedAmount() {
         return forgedAmount;
     }
 
     /**
-     * @return an unmodifiable list of required ingredients
+     * Returns the required ingredients to forge this item.
+     *
+     * @return unmodifiable list of ingredients
      */
     public List<CraftingObject> getIngredients() {
         return Collections.unmodifiableList(ingredients);
     }
 
     /**
-     * @return the fuel cost required to forge this recipe
+     * Returns the fuel cost required to perform this forging operation.
+     *
+     * @return fuel cost
      */
     public int getFuelCost() {
         return fuelCost;
     }
 
     /**
-     * Builder for creating and registering {@link ForgeRecipe} instances.
+     * Builder for creating {@link ForgeRecipe} instances.
+     * <p>
+     * Provides a fluent interface to define the output item, amount,
+     * ingredients, and fuel cost. Use {@link #build()} to finalize.
      */
     public static final class Builder {
-        private ItemTemplate forgedItem;
-        private int forgedAmount;
+        private final BlightedItem forgedItem;
+        private final int forgedAmount;
         private final List<CraftingObject> ingredients = new ArrayList<>();
-        private int fuelCost;
+        private int fuelCost = 0;
 
-        /**
-         * Sets the item produced by the recipe.
-         *
-         * @param forgedItem the resulting item template
-         * @return this builder instance
-         */
-        public Builder forgedItem(ItemTemplate forgedItem) {
+        private Builder(BlightedItem forgedItem, int forgedAmount) {
             this.forgedItem = forgedItem;
-            return this;
+            this.forgedAmount = forgedAmount;
         }
 
         /**
-         * Sets the number of items produced by the recipe.
+         * Creates a new builder for a forge recipe producing the given item.
          *
-         * @param amount number of items produced
-         * @return this builder instance
+         * @param item   the resulting item
+         * @param amount the quantity produced
+         * @return new builder instance
          */
-        public Builder forgedAmount(int amount) {
-            this.forgedAmount = amount;
-            return this;
+        public static Builder of(BlightedItem item, int amount) {
+            return new Builder(item, amount);
         }
 
         /**
-         * Adds multiple ingredients required by the recipe.
+         * Creates a new builder using the result item's ID.
          *
-         * @param ingredients crafting ingredients
-         * @return this builder instance
+         * @param itemId the result item identifier
+         * @param amount the quantity produced
+         * @return new builder instance
          */
-        public Builder ingredients(CraftingObject... ingredients) {
-            this.ingredients.addAll(Arrays.asList(ingredients));
-            return this;
+        public static Builder of(String itemId, int amount) {
+            return new Builder(ItemRegistry.getItem(itemId), amount);
         }
 
         /**
-         * Adds a single ingredient required by the recipe.
+         * Adds a custom ingredient to the recipe.
          *
-         * @param ingredient crafting ingredient
-         * @return this builder instance
+         * @param ingredient the ingredient to add
+         * @return this builder
          */
         public Builder addIngredient(CraftingObject ingredient) {
             this.ingredients.add(ingredient);
@@ -120,10 +123,57 @@ public final class ForgeRecipe {
         }
 
         /**
-         * Sets the fuel cost required to forge the recipe.
+         * Adds a vanilla material as an ingredient.
          *
-         * @param fuelCost required fuel amount
-         * @return this builder instance
+         * @param material the material to add
+         * @param amount   required quantity
+         * @return this builder
+         */
+        public Builder addIngredient(Material material, int amount) {
+            this.ingredients.add(new CraftingObject(material, amount));
+            return this;
+        }
+
+        /**
+         * Adds a custom item as an ingredient.
+         *
+         * @param item   the custom item
+         * @param amount required quantity
+         * @return this builder
+         */
+        public Builder addIngredient(BlightedItem item, int amount) {
+            this.ingredients.add(new CraftingObject(item, amount));
+            return this;
+        }
+
+        /**
+         * Adds a custom item by ID as an ingredient.
+         *
+         * @param itemId the custom item ID
+         * @param amount required quantity
+         * @return this builder
+         */
+        public Builder addIngredient(String itemId, int amount) {
+            this.ingredients.add(new CraftingObject(ItemRegistry.getItem(itemId), amount));
+            return this;
+        }
+
+        /**
+         * Adds multiple ingredients at once.
+         *
+         * @param ingredients array of ingredients to add
+         * @return this builder
+         */
+        public Builder ingredients(CraftingObject... ingredients) {
+            this.ingredients.addAll(Arrays.asList(ingredients));
+            return this;
+        }
+
+        /**
+         * Sets the fuel cost for this recipe.
+         *
+         * @param fuelCost the fuel amount required
+         * @return this builder
          */
         public Builder fuelCost(int fuelCost) {
             this.fuelCost = fuelCost;
@@ -131,9 +181,9 @@ public final class ForgeRecipe {
         }
 
         /**
-         * Builds and registers the forge recipe.
+         * Builds the {@link ForgeRecipe} instance.
          *
-         * @return the created {@link ForgeRecipe}
+         * @return the constructed forge recipe
          */
         public ForgeRecipe build() {
             return new ForgeRecipe(

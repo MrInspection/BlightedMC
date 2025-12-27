@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.smp.features.entities.spawnable;
 import fr.moussax.blightedMC.smp.core.entities.EntityImmunities;
 import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
 import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -42,7 +42,7 @@ public class LaserEngineer extends SpawnableEntity {
 
         setLootTable(new LootTable().setMaxDrop(2)
             .addLoot(Material.ROTTEN_FLESH, 1, 3, 0.90, LootDropRarity.COMMON)
-            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY)
+            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE)
         );
 
         armor = new ItemStack[]{

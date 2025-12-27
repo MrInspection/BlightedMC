@@ -48,6 +48,7 @@ import java.util.function.Consumer;
 public class ItemBuilder {
     private final ItemStack item;
     private ItemMeta itemMeta;
+    private boolean unstackable;
 
     private Map<Enchantment, Integer> enchantments = new HashMap<>();
     private Map<Attribute, Collection<AttributeModifier>> attributes = new HashMap<>();
@@ -76,7 +77,7 @@ public class ItemBuilder {
      * @throws IllegalArgumentException if amount is outside valid range
      * @throws IllegalStateException    if the material has no ItemMeta
      */
-    public ItemBuilder(Material material, int amount) {
+    public ItemBuilder(@NonNull Material material, int amount) {
         this(new ItemStack(material, validateAmount(material, amount)));
     }
 
@@ -122,10 +123,17 @@ public class ItemBuilder {
         }
 
         this.itemMeta = meta;
+
+        // Load standard enchants
         this.enchantments.putAll(itemStack.getEnchantments());
+
+        // Load stored enchants if the source is a book
+        if (this.itemMeta instanceof EnchantmentStorageMeta storageMeta) {
+            this.enchantments.putAll(storageMeta.getStoredEnchants());
+        }
     }
 
-    private static int validateAmount(Material material, int amount) {
+    private static int validateAmount(@NonNull Material material, int amount) {
         if (amount < 1 || amount > material.getMaxStackSize()) {
             throw new IllegalArgumentException("Amount must be between 1 and " + material.getMaxStackSize());
         }
@@ -214,6 +222,35 @@ public class ItemBuilder {
     }
 
     /**
+     * Sets the maximum durability of this item.
+     *
+     * @param maxDurability the new maximum durability
+     * @return this builder
+     */
+    public ItemBuilder setMaxDurability(int maxDurability) {
+        if (itemMeta instanceof Damageable damageable) {
+            damageable.setMaxDamage(maxDurability);
+        }
+        return this;
+    }
+
+    /**
+     * Sets the item's durability as a percentage.
+     *
+     * @param percent 0.0 to 1.0 (1.0 = full health, 0.0 = broken)
+     * @return this builder
+     */
+    public ItemBuilder setDurabilityPercent(double percent) {
+        if (!(itemMeta instanceof Damageable damageable)) return this;
+
+        int maxDurability = damageable.hasMaxDamage() ? damageable.getMaxDamage() : item.getType().getMaxDurability();
+        int damage = (int) Math.round(maxDurability * (1.0 - percent));
+
+        damageable.setDamage(Math.min(damage, maxDurability - 1));
+        return this;
+    }
+
+    /**
      * Sets the rarity of this item.
      *
      * @param rarity the {@link ItemRarity} to assign to the item
@@ -232,6 +269,17 @@ public class ItemBuilder {
      */
     public ItemBuilder setUnbreakable(boolean unbreakable) {
         itemMeta.setUnbreakable(unbreakable);
+        return this;
+    }
+
+    /**
+     * Marks the item as unstackable by setting its max stack size to 1.
+     *
+     * @param unstackable true to make unstackable
+     * @return this builder
+     */
+    public ItemBuilder setUnstackable(boolean unstackable) {
+        this.unstackable = unstackable;
         return this;
     }
 
@@ -396,7 +444,6 @@ public class ItemBuilder {
      * @param flag the item flag
      * @return this builder
      */
-    @SuppressWarnings("UnusedReturnValue")
     public ItemBuilder addItemFlag(ItemFlag flag) {
         itemMeta.addItemFlags(flag);
         return this;
@@ -408,9 +455,8 @@ public class ItemBuilder {
      * @param flags the item flags
      * @return this builder
      */
-    @SuppressWarnings("UnusedReturnValue")
-    public ItemBuilder addItemFlag(List<ItemFlag> flags) {
-        itemMeta.addItemFlags(flags.toArray(new ItemFlag[0]));
+    public ItemBuilder addItemFlag(ItemFlag... flags) {
+        itemMeta.addItemFlags(flags);
         return this;
     }
 
@@ -542,7 +588,7 @@ public class ItemBuilder {
      *
      * @return this builder
      */
-    @SuppressWarnings("UnstableApiUsage")
+    @SuppressWarnings({"UnstableApiUsage", "UnusedReturnValue"})
     public ItemBuilder addNotEquippable() {
         return editEquippable(equippable -> {
             equippable.setSlot(EquipmentSlot.HAND);
@@ -599,6 +645,20 @@ public class ItemBuilder {
     }
 
     /**
+     * Converts the item to an enchanted book.
+     * Updates the ItemMeta accordingly.
+     *
+     * @return this builder
+     */
+    public ItemBuilder asEnchantedBook() {
+        if (item.getType() != Material.ENCHANTED_BOOK) {
+            item.setType(Material.ENCHANTED_BOOK);
+            this.itemMeta = this.item.getItemMeta();
+        }
+        return this;
+    }
+
+    /**
      * Finalizes and returns a new {@link ItemStack} with all modifications applied.
      *
      * @return customized item stack
@@ -610,6 +670,10 @@ public class ItemBuilder {
         applyArmorTrim();
         applyLeatherColor();
         applySkullProperties();
+
+        if (unstackable) {
+            itemMeta.setMaxStackSize(1);
+        }
 
         item.setItemMeta(itemMeta);
         return item;
@@ -665,9 +729,13 @@ public class ItemBuilder {
     // ========================================
 
     private void applyEnchantments() {
-        if (!enchantments.isEmpty()) {
-            enchantments.forEach((enchantment, level) -> itemMeta.addEnchant(enchantment, level, true));
+        if (enchantments.isEmpty()) return;
+
+        if (itemMeta instanceof EnchantmentStorageMeta storageMeta) {
+            enchantments.forEach((enchantment, level) -> storageMeta.addStoredEnchant(enchantment, level, true));
+            return;
         }
+        enchantments.forEach((enchantment, level) -> itemMeta.addEnchant(enchantment, level, true));
     }
 
     private void applyAttributes() {

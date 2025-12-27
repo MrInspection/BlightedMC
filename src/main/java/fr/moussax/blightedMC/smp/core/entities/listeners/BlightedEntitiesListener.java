@@ -6,8 +6,8 @@ import fr.moussax.blightedMC.smp.core.entities.EntityAttachment;
 import fr.moussax.blightedMC.smp.core.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.debug.Log;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
@@ -25,9 +25,10 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.projectiles.ProjectileSource;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+
+import static fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity.ENTITY_ID_KEY;
 
 public class BlightedEntitiesListener implements Listener {
     private static final Map<UUID, AbstractBlightedEntity> BLIGHTED_ENTITIES = new HashMap<>();
@@ -136,14 +137,11 @@ public class BlightedEntitiesListener implements Listener {
     }
 
     private void scheduleNameTagUpdate(AbstractBlightedEntity blighted, LivingEntity entity) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!entity.isDead()) {
-                    blighted.updateNameTag();
-                }
+        Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> {
+            if (entity != null && !entity.isDead()) {
+                blighted.updateNameTag();
             }
-        }.runTaskLater(BlightedMC.getInstance(), 1L);
+        }, 1L);
     }
 
     @EventHandler
@@ -237,25 +235,20 @@ public class BlightedEntitiesListener implements Listener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                rehydrateChunk(event.getChunk());
-            }
-        }.runTaskLater(BlightedMC.getInstance(), 2L);
+        Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> rehydrateChunk(event.getChunk()), 2L);
     }
 
     public static void rehydrateChunk(Chunk chunk) {
-        NamespacedKey key = new NamespacedKey(BlightedMC.getInstance(), "entityId");
+
         for (Entity entity : chunk.getEntities()) {
             if (!(entity instanceof LivingEntity living)) continue;
             if (BLIGHTED_ENTITIES.containsKey(living.getUniqueId())) continue;
 
             PersistentDataContainer pdc = living.getPersistentDataContainer();
-            String entityId = pdc.get(key, PersistentDataType.STRING);
+            String entityId = pdc.get(ENTITY_ID_KEY, PersistentDataType.STRING);
             if (entityId == null || entityId.isEmpty()) continue;
 
-            AbstractBlightedEntity prototype = EntitiesRegistry.getEntity(entityId);
+            AbstractBlightedEntity prototype = EntitiesRegistry.get(entityId);
             if (prototype == null) continue;
 
             AbstractBlightedEntity instance = createInstance(prototype);

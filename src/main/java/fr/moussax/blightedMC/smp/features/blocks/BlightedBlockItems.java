@@ -1,25 +1,19 @@
 package fr.moussax.blightedMC.smp.features.blocks;
 
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
 import org.bukkit.Material;
 
-import java.util.List;
-
-public class BlocksDirectory implements ItemRegistry {
+public class BlightedBlockItems implements ItemProvider {
 
     @Override
-    public List<ItemTemplate> defineItems() {
-        ItemTemplate blightedCraftingTable = new ItemTemplate(
-            "BLIGHTED_WORKBENCH",
-            ItemType.BLOCK,
-            ItemRarity.UNCOMMON,
-            Material.ENCHANTING_TABLE,
-            "Blighted Workbench"
-        );
-        blightedCraftingTable.addLore(
+    public void register() {
+
+        BlightedItem blightedWorkbench = new BlightedItem("BLIGHTED_WORKBENCH", ItemType.BLOCK, ItemRarity.UNCOMMON, Material.ENCHANTING_TABLE);
+        blightedWorkbench.setDisplayName("Blighted Workbench");
+        blightedWorkbench.addLore(
             "§8Placeable Block",
             "",
             " §7A crafting table infused with ",
@@ -29,11 +23,10 @@ public class BlocksDirectory implements ItemRegistry {
             "",
             ItemRarity.UNCOMMON.getName() + " BLOCK"
         );
-        blightedCraftingTable.addEnchantmentGlint();
+        blightedWorkbench.addEnchantmentGlint();
 
-        ItemTemplate blightedForge = new ItemTemplate(
-            "BLIGHTED_FORGE", ItemType.BLOCK, ItemRarity.RARE, Material.BLAST_FURNACE, "Blighted Forge"
-        );
+        BlightedItem blightedForge = new BlightedItem("BLIGHTED_FORGE", ItemType.BLOCK, ItemRarity.RARE, Material.BLAST_FURNACE);
+        blightedForge.setDisplayName("Blighted Forge");
         blightedForge.addLore(
             "§8Placeable Machine",
             "",
@@ -46,6 +39,6 @@ public class BlocksDirectory implements ItemRegistry {
         );
         blightedForge.addEnchantmentGlint();
 
-        return ItemRegistry.add(List.of(blightedCraftingTable, blightedForge));
+        add(blightedWorkbench, blightedForge);
     }
 }

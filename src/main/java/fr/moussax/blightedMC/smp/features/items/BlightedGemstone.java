@@ -1,21 +1,22 @@
 package fr.moussax.blightedMC.smp.features.items;
 
 import fr.moussax.blightedMC.smp.core.entities.loot.gems.GemsItem;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.abilities.Ability;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityType;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.smp.core.items.rules.PreventPlacementRule;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
+import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
 import org.bukkit.Material;
 
-import java.util.List;
+public class BlightedGemstone implements ItemProvider {
 
-public class BlightedGemstone implements ItemRegistry {
     @Override
-    public List<ItemTemplate> defineItems() {
-        ItemTemplate blightedGemstone = new ItemTemplate("BLIGHTED_GEMSTONE", ItemType.UNCATEGORIZED, ItemRarity.SPECIAL, Material.PLAYER_HEAD, "Blighted Gemstone");
+    public void register() {
+        BlightedItem blightedGemstone = new BlightedItem("BLIGHTED_GEMSTONE", ItemType.UNCATEGORIZED, ItemRarity.SPECIAL, Material.PLAYER_HEAD);
+        blightedGemstone.setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM2MjM1MjFjODExMWFkMjllOWRjZjdhY2M1NjA4NWE5YWIwN2RhNzMyZDE1MTg5NzZhZWU2MWQwYjNlM2JkNiJ9fX0=");
+        blightedGemstone.setDisplayName("Blighted Gemstone");
         blightedGemstone.addLore(
             "§8Consumable Item",
             "",
@@ -32,10 +33,10 @@ public class BlightedGemstone implements ItemRegistry {
         );
 
         blightedGemstone.addNotEquippable();
-        blightedGemstone.setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM2MjM1MjFjODExMWFkMjllOWRjZjdhY2M1NjA4NWE5YWIwN2RhNzMyZDE1MTg5NzZhZWU2MWQwYjNlM2JkNiJ9fX0=");
-        blightedGemstone.addRule(new PreventPlacementRule());
+        blightedGemstone.isUnstackable();
+        blightedGemstone.addRule(ItemRule.PREVENT_PLACEMENT);
         blightedGemstone.addAbility(new Ability(new GemsItem.BlightedGemstoneAbility(), "Consume Gems", AbilityType.RIGHT_CLICK));
 
-        return ItemRegistry.add(blightedGemstone);
+        add(blightedGemstone);
     }
 }

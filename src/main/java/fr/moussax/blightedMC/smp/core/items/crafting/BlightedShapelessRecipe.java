@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.smp.core.items.crafting;
 
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
+import fr.moussax.blightedMC.utils.Utilities;
 
 import java.util.*;
 
@@ -14,25 +15,25 @@ import java.util.*;
 public final class BlightedShapelessRecipe extends BlightedRecipe {
     private final List<CraftingObject> ingredientList = new ArrayList<>();
     private final Map<String, Integer> ingredientCountMap = new HashMap<>();
-    private final ItemTemplate resultItemTemplate;
+    private final BlightedItem resultBlightedItem;
 
     /**
      * Creates a new shapeless recipe with the given result item.
      *
-     * @param resultItemTemplate the item produced by this recipe
+     * @param resultBlightedItem the item produced by this recipe
      */
-    public BlightedShapelessRecipe(ItemTemplate resultItemTemplate) {
-        this.resultItemTemplate = resultItemTemplate;
+    public BlightedShapelessRecipe(BlightedItem resultBlightedItem) {
+        this.resultBlightedItem = resultBlightedItem;
     }
 
     /**
      * Returns the result of this recipe.
      *
-     * @return the {@link ItemTemplate} produced by the recipe
+     * @return the {@link BlightedItem} produced by the recipe
      */
     @Override
-    public ItemTemplate getResult() {
-        return resultItemTemplate;
+    public BlightedItem getResult() {
+        return resultBlightedItem;
     }
 
     /**
@@ -60,7 +61,7 @@ public final class BlightedShapelessRecipe extends BlightedRecipe {
         if (ingredient.isCustom()) {
             itemId = ingredient.getManager().getItemId();
         } else if (ingredient.isVanilla()) {
-            itemId = "vanilla:" + ingredient.getVanillaItem().getType().name().toLowerCase();
+            itemId = Utilities.resolveItemId(ingredient.getVanillaItem(), "vanilla:");
         } else {
             throw new IllegalArgumentException("Ingredient must be custom or vanilla");
         }

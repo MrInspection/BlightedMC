@@ -1,27 +1,21 @@
 package fr.moussax.blightedMC.smp.features.items;
 
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.abilities.Ability;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityType;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.smp.core.items.rules.PreventProjectileLaunchRule;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
+import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
 import fr.moussax.blightedMC.smp.features.abilities.VoidStepAbility;
 import org.bukkit.Material;
 
-import java.util.List;
+public class GlimmeringEye implements ItemProvider {
 
-public class GlimmeringEye implements ItemRegistry {
     @Override
-    public List<ItemTemplate> defineItems() {
-        ItemTemplate glimmeringEye = new ItemTemplate(
-            "GLIMMERING_EYE",
-            ItemType.UNCATEGORIZED,
-            ItemRarity.RARE,
-            Material.ENDER_EYE,
-            "Glimmering Eye"
-        );
+    public void register() {
+        BlightedItem glimmeringEye = new BlightedItem("GLIMMERING_EYE", ItemType.UNCATEGORIZED, ItemRarity.RARE, Material.ENDER_EYE);
+        glimmeringEye.setDisplayName("Glimmering Eye");
         glimmeringEye.addLore(
             "§8Consumable Item",
             "",
@@ -35,8 +29,8 @@ public class GlimmeringEye implements ItemRegistry {
         );
         glimmeringEye.addEnchantmentGlint();
         glimmeringEye.addAbility(new Ability(new VoidStepAbility(), "Voidstep", AbilityType.RIGHT_CLICK));
-        glimmeringEye.addRule(new PreventProjectileLaunchRule());
+        glimmeringEye.addRule(ItemRule.PREVENT_PROJECTILE_LAUNCH);
 
-        return ItemRegistry.add(glimmeringEye);
+        add(glimmeringEye);
     }
 }

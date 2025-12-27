@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.smp.core.entities.rituals.menu;
 
 import fr.moussax.blightedMC.smp.core.entities.rituals.AncientRitual;
+import fr.moussax.blightedMC.smp.core.entities.rituals.registry.RitualRegistry;
 import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.smp.core.menus.*;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -40,7 +41,7 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
     public RitualsDirectoryMenu(Menu previousMenu) {
         super("Ancient Rituals", 54);
         this.previousMenu = previousMenu;
-        this.cachedRituals = new ArrayList<>(AncientRitual.REGISTRY);
+        this.cachedRituals = new ArrayList<>(RitualRegistry.REGISTRY);
         this.cachedRituals.sort((r1, r2) -> {
             String name1 = r1.getSummonedCreature() != null ? r1.getSummonedCreature().getName() : "Unknown Ritual";
             String name2 = r2.getSummonedCreature() != null ? r2.getSummonedCreature().getName() : "Unknown Ritual";

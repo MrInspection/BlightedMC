@@ -2,8 +2,8 @@ package fr.moussax.blightedMC.utils.commands;
 
 import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.smp.core.entities.registry.EntitiesRegistry;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemDirectory;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -64,11 +64,11 @@ public class CommandTabSuggestionBuilder implements TabCompleter {
                         .map(Player::getName)
                         .toList();
                 } else if (suggestions.size() == 1 && suggestions.getFirst().equals("$items")) {
-                    candidates = ItemDirectory.getAllItems().stream()
-                        .map(ItemTemplate::getItemId)
+                    candidates = ItemRegistry.getAllItems().stream()
+                        .map(BlightedItem::getItemId)
                         .toList();
                 } else if (suggestions.size() == 1 && suggestions.getFirst().equals("$entities")) {
-                    candidates = EntitiesRegistry.getAllEntities().stream()
+                    candidates = EntitiesRegistry.getAll().stream()
                         .map(AbstractBlightedEntity::getEntityId)
                         .toList();
                 } else {

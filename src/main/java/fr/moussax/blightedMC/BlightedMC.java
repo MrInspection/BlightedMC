@@ -1,11 +1,12 @@
 package fr.moussax.blightedMC;
 
 import fr.moussax.blightedMC.registry.EventsRegistry;
-import fr.moussax.blightedMC.registry.GlobalRegistry;
+import fr.moussax.blightedMC.registry.RegistrySystem;
 import fr.moussax.blightedMC.server.BlightedServer;
 import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
 import fr.moussax.blightedMC.server.database.PluginDatabase;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.engine.BlightedSpawnEngine;
 import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.Bukkit;
@@ -35,11 +36,12 @@ public final class BlightedMC extends JavaPlugin {
         BlightedServer.getInstance().configureServer();
 
         CommandBuilder.initializeCommands();
-        GlobalRegistry.initializeAllRegistries();
+        RegistrySystem.initialize();
         eventsRegistry = new EventsRegistry();
         eventsRegistry.initializeListeners();
 
         BlightedServer.getInstance().rehydrateEntitiesOnLoadedChunks();
+        new BlightedSpawnEngine().runTaskTimer(this, 100L, 1L);
     }
 
     private void initializeDatabase() {
@@ -79,10 +81,7 @@ public final class BlightedMC extends JavaPlugin {
     @Override
     public void onDisable() {
         database.closeConnection();
-        if (eventsRegistry != null && eventsRegistry.getBlockListener() != null) {
-            eventsRegistry.getBlockListener().saveData();
-        }
-        GlobalRegistry.clearAllRegistries();
+        RegistrySystem.clear();
     }
 
     public PluginSettings getSettings() {

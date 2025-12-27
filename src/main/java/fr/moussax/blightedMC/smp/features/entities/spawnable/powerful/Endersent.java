@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.smp.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
 import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.smp.features.entities.spawnable.Watchling;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -62,7 +62,7 @@ public class Endersent extends SpawnableEntity {
             .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, LootDropRarity.COMMON)
             .addLoot(Material.ENDER_EYE, 1, 3, 0.31, LootDropRarity.UNCOMMON)
             .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, LootDropRarity.RARE)
-            .addGemsLoot(30, 0.03, LootDropRarity.EXTRAORDINARY);
+            .addGemsLoot(30, 0.03, LootDropRarity.VERY_RARE);
     }
 
     private void setupBehavior() {

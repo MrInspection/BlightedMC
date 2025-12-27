@@ -1,5 +1,6 @@
-package fr.moussax.blightedMC.smp.core.items.rules;
+package fr.moussax.blightedMC.smp.core.items.rules.common;
 
+import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 

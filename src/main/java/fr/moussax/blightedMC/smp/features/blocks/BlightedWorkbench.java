@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.smp.features.blocks;
 
 import fr.moussax.blightedMC.smp.core.items.blocks.BlightedBlock;
 import fr.moussax.blightedMC.smp.core.items.crafting.menu.CraftingTableMenu;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemDirectory;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -14,7 +14,7 @@ import org.bukkit.inventory.EquipmentSlot;
 public class BlightedWorkbench extends BlightedBlock {
 
     public BlightedWorkbench() {
-        super(Material.ENCHANTING_TABLE, ItemDirectory.getItem("BLIGHTED_WORKBENCH"));
+        super(Material.ENCHANTING_TABLE, ItemRegistry.getItem("BLIGHTED_WORKBENCH"));
     }
 
     @Override

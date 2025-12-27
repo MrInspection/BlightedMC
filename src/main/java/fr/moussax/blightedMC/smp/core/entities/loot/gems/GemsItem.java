@@ -1,10 +1,10 @@
 package fr.moussax.blightedMC.smp.core.entities.loot.gems;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.smp.core.items.ItemGenerator;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
+import fr.moussax.blightedMC.smp.core.items.ItemFactory;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityManager;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemDirectory;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import fr.moussax.blightedMC.utils.sound.SoundSequence;
@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-public record GemsItem(int amount) implements ItemGenerator {
+public record GemsItem(int amount) implements ItemFactory {
     public GemsItem(ItemStack itemStack) {
         ItemMeta meta = itemStack.getItemMeta();
         assert meta != null;
@@ -75,14 +75,14 @@ public record GemsItem(int amount) implements ItemGenerator {
 
     @Override
     public ItemStack createItemStack() {
-        ItemTemplate itemTemplate = ItemDirectory.getItem("BLIGHTED_GEMSTONE");
+        BlightedItem blightedItem = ItemRegistry.getItem("BLIGHTED_GEMSTONE");
 
-        if (itemTemplate == null) {
+        if (blightedItem == null) {
             throw new IllegalStateException("BLIGHTED_GEMSTONE is not registered. Ensure ItemDirectory.initializeItems() runs before creating Gems items.");
         }
 
-        itemTemplate.setLore(7, "§8 Gems: §d" + this.amount + "✵");
-        ItemStack itemStack = itemTemplate.toItemStack();
+        blightedItem.setLore(7, "§8 Gems: §d" + this.amount + "✵");
+        ItemStack itemStack = blightedItem.toItemStack();
 
         ItemMeta meta = itemStack.getItemMeta();
         assert meta != null;

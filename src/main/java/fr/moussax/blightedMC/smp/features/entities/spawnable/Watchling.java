@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.smp.features.entities.spawnable;
 
 import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
 import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.utils.Utilities;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalLookAtPlayer;
@@ -48,7 +48,7 @@ public class Watchling extends SpawnableEntity {
         return new LootTable()
             .setMaxDrop(2)
             .addLoot(Material.ENDER_PEARL, 1, 2, 1.0, LootDropRarity.COMMON)
-            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
+            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
     }
 
     private void setupBehavior() {

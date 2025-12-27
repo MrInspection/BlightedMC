@@ -1,21 +1,19 @@
 package fr.moussax.blightedMC.smp.features.items;
 
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.smp.core.items.rules.PreventBucketInteractionsRule;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
+import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
+import fr.moussax.blightedMC.smp.core.items.rules.common.PreventBucketInteractionsRule;
 import org.bukkit.Material;
 
-import java.util.List;
+public class ThermalFuels implements ItemProvider {
 
-public class ThermalFuels implements ItemRegistry {
     @Override
-    public List<ItemTemplate> defineItems() {
-        ItemTemplate enchantedCoal = new ItemTemplate(
-            "ENCHANTED_COAL", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.COAL, "Enchanted Coal"
-        );
-        enchantedCoal.addEnchantmentGlint();
+    public void register() {
+        BlightedItem enchantedCoal = new BlightedItem("ENCHANTED_COAL", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.COAL);
+        enchantedCoal.setDisplayName("Enchanted Coal");
         enchantedCoal.addLore(
             "§8Thermal Fuel", "",
             " §7Ultra-dense carbon radiating ",
@@ -24,12 +22,10 @@ public class ThermalFuels implements ItemRegistry {
             " §7machine.", ""
         );
         enchantedCoal.addLore(ItemRarity.UNCOMMON.getName());
+        enchantedCoal.addEnchantmentGlint();
 
-        ItemTemplate enchantedLavaBucket = new ItemTemplate(
-            "ENCHANTED_LAVA_BUCKET", ItemType.MATERIAL, ItemRarity.RARE, Material.LAVA_BUCKET, "Enchanted Lava Bucket"
-        );
-        enchantedLavaBucket.addEnchantmentGlint();
-        enchantedLavaBucket.addRule(new PreventBucketInteractionsRule());
+        BlightedItem enchantedLavaBucket = new BlightedItem("ENCHANTED_LAVA_BUCKET", ItemType.MATERIAL, ItemRarity.RARE, Material.LAVA_BUCKET);
+        enchantedLavaBucket.setDisplayName("Enchanted Lava Bucket");
         enchantedLavaBucket.addLore(
             "§8Thermal Fuel", "",
             " §7Enriched lava capable of ",
@@ -38,12 +34,11 @@ public class ThermalFuels implements ItemRegistry {
             " §7machine.", ""
         );
         enchantedLavaBucket.addLore(ItemRarity.RARE.getName());
+        enchantedLavaBucket.addEnchantmentGlint();
+        enchantedLavaBucket.addRule(ItemRule.PREVENT_BUCKET_INTERACTIONS);
 
-        ItemTemplate magmaBucket = new ItemTemplate(
-            "MAGMA_BUCKET", ItemType.MATERIAL, ItemRarity.EPIC, Material.LAVA_BUCKET, "Magma Bucket"
-        );
-        magmaBucket.addEnchantmentGlint();
-        magmaBucket.addRule(new PreventBucketInteractionsRule());
+        BlightedItem magmaBucket = new BlightedItem("MAGMA_BUCKET", ItemType.MATERIAL, ItemRarity.EPIC, Material.LAVA_BUCKET);
+        magmaBucket.setDisplayName("Magma Bucket");
         magmaBucket.addLore(
             "§8Thermal Fuel", "",
             " §7A superheated amalgam of ",
@@ -52,12 +47,11 @@ public class ThermalFuels implements ItemRegistry {
             " §7machine.", ""
         );
         magmaBucket.addLore(ItemRarity.EPIC.getName());
+        magmaBucket.addEnchantmentGlint();
+        magmaBucket.addRule(ItemRule.PREVENT_BUCKET_INTERACTIONS);
 
-        ItemTemplate plasmaBucket = new ItemTemplate(
-            "PLASMA_BUCKET", ItemType.MATERIAL, ItemRarity.LEGENDARY, Material.LAVA_BUCKET, "Plasma Bucket"
-        );
-        plasmaBucket.addEnchantmentGlint();
-        plasmaBucket.addRule(new PreventBucketInteractionsRule());
+        BlightedItem plasmaBucket = new BlightedItem("PLASMA_BUCKET", ItemType.MATERIAL, ItemRarity.LEGENDARY, Material.LAVA_BUCKET);
+        plasmaBucket.setDisplayName("Plasma Bucket");
         plasmaBucket.addLore(
             "§8Thermal Fuel", "",
             " §7Stable ionized matter containing ",
@@ -66,7 +60,9 @@ public class ThermalFuels implements ItemRegistry {
             " §7machine.", ""
         );
         plasmaBucket.addLore(ItemRarity.LEGENDARY.getName());
+        plasmaBucket.addEnchantmentGlint();
+        plasmaBucket.addRule(ItemRule.PREVENT_BUCKET_INTERACTIONS);
 
-        return ItemRegistry.add(List.of(enchantedCoal, enchantedLavaBucket, magmaBucket, plasmaBucket));
+        add(enchantedCoal, enchantedLavaBucket, magmaBucket, plasmaBucket);
     }
 }

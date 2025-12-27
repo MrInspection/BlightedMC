@@ -1,29 +1,22 @@
 package fr.moussax.blightedMC.smp.features.armors;
 
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
 import fr.moussax.blightedMC.smp.features.abilities.HomodeusFlightAbility;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 
-import java.util.List;
-
-public class HomodeusArmor implements ItemRegistry {
+public class HomodeusArmor implements ItemProvider {
 
     @Override
-    public List<ItemTemplate> defineItems() {
+    public void register() {
         FullSetBonus homodeusFlightBonus = new HomodeusFlightAbility();
 
-        ItemTemplate homodeusHelmet = new ItemTemplate(
-            "HOMODEUS_HELMET", ItemType.HELMET, ItemRarity.LEGENDARY, Material.LEATHER_HELMET, "Homodeus Helmet"
-        );
-        homodeusHelmet.addEnchantmentGlint();
-        homodeusHelmet.setLeatherColor("#ffffff");
-        homodeusHelmet.addItemFlag(List.of(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE));
-        homodeusHelmet.setUnbreakable(true);
+        BlightedItem homodeusHelmet = new BlightedItem("HOMODEUS_HELMET", ItemType.HELMET, ItemRarity.LEGENDARY, Material.LEATHER_HELMET);
+        homodeusHelmet.setDisplayName("Homodeus Helmet");
         homodeusHelmet.addLore(
             "",
             " §5Full Set Bonus: Homodeus",
@@ -33,15 +26,14 @@ public class HomodeusArmor implements ItemRegistry {
             "",
             ItemRarity.LEGENDARY.getName()
         );
-        homodeusHelmet.setFullSetBonus(homodeusFlightBonus);
+        homodeusHelmet.setUnbreakable(true);
+        homodeusHelmet.addEnchantmentGlint();
+        homodeusHelmet.setLeatherColor("#ffffff");
+        homodeusHelmet.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
 
-        ItemTemplate homodeusChestplate = new ItemTemplate(
-            "HOMODEUS_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.LEGENDARY, Material.LEATHER_CHESTPLATE, "Homodeus Chestplate"
-        );
-        homodeusChestplate.addEnchantmentGlint();
-        homodeusChestplate.setLeatherColor("#ffffff");
-        homodeusChestplate.setUnbreakable(true);
-        homodeusChestplate.addItemFlag(List.of(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE));
+
+        BlightedItem homodeusChestplate = new BlightedItem("HOMODEUS_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.LEGENDARY, Material.LEATHER_CHESTPLATE);
+        homodeusChestplate.setDisplayName("Homodeus Chestplate");
         homodeusChestplate.addLore(
             "",
             " §5Full Set Bonus: Homodeus",
@@ -51,15 +43,13 @@ public class HomodeusArmor implements ItemRegistry {
             "",
             ItemRarity.LEGENDARY.getName()
         );
-        homodeusChestplate.setFullSetBonus(homodeusFlightBonus);
+        homodeusChestplate.addEnchantmentGlint();
+        homodeusChestplate.setLeatherColor("#ffffff");
+        homodeusChestplate.setUnbreakable(true);
+        homodeusChestplate.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
 
-        ItemTemplate homodeusLeggings = new ItemTemplate(
-            "HOMODEUS_LEGGINGS", ItemType.LEGGINGS, ItemRarity.LEGENDARY, Material.LEATHER_LEGGINGS, "Homodeus Leggings"
-        );
-        homodeusLeggings.addEnchantmentGlint();
-        homodeusLeggings.setLeatherColor("#ffffff");
-        homodeusLeggings.setUnbreakable(true);
-        homodeusLeggings.addItemFlag(List.of(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE));
+        BlightedItem homodeusLeggings = new BlightedItem("HOMODEUS_LEGGINGS", ItemType.LEGGINGS, ItemRarity.LEGENDARY, Material.LEATHER_LEGGINGS);
+        homodeusLeggings.setDisplayName("Homodeus Leggings");
         homodeusLeggings.addLore(
             "",
             " §5Full Set Bonus: Homodeus",
@@ -69,15 +59,14 @@ public class HomodeusArmor implements ItemRegistry {
             "",
             ItemRarity.LEGENDARY.getName()
         );
-        homodeusLeggings.setFullSetBonus(homodeusFlightBonus);
+        homodeusLeggings.addEnchantmentGlint();
+        homodeusLeggings.setLeatherColor("#ffffff");
+        homodeusLeggings.setUnbreakable(true);
+        homodeusLeggings.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
 
-        ItemTemplate homodeusBoots = new ItemTemplate(
-            "HOMODEUS_BOOTS", ItemType.BOOTS, ItemRarity.LEGENDARY, Material.LEATHER_BOOTS, "Homodeus Boots"
-        );
-        homodeusBoots.addEnchantmentGlint();
-        homodeusBoots.setLeatherColor("#ffffff");
-        homodeusBoots.addItemFlag(List.of(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE));
-        homodeusBoots.setUnbreakable(true);
+        BlightedItem homodeusBoots = new BlightedItem("HOMODEUS_BOOTS", ItemType.BOOTS, ItemRarity.LEGENDARY, Material.LEATHER_BOOTS);
+        homodeusBoots.setDisplayName("Homodeus Boots");
+
         homodeusBoots.addLore(
             "",
             " §5Full Set Bonus: Homodeus",
@@ -87,8 +76,21 @@ public class HomodeusArmor implements ItemRegistry {
             "",
             ItemRarity.LEGENDARY.getName()
         );
+        homodeusBoots.addEnchantmentGlint();
+        homodeusBoots.setLeatherColor("#ffffff");
+        homodeusBoots.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
+        homodeusBoots.setUnbreakable(true);
+
+        homodeusHelmet.setFullSetBonus(homodeusFlightBonus);
+        homodeusChestplate.setFullSetBonus(homodeusFlightBonus);
+        homodeusLeggings.setFullSetBonus(homodeusFlightBonus);
         homodeusBoots.setFullSetBonus(homodeusFlightBonus);
 
-        return ItemRegistry.add(List.of(homodeusHelmet, homodeusChestplate, homodeusLeggings, homodeusBoots));
+        add(
+            homodeusHelmet,
+            homodeusChestplate,
+            homodeusLeggings,
+            homodeusBoots
+        );
     }
 }

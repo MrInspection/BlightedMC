@@ -1,50 +1,44 @@
 package fr.moussax.blightedMC.smp.features.items;
 
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.smp.core.items.rules.PreventPlacementRule;
-import fr.moussax.blightedMC.smp.core.items.rules.PreventProjectileLaunchRule;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
+import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
+import fr.moussax.blightedMC.smp.core.items.rules.common.PreventProjectileLaunchRule;
 import org.bukkit.Material;
 
-import java.util.List;
-
-public class BlightedMaterials implements ItemRegistry {
+public class BlightedMaterials implements ItemProvider {
 
     @Override
-    public List<ItemTemplate> defineItems() {
-
-        ItemTemplate enchantedIronIngot = new ItemTemplate(
-            "ENCHANTED_IRON_INGOT", ItemType.MATERIAL, ItemRarity.UNCOMMON,
-            Material.IRON_INGOT, "Enchanted Iron Ingot"
-        );
+    public void register() {
+        BlightedItem enchantedIronIngot = new BlightedItem("ENCHANTED_IRON_INGOT", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.IRON_INGOT);
+        enchantedIronIngot.setDisplayName("Enchanted Iron Ingot");
         enchantedIronIngot.addEnchantmentGlint();
         enchantedIronIngot.addLore(ItemRarity.UNCOMMON.getName());
 
-        ItemTemplate enchantedIronBlock = new ItemTemplate(
-            "ENCHANTED_IRON_BLOCK", ItemType.MATERIAL, ItemRarity.RARE,
-            Material.IRON_BLOCK, "Enchanted Iron Block"
-        );
+        BlightedItem enchantedIronBlock = new BlightedItem("ENCHANTED_IRON_BLOCK", ItemType.MATERIAL, ItemRarity.RARE, Material.IRON_BLOCK);
+        enchantedIronBlock.setDisplayName("Enchanted Iron Block");
         enchantedIronBlock.addLore(ItemRarity.RARE.getName());
         enchantedIronBlock.addEnchantmentGlint();
-        enchantedIronBlock.addRule(new PreventPlacementRule());
+        enchantedIronBlock.addRule(ItemRule.PREVENT_PLACEMENT);
 
-        ItemTemplate enchantedEnderPearl = new ItemTemplate(
-            "ENCHANTED_ENDER_PEARL", ItemType.MATERIAL, ItemRarity.UNCOMMON,
-            Material.ENDER_PEARL, "Enchanted Ender Pearl"
-        );
+        BlightedItem enchantedEnderPearl = new BlightedItem("ENCHANTED_ENDER_PEARL", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.ENDER_PEARL);
+        enchantedEnderPearl.setDisplayName("Enchanted Ender Pearl");
         enchantedEnderPearl.addLore(ItemRarity.UNCOMMON.getName());
         enchantedEnderPearl.addEnchantmentGlint();
-        enchantedEnderPearl.addRule(new PreventProjectileLaunchRule());
+        enchantedEnderPearl.addRule(ItemRule.PREVENT_PROJECTILE_LAUNCH);
 
-        ItemTemplate enchantedGhastTear = new ItemTemplate(
-            "ENCHANTED_GHAST_TEAR", ItemType.MATERIAL, ItemRarity.UNCOMMON,
-            Material.GHAST_TEAR, "Enchanted Ghast Tear"
-        );
+        BlightedItem enchantedGhastTear = new BlightedItem("ENCHANTED_GHAST_TEAR", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.GHAST_TEAR);
+        enchantedGhastTear.setDisplayName("Enchanted Ghast Tear");
         enchantedGhastTear.addLore(ItemRarity.UNCOMMON.getName());
         enchantedGhastTear.addEnchantmentGlint();
 
-        return ItemRegistry.add(List.of(enchantedIronIngot, enchantedIronBlock, enchantedEnderPearl, enchantedGhastTear));
+        add(
+            enchantedIronIngot,
+            enchantedIronBlock,
+            enchantedEnderPearl,
+            enchantedGhastTear
+        );
     }
 }

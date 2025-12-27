@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.smp.core.player;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.abilities.CooldownEntry;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
@@ -31,7 +31,7 @@ public class BlightedPlayer {
 
     private final List<FullSetBonus> activeFullSetBonuses = new ArrayList<>();
     private final List<CooldownEntry> cooldowns = new ArrayList<>();
-    private final EnumMap<ItemType, ItemTemplate> armorPieces = new EnumMap<>(ItemType.class);
+    private final EnumMap<ItemType, BlightedItem> armorPieces = new EnumMap<>(ItemType.class);
 
     private ItemStack[] lastKnownArmor = new ItemStack[4];
     private final BukkitTask actionBarTask;
@@ -96,7 +96,7 @@ public class BlightedPlayer {
         clearActiveBonuses();
 
         // Rebuild active bonuses based on equipped armor
-        for (ItemTemplate piece : armorPieces.values()) {
+        for (BlightedItem piece : armorPieces.values()) {
             if (piece == null) continue;
 
             List<FullSetBonus> bonuses = Collections.singletonList(piece.getFullSetBonus());
@@ -111,17 +111,17 @@ public class BlightedPlayer {
         armorPieces.clear();
     }
 
-    public ItemTemplate getEquippedItemManager() {
+    public BlightedItem getEquippedItemManager() {
         ItemStack mainHandItem = player.getInventory().getItemInMainHand();
-        return ItemTemplate.fromItemStack(mainHandItem);
+        return BlightedItem.fromItemStack(mainHandItem);
     }
 
     public List<FullSetBonus> getActiveFullSetBonuses() {
         return Collections.unmodifiableList(activeFullSetBonuses);
     }
 
-    public void addArmorPiece(ItemType type, ItemTemplate itemTemplate) {
-        setArmorPiece(type, itemTemplate);
+    public void addArmorPiece(ItemType type, BlightedItem blightedItem) {
+        setArmorPiece(type, blightedItem);
     }
 
     public void clearActiveBonuses() {
@@ -152,11 +152,11 @@ public class BlightedPlayer {
         });
     }
 
-    public void setArmorPiece(ItemType type, ItemTemplate itemTemplate) {
-        armorPieces.put(type, itemTemplate);
+    public void setArmorPiece(ItemType type, BlightedItem blightedItem) {
+        armorPieces.put(type, blightedItem);
     }
 
-    public ItemTemplate getArmorPiece(ItemType type) {
+    public BlightedItem getArmorPiece(ItemType type) {
         return armorPieces.get(type);
     }
 

@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.smp.features.abilities;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityManager;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemDirectory;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Location;
@@ -79,7 +79,7 @@ public class WitherImpactAbility implements AbilityManager<PlayerInteractEvent>,
     }
 
     private boolean isHoldingHyperion(Player player) {
-        return player.getInventory().getItemInMainHand().equals(ItemDirectory.getItem("HYPERION").toItemStack());
+        return player.getInventory().getItemInMainHand().equals(ItemRegistry.getItem("HYPERION").toItemStack());
     }
 
     private void teleport(Player player) {

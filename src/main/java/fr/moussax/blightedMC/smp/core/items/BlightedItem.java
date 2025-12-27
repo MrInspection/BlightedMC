@@ -5,7 +5,7 @@ import fr.moussax.blightedMC.smp.core.items.abilities.Ability;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityExecutor;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemDirectory;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -21,9 +21,6 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
-import static fr.moussax.blightedMC.smp.core.items.registry.ItemDirectory.ID_KEY;
 
 /**
  * Represents a customizable item template in BlightedMC.
@@ -36,14 +33,13 @@ import static fr.moussax.blightedMC.smp.core.items.registry.ItemDirectory.ID_KEY
  * @see fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus
  * @see fr.moussax.blightedMC.smp.core.items.rules.ItemRule
  */
-public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator {
-    public static final NamespacedKey ITEM_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "id");
-    public static final NamespacedKey ITEM_RARITY_KEY = new NamespacedKey(BlightedMC.getInstance(), "rarity");
+public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
+    public static final NamespacedKey BLIGHTED_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_id");
+    public static final NamespacedKey BLIGHTED_RARITY_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_rarity");
 
     private final String itemId;
     private final ItemRarity itemRarity;
     private final ItemType itemType;
-    private boolean isUnstackable;
     private FullSetBonus fullSetBonus;
 
     private final List<Ability> abilities = new ArrayList<>();
@@ -57,57 +53,8 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
      * @param rarity   the item rarity
      * @param material the base material
      */
-    public ItemTemplate(String itemId, ItemType type, ItemRarity rarity, Material material) {
+    public BlightedItem(@NonNull String itemId, @NonNull ItemType type, @NonNull ItemRarity rarity, @NonNull Material material) {
         super(material);
-        this.itemId = itemId;
-        this.itemType = type;
-        this.itemRarity = rarity;
-    }
-
-    /**
-     * Creates a new item template with a display name.
-     *
-     * @param itemId      the unique item identifier
-     * @param type        the item type
-     * @param rarity      the item rarity
-     * @param material    the base material
-     * @param displayName the item display name
-     */
-    public ItemTemplate(String itemId, ItemType type, ItemRarity rarity, Material material, String displayName) {
-        super(material, rarity.getColorPrefix() + displayName);
-        this.itemId = itemId;
-        this.itemType = type;
-        this.itemRarity = rarity;
-    }
-
-    /**
-     * Creates a new item template with a defined stack amount.
-     *
-     * @param itemId   the unique item identifier
-     * @param type     the item type
-     * @param rarity   the item rarity
-     * @param material the base material
-     * @param amount   the item stack size
-     */
-    public ItemTemplate(String itemId, ItemType type, ItemRarity rarity, Material material, int amount) {
-        super(material, amount);
-        this.itemId = itemId;
-        this.itemType = type;
-        this.itemRarity = rarity;
-    }
-
-    /**
-     * Creates a new item template with a display name and stack size.
-     *
-     * @param itemId      the unique item identifier
-     * @param type        the item type
-     * @param rarity      the item rarity
-     * @param material    the base material
-     * @param amount      the stack size
-     * @param displayName the item display name
-     */
-    public ItemTemplate(String itemId, ItemType type, ItemRarity rarity, Material material, int amount, String displayName) {
-        super(material, amount, rarity.getColorPrefix() + displayName);
         this.itemId = itemId;
         this.itemType = type;
         this.itemRarity = rarity;
@@ -121,7 +68,7 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
      * @param rarity    the item rarity
      * @param itemStack the source item stack
      */
-    public ItemTemplate(String itemId, ItemType type, ItemRarity rarity, ItemStack itemStack) {
+    public BlightedItem(@NonNull String itemId, @NonNull ItemType type, @NonNull ItemRarity rarity, @NonNull ItemStack itemStack) {
         super(itemStack);
         this.itemId = itemId;
         this.itemType = type;
@@ -156,9 +103,8 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
     }
 
     @Override
-    public ItemTemplate setDisplayName(@NonNull String displayName) {
-        String coloredName = itemRarity.getColorPrefix() + displayName;
-        super.setDisplayName(coloredName);
+    public BlightedItem setDisplayName(@NonNull String displayName) {
+        super.setDisplayName(itemRarity.getColorPrefix() + displayName);
         return this;
     }
 
@@ -167,9 +113,8 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
      *
      * @return this instance for chaining
      */
-    @SuppressWarnings({"unused", "UnusedReturnValue"})
-    public ItemTemplate isUnstackable() {
-        this.isUnstackable = true;
+    public BlightedItem isUnstackable() {
+        super.setUnstackable(true);
         return this;
     }
 
@@ -192,22 +137,22 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
     }
 
     /**
-     * Builds an {@link ItemTemplate} from an existing {@link ItemStack}.
+     * Builds an {@link BlightedItem} from an existing {@link ItemStack}.
      *
      * @param itemStack the item stack
      * @return the corresponding item template or {@code null} if not registered
      */
-    public static ItemTemplate fromItemStack(ItemStack itemStack) {
-        if (itemStack == null || itemStack.getType().isAir()) return null;
+    public static BlightedItem fromItemStack(@NonNull ItemStack itemStack) {
+        if (itemStack.getType().isAir()) return null;
 
         var meta = itemStack.getItemMeta();
         if (meta == null) return null;
 
         var container = meta.getPersistentDataContainer();
-        String itemId = container.get(ID_KEY, PersistentDataType.STRING);
+        String itemId = container.get(BLIGHTED_ID_KEY, PersistentDataType.STRING);
         if (itemId == null) return null;
 
-        return ItemDirectory.getItem(itemId);
+        return ItemRegistry.getItem(itemId);
     }
 
     /**
@@ -281,20 +226,12 @@ public class ItemTemplate extends ItemBuilder implements ItemRule, ItemGenerator
      */
     @Override
     public ItemStack toItemStack() {
-        ItemStack item = super.toItemStack();
-
-        var meta = item.getItemMeta();
-        assert meta != null;
-        meta.getPersistentDataContainer().set(ITEM_ID_KEY, PersistentDataType.STRING, itemId);
-        meta.getPersistentDataContainer().set(ITEM_RARITY_KEY, PersistentDataType.STRING, itemRarity.name());
-
-        if (isUnstackable) {
-            NamespacedKey unstackableKey = new NamespacedKey(BlightedMC.getInstance(), "unstackable");
-            meta.getPersistentDataContainer().set(unstackableKey, PersistentDataType.STRING, UUID.randomUUID().toString());
-        }
-
-        item.setItemMeta(meta);
-        return item;
+        this.setItemMeta(itemMeta -> {
+            var container = itemMeta.getPersistentDataContainer();
+            container.set(BLIGHTED_ID_KEY, PersistentDataType.STRING, itemId);
+            container.set(BLIGHTED_RARITY_KEY, PersistentDataType.STRING, itemRarity.name());
+        });
+        return super.toItemStack();
     }
 
     @Override

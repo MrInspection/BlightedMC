@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.smp.core.items.forging.menu;
 
 import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.smp.core.items.forging.ForgeRecipe;
+import fr.moussax.blightedMC.smp.core.items.forging.registry.ForgeRegistry;
 import fr.moussax.blightedMC.smp.core.menus.*;
 import fr.moussax.blightedMC.utils.Utilities;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
@@ -51,7 +52,7 @@ public class ForgeRecipesMenu extends PaginatedMenu {
     public ForgeRecipesMenu(Menu previousMenu) {
         super("Forge Recipes", 54);
         this.previousMenu = previousMenu;
-        this.cachedRecipes = new ArrayList<>(ForgeRecipe.REGISTRY);
+        this.cachedRecipes = new ArrayList<>(ForgeRegistry.RECIPES);
         this.cachedRecipes.sort((r1, r2) -> {
             String name1 = r1.getForgedItem().getDisplayName();
             String name2 = r2.getForgedItem().getDisplayName();

@@ -14,7 +14,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
-import static fr.moussax.blightedMC.smp.core.items.ItemTemplate.ITEM_ID_KEY;
+import static fr.moussax.blightedMC.smp.core.items.BlightedItem.BLIGHTED_ID_KEY;
 
 /**
  * Utility class providing general-purpose helper methods for the BlightedMC plugin.
@@ -65,7 +65,7 @@ public class Utilities {
             return "vanilla:" + item.getType().name();
         }
 
-        NamespacedKey itemIdKey = ITEM_ID_KEY;
+        NamespacedKey itemIdKey = BLIGHTED_ID_KEY;
         String customId = meta.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
         return customId != null ? customId : "vanilla:" + item.getType().name();
     }

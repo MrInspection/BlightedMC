@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.core.items.abilities;
 
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,15 +15,15 @@ public final class ArmorManager {
     }
 
     public static void updatePlayerArmor(BlightedPlayer player) {
-        List<ItemTemplate> equipped = getEquippedArmor(player.getPlayer());
+        List<BlightedItem> equipped = getEquippedArmor(player.getPlayer());
 
         player.clearArmorPieces();
         Map<Class<? extends FullSetBonus>, Integer> bonusCount = new HashMap<>();
 
-        for (ItemTemplate itemTemplate : equipped) {
-            if (itemTemplate == null) continue;
-            player.setArmorPiece(itemTemplate.getItemType(), itemTemplate);
-            FullSetBonus bonus = itemTemplate.getFullSetBonus();
+        for (BlightedItem blightedItem : equipped) {
+            if (blightedItem == null) continue;
+            player.setArmorPiece(blightedItem.getItemType(), blightedItem);
+            FullSetBonus bonus = blightedItem.getFullSetBonus();
             if (bonus != null) {
                 bonusCount.merge(bonus.getClass(), 1, Integer::sum);
             }
@@ -65,12 +65,12 @@ public final class ArmorManager {
         });
     }
 
-    private static List<ItemTemplate> getEquippedArmor(Player player) {
+    private static List<BlightedItem> getEquippedArmor(Player player) {
         var armor = player.getInventory().getArmorContents();
-        List<ItemTemplate> managers = new ArrayList<>(armor.length);
+        List<BlightedItem> managers = new ArrayList<>(armor.length);
         for (ItemStack item : armor) {
             if (item == null || item.getType().isAir()) continue;
-            ItemTemplate manager = ItemTemplate.fromItemStack(item);
+            BlightedItem manager = BlightedItem.fromItemStack(item);
             if (manager != null) managers.add(manager);
         }
         return managers;

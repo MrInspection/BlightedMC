@@ -2,9 +2,6 @@ package fr.moussax.blightedMC.smp.core.entities;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.entities.immunity.EntityImmunity;
-import fr.moussax.blightedMC.smp.core.entities.immunity.FireImmunity;
-import fr.moussax.blightedMC.smp.core.entities.immunity.MeleeImmunity;
-import fr.moussax.blightedMC.smp.core.entities.immunity.ProjectileImmunity;
 import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
@@ -53,7 +50,7 @@ import java.util.function.Supplier;
  * }</pre>
  */
 public abstract class AbstractBlightedEntity implements Cloneable {
-    private static final String ENTITY_ID_KEY = "entityId";
+    public static final NamespacedKey ENTITY_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_entity_id");
     private static final Map<Entity, EntityAttachment> ENTITY_ATTACHMENTS =
         Collections.synchronizedMap(new WeakHashMap<>());
 
@@ -169,12 +166,10 @@ public abstract class AbstractBlightedEntity implements Cloneable {
 
     /**
      * Persists the configured entity id into the entity's {@link PersistentDataContainer}.
-     * Uses plugin NamespacedKey({@code "entityId"}).
      */
     private void persistEntityId() {
         PersistentDataContainer data = entity.getPersistentDataContainer();
-        NamespacedKey key = new NamespacedKey(BlightedMC.getInstance(), ENTITY_ID_KEY);
-        data.set(key, PersistentDataType.STRING, getEntityId());
+        data.set(ENTITY_ID_KEY, PersistentDataType.STRING, getEntityId());
     }
 
     /**
@@ -346,9 +341,9 @@ public abstract class AbstractBlightedEntity implements Cloneable {
 
         for (EntityImmunities.ImmunityType type : attribute.value()) {
             switch (type) {
-                case MELEE -> immunities.add(new MeleeImmunity());
-                case FIRE -> immunities.add(new FireImmunity());
-                case PROJECTILE -> immunities.add(new ProjectileImmunity());
+                case MELEE -> immunities.add(EntityImmunity.MELEE);
+                case FIRE -> immunities.add(EntityImmunity.FIRE);
+                case PROJECTILE -> immunities.add(EntityImmunity.PROJECTILE);
             }
         }
     }
@@ -627,6 +622,15 @@ public abstract class AbstractBlightedEntity implements Cloneable {
      */
     public LivingEntity getEntity() {
         return entity;
+    }
+
+    /**
+     * Returns the underlying Bukkit entity type.
+     *
+     * @return the entity type
+     */
+    public EntityType getEntityType() {
+        return entityType;
     }
 
     /**
