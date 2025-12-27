@@ -78,11 +78,16 @@ public final class ItemRegistry {
      * Retrieves an item template by its unique identifier.
      *
      * @param itemId the unique item identifier
-     * @return the item template, or {@code null} if not found
+     * @return the item template
+     * @throws IllegalArgumentException if no item is found with the given ID
      */
-    @Nullable
-    public static BlightedItem getItem(String itemId) {
-        return REGISTERED_ITEMS.get(itemId);
+    @NonNull
+    public static BlightedItem getItem(@NonNull String itemId) {
+        BlightedItem item = REGISTERED_ITEMS.get(itemId);
+        if (item == null) {
+            throw new IllegalArgumentException("Unknown item ID: " + itemId);
+        }
+        return item;
     }
 
     /**
