@@ -40,7 +40,7 @@ public final class BlightedStray extends BlightedCreature {
             .addLoot(Material.BONE, 2, 5, 1.0, LootDropRarity.COMMON)
             .addLoot(Material.ARROW, 2, 5, 1.0, LootDropRarity.COMMON)
             .addLoot(slownessArrow, 1, 3, 0.4, LootDropRarity.UNCOMMON)
-            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
+            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
     }
 
     @Override

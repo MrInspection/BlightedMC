@@ -30,7 +30,7 @@ public final class BlightedPiglin extends BlightedCreature {
             .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0, LootDropRarity.COMMON)
             .addLoot(Material.GOLD_INGOT, 1, 3, 0.4, LootDropRarity.UNCOMMON)
             .addLoot(Material.CROSSBOW, 1, 1, 0.1, LootDropRarity.RARE)
-            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
+            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
     }
 
     @Override

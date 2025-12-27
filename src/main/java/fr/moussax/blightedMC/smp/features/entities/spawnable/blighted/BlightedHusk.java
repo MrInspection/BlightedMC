@@ -28,7 +28,7 @@ public final class BlightedHusk extends BlightedCreature {
             .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, LootDropRarity.COMMON)
             .addLoot(Material.SAND, 1, 3, 0.3, LootDropRarity.UNCOMMON)
             .addLoot(Material.IRON_INGOT, 1, 2, 0.1, LootDropRarity.RARE)
-            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
+            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
     }
 
     @Override

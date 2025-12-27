@@ -29,8 +29,8 @@ public final class BlightedWitherSkeleton extends BlightedCreature {
             .setMaxDrop(4)
             .addLoot(Material.BONE, 2, 5, 1.0, LootDropRarity.COMMON)
             .addLoot(Material.COAL, 1, 3, 0.5, LootDropRarity.UNCOMMON)
-            .addLoot(Material.WITHER_SKELETON_SKULL, 1, 1, 0.03, LootDropRarity.EXTRAORDINARY)
-            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
+            .addLoot(Material.WITHER_SKELETON_SKULL, 1, 1, 0.03, LootDropRarity.VERY_RARE)
+            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
     }
 
     @Override

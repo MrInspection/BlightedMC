@@ -64,7 +64,7 @@ public class VoidlingDefender extends SpawnableEntity {
             .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, LootDropRarity.COMMON)
             .addLoot(Material.ENDER_EYE, 1, 3, 0.31, LootDropRarity.UNCOMMON)
             .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, LootDropRarity.RARE)
-            .addGemsLoot(30, 0.03, LootDropRarity.EXTRAORDINARY);
+            .addGemsLoot(30, 0.03, LootDropRarity.VERY_RARE);
     }
 
     private void setupBehavior() {

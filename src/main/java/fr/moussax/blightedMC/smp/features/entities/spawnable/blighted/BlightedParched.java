@@ -38,7 +38,7 @@ public final class BlightedParched extends BlightedCreature {
             .setMaxDrop(4)
             .addLoot(Material.BONE, 2, 5, 1.0, LootDropRarity.COMMON)
             .addLoot(Material.ARROW, 2, 5, 1.0, LootDropRarity.COMMON)
-            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
+            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
     }
 
     @Override

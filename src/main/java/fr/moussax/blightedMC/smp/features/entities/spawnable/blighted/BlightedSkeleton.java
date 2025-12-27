@@ -39,7 +39,7 @@ public final class BlightedSkeleton extends BlightedCreature {
             .addLoot(Material.BONE, 2, 5, 1.0, LootDropRarity.COMMON)
             .addLoot(Material.ARROW, 2, 5, 1.0, LootDropRarity.COMMON)
             .addLoot(Material.BOW, 1, 1, 0.15, LootDropRarity.RARE)
-            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
+            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
     }
 
     @Override

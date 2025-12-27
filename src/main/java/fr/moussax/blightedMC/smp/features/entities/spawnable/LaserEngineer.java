@@ -42,7 +42,7 @@ public class LaserEngineer extends SpawnableEntity {
 
         setLootTable(new LootTable().setMaxDrop(2)
             .addLoot(Material.ROTTEN_FLESH, 1, 3, 0.90, LootDropRarity.COMMON)
-            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY)
+            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE)
         );
 
         armor = new ItemStack[]{

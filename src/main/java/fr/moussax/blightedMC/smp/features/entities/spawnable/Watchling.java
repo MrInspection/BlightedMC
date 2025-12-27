@@ -48,7 +48,7 @@ public class Watchling extends SpawnableEntity {
         return new LootTable()
             .setMaxDrop(2)
             .addLoot(Material.ENDER_PEARL, 1, 2, 1.0, LootDropRarity.COMMON)
-            .addGemsLoot(5, 0.03, LootDropRarity.EXTRAORDINARY);
+            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
     }
 
     private void setupBehavior() {
