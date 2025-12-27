@@ -4,7 +4,7 @@ BlightedMC is a open-source project inspired by Hypixel Skyblock for some core m
 
 
 > [!IMPORTANT]
-> This project is still under development, the entire gameplay isn't finished yet. The current state of the project is to polish the core APIs elements and squash bugs.
+> This project is still under development, the entire gameplay isn't finished yet. The current state of the project is to work on the early game phase and squash bugs
 
 ### Why This Project Exists
 
