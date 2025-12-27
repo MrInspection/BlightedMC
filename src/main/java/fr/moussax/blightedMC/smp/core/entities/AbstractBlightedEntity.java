@@ -2,9 +2,6 @@ package fr.moussax.blightedMC.smp.core.entities;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.entities.immunity.EntityImmunity;
-import fr.moussax.blightedMC.smp.core.entities.immunity.FireImmunity;
-import fr.moussax.blightedMC.smp.core.entities.immunity.MeleeImmunity;
-import fr.moussax.blightedMC.smp.core.entities.immunity.ProjectileImmunity;
 import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
@@ -53,7 +50,7 @@ import java.util.function.Supplier;
  * }</pre>
  */
 public abstract class AbstractBlightedEntity implements Cloneable {
-    private static final String ENTITY_ID_KEY = "entityId";
+    private static final String ENTITY_ID_KEY = "blighted_entity_id";
     private static final Map<Entity, EntityAttachment> ENTITY_ATTACHMENTS =
         Collections.synchronizedMap(new WeakHashMap<>());
 
@@ -346,9 +343,9 @@ public abstract class AbstractBlightedEntity implements Cloneable {
 
         for (EntityImmunities.ImmunityType type : attribute.value()) {
             switch (type) {
-                case MELEE -> immunities.add(new MeleeImmunity());
-                case FIRE -> immunities.add(new FireImmunity());
-                case PROJECTILE -> immunities.add(new ProjectileImmunity());
+                case MELEE -> immunities.add(EntityImmunity.MELEE);
+                case FIRE -> immunities.add(EntityImmunity.FIRE);
+                case PROJECTILE -> immunities.add(EntityImmunity.PROJECTILE);
             }
         }
     }

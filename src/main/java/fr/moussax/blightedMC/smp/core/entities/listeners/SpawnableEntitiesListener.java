@@ -28,7 +28,7 @@ public class SpawnableEntitiesListener implements Listener {
         if (world == null) return;
 
         List<SpawnableEntity> eligible = new ArrayList<>();
-        for (SpawnableEntity entity : SpawnableEntitiesRegistry.getAllEntities()) {
+        for (SpawnableEntity entity : SpawnableEntitiesRegistry.getAll()) {
             if (entity.canSpawnAt(location, world)) {
                 eligible.add(entity);
             }

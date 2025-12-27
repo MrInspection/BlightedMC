@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.smp.core.entities.loot;
 import fr.moussax.blightedMC.smp.core.entities.loot.gems.GemsItem;
 import fr.moussax.blightedMC.smp.core.entities.loot.gems.GemsLoot;
 import fr.moussax.blightedMC.smp.core.entities.loot.gems.GemsLootAdapter;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemDirectory;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -34,7 +34,7 @@ public class LootTable {
      * @return this LootTable for chaining
      */
     public LootTable addLoot(String itemId, int min, int max, double dropChance, LootDropRarity rarity) {
-        ItemLoot itemLoot = new ItemLoot(ItemDirectory.getItem(itemId).toItemStack(), min, max);
+        ItemLoot itemLoot = new ItemLoot(Objects.requireNonNull(ItemRegistry.getItem(itemId)).toItemStack(), min, max);
         lootEntries.add(new LootEntry(itemLoot, dropChance, rarity));
         return this;
     }

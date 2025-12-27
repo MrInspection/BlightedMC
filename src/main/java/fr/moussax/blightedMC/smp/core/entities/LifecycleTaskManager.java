@@ -8,18 +8,12 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Manages the lifecycle-bound tasks associated with a {@link AbstractBlightedEntity}.
+ * Manages scheduler tasks bound to the lifecycle of an {@link AbstractBlightedEntity}.
  * <p>
- * This class allows entities to register both delayed and repeating tasks that
- * automatically start when the entity is initialized and stop when it is destroyed.
- * All tasks are stored as {@link BukkitRunnable} instances and are tied to the plugin’s scheduler.
- * <p>
- * Tasks registered through this manager are:
- * <ul>
- *   <li>Executed using the {@link BlightedMC} plugin instance</li>
- *   <li>Automatically cancelable when the entity is killed or detached</li>
- *   <li>Reschedulable via {@link #scheduleAll()} or {@link #scheduleLast()}</li>
- * </ul>
+ * Allows entities to register delayed or repeating {@link BukkitRunnable} tasks that
+ * are automatically scheduled on initialization and canceled on destruction.
+ * Tasks are executed through the {@link BlightedMC} plugin scheduler and can be
+ * rescheduled as needed during the entity’s lifetime.
  */
 public final class LifecycleTaskManager {
 
