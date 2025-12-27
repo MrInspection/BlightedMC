@@ -1,6 +1,8 @@
 package fr.moussax.blightedMC.smp.core.entities.spawnable;
 
 import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnCondition;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.engine.SpawnMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
@@ -20,6 +22,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 public abstract class SpawnableEntity extends AbstractBlightedEntity {
     private final String entityId;
     private final double spawnProbability;
+    private final SpawnMode spawnMode;
     private SpawnProfile spawnProfile;
 
     /**
@@ -32,9 +35,24 @@ public abstract class SpawnableEntity extends AbstractBlightedEntity {
      * @param probability spawn probability in the range {@code [0.0, 1.0]}
      */
     protected SpawnableEntity(String entityId, String name, int maxHealth, EntityType entityType, double probability) {
+        this(entityId, name, maxHealth, entityType, probability, SpawnMode.REPLACEMENT);
+    }
+
+    /**
+     * Creates a spawn definition for a blighted entity type.
+     *
+     * @param entityId    unique identifier for the entity type
+     * @param name        display name
+     * @param maxHealth   maximum health value
+     * @param entityType  underlying Bukkit {@link EntityType}
+     * @param probability spawn probability in the range {@code [0.0, 1.0]}
+     * @param mode spawn mode of the entity
+     */
+    protected SpawnableEntity(String entityId, String name, int maxHealth, EntityType entityType, double probability, SpawnMode mode) {
         super(name, maxHealth, entityType);
         this.entityId = entityId;
         this.spawnProbability = probability;
+        this.spawnMode = mode;
         this.spawnProfile = new SpawnProfile();
         defineSpawnConditions();
     }
@@ -70,6 +88,10 @@ public abstract class SpawnableEntity extends AbstractBlightedEntity {
      */
     public double getSpawnProbability() {
         return spawnProbability;
+    }
+
+    public SpawnMode getSpawnMode() {
+        return spawnMode;
     }
 
     /**

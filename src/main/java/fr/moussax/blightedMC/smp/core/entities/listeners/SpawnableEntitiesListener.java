@@ -1,9 +1,11 @@
 package fr.moussax.blightedMC.smp.core.entities.listeners;
 
 import fr.moussax.blightedMC.smp.core.entities.registry.SpawnableEntitiesRegistry;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.engine.SpawnMode;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -27,9 +29,14 @@ public class SpawnableEntitiesListener implements Listener {
         World world = location.getWorld();
         if (world == null) return;
 
+        EntityType vanillaType = event.getEntityType();
+
         List<SpawnableEntity> eligible = new ArrayList<>();
         for (SpawnableEntity entity : SpawnableEntitiesRegistry.getAll()) {
-            if (entity.canSpawnAt(location, world)) {
+            SpawnMode mode = entity.getSpawnMode();
+            if ((mode == SpawnMode.REPLACEMENT || mode == SpawnMode.HYBRID) &&
+                entity.getEntityType().equals(vanillaType) &&
+                entity.canSpawnAt(location, world)) {
                 eligible.add(entity);
             }
         }

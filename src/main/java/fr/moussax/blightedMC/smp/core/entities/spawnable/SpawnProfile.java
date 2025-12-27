@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.smp.core.entities.spawnable;
 
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnCondition;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.jspecify.annotations.NonNull;

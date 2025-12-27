@@ -6,6 +6,7 @@ import fr.moussax.blightedMC.server.BlightedServer;
 import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
 import fr.moussax.blightedMC.server.database.PluginDatabase;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.engine.BlightedSpawnEngine;
 import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.Bukkit;
@@ -40,6 +41,7 @@ public final class BlightedMC extends JavaPlugin {
         eventsRegistry.initializeListeners();
 
         BlightedServer.getInstance().rehydrateEntitiesOnLoadedChunks();
+        new BlightedSpawnEngine().runTaskTimer(this, 100L, 1L);
     }
 
     private void initializeDatabase() {
