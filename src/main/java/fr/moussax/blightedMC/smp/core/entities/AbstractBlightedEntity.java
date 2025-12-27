@@ -50,7 +50,7 @@ import java.util.function.Supplier;
  * }</pre>
  */
 public abstract class AbstractBlightedEntity implements Cloneable {
-    private static final String ENTITY_ID_KEY = "blighted_entity_id";
+    public static final NamespacedKey ENTITY_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_entity_id");
     private static final Map<Entity, EntityAttachment> ENTITY_ATTACHMENTS =
         Collections.synchronizedMap(new WeakHashMap<>());
 
@@ -166,12 +166,10 @@ public abstract class AbstractBlightedEntity implements Cloneable {
 
     /**
      * Persists the configured entity id into the entity's {@link PersistentDataContainer}.
-     * Uses plugin NamespacedKey({@code "entityId"}).
      */
     private void persistEntityId() {
         PersistentDataContainer data = entity.getPersistentDataContainer();
-        NamespacedKey key = new NamespacedKey(BlightedMC.getInstance(), ENTITY_ID_KEY);
-        data.set(key, PersistentDataType.STRING, getEntityId());
+        data.set(ENTITY_ID_KEY, PersistentDataType.STRING, getEntityId());
     }
 
     /**
@@ -624,6 +622,15 @@ public abstract class AbstractBlightedEntity implements Cloneable {
      */
     public LivingEntity getEntity() {
         return entity;
+    }
+
+    /**
+     * Returns the underlying Bukkit entity type.
+     *
+     * @return the entity type
+     */
+    public EntityType getEntityType() {
+        return entityType;
     }
 
     /**
