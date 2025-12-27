@@ -111,16 +111,13 @@ public class LootTable {
     public List<DroppableConsumable> generateLoot() {
         List<DroppableConsumable> successfulDrops = new ArrayList<>();
 
-        // First pass: determine which items will drop based on chance
         for (LootEntry entry : lootEntries) {
             if (randomizer.nextDouble() <= entry.dropChance) {
                 successfulDrops.add(entry.item);
             }
         }
 
-        // Apply max drops limit
         if (successfulDrops.size() > maxDrops) {
-            // Shuffle and take only the first maxDrops items
             Collections.shuffle(successfulDrops, randomizer);
             successfulDrops = successfulDrops.subList(0, maxDrops);
         }
@@ -138,6 +135,7 @@ public class LootTable {
      */
     public void dropLoot(Location location, BlightedPlayer killer) {
         int lootingLevel = 0;
+
         if (killer != null && killer.getPlayer() != null) {
             ItemStack weapon = killer.getPlayer().getInventory().getItemInMainHand();
             if (weapon.hasItemMeta() && Objects.requireNonNull(weapon.getItemMeta()).hasEnchant(Enchantment.LOOTING)) {
@@ -147,7 +145,6 @@ public class LootTable {
 
         List<LootEntry> successfulDrops = new ArrayList<>();
 
-        // First pass: determine which items will drop
         for (LootEntry entry : lootEntries) {
             double adjustedChance = entry.rarity.applyLooting(entry.dropChance, lootingLevel);
             if (randomizer.nextDouble() <= adjustedChance) {
@@ -155,68 +152,60 @@ public class LootTable {
             }
         }
 
-        // Apply max drops limit
         if (successfulDrops.size() > maxDrops) {
-            // Shuffle and take only the first maxDrops items
             Collections.shuffle(successfulDrops, randomizer);
             successfulDrops = successfulDrops.subList(0, maxDrops);
         }
 
-        // Second pass: actually drop the items
         for (LootEntry entry : successfulDrops) {
             int amount = entry.item.generateAmount();
             String itemName = formatItemName(entry.item.name(), amount);
+
             entry.item.consume(killer, location, false, amount);
-            if (killer != null && shouldSendMessage(entry.rarity)) {
-                killer.getPlayer().sendMessage(getRarityMessage(entry.rarity, itemName));
-                playDropSound(killer, entry.rarity);
+
+            if (killer != null && killer.getPlayer() != null) {
+                handleLootFeedback(killer, entry.rarity, itemName);
             }
         }
     }
 
-    private boolean shouldSendMessage(LootDropRarity rarity) {
-        return switch (rarity) {
-            case EXTRAORDINARY, MIRACULOUS, INSANE -> true;
-            default -> false;
-        };
-    }
-
-    private String getRarityMessage(LootDropRarity rarity, String itemName) {
-        String prefix = switch (rarity) {
-            case INSANE -> " §c§lINSANE DROP! §7You found §c";
-            case MIRACULOUS -> " §d§lMIRACULOUS DROP! §7You found §d";
-            case EXTRAORDINARY -> " §b§lEXTRAORDINARY DROP! §7You found §5";
-            case RARE -> " §e§lRARE DROP! §7You found §b";
-            default -> null;
-        };
-        return prefix + itemName;
-    }
-
-    private void playDropSound(BlightedPlayer player, LootDropRarity rarity) {
-        Sound sound;
-        float pitch;
+    private void handleLootFeedback(BlightedPlayer killer, LootDropRarity rarity, String itemName) {
+        String prefix = null;
+        Sound sound = null;
+        float pitch = 1.0f;
 
         switch (rarity) {
             case INSANE -> {
+                prefix = " §c§lINSANE DROP! §f| §7You found §f";
                 sound = Sound.UI_TOAST_CHALLENGE_COMPLETE;
-                pitch = 0.9f;
+                pitch = 0.8f;
             }
-            case MIRACULOUS -> {
+            case CRAZY -> {
+                prefix = " §d§lCRAZY DROP! §f| §7You found §f";
                 sound = Sound.UI_TOAST_CHALLENGE_COMPLETE;
                 pitch = 1.2f;
             }
-            case EXTRAORDINARY -> {
+            case VERY_RARE -> {
+                prefix = " §b§lVERY RARE DROP! §f| §7You found §f";
                 sound = Sound.UI_TOAST_CHALLENGE_COMPLETE;
                 pitch = 1.5f;
             }
+            case RARE -> {
+                prefix = " §f§lRARE DROP! §f| §7You found §f";
+                sound = Sound.UI_TOAST_CHALLENGE_COMPLETE;
+                pitch = 1.8f;
+            }
             default -> {
-                sound = null;
-                pitch = 1.0f;
+                // No feedback for COMMON and UNCOMMON items
             }
         }
 
-        if (sound != null && player.getPlayer() != null) {
-            player.getPlayer().playSound(player.getPlayer().getLocation(), sound, 1.0f, pitch);
+        if (prefix != null) {
+            killer.getPlayer().sendMessage(prefix + itemName);
+        }
+
+        if (sound != null) {
+            killer.getPlayer().playSound(killer.getPlayer().getLocation(), sound, 1.0f, pitch);
         }
     }
 
@@ -232,5 +221,6 @@ public class LootTable {
      * @param dropChance the probability to drop (0.0-1.0)
      * @param rarity     the drop rarity
      */
-    private record LootEntry(ItemLoot item, double dropChance, LootDropRarity rarity) { }
+    private record LootEntry(ItemLoot item, double dropChance, LootDropRarity rarity) {
+    }
 }
