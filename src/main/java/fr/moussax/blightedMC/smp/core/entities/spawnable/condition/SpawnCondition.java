@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.core.entities.spawnable;
+package fr.moussax.blightedMC.smp.core.entities.spawnable.condition;
 
 import org.bukkit.Location;
 import org.bukkit.World;

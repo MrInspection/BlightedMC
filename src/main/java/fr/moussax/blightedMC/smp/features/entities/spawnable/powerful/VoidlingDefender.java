@@ -5,7 +5,7 @@ import fr.moussax.blightedMC.smp.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
 import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.smp.features.entities.spawnable.Watchling;
 import fr.moussax.blightedMC.utils.Utilities;

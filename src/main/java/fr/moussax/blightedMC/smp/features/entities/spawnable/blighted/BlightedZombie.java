@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
 
 import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
 import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
