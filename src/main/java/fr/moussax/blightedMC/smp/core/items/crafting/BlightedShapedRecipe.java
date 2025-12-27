@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.smp.core.items.crafting;
 
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
+import fr.moussax.blightedMC.utils.Utilities;
 
 import java.util.*;
 
@@ -11,7 +12,7 @@ import java.util.*;
  * The placement of ingredients matters, unlike shapeless recipes.
  */
 public final class BlightedShapedRecipe extends BlightedRecipe {
-    private final ItemTemplate resultItemTemplate;
+    private final BlightedItem resultBlightedItem;
     private final int resultAmount;
 
     /**
@@ -29,13 +30,13 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
     private final List<CraftingObject> recipePattern = new ArrayList<>();
 
     /**
-     * Creates a new-shaped recipe with a given result item and output amount.
+     * Creates a shaped recipe with a given result item and quantity.
      *
-     * @param resultItemTemplate the resulting custom item
-     * @param resultAmount       the number of items produced
+     * @param resultBlightedItem the resulting item
+     * @param resultAmount       the quantity produced
      */
-    public BlightedShapedRecipe(ItemTemplate resultItemTemplate, int resultAmount) {
-        this.resultItemTemplate = resultItemTemplate;
+    public BlightedShapedRecipe(BlightedItem resultBlightedItem, int resultAmount) {
+        this.resultBlightedItem = resultBlightedItem;
         this.resultAmount = resultAmount;
     }
 
@@ -45,8 +46,8 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
      * @return the result item
      */
     @Override
-    public ItemTemplate getResult() {
-        return resultItemTemplate;
+    public BlightedItem getResult() {
+        return resultBlightedItem;
     }
 
     /**
@@ -60,10 +61,9 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
     }
 
     /**
-     * Returns an unmodifiable view of the recipe pattern.
-     * <p>The list is ordered according to the 3×3 crafting grid slots (0–8).
+     * Returns an unmodifiable view of the recipe's ingredient pattern.
      *
-     * @return the recipe pattern
+     * @return list of ingredients in slot order (0–8)
      */
     public List<CraftingObject> getRecipe() {
         return Collections.unmodifiableList(recipePattern);
@@ -72,7 +72,7 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
     /**
      * Replaces the current recipe pattern with a new one.
      *
-     * @param recipePattern the new pattern (size up to 9)
+     * @param recipePattern the new ingredient list
      */
     public void setRecipe(List<CraftingObject> recipePattern) {
         this.recipePattern.clear();
@@ -80,8 +80,7 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
     }
 
     /**
-     * Adds a single ingredient to the recipe.
-     * <p>Ingredients are added in slot order (0–8).
+     * Adds a single ingredient to the next available slot in the recipe.
      *
      * @param ingredient the ingredient to add
      */
@@ -90,16 +89,16 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
     }
 
     /**
-     * Returns the crafting grid slot index used for attribute transfer.
+     * Returns the slot index used for attribute transfer.
      *
-     * @return the attribute source slot index, or -1 if not used
+     * @return the slot index (0–8), or -1 if none
      */
     public int getAttributeSourceSlot() {
         return attributeSourceSlotIndex;
     }
 
     /**
-     * Sets the slot index for attribute transfer.
+     * Sets the slot index used to transfer attributes to the result.
      *
      * @param slotIndex the slot index (0–8)
      * @throws IllegalArgumentException if the index is outside 0–8
@@ -112,9 +111,9 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
     }
 
     /**
-     * Checks if this recipe transfers attributes from a crafting slot.
+     * Returns whether a source slot is defined for attribute transfer.
      *
-     * @return true if a source slot is defined, false otherwise
+     * @return true if a source slot is set, false otherwise
      */
     public boolean hasAttributeSourceSlot() {
         return attributeSourceSlotIndex >= 0;
@@ -122,13 +121,14 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
 
     /**
      * Returns a map of all ingredients and their total required amounts.
-     * <p>Keys are item identifiers, which can be either:
+     * <p>
+     * Keys are item identifiers:
      * <ul>
-     *   <li>Custom items: {@code manager.getItemId()}</li>
-     *   <li>Vanilla items: {@code "vanilla:material_name"}</li>
+     *     <li>Custom items: {@code manager.getItemId()}</li>
+     *     <li>Vanilla items: {@code "vanilla:material_name"}</li>
      * </ul>
      *
-     * @return an unmodifiable map of ingredient identifiers to quantities
+     * @return unmodifiable map of item IDs to required amounts
      * @throws IllegalArgumentException if an ingredient is neither custom nor vanilla
      */
     public Map<String, Integer> getIngredientCountMap() {
@@ -139,7 +139,7 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
             if (ingredient.isCustom()) {
                 itemId = ingredient.getManager().getItemId();
             } else if (ingredient.isVanilla()) {
-                itemId = "vanilla:" + ingredient.getVanillaItem().getType().name().toLowerCase();
+                itemId = Utilities.resolveItemId(ingredient.getVanillaItem(), "vanilla:");
             } else {
                 throw new IllegalArgumentException("Ingredient must be custom or vanilla");
             }

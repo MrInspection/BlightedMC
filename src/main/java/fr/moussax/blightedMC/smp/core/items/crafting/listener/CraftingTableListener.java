@@ -1,10 +1,12 @@
-package fr.moussax.blightedMC.smp.core.items.crafting.menu;
+package fr.moussax.blightedMC.smp.core.items.crafting.listener;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.smp.core.items.crafting.BlightedShapedRecipe;
 import fr.moussax.blightedMC.smp.core.items.crafting.BlightedShapelessRecipe;
 import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
+import fr.moussax.blightedMC.smp.core.items.crafting.menu.CraftingTableMenu;
+import fr.moussax.blightedMC.smp.core.items.crafting.menu.RecipeBookMenu;
 import fr.moussax.blightedMC.smp.core.menus.Menu;
 import fr.moussax.blightedMC.smp.core.menus.MenuManager;
 import org.bukkit.Bukkit;

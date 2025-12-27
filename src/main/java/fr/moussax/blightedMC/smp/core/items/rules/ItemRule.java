@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.smp.core.items.rules;
 
+import fr.moussax.blightedMC.smp.core.items.rules.common.*;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -8,17 +9,23 @@ import org.bukkit.inventory.ItemStack;
 /**
  * Defines behavioral restrictions for custom items in BlightedMC.
  * <p>
- * Implementations of this interface allow developers to control when and how
- * a specific item can be placed, interacted with, or used in events.
- * <p>
- * All methods have permissive defaults ({@code true}) and can be selectively overridden.
+ * Implementations override these methods to define permissions.
+ * Defaults are set to prevent placement but allow interaction.
  */
 public interface ItemRule {
+    ItemRule PREVENT_BUCKET_INTERACTIONS = new PreventBucketInteractionsRule();
+    ItemRule PREVENT_CONSUME = new PreventConsumeRule();
+    ItemRule PREVENT_DROP = new PreventDropRule();
+    ItemRule PREVENT_INTERACTION = new PreventInteractionRule();
+    ItemRule PREVENT_PLACEMENT = new PreventPlacementRule();
+    ItemRule PREVENT_PROJECTILE_LAUNCH = new PreventProjectileLaunchRule();
 
     /**
      * Determines whether the item can be placed as a block.
+     * <p>
+     * <b>Default:</b> {@code false} (Prevents custom items like enchanted blocks from being placed)
      *
-     * @param event     the {@link BlockPlaceEvent} representing the placement action
+     * @param event     the {@link BlockPlaceEvent}
      * @param itemStack the item being placed
      * @return {@code true} to allow placement, {@code false} to cancel it
      */
@@ -27,11 +34,12 @@ public interface ItemRule {
     }
 
     /**
-     * Determines whether the item can interact with the environment,
-     * typically triggered by right or left-click actions.
+     * Determines whether the item can interact with the environment.
+     * <p>
+     * <b>Default:</b> {@code true} (Allows standard clicking/interaction)
      *
-     * @param event     the {@link PlayerInteractEvent} representing the interaction
-     * @param itemStack the item being used to interact
+     * @param event     the {@link PlayerInteractEvent}
+     * @param itemStack the item being used
      * @return {@code true} to allow interaction, {@code false} to prevent it
      */
     default boolean canInteract(PlayerInteractEvent event, ItemStack itemStack) {
@@ -39,14 +47,11 @@ public interface ItemRule {
     }
 
     /**
-     * Determines whether the item can be used in a general event context.
-     * <p>
-     * This applies to non-standard interactions, such as custom plugin events
-     * or indirect uses not covered by placement or interaction rules.
+     * Determines whether the item can be used in generic contexts.
      *
-     * @param event     the {@link Event} representing the usage context
+     * @param event     the triggering {@link Event}
      * @param itemStack the item being used
-     * @return {@code true} to allow usage, {@code false} otherwise
+     * @return {@code true} if allowed, {@code false} otherwise
      */
     default boolean canUse(Event event, ItemStack itemStack) {
         return false;

@@ -1,66 +1,106 @@
 package fr.moussax.blightedMC.smp.core.items.registry;
 
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
+import fr.moussax.blightedMC.smp.features.armors.HomodeusArmor;
+import fr.moussax.blightedMC.smp.features.armors.RocketBoots;
+import fr.moussax.blightedMC.smp.features.blocks.BlightedBlockItems;
+import fr.moussax.blightedMC.smp.features.items.*;
+import fr.moussax.blightedMC.utils.debug.Log;
+import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Defines a contract for registering custom {@link ItemTemplate} instances into the global {@link ItemDirectory}.
+ * The central registry for all custom {@link BlightedItem}.
  * <p>
- * Implementations are responsible for creating and returning their items via {@link #defineItems()}.
- * Items can be added individually or in batches using the provided {@link #add(ItemTemplate)} and {@link #add(List)} helpers.
- * <p>
- * Example for a single item:
- * <pre>{@code
- * public class BonemerangRegistry implements ItemRegistry {
- *   @Override
- *   public List<ItemTemplate> defineItems() {
- *     ItemTemplate bonemerang = new ItemTemplate("BONEMERANG", ItemType.BOW, ItemRarity.LEGENDARY, Material.BOW);
- *     bonemerang.addAbility(new BonemerangAbility());
- *     return ItemRegistry.add(bonemerang);
- *   }
- * }
- * }</pre>
- * Example for multiple items:
- * <pre>{@code
- * public class WeaponSetRegistry implements ItemRegistry {
- *   @Override
- *   public List<ItemTemplate> defineItems() {
- *     ItemTemplate sword = new ItemTemplate("FIRE_SWORD", ItemType.SWORD, ItemRarity.EPIC, Material.DIAMOND_SWORD);
- *     ItemTemplate axe = new ItemTemplate("ICE_AXE", ItemType.AXE, ItemRarity.EPIC, Material.DIAMOND_AXE);
- *     return ItemRegistry.add(List.of(sword, axe));
- *   }
- * }
- * }</pre>
+ * This class is responsible for initializing {@link ItemProvider} modules
+ * and maintaining the global lookup map.
  */
-@FunctionalInterface
-public interface ItemRegistry {
-    /**
-     * Defines and registers all custom items for this registry implementation.
-     *
-     * @return a list containing the registered item templates
-     */
-    List<ItemTemplate> defineItems();
+public final class ItemRegistry {
+    private static final Map<String, BlightedItem> REGISTERED_ITEMS = new HashMap<>();
 
-    /**
-     * Registers a single {@link ItemTemplate} into the {@link ItemDirectory}.
-     *
-     * @param item the item template to register
-     * @return a singleton list containing the registered item
-     */
-    static List<ItemTemplate> add(ItemTemplate item) {
-        ItemDirectory.addItem(item);
-        return List.of(item);
+    private static final List<ItemProvider> MODULES = List.of(
+        new BlightedGemstone(),
+        new BlightedMaterials(),
+        new Bonemerang(),
+        new GlimmeringEye(),
+        new KnightsSword(),
+        new HomodeusArmor(),
+        new RocketBoots(),
+        new BlightedBlockItems(),
+        new Hyperion(),
+        new ThermalFuels()
+    );
+
+    private ItemRegistry() {
     }
 
     /**
-     * Registers multiple {@link ItemTemplate} instances into the {@link ItemDirectory}.
-     *
-     * @param items list of item templates to register
-     * @return the same list of registered items
+     * Initializes and registers all items defined across the project.
+     * This method must be called during plugin startup before any items are referenced.
      */
-    static List<ItemTemplate> add(List<ItemTemplate> items) {
-        items.forEach(ItemDirectory::addItem);
-        return items;
+    public static void initialize() {
+        clear();
+        MODULES.forEach(ItemProvider::register);
+        Log.success("ItemDirectory", "Registered " + REGISTERED_ITEMS.size() + " custom items.");
+    }
+
+    /**
+     * Retrieves a BlightedItem template from a physical ItemStack.
+     * Uses the centralized key defined in BlightedItem.
+     *
+     * @param itemStack the item to check
+     * @return the template, or null if not a custom item
+     */
+    @Nullable
+    public static BlightedItem fromItemStack(@NonNull ItemStack itemStack) {
+        return BlightedItem.fromItemStack(itemStack);
+    }
+
+    /**
+     * Registers an item template to the directory.
+     *
+     * @param blightedItem the item template to register
+     * @throws IllegalArgumentException if an item with the same ID is already registered
+     */
+    static void addItem(@NonNull BlightedItem blightedItem) {
+        if (REGISTERED_ITEMS.containsKey(blightedItem.getItemId())) {
+            throw new IllegalArgumentException("Duplicate item ID: " + blightedItem.getItemId());
+        }
+        REGISTERED_ITEMS.put(blightedItem.getItemId(), blightedItem);
+    }
+
+    /**
+     * Retrieves an item template by its unique identifier.
+     *
+     * @param itemId the unique item identifier
+     * @return the item template, or {@code null} if not found
+     */
+    @Nullable
+    public static BlightedItem getItem(String itemId) {
+        return REGISTERED_ITEMS.get(itemId);
+    }
+
+    /**
+     * Retrieves all registered item templates.
+     *
+     * @return immutable copy of all registered items
+     */
+    public static List<BlightedItem> getAllItems() {
+        return List.copyOf(REGISTERED_ITEMS.values());
+    }
+
+    /**
+     * Clears all registered items from the directory.
+     *
+     * <p>This method should be used with caution, typically only during
+     * plugin reload or shutdown procedures.
+     */
+    public static void clear() {
+        REGISTERED_ITEMS.clear();
     }
 }

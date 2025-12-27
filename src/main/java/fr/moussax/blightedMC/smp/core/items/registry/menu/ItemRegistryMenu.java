@@ -1,7 +1,8 @@
-package fr.moussax.blightedMC.smp.core.items.registry;
+package fr.moussax.blightedMC.smp.core.items.registry.menu;
 
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.menus.*;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
@@ -18,19 +19,19 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class ItemDirectoryMenu {
+public class ItemRegistryMenu {
     private static final int[] CATEGORY_SLOTS = {10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 40, 41, 42, 43};
     private static final int SEARCH_SLOT = 41;
     private static final int[] ITEM_SLOTS = CATEGORY_SLOTS;
 
     private static ItemBuilder hideAllItemFlags(ItemBuilder builder) {
-        return builder.addItemFlag(List.of(
+        return builder.addItemFlag(
             ItemFlag.HIDE_ATTRIBUTES,
             ItemFlag.HIDE_UNBREAKABLE,
             ItemFlag.HIDE_ENCHANTS,
             ItemFlag.HIDE_DESTROYS,
             ItemFlag.HIDE_PLACED_ON
-        ));
+        );
     }
 
     private static ItemStack buildMenuItem(ItemStack base, String name, List<String> lore) {
@@ -106,31 +107,31 @@ public class ItemDirectoryMenu {
     private static void openSearchSign(Player player, Menu previousMenu) {
         player.closeInventory();
         player.sendMessage("§8 ■ §7Type your §f§lSEARCH INPUT §7into the chat:");
-        ItemDirectorySearch.awaitingSearch.put(player.getUniqueId(), previousMenu);
+        ItemRegistrySearch.awaitingSearch.put(player.getUniqueId(), previousMenu);
     }
 
     public static class BlightedItemsPaginatedMenu extends PaginatedMenu {
         private final Menu previousMenu;
-        private final List<ItemTemplate> itemTemplates;
+        private final List<BlightedItem> blightedItems;
 
-        public BlightedItemsPaginatedMenu(Menu previousMenu, Predicate<ItemTemplate> filter, String title) {
+        public BlightedItemsPaginatedMenu(Menu previousMenu, Predicate<BlightedItem> filter, String title) {
             super(title, 54);
             this.previousMenu = previousMenu;
-            this.itemTemplates = ItemDirectory.getAllItems().stream().filter(filter).collect(Collectors.toList());
-            this.itemTemplates.sort((i1, i2) -> {
+            this.blightedItems = ItemRegistry.getAllItems().stream().filter(filter).collect(Collectors.toList());
+            this.blightedItems.sort((i1, i2) -> {
                 String name1 = i1.getDisplayName();
                 String name2 = i2.getDisplayName();
                 return (name1 != null ? name1 : "").compareTo(name2 != null ? name2 : "");
             });
         }
 
-        public BlightedItemsPaginatedMenu(ItemType.Category category, Menu previousMenu, Predicate<ItemTemplate> filter, String title) {
+        public BlightedItemsPaginatedMenu(ItemType.Category category, Menu previousMenu, Predicate<BlightedItem> filter, String title) {
             this(previousMenu, filter, title);
         }
 
         @Override
         protected int getTotalItems(Player player) {
-            return itemTemplates.size();
+            return blightedItems.size();
         }
 
         @Override
@@ -140,10 +141,10 @@ public class ItemDirectoryMenu {
 
         @Override
         protected ItemStack getItem(Player player, int index) {
-            if (index >= itemTemplates.size()) return new ItemStack(Material.AIR);
-            ItemTemplate itemTemplate = itemTemplates.get(index);
+            if (index >= blightedItems.size()) return new ItemStack(Material.AIR);
+            BlightedItem blightedItem = blightedItems.get(index);
 
-            ItemStack stack = itemTemplate.toItemStack().clone();
+            ItemStack stack = blightedItem.toItemStack().clone();
             var meta = stack.getItemMeta();
             if (meta != null) {
                 List<String> lore = Optional.ofNullable(meta.getLore()).orElse(new ArrayList<>());
@@ -164,7 +165,7 @@ public class ItemDirectoryMenu {
             int start = currentPage * getItemsPerPage();
             int end = Math.min(start + getItemsPerPage(), getTotalItems(player));
 
-            if (itemTemplates.isEmpty()) {
+            if (blightedItems.isEmpty()) {
                 setItem(22, buildMenuItem(new ItemStack(Material.RED_STAINED_GLASS_PANE),
                     "§cNo Items Found",
                     List.of("§7No items match the criteria")), MenuItemInteraction.ANY_CLICK, (p, t) -> {
@@ -207,7 +208,7 @@ public class ItemDirectoryMenu {
 
         @Override
         protected void onItemClick(Player player, int index, ClickType clickType) {
-            if (index < itemTemplates.size()) player.getInventory().addItem(itemTemplates.get(index).toItemStack());
+            if (index < blightedItems.size()) player.getInventory().addItem(blightedItems.get(index).toItemStack());
         }
     }
 

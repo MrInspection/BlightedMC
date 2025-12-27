@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.smp.core.items.abilities;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -123,15 +123,15 @@ public class AbilityListener implements Listener {
             blightedPlayer = new BlightedPlayer(player);
         }
 
-        ItemTemplate itemTemplate = blightedPlayer.getEquippedItemManager();
-        if (itemTemplate == null || itemTemplate.getAbilities().isEmpty()) {
+        BlightedItem blightedItem = blightedPlayer.getEquippedItemManager();
+        if (blightedItem == null || blightedItem.getAbilities().isEmpty()) {
             return;
         }
 
         // Only trigger if the event matches the ability's trigger type
-        for (Ability ability : itemTemplate.getAbilities()) {
+        for (Ability ability : blightedItem.getAbilities()) {
             if (ability.type().matches(event)) {
-                itemTemplate.triggerAbilities(blightedPlayer, event);
+                blightedItem.triggerAbilities(blightedPlayer, event);
                 break;
             }
         }
