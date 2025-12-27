@@ -26,7 +26,7 @@ public sealed abstract class BlightedCreature extends SpawnableEntity
     private int particleTicks = 0;
 
     protected BlightedCreature(String entityId, String name, EntityType entityType) {
-        super(entityId, name, 30, entityType, 0.04);
+        super(entityId, name, 30, entityType, 0.03);
         setNameTagType(EntityNameTag.BLIGHTED);
         setupDefaultArmor();
         setupEnrageTask();

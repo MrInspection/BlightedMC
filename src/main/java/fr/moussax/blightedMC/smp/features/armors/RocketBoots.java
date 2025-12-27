@@ -1,24 +1,21 @@
 package fr.moussax.blightedMC.smp.features.armors;
 
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
 import fr.moussax.blightedMC.smp.features.abilities.RocketBootsAbility;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 
-import java.util.List;
-
-public class RocketBoots implements ItemRegistry {
+public class RocketBoots implements ItemProvider {
 
     @Override
-    public List<ItemTemplate> defineItems() {
-        ItemTemplate rocketBoots = new ItemTemplate("ROCKET_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS, "Rocket Boots");
-        rocketBoots.setLeatherColor("#B02E26").setArmorTrim(TrimMaterial.QUARTZ, TrimPattern.BOLT);
-        rocketBoots.addItemFlag(List.of(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ARMOR_TRIM));
+    public void register() {
+        BlightedItem rocketBoots = new BlightedItem("ROCKET_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS);
+        rocketBoots.setDisplayName("Rocket Boots");
         rocketBoots.addLore(
             "",
             "§5 Ability: Double Jump",
@@ -27,8 +24,11 @@ public class RocketBoots implements ItemRegistry {
             "",
             ItemRarity.UNCOMMON.getName() + " BOOTS"
         );
+
+        rocketBoots.setLeatherColor("#B02E26").setArmorTrim(TrimMaterial.QUARTZ, TrimPattern.BOLT);
+        rocketBoots.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ARMOR_TRIM);
         rocketBoots.setFullSetBonus(new RocketBootsAbility());
 
-        return ItemRegistry.add(rocketBoots);
+        add(rocketBoots);
     }
 }

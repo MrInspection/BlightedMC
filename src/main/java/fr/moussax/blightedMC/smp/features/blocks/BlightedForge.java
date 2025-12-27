@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.smp.features.blocks;
 
 import fr.moussax.blightedMC.smp.core.items.blocks.BlightedBlock;
 import fr.moussax.blightedMC.smp.core.items.forging.menu.ForgeMenu;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemDirectory;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.menus.MenuManager;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -13,7 +13,7 @@ public class BlightedForge extends BlightedBlock {
     public static BlightedForge instance;
 
     public BlightedForge() {
-        super(Material.BLAST_FURNACE, ItemDirectory.getItem("BLIGHTED_FORGE"));
+        super(Material.BLAST_FURNACE, ItemRegistry.getItem("BLIGHTED_FORGE"));
     }
 
     @Override

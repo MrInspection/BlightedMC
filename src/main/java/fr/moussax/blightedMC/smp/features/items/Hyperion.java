@@ -1,24 +1,21 @@
 package fr.moussax.blightedMC.smp.features.items;
 
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
-import fr.moussax.blightedMC.smp.core.items.ItemTemplate;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.abilities.Ability;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityType;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
 import fr.moussax.blightedMC.smp.features.abilities.WitherImpactAbility;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 
-import java.util.List;
-
-public class Hyperion implements ItemRegistry {
+public class Hyperion implements ItemProvider {
 
     @Override
-    public List<ItemTemplate> defineItems() {
-        ItemTemplate hyperion = new ItemTemplate("HYPERION", ItemType.SWORD, ItemRarity.LEGENDARY, Material.IRON_SWORD, "Hyperion");
-        hyperion.setUnbreakable(true).addItemFlag(List.of(ItemFlag.HIDE_UNBREAKABLE));
-        hyperion.addItemFlag(ItemFlag.HIDE_UNBREAKABLE);
+    public void register() {
+        BlightedItem hyperion = new BlightedItem("HYPERION", ItemType.SWORD, ItemRarity.LEGENDARY, Material.IRON_SWORD);
+        hyperion.setDisplayName("Hyperion");
         hyperion.addLore(
             "",
             "§5 Ability: Wither Impact  §d§lRIGHT CLICK",
@@ -29,7 +26,10 @@ public class Hyperion implements ItemRegistry {
             "",
             ItemRarity.LEGENDARY.getName() + " SWORD"
         );
+        hyperion.setUnbreakable(true);
+        hyperion.addItemFlag(ItemFlag.HIDE_UNBREAKABLE);
         hyperion.addAbility(new Ability(new WitherImpactAbility(), "Whither Impact", AbilityType.RIGHT_CLICK));
-        return ItemRegistry.add(hyperion);
+
+        add(hyperion);
     }
 }
