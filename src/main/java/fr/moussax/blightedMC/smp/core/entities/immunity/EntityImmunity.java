@@ -14,6 +14,7 @@ public interface EntityImmunity {
     EntityImmunity FIRE = new FireImmunity();
     EntityImmunity MELEE = new MeleeImmunity();
     EntityImmunity PROJECTILE = new ProjectileImmunity();
+    EntityImmunity MACE = new MaceImmunity();
 
     /**
      * Determines whether the specified entity is immune to the given damage event.
@@ -23,4 +24,11 @@ public interface EntityImmunity {
      * @return {@code true} if the entity is immune to this damage event, {@code false} otherwise
      */
     boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event);
+
+    /**
+     * @return The message sent to the player when this immunity blocks damage.
+     */
+    default String getImmunityMessage() {
+        return "§4 ■ §cThis creature is immune to this type of damage!";
+    }
 }

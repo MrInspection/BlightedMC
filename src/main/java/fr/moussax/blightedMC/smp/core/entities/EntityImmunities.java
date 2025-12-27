@@ -33,6 +33,6 @@ public @interface EntityImmunities {
         MELEE,
         PROJECTILE,
         FIRE,
-        MAGIC,
+        MACE
     }
 }

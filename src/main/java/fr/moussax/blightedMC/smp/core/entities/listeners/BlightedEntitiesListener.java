@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.smp.core.entities.listeners;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.smp.core.entities.EntityAttachment;
+import fr.moussax.blightedMC.smp.core.entities.immunity.EntityImmunity;
 import fr.moussax.blightedMC.smp.core.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.debug.Log;
@@ -15,6 +16,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -44,7 +46,7 @@ public class BlightedEntitiesListener implements Listener {
         return BLIGHTED_ENTITIES.get(entity.getUniqueId());
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onEntityDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof LivingEntity entity)) return;
         if (processingDamageEntityIds.get().contains(entity.getUniqueId())) return;
@@ -119,12 +121,13 @@ public class BlightedEntitiesListener implements Listener {
     }
 
     private boolean handleImmunity(AbstractBlightedEntity blighted, LivingEntity entity, EntityDamageByEntityEvent event) {
-        if (!blighted.isImmuneTo(entity, event)) return false;
+        EntityImmunity triggeredRule = blighted.getTriggeredImmunity(entity,event);
+        if(triggeredRule == null) return false;
 
         event.setCancelled(true);
         Player player = getPlayerDamager(event.getDamager());
         if (player != null) {
-            player.sendMessage("§4 ■ §cThis creature is immune to this type of damage!");
+            player.sendMessage(triggeredRule.getImmunityMessage());
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 100, 0.6f);
         }
         return true;

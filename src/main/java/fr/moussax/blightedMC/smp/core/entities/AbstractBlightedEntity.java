@@ -344,24 +344,25 @@ public abstract class AbstractBlightedEntity implements Cloneable {
                 case MELEE -> immunities.add(EntityImmunity.MELEE);
                 case FIRE -> immunities.add(EntityImmunity.FIRE);
                 case PROJECTILE -> immunities.add(EntityImmunity.PROJECTILE);
+                case MACE -> immunities.add(EntityImmunity.MACE);
             }
         }
     }
 
     /**
-     * Evaluates whether an incoming damage event should be ignored according to configured immunity rules.
+     * Determines whether an incoming damage event triggers an immunity rule.
      *
-     * @param entity the attacking entity
-     * @param event  the damage event
-     * @return {@code true} if the damage should be ignored (entity is immune), {@code false} otherwise
+     * @param entity the entity receiving the damage
+     * @param event  the damage event being evaluated
+     * @return the {@link EntityImmunity} that applies to this event, or {@code null} if no immunity is triggered
      */
-    public boolean isImmuneTo(LivingEntity entity, EntityDamageEvent event) {
+    public EntityImmunity getTriggeredImmunity(LivingEntity entity, EntityDamageEvent event) {
         for (EntityImmunity rule : immunities) {
             if (rule.isImmune(entity, event)) {
-                return true;
+                return rule;
             }
         }
-        return false;
+        return null;
     }
 
     /**
