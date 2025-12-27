@@ -172,16 +172,16 @@ public class BlightedBlockListener implements Listener {
             if (customBlock == null) continue;
 
             iterator.remove();
+
+            cleanupBlockData(block);
             block.setType(Material.AIR);
 
             if (random.nextFloat() <= yield) {
-                ItemStack drop = customBlock.onBreak(null, customBlock.getBlightedItem().toItemStack());
+                ItemStack drop = customBlock.onBreak(customBlock.getBlightedItem().toItemStack());
                 if (drop != null) {
                     block.getWorld().dropItemNaturally(block.getLocation(), drop);
                 }
             }
-
-            cleanupBlockData(block);
         }
     }
 

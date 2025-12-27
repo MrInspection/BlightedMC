@@ -92,4 +92,17 @@ public abstract class BlightedBlock {
     public ItemStack onBreak(BlockBreakEvent event, ItemStack droppedItem) {
         return droppedItem;
     }
+
+    /**
+     * Called when the block is broken without a player interaction event.
+     * <p>
+     * This method is used in situations like explosions where a BlockBreakEvent is not available.
+     * Override to modify or replace the dropped item.
+     *
+     * @param droppedItem the default item to drop (can be modified or null)
+     * @return the item to drop, or null for no drop
+     */
+    public ItemStack onBreak(ItemStack droppedItem) {
+        return droppedItem;
+    }
 }
