@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC;
 
 import fr.moussax.blightedMC.registry.EventsRegistry;
-import fr.moussax.blightedMC.registry.GlobalRegistry;
+import fr.moussax.blightedMC.registry.RegistrySystem;
 import fr.moussax.blightedMC.server.BlightedServer;
 import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
@@ -35,7 +35,7 @@ public final class BlightedMC extends JavaPlugin {
         BlightedServer.getInstance().configureServer();
 
         CommandBuilder.initializeCommands();
-        GlobalRegistry.initializeAllRegistries();
+        RegistrySystem.initialize();
         eventsRegistry = new EventsRegistry();
         eventsRegistry.initializeListeners();
 
@@ -79,10 +79,7 @@ public final class BlightedMC extends JavaPlugin {
     @Override
     public void onDisable() {
         database.closeConnection();
-        if (eventsRegistry != null && eventsRegistry.getBlockListener() != null) {
-            eventsRegistry.getBlockListener().saveData();
-        }
-        GlobalRegistry.clearAllRegistries();
+        RegistrySystem.clear();
     }
 
     public PluginSettings getSettings() {
