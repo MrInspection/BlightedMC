@@ -26,14 +26,14 @@ public final class BlightedMC extends JavaPlugin {
         instance = this;
 
         Log.info("Plugin", "Initializing BlightedMC plugin...");
+        BlightedServer.initialize(this);
+        BlightedServer.getInstance().configureServer();
+
         String config = PluginFiles.CONFIG.getFileName();
         saveResourcesAs(config, config);
 
         settings = PluginSettings.load(this);
         initializeDatabase();
-
-        BlightedServer.initialize(this);
-        BlightedServer.getInstance().configureServer();
 
         CommandBuilder.initializeCommands();
         RegistrySystem.initialize();
