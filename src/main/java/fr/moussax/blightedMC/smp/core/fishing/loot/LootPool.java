@@ -1,93 +1,56 @@
 package fr.moussax.blightedMC.smp.core.fishing.loot;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * Represents a collection of loot entries with optional conditions and a roll chance.
- * <p>
- * Provides functionality to add entries, set global conditions, and roll for a loot entry
- * based on a context and random chance.
- */
 public class LootPool {
     private final List<LootEntry> entries = new ArrayList<>();
     private LootCondition globalCondition = LootCondition.alwaysTrue();
     private double rollChance = 1.0;
+    private double cachedTotalWeight = -1;
 
-    /**
-     * Adds a single loot entry to the pool.
-     *
-     * @param entry the loot entry to add
-     * @return this loot pool
-     */
     public LootPool add(LootEntry entry) {
         entries.add(entry);
+        cachedTotalWeight = -1;
         return this;
     }
 
-    /**
-     * Adds multiple loot entries to the pool.
-     *
-     * @param entries the loot entries to add
-     * @return this loot pool
-     */
     public LootPool add(LootEntry... entries) {
-        this.entries.addAll(Arrays.asList(entries));
+        Collections.addAll(this.entries, entries);
+        cachedTotalWeight = -1;
         return this;
     }
 
-    /**
-     * Adds a list of loot entries to the pool.
-     *
-     * @param entries the list of loot entries to add
-     * @return this loot pool
-     */
     public LootPool add(List<LootEntry> entries) {
         this.entries.addAll(entries);
+        cachedTotalWeight = -1;
         return this;
     }
 
-    /**
-     * Sets a global condition that must be satisfied for any entry to be rolled.
-     *
-     * @param condition the condition to set
-     * @return this loot pool
-     */
     public LootPool setGlobalCondition(LootCondition condition) {
         this.globalCondition = condition;
         return this;
     }
 
-    /**
-     * Sets the overall probability that a roll will yield any entry.
-     *
-     * @param chance the roll chance between 0.0 and 1.0
-     * @return this loot pool
-     */
-    @SuppressWarnings("UnusedReturnValue")
-    public LootPool setRollChance(double chance) {
+    public void setRollChance(double chance) {
         this.rollChance = Math.max(0.0, Math.min(1.0, chance));
-        return this;
     }
 
-    /**
-     * Rolls for a loot entry using the given randomizer and context.
-     *
-     * @param randomizer the random generator
-     * @param context    the loot context
-     * @return an optional containing the selected loot entry, or empty if none selected
-     */
-    public Optional<LootEntry> roll(Random randomizer, LootContext context) {
+    public Optional<LootEntry> roll(LootContext context) {
         if (!globalCondition.test(context)) return Optional.empty();
-        if (randomizer.nextDouble() > rollChance) return Optional.empty();
+        if (ThreadLocalRandom.current().nextDouble() > rollChance) return Optional.empty();
 
-        List<LootEntry> validEntries = entries.stream()
-            .filter(entry -> entry.meetsCondition(context))
-            .toList();
+        List<LootEntry> validEntries = new ArrayList<>();
+        for (LootEntry entry : entries) {
+            if (entry.meetsCondition(context)) {
+                validEntries.add(entry);
+            }
+        }
 
         if (validEntries.isEmpty()) return Optional.empty();
 
-        double totalWeight = validEntries.stream().mapToDouble(LootEntry::getWeight).sum();
-        double roll = randomizer.nextDouble() * totalWeight;
+        double totalWeight = calculateTotalWeight(validEntries);
+        double roll = ThreadLocalRandom.current().nextDouble() * totalWeight;
         double accumulatedWeight = 0;
 
         for (LootEntry entry : validEntries) {
@@ -100,20 +63,27 @@ public class LootPool {
         return Optional.of(validEntries.getLast());
     }
 
-    /**
-     * Checks if the pool contains no entries.
-     *
-     * @return true if the pool is empty, false otherwise
-     */
+    private double calculateTotalWeight(List<LootEntry> validEntries) {
+        if (validEntries == entries && cachedTotalWeight >= 0) {
+            return cachedTotalWeight;
+        }
+
+        double total = 0;
+        for (LootEntry entry : validEntries) {
+            total += entry.getWeight();
+        }
+
+        if (validEntries == entries) {
+            cachedTotalWeight = total;
+        }
+
+        return total;
+    }
+
     public boolean isEmpty() {
         return entries.isEmpty();
     }
 
-    /**
-     * Returns the number of entries in the pool.
-     *
-     * @return the size of the loot pool
-     */
     public int size() {
         return entries.size();
     }

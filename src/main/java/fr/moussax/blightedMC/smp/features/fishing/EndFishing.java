@@ -1,14 +1,22 @@
-package fr.moussax.blightedMC.smp.core.fishing.dimension;
+package fr.moussax.blightedMC.smp.features.fishing;
 
 import fr.moussax.blightedMC.smp.core.fishing.FishingLootTable;
 import fr.moussax.blightedMC.smp.core.fishing.loot.LootEntry;
+import fr.moussax.blightedMC.smp.core.fishing.registry.FishingLootProvider;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
-public class EndFishing {
+public class EndFishing implements FishingLootProvider {
 
-    public static FishingLootTable create() {
+    @Override
+    public void register() {
+        addWater(World.Environment.THE_END);
+    }
+
+    @Override
+    public FishingLootTable provide() {
         return FishingLootTable.builder()
             .setEntityRollChance(0.20)
             .addEntities(

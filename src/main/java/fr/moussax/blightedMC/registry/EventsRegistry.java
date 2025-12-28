@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.registry;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.smp.core.entities.listeners.SpawnableEntitiesListener;
-import fr.moussax.blightedMC.smp.core.fishing.FishingListener;
+import fr.moussax.blightedMC.smp.core.fishing.listeners.FishingListener;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityListener;
 import fr.moussax.blightedMC.smp.core.items.blocks.BlightedBlockListener;
 import fr.moussax.blightedMC.smp.core.items.crafting.listener.CraftingTableListener;

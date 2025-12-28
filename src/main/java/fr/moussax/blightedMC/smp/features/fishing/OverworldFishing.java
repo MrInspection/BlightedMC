@@ -1,22 +1,27 @@
-package fr.moussax.blightedMC.smp.core.fishing.dimension;
+package fr.moussax.blightedMC.smp.features.fishing;
 
 import fr.moussax.blightedMC.smp.core.fishing.FishingLootTable;
 import fr.moussax.blightedMC.smp.core.fishing.loot.LootCondition;
 import fr.moussax.blightedMC.smp.core.fishing.loot.LootEntry;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.InfernalBlaze;
+import fr.moussax.blightedMC.smp.core.fishing.registry.FishingLootProvider;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
-public class OverworldFishing {
-    public static FishingLootTable create() {
+public class OverworldFishing implements FishingLootProvider {
+
+    @Override
+    public void register() {
+        addWater(World.Environment.NORMAL);
+    }
+
+    @Override
+    public FishingLootTable provide() {
         return FishingLootTable.builder()
             .setEntityRollChance(0.30)
             .addEntities(
-                LootEntry.blightedEntity(new InfernalBlaze(), 1.0)
-                    .withCatchMessage("§b§l NICE CATCH! §7You caught a §3Dummy§7!"),
-
                 LootEntry.entity(EntityType.DROWNED, 1.0, LootCondition.biome(Biome.DEEP_OCEAN))
                     .withCatchMessage("§d§l RARE CATCH! §7You caught a §bDrowned§7!"),
 
