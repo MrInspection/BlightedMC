@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.smp.features.recipes;
 
+import fr.moussax.blightedMC.smp.core.items.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.smp.core.items.crafting.registry.RecipeProvider;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import org.bukkit.Material;
@@ -16,22 +17,6 @@ public final class MaterialRecipes implements RecipeProvider {
         var enchantedIronBlockRecipe = shapedRecipe("ENCHANTED_IRON_BLOCK", 1)
             .shape(" e ", "eee", " e ")
             .bind('e', ItemRegistry.getItem("ENCHANTED_IRON_INGOT"), 8)
-            .build();
-
-        var enchantedEnderPearlRecipe = shapedRecipe("ENCHANTED_ENDER_PEARL", 2)
-            .shape(" i ", "iii", " i ")
-            .bind('i', Material.ENDER_PEARL, 16)
-            .build();
-
-        var glimmeringEyeRecipe = shapedRecipe("GLIMMERING_EYE", 1)
-            .shape(" i ", "iji", " i ")
-            .bind('i', ItemRegistry.getItem("ENCHANTED_ENDER_PEARL"), 1)
-            .bind('j', Material.OPEN_EYEBLOSSOM, 1)
-            .build();
-
-        var enchantedGhastTearRecipe = shapedRecipe("ENCHANTED_GHAST_TEAR", 1)
-            .shape(" i ", "iii", " i ")
-            .bind('i', Material.GHAST_TEAR, 1)
             .build();
 
         var enchantedCoalRecipe = shapedRecipe("ENCHANTED_COAL", 1)
@@ -70,25 +55,22 @@ public final class MaterialRecipes implements RecipeProvider {
             .bind('e', ItemRegistry.getItem("BLIGHTED_WORKBENCH"), 1)
             .build();
 
-        // TODO : Lava Fishing Rod Recipe
-        /*var lavaRod = shapedRecipe("LAVA_FISHING_ROD", 1)
-            .shape("  a", " ab", "acb")
+        BlightedRecipe magmaRodRecipe = shapedRecipe("MAGMA_ROD", 1)
+            .shape("  a", " ab", "abc")
             .bind('a', Material.BLAZE_ROD, 1)
             .bind('b', Material.MAGMA_CREAM, 1)
             .bind('c', Material.GHAST_TEAR, 1)
-            .build();*/
+            .build();
 
         add(
             enchantedIronIngotRecipe,
             enchantedIronBlockRecipe,
-            enchantedEnderPearlRecipe,
-            glimmeringEyeRecipe,
-            enchantedGhastTearRecipe,
             enchantedCoalRecipe,
             enchantedLavaBucketRecipe,
             magmaBucketRecipe,
             blightedCraftingTable,
-            blightedForgeRecipe
+            blightedForgeRecipe,
+            magmaRodRecipe
         );
     }
 }

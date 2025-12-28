@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.features.items;
 
-import fr.moussax.blightedMC.smp.core.entities.loot.gems.GemsItem;
+import fr.moussax.blightedMC.smp.core.shared.loot.results.gems.GemsItem;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
