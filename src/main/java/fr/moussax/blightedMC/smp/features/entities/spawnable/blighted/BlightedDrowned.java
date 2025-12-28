@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
 
-import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
+import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -20,7 +20,7 @@ import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFe
 public final class BlightedDrowned extends BlightedCreature {
     public BlightedDrowned() {
         super("BLIGHTED_DROWNED", "Blighted Drowned", EntityType.DROWNED);
-        setLootTable(new EntityLootTableBuilder()
+        setLootTable(new BlightedLootBuilder()
             .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, COMMON)
             .addLoot(Material.COPPER_INGOT, 1, 3, 0.4, UNCOMMON)
             .addLoot(Material.NAUTILUS_SHELL, 1, 1, 0.08, RARE)

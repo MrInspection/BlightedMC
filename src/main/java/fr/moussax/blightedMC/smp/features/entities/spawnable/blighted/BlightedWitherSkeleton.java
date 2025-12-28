@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
 
-import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
+import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -19,7 +19,7 @@ import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFe
 public final class BlightedWitherSkeleton extends BlightedCreature {
     public BlightedWitherSkeleton() {
         super("BLIGHTED_WITHER_SKELETON", "Blighted Wither Skeleton", EntityType.WITHER_SKELETON);
-        setLootTable(new EntityLootTableBuilder()
+        setLootTable(new BlightedLootBuilder()
             .setMaxDrop(4)
             .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
             .addLoot(Material.COAL, 1, 3, 0.5, UNCOMMON)

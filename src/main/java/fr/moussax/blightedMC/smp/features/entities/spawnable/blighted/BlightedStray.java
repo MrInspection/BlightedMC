@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
 
-import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
+import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -22,7 +22,7 @@ public final class BlightedStray extends BlightedCreature {
         itemInMainHand = new ItemStack(Material.BOW);
         setDamage(6);
         setDroppedExp(12);
-        setLootTable(new EntityLootTableBuilder()
+        setLootTable(new BlightedLootBuilder()
             .setMaxDrop(4)
             .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
             .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)

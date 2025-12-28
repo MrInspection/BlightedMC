@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
 
-import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
+import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -20,7 +20,7 @@ public final class BlightedPiglin extends BlightedCreature {
     public BlightedPiglin() {
         super("BLIGHTED_PIGLIN", "Blighted Piglin", EntityType.PIGLIN);
         itemInMainHand = new ItemStack(Material.GOLDEN_SWORD);
-        setLootTable(new EntityLootTableBuilder()
+        setLootTable(new BlightedLootBuilder()
             .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0, COMMON)
             .addLoot(Material.GOLD_INGOT, 1, 3, 0.4, UNCOMMON)
             .addLoot(Material.CROSSBOW, 1, 1, 0.1, RARE)

@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
 
-import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
+import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -17,7 +17,7 @@ public final class BlightedZombie extends BlightedCreature {
         super("BLIGHTED_ZOMBIE", "Blighted Zombie", EntityType.ZOMBIE);
         setDamage(6);
         setDroppedExp(12);
-        setLootTable(new EntityLootTableBuilder()
+        setLootTable(new BlightedLootBuilder()
             .setMaxDrop(3)
             .addLoot(Material.ROTTEN_FLESH, 2, 6, 1.0, COMMON)
             .addLoot(Material.POTATO, 1, 2, 0.15, UNCOMMON)
