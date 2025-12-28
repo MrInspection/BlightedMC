@@ -1,9 +1,8 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable.powerful;
 
+import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
-import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.smp.features.entities.spawnable.Watchling;
@@ -30,6 +29,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+
 public class Endersent extends SpawnableEntity {
 
     private int projectileHits = 0;
@@ -51,18 +52,17 @@ public class Endersent extends SpawnableEntity {
         addAttribute(Attribute.KNOCKBACK_RESISTANCE, 1.0);
         addAttribute(Attribute.MOVEMENT_SPEED, 0.25);
 
-        setLootTable(createLootTable());
+        setLootTable(new EntityLootTableBuilder()
+            .setMaxDrop(2)
+            .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, COMMON)
+            .addLoot(Material.ENDER_EYE, 1, 3, 0.31, UNCOMMON)
+            .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, RARE)
+            .addGemsLoot(30, 0.03, VERY_RARE)
+            .build()
+        );
+
         setNameTagType(EntityNameTag.BOSS);
         setupBehavior();
-    }
-
-    private LootTable createLootTable() {
-        return new LootTable()
-            .setMaxDrop(2)
-            .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, LootDropRarity.COMMON)
-            .addLoot(Material.ENDER_EYE, 1, 3, 0.31, LootDropRarity.UNCOMMON)
-            .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, LootDropRarity.RARE)
-            .addGemsLoot(30, 0.03, LootDropRarity.VERY_RARE);
     }
 
     private void setupBehavior() {

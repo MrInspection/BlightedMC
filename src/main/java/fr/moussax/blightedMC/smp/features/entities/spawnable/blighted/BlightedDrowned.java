@@ -1,7 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
 
-import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
-import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
+import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -16,25 +15,24 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.Objects;
 
+import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+
 public final class BlightedDrowned extends BlightedCreature {
     public BlightedDrowned() {
         super("BLIGHTED_DROWNED", "Blighted Drowned", EntityType.DROWNED);
-        setLootTable(createLootTable());
+        setLootTable(new EntityLootTableBuilder()
+            .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, COMMON)
+            .addLoot(Material.COPPER_INGOT, 1, 3, 0.4, UNCOMMON)
+            .addLoot(Material.NAUTILUS_SHELL, 1, 1, 0.08, RARE)
+            .addLoot(Material.TRIDENT, 1, 1, 0.02, VERY_RARE)
+            .addGemsLoot(5, 0.03, VERY_RARE)
+            .build()
+        );
         setDamage(6);
         setDroppedExp(12);
         itemInMainHand = new ItemStack(Material.AIR);
         addAttribute(Attribute.WATER_MOVEMENT_EFFICIENCY, 1.8);
 
-    }
-
-    private LootTable createLootTable() {
-        return new LootTable()
-            .setMaxDrop(4)
-            .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, LootDropRarity.COMMON)
-            .addLoot(Material.COPPER_INGOT, 1, 3, 0.4, LootDropRarity.UNCOMMON)
-            .addLoot(Material.NAUTILUS_SHELL, 1, 1, 0.08, LootDropRarity.RARE)
-            .addLoot(Material.TRIDENT, 1, 1, 0.02, LootDropRarity.VERY_RARE)
-            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
     }
 
     @Override
@@ -49,22 +47,22 @@ public final class BlightedDrowned extends BlightedCreature {
     protected void defineSpawnConditions() {
         addCondition(
             SpawnConditionFactory.biome(
-                Biome.RIVER,
-                Biome.FROZEN_RIVER,
-                Biome.OCEAN,
-                Biome.COLD_OCEAN,
-                Biome.FROZEN_OCEAN,
-                Biome.LUKEWARM_OCEAN,
-                Biome.WARM_OCEAN,
-                Biome.DEEP_OCEAN,
-                Biome.DEEP_COLD_OCEAN,
-                Biome.DEEP_FROZEN_OCEAN,
-                Biome.DEEP_LUKEWARM_OCEAN,
-                Biome.DRIPSTONE_CAVES
-            )
-            .and(SpawnConditionFactory.maxBlockLight(0))
-            .and(SpawnConditionFactory.maxLightLevel(7))
-            .and(SpawnConditionFactory.notInLiquid().not())
+                    Biome.RIVER,
+                    Biome.FROZEN_RIVER,
+                    Biome.OCEAN,
+                    Biome.COLD_OCEAN,
+                    Biome.FROZEN_OCEAN,
+                    Biome.LUKEWARM_OCEAN,
+                    Biome.WARM_OCEAN,
+                    Biome.DEEP_OCEAN,
+                    Biome.DEEP_COLD_OCEAN,
+                    Biome.DEEP_FROZEN_OCEAN,
+                    Biome.DEEP_LUKEWARM_OCEAN,
+                    Biome.DRIPSTONE_CAVES
+                )
+                .and(SpawnConditionFactory.maxBlockLight(0))
+                .and(SpawnConditionFactory.maxLightLevel(7))
+                .and(SpawnConditionFactory.notInLiquid().not())
         );
     }
 }

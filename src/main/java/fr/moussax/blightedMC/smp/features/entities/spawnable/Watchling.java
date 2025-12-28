@@ -1,7 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable;
 
-import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
-import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
+import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -26,6 +25,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Random;
 
+import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.COMMON;
+import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.VERY_RARE;
+
 public class Watchling extends SpawnableEntity {
 
     private long lastTeleportTime = 0;
@@ -40,15 +42,13 @@ public class Watchling extends SpawnableEntity {
         setDamage(10);
         setDroppedExp(10);
 
-        setLootTable(createLootTable());
-        setupBehavior();
-    }
-
-    private LootTable createLootTable() {
-        return new LootTable()
+        setLootTable(new EntityLootTableBuilder()
             .setMaxDrop(2)
-            .addLoot(Material.ENDER_PEARL, 1, 2, 1.0, LootDropRarity.COMMON)
-            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
+            .addLoot(Material.ENDER_PEARL, 1, 2, 1.0, COMMON)
+            .addGemsLoot(5, 0.03, VERY_RARE)
+            .build()
+        );
+        setupBehavior();
     }
 
     private void setupBehavior() {
