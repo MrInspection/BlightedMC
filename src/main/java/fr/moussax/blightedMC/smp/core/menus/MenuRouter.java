@@ -2,10 +2,7 @@ package fr.moussax.blightedMC.smp.core.menus;
 
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Handles the navigation and history of opened menus for each player.
@@ -14,7 +11,7 @@ import java.util.UUID;
  * going back to the previous menu and clearing menu history.</p>
  */
 public class MenuRouter {
-    private static final Map<UUID, Stack<Menu>> history = new HashMap<>();
+    private static final Map<UUID, Deque<Menu>> history = new HashMap<>();
 
     /**
      * Registers the currently opened menu for a player.
@@ -26,7 +23,7 @@ public class MenuRouter {
      * @param menu   the menu to register as current
      */
     public static void setCurrentMenu(Player player, Menu menu) {
-        history.computeIfAbsent(player.getUniqueId(), k -> new Stack<>()).push(menu);
+        history.computeIfAbsent(player.getUniqueId(), k -> new ArrayDeque<>()).push(menu);
     }
 
     /**
@@ -38,7 +35,7 @@ public class MenuRouter {
      * @param player the player navigating back
      */
     public static void goBack(Player player) {
-        Stack<Menu> stack = history.get(player.getUniqueId());
+        Deque<Menu> stack = history.get(player.getUniqueId());
         if (stack == null || stack.isEmpty()) {
             player.closeInventory();
             return;
