@@ -1,15 +1,22 @@
 package fr.moussax.blightedMC.smp.features.fishing;
 
 import fr.moussax.blightedMC.smp.core.fishing.FishingLootTable;
-import fr.moussax.blightedMC.smp.core.fishing.loot.LootEntry;
 import fr.moussax.blightedMC.smp.core.fishing.registry.FishingLootProvider;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.InfernalBlaze;
+import fr.moussax.blightedMC.smp.core.shared.loot.LootCondition;
+import fr.moussax.blightedMC.smp.core.shared.loot.LootEntry;
+import fr.moussax.blightedMC.smp.core.shared.loot.decorators.FishingLootFeedbackDecorator;
+import fr.moussax.blightedMC.smp.core.shared.loot.decorators.MessageDecorator;
+import fr.moussax.blightedMC.smp.core.shared.loot.providers.AmountProvider;
+import fr.moussax.blightedMC.smp.core.shared.loot.results.EntityResult;
+import fr.moussax.blightedMC.smp.core.shared.loot.results.ItemResult;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
-public final class OverworldLavaFishing implements FishingLootProvider {
+import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
+
+public class OverworldLavaFishing implements FishingLootProvider {
 
     @Override
     public void register() {
@@ -19,23 +26,118 @@ public final class OverworldLavaFishing implements FishingLootProvider {
     @Override
     public FishingLootTable provide() {
         return FishingLootTable.builder()
-            .setEntityRollChance(0.30)
+            .setEntityRollChance(0.12)
             .addEntities(
-                LootEntry.blightedEntity(new InfernalBlaze(), 1.0)
-                    .withCatchMessage("§b§l NICE CATCH! §f| §7You caught a §fDummy§7!"),
-
-                LootEntry.entity(EntityType.VINDICATOR, 1.0)
-                    .withCatchMessage("§d§l RARE CATCH! §f| §7You caught a §fBlaze§7!"),
-
-                LootEntry.entity(EntityType.ENDERMAN, 0.5)
-                    .withCatchMessage("§6§l EPIC CATCH! §f| §7You caught a §fGuardian§7!")
+                LootEntry.weighted(
+                    new MessageDecorator(
+                        new FishingLootFeedbackDecorator(
+                            EntityResult.vanilla(EntityType.STRIDER, new Vector(0, 0.3, 0)),
+                            GOOD_CATCH
+                        ),
+                        "§c§lSIZZLE! §7You caught a §6Strider§7!"
+                    ),
+                    6.0,
+                    AmountProvider.fixed(1),
+                    LootCondition.alwaysTrue()
+                ),
+                LootEntry.weighted(
+                    new MessageDecorator(
+                        new FishingLootFeedbackDecorator(
+                            EntityResult.vanilla(EntityType.MAGMA_CUBE, new Vector(0, 0.3, 0)),
+                            GREAT_CATCH
+                        ),
+                        "§6§lBURNING! §7You caught a §cMagma Cube§7!"
+                    ),
+                    3.0,
+                    AmountProvider.fixed(1),
+                    LootCondition.alwaysTrue()
+                ),
+                LootEntry.weighted(
+                    new MessageDecorator(
+                        new FishingLootFeedbackDecorator(
+                            EntityResult.vanilla(EntityType.BLAZE, new Vector(0, 0.3, 0)),
+                            OUTSTANDING_CATCH
+                        ),
+                        "§e§lINCREDIBLE! §7You caught a §6Blaze§7!"
+                    ),
+                    0.8,
+                    AmountProvider.fixed(1),
+                    LootCondition.alwaysTrue()
+                )
             )
             .addItems(
-                LootEntry.item(new ItemStack(Material.DIAMOND_CHESTPLATE, 2), 60.0),
-                LootEntry.item(new ItemStack(Material.GOLD_INGOT), 30.0),
-                LootEntry.item(new ItemStack(Material.OBSIDIAN), 15.0),
-                LootEntry.item(new ItemStack(Material.REDSTONE), 10.0),
-                LootEntry.item(new ItemStack(Material.QUARTZ, 3), 5.0)
+                LootEntry.weighted(
+                    new FishingLootFeedbackDecorator(
+                        ItemResult.of(Material.OBSIDIAN),
+                        COMMON
+                    ),
+                    45.0,
+                    AmountProvider.range(1, 2),
+                    LootCondition.alwaysTrue()
+                ),
+                LootEntry.weighted(
+                    new FishingLootFeedbackDecorator(
+                        ItemResult.of(Material.BASALT),
+                        COMMON
+                    ),
+                    40.0,
+                    AmountProvider.range(2, 4),
+                    LootCondition.alwaysTrue()
+                ),
+                LootEntry.weighted(
+                    new FishingLootFeedbackDecorator(
+                        ItemResult.of(Material.MAGMA_BLOCK),
+                        GOOD_CATCH
+                    ),
+                    25.0,
+                    AmountProvider.range(1, 3),
+                    LootCondition.alwaysTrue()
+                ),
+                LootEntry.weighted(
+                    new FishingLootFeedbackDecorator(
+                        ItemResult.of(Material.MAGMA_CREAM),
+                        GOOD_CATCH
+                    ),
+                    18.0,
+                    AmountProvider.range(1, 2),
+                    LootCondition.alwaysTrue()
+                ),
+                LootEntry.weighted(
+                    new FishingLootFeedbackDecorator(
+                        ItemResult.of(Material.FIRE_CHARGE),
+                        GREAT_CATCH
+                    ),
+                    10.0,
+                    AmountProvider.range(2, 4),
+                    LootCondition.alwaysTrue()
+                ),
+                LootEntry.weighted(
+                    new FishingLootFeedbackDecorator(
+                        ItemResult.of(Material.BLAZE_ROD),
+                        GREAT_CATCH
+                    ),
+                    6.0,
+                    AmountProvider.range(1, 2),
+                    LootCondition.alwaysTrue()
+                ),
+                LootEntry.weighted(
+                    new FishingLootFeedbackDecorator(
+                        ItemResult.of(Material.ANCIENT_DEBRIS),
+                        OUTSTANDING_CATCH
+                    ),
+                    1.5,
+                    AmountProvider.fixed(1),
+                    LootCondition.alwaysTrue()
+                ),
+                LootEntry.weighted(
+                    new FishingLootFeedbackDecorator(
+                        ItemResult.of(Material.NETHERITE_SCRAP),
+                        OUTSTANDING_CATCH
+                    ),
+                    0.5,
+                    AmountProvider.fixed(1),
+                    LootCondition.alwaysTrue()
+                )
             )
             .build();
     }
