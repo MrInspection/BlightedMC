@@ -9,10 +9,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
 
 import java.util.Objects;
 
@@ -45,12 +43,12 @@ public final class BlightedBogged extends BlightedCreature {
     protected void defineSpawnConditions() {
         addCondition(
             SpawnConditionFactory.biome(
-                Biome.SWAMP,
-                Biome.MANGROVE_SWAMP
-            )
-            .and(SpawnConditionFactory.maxBlockLight(0))
-            .and(SpawnConditionFactory.maxLightLevel(7))
-            .and(SpawnConditionFactory.notInLiquid())
+                    Biome.SWAMP,
+                    Biome.MANGROVE_SWAMP
+                )
+                .and(SpawnConditionFactory.maxBlockLight(0))
+                .and(SpawnConditionFactory.maxLightLevel(7))
+                .and(SpawnConditionFactory.notInLiquid())
         );
     }
 }
