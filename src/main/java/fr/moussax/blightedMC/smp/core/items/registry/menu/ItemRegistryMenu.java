@@ -3,7 +3,9 @@ package fr.moussax.blightedMC.smp.core.items.registry.menu;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.smp.core.menus.*;
+import fr.moussax.blightedMC.smp.core.shared.menu.*;
+import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Material;
@@ -20,7 +22,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ItemRegistryMenu {
-    private static final int[] CATEGORY_SLOTS = {10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 40, 41, 42, 43};
+    private static final int[] CATEGORY_SLOTS = {
+        10, 11, 12, 13, 14, 15, 16,
+        19, 20, 21, 22, 23, 24, 25,
+        28, 29, 30, 31, 32, 33, 34,
+        37, 38, 39, 40, 41, 42, 43
+    };
+
     private static final int SEARCH_SLOT = 41;
     private static final int[] ITEM_SLOTS = CATEGORY_SLOTS;
 
@@ -136,7 +144,7 @@ public class ItemRegistryMenu {
 
         @Override
         protected int getItemsPerPage() {
-            return 27;
+            return 28;
         }
 
         @Override
@@ -198,9 +206,6 @@ public class ItemRegistryMenu {
                 setItem(50, MenuElementPreset.NEXT_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                     currentPage++;
                     MenuManager.openMenu(this, p);
-                });
-            else if (currentPage > 0)
-                setItem(50, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
                 });
 
             setItem(49, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());

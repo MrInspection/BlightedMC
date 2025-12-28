@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.commands.admin;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.items.registry.menu.ItemRegistryMenu;
-import fr.moussax.blightedMC.smp.core.menus.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.menu.MenuManager;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

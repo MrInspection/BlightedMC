@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.smp.features.blocks;
 import fr.moussax.blightedMC.smp.core.items.blocks.BlightedBlock;
 import fr.moussax.blightedMC.smp.core.items.forging.menu.ForgeMenu;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.smp.core.menus.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.menu.MenuManager;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;

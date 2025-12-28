@@ -10,7 +10,7 @@ import fr.moussax.blightedMC.smp.core.items.crafting.listener.CraftingTableListe
 import fr.moussax.blightedMC.smp.core.items.listeners.UnsafeAnvilListener;
 import fr.moussax.blightedMC.smp.core.items.registry.menu.ItemRegistrySearch;
 import fr.moussax.blightedMC.smp.core.items.rules.ItemRuleListener;
-import fr.moussax.blightedMC.smp.core.menus.MenuListener;
+import fr.moussax.blightedMC.smp.core.shared.menu.MenuListener;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayerListener;
 import fr.moussax.blightedMC.smp.features.abilities.WitherImpactAbility;
 import org.bukkit.Bukkit;

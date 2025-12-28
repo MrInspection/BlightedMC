@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.core.menus;
+package fr.moussax.blightedMC.smp.core.shared.menu.interaction;
 
 public enum MenuItemInteraction {
     LEFT_CLICK,

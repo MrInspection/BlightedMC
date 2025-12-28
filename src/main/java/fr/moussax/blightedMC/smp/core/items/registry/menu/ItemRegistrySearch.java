@@ -1,8 +1,8 @@
 package fr.moussax.blightedMC.smp.core.items.registry.menu;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.smp.core.menus.Menu;
-import fr.moussax.blightedMC.smp.core.menus.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.menu.Menu;
+import fr.moussax.blightedMC.smp.core.shared.menu.MenuManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

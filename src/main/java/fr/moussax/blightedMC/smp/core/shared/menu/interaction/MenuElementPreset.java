@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.core.menus;
+package fr.moussax.blightedMC.smp.core.shared.menu.interaction;
 
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;

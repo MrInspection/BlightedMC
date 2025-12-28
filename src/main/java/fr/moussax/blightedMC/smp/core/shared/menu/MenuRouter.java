@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.core.menus;
+package fr.moussax.blightedMC.smp.core.shared.menu;
 
 import org.bukkit.entity.Player;
 
@@ -10,7 +10,7 @@ import java.util.*;
  * <p>This class maintains a stack of menus per player to allow
  * going back to the previous menu and clearing menu history.</p>
  */
-public class MenuRouter {
+public final class MenuRouter {
     private static final Map<UUID, Deque<Menu>> history = new HashMap<>();
 
     /**

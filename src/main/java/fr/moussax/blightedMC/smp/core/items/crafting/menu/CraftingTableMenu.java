@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.core.items.crafting.menu;
 
-import fr.moussax.blightedMC.smp.core.menus.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

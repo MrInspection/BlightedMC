@@ -1,5 +1,7 @@
-package fr.moussax.blightedMC.smp.core.menus;
+package fr.moussax.blightedMC.smp.core.shared.menu;
 
+import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuItemInteraction;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;

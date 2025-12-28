@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.core.menus;
+package fr.moussax.blightedMC.smp.core.shared.menu;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -7,7 +7,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class MenuListener implements Listener {
+public final class MenuListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {

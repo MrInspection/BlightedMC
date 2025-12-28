@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.core.menus;
+package fr.moussax.blightedMC.smp.core.shared.menu;
 
 import org.bukkit.entity.Player;
 
@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
  * <p>Provides overloaded methods to handle both standard
  * {@link Menu} instances and {@link PaginatedMenu} instances.</p>
  */
-public class MenuManager {
+public final class MenuManager {
 
     /**
      * Opens a standard menu for the specified player.
