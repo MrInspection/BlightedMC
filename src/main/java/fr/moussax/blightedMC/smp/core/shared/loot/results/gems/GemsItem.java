@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.core.entities.loot.gems;
+package fr.moussax.blightedMC.smp.core.shared.loot.results.gems;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
@@ -14,7 +14,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+/**
+ * Represents a Blighted Gem item with a specific gem amount.
+ * Provides functionality to create an ItemStack and add gems to a player.
+ */
 public record GemsItem(int amount) implements ItemFactory {
+
+    /**
+     * Constructs a GemsItem from an existing ItemStack by reading its gem amount.
+     *
+     * @param itemStack the item stack containing gem metadata
+     */
     public GemsItem(ItemStack itemStack) {
         ItemMeta meta = itemStack.getItemMeta();
         assert meta != null;
@@ -24,10 +34,18 @@ public record GemsItem(int amount) implements ItemFactory {
         this(value != null ? value : 1);
     }
 
+    /**
+     * Adds the gems represented by this item to the specified player.
+     *
+     * @param player the player to receive the gems
+     */
     public void addGems(BlightedPlayer player) {
         player.addGems(amount);
     }
 
+    /**
+     * Ability allowing the player to consume a Blighted Gemstone item.
+     */
     public static class BlightedGemstoneAbility implements AbilityManager<PlayerInteractEvent> {
 
         @Override
@@ -73,13 +91,14 @@ public record GemsItem(int amount) implements ItemFactory {
         }
     }
 
+    /**
+     * Creates the ItemStack representation of this GemsItem, including lore and gem metadata.
+     *
+     * @return the ItemStack representing this gem item
+     */
     @Override
     public ItemStack createItemStack() {
         BlightedItem blightedItem = ItemRegistry.getItem("BLIGHTED_GEMSTONE");
-
-        if (blightedItem == null) {
-            throw new IllegalStateException("BLIGHTED_GEMSTONE is not registered. Ensure ItemDirectory.initializeItems() runs before creating Gems items.");
-        }
 
         blightedItem.setLore(7, "§8 Gems: §d" + this.amount + "✵");
         ItemStack itemStack = blightedItem.toItemStack();
