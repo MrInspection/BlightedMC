@@ -9,8 +9,6 @@ import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.FishHook;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -73,7 +71,6 @@ public class LavaFishingHook {
         int baseTime = BASE_WAIT_TIME;
         int variance = WAIT_TIME_VARIANCE;
 
-        // Lure reduces wait time (each level reduces by 5 seconds = 100 ticks / 3)
         baseTime -= (lureLevel * 33);
         variance -= (lureLevel * 20);
 
@@ -84,7 +81,6 @@ public class LavaFishingHook {
     }
 
     private int calculateBiteWindow() {
-        // Luck of the Sea increases bite window slightly
         return BASE_BITE_WINDOW_TICKS + (luckOfSeaLevel * 10);
     }
 
@@ -229,18 +225,11 @@ public class LavaFishingHook {
 
         FishingLootTable lootTable = getLootTableForEnvironment();
 
-        LivingEntity entity = lootTable.rollEntity(blightedPlayer, hookLoc, velocity);
-        if (entity != null) return true;
+        lootTable.rollEntity(blightedPlayer, hookLoc, velocity);
+        lootTable.rollItem(blightedPlayer, hookLoc);
 
-        ItemStack drop = lootTable.rollItem(blightedPlayer);
-        if (drop != null) {
-            Item droppedItem = world.dropItem(hookLoc, drop);
-            droppedItem.setVelocity(velocity);
-            player.giveExp(ThreadLocalRandom.current().nextInt(3, 8));
-            return true;
-        }
-
-        return false;
+        player.giveExp(ThreadLocalRandom.current().nextInt(3, 8));
+        return true;
     }
 
     private FishingLootTable getLootTableForEnvironment() {

@@ -1,67 +1,60 @@
 package fr.moussax.blightedMC.smp.core.fishing;
 
-import fr.moussax.blightedMC.smp.core.fishing.loot.LootContext;
-import fr.moussax.blightedMC.smp.core.fishing.loot.LootEntry;
-import fr.moussax.blightedMC.smp.core.fishing.loot.LootPool;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
+import fr.moussax.blightedMC.smp.core.shared.loot.LootContext;
+import fr.moussax.blightedMC.smp.core.shared.loot.LootEntry;
+import fr.moussax.blightedMC.smp.core.shared.loot.LootTable;
+import fr.moussax.blightedMC.smp.core.shared.loot.strategies.WeightedSelectionStrategy;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
-public class FishingLootTable {
-    private final LootPool entityPool;
-    private final LootPool itemPool;
+public final class FishingLootTable {
+    private final LootTable entityTable;
+    private final LootTable itemTable;
     private final double entityRollChance;
 
-    private FishingLootTable(LootPool entityPool, LootPool itemPool, double entityRollChance) {
-        this.entityPool = entityPool;
-        this.itemPool = itemPool;
+    private FishingLootTable(LootTable entityTable, LootTable itemTable, double entityRollChance) {
+        this.entityTable = entityTable;
+        this.itemTable = itemTable;
         this.entityRollChance = entityRollChance;
     }
 
-    public LivingEntity rollEntity(BlightedPlayer player, Location location, Vector velocity) {
-        if (entityPool.isEmpty()) return null;
+    public void rollEntity(BlightedPlayer player, Location location, Vector velocity) {
+        if (entityTable.isEmpty()) return;
 
-        World world = location.getWorld();
-        Biome biome = Objects.requireNonNull(world).getBiome(location);
-        LootContext context = new LootContext(player, biome, world.getEnvironment());
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        if (random.nextDouble() > entityRollChance) return;
 
-        return entityPool.roll(context)
-            .filter(LootEntry::isEntity)
-            .map(entry -> entry.spawnEntity(player, location, velocity))
-            .orElse(null);
+        World world = Objects.requireNonNull(location.getWorld());
+        Biome biome = world.getBiome(location);
+
+        LootContext context = new LootContext(player, world, biome, location, random);
+        entityTable.execute(context);
     }
 
-    public ItemStack rollItem(BlightedPlayer player) {
-        if (itemPool.isEmpty()) return null;
+    public void rollItem(BlightedPlayer player, Location location) {
+        if (itemTable.isEmpty()) return;
 
-        Location location = player.getPlayer().getLocation();
-        World world = location.getWorld();
-        Biome biome = Objects.requireNonNull(world).getBiome(location);
-        LootContext context = new LootContext(player, biome, world.getEnvironment());
+        World world = Objects.requireNonNull(location.getWorld());
+        Biome biome = world.getBiome(location);
+        ThreadLocalRandom random = ThreadLocalRandom.current();
 
-        return itemPool.roll(context)
-            .filter(LootEntry::isItem)
-            .map(entry -> entry.createItem(player))
-            .orElse(null);
-    }
-
-    public double getEntityRollChance() {
-        return entityRollChance;
+        LootContext context = new LootContext(player, world, biome, location, random);
+        itemTable.execute(context);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
-        private final LootPool entityPool = new LootPool();
-        private final LootPool itemPool = new LootPool();
+    public static final class Builder {
+        private final LootTable.Builder entityTableBuilder = LootTable.builder();
+        private final LootTable.Builder itemTableBuilder = LootTable.builder();
         private double entityRollChance = 0.15;
 
         public Builder setEntityRollChance(double chance) {
@@ -70,28 +63,39 @@ public class FishingLootTable {
         }
 
         public Builder addEntity(LootEntry entry) {
-            entityPool.add(entry);
+            entityTableBuilder.addEntry(entry);
             return this;
         }
 
         public Builder addEntities(LootEntry... entries) {
-            entityPool.add(entries);
+            entityTableBuilder.addEntries(entries);
             return this;
         }
 
         public Builder addItem(LootEntry entry) {
-            itemPool.add(entry);
+            itemTableBuilder.addEntry(entry);
             return this;
         }
 
         public Builder addItems(LootEntry... entries) {
-            itemPool.add(entries);
+            itemTableBuilder.addEntries(entries);
             return this;
         }
 
         public FishingLootTable build() {
-            entityPool.setRollChance(entityRollChance);
-            return new FishingLootTable(entityPool, itemPool, entityRollChance);
+            entityTableBuilder
+                .selectionStrategy(new WeightedSelectionStrategy())
+                .rollChance(1.0);
+
+            itemTableBuilder
+                .selectionStrategy(new WeightedSelectionStrategy())
+                .rollChance(1.0);
+
+            return new FishingLootTable(
+                entityTableBuilder.build(),
+                itemTableBuilder.build(),
+                entityRollChance
+            );
         }
     }
 }

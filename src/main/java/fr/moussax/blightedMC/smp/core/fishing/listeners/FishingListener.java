@@ -50,7 +50,6 @@ public class FishingListener implements Listener {
         BlightedItem rod = getLavaRodFromInventory(player);
         if (rod == null) return;
 
-        // Initial check at cast time
         Material hookBlockType = hook.getLocation().getBlock().getType();
         if (hookBlockType == Material.WATER) {
             Formatter.warn(player, "Lava fishing rods cannot be used in water!");
@@ -107,11 +106,10 @@ public class FishingListener implements Listener {
 
         if (rodItemStack == null || rodItemStack.getType().getMaxDurability() <= 0) return;
 
-        // Check Unbreaking Enchantment
         int unbreakingLevel = rodItemStack.getEnchantmentLevel(Enchantment.UNBREAKING);
         if (unbreakingLevel > 0) {
             if (ThreadLocalRandom.current().nextDouble() > (1.0 / (unbreakingLevel + 1))) {
-                return; // Damage negated
+                return;
             }
         }
 
@@ -131,7 +129,6 @@ public class FishingListener implements Listener {
     private void handleStandardFishing(PlayerFishEvent event, Player player, FishHook hook, BlightedPlayer blightedPlayer) {
         if (event.getState() != PlayerFishEvent.State.CAUGHT_FISH) return;
 
-        // Prevent Lava Rod from catching things in water
         BlightedItem rod = getLavaRodFromInventory(player);
         if (rod != null) {
             event.setCancelled(true);
@@ -147,15 +144,9 @@ public class FishingListener implements Listener {
         World.Environment environment = player.getWorld().getEnvironment();
         FishingLootTable lootTable = FishingLootRegistry.getTable(environment, FishingMethod.WATER);
 
-        LivingEntity entity = lootTable.rollEntity(blightedPlayer, hook.getLocation(), caughtItem.getVelocity());
-        if (entity != null) {
-            caughtItem.remove();
-            return;
-        }
+        lootTable.rollEntity(blightedPlayer, hook.getLocation(), caughtItem.getVelocity());
+        lootTable.rollItem(blightedPlayer, hook.getLocation());
 
-        ItemStack customItem = lootTable.rollItem(blightedPlayer);
-        if (customItem != null) {
-            caughtItem.setItemStack(customItem);
-        }
+        caughtItem.remove();
     }
 }
