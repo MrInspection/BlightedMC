@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.core.shared.menu.interaction;
+package fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
