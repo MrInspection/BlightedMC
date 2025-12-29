@@ -7,6 +7,8 @@ import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
 import fr.moussax.blightedMC.server.database.PluginDatabase;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.engine.BlightedSpawnEngine;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.Bukkit;
@@ -44,6 +46,67 @@ public final class BlightedMC extends JavaPlugin {
         new BlightedSpawnEngine().runTaskTimer(this, 100L, 1L);
     }
 
+    @Override
+    public void onDisable() {
+        database.closeConnection();
+        eventsRegistry.shutdownMenus();
+        RegistrySystem.clear();
+    }
+
+    /**
+     * Retrieves the plugin settings.
+     *
+     * @return the plugin settings instance
+     */
+    public PluginSettings getSettings() {
+        return settings;
+    }
+
+    /**
+     * Retrieves the plugin database connection.
+     *
+     * @return the plugin database instance
+     */
+    public PluginDatabase getDatabase() {
+        return database;
+    }
+
+    /**
+     * Retrieves the instance of the menu manager.
+     *
+     * @return the menu manager
+     */
+    public MenuManager getMenuManager() {
+        return eventsRegistry.getMenuManager();
+    }
+
+    /**
+     * Retrieves the instance of the menu system.
+     *
+     * @return the menu system
+     */
+    public MenuSystem getMenuSystem() {
+        return eventsRegistry.getMenuSystem();
+    }
+
+    /**
+     * Static accessor to the plugin's menu manager.
+     *
+     * @return the menu manager
+     */
+    public static MenuManager menuManager() {
+        return instance.getMenuManager();
+    }
+
+    /**
+     * Retrieves the singleton instance of the plugin.
+     *
+     * @return the plugin instance
+     */
+    public static BlightedMC getInstance() {
+        return instance;
+    }
+
     private void initializeDatabase() {
         try {
             database = new PluginDatabase(getDataFolder().getAbsolutePath() + "/" + PluginFiles.DATABASE.getFileName());
@@ -76,23 +139,5 @@ public final class BlightedMC extends JavaPlugin {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public void onDisable() {
-        database.closeConnection();
-        RegistrySystem.clear();
-    }
-
-    public PluginSettings getSettings() {
-        return settings;
-    }
-
-    public PluginDatabase getDatabase() {
-        return database;
-    }
-
-    public static BlightedMC getInstance() {
-        return instance;
     }
 }

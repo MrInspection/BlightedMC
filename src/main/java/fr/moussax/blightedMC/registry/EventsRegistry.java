@@ -10,24 +10,28 @@ import fr.moussax.blightedMC.smp.core.items.crafting.listener.CraftingTableListe
 import fr.moussax.blightedMC.smp.core.items.listeners.UnsafeAnvilListener;
 import fr.moussax.blightedMC.smp.core.items.registry.menu.ItemRegistrySearch;
 import fr.moussax.blightedMC.smp.core.items.rules.ItemRuleListener;
-import fr.moussax.blightedMC.smp.core.shared.menu.MenuListener;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayerListener;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuListener;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.smp.features.abilities.WitherImpactAbility;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
 public final class EventsRegistry {
     private final BlightedMC instance = BlightedMC.getInstance();
-    private static BlightedBlockListener blockListener;
+    private MenuSystem menuSystem;
+    private MenuManager menuManager;
 
     public void initializeListeners() {
         PluginManager pm = Bukkit.getPluginManager();
-        pm.registerEvents(new MenuListener(), instance);
+        menuSystem = new MenuSystem(instance);
+        menuManager = new MenuManager(menuSystem);
+
+        pm.registerEvents(new MenuListener(menuSystem), instance);
         pm.registerEvents(new BlightedEntitiesListener(), instance);
         pm.registerEvents(new SpawnableEntitiesListener(), instance);
-
-        blockListener = new BlightedBlockListener();
-        pm.registerEvents(blockListener, instance);
+        pm.registerEvents(new BlightedBlockListener(), instance);
         pm.registerEvents(new BlightedPlayerListener(), instance);
         pm.registerEvents(new CraftingTableListener(), instance);
         pm.registerEvents(new ItemRuleListener(), instance);
@@ -38,7 +42,17 @@ public final class EventsRegistry {
         pm.registerEvents(new WitherImpactAbility(), instance);
     }
 
-    public BlightedBlockListener getBlockListener() {
-        return blockListener;
+    public MenuManager getMenuManager() {
+        return menuManager;
+    }
+
+    public MenuSystem getMenuSystem() {
+        return menuSystem;
+    }
+
+    public void shutdownMenus() {
+        if (menuSystem != null) {
+            menuSystem.shutdown();
+        }
     }
 }

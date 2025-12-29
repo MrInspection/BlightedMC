@@ -1,18 +1,23 @@
 package fr.moussax.blightedMC.smp.core.entities.rituals.menu;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.entities.rituals.AncientRitual;
 import fr.moussax.blightedMC.smp.core.entities.rituals.registry.RitualRegistry;
 import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
-import fr.moussax.blightedMC.smp.core.shared.menu.*;
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuElementPreset;
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuItemInteraction;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.PaginatedMenu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuItemInteraction;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +42,8 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
     private static final int CLOSE_BUTTON_SLOT = 49;
     private static final int NEXT_BUTTON_SLOT = 50;
 
+    private static final MenuManager manager = BlightedMC.menuManager();
+
     private final Menu previousMenu;
     private final List<AncientRitual> cachedRituals;
 
@@ -52,7 +59,7 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
     }
 
     @Override
-    protected int getTotalItems(Player player) {
+    protected int getTotalItems(@NonNull Player player) {
         return cachedRituals.size();
     }
 
@@ -62,7 +69,7 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
     }
 
     @Override
-    protected ItemStack getItem(Player player, int index) {
+    protected ItemStack getItem(@NonNull Player player, int index) {
         if (index >= cachedRituals.size()) {
             return new ItemStack(Material.AIR);
         }
@@ -72,7 +79,7 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
     }
 
     @Override
-    public void build(Player player) {
+    public void build(@NonNull Player player) {
         totalItems = getTotalItems(player);
         int start = currentPage * getItemsPerPage();
         int end = Math.min(start + getItemsPerPage(), totalItems);
@@ -85,13 +92,13 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
     }
 
     @Override
-    protected void onItemClick(Player player, int index, org.bukkit.event.inventory.ClickType clickType) {
+    protected void onItemClick(@NonNull Player player, int index, @NonNull ClickType clickType) {
         if (index >= cachedRituals.size()) {
             return;
         }
 
         AncientRitual rite = cachedRituals.get(index);
-        MenuManager.openMenu(new RitualAltarMenu(rite, this), player);
+        manager.openMenu(new RitualAltarMenu(rite, this), player);
     }
 
     private ItemStack buildRiteDisplayItem(AncientRitual ritual) {
@@ -170,7 +177,7 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
         if (currentPage > 0) {
             setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, _) -> {
                 currentPage--;
-                MenuManager.openMenu(this, p);
+                manager.openMenu(this, p);
             });
             return;
         }
@@ -178,7 +185,7 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
         if (previousMenu != null) {
             setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, _) -> {
                 close();
-                MenuManager.openMenu(previousMenu, p);
+                manager.openMenu(previousMenu, p);
             });
         }
     }
@@ -187,7 +194,7 @@ public class RitualsDirectoryMenu extends PaginatedMenu {
         if (end < totalItems) {
             setItem(NEXT_BUTTON_SLOT, MenuElementPreset.NEXT_BUTTON, MenuItemInteraction.ANY_CLICK, (p, _) -> {
                 currentPage++;
-                MenuManager.openMenu(this, p);
+                manager.openMenu(this, p);
             });
         } else {
             setItem(NEXT_BUTTON_SLOT, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), MenuItemInteraction.ANY_CLICK, (_, _) -> {

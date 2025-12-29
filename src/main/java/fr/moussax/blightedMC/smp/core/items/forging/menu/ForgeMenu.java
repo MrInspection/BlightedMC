@@ -1,12 +1,12 @@
 package fr.moussax.blightedMC.smp.core.items.forging.menu;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.smp.core.items.forging.ForgeFuel;
 import fr.moussax.blightedMC.smp.core.items.forging.ForgeRecipe;
-import fr.moussax.blightedMC.smp.core.shared.menu.Menu;
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuElementPreset;
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuItemInteraction;
-import fr.moussax.blightedMC.smp.core.shared.menu.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -212,7 +212,8 @@ public class ForgeMenu extends Menu {
             .toItemStack();
 
         setItem(49, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (_, _) -> close());
-        setItem(50, recipeBook, MenuItemInteraction.ANY_CLICK, (p, _) -> MenuManager.openMenu(new ForgeRecipesMenu(this), p));
+        setItem(50, recipeBook, MenuItemInteraction.ANY_CLICK, (p, _) ->
+            BlightedMC.menuManager().openMenu(new ForgeRecipesMenu(this), p));
     }
 
     private void setupFuelButtons(Player player) {

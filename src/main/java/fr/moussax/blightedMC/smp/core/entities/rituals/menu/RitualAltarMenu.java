@@ -4,10 +4,9 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.entities.rituals.AncientRitual;
 import fr.moussax.blightedMC.smp.core.entities.rituals.RitualAnimations;
 import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
-import fr.moussax.blightedMC.smp.core.shared.menu.Menu;
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuElementPreset;
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuItemInteraction;
-import fr.moussax.blightedMC.smp.core.shared.menu.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -189,7 +188,8 @@ public class RitualAltarMenu extends Menu {
                 " §8unchanged.", "", "§eClick to browse!").toItemStack();
 
         setItem(49, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
-        setItem(50, recipeBook, MenuItemInteraction.ANY_CLICK, (p, t) -> MenuManager.openMenu(new RitualsDirectoryMenu(this), p));
+        setItem(50, recipeBook, MenuItemInteraction.ANY_CLICK, (p, t) ->
+            BlightedMC.menuManager().openMenu(new RitualsDirectoryMenu(this), p));
     }
 
     private void consumeIngredients(Player player) {
@@ -221,7 +221,7 @@ public class RitualAltarMenu extends Menu {
 
     private void handleFinalImpact(Location loc) {
         if (ritual.getSummonedCreature() != null) {
-            Bukkit.broadcastMessage("§5 ☤ §dThe §c" + ritual.getSummonedCreature().getName() + " §dhas been summoned by §f" + getPlayer().getName() + "§d.");
+            Bukkit.broadcastMessage("§5 ☤ §dThe §c" + ritual.getSummonedCreature().getName() + " §dhas been summoned by §f" + Objects.requireNonNull(getPlayer()).getName() + "§d.");
             ritual.getSummonedCreature().clone().spawn(loc);
         }
     }

@@ -1,31 +1,33 @@
-package fr.moussax.blightedMC.smp.core.shared.menu;
+package fr.moussax.blightedMC.smp.core.shared.ui.menu;
 
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuAction;
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuElementPreset;
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuItemInteraction;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuAction;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuItemInteraction;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuSystem;
+import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
- * Base class for interactive inventory menus.
+ * Represents a custom interactive inventory menu.
  *
- * <p>Menus display items in slots and handle player interactions
- * through {@link MenuItemInteraction} and {@link MenuAction}.
- * Slots can be set individually, in bulk, or filled automatically for empty slots.
- * This provides flexibility for creating complex, interactive inventory layouts.</p>
+ * <p>Supports placing items, presets, or dynamically generated items via {@link ItemBuilder},
+ * handling different click types with {@link MenuItemInteraction}, and executing actions with {@link MenuAction}.</p>
  *
- * <p>Extend this class and implement {@link #build(Player)} to define
- * the menu layout and behavior for players.</p>
+ * <p>Provides methods for opening, closing, refreshing menus, filling slots, and managing submenus.</p>
  */
 public abstract class Menu implements InventoryHolder {
     protected final String title;
@@ -33,6 +35,7 @@ public abstract class Menu implements InventoryHolder {
     protected final Map<Integer, MenuSlot> slots = new HashMap<>();
     protected Inventory inventory;
     protected UUID viewerId;
+    protected MenuSystem menuSystem;
 
     /**
      * Creates a new menu.
@@ -47,6 +50,17 @@ public abstract class Menu implements InventoryHolder {
     }
 
     /**
+     * Injects the menu system instance.
+     *
+     * <p>Should be called before opening the menu.</p>
+     *
+     * @param menuSystem menu system instance
+     */
+    public void setMenuSystem(@NonNull MenuSystem menuSystem) {
+        this.menuSystem = menuSystem;
+    }
+
+    /**
      * Defines the content of the menu for the given player.
      *
      * @param player player viewing the menu
@@ -57,11 +71,15 @@ public abstract class Menu implements InventoryHolder {
      * Opens the menu for a player.
      *
      * <p>Clears existing slots, rebuilds content, sets items, and
-     * registers the menu in {@link MenuRouter}.</p>
+     * registers the menu in the menu system.</p>
      *
      * @param player target player
      */
-    public void open(Player player) {
+    public void open(@NonNull Player player) {
+        if (menuSystem == null || menuSystem.isShuttingDown()) {
+            return;
+        }
+
         this.viewerId = player.getUniqueId();
 
         slots.clear();
@@ -73,7 +91,7 @@ public abstract class Menu implements InventoryHolder {
         }
 
         player.openInventory(inventory);
-        MenuRouter.setCurrentMenu(player, this);
+        menuSystem.registerMenu(player, this);
     }
 
     /**
@@ -81,6 +99,7 @@ public abstract class Menu implements InventoryHolder {
      *
      * @return the player, or null if they are offline
      */
+    @Nullable
     protected Player getPlayer() {
         return viewerId != null ? Bukkit.getPlayer(viewerId) : null;
     }
@@ -93,7 +112,7 @@ public abstract class Menu implements InventoryHolder {
      * @param interaction triggering interaction
      * @param action      action to execute when clicked
      */
-    public void setItem(int slot, ItemStack item, MenuItemInteraction interaction, MenuAction action) {
+    public void setItem(int slot, @NonNull ItemStack item, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
         slots.put(slot, new MenuSlot(item, interaction, action));
     }
 
@@ -105,8 +124,47 @@ public abstract class Menu implements InventoryHolder {
      * @param interaction triggering interaction
      * @param action      action to execute when clicked
      */
-    public void setItem(int slot, MenuElementPreset preset, MenuItemInteraction interaction, MenuAction action) {
+    public void setItem(int slot, @NonNull MenuElementPreset preset, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
         setItem(slot, preset.getItem(), interaction, action);
+    }
+
+    /**
+     * Places a dynamically generated item in a slot with an associated action.
+     *
+     * @param slot        slot index
+     * @param builder     consumer that configures the item using {@link ItemBuilder}
+     * @param interaction triggering interaction
+     * @param action      action to execute when clicked
+     */
+    public void setItem(int slot, @NonNull Consumer<ItemBuilder> builder,
+                        @NonNull MenuItemInteraction interaction,
+                        @NonNull MenuAction action) {
+        ItemBuilder itemBuilder = new ItemBuilder(Material.STONE);
+        builder.accept(itemBuilder);
+        setItem(slot, itemBuilder.toItemStack(), interaction, action);
+    }
+
+    /**
+     * Places a dynamically generated item in a slot using any click.
+     *
+     * @param slot    slot index
+     * @param builder consumer that configures the item using {@link ItemBuilder}
+     */
+    public void setItem(int slot, @NonNull Consumer<ItemBuilder> builder) {
+        setItem(slot, builder, MenuItemInteraction.ANY_CLICK, (player, type) -> {
+        });
+    }
+
+    /**
+     * Fills the specified slots with dynamically generated items using any click.
+     *
+     * @param slots   slot indices to fill
+     * @param builder consumer that configures each item using {@link ItemBuilder}
+     */
+    public void fillSlots(int[] slots, @NonNull Consumer<ItemBuilder> builder) {
+        for (int slot : slots) {
+            setItem(slot, builder);
+        }
     }
 
     /**
@@ -116,7 +174,7 @@ public abstract class Menu implements InventoryHolder {
      * @param item        item to place
      * @param interaction interaction type for each slot
      */
-    public void fillSlots(int[] slots, ItemStack item, MenuItemInteraction interaction) {
+    public void fillSlots(int[] slots, @NonNull ItemStack item, @NonNull MenuItemInteraction interaction) {
         for (int slot : slots) {
             setItem(slot, item, interaction, (player, type) -> {
             });
@@ -130,7 +188,7 @@ public abstract class Menu implements InventoryHolder {
      * @param preset      preset item
      * @param interaction interaction type for each slot
      */
-    public void fillSlots(int[] slots, MenuElementPreset preset, MenuItemInteraction interaction) {
+    public void fillSlots(int[] slots, @NonNull MenuElementPreset preset, @NonNull MenuItemInteraction interaction) {
         for (int slot : slots) {
             setItem(slot, preset, interaction, (player, type) -> {
             });
@@ -143,7 +201,7 @@ public abstract class Menu implements InventoryHolder {
      * @param slots slot indices to fill
      * @param item  item to place
      */
-    public void fillSlots(int[] slots, ItemStack item) {
+    public void fillSlots(int[] slots, @NonNull ItemStack item) {
         fillSlots(slots, item, MenuItemInteraction.ANY_CLICK);
     }
 
@@ -153,8 +211,21 @@ public abstract class Menu implements InventoryHolder {
      * @param slots  slot indices to fill
      * @param preset preset item
      */
-    public void fillSlots(int[] slots, MenuElementPreset preset) {
+    public void fillSlots(int[] slots, @NonNull MenuElementPreset preset) {
         fillSlots(slots, preset.getItem(), MenuItemInteraction.ANY_CLICK);
+    }
+
+    /**
+     * Fills all empty slots in the menu with dynamically generated items using any click.
+     *
+     * @param builder consumer that configures each item using {@link ItemBuilder}
+     */
+    public void fillEmptyWith(@NonNull Consumer<ItemBuilder> builder) {
+        for (int slot = 0; slot < size; slot++) {
+            if (!slots.containsKey(slot)) {
+                setItem(slot, builder);
+            }
+        }
     }
 
     /**
@@ -162,7 +233,7 @@ public abstract class Menu implements InventoryHolder {
      *
      * @param item item to fill empty slots
      */
-    public void fillEmptyWith(ItemStack item) {
+    public void fillEmptyWith(@NonNull ItemStack item) {
         for (int slot = 0; slot < size; slot++) {
             if (!slots.containsKey(slot)) {
                 setItem(slot, item, MenuItemInteraction.ANY_CLICK, (p, t) -> {
@@ -176,7 +247,7 @@ public abstract class Menu implements InventoryHolder {
      *
      * @param preset preset item to fill empty slots
      */
-    public void fillEmptyWith(MenuElementPreset preset) {
+    public void fillEmptyWith(@NonNull MenuElementPreset preset) {
         fillEmptyWith(preset.getItem());
     }
 
@@ -199,17 +270,26 @@ public abstract class Menu implements InventoryHolder {
      *
      * @param submenu submenu to open
      */
-    public void openSubMenu(Menu submenu) {
+    public void openSubMenu(@NonNull Menu submenu) {
         Player player = getPlayer();
-        if (player != null) submenu.open(player);
+        if (player != null && menuSystem != null) {
+            submenu.setMenuSystem(menuSystem);
+            submenu.open(player);
+        }
     }
 
     /**
-     * Returns to the previous menu via {@link MenuRouter}.
+     * Returns to the previous menu.
      */
     public void goBack() {
         Player player = getPlayer();
-        if (player != null) MenuRouter.goBack(player);
+        if (player != null && menuSystem != null) {
+            menuSystem.goBack(player);
+        }
+    }
+
+    public Map<Integer, MenuSlot> getSlots() {
+        return slots;
     }
 
     /**
@@ -217,7 +297,9 @@ public abstract class Menu implements InventoryHolder {
      */
     public void close() {
         Player player = getPlayer();
-        if (player != null) player.closeInventory();
+        if (player != null) {
+            player.closeInventory();
+        }
     }
 
     /**
@@ -229,7 +311,11 @@ public abstract class Menu implements InventoryHolder {
      * @param player player to refresh
      */
     @SuppressWarnings("UnstableApiUsage")
-    protected void refresh(Player player) {
+    protected void refresh(@NonNull Player player) {
+        if (menuSystem != null && menuSystem.isShuttingDown()) {
+            return;
+        }
+
         slots.clear();
         build(player);
         inventory.clear();
@@ -255,7 +341,7 @@ public abstract class Menu implements InventoryHolder {
          * @param interaction triggering interaction
          * @param action      action executed on click
          */
-        public MenuSlot(ItemStack item, MenuItemInteraction interaction, MenuAction action) {
+        public MenuSlot(@NonNull ItemStack item, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
             this.item = item;
             actions.put(interaction, action);
         }
@@ -266,7 +352,7 @@ public abstract class Menu implements InventoryHolder {
          * @param player    clicking player
          * @param clickType type of click
          */
-        public void handle(Player player, ClickType clickType) {
+        public void handle(@NonNull Player player, @NonNull ClickType clickType) {
             if (clickType == ClickType.LEFT && actions.containsKey(MenuItemInteraction.LEFT_CLICK)) {
                 actions.get(MenuItemInteraction.LEFT_CLICK).execute(player, clickType);
             } else if (clickType == ClickType.RIGHT && actions.containsKey(MenuItemInteraction.RIGHT_CLICK)) {
