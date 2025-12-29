@@ -144,9 +144,9 @@ public class FishingListener implements Listener {
         World.Environment environment = player.getWorld().getEnvironment();
         FishingLootTable lootTable = FishingLootRegistry.getTable(environment, FishingMethod.WATER);
 
-        lootTable.rollEntity(blightedPlayer, hook.getLocation(), caughtItem.getVelocity());
-        lootTable.rollItem(blightedPlayer, hook.getLocation());
-
-        caughtItem.remove();
+        boolean success = lootTable.roll(blightedPlayer, hook.getLocation(), caughtItem.getVelocity());
+        if (success) {
+            caughtItem.remove();
+        }
     }
 }

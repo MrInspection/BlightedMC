@@ -13,7 +13,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
-import org.bukkit.util.Vector;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
 
@@ -32,7 +31,7 @@ public class OverworldFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.SQUID, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.SQUID),
                             COMMON
                         ),
                         "§b§lSPLASH! §7You caught a §9Squid§7!"
@@ -44,7 +43,7 @@ public class OverworldFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.SALMON, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.SALMON),
                             GOOD_CATCH
                         ),
                         "§e§lNICE! §7You caught a §6Salmon§7!"
@@ -56,7 +55,7 @@ public class OverworldFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.TROPICAL_FISH, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.TROPICAL_FISH),
                             GOOD_CATCH
                         ),
                         "§d§lCOLORFUL! §7You caught a §bTropical Fish§7!"
@@ -68,7 +67,7 @@ public class OverworldFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.PUFFERFISH, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.PUFFERFISH),
                             GREAT_CATCH
                         ),
                         "§e§lCAREFUL! §7You caught a §ePufferfish§7!"
@@ -80,7 +79,7 @@ public class OverworldFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.DOLPHIN, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.DOLPHIN),
                             OUTSTANDING_CATCH
                         ),
                         "§b§lAMAZING! §7You caught a §9Dolphin§7!"

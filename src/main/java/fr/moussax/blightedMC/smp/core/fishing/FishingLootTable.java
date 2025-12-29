@@ -24,28 +24,23 @@ public final class FishingLootTable {
         this.entityRollChance = entityRollChance;
     }
 
-    public void rollEntity(BlightedPlayer player, Location location, Vector velocity) {
-        if (entityTable.isEmpty()) return;
-
+    public boolean roll(BlightedPlayer player, Location location, Vector velocity) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        if (random.nextDouble() > entityRollChance) return;
-
         World world = Objects.requireNonNull(location.getWorld());
         Biome biome = world.getBiome(location);
+        LootContext context = new LootContext(player, world, biome, location, random, velocity);
 
-        LootContext context = new LootContext(player, world, biome, location, random);
-        entityTable.execute(context);
-    }
+        if (!entityTable.isEmpty() && random.nextDouble() <= entityRollChance) {
+            entityTable.execute(context);
+            return true;
+        }
 
-    public void rollItem(BlightedPlayer player, Location location) {
-        if (itemTable.isEmpty()) return;
+        if (!itemTable.isEmpty()) {
+            itemTable.execute(context);
+            return true;
+        }
 
-        World world = Objects.requireNonNull(location.getWorld());
-        Biome biome = world.getBiome(location);
-        ThreadLocalRandom random = ThreadLocalRandom.current();
-
-        LootContext context = new LootContext(player, world, biome, location, random);
-        itemTable.execute(context);
+        return false;
     }
 
     public static Builder builder() {

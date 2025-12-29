@@ -225,11 +225,13 @@ public class LavaFishingHook {
 
         FishingLootTable lootTable = getLootTableForEnvironment();
 
-        lootTable.rollEntity(blightedPlayer, hookLoc, velocity);
-        lootTable.rollItem(blightedPlayer, hookLoc);
+        boolean success = lootTable.roll(blightedPlayer, hookLoc, velocity);
 
-        player.giveExp(ThreadLocalRandom.current().nextInt(3, 8));
-        return true;
+        if (success) {
+            player.giveExp(ThreadLocalRandom.current().nextInt(3, 8));
+        }
+
+        return success;
     }
 
     private FishingLootTable getLootTableForEnvironment() {

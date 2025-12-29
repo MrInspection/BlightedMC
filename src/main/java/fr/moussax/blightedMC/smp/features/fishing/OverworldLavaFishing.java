@@ -12,7 +12,6 @@ import fr.moussax.blightedMC.smp.core.shared.loot.results.ItemResult;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
-import org.bukkit.util.Vector;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
 
@@ -31,7 +30,7 @@ public class OverworldLavaFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.STRIDER, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.STRIDER),
                             GOOD_CATCH
                         ),
                         "§c§lSIZZLE! §7You caught a §6Strider§7!"
@@ -43,7 +42,7 @@ public class OverworldLavaFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.MAGMA_CUBE, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.MAGMA_CUBE),
                             GREAT_CATCH
                         ),
                         "§6§lBURNING! §7You caught a §cMagma Cube§7!"
@@ -55,7 +54,7 @@ public class OverworldLavaFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.BLAZE, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.BLAZE),
                             OUTSTANDING_CATCH
                         ),
                         "§e§lINCREDIBLE! §7You caught a §6Blaze§7!"

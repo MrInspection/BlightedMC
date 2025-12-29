@@ -12,7 +12,6 @@ import fr.moussax.blightedMC.smp.core.shared.loot.results.ItemResult;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
-import org.bukkit.util.Vector;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
 
@@ -31,7 +30,7 @@ public class NetherFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.ZOMBIFIED_PIGLIN, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.ZOMBIFIED_PIGLIN),
                             GOOD_CATCH
                         ),
                         "§6§lOINK! §7You caught a §cZombified Piglin§7!"
@@ -43,7 +42,7 @@ public class NetherFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.MAGMA_CUBE, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.MAGMA_CUBE),
                             GREAT_CATCH
                         ),
                         "§c§lHOT! §7You caught a §6Magma Cube§7!"
@@ -55,7 +54,7 @@ public class NetherFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.BLAZE, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.BLAZE),
                             OUTSTANDING_CATCH
                         ),
                         "§6§lBLAZING! §7You caught a §eBlaze§7!"

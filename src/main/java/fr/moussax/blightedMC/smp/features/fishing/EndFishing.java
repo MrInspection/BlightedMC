@@ -12,7 +12,6 @@ import fr.moussax.blightedMC.smp.core.shared.loot.results.ItemResult;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
-import org.bukkit.util.Vector;
 
 public class EndFishing implements FishingLootProvider {
 
@@ -29,7 +28,7 @@ public class EndFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.ENDERMITE, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.ENDERMITE),
                             FishingLootFeedbackDecorator.FishingCatchQuality.GOOD_CATCH
                         ),
                         "§b§lYUCK! §7You caught an §5Endermite§7!"
@@ -41,7 +40,7 @@ public class EndFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.SHULKER, new Vector(0, 0.3, 0)),
+                            EntityResult.vanilla(EntityType.SHULKER),
                             FishingLootFeedbackDecorator.FishingCatchQuality.OUTSTANDING_CATCH
                         ),
                         "§d§lRARE CATCH! §7You caught a §5Shulker§7!"
