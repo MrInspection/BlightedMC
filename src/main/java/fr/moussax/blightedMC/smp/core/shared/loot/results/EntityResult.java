@@ -52,17 +52,11 @@ public final class EntityResult implements LootResult {
     public void execute(LootContext context, int amount) {
         LivingEntity spawned = null;
 
-        Location spawnLocation = context.origin().clone();
-
-        if (spawnLocation.getBlock().isLiquid()) {
-            spawnLocation.add(0, 1, 0);
-        }
-
         if (entityType != null) {
             spawned = (LivingEntity) Objects.requireNonNull(context.origin().getWorld())
-                .spawnEntity(spawnLocation, entityType);
+                .spawnEntity(context.origin(), entityType);
         } else if (blightedEntity != null) {
-            spawned = blightedEntity.clone().spawn(spawnLocation);
+            spawned = blightedEntity.clone().spawn(context.origin());
         }
 
         if (spawned != null && context.velocity() != null) {

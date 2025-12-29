@@ -164,13 +164,8 @@ public final class ItemResult implements LootResult {
 
         drop.setAmount(amount);
 
-        Location spawnLocation = context.origin().clone();
-        if (spawnLocation.getBlock().isLiquid()) {
-            spawnLocation.add(0, 1, 0);
-        }
-
         Item droppedItem = Objects.requireNonNull(context.origin().getWorld())
-            .dropItem(spawnLocation, drop);
+            .dropItem(context.origin(), drop);
 
         if (context.velocity() != null) {
             droppedItem.setVelocity(context.velocity());
