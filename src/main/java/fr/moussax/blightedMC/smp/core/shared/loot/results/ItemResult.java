@@ -4,8 +4,10 @@ import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.shared.loot.LootContext;
 import fr.moussax.blightedMC.smp.core.shared.loot.LootResult;
 import fr.moussax.blightedMC.utils.ItemBuilder;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -36,8 +38,7 @@ public final class ItemResult implements LootResult {
      */
     public static ItemResult of(String itemId) {
         ItemStack item = Objects.requireNonNull(
-            ItemRegistry.getItem(itemId),
-            "Item not found in registry: " + itemId
+            ItemRegistry.getItem(itemId), "Item not found in registry: " + itemId
         ).toItemStack();
         return new ItemResult(item, null);
     }
@@ -65,14 +66,13 @@ public final class ItemResult implements LootResult {
     /**
      * Creates an ItemResult from a registry ID with a modifier to adjust the item.
      *
-     * @param itemId the registry ID
+     * @param itemId   the registry ID
      * @param modifier a function to modify the ItemBuilder
      * @return a new ItemResult
      */
     public static ItemResult of(String itemId, Consumer<ItemBuilder> modifier) {
         ItemStack item = Objects.requireNonNull(
-            ItemRegistry.getItem(itemId),
-            "Item not found in registry: " + itemId
+            ItemRegistry.getItem(itemId), "Item not found in registry: " + itemId
         ).toItemStack();
         return new ItemResult(item, modifier);
     }
@@ -92,7 +92,7 @@ public final class ItemResult implements LootResult {
      * Creates an ItemResult from an ItemStack with a modifier.
      *
      * @param itemStack the ItemStack
-     * @param modifier a function to modify the ItemBuilder
+     * @param modifier  a function to modify the ItemBuilder
      * @return a new ItemResult
      */
     public static ItemResult of(ItemStack itemStack, Consumer<ItemBuilder> modifier) {
@@ -102,7 +102,7 @@ public final class ItemResult implements LootResult {
     /**
      * Creates an ItemResult with randomized durability.
      *
-     * @param material the Material
+     * @param material   the Material
      * @param minPercent minimum durability percentage
      * @param maxPercent maximum durability percentage
      * @return a new ItemResult
@@ -132,8 +132,8 @@ public final class ItemResult implements LootResult {
      * Creates an ItemResult as an enchanted book from a list of enchantments with random levels.
      *
      * @param enchantments list of enchantments
-     * @param minLevel minimum level
-     * @param maxLevel maximum level
+     * @param minLevel     minimum level
+     * @param maxLevel     maximum level
      * @return a new ItemResult
      */
     public static ItemResult randomEnchantedBook(List<Enchantment> enchantments, int minLevel, int maxLevel) {
@@ -148,7 +148,7 @@ public final class ItemResult implements LootResult {
      * Drops the item at the loot origin and applies the modifier if present.
      *
      * @param context the loot context
-     * @param amount the number of items to drop
+     * @param amount  the number of items to drop
      */
     @Override
     public void execute(LootContext context, int amount) {
@@ -163,7 +163,18 @@ public final class ItemResult implements LootResult {
         }
 
         drop.setAmount(amount);
-        Objects.requireNonNull(context.origin().getWorld()).dropItemNaturally(context.origin(), drop);
+
+        Location spawnLocation = context.origin().clone();
+        if (spawnLocation.getBlock().isLiquid()) {
+            spawnLocation.add(0, 1, 0);
+        }
+
+        Item droppedItem = Objects.requireNonNull(context.origin().getWorld())
+            .dropItem(spawnLocation, drop);
+
+        if (context.velocity() != null) {
+            droppedItem.setVelocity(context.velocity());
+        }
     }
 
     /**

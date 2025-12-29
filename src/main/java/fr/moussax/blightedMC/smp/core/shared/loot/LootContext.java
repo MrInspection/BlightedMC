@@ -4,6 +4,7 @@ import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
+import org.bukkit.util.Vector;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -18,7 +19,8 @@ import java.util.concurrent.ThreadLocalRandom;
  * @param biome the biome at the loot origin
  * @param origin the location where loot is dropped or spawned
  * @param random RNG for the current loot roll
+ * @param velocity the velocity for the current loot roll
  */
 public record LootContext(BlightedPlayer player, World world, Biome biome, Location origin,
-                          ThreadLocalRandom random) {
+                          ThreadLocalRandom random, Vector velocity) {
 }
