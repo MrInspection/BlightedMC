@@ -7,8 +7,7 @@ import fr.moussax.blightedMC.smp.core.items.crafting.BlightedShapelessRecipe;
 import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.smp.core.items.crafting.menu.CraftingTableMenu;
 import fr.moussax.blightedMC.smp.core.items.crafting.menu.RecipeBookMenu;
-import fr.moussax.blightedMC.smp.core.shared.menu.Menu;
-import fr.moussax.blightedMC.smp.core.shared.menu.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.Menu;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -363,7 +362,7 @@ public class CraftingTableListener implements Listener {
     }
 
     private void openRecipeBook(Player player) {
-        MenuManager.openMenu(
+        BlightedMC.menuManager().openMenu(
             new RecipeBookMenu.RecipeListMenu(
                 new Menu("Crafting Table", 54) {
                     @Override

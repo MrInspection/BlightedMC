@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.core.items.crafting.menu;
 
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -47,7 +47,9 @@ public class CraftingTableMenu {
     }
 
     public static ItemStack VALID_RECIPE_INDICATOR(boolean isValid) {
-        return new ItemBuilder(isValid ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE, "§r").setHideTooltip(true).toItemStack();
+        return new ItemBuilder(isValid ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE)
+            .setDisplayName("§r")
+            .setHideTooltip(true).toItemStack();
     }
 
     public static ItemStack RECIPE_REQUIRED() {

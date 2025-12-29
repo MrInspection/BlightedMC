@@ -1,11 +1,14 @@
 package fr.moussax.blightedMC.smp.core.items.registry.menu;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.smp.core.shared.menu.*;
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuElementPreset;
-import fr.moussax.blightedMC.smp.core.shared.menu.interaction.MenuItemInteraction;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.PaginatedMenu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuItemInteraction;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Material;
@@ -13,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +35,8 @@ public class ItemRegistryMenu {
 
     private static final int SEARCH_SLOT = 41;
     private static final int[] ITEM_SLOTS = CATEGORY_SLOTS;
+
+    private static final MenuManager manager = BlightedMC.menuManager();
 
     private static ItemBuilder hideAllItemFlags(ItemBuilder builder) {
         return builder.addItemFlag(
@@ -64,7 +70,7 @@ public class ItemRegistryMenu {
             for (int i = 0; i < categories.size() && i < CATEGORY_SLOTS.length; i++) {
                 ItemType.Category category = categories.get(i);
                 ItemStack item = buildMenuItem(getCategoryIcon(category), "§b" + formatCategoryName(category), getCategoryLore(category));
-                setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (p, t) -> MenuManager.openMenu(
+                setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (p, t) -> manager.openMenu(
                     new BlightedItemsPaginatedMenu(category, this,
                         itemObj -> itemObj.getItemType() != null && itemObj.getItemType().getCategory() == category,
                         "§r" + Formatter.formatEnumName(category.name()) + " Items"), p));
@@ -148,7 +154,7 @@ public class ItemRegistryMenu {
         }
 
         @Override
-        protected ItemStack getItem(Player player, int index) {
+        protected ItemStack getItem(@NonNull Player player, int index) {
             if (index >= blightedItems.size()) return new ItemStack(Material.AIR);
             BlightedItem blightedItem = blightedItems.get(index);
 
@@ -168,7 +174,7 @@ public class ItemRegistryMenu {
         }
 
         @Override
-        public void build(Player player) {
+        public void build(@NonNull Player player) {
             clearMenu();
             int start = currentPage * getItemsPerPage();
             int end = Math.min(start + getItemsPerPage(), getTotalItems(player));
@@ -197,22 +203,22 @@ public class ItemRegistryMenu {
         private void setNavigation() {
             if (currentPage > 0) setItem(48, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                 currentPage--;
-                MenuManager.openMenu(this, p);
+                manager.openMenu(this, p);
             });
             else
-                setItem(48, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> MenuManager.openMenu(previousMenu, p));
+                setItem(48, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> manager.openMenu(previousMenu, p));
 
             if ((currentPage + 1) * getItemsPerPage() < getTotalItems(null))
                 setItem(50, MenuElementPreset.NEXT_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                     currentPage++;
-                    MenuManager.openMenu(this, p);
+                    manager.openMenu(this, p);
                 });
 
             setItem(49, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
         }
 
         @Override
-        protected void onItemClick(Player player, int index, ClickType clickType) {
+        protected void onItemClick(@NonNull Player player, int index, @NonNull ClickType clickType) {
             if (index < blightedItems.size()) player.getInventory().addItem(blightedItems.get(index).toItemStack());
         }
     }

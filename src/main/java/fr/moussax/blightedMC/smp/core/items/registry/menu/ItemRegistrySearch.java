@@ -1,8 +1,9 @@
 package fr.moussax.blightedMC.smp.core.items.registry.menu;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.smp.core.shared.menu.Menu;
-import fr.moussax.blightedMC.smp.core.shared.menu.MenuManager;
+
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ItemRegistrySearch implements Listener {
     public static final ConcurrentHashMap<UUID, Menu> awaitingSearch = new ConcurrentHashMap<>();
+    private static final MenuManager manager = BlightedMC.menuManager();
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
@@ -23,9 +25,9 @@ public class ItemRegistrySearch implements Listener {
             Menu previousMenu = awaitingSearch.remove(uuid);
             Bukkit.getScheduler().runTask(BlightedMC.getInstance(), () -> {
                 if (!search.isEmpty()) {
-                    MenuManager.openMenu(new ItemRegistryMenu.SearchResultsPaginatedMenu(search, previousMenu), event.getPlayer());
+                    manager.openMenu(new ItemRegistryMenu.SearchResultsPaginatedMenu(search, previousMenu), event.getPlayer());
                 } else {
-                    MenuManager.openMenu(previousMenu, event.getPlayer());
+                    manager.openMenu(previousMenu, event.getPlayer());
                 }
             });
         }
