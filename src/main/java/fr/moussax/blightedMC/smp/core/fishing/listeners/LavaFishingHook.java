@@ -209,23 +209,26 @@ public class LavaFishingHook {
 
         if (!isReadyToCatch) return false;
 
-        Location hookLoc = hook.getLocation().add(0, 1, 0);
+        Location hookLoc = hook.getLocation();
         World world = hookLoc.getWorld();
         if (world == null) return false;
-
-        Location playerTarget = player.getLocation().add(0, 1.0, 0);
-        Vector vector = playerTarget.toVector().subtract(hookLoc.toVector());
-        double distance = vector.length();
-
-        Vector velocity = vector.multiply(0.12);
-        velocity.setY(velocity.getY() + (Math.sqrt(distance) * 0.06));
 
         Objects.requireNonNull(world).spawnParticle(Particle.LAVA, hookLoc, 10, 0.3, 0.3, 0.3, 0.1);
         world.playSound(hookLoc, Sound.BLOCK_LAVA_EXTINGUISH, 1.0f, 1.0f);
 
-        FishingLootTable lootTable = getLootTableForEnvironment();
+        Location playerTarget = player.getLocation();
+        playerTarget.add(0, 0.5, 0);
 
-        boolean success = lootTable.roll(blightedPlayer, hookLoc, velocity);
+        Vector vector = playerTarget.toVector().subtract(hookLoc.toVector());
+        double distance = vector.length();
+
+        Vector velocity = vector.multiply(0.08);
+        velocity.setY(velocity.getY() + (Math.sqrt(distance) * 0.05) + 0.15);
+
+        Location spawnLoc = hookLoc.clone().add(0, 0.5, 0);
+
+        FishingLootTable lootTable = getLootTableForEnvironment();
+        boolean success = lootTable.roll(blightedPlayer, spawnLoc, velocity);
 
         if (success) {
             player.giveExp(ThreadLocalRandom.current().nextInt(3, 8));

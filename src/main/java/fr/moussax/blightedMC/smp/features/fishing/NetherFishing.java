@@ -19,7 +19,7 @@ public class NetherFishing implements FishingLootProvider {
 
     @Override
     public void register() {
-        addWater(World.Environment.NETHER);
+        addLava(World.Environment.NETHER);
     }
 
     @Override

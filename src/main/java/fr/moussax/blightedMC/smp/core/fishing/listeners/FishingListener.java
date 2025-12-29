@@ -8,6 +8,7 @@ import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -20,6 +21,7 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -144,9 +146,23 @@ public class FishingListener implements Listener {
         World.Environment environment = player.getWorld().getEnvironment();
         FishingLootTable lootTable = FishingLootRegistry.getTable(environment, FishingMethod.WATER);
 
-        boolean success = lootTable.roll(blightedPlayer, hook.getLocation(), caughtItem.getVelocity());
+        // FIX: Calculate velocity manually because caughtItem velocity is 0 until server ticks later
+        Vector velocity = calculateVelocity(hook.getLocation(), player.getLocation());
+
+        boolean success = lootTable.roll(blightedPlayer, hook.getLocation(), velocity);
         if (success) {
             caughtItem.remove();
         }
+    }
+
+    private Vector calculateVelocity(Location origin, Location target) {
+        Vector vector = target.toVector().subtract(origin.toVector());
+        double distance = vector.length();
+
+        // Standard fishing physics
+        vector.multiply(0.1);
+        vector.setY(vector.getY() + Math.sqrt(distance) * 0.08);
+
+        return vector;
     }
 }
