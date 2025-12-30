@@ -21,94 +21,19 @@ public class ItemRuleListener implements Listener {
 
     private BlightedItem getManager(ItemStack stack) {
         if (stack == null || !stack.hasItemMeta()) return null;
-
         var meta = stack.getItemMeta();
         if (meta == null) return null;
-
         String id = meta.getPersistentDataContainer().get(BLIGHTED_ID_KEY, PersistentDataType.STRING);
         if (id == null) return null;
-
         return ItemRegistry.getItem(id);
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onBucketEmpty(PlayerBucketEmptyEvent event) {
-        Player player = event.getPlayer();
-
-        ItemStack itemInMainHand = player.getInventory().getItemInMainHand();
-        ItemStack itemInOffHand = player.getInventory().getItemInOffHand();
-
-        BlightedItem mainManager = getManager(itemInMainHand);
-        BlightedItem offManager = getManager(itemInOffHand);
-
-        if (mainManager != null && mainManager.canUse(event, itemInMainHand)) {
-            event.setCancelled(true);
-            return;
-        }
-
-        if (offManager != null && offManager.canUse(event, itemInOffHand)) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    @SuppressWarnings("UnstableApiUsage")
-    public void onBlockPlace(BlockPlaceEvent event) {
-        BlightedItem manager = getManager(event.getItemInHand());
-        if (manager == null) return;
-
-        if (manager.canPlace(event, event.getItemInHand())) {
-            event.setCancelled(true);
-            event.getPlayer().updateInventory(); // Prevent ghost block
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
-        ItemStack mainHand = event.getPlayer().getInventory().getItemInMainHand();
-        ItemStack offHand = event.getPlayer().getInventory().getItemInOffHand();
+        ItemStack stack = event.getItem();
+        BlightedItem manager = getManager(stack);
 
-        BlightedItem mainManager = getManager(mainHand);
-        BlightedItem offManager = getManager(offHand);
-
-        boolean cancel = false;
-
-        if (mainManager != null && mainManager.canUse(event, mainHand)) cancel = true;
-        if (offManager != null && offManager.canUse(event, offHand)) cancel = true;
-
-        if (cancel) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onItemDrop(PlayerDropItemEvent event) {
-        ItemStack dropped = event.getItemDrop().getItemStack();
-        BlightedItem manager = getManager(dropped);
-        if (manager == null) return;
-
-        if (manager.canUse(event, dropped)) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onItemConsume(PlayerItemConsumeEvent event) {
-        BlightedItem manager = getManager(event.getItem());
-        if (manager == null) return;
-
-        if (manager.canUse(event, event.getItem())) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent event) {
-        ItemStack current = event.getCurrentItem();
-        BlightedItem manager = getManager(current);
-        if (manager == null) return;
-
-        if (manager.canUse(event, current)) {
+        if (manager != null && manager.canUse(event, stack)) {
             event.setCancelled(true);
         }
     }
@@ -117,22 +42,63 @@ public class ItemRuleListener implements Listener {
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
         if (!(event.getEntity().getShooter() instanceof Player player)) return;
 
-        // Check both hands
+        boolean cancelled = false;
+
         ItemStack mainHand = player.getInventory().getItemInMainHand();
-        ItemStack offHand = player.getInventory().getItemInOffHand();
-
-        BlightedItem manager = getManager(mainHand);
-        if (manager == null) manager = getManager(offHand);
-
-        if (manager == null) return;
-
-        // Apply rule for all items that have PreventProjectileLaunchRule
-        if (manager.canUse(event, mainHand) || manager.canUse(event, offHand)) {
-            event.setCancelled(true);
-
-            // Remove cooldown to prevent client desync
+        BlightedItem mainManager = getManager(mainHand);
+        if (mainManager != null && mainManager.canUse(event, mainHand)) {
+            cancelled = true;
             player.setCooldown(mainHand.getType(), 0);
+        }
+
+        ItemStack offHand = player.getInventory().getItemInOffHand();
+        BlightedItem offManager = getManager(offHand);
+        if (offManager != null && offManager.canUse(event, offHand)) {
+            cancelled = true;
             player.setCooldown(offHand.getType(), 0);
+        }
+
+        if (cancelled) event.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBucketEmpty(PlayerBucketEmptyEvent event) {
+        BlightedItem manager = getManager(event.getItemStack());
+        if (manager != null && manager.canUse(event, event.getItemStack())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        BlightedItem manager = getManager(event.getItemInHand());
+        if (manager != null && manager.canPlace(event, event.getItemInHand())) {
+            event.setCancelled(true);
+            event.getPlayer().updateInventory();
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onItemDrop(PlayerDropItemEvent event) {
+        BlightedItem manager = getManager(event.getItemDrop().getItemStack());
+        if (manager != null && manager.canUse(event, event.getItemDrop().getItemStack())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onItemConsume(PlayerItemConsumeEvent event) {
+        BlightedItem manager = getManager(event.getItem());
+        if (manager != null && manager.canUse(event, event.getItem())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryClick(InventoryClickEvent event) {
+        BlightedItem manager = getManager(event.getCurrentItem());
+        if (manager != null && manager.canUse(event, event.getCurrentItem())) {
+            event.setCancelled(true);
         }
     }
 }
