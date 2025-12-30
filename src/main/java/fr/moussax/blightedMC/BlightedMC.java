@@ -41,6 +41,7 @@ public final class BlightedMC extends JavaPlugin {
         RegistrySystem.initialize();
         eventsRegistry = new EventsRegistry();
         eventsRegistry.initializeListeners();
+        eventsRegistry.buildSpawnCache();
 
         BlightedServer.getInstance().rehydrateEntitiesOnLoadedChunks();
         new BlightedSpawnEngine().runTaskTimer(this, 100L, 1L);

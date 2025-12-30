@@ -21,15 +21,17 @@ public final class EventsRegistry {
     private final BlightedMC instance = BlightedMC.getInstance();
     private MenuSystem menuSystem;
     private MenuManager menuManager;
+    private SpawnableEntitiesListener spawnableEntitiesListener;
 
     public void initializeListeners() {
         PluginManager pm = Bukkit.getPluginManager();
         menuSystem = new MenuSystem(instance);
         menuManager = new MenuManager(menuSystem);
+        spawnableEntitiesListener = new SpawnableEntitiesListener();
 
         pm.registerEvents(new MenuListener(menuSystem), instance);
         pm.registerEvents(new BlightedEntitiesListener(), instance);
-        pm.registerEvents(new SpawnableEntitiesListener(), instance);
+        pm.registerEvents(spawnableEntitiesListener, instance);
         pm.registerEvents(new BlightedBlockListener(), instance);
         pm.registerEvents(new BlightedPlayerListener(), instance);
         pm.registerEvents(new ItemRuleListener(), instance);
@@ -38,6 +40,12 @@ public final class EventsRegistry {
         pm.registerEvents(new FishingListener(), instance);
         pm.registerEvents(new UnsafeAnvilListener(), instance);
         pm.registerEvents(new WitherImpactAbility(), instance);
+    }
+
+    public void buildSpawnCache() {
+        if (spawnableEntitiesListener != null) {
+            spawnableEntitiesListener.rebuildCache();
+        }
     }
 
     public MenuManager getMenuManager() {

@@ -20,7 +20,7 @@ public final class LifecycleTaskManager {
     /**
      * Holds all registered scheduled tasks for the associated entity.
      */
-    private final List<ScheduledTask> tasks = new ArrayList<>();
+    private List<ScheduledTask> tasks;
 
     /**
      * Adds a repeating task that executes periodically for the entity lifecycle.
@@ -30,6 +30,7 @@ public final class LifecycleTaskManager {
      * @param periodTicks interval between consecutive runs, in ticks
      */
     public void addRepeatingTask(Supplier<BukkitRunnable> factory, long delayTicks, long periodTicks) {
+        ensureList();
         tasks.add(new ScheduledTask(factory, delayTicks, periodTicks, true));
     }
 
@@ -40,6 +41,7 @@ public final class LifecycleTaskManager {
      * @param delayTicks delay before execution, in ticks
      */
     public void addDelayedTask(Supplier<BukkitRunnable> factory, long delayTicks) {
+        ensureList();
         tasks.add(new ScheduledTask(factory, delayTicks, 0L, false));
     }
 
@@ -48,8 +50,9 @@ public final class LifecycleTaskManager {
      * during the entity’s runtime initialization phase.
      */
     public void scheduleAll() {
-        for (ScheduledTask task : tasks) {
-            task.schedule();
+        if (tasks == null) return;
+        for (ScheduledTask task : new ArrayList<>(tasks)) {
+            task.schedule(this);
         }
     }
 
@@ -58,8 +61,8 @@ public final class LifecycleTaskManager {
      * Useful for adding new runtime behaviors dynamically.
      */
     public void scheduleLast() {
-        if (tasks.isEmpty()) return;
-        tasks.getLast().schedule();
+        if (tasks == null || tasks.isEmpty()) return;
+        tasks.getLast().schedule(this);
     }
 
     /**
@@ -67,9 +70,21 @@ public final class LifecycleTaskManager {
      * This should be invoked during entity destruction or killing.
      */
     public void cancelAll() {
+        if (tasks == null) return;
         for (ScheduledTask task : tasks) {
             task.cancel();
         }
+        tasks.clear();
+        tasks = null;
+    }
+
+    private void ensureList() {
+        if (tasks == null) tasks = new ArrayList<>(4);
+    }
+
+    private void onTaskComplete(ScheduledTask task) {
+        if (tasks == null) return;
+        tasks.remove(task);
     }
 
     /**
@@ -83,14 +98,6 @@ public final class LifecycleTaskManager {
         private final boolean repeating;
         private BukkitRunnable current;
 
-        /**
-         * Constructs a new scheduled task definition.
-         *
-         * @param factory     the runnable supplier
-         * @param delayTicks  delay before first execution
-         * @param periodTicks interval between runs (ignored for non-repeating)
-         * @param repeating   whether this task repeats
-         */
         private ScheduledTask(Supplier<BukkitRunnable> factory, long delayTicks, long periodTicks, boolean repeating) {
             this.factory = factory;
             this.delayTicks = delayTicks;
@@ -98,28 +105,36 @@ public final class LifecycleTaskManager {
             this.repeating = repeating;
         }
 
-        /**
-         * Starts or restarts this task on the Bukkit scheduler.
-         * Cancels any previous instance before scheduling a new one.
-         */
-        private void schedule() {
+        private void schedule(LifecycleTaskManager manager) {
             cancel();
-            current = factory.get();
+
             if (repeating) {
+                current = factory.get();
                 current.runTaskTimer(BlightedMC.getInstance(), delayTicks, periodTicks);
             } else {
+                current = new BukkitRunnable() {
+                    private final BukkitRunnable inner = factory.get();
+
+                    @Override
+                    public void run() {
+                        try {
+                            if (inner != null) inner.run();
+                        } finally {
+                            // Ensure this is removed from the list even if the logic crashes
+                            manager.onTaskComplete(ScheduledTask.this);
+                        }
+                    }
+                };
                 current.runTaskLater(BlightedMC.getInstance(), delayTicks);
             }
         }
 
-        /**
-         * Cancels the currently running task instance, if active.
-         * Ignores cancellation errors due to already terminated tasks.
-         */
         private void cancel() {
             if (current != null) {
                 try {
-                    current.cancel();
+                    if (!current.isCancelled()) {
+                        current.cancel();
+                    }
                 } catch (IllegalStateException ignored) {
                 }
                 current = null;
