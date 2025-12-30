@@ -54,7 +54,7 @@ public class RecipeBookMenu {
         private final List<BlightedRecipe> cachedRecipes;
 
         public RecipeListMenu(Menu previousMenu) {
-            super("§rBlighted Recipe Book", 54);
+            super("Blighted Recipe Book", 54);
             this.previousMenu = previousMenu;
             this.cachedRecipes = new ArrayList<>(BlightedRecipe.REGISTERED_RECIPES);
             this.cachedRecipes.sort((r1, r2) -> {
@@ -125,7 +125,7 @@ public class RecipeBookMenu {
             } else {
                 setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                     close();
-                    p.openInventory(CraftingTableMenu.createInventory());
+                    manager.openMenu(new CraftingTableMenu(), player);
                 });
             }
 

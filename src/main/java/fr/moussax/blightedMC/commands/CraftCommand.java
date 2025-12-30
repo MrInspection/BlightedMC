@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.commands;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.crafting.menu.CraftingTableMenu;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,7 +12,7 @@ public class CraftCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
         if (!(label.equalsIgnoreCase("craft") && sender instanceof Player player)) return false;
-        player.openInventory(CraftingTableMenu.createInventory());
+        BlightedMC.menuManager().openMenu(new CraftingTableMenu(), player);
         return true;
     }
 }
