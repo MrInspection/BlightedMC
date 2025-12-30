@@ -8,6 +8,8 @@ import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.FishHook;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -22,14 +24,20 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class LavaFishingHook {
     private static final Map<UUID, LavaFishingHook> ACTIVE_HOOKS = new HashMap<>();
+
     private static final double FLOAT_TARGET_HIGH = 0.85;
     private static final double FLOAT_TARGET_LOW = 0.6;
     private static final double PARTICLE_SPEED = 0.15;
-    private static final double PARTICLE_DISTANCE_THRESHOLD = 0.25;
+    private static final double PARTICLE_DISTANCE_SQUARED = 0.25 * 0.25;
+
+    private static final Vector FLOAT_UP = new Vector(0, 0.04, 0);
+    private static final Vector FLOAT_DOWN = new Vector(0, -0.01, 0);
+
+    private static final int BASE_WAIT_TIME = 160;     // 8 Seconds
+    private static final int WAIT_TIME_VARIANCE = 240; // +0 to 12 Seconds variance
     private static final int BASE_BITE_WINDOW_TICKS = 30;
-    private static final int BASE_WAIT_TIME = 100;
-    private static final int WAIT_TIME_VARIANCE = 60;
-    private static final int PARTICLE_COUNT = 3;
+
+    private static final int PARTICLE_COUNT = 16; // Player feedback
 
     private final FishHook hook;
     private final BlightedPlayer blightedPlayer;
@@ -37,47 +45,31 @@ public class LavaFishingHook {
     private final World.Environment environment;
     private final int luckOfSeaLevel;
     private final int lureLevel;
-    private BukkitRunnable task;
 
+    private BukkitRunnable task;
     private boolean isReadyToCatch = false;
 
-    public LavaFishingHook(FishHook hook, BlightedPlayer blightedPlayer, Player player) {
+    public LavaFishingHook(FishHook hook, BlightedPlayer blightedPlayer, Player player, ItemStack rod) {
         this.hook = hook;
         this.blightedPlayer = blightedPlayer;
         this.player = player;
         this.environment = hook.getWorld().getEnvironment();
 
-        ItemStack rod = getRodFromPlayer(player);
-        this.luckOfSeaLevel = rod != null ? rod.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA) : 0;
-        this.lureLevel = rod != null ? rod.getEnchantmentLevel(Enchantment.LURE) : 0;
+        if (rod != null) {
+            this.luckOfSeaLevel = rod.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
+            this.lureLevel = rod.getEnchantmentLevel(Enchantment.LURE);
+        } else {
+            this.luckOfSeaLevel = 0;
+            this.lureLevel = 0;
+        }
 
         ACTIVE_HOOKS.put(hook.getUniqueId(), this);
         startLavaTask(calculateWaitTime());
     }
 
-    private ItemStack getRodFromPlayer(Player player) {
-        ItemStack mainHand = player.getInventory().getItemInMainHand();
-        if (mainHand.getType() == Material.FISHING_ROD || mainHand.getType().name().contains("FISHING_ROD")) {
-            return mainHand;
-        }
-        ItemStack offHand = player.getInventory().getItemInOffHand();
-        if (offHand.getType() == Material.FISHING_ROD || offHand.getType().name().contains("FISHING_ROD")) {
-            return offHand;
-        }
-        return null;
-    }
-
     private int calculateWaitTime() {
-        int baseTime = BASE_WAIT_TIME;
-        int variance = WAIT_TIME_VARIANCE;
-
-        baseTime -= (lureLevel * 33);
-        variance -= (lureLevel * 20);
-
-        baseTime = Math.max(20, baseTime);
-        variance = Math.max(20, variance);
-
-        return baseTime + ThreadLocalRandom.current().nextInt(variance);
+        int baseTime = Math.max(40, BASE_WAIT_TIME - (lureLevel * 40));
+        return baseTime + ThreadLocalRandom.current().nextInt(WAIT_TIME_VARIANCE);
     }
 
     private int calculateBiteWindow() {
@@ -90,22 +82,9 @@ public class LavaFishingHook {
 
             @Override
             public void run() {
-                if (hook.isDead() || !player.isOnline()) {
-                    remove();
-                    return;
-                }
+                if (isInvalid()) return;
 
-                preventBurning();
-
-                Material blockType = hook.getLocation().getBlock().getType();
-                if (blockType == Material.WATER) {
-                    hook.remove();
-                    remove();
-                    Formatter.warn(player, "Lava fishing rods cannot be used in water!");
-                    return;
-                }
-
-                if (blockType != Material.LAVA) {
+                if (hook.getLocation().getBlock().getType() != Material.LAVA) {
                     hook.setGravity(true);
                     return;
                 }
@@ -124,7 +103,8 @@ public class LavaFishingHook {
     private void startCatchAnimation() {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         double angle = random.nextDouble() * 2 * Math.PI;
-        Location particleLoc = hook.getLocation().clone().add(
+
+        Location particleLocation = hook.getLocation().clone().add(
             Math.cos(angle) * 4.0,
             0,
             Math.sin(angle) * 4.0
@@ -136,26 +116,13 @@ public class LavaFishingHook {
 
             @Override
             public void run() {
-                if (hook.isDead()) {
-                    remove();
-                    return;
-                }
-
-                preventBurning();
-
-                Material blockType = hook.getLocation().getBlock().getType();
-                if (blockType == Material.WATER) {
-                    hook.remove();
-                    remove();
-                    Formatter.warn(player, "Lava fishing rods cannot be used in water!");
-                    return;
-                }
+                if (isInvalid()) return;
 
                 if (!reachedHook) {
-                    moveParticleToHook(particleLoc);
+                    moveParticleToHook(particleLocation);
                     adjustHookFloat(FLOAT_TARGET_HIGH);
 
-                    if (particleLoc.distanceSquared(hook.getLocation()) < PARTICLE_DISTANCE_THRESHOLD) {
+                    if (particleLocation.distanceSquared(hook.getLocation()) < PARTICLE_DISTANCE_SQUARED) {
                         reachedHook = true;
                         hook.getWorld().playSound(hook.getLocation(), Sound.ENTITY_GENERIC_SPLASH, 1f, 0.5f);
                     }
@@ -172,24 +139,31 @@ public class LavaFishingHook {
         task.runTaskTimer(BlightedMC.getInstance(), 1L, 1L);
     }
 
-    private void preventBurning() {
+    private boolean isInvalid() {
+        if (hook.isDead() || !player.isOnline()) {
+            remove();
+            return true;
+        }
+
         hook.setVisualFire(false);
         hook.setFireTicks(0);
+
+        if (hook.isInWater()) {
+            hook.remove();
+            remove();
+            Formatter.warn(player, "Lava fishing rods cannot be used in water!");
+            return true;
+        }
+        return false;
     }
 
     private void moveParticleToHook(Location particleLoc) {
-        Vector direction = hook.getLocation().toVector()
-            .subtract(particleLoc.toVector())
-            .normalize()
-            .multiply(PARTICLE_SPEED);
-
+        Vector direction = hook.getLocation().toVector().subtract(particleLoc.toVector());
+        direction.normalize().multiply(PARTICLE_SPEED);
         particleLoc.add(direction);
+
         Objects.requireNonNull(particleLoc.getWorld()).spawnParticle(
-            Particle.SMOKE,
-            particleLoc,
-            PARTICLE_COUNT,
-            0.1, 0.1, 0.1,
-            0.01
+            Particle.SMOKE, particleLoc, PARTICLE_COUNT, 0.05, 0.05, 0.05, 0.01
         );
     }
 
@@ -197,11 +171,7 @@ public class LavaFishingHook {
         hook.setGravity(false);
         double currentOffset = hook.getLocation().getY() - hook.getLocation().getBlockY();
 
-        if (currentOffset < targetOffset) {
-            hook.setVelocity(new Vector(0, 0.04, 0));
-        } else {
-            hook.setVelocity(new Vector(0, -0.01, 0));
-        }
+        hook.setVelocity(currentOffset < targetOffset ? FLOAT_UP : FLOAT_DOWN);
     }
 
     public boolean reelIn() {
@@ -209,42 +179,38 @@ public class LavaFishingHook {
 
         if (!isReadyToCatch) return false;
 
-        Location hookLoc = hook.getLocation();
-        World world = hookLoc.getWorld();
+        Location hookLocation = hook.getLocation();
+        World world = hookLocation.getWorld();
         if (world == null) return false;
 
-        Objects.requireNonNull(world).spawnParticle(Particle.LAVA, hookLoc, 10, 0.3, 0.3, 0.3, 0.1);
-        world.playSound(hookLoc, Sound.BLOCK_LAVA_EXTINGUISH, 1.0f, 1.0f);
+        world.spawnParticle(Particle.LAVA, hookLocation, 10, 0.3, 0.3, 0.3, 0.1);
+        world.playSound(hookLocation, Sound.BLOCK_LAVA_EXTINGUISH, 1.0f, 1.0f);
 
-        Location playerTarget = player.getLocation();
-        playerTarget.add(0, 0.5, 0);
+        Location playerLocation = player.getLocation();
+        Vector velocity = playerLocation.toVector().subtract(hookLocation.toVector());
 
-        Vector vector = playerTarget.toVector().subtract(hookLoc.toVector());
-        double distance = vector.length();
-
-        Vector velocity = vector.multiply(0.08);
+        double distance = velocity.length();
+        velocity.multiply(0.08);
         velocity.setY(velocity.getY() + (Math.sqrt(distance) * 0.05) + 0.15);
 
-        Location spawnLoc = hookLoc.clone().add(0, 0.5, 0);
+        Location spawnLocation = hookLocation.add(0, 0.5, 0);
 
-        FishingLootTable lootTable = getLootTableForEnvironment();
-        boolean success = lootTable.roll(blightedPlayer, spawnLoc, velocity);
+        FishingLootTable lootTable = FishingLootRegistry.getTable(environment, FishingMethod.LAVA);
+        boolean success = lootTable.roll(blightedPlayer, spawnLocation, velocity);
 
         if (success) {
-            player.giveExp(ThreadLocalRandom.current().nextInt(3, 8));
+            ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(playerLocation, EntityType.EXPERIENCE_ORB);
+            orb.setExperience(ThreadLocalRandom.current().nextInt(3, 8));
         }
 
         return success;
-    }
-
-    private FishingLootTable getLootTableForEnvironment() {
-        return FishingLootRegistry.getTable(environment, FishingMethod.LAVA);
     }
 
     public void remove() {
         ACTIVE_HOOKS.remove(hook.getUniqueId());
         if (task != null && !task.isCancelled()) {
             task.cancel();
+            task = null;
         }
     }
 
