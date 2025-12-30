@@ -101,7 +101,6 @@ public sealed abstract class BlightedRecipe
             CraftingObject expectedSlot = expectedPattern.get(slotIndex);
             String currentItemId = craftingGridItemIds.get(slotIndex);
 
-            // Slot expected to be empty must be empty
             if (expectedSlot == null || (expectedSlot.getManager() == null && !expectedSlot.isVanilla())) {
                 if (!currentItemId.isEmpty()) return false;
                 continue;
@@ -111,15 +110,13 @@ public sealed abstract class BlightedRecipe
             if (expectedSlot.isCustom()) {
                 expectedItemId = expectedSlot.getManager().getItemId();
             } else if (expectedSlot.isVanilla()) {
-                expectedItemId = "vanilla:" + expectedSlot.getVanillaItem().getType().name().toLowerCase(Locale.ROOT);
+                expectedItemId = "vanilla:" + expectedSlot.getVanillaItem().getType().name();
             } else {
                 return false;
             }
 
-            // Must match expected item ID
             if (!currentItemId.equals(expectedItemId)) return false;
 
-            // Must meet the required amount
             ItemStack currentStack = craftingGrid.get(slotIndex);
             if (currentStack == null || currentStack.getAmount() < expectedSlot.getAmount()) return false;
         }
@@ -131,7 +128,6 @@ public sealed abstract class BlightedRecipe
      * Checks if a shapeless recipe matches the given crafting grid.
      */
     private static boolean matchesShapelessRecipe(BlightedShapelessRecipe recipe, List<ItemStack> craftingGrid, List<String> craftingGridItemIds) {
-
         Map<String, Integer> remainingRequiredCounts = new HashMap<>(recipe.getIngredientCountMap());
 
         for (int slotIndex = 0; slotIndex < craftingGrid.size(); slotIndex++) {
@@ -139,14 +135,16 @@ public sealed abstract class BlightedRecipe
             if (currentStack == null || currentStack.getType() == Material.AIR) continue;
 
             String currentItemId = craftingGridItemIds.get(slotIndex);
-            if (currentItemId.isEmpty() || !remainingRequiredCounts.containsKey(currentItemId)) return false;
+
+            if (currentItemId.isEmpty() || !remainingRequiredCounts.containsKey(currentItemId)) {
+                return false;
+            }
 
             int newRemaining = remainingRequiredCounts.get(currentItemId) - currentStack.getAmount();
-            if (newRemaining < 0) return false; // Too many items
+            if (newRemaining < 0) return false;
             remainingRequiredCounts.put(currentItemId, newRemaining);
         }
 
-        // All ingredients must be exactly used
         return remainingRequiredCounts.values().stream().allMatch(amount -> amount == 0);
     }
 }
