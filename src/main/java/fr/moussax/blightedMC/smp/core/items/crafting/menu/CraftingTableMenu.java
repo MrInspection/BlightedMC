@@ -83,7 +83,7 @@ public class CraftingTableMenu extends InteractiveMenu {
     }
 
     private void craftOnce(BlightedRecipe recipe, Player player) {
-        ItemStack resultItem = getResultItem(recipe);
+        ItemStack resultItem = recipe.assemble(getInputGrid());
         ItemStack cursorItem = player.getItemOnCursor();
 
         if (!canAddToCursor(cursorItem, resultItem)) return;
@@ -102,7 +102,7 @@ public class CraftingTableMenu extends InteractiveMenu {
         int maxCrafts = getMaxCraftCount(recipe);
         if (maxCrafts <= 0) return;
 
-        ItemStack resultItem = getResultItem(recipe);
+        ItemStack resultItem = recipe.assemble(getInputGrid());
         resultItem.setAmount(resultItem.getAmount() * maxCrafts);
 
         Map<Integer, ItemStack> leftover = player.getInventory().addItem(resultItem);
@@ -213,14 +213,17 @@ public class CraftingTableMenu extends InteractiveMenu {
         return 0;
     }
 
-    private BlightedRecipe getMatchingRecipe() {
+    private List<ItemStack> getInputGrid() {
         List<ItemStack> grid = new ArrayList<>();
         for (int slot : INPUT_SLOTS) {
             ItemStack item = inventory.getItem(slot);
-            // Must add null for empty slots (AIR) for BlightedRecipe compatibility
             grid.add((item != null && item.getType() != Material.AIR) ? item : null);
         }
-        Set<BlightedRecipe> matches = BlightedRecipe.findMatchingRecipes(grid);
+        return grid;
+    }
+
+    private BlightedRecipe getMatchingRecipe() {
+        Set<BlightedRecipe> matches = BlightedRecipe.findMatchingRecipes(getInputGrid());
         return matches.isEmpty() ? null : matches.iterator().next();
     }
 
@@ -230,7 +233,7 @@ public class CraftingTableMenu extends InteractiveMenu {
             return;
         }
 
-        ItemStack result = getResultItem(recipe);
+        ItemStack result = recipe.assemble(getInputGrid());
         ItemBuilder builder = new ItemBuilder(result);
         builder.addLore("§8§m----------------", "§7This is the item you are crafting.");
         inventory.setItem(OUTPUT_SLOT, builder.toItemStack());
@@ -242,12 +245,6 @@ public class CraftingTableMenu extends InteractiveMenu {
 
         for (int slot : INDICATOR_SLOTS_LEFT) inventory.setItem(slot, indicator);
         for (int slot : INDICATOR_SLOTS_RIGHT) inventory.setItem(slot, indicator);
-    }
-
-    private ItemStack getResultItem(BlightedRecipe recipe) {
-        ItemStack item = recipe.getResult().toItemStack().clone();
-        item.setAmount(Math.max(1, recipe.getAmount()));
-        return item;
     }
 
     private ItemStack RECIPE_REQUIRED() {
