@@ -14,10 +14,24 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
     private static final int MAX_DISTANCE = 40;
 
     @Override
+    public String[] getDescription() {
+        return new String[]{
+            "Teleport through the void to the ",
+            "block you're looking at, up to §e" + MAX_DISTANCE,
+            "blocks away."
+        };
+    }
+
+    @Override
     public boolean triggerAbility(PlayerInteractEvent event) {
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(event.getPlayer());
         Location targetLocation = getTargetedEyeLocation(blightedPlayer);
-        if (targetLocation == null) return false;
+
+        if (targetLocation == null) {
+            // FIX: Add feedback so you know why it didn't work
+            blightedPlayer.getPlayer().sendMessage("§cObstructed destination!");
+            return false;
+        }
 
         Location currentLook = blightedPlayer.getPlayer().getLocation();
         targetLocation.setYaw(currentLook.getYaw());
@@ -32,7 +46,6 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
 
         var isInSurvival = blightedPlayer.getPlayer().getGameMode() == GameMode.SURVIVAL;
 
-        // Consume Item
         ItemStack usedItem = event.getItem();
         if ((usedItem != null && usedItem.getAmount() > 0) && isInSurvival) {
             usedItem.setAmount(usedItem.getAmount() - 1);
@@ -57,12 +70,10 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
     }
 
     @Override
-    public void start(BlightedPlayer player) {
-    }
+    public void start(BlightedPlayer player) {}
 
     @Override
-    public void stop(BlightedPlayer player) {
-    }
+    public void stop(BlightedPlayer player) {}
 
     private Location getTargetedEyeLocation(BlightedPlayer blightedPlayer) {
         var player = blightedPlayer.getPlayer();
@@ -70,42 +81,49 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
         var direction = eyeLocation.getDirection();
 
         RayTraceResult traceResult = player.getWorld().rayTraceBlocks(
-            eyeLocation, direction, VoidStepAbility.MAX_DISTANCE, FluidCollisionMode.NEVER, true
+            eyeLocation, direction, MAX_DISTANCE, FluidCollisionMode.NEVER, true
         );
 
+        // Case 1: We hit a block
         if (traceResult != null && traceResult.getHitBlock() != null) {
             Block hitBlock = traceResult.getHitBlock();
 
-            // always land on top of the block
-            Location topOfBlock = new Location(
-                player.getWorld(),
-                hitBlock.getX() + 0.5,
-                hitBlock.getY() + 1.0,
-                hitBlock.getZ() + 0.5
-            );
+            // Try landing on top
+            Location topOfBlock = hitBlock.getLocation().add(0.5, 1.0, 0.5);
 
-            if (isSafeTeleportationLocation(topOfBlock)) return topOfBlock;
-            Location upOne = topOfBlock.clone().add(0, 1, 0);
-            if (isSafeTeleportationLocation(upOne)) return upOne;
-            return null; // if blocked, cancel like a failed pearl
+            // STRICT check for landing: We need solid ground below
+            if (isSafe(topOfBlock, true)) return topOfBlock;
+
+            return null;
         }
 
-        // fallback: max distance point in the air
-        Vector maxVec = direction.normalize().multiply(VoidStepAbility.MAX_DISTANCE);
+        // Case 2: We hit nothing (Air Dash)
+        Vector maxVec = direction.normalize().multiply(MAX_DISTANCE);
         Location inAir = eyeLocation.add(maxVec);
 
-        // allow teleport if the space is clear
-        if (isSafeTeleportationLocation(inAir)) return inAir;
+        // LENIENT check for air: We DON'T need solid ground below
+        if (isSafe(inAir, false)) return inAir;
+
         return null;
     }
 
-    private boolean isSafeTeleportationLocation(Location location) {
+    /**
+     * Checks if a location is safe to teleport to.
+     * @param location The feet location
+     * @param requireGround Whether we strictly require a solid block below (true for landing, false for air dash)
+     */
+    private boolean isSafe(Location location, boolean requireGround) {
         Block feet = location.getBlock();
         Block head = feet.getRelative(BlockFace.UP);
         Block below = feet.getRelative(BlockFace.DOWN);
 
-        if (!feet.getType().isAir()) return false;
-        if (!head.getType().isAir()) return false;
-        return below.getType().isSolid();
+        // 1. Must not suffocate
+        if (feet.getType().isSolid()) return false;
+        if (head.getType().isSolid()) return false;
+
+        // 2. Ground check (Only if required)
+        if (requireGround && !below.getType().isSolid()) return false;
+
+        return true;
     }
 }
