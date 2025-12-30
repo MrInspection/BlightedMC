@@ -7,133 +7,147 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemBreakEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.event.player.*;
 
-public class AbilityListener implements Listener {
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
-    public AbilityListener() {
-        // Periodic armor refresh for all online players (every 2 seconds)
-        Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(), () -> {
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-                if (blightedPlayer != null) ArmorManager.updatePlayerArmor(blightedPlayer);
-            }
-        }, 0L, 40L);
+public final class AbilityListener implements Listener {
+    private final Set<UUID> dirtyArmorPlayers = new HashSet<>();
+    private boolean updateTaskScheduled = false;
+
+    private void scheduleArmorUpdate(Player player) {
+        dirtyArmorPlayers.add(player.getUniqueId());
+
+        if (!updateTaskScheduled) {
+            updateTaskScheduled = true;
+            Bukkit.getScheduler().runTask(BlightedMC.getInstance(), this::processArmorUpdates);
+        }
     }
 
-    private void checkArmorChange(Player player) {
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-        if (blightedPlayer == null) return;
-        ItemStack[] before = blightedPlayer.getLastKnownArmor();
-        ItemStack[] after = player.getInventory().getArmorContents();
-        if (hasArmorChanged(before, after)) {
+    private void processArmorUpdates() {
+        updateTaskScheduled = false;
+        if (dirtyArmorPlayers.isEmpty()) return;
+
+        for (UUID uuid : dirtyArmorPlayers) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player == null || !player.isOnline()) continue;
+
+            BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+            if (blightedPlayer == null) blightedPlayer = new BlightedPlayer(player);
+
             ArmorManager.updatePlayerArmor(blightedPlayer);
-            blightedPlayer.setLastKnownArmor(after);
+        }
+        dirtyArmorPlayers.clear();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getWhoClicked() instanceof Player player) scheduleArmorUpdate(player);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (event.getWhoClicked() instanceof Player player) scheduleArmorUpdate(player);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerItemBreak(PlayerItemBreakEvent event) {
+        scheduleArmorUpdate(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        scheduleArmorUpdate(event.getEntity());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        scheduleArmorUpdate(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        scheduleArmorUpdate(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onArmorEquip(PlayerInteractEvent event) {
+        if (!event.getAction().name().contains("RIGHT")) return;
+        if (event.getItem() == null) return;
+
+        String type = event.getItem().getType().name();
+        if (!type.endsWith("_HELMET")
+            && !type.endsWith("_CHESTPLATE")
+            && !type.endsWith("_LEGGINGS")
+            && !type.endsWith("_BOOTS")) return;
+
+        scheduleArmorUpdate(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onSneakToggle(PlayerToggleSneakEvent e) {
+        BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(e.getPlayer());
+        if (bp != null) {
+            ArmorManager.handleSneakUpdate(bp, e.isSneaking());
         }
     }
 
-    private boolean hasArmorChanged(ItemStack[] before, ItemStack[] after) {
-        if (before == null || after == null) return true;
-        if (before.length != after.length) return true;
-        for (int i = 0; i < before.length; i++) {
-            if (!isSameItem(before[i], after[i])) return true;
-        }
-        return false;
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        trigger(event.getPlayer(), event);
     }
 
-    private boolean isSameItem(ItemStack a, ItemStack b) {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
-        return a.isSimilar(b) && a.getAmount() == b.getAmount();
-    }
-
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent e) {
-        if (e.getWhoClicked() instanceof Player player) {
-            Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> checkArmorChange(player), 1L);
-        }
-    }
-
-    @EventHandler
-    public void onInventoryDrag(InventoryDragEvent e) {
-        if (e.getWhoClicked() instanceof Player player) {
-            Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> checkArmorChange(player), 1L);
-        }
-    }
-
-    @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent e) {
-        if (e.getHand() == EquipmentSlot.OFF_HAND) return;
-        trigger(e.getPlayer(), e);
-        Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> checkArmorChange(e.getPlayer()), 1L);
-    }
-
-    @EventHandler
-    public void onPlayerItemBreak(PlayerItemBreakEvent e) {
-        Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> checkArmorChange(e.getPlayer()), 1L);
-    }
-
-    @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent e) {
-        checkArmorChange(e.getEntity());
-    }
-
-    @EventHandler
-    public void onPlayerRespawn(PlayerRespawnEvent e) {
-        Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> checkArmorChange(e.getPlayer()), 1L);
-    }
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent e) {
-        Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> checkArmorChange(e.getPlayer()), 1L);
-    }
-
-
-    @EventHandler
-    public void onEntityDamage(EntityDamageByEntityEvent e) {
-        if (e.getDamager() instanceof Player p) trigger(p, e);
-    }
-
-    @EventHandler
-    public void onArmorEquip(InventoryClickEvent e) {
-        if (!(e.getWhoClicked() instanceof Player player)) return;
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-                if (blightedPlayer != null) ArmorManager.updatePlayerArmor(blightedPlayer);
-            }
-        }.runTaskLater(BlightedMC.getInstance(), 1);
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityDamage(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player player) trigger(player, event);
     }
 
     private <T extends Event> void trigger(Player player, T event) {
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-        if (blightedPlayer == null) {
-            blightedPlayer = new BlightedPlayer(player);
+        if (blightedPlayer == null) blightedPlayer = new BlightedPlayer(player);
+
+        BlightedItem blightedItem;
+        if (event instanceof PlayerInteractEvent interactEvent) {
+            if (interactEvent.getItem() == null) return;
+            blightedItem = BlightedItem.fromItemStack(interactEvent.getItem());
+        } else {
+            blightedItem = blightedPlayer.getEquippedItemManager();
         }
 
-        BlightedItem blightedItem = blightedPlayer.getEquippedItemManager();
-        if (blightedItem == null || blightedItem.getAbilities().isEmpty()) {
-            return;
-        }
+        if (blightedItem == null) return;
 
-        // Only trigger if the event matches the ability's trigger type
-        for (Ability ability : blightedItem.getAbilities()) {
-            if (ability.type().matches(event)) {
-                blightedItem.triggerAbilities(blightedPlayer, event);
-                break;
+        List<Ability> abilities = blightedItem.getAbilities();
+        if (abilities.isEmpty()) return;
+
+        Ability bestMatch = null;
+
+        for (Ability ability : abilities) {
+            if (!ability.type().matches(event)) continue;
+
+            if (bestMatch == null || isMoreSpecific(ability.type(), bestMatch.type())) {
+                bestMatch = ability;
             }
         }
+
+        if (bestMatch == null) return;
+
+        AbilityExecutor.execute(bestMatch, blightedPlayer, event);
+    }
+
+    /**
+     * Determines if 'candidate' is a higher priority match than 'current'.
+     * Logic: A SNEAK variant is more specific than a normal variant.
+     */
+    private boolean isMoreSpecific(AbilityType candidate, AbilityType current) {
+        return candidate.name().startsWith("SNEAK_") && !current.name().startsWith("SNEAK_");
     }
 }
