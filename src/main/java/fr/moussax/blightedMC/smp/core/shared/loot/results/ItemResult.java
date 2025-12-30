@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.shared.loot.LootContext;
 import fr.moussax.blightedMC.smp.core.shared.loot.LootResult;
 import fr.moussax.blightedMC.utils.ItemBuilder;
-import org.bukkit.Location;
+import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
@@ -185,8 +185,7 @@ public final class ItemResult implements LootResult {
             return formatAmount(meta.getDisplayName(), amount);
         }
 
-        String rawName = itemStack.getType().name().toLowerCase().replace('_', ' ');
-        String formattedName = Character.toUpperCase(rawName.charAt(0)) + rawName.substring(1);
+        String formattedName = Formatter.formatEnumName(itemStack.getType().name());
         return formatAmount(formattedName, amount);
     }
 

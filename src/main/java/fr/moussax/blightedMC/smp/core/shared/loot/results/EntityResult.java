@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.smp.core.shared.loot.results;
 import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.smp.core.shared.loot.LootContext;
 import fr.moussax.blightedMC.smp.core.shared.loot.LootResult;
-import org.bukkit.Location;
+import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
@@ -73,8 +73,7 @@ public final class EntityResult implements LootResult {
     @Override
     public String displayName(int amount) {
         if (entityType != null) {
-            String name = entityType.name().toLowerCase().replace('_', ' ');
-            return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+            return Formatter.formatEnumName(entityType.name());
         }
         return "Blighted Entity";
     }
