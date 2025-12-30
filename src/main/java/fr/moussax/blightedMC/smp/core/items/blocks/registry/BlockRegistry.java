@@ -1,26 +1,20 @@
 package fr.moussax.blightedMC.smp.core.items.blocks.registry;
 
 import fr.moussax.blightedMC.smp.core.items.blocks.BlightedBlock;
+import fr.moussax.blightedMC.smp.features.blocks.BlightedForge;
+import fr.moussax.blightedMC.smp.features.blocks.BlightedWorkbench;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Central registry for all {@link BlightedBlock} instances in BlightedMC.
- * <p>
- * Manages registration and lookup of custom blocks defined via
- * {@link BlockProvider} implementations. Provides methods to register,
- * retrieve, and clear blocks.
  */
 public final class BlockRegistry {
 
     public static final HashMap<String, BlightedBlock> REGISTRY = new HashMap<>();
-    private static final List<BlockProvider> PROVIDERS = List.of(
-        // Add new BlockProviders here
-    );
 
     private BlockRegistry() {
     }
@@ -32,7 +26,9 @@ public final class BlockRegistry {
      */
     public static void initialize() {
         clear();
-        PROVIDERS.forEach(BlockProvider::register);
+
+        register(new BlightedWorkbench());
+        register(new BlightedForge());
 
         Log.success("BlockRegistry", "Registered " + REGISTRY.size() + " custom blocks.");
     }
