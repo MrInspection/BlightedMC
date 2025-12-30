@@ -16,19 +16,14 @@ public class GlimmeringEye implements ItemProvider {
     public void register() {
         BlightedItem glimmeringEye = new BlightedItem("GLIMMERING_EYE", ItemType.UNCATEGORIZED, ItemRarity.RARE, Material.ENDER_EYE);
         glimmeringEye.setDisplayName("Glimmering Eye");
-        glimmeringEye.addLore(
-            "§8Consumable Item",
-            "",
-            "§5 Ability: Voidstep  §d§lRIGHT CLICK ",
-            "§7 Teleport through the void to the ",
-            "§7 block you're looking at, up to §e40",
-            "§7 blocks away.",
-            "§8 Mana Cost: §35",
-            "",
-            ItemRarity.RARE.getName()
-        );
+
+        Ability voidStep = new Ability(new VoidStepAbility(), "Voidstep", AbilityType.RIGHT_CLICK);
+
+        glimmeringEye.addLore("§8Consumable Item", "");
+        glimmeringEye.addLore(voidStep.getAbilityLore());
+        glimmeringEye.addLore("", ItemRarity.RARE.getName());
         glimmeringEye.addEnchantmentGlint();
-        glimmeringEye.addAbility(new Ability(new VoidStepAbility(), "Voidstep", AbilityType.RIGHT_CLICK));
+        glimmeringEye.addAbility(voidStep);
         glimmeringEye.addRule(ItemRule.PREVENT_PROJECTILE_LAUNCH);
 
         add(glimmeringEye);
