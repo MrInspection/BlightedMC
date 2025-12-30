@@ -2,15 +2,16 @@ package fr.moussax.blightedMC.smp.core.items.crafting;
 
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.utils.Utilities;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
 /**
- * Represents a shapeless recipe in the custom BlightedMC crafting system.
+ * Concrete implementation of a shapeless Blighted crafting recipe.
  * <p>
- * Unlike shaped recipes, the order of the ingredients in a shapeless recipe
- * does not matter. A recipe is considered valid if all required ingredients
- * are present in the correct quantities.
+ * Ingredient order is ignored, and attribute transfer may occur from
+ * a designated ingredient instance found in the crafting grid.
  */
 public final class BlightedShapelessRecipe extends BlightedRecipe {
     private final List<CraftingObject> ingredientList = new ArrayList<>();
@@ -18,42 +19,56 @@ public final class BlightedShapelessRecipe extends BlightedRecipe {
     private final BlightedItem resultBlightedItem;
 
     /**
-     * Creates a new shapeless recipe with the given result item.
-     *
-     * @param resultBlightedItem the item produced by this recipe
+     * Ingredient acting as the attribute source.
+     * {@code null} disables attribute transfer.
      */
+    private CraftingObject attributeSourceIngredient = null;
+
     public BlightedShapelessRecipe(BlightedItem resultBlightedItem) {
         this.resultBlightedItem = resultBlightedItem;
     }
 
-    /**
-     * Returns the result of this recipe.
-     *
-     * @return the {@link BlightedItem} produced by the recipe
-     */
     @Override
     public BlightedItem getResult() {
         return resultBlightedItem;
     }
 
-    /**
-     * Returns the quantity produced per craft.
-     * <p>
-     * Shapeless recipes in this implementation do not define variable amounts
-     * and always return 0 by default.
-     *
-     * @return the amount produced, always 0
-     */
     @Override
     public int getAmount() {
-        return 0; // This recipe type does not define per-result amounts
+        return 0;
     }
 
     /**
-     * Adds an ingredient to this shapeless recipe.
+     * Builds the result item and transfers attributes from the first
+     * matching source ingredient found in the grid, if configured.
      *
-     * @param ingredient the ingredient to add
-     * @throws IllegalArgumentException if the ingredient is neither custom nor vanilla
+     * @param craftingGrid crafting grid contents
+     * @return assembled result item
+     */
+    @Override
+    public ItemStack assemble(List<ItemStack> craftingGrid) {
+        ItemStack result = resultBlightedItem.toItemStack().clone();
+
+        if (attributeSourceIngredient != null) {
+            String targetId = attributeSourceIngredient.getId();
+            for (ItemStack stack : craftingGrid) {
+                if (stack == null || stack.getType() == Material.AIR) continue;
+
+                String stackId = Utilities.resolveItemId(stack, targetId);
+                if (stackId.equals(targetId)) {
+                    transferAttributes(stack, result);
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Registers an ingredient and updates its required count.
+     *
+     * @param ingredient recipe ingredient
      */
     public void addIngredient(CraftingObject ingredient) {
         ingredientList.add(ingredient);
@@ -69,19 +84,23 @@ public final class BlightedShapelessRecipe extends BlightedRecipe {
     }
 
     /**
-     * Returns an unmodifiable list of all ingredients in this recipe.
+     * Defines which ingredient provides enchantments and durability.
      *
-     * @return a list of recipe ingredients
+     * @param ingredient registered ingredient
      */
+    public void setAttributeSource(CraftingObject ingredient) {
+        if (!ingredientList.contains(ingredient)) {
+            throw new IllegalArgumentException("Attribute source must be a registered ingredient of this recipe");
+        }
+        this.attributeSourceIngredient = ingredient;
+    }
+
+    /** @return immutable list of registered ingredients */
     public List<CraftingObject> getIngredients() {
         return Collections.unmodifiableList(ingredientList);
     }
 
-    /**
-     * Returns an unmodifiable map of ingredient identifiers to their total required counts.
-     *
-     * @return a map of ingredient identifiers to quantities
-     */
+    /** @return immutable map of item ID → required amount */
     public Map<String, Integer> getIngredientCountMap() {
         return Collections.unmodifiableMap(ingredientCountMap);
     }

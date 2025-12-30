@@ -6,7 +6,6 @@ import fr.moussax.blightedMC.smp.core.entities.listeners.SpawnableEntitiesListen
 import fr.moussax.blightedMC.smp.core.fishing.listeners.FishingListener;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityListener;
 import fr.moussax.blightedMC.smp.core.items.blocks.BlightedBlockListener;
-import fr.moussax.blightedMC.smp.core.items.crafting.listener.CraftingTableListener;
 import fr.moussax.blightedMC.smp.core.items.listeners.UnsafeAnvilListener;
 import fr.moussax.blightedMC.smp.core.items.registry.menu.ItemRegistrySearch;
 import fr.moussax.blightedMC.smp.core.items.rules.ItemRuleListener;
@@ -33,7 +32,6 @@ public final class EventsRegistry {
         pm.registerEvents(new SpawnableEntitiesListener(), instance);
         pm.registerEvents(new BlightedBlockListener(), instance);
         pm.registerEvents(new BlightedPlayerListener(), instance);
-        pm.registerEvents(new CraftingTableListener(), instance);
         pm.registerEvents(new ItemRuleListener(), instance);
         pm.registerEvents(new AbilityListener(), instance);
         pm.registerEvents(new ItemRegistrySearch(), instance);

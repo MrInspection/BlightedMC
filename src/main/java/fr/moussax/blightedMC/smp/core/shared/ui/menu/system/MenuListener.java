@@ -1,6 +1,9 @@
 package fr.moussax.blightedMC.smp.core.shared.ui.menu.system;
 
+import fr.moussax.blightedMC.smp.core.items.crafting.menu.CraftingTableMenu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.InteractiveMenu;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.utils.Utilities;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,14 +23,21 @@ public final class MenuListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-
         if (!(event.getView().getTopInventory().getHolder() instanceof Menu menu)) return;
 
-        event.setCancelled(true);
+        boolean isTopInventory = event.getClickedInventory() == event.getView().getTopInventory();
+        int slotIndex = event.getRawSlot();
 
-        if (event.getClickedInventory() == null || event.getClickedInventory() != event.getView().getTopInventory()) {
-            return;
+        if (menu instanceof InteractiveMenu interactive) {
+            if (!isTopInventory || interactive.isInteractable(slotIndex)) {
+                event.setCancelled(false);
+                Utilities.delay(() -> interactive.onUpdate(player), 1L);
+                return;
+            }
         }
+
+        event.setCancelled(true);
+        if (!isTopInventory) return;
 
         Menu.MenuSlot slot = menu.getSlots().get(event.getSlot());
         if (slot != null) {
@@ -37,15 +47,30 @@ public final class MenuListener implements Listener {
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.getView().getTopInventory().getHolder() instanceof Menu) {
-            event.setCancelled(true);
+        if (!(event.getView().getTopInventory().getHolder() instanceof Menu menu)) return;
+
+        if (menu instanceof InteractiveMenu interactive) {
+            for (int slot : event.getRawSlots()) {
+                if (slot < event.getView().getTopInventory().getSize() && !interactive.isInteractable(slot)) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            event.setCancelled(false);
+            Utilities.delay(() -> interactive.onUpdate((Player) event.getWhoClicked()), 1L);
+            return;
         }
+        event.setCancelled(true);
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player player)) return;
-        if (!(event.getView().getTopInventory().getHolder() instanceof Menu)) return;
+        if (!(event.getView().getTopInventory().getHolder() instanceof Menu menu)) return;
+
+        if (menu instanceof CraftingTableMenu craftingMenu) {
+            craftingMenu.returnItems(player);
+        }
 
         Menu activeMenu = menuSystem.getActiveMenu(player);
         if (activeMenu != null && activeMenu.getInventory().equals(event.getInventory())) {
