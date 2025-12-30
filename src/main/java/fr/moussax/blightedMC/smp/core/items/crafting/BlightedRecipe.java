@@ -4,52 +4,48 @@ import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.utils.Utilities;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.Repairable;
 
 import java.util.*;
 
 /**
- * Abstract base class for all BlightedMC crafting recipes.
+ * Base type for all BlightedMC custom crafting recipes.
  * <p>
- * Provides shared functionality for recipe registration, result retrieval,
- * and matching against a 3×3 crafting grid. Subclasses implement specific
- * behavior for shaped or shapeless recipes, handling either fixed patterns
- * or order-independent ingredient matching.
+ * Supports shaped and shapeless recipes and handles attribute swapping
+ * (e.g., enchantments, durability, repair cost) during item assembly.
  */
-public sealed abstract class BlightedRecipe
-    permits BlightedShapedRecipe, BlightedShapelessRecipe {
+public sealed abstract class BlightedRecipe permits BlightedShapedRecipe, BlightedShapelessRecipe {
 
-    /** Global registry of all registered crafting recipes. */
+    /** Global registry of all registered Blighted recipes. */
     public static final Set<BlightedRecipe> REGISTERED_RECIPES = new HashSet<>();
 
-    /**
-     * Returns the resulting custom item of this recipe.
-     *
-     * @return the recipe's result
-     */
+    /** @return the logical result definition of this recipe */
     public abstract BlightedItem getResult();
 
-    /**
-     * Returns the number of items produced by this recipe.
-     *
-     * @return quantity produced
-     */
+    /** @return the base output amount */
     public abstract int getAmount();
 
     /**
-     * Registers this recipe in the global recipe registry.
+     * Builds the final result item using the provided crafting grid.
+     * Performs attribute swapping from relevant ingredients.
+     *
+     * @param craftingGrid 3×3 grid in row-major order (null or AIR for empty)
+     * @return assembled result item
      */
+    public abstract ItemStack assemble(List<ItemStack> craftingGrid);
+
+    /** Registers this recipe in the global registry. */
     public void addRecipe() {
         REGISTERED_RECIPES.add(this);
     }
 
     /**
-     * Finds all recipes matching the given 3×3 crafting grid.
-     * <p>
-     * The grid should be provided as a list of nine {@link ItemStack} elements
-     * in row-major order. Empty or air-only grids return an empty set.
+     * Resolves all recipes matching the given crafting grid.
      *
-     * @param craftingGrid the 3×3 crafting grid
-     * @return set of recipes that match the grid
+     * @param craftingGrid 3×3 grid in row-major order
+     * @return matching recipes, or empty if none match
      */
     public static Set<BlightedRecipe> findMatchingRecipes(List<ItemStack> craftingGrid) {
         boolean isEmpty = craftingGrid.stream()
@@ -75,7 +71,7 @@ public sealed abstract class BlightedRecipe
         return matchingRecipes;
     }
 
-    /** Extracts custom or vanilla item IDs from the crafting grid. */
+    /** Resolves custom or vanilla item IDs for each grid slot. */
     private static List<String> resolveItemIdsFromGrid(List<ItemStack> craftingGrid) {
         List<String> itemIdsInGrid = new ArrayList<>(craftingGrid.size());
 
@@ -89,7 +85,7 @@ public sealed abstract class BlightedRecipe
         return itemIdsInGrid;
     }
 
-    /** Checks if a shaped recipe matches the given crafting grid. */
+    /** Checks whether a shaped recipe matches the crafting grid exactly. */
     private static boolean matchesShapedRecipe(BlightedShapedRecipe recipe,
                                                List<ItemStack> craftingGrid,
                                                List<String> craftingGridItemIds) {
@@ -124,9 +120,7 @@ public sealed abstract class BlightedRecipe
         return true;
     }
 
-    /**
-     * Checks if a shapeless recipe matches the given crafting grid.
-     */
+    /** Checks whether a shapeless recipe matches the crafting grid. */
     private static boolean matchesShapelessRecipe(BlightedShapelessRecipe recipe, List<ItemStack> craftingGrid, List<String> craftingGridItemIds) {
         Map<String, Integer> remainingRequiredCounts = new HashMap<>(recipe.getIngredientCountMap());
 
@@ -146,5 +140,43 @@ public sealed abstract class BlightedRecipe
         }
 
         return remainingRequiredCounts.values().stream().allMatch(amount -> amount == 0);
+    }
+
+    /**
+     * Transfers allowed attributes from source to target.
+     * <p>
+     * Copies enchantments, durability, and repair cost.
+     * The display name is intentionally ignored.
+     *
+     * @param source ingredient item
+     * @param target result item
+     */
+    protected void transferAttributes(ItemStack source, ItemStack target) {
+        if (source == null || !source.hasItemMeta()) return;
+        ItemMeta sourceMeta = source.getItemMeta();
+        ItemMeta targetMeta = target.getItemMeta();
+        if (targetMeta == null) return;
+
+        if (Objects.requireNonNull(sourceMeta).hasEnchants()) {
+            sourceMeta.getEnchants().forEach((enchantment, level) ->
+                targetMeta.addEnchant(enchantment, level, true)
+            );
+        }
+
+        // Transfer repair cost
+        if (sourceMeta instanceof Repairable sourceRepair
+            && targetMeta instanceof Repairable targetRepair) {
+            targetRepair.setRepairCost(sourceRepair.getRepairCost());
+        }
+
+        // Transfer durability damage
+        if (sourceMeta instanceof Damageable sourceDamage
+            && targetMeta instanceof Damageable targetDamage) {
+            if (sourceDamage.hasDamage()) {
+                targetDamage.setDamage(sourceDamage.getDamage());
+            }
+        }
+
+        target.setItemMeta(targetMeta);
     }
 }
