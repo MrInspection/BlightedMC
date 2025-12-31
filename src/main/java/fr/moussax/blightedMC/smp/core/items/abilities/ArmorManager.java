@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class ArmorManager {
@@ -21,8 +22,7 @@ public final class ArmorManager {
         Map<Class<? extends FullSetBonus>, Integer> bonusCount = new HashMap<>();
 
         for (ItemStack item : armorContents) {
-            if (item == null) continue;
-            if (item.getType().isAir()) continue;
+            if (item == null || item.getType().isAir()) continue;
 
             BlightedItem blightedItem = BlightedItem.fromItemStack(item);
             if (blightedItem == null) continue;
@@ -30,47 +30,46 @@ public final class ArmorManager {
             player.setArmorPiece(blightedItem.getItemType(), blightedItem);
 
             FullSetBonus bonus = blightedItem.getFullSetBonus();
-            if (bonus == null) continue;
-
-            bonusCount.merge(bonus.getClass(), 1, Integer::sum);
+            if (bonus != null) {
+                bonusCount.merge(bonus.getClass(), 1, Integer::sum);
+            }
         }
 
-        for (FullSetBonus activeBonus : new ArrayList<>(player.getActiveFullSetBonuses())) {
-            int count = bonusCount.getOrDefault(activeBonus.getClass(), 0);
-            if (count >= activeBonus.getMaxPieces()) continue;
+        List<FullSetBonus> activeBonuses = new ArrayList<>(player.getActiveFullSetBonuses());
 
-            activeBonus.deactivate();
-            player.removeActiveBonusByClass(activeBonus.getClass());
+        for (FullSetBonus active : activeBonuses) {
+            int equippedCount = bonusCount.getOrDefault(active.getClass(), 0);
+
+            if (equippedCount < active.getMaxPieces()) {
+                try {
+                    active.deactivate();
+                } catch (Exception e) {
+                    Log.error("ArmorManager", "Error stopping ability: " + active.getClass().getSimpleName());
+                }
+                player.removeActiveBonusByClass(active.getClass());
+            }
         }
 
         bonusCount.forEach((bonusClass, count) -> {
+            boolean isRunning = player.getActiveFullSetBonuses().stream()
+                .anyMatch(b -> b.getClass().equals(bonusClass));
+
+            if (isRunning) return;
+
             try {
-                for (FullSetBonus active : player.getActiveFullSetBonuses()) {
-                    if (active.getClass().equals(bonusClass)) {
-                        return;
-                    }
-                }
+                FullSetBonus newBonus = bonusClass.getDeclaredConstructor().newInstance();
+                if (count < newBonus.getMaxPieces()) return;
 
-                FullSetBonus tempInstance = bonusClass.getDeclaredConstructor().newInstance();
-                if (count < tempInstance.getMaxPieces()) return;
+                newBonus.setPlayer(player);
+                player.addActiveBonus(newBonus);
 
-                tempInstance.setPlayer(player);
-                player.addActiveBonus(tempInstance);
-
-                if (tempInstance.getType() == FullSetBonus.SetType.NORMAL) {
-                    tempInstance.activate();
-                    return;
-                }
-
-                if (tempInstance.getType() == FullSetBonus.SetType.SNEAK
-                    && player.getPlayer().isSneaking()) {
-                    tempInstance.activate();
+                if (newBonus.getType() == FullSetBonus.SetType.NORMAL) {
+                    newBonus.activate();
+                } else if (newBonus.getType() == FullSetBonus.SetType.SNEAK && player.getPlayer().isSneaking()) {
+                    newBonus.activate();
                 }
             } catch (Exception e) {
-                Log.error(
-                    "ArmorManager",
-                    "Failed to activate full set bonus " + bonusClass.getSimpleName()
-                );
+                Log.error("ArmorManager", "Failed to activate bonus " + bonusClass.getSimpleName());
             }
         });
     }

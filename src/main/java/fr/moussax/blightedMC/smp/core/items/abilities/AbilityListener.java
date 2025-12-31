@@ -13,6 +13,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 
 import java.util.HashSet;
@@ -25,12 +26,13 @@ public final class AbilityListener implements Listener {
     private boolean updateTaskScheduled = false;
 
     private void scheduleArmorUpdate(Player player) {
+        if (player == null) return;
         dirtyArmorPlayers.add(player.getUniqueId());
 
-        if (!updateTaskScheduled) {
-            updateTaskScheduled = true;
-            Bukkit.getScheduler().runTask(BlightedMC.getInstance(), this::processArmorUpdates);
-        }
+        if (updateTaskScheduled) return;
+
+        updateTaskScheduled = true;
+        Bukkit.getScheduler().runTask(BlightedMC.getInstance(), this::processArmorUpdates);
     }
 
     private void processArmorUpdates() {
@@ -42,7 +44,7 @@ public final class AbilityListener implements Listener {
             if (player == null || !player.isOnline()) continue;
 
             BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-            if (blightedPlayer == null) blightedPlayer = new BlightedPlayer(player);
+            if (blightedPlayer == null) continue;
 
             ArmorManager.updatePlayerArmor(blightedPlayer);
         }
@@ -51,12 +53,36 @@ public final class AbilityListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getWhoClicked() instanceof Player player) scheduleArmorUpdate(player);
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        boolean isArmorSlot = event.getSlotType() == InventoryType.SlotType.ARMOR;
+        if (isArmorSlot || event.isShiftClick()) {
+            scheduleArmorUpdate(player);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.getWhoClicked() instanceof Player player) scheduleArmorUpdate(player);
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+
+        for (int slot : event.getRawSlots()) {
+            if (slot >= 5 && slot <= 8) {
+                scheduleArmorUpdate(player);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        UUID uniqueId = event.getPlayer().getUniqueId();
+        dirtyArmorPlayers.remove(uniqueId);
+
+        BlightedPlayer player = BlightedPlayer.getBlightedPlayer(event.getPlayer());
+        if (player == null) return;
+
+        for (FullSetBonus bonus : player.getActiveFullSetBonuses()) {
+            bonus.deactivate();
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -80,20 +106,6 @@ public final class AbilityListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onArmorEquip(PlayerInteractEvent event) {
-        if (!event.getAction().name().contains("RIGHT")) return;
-        if (event.getItem() == null) return;
-
-        String type = event.getItem().getType().name();
-        if (!type.endsWith("_HELMET")
-            && !type.endsWith("_CHESTPLATE")
-            && !type.endsWith("_LEGGINGS")
-            && !type.endsWith("_BOOTS")) return;
-
-        scheduleArmorUpdate(event.getPlayer());
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSneakToggle(PlayerToggleSneakEvent e) {
         BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(e.getPlayer());
         if (bp != null) {
@@ -103,22 +115,25 @@ public final class AbilityListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getItem() != null && isArmorMaterial(event.getItem().getType().name())) {
+            scheduleArmorUpdate(event.getPlayer());
+        }
         trigger(event.getPlayer(), event);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onEntityDamage(EntityDamageByEntityEvent event) {
-        if (event.getDamager() instanceof Player player) trigger(player, event);
+    private boolean isArmorMaterial(String name) {
+        return name.endsWith("_HELMET") || name.endsWith("_CHESTPLATE")
+            || name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS");
     }
 
     private <T extends Event> void trigger(Player player, T event) {
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-        if (blightedPlayer == null) blightedPlayer = new BlightedPlayer(player);
+        if (blightedPlayer == null) return;
 
         BlightedItem blightedItem;
-        if (event instanceof PlayerInteractEvent interactEvent) {
-            if (interactEvent.getItem() == null) return;
-            blightedItem = BlightedItem.fromItemStack(interactEvent.getItem());
+        if (event instanceof PlayerInteractEvent ie) {
+            if (ie.getItem() == null) return;
+            blightedItem = BlightedItem.fromItemStack(ie.getItem());
         } else {
             blightedItem = blightedPlayer.getEquippedItemManager();
         }
@@ -129,24 +144,18 @@ public final class AbilityListener implements Listener {
         if (abilities.isEmpty()) return;
 
         Ability bestMatch = null;
-
         for (Ability ability : abilities) {
             if (!ability.type().matches(event)) continue;
-
             if (bestMatch == null || isMoreSpecific(ability.type(), bestMatch.type())) {
                 bestMatch = ability;
             }
         }
 
-        if (bestMatch == null) return;
-
-        AbilityExecutor.execute(bestMatch, blightedPlayer, event);
+        if (bestMatch != null) {
+            AbilityExecutor.execute(bestMatch, blightedPlayer, event);
+        }
     }
 
-    /**
-     * Determines if 'candidate' is a higher priority match than 'current'.
-     * Logic: A SNEAK variant is more specific than a normal variant.
-     */
     private boolean isMoreSpecific(AbilityType candidate, AbilityType current) {
         return candidate.name().startsWith("SNEAK_") && !current.name().startsWith("SNEAK_");
     }
