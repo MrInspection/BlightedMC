@@ -109,33 +109,6 @@ public class OverworldLavaFishing implements FishingLootProvider {
                     10.0,
                     AmountProvider.range(2, 4),
                     LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.BLAZE_ROD),
-                        GREAT_CATCH
-                    ),
-                    6.0,
-                    AmountProvider.range(1, 2),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ANCIENT_DEBRIS),
-                        OUTSTANDING_CATCH
-                    ),
-                    1.5,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.NETHERITE_SCRAP),
-                        OUTSTANDING_CATCH
-                    ),
-                    0.5,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
                 )
             )
             .build();

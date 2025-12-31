@@ -7,6 +7,8 @@ import fr.moussax.blightedMC.smp.core.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
+import fr.moussax.blightedMC.smp.features.abilities.weave.EmberWeaveSetBonus;
+import fr.moussax.blightedMC.smp.features.abilities.weave.MagmaweaveSetBonus;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
@@ -60,7 +62,16 @@ public class FishingListener implements Listener {
         }
 
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-        new LavaFishingHook(hook, blightedPlayer, player, rodStack);
+        double speedMultiplier = 1.0;
+        if(blightedPlayer != null && blightedPlayer.hasFullSetBonus(EmberWeaveSetBonus.class)) {
+            speedMultiplier = 0.85;
+            player.playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 0.8f);
+        } else if (blightedPlayer != null && blightedPlayer.hasFullSetBonus(MagmaweaveSetBonus.class)) {
+            speedMultiplier = 0.70;
+            player.playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 0.8f);
+        }
+
+        new LavaFishingHook(hook, blightedPlayer, player, rodStack, speedMultiplier);
     }
 
     private void handleLavaFishingReel(PlayerFishEvent event, LavaFishingHook customHook, Player player) {

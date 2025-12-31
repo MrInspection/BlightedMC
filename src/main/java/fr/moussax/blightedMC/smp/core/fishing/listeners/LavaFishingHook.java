@@ -45,15 +45,17 @@ public class LavaFishingHook {
     private final World.Environment environment;
     private final int luckOfSeaLevel;
     private final int lureLevel;
+    private final double speedMultiplier;
 
     private BukkitRunnable task;
     private boolean isReadyToCatch = false;
 
-    public LavaFishingHook(FishHook hook, BlightedPlayer blightedPlayer, Player player, ItemStack rod) {
+    public LavaFishingHook(FishHook hook, BlightedPlayer blightedPlayer, Player player, ItemStack rod, double speedMultiplier) {
         this.hook = hook;
         this.blightedPlayer = blightedPlayer;
         this.player = player;
         this.environment = hook.getWorld().getEnvironment();
+        this.speedMultiplier = speedMultiplier;
 
         if (rod != null) {
             this.luckOfSeaLevel = rod.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
@@ -69,7 +71,8 @@ public class LavaFishingHook {
 
     private int calculateWaitTime() {
         int baseTime = Math.max(40, BASE_WAIT_TIME - (lureLevel * 40));
-        return baseTime + ThreadLocalRandom.current().nextInt(WAIT_TIME_VARIANCE);
+        int totalWaitTime = baseTime + ThreadLocalRandom.current().nextInt(WAIT_TIME_VARIANCE);
+        return (int) (totalWaitTime * speedMultiplier);
     }
 
     private int calculateBiteWindow() {

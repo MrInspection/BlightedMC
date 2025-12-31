@@ -4,6 +4,7 @@ import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
+import fr.moussax.blightedMC.smp.core.items.rules.common.PreventPlacementRule;
 import org.bukkit.Material;
 
 public class NetherMaterials implements ItemProvider {
@@ -76,6 +77,41 @@ public class NetherMaterials implements ItemProvider {
         enchantedNetherrack.addLore(ItemRarity.UNCOMMON.getName());
         enchantedNetherrack.addEnchantmentGlint();
 
+        // TODO - Finish items
+        BlightedItem vengefulEye = new BlightedItem("VENGEFUL_EYE", ItemType.UNCATEGORIZED, ItemRarity.EPIC, Material.PLAYER_HEAD);
+        vengefulEye.setDisplayName("Vengeful Eye");
+        vengefulEye.setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjkzZWMyODVmNWM2NzcwZTdkZmMxZjI3NzVkMGU5NTYzOTk3Mzc4Njk5OWJkZDM2Y2M4ZTk5OGIyNWU3NTNmYiJ9fX0=");
+        vengefulEye.addLore(ItemRarity.EPIC.getName());
+        vengefulEye.addRule(new PreventPlacementRule());
+
+        BlightedItem cremeBrulee = new BlightedItem("CREME_BRULEE", ItemType.UNCATEGORIZED, ItemRarity.UNCOMMON, Material.PUMPKIN_PIE);
+        cremeBrulee.setDisplayName("Crème brûlée");
+        cremeBrulee.addLore(
+            "§8French Food",
+            "",
+            " §7Impervious to the flame that",
+            " §7scorched its §6caramelized§7,",
+            " §6crown§7, this custard remains",
+            " §7velvety and untouched within. ",
+            "",
+            " §8“Sous le feu, la promesse",
+            " §8d'un instant sucré.”",
+            "",
+            ItemRarity.UNCOMMON.getName() + " GOURMET"
+        );
+        cremeBrulee.editFood(food -> {
+            food.setNutrition(10);
+            food.setSaturation(14.4f);
+            food.setCanAlwaysEat(true);
+        });
+        cremeBrulee.addEnchantmentGlint();
+
+        BlightedItem suspiciousFungus = new BlightedItem("SUSPICIOUS_FUNGUS", ItemType.UNCATEGORIZED, ItemRarity.RARE, Material.CRIMSON_FUNGUS);
+        suspiciousFungus.setDisplayName("SuSpIcIoUs Fungus");
+        suspiciousFungus.addLore(ItemRarity.RARE.getName());
+        suspiciousFungus.addRule(new PreventPlacementRule());
+        suspiciousFungus.addEnchantmentGlint();
+
         add(
             enchantedGhastTear,
             enchantedMagmaCream,
@@ -87,7 +123,10 @@ public class NetherMaterials implements ItemProvider {
             flames,
             sulfur,
             enchantedSulfur,
-            enchantedNetherrack
+            enchantedNetherrack,
+            vengefulEye,
+            cremeBrulee,
+            suspiciousFungus
         );
     }
 }

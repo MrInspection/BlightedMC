@@ -5,6 +5,7 @@ import fr.moussax.blightedMC.smp.core.fishing.registry.FishingLootProvider;
 import fr.moussax.blightedMC.smp.core.shared.loot.LootCondition;
 import fr.moussax.blightedMC.smp.core.shared.loot.LootEntry;
 import fr.moussax.blightedMC.smp.core.shared.loot.decorators.FishingLootFeedbackDecorator;
+import fr.moussax.blightedMC.smp.core.shared.loot.decorators.FishingLootSoundDecorator;
 import fr.moussax.blightedMC.smp.core.shared.loot.decorators.MessageDecorator;
 import fr.moussax.blightedMC.smp.core.shared.loot.providers.AmountProvider;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.EntityResult;
@@ -54,9 +55,9 @@ public class OverworldFishing implements FishingLootProvider {
                 ),
                 LootEntry.weighted(
                     new MessageDecorator(
-                        new FishingLootFeedbackDecorator(
+                        new FishingLootSoundDecorator(
                             EntityResult.vanilla(EntityType.TROPICAL_FISH),
-                            GOOD_CATCH
+                            FishingLootSoundDecorator.FishingCatchQuality.GOOD_CATCH
                         ),
                         "§d§lCOLORFUL! §7You caught a §bTropical Fish§7!"
                     ),
@@ -92,7 +93,7 @@ public class OverworldFishing implements FishingLootProvider {
             .addItems(
                 LootEntry.weighted(
                     new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.COD),
+                        ItemResult.of(Material.ACACIA_BOAT),
                         COMMON
                     ),
                     50.0,
@@ -101,7 +102,7 @@ public class OverworldFishing implements FishingLootProvider {
                 ),
                 LootEntry.weighted(
                     new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.SALMON),
+                        ItemResult.of(Material.ACACIA_BUTTON),
                         COMMON
                     ),
                     35.0,
@@ -110,7 +111,7 @@ public class OverworldFishing implements FishingLootProvider {
                 ),
                 LootEntry.weighted(
                     new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.KELP),
+                        ItemResult.of(Material.ACACIA_PLANKS),
                         COMMON
                     ),
                     30.0,
@@ -119,7 +120,7 @@ public class OverworldFishing implements FishingLootProvider {
                 ),
                 LootEntry.weighted(
                     new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.SEAGRASS),
+                        ItemResult.of(Material.ACACIA_FENCE),
                         COMMON
                     ),
                     25.0,
@@ -128,7 +129,7 @@ public class OverworldFishing implements FishingLootProvider {
                 ),
                 LootEntry.weighted(
                     new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.TROPICAL_FISH),
+                        ItemResult.of(Material.ACACIA_FENCE_GATE),
                         GOOD_CATCH
                     ),
                     15.0,
@@ -137,7 +138,7 @@ public class OverworldFishing implements FishingLootProvider {
                 ),
                 LootEntry.weighted(
                     new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.PUFFERFISH),
+                        ItemResult.of(Material.ACACIA_LEAVES),
                         GOOD_CATCH
                     ),
                     12.0,

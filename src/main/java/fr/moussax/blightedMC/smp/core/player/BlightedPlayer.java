@@ -1,16 +1,15 @@
 package fr.moussax.blightedMC.smp.core.player;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.server.database.PlayerDataHandler;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
-import fr.moussax.blightedMC.smp.core.items.abilities.AbilityExecutor;
 import fr.moussax.blightedMC.smp.core.items.abilities.ArmorManager;
 import fr.moussax.blightedMC.smp.core.items.abilities.CooldownEntry;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.smp.core.managers.ActionBarManager;
 import fr.moussax.blightedMC.smp.core.managers.GemsManager;
 import fr.moussax.blightedMC.smp.core.managers.ManaManager;
-import fr.moussax.blightedMC.server.database.PlayerDataHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -137,6 +136,15 @@ public class BlightedPlayer {
         if (activeFullSetBonuses.remove(bonus)) {
             bonus.deactivate();
         }
+    }
+
+    public boolean hasFullSetBonus(Class<? extends FullSetBonus> bonusClass) {
+        for (FullSetBonus bonus : activeFullSetBonuses) {
+            if (bonusClass.isInstance(bonus)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void removeActiveBonusByClass(Class<? extends FullSetBonus> bonusClass) {
