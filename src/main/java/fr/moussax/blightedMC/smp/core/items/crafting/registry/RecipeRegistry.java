@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.smp.core.items.crafting.registry;
 
 import fr.moussax.blightedMC.smp.core.items.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.smp.features.recipes.EndRecipes;
+import fr.moussax.blightedMC.smp.features.recipes.EquipmentRecipes;
 import fr.moussax.blightedMC.smp.features.recipes.MaterialRecipes;
 import fr.moussax.blightedMC.smp.features.recipes.NetherMaterialRecipes;
 import fr.moussax.blightedMC.utils.debug.Log;
@@ -20,7 +21,8 @@ public final class RecipeRegistry {
     private static final List<RecipeProvider> PROVIDERS = List.of(
         new MaterialRecipes(),
         new NetherMaterialRecipes(),
-        new EndRecipes()
+        new EndRecipes(),
+        new EquipmentRecipes()
     );
 
     private RecipeRegistry() {

@@ -9,6 +9,7 @@ import fr.moussax.blightedMC.smp.core.shared.ui.menu.PaginatedMenu;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.ui.sign.SignInputMenu;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Material;
@@ -25,7 +26,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class ItemRegistryMenu {
+public final class ItemRegistryMenu {
     private static final int[] CATEGORY_SLOTS = {
         10, 11, 12, 13, 14, 15, 16,
         19, 20, 21, 22, 23, 24, 25,
@@ -71,12 +72,12 @@ public class ItemRegistryMenu {
                 ItemType.Category category = categories.get(i);
                 ItemStack item = buildMenuItem(getCategoryIcon(category), "§b" + formatCategoryName(category), getCategoryLore(category));
                 setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (p, t) -> manager.openMenu(
-                    new BlightedItemsPaginatedMenu(category, this,
+                    new BlightedItemsPaginatedMenu(this,
                         itemObj -> itemObj.getItemType() != null && itemObj.getItemType().getCategory() == category,
                         "§r" + Formatter.formatEnumName(category.name()) + " Items"), p));
             }
 
-            setItem(SEARCH_SLOT, buildMenuItem(new ItemStack(Material.BIRCH_SIGN), "§eSearch Items", List.of("§7Click to search for items!")),
+            setItem(SEARCH_SLOT, buildMenuItem(new ItemStack(Material.PALE_OAK_SIGN), "§eSearch Items", List.of("§7Click to search for items!")),
                 MenuItemInteraction.ANY_CLICK, (p, t) -> openSearchSign(p, this));
             setItem(40, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
         }
@@ -119,9 +120,17 @@ public class ItemRegistryMenu {
     }
 
     private static void openSearchSign(Player player, Menu previousMenu) {
-        player.closeInventory();
-        player.sendMessage("§8 ■ §7Type your §f§lSEARCH INPUT §7into the chat:");
-        ItemRegistrySearch.awaitingSearch.put(player.getUniqueId(), previousMenu);
+        SignInputMenu.builder()
+            .lines("", "^^^^^^", "Enter your", "search!")
+            .onComplete(result -> {
+                String search = result.getFirstLine().trim();
+                if (search.isEmpty()) {
+                    manager.openMenu(previousMenu, player);
+                    return;
+                }
+                manager.openMenu(new SearchResultsPaginatedMenu(search, previousMenu), player);
+            })
+            .open(player);
     }
 
     public static class BlightedItemsPaginatedMenu extends PaginatedMenu {
@@ -137,10 +146,6 @@ public class ItemRegistryMenu {
                 String name2 = i2.getDisplayName();
                 return (name1 != null ? name1 : "").compareTo(name2 != null ? name2 : "");
             });
-        }
-
-        public BlightedItemsPaginatedMenu(ItemType.Category category, Menu previousMenu, Predicate<BlightedItem> filter, String title) {
-            this(previousMenu, filter, title);
         }
 
         @Override
@@ -224,18 +229,15 @@ public class ItemRegistryMenu {
     }
 
     public static class SearchResultsPaginatedMenu extends BlightedItemsPaginatedMenu {
-        private final String searchTerm;
-
         public SearchResultsPaginatedMenu(String searchTerm, Menu previousMenu) {
             super(previousMenu,
                 item -> {
-                    if (item.getItemId().toLowerCase().contains(searchTerm.toLowerCase())) return true;
-
+                    String term = searchTerm.toLowerCase();
+                    if (item.getItemId().toLowerCase().contains(term)) return true;
                     var meta = item.getItemMeta();
-                    return meta != null && meta.getDisplayName().toLowerCase().contains(searchTerm.toLowerCase());
+                    return meta != null && meta.getDisplayName().toLowerCase().contains(term);
                 },
                 "§rSearch: " + searchTerm);
-            this.searchTerm = searchTerm.toLowerCase();
         }
     }
 }

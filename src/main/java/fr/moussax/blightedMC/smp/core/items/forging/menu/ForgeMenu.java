@@ -20,7 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ForgeMenu extends Menu {
+public final class ForgeMenu extends Menu {
     private static final int[] GRID_SLOTS = {19, 20, 21, 28, 29, 30, 37, 38, 39};
     private static final int[] REQUIRED_ITEM_INDICATOR_SLOTS = {10, 11, 12, 13};
     private static final int[] FORGED_ITEM_INDICATOR_SLOTS = {15, 16};

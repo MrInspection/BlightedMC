@@ -17,7 +17,7 @@ import java.util.Set;
  * provides access to all registered forge recipes, and allows clearing
  * or reinitializing the registry during plugin startup or reload.
  */
-public class ForgeRegistry {
+public final class ForgeRegistry {
 
     /** Set of all registered forge recipes. */
     public static final Set<ForgeRecipe> RECIPES = new HashSet<>();

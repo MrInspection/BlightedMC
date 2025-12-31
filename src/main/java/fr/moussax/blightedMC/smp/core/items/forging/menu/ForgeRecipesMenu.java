@@ -29,7 +29,7 @@ import java.util.List;
  * Navigation buttons for paging, closing, and returning to a previous menu are included.
  * </p>
  */
-public class ForgeRecipesMenu extends PaginatedMenu {
+public final class ForgeRecipesMenu extends PaginatedMenu {
     private static final int[] RECIPE_SLOTS = {
         10, 11, 12, 13, 14, 15, 16,
         19, 20, 21, 22, 23, 24, 25,

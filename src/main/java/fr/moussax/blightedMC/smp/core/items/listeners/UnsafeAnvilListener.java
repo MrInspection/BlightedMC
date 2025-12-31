@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.Repairable;
 
 import java.util.Map;
 
-public class UnsafeAnvilListener implements Listener {
+public final class UnsafeAnvilListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPrepareAnvil(PrepareAnvilEvent event) {

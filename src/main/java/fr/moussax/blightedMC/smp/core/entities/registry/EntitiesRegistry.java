@@ -53,7 +53,8 @@ public final class EntitiesRegistry {
         new VoidlingDefender()
     );
 
-    private EntitiesRegistry() {}
+    private EntitiesRegistry() {
+    }
 
     /**
      * Initializes the entity registry by clearing existing entries and registering default entities.
@@ -109,7 +110,9 @@ public final class EntitiesRegistry {
             .toList();
     }
 
-    /** Clears all registered entities and resets the spawnable entity registry. */
+    /**
+     * Clears all registered entities and resets the spawnable entity registry.
+     */
     public static void clear() {
         ENTITIES.clear();
         SpawnableEntitiesRegistry.clear();
