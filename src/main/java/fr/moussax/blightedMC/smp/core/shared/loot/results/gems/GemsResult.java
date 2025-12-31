@@ -2,6 +2,8 @@ package fr.moussax.blightedMC.smp.core.shared.loot.results.gems;
 
 import fr.moussax.blightedMC.smp.core.shared.loot.LootContext;
 import fr.moussax.blightedMC.smp.core.shared.loot.LootResult;
+import org.bukkit.entity.Item;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
 
@@ -20,11 +22,13 @@ public final class GemsResult implements LootResult {
      */
     @Override
     public void execute(LootContext context, int amount) {
-        if (context.player() != null) {
-            context.player().addGems(amount);
-        } else {
-            Objects.requireNonNull(context.origin().getWorld())
-                .dropItemNaturally(context.origin(), new GemsItem(amount).createItemStack());
+        ItemStack gemstone = new GemsItem(amount).createItemStack();
+
+        Item droppedItem = Objects.requireNonNull(context.origin().getWorld())
+            .dropItem(context.origin(), gemstone);
+
+        if(context.velocity() != null) {
+            droppedItem.setVelocity(context.velocity());
         }
     }
 

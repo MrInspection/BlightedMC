@@ -43,9 +43,9 @@ public final class FishingLootFeedbackDecorator implements FeedbackDecorator {
         }
 
         String prefix = switch (quality) {
-            case OUTSTANDING_CATCH -> " §d§lOUTSTANDING CATCH! §f| §7You caught §f";
-            case GREAT_CATCH -> " §6§lGREAT CATCH! §f| §7You caught §f";
-            case GOOD_CATCH -> " §5§lGOOD CATCH! §f| §7You caught §f";
+            case OUTSTANDING_CATCH -> " §d§lOUTSTANDING CATCH! §f| §7You found §f";
+            case GREAT_CATCH -> " §6§lGREAT CATCH! §f| §7You found §f";
+            case GOOD_CATCH -> " §5§lGOOD CATCH! §f| §7You found §f";
             default -> null;
         };
 
