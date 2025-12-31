@@ -31,8 +31,11 @@ public final class SignInputManager {
         var actualState = nmsPlayer.A().a_(session.position);
         nmsPlayer.g.b(new PacketPlayOutBlockChange(session.position, actualState));
 
-        Bukkit.getScheduler().runTask(BlightedMC.getInstance(), () ->
-            session.menu().handleComplete(player, lines)
+        Bukkit.getScheduler().runTask(BlightedMC.getInstance(), () -> {
+                if (player.isOnline()) {
+                    session.menu().handleComplete(player, lines);
+                }
+            }
         );
     }
 

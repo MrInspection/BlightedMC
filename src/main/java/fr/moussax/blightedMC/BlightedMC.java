@@ -51,6 +51,7 @@ public final class BlightedMC extends JavaPlugin {
     public void onDisable() {
         database.closeConnection();
         eventsRegistry.shutdownMenus();
+        eventsRegistry.cleanup();
         RegistrySystem.clear();
     }
 
