@@ -92,7 +92,7 @@ public class BlightedPlayer {
     }
 
     public List<CooldownEntry> getCooldowns() {
-        return cooldowns;
+        return Collections.unmodifiableList(cooldowns);
     }
 
     public void addCooldown(CooldownEntry entry) {

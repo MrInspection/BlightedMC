@@ -47,7 +47,7 @@ public final class MaterialRecipes implements RecipeProvider {
 
         BlightedRecipe enchantedAmethystShardRecipe = shapedRecipe("ENCHANTED_AMETHYST_SHARD", 1)
             .shape(" i ", "iii", " i ")
-            .bind('i', Material.REDSTONE, 8)
+            .bind('i', Material.AMETHYST_SHARD, 8)
             .build();
 
         BlightedRecipe enchantedEmeraldRecipe = shapedRecipe("ENCHANTED_EMERALD", 1)

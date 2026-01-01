@@ -10,6 +10,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public final class MagmaweaveSetBonus extends EmberWeaveSetBonus {
+    private int taskCounter = 0;
+
     @Override
     public void startAbilityEffect() {
         if (isActive) return;
@@ -20,23 +22,26 @@ public final class MagmaweaveSetBonus extends EmberWeaveSetBonus {
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_AMBIENT, 2.0f, 0.5f);
 
         this.isActive = true;
+        this.taskCounter = 0;
         this.passiveTask = new BukkitRunnable() {
             @Override
             public void run() {
                 if (!player.isOnline() || !isActive) {
                     this.cancel();
+                    taskCounter = 0;
                     if (player.isOnline()) {
                         player.removePotionEffect(PotionEffectType.FIRE_RESISTANCE);
                         player.removePotionEffect(PotionEffectType.RESISTANCE);
                     }
                     return;
                 }
+                taskCounter++;
 
                 player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 70, 0, true, false, true));
 
-                if (player.getLocation().getBlock().getType() == Material.LAVA) {
+                if (player.getLocation().getBlock().isLiquid() && player.getLocation().getBlock().getType() == Material.LAVA) {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 40, 0, true, false, true));
-                    if (player.getTicksLived() % 10 == 0) {
+                    if (taskCounter % 10 == 0) {
                         player.getWorld().spawnParticle(
                             Particle.FALLING_OBSIDIAN_TEAR,
                             player.getLocation().add(0, 1.2, 0),

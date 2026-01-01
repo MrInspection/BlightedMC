@@ -5,8 +5,6 @@ import fr.moussax.blightedMC.smp.core.shared.loot.LootResult;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Objects;
-
 /**
  * A {@link LootResult} that grants Blighted Gems to the player
  * or drops them at a location if no player is present.
@@ -18,16 +16,16 @@ public final class GemsResult implements LootResult {
      * at the loot origin if the player is null.
      *
      * @param context the loot context
-     * @param amount the number of gems to grant
+     * @param amount  the number of gems to grant
      */
     @Override
     public void execute(LootContext context, int amount) {
         ItemStack gemstone = new GemsItem(amount).createItemStack();
+        if (context.origin().getWorld() == null) return;
 
-        Item droppedItem = Objects.requireNonNull(context.origin().getWorld())
-            .dropItem(context.origin(), gemstone);
+        Item droppedItem = context.origin().getWorld().dropItem(context.origin(), gemstone);
 
-        if(context.velocity() != null) {
+        if (context.velocity() != null) {
             droppedItem.setVelocity(context.velocity());
         }
     }

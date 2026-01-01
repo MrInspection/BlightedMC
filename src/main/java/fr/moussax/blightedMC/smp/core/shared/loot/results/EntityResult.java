@@ -53,8 +53,14 @@ public final class EntityResult implements LootResult {
         LivingEntity spawned = null;
 
         if (entityType != null) {
-            spawned = (LivingEntity) Objects.requireNonNull(context.origin().getWorld())
+            var entity = Objects.requireNonNull(context.origin().getWorld())
                 .spawnEntity(context.origin(), entityType);
+
+            if (entity instanceof LivingEntity living) {
+                spawned = living;
+            } else {
+                return;
+            }
         } else if (blightedEntity != null) {
             spawned = blightedEntity.clone().spawn(context.origin());
         }
