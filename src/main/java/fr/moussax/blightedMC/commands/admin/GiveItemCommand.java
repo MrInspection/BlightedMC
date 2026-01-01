@@ -1,9 +1,9 @@
 package fr.moussax.blightedMC.commands.admin;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.items.registry.menu.ItemRegistryMenu;
-import fr.moussax.blightedMC.smp.core.menus.MenuManager;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -23,16 +23,12 @@ public class GiveItemCommand implements CommandExecutor {
         if (!enforceAdminPermission(player)) return false;
 
         if (args.length == 0) {
-            MenuManager.openMenu(new ItemRegistryMenu.ItemCategoriesMenu(), player);
+            BlightedMC.menuManager().openMenu(new ItemRegistryMenu.ItemCategoriesMenu(), player);
             return true;
         }
 
         String itemId = args[0].toUpperCase();
         BlightedItem blightedItem = ItemRegistry.getItem(itemId);
-        if (blightedItem == null) {
-            warn(player, "Unable to find item matching the ID: §4" + itemId + "§c.");
-            return false;
-        }
 
         int amount = 1;
         if (args.length > 1) {

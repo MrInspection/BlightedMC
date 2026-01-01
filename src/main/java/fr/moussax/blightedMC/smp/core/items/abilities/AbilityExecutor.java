@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.smp.core.items.abilities;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
+import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.event.Cancellable;
@@ -11,59 +12,77 @@ import java.time.Instant;
 
 import static fr.moussax.blightedMC.utils.formatting.Formatter.warn;
 
-/**
- * Executes player abilities, handling cooldowns, mana, and activation.
- * <p>
- * Provides static methods to trigger abilities, enforce cooldowns, and apply mana costs.
- * This class is not instantiable.
- */
 public final class AbilityExecutor {
-    private AbilityExecutor() {
-    }
+    private AbilityExecutor() {}
 
     public static <T extends Event> void execute(Ability ability, BlightedPlayer player, T event) {
         AbilityManager<T> manager = castManager(ability.manager());
 
         for (CooldownEntry entry : player.getCooldowns()) {
-            if (entry.abilityManager().equals(manager.getClass()) && entry.abilityType() == ability.type()) {
-                double remainingSeconds = entry.getRemainingCooldownTimeInSeconds();
-                if (remainingSeconds <= 0) continue;
+            if (!entry.abilityManager().equals(manager.getClass())) continue;
+            if (entry.abilityType() != ability.type()) continue;
 
-                String abilityName = ability.name();
-                String timeText = String.format("%.0fs", remainingSeconds);
-                warn(player.getPlayer(), "§cYour §f" + abilityName + " §cability is on cooldown for §d" + timeText + "§c!");
-                if (event instanceof Cancellable c) c.setCancelled(true);
-                return;
-            }
-        }
+            double remaining = entry.getRemainingCooldownTimeInSeconds();
+            if (remaining <= 0) continue;
 
-        int manaCost = manager.getManaCost();
-        if (player.getMana().getCurrentMana() < manaCost) {
-            player.getPlayer().playSound(player.getPlayer().getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 100f, 0.5f);
-            player.getActionBarManager().setInsufficientMana(true);
-            if (event instanceof Cancellable c) c.setCancelled(true);
+            warn(
+                player.getPlayer(),
+                "§cYour §f" + ability.name()
+                    + " §cability is on cooldown for §d"
+                    + (int) Math.ceil(remaining) + "s§c!"
+            );
+            cancel(event);
             return;
         }
 
         if (!manager.canTrigger(player)) {
-            if (event instanceof Cancellable c) c.setCancelled(true);
+            cancel(event);
+            return;
+        }
+
+        int manaCost = manager.getManaCost();
+        if (player.getMana().getCurrentMana() < manaCost) {
+            player.getPlayer().playSound(
+                player.getPlayer().getLocation(),
+                Sound.ENTITY_ENDERMAN_TELEPORT,
+                100f,
+                0.5f
+            );
+            player.getActionBarManager().setInsufficientMana(true);
+            cancel(event);
             return;
         }
 
         try {
             boolean success = manager.triggerAbility(event);
-            if (event instanceof Cancellable c) c.setCancelled(!success || c.isCancelled());
-            if (success) {
-                if (manaCost > 0) {
-                    player.getMana().consumeMana(manaCost);
-                    player.getActionBarManager().tick();
-                }
-                manager.start(player);
-                startCooldown(player, manager.getClass(), ability.type(), manager.getCooldownSeconds());
+            if (!success) {
+                cancel(event);
+                return;
             }
+
+            cancel(event);
+
+            if (manaCost > 0) {
+                player.getMana().consumeMana(manaCost);
+                player.getActionBarManager().tick();
+            }
+
+            manager.start(player);
+            startCooldown(
+                player,
+                manager.getClass(),
+                ability.type(),
+                manager.getCooldownSeconds()
+            );
         } catch (Exception e) {
-            player.getPlayer().sendMessage("§cAbility execution failed: " + e.getClass().getSimpleName());
-            if (event instanceof Cancellable c) c.setCancelled(true);
+            Log.error("§cAbility execution failed: " + e.getClass().getSimpleName());
+            cancel(event);
+        }
+    }
+
+    private static void cancel(Event event) {
+        if (event instanceof Cancellable cancellable) {
+            cancellable.setCancelled(true);
         }
     }
 
@@ -72,31 +91,25 @@ public final class AbilityExecutor {
         return (AbilityManager<T>) manager;
     }
 
-    private static String getAbilityDisplayName(AbilityManager<?> manager) {
-        String className = manager.getClass().getSimpleName();
-        if (className.endsWith("Ability")) className = className.substring(0, className.length() - 8);
-        if (className.endsWith("Manager")) className = className.substring(0, className.length() - 7);
-        if (className.length() <= 1) return className;
-
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < className.length(); i++) {
-            char c = className.charAt(i);
-            if (Character.isUpperCase(c) && i > 0) result.append(' ');
-            result.append(i == 0 || Character.isUpperCase(className.charAt(i - 1)) ? Character.toUpperCase(c) : Character.toLowerCase(c));
-        }
-        return result.toString().trim();
-    }
-
     @SuppressWarnings("rawtypes")
-    public static void startCooldown(BlightedPlayer blightedPlayer,
-                                     Class<? extends AbilityManager> abilityManagerClass,
-                                     AbilityType abilityType,
-                                     int cooldownSeconds) {
-        CooldownEntry newEntry = new CooldownEntry(abilityManagerClass, abilityType, Instant.now().plusSeconds(cooldownSeconds));
+    public static void startCooldown(
+        BlightedPlayer blightedPlayer,
+        Class<? extends AbilityManager> abilityManagerClass,
+        AbilityType abilityType,
+        int cooldownSeconds
+    ) {
+        if (cooldownSeconds <= 0) return;
 
-        for (CooldownEntry entry : blightedPlayer.getCooldowns()) {
-            if (entry.abilityManager().equals(abilityManagerClass) && entry.abilityType() == abilityType) return;
-        }
+        CooldownEntry newEntry = new CooldownEntry(
+            abilityManagerClass,
+            abilityType,
+            Instant.now().plusSeconds(cooldownSeconds)
+        );
+
+        blightedPlayer.getCooldowns().removeIf(cooldownEntry ->
+            cooldownEntry.abilityManager().equals(abilityManagerClass)
+                && cooldownEntry.abilityType() == abilityType
+        );
 
         blightedPlayer.addCooldown(newEntry);
 

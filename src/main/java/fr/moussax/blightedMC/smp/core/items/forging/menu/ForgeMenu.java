@@ -1,12 +1,12 @@
 package fr.moussax.blightedMC.smp.core.items.forging.menu;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.smp.core.items.forging.ForgeFuel;
 import fr.moussax.blightedMC.smp.core.items.forging.ForgeRecipe;
-import fr.moussax.blightedMC.smp.core.menus.Menu;
-import fr.moussax.blightedMC.smp.core.menus.MenuElementPreset;
-import fr.moussax.blightedMC.smp.core.menus.MenuItemInteraction;
-import fr.moussax.blightedMC.smp.core.menus.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -20,7 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ForgeMenu extends Menu {
+public final class ForgeMenu extends Menu {
     private static final int[] GRID_SLOTS = {19, 20, 21, 28, 29, 30, 37, 38, 39};
     private static final int[] REQUIRED_ITEM_INDICATOR_SLOTS = {10, 11, 12, 13};
     private static final int[] FORGED_ITEM_INDICATOR_SLOTS = {15, 16};
@@ -212,7 +212,8 @@ public class ForgeMenu extends Menu {
             .toItemStack();
 
         setItem(49, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (_, _) -> close());
-        setItem(50, recipeBook, MenuItemInteraction.ANY_CLICK, (p, _) -> MenuManager.openMenu(new ForgeRecipesMenu(this), p));
+        setItem(50, recipeBook, MenuItemInteraction.ANY_CLICK, (p, _) ->
+            BlightedMC.menuManager().openMenu(new ForgeRecipesMenu(this), p));
     }
 
     private void setupFuelButtons(Player player) {

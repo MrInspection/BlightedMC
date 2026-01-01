@@ -1,10 +1,14 @@
 package fr.moussax.blightedMC.smp.core.items.registry;
 
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
+import fr.moussax.blightedMC.smp.features.armors.FishingArmors;
 import fr.moussax.blightedMC.smp.features.armors.HomodeusArmor;
 import fr.moussax.blightedMC.smp.features.armors.RocketBoots;
 import fr.moussax.blightedMC.smp.features.blocks.BlightedBlockItems;
 import fr.moussax.blightedMC.smp.features.items.*;
+import fr.moussax.blightedMC.smp.features.items.materials.BlightedMaterials;
+import fr.moussax.blightedMC.smp.features.items.materials.EndMaterials;
+import fr.moussax.blightedMC.smp.features.items.materials.NetherMaterials;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
@@ -33,7 +37,11 @@ public final class ItemRegistry {
         new RocketBoots(),
         new BlightedBlockItems(),
         new Hyperion(),
-        new ThermalFuels()
+        new ThermalFuels(),
+        new BlightedTools(),
+        new NetherMaterials(),
+        new EndMaterials(),
+        new FishingArmors()
     );
 
     private ItemRegistry() {

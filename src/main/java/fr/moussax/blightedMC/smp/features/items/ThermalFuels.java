@@ -24,7 +24,7 @@ public class ThermalFuels implements ItemProvider {
         enchantedCoal.addLore(ItemRarity.UNCOMMON.getName());
         enchantedCoal.addEnchantmentGlint();
 
-        BlightedItem enchantedLavaBucket = new BlightedItem("ENCHANTED_LAVA_BUCKET", ItemType.MATERIAL, ItemRarity.RARE, Material.LAVA_BUCKET);
+        BlightedItem enchantedLavaBucket = new BlightedItem("ENCHANTED_LAVA_BUCKET", ItemType.UNCATEGORIZED, ItemRarity.RARE, Material.LAVA_BUCKET);
         enchantedLavaBucket.setDisplayName("Enchanted Lava Bucket");
         enchantedLavaBucket.addLore(
             "§8Thermal Fuel", "",
@@ -37,7 +37,7 @@ public class ThermalFuels implements ItemProvider {
         enchantedLavaBucket.addEnchantmentGlint();
         enchantedLavaBucket.addRule(ItemRule.PREVENT_BUCKET_INTERACTIONS);
 
-        BlightedItem magmaBucket = new BlightedItem("MAGMA_BUCKET", ItemType.MATERIAL, ItemRarity.EPIC, Material.LAVA_BUCKET);
+        BlightedItem magmaBucket = new BlightedItem("MAGMA_BUCKET", ItemType.UNCATEGORIZED, ItemRarity.EPIC, Material.LAVA_BUCKET);
         magmaBucket.setDisplayName("Magma Bucket");
         magmaBucket.addLore(
             "§8Thermal Fuel", "",
@@ -50,7 +50,7 @@ public class ThermalFuels implements ItemProvider {
         magmaBucket.addEnchantmentGlint();
         magmaBucket.addRule(ItemRule.PREVENT_BUCKET_INTERACTIONS);
 
-        BlightedItem plasmaBucket = new BlightedItem("PLASMA_BUCKET", ItemType.MATERIAL, ItemRarity.LEGENDARY, Material.LAVA_BUCKET);
+        BlightedItem plasmaBucket = new BlightedItem("PLASMA_BUCKET", ItemType.UNCATEGORIZED, ItemRarity.LEGENDARY, Material.LAVA_BUCKET);
         plasmaBucket.setDisplayName("Plasma Bucket");
         plasmaBucket.addLore(
             "§8Thermal Fuel", "",

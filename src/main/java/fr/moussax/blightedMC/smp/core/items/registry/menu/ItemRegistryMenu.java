@@ -1,9 +1,15 @@
 package fr.moussax.blightedMC.smp.core.items.registry.menu;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.smp.core.menus.*;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.PaginatedMenu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuItemInteraction;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.ui.sign.SignInputMenu;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Material;
@@ -11,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,10 +26,18 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class ItemRegistryMenu {
-    private static final int[] CATEGORY_SLOTS = {10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 40, 41, 42, 43};
+public final class ItemRegistryMenu {
+    private static final int[] CATEGORY_SLOTS = {
+        10, 11, 12, 13, 14, 15, 16,
+        19, 20, 21, 22, 23, 24, 25,
+        28, 29, 30, 31, 32, 33, 34,
+        37, 38, 39, 40, 41, 42, 43
+    };
+
     private static final int SEARCH_SLOT = 41;
     private static final int[] ITEM_SLOTS = CATEGORY_SLOTS;
+
+    private static final MenuManager manager = BlightedMC.menuManager();
 
     private static ItemBuilder hideAllItemFlags(ItemBuilder builder) {
         return builder.addItemFlag(
@@ -56,13 +71,13 @@ public class ItemRegistryMenu {
             for (int i = 0; i < categories.size() && i < CATEGORY_SLOTS.length; i++) {
                 ItemType.Category category = categories.get(i);
                 ItemStack item = buildMenuItem(getCategoryIcon(category), "§b" + formatCategoryName(category), getCategoryLore(category));
-                setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (p, t) -> MenuManager.openMenu(
-                    new BlightedItemsPaginatedMenu(category, this,
+                setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (p, t) -> manager.openMenu(
+                    new BlightedItemsPaginatedMenu(this,
                         itemObj -> itemObj.getItemType() != null && itemObj.getItemType().getCategory() == category,
                         "§r" + Formatter.formatEnumName(category.name()) + " Items"), p));
             }
 
-            setItem(SEARCH_SLOT, buildMenuItem(new ItemStack(Material.BIRCH_SIGN), "§eSearch Items", List.of("§7Click to search for items!")),
+            setItem(SEARCH_SLOT, buildMenuItem(new ItemStack(Material.PALE_OAK_SIGN), "§eSearch Items", List.of("§7Click to search for items!")),
                 MenuItemInteraction.ANY_CLICK, (p, t) -> openSearchSign(p, this));
             setItem(40, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
         }
@@ -105,9 +120,17 @@ public class ItemRegistryMenu {
     }
 
     private static void openSearchSign(Player player, Menu previousMenu) {
-        player.closeInventory();
-        player.sendMessage("§8 ■ §7Type your §f§lSEARCH INPUT §7into the chat:");
-        ItemRegistrySearch.awaitingSearch.put(player.getUniqueId(), previousMenu);
+        SignInputMenu.builder()
+            .lines("", "^^^^^^", "Enter your", "search!")
+            .onComplete(result -> {
+                String search = result.getFirstLine().trim();
+                if (search.isEmpty()) {
+                    manager.openMenu(previousMenu, player);
+                    return;
+                }
+                manager.openMenu(new SearchResultsPaginatedMenu(search, previousMenu), player);
+            })
+            .open(player);
     }
 
     public static class BlightedItemsPaginatedMenu extends PaginatedMenu {
@@ -125,10 +148,6 @@ public class ItemRegistryMenu {
             });
         }
 
-        public BlightedItemsPaginatedMenu(ItemType.Category category, Menu previousMenu, Predicate<BlightedItem> filter, String title) {
-            this(previousMenu, filter, title);
-        }
-
         @Override
         protected int getTotalItems(Player player) {
             return blightedItems.size();
@@ -136,11 +155,11 @@ public class ItemRegistryMenu {
 
         @Override
         protected int getItemsPerPage() {
-            return 27;
+            return 28;
         }
 
         @Override
-        protected ItemStack getItem(Player player, int index) {
+        protected ItemStack getItem(@NonNull Player player, int index) {
             if (index >= blightedItems.size()) return new ItemStack(Material.AIR);
             BlightedItem blightedItem = blightedItems.get(index);
 
@@ -160,7 +179,7 @@ public class ItemRegistryMenu {
         }
 
         @Override
-        public void build(Player player) {
+        public void build(@NonNull Player player) {
             clearMenu();
             int start = currentPage * getItemsPerPage();
             int end = Math.min(start + getItemsPerPage(), getTotalItems(player));
@@ -189,42 +208,36 @@ public class ItemRegistryMenu {
         private void setNavigation() {
             if (currentPage > 0) setItem(48, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                 currentPage--;
-                MenuManager.openMenu(this, p);
+                manager.openMenu(this, p);
             });
             else
-                setItem(48, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> MenuManager.openMenu(previousMenu, p));
+                setItem(48, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> manager.openMenu(previousMenu, p));
 
             if ((currentPage + 1) * getItemsPerPage() < getTotalItems(null))
                 setItem(50, MenuElementPreset.NEXT_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                     currentPage++;
-                    MenuManager.openMenu(this, p);
-                });
-            else if (currentPage > 0)
-                setItem(50, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                    manager.openMenu(this, p);
                 });
 
             setItem(49, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
         }
 
         @Override
-        protected void onItemClick(Player player, int index, ClickType clickType) {
+        protected void onItemClick(@NonNull Player player, int index, @NonNull ClickType clickType) {
             if (index < blightedItems.size()) player.getInventory().addItem(blightedItems.get(index).toItemStack());
         }
     }
 
     public static class SearchResultsPaginatedMenu extends BlightedItemsPaginatedMenu {
-        private final String searchTerm;
-
         public SearchResultsPaginatedMenu(String searchTerm, Menu previousMenu) {
             super(previousMenu,
                 item -> {
-                    if (item.getItemId().toLowerCase().contains(searchTerm.toLowerCase())) return true;
-
+                    String term = searchTerm.toLowerCase();
+                    if (item.getItemId().toLowerCase().contains(term)) return true;
                     var meta = item.getItemMeta();
-                    return meta != null && meta.getDisplayName().toLowerCase().contains(searchTerm.toLowerCase());
+                    return meta != null && meta.getDisplayName().toLowerCase().contains(term);
                 },
                 "§rSearch: " + searchTerm);
-            this.searchTerm = searchTerm.toLowerCase();
         }
     }
 }

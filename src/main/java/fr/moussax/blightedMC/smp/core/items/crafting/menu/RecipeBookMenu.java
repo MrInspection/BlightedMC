@@ -1,25 +1,32 @@
 package fr.moussax.blightedMC.smp.core.items.crafting.menu;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.smp.core.items.crafting.BlightedShapedRecipe;
 import fr.moussax.blightedMC.smp.core.items.crafting.BlightedShapelessRecipe;
 import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
-import fr.moussax.blightedMC.smp.core.menus.*;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.PaginatedMenu;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuItemInteraction;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecipeBookMenu {
+public final class RecipeBookMenu {
     private static final int[] RECIPE_SLOTS = {
         10, 11, 12, 13, 14, 15, 16,
         19, 20, 21, 22, 23, 24, 25,
         28, 29, 30, 31, 32, 33, 34,
-        37, 38, 40, 41, 42, 43
+        37, 38, 39, 40, 41, 42, 43
     };
 
     private static final int[] FILLER_SLOTS = {
@@ -40,12 +47,14 @@ public class RecipeBookMenu {
     private static final int CLOSE_BUTTON_SLOT = 49;
     private static final int NEXT_BUTTON_SLOT = 50;
 
+    private static final MenuManager manager = BlightedMC.menuManager();
+
     public static class RecipeListMenu extends PaginatedMenu {
         private final Menu previousMenu;
         private final List<BlightedRecipe> cachedRecipes;
 
         public RecipeListMenu(Menu previousMenu) {
-            super("§rBlighted Recipe Book", 54);
+            super("Blighted Recipe Book", 54);
             this.previousMenu = previousMenu;
             this.cachedRecipes = new ArrayList<>(BlightedRecipe.REGISTERED_RECIPES);
             this.cachedRecipes.sort((r1, r2) -> {
@@ -56,7 +65,7 @@ public class RecipeBookMenu {
         }
 
         @Override
-        protected int getTotalItems(Player player) {
+        protected int getTotalItems(@NonNull Player player) {
             return cachedRecipes.size();
         }
 
@@ -66,7 +75,7 @@ public class RecipeBookMenu {
         }
 
         @Override
-        protected ItemStack getItem(Player player, int index) {
+        protected ItemStack getItem(@NonNull Player player, int index) {
             if (index >= cachedRecipes.size()) return new ItemStack(Material.AIR);
 
             BlightedRecipe recipe = cachedRecipes.get(index);
@@ -86,7 +95,7 @@ public class RecipeBookMenu {
         }
 
         @Override
-        public void build(Player player) {
+        public void build(@NonNull Player player) {
             totalItems = getTotalItems(player);
             int start = currentPage * getItemsPerPage();
             int end = Math.min(start + getItemsPerPage(), totalItems);
@@ -111,19 +120,19 @@ public class RecipeBookMenu {
             if (currentPage > 0) {
                 setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                     currentPage--;
-                    MenuManager.openMenu(this, p);
+                    manager.openMenu(this, p);
                 });
             } else {
                 setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                     close();
-                    p.openInventory(CraftingTableMenu.createInventory());
+                    manager.openMenu(new CraftingTableMenu(), player);
                 });
             }
 
             if (end < totalItems) {
                 setItem(NEXT_BUTTON_SLOT, MenuElementPreset.NEXT_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
                     currentPage++;
-                    MenuManager.openMenu(this, p);
+                    manager.openMenu(this, p);
                 });
             } else {
                 setItem(NEXT_BUTTON_SLOT, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
@@ -134,10 +143,10 @@ public class RecipeBookMenu {
         }
 
         @Override
-        protected void onItemClick(Player player, int index, org.bukkit.event.inventory.ClickType clickType) {
+        protected void onItemClick(@NonNull Player player, int index, @NonNull ClickType clickType) {
             if (index >= cachedRecipes.size()) return;
 
-            MenuManager.openMenu(new RecipeDetailMenu(cachedRecipes.get(index), this), player);
+            manager.openMenu(new RecipeDetailMenu(cachedRecipes.get(index), this), player);
         }
     }
 
@@ -193,7 +202,7 @@ public class RecipeBookMenu {
                     if (craftingObject.isCustom()) {
                         BlightedRecipe ingredientRecipe = findRecipeForItem(craftingObject.getManager());
                         if (ingredientRecipe != null) {
-                            MenuManager.openMenu(new RecipeDetailMenu(ingredientRecipe, this), p);
+                            manager.openMenu(new RecipeDetailMenu(ingredientRecipe, this), p);
                         }
                     }
                 });
@@ -203,18 +212,23 @@ public class RecipeBookMenu {
         private void setupShapelessRecipeGrid(BlightedShapelessRecipe shapelessRecipe) {
             List<CraftingObject> ingredients = shapelessRecipe.getIngredients();
 
-            for (int i = 0; i < ingredients.size() && i < CRAFTING_GRID_SLOTS.length; i++) {
-                CraftingObject ingredient = ingredients.get(i);
-                ItemStack ingredientItem = createIngredientDisplay(ingredient);
+            for (int i = 0; i < CRAFTING_GRID_SLOTS.length; i++) {
+                if (i < ingredients.size()) {
+                    CraftingObject ingredient = ingredients.get(i);
+                    ItemStack ingredientItem = createIngredientDisplay(ingredient);
 
-                setItem(CRAFTING_GRID_SLOTS[i], ingredientItem, MenuItemInteraction.ANY_CLICK, (p, t) -> {
-                    if (ingredient.isCustom()) {
-                        BlightedRecipe ingredientRecipe = findRecipeForItem(ingredient.getManager());
-                        if (ingredientRecipe != null) {
-                            MenuManager.openMenu(new RecipeDetailMenu(ingredientRecipe, this), p);
+                    setItem(CRAFTING_GRID_SLOTS[i], ingredientItem, MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                        if (ingredient.isCustom()) {
+                            BlightedRecipe ingredientRecipe = findRecipeForItem(ingredient.getManager());
+                            if (ingredientRecipe != null) {
+                                manager.openMenu(new RecipeDetailMenu(ingredientRecipe, this), p);
+                            }
                         }
-                    }
-                });
+                    });
+                } else {
+                    setItem(CRAFTING_GRID_SLOTS[i], new ItemStack(Material.AIR), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                    });
+                }
             }
         }
 
@@ -245,9 +259,10 @@ public class RecipeBookMenu {
 
         private void setupNavigation() {
             setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK,
-                (p, t) -> MenuManager.openMenu(previousMenu, p));
+                (p, t) -> manager.openMenu(previousMenu, p));
             setItem(CLOSE_BUTTON_SLOT, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK,
                 (p, t) -> close());
+
             fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
         }
     }

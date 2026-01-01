@@ -1,7 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
 
-import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
-import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
+import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -10,12 +9,12 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
 
 import java.util.Objects;
+
+import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
 public final class BlightedStray extends BlightedCreature {
     public BlightedStray() {
@@ -23,24 +22,13 @@ public final class BlightedStray extends BlightedCreature {
         itemInMainHand = new ItemStack(Material.BOW);
         setDamage(6);
         setDroppedExp(12);
-        setLootTable(createLootTable());
-    }
-
-    private LootTable createLootTable() {
-        ItemStack slownessArrow = new ItemBuilder(Material.TIPPED_ARROW)
-            .setItemMeta(meta -> {
-                if (meta instanceof PotionMeta potionMeta) {
-                    potionMeta.setBasePotionType(PotionType.SLOWNESS);
-                }
-            })
-            .toItemStack();
-
-        return new LootTable()
+        setLootTable(new BlightedLootBuilder()
             .setMaxDrop(4)
-            .addLoot(Material.BONE, 2, 5, 1.0, LootDropRarity.COMMON)
-            .addLoot(Material.ARROW, 2, 5, 1.0, LootDropRarity.COMMON)
-            .addLoot(slownessArrow, 1, 3, 0.4, LootDropRarity.UNCOMMON)
-            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
+            .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
+            .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
+            .addGemsLoot(5, 0.03, VERY_RARE)
+            .build()
+        );
     }
 
     @Override

@@ -1,10 +1,8 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityImmunities;
-import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
-import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
@@ -39,11 +37,6 @@ public class LaserEngineer extends SpawnableEntity {
         setDamage(10);
         setDefense(10);
         setDroppedExp(6);
-
-        setLootTable(new LootTable().setMaxDrop(2)
-            .addLoot(Material.ROTTEN_FLESH, 1, 3, 0.90, LootDropRarity.COMMON)
-            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE)
-        );
 
         armor = new ItemStack[]{
             new ItemBuilder(Material.LEATHER_BOOTS).setLeatherColor("#737775").addEnchantmentGlint().setUnbreakable(true).toItemStack(),

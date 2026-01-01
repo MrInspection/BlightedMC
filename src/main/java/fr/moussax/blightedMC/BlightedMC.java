@@ -7,6 +7,8 @@ import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
 import fr.moussax.blightedMC.server.database.PluginDatabase;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.engine.BlightedSpawnEngine;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
+import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.Bukkit;
@@ -26,22 +28,85 @@ public final class BlightedMC extends JavaPlugin {
         instance = this;
 
         Log.info("Plugin", "Initializing BlightedMC plugin...");
+        BlightedServer.initialize(this);
+        BlightedServer.getInstance().configureServer();
+
         String config = PluginFiles.CONFIG.getFileName();
         saveResourcesAs(config, config);
 
         settings = PluginSettings.load(this);
         initializeDatabase();
 
-        BlightedServer.initialize(this);
-        BlightedServer.getInstance().configureServer();
-
         CommandBuilder.initializeCommands();
         RegistrySystem.initialize();
         eventsRegistry = new EventsRegistry();
         eventsRegistry.initializeListeners();
+        eventsRegistry.buildSpawnCache();
 
         BlightedServer.getInstance().rehydrateEntitiesOnLoadedChunks();
         new BlightedSpawnEngine().runTaskTimer(this, 100L, 1L);
+    }
+
+    @Override
+    public void onDisable() {
+        database.closeConnection();
+        eventsRegistry.shutdownMenus();
+        eventsRegistry.cleanup();
+        RegistrySystem.clear();
+    }
+
+    /**
+     * Retrieves the plugin settings.
+     *
+     * @return the plugin settings instance
+     */
+    public PluginSettings getSettings() {
+        return settings;
+    }
+
+    /**
+     * Retrieves the plugin database connection.
+     *
+     * @return the plugin database instance
+     */
+    public PluginDatabase getDatabase() {
+        return database;
+    }
+
+    /**
+     * Retrieves the instance of the menu manager.
+     *
+     * @return the menu manager
+     */
+    public MenuManager getMenuManager() {
+        return eventsRegistry.getMenuManager();
+    }
+
+    /**
+     * Retrieves the instance of the menu system.
+     *
+     * @return the menu system
+     */
+    public MenuSystem getMenuSystem() {
+        return eventsRegistry.getMenuSystem();
+    }
+
+    /**
+     * Static accessor to the plugin's menu manager.
+     *
+     * @return the menu manager
+     */
+    public static MenuManager menuManager() {
+        return instance.getMenuManager();
+    }
+
+    /**
+     * Retrieves the singleton instance of the plugin.
+     *
+     * @return the plugin instance
+     */
+    public static BlightedMC getInstance() {
+        return instance;
     }
 
     private void initializeDatabase() {
@@ -76,23 +141,5 @@ public final class BlightedMC extends JavaPlugin {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public void onDisable() {
-        database.closeConnection();
-        RegistrySystem.clear();
-    }
-
-    public PluginSettings getSettings() {
-        return settings;
-    }
-
-    public PluginDatabase getDatabase() {
-        return database;
-    }
-
-    public static BlightedMC getInstance() {
-        return instance;
     }
 }

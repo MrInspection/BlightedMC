@@ -17,6 +17,7 @@ public class ShapedRecipeBuilder {
     private final BlightedItem result;
     private final int amount;
     private ShapeEncoder encoder;
+    private int attributeSourceSlot = -1;
 
     private ShapedRecipeBuilder(BlightedItem result, int amount) {
         this.result = result;
@@ -103,6 +104,22 @@ public class ShapedRecipeBuilder {
     }
 
     /**
+     * Sets which slot in the 3x3 grid transfers its attributes (enchants, durability) to the result.
+     * <p>
+     * Slots are indexed 0-8 (Row 1: 0,1,2 | Row 2: 3,4,5 | Row 3: 6,7,8).
+     *
+     * @param slotIndex the index of the source slot
+     * @return this builder
+     */
+    public ShapedRecipeBuilder attributeSource(int slotIndex) {
+        if (slotIndex < 0 || slotIndex >= 9) {
+            throw new IllegalArgumentException("Attribute source slot must be between 0 and 8");
+        }
+        this.attributeSourceSlot = slotIndex;
+        return this;
+    }
+
+    /**
      * Builds the shaped recipe.
      *
      * @return the constructed {@link BlightedShapedRecipe}
@@ -112,6 +129,11 @@ public class ShapedRecipeBuilder {
         validateEncoder();
         BlightedShapedRecipe recipe = new BlightedShapedRecipe(result, amount);
         recipe.setRecipe(encoder.encodeCraftingRecipe());
+
+        if (attributeSourceSlot != -1) {
+            recipe.setAttributeSourceSlot(attributeSourceSlot);
+        }
+
         return recipe;
     }
 

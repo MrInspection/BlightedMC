@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.smp.features.blocks;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
+import fr.moussax.blightedMC.smp.core.items.blocks.registry.BlockRegistry;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
 import org.bukkit.Material;
 

@@ -1,7 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
 
-import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
-import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
+import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -14,21 +13,20 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.Objects;
 
+import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+
 public final class BlightedHusk extends BlightedCreature {
     public BlightedHusk() {
         super("BLIGHTED_HUSK", "Blighted Husk", EntityType.HUSK);
         setDamage(6);
         setDroppedExp(12);
-        setLootTable(createLootTable());
-    }
-
-    private LootTable createLootTable() {
-        return new LootTable()
-            .setMaxDrop(4)
-            .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, LootDropRarity.COMMON)
-            .addLoot(Material.SAND, 1, 3, 0.3, LootDropRarity.UNCOMMON)
-            .addLoot(Material.IRON_INGOT, 1, 2, 0.1, LootDropRarity.RARE)
-            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
+        setLootTable(new BlightedLootBuilder()
+            .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, COMMON)
+            .addLoot(Material.SAND, 1, 3, 0.3, UNCOMMON)
+            .addLoot(Material.IRON_INGOT, 1, 2, 0.1, RARE)
+            .addGemsLoot(5, 0.03, VERY_RARE)
+            .build()
+        );
     }
 
     @Override

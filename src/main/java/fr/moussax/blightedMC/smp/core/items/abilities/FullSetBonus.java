@@ -6,34 +6,49 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitRunnable;
 
+/**
+ * Represents a bonus granted when wearing a complete or partial armor set.
+ */
 public interface FullSetBonus {
+
+    /** Starts the bonus effect. */
     void startAbilityEffect();
 
+    /** Stops the bonus effect. */
     void stopAbilityEffect();
 
+    /** @return number of equipped pieces contributing to this bonus */
     int getPieces();
 
+    /** @return required number of pieces to activate this bonus */
     int getMaxPieces();
 
+    /** Assigns the owning player. */
     void setPlayer(BlightedPlayer player);
 
+    /** @return activation type of this bonus */
     default SetType getType() {
         return SetType.NORMAL;
     }
 
+    /** @return whether this bonus registers Bukkit listeners */
     default boolean hasListener() {
         return this instanceof Listener;
     }
 
+    /** Activates the bonus and registers listeners if needed. */
     default void activate() {
         if (hasListener()) {
-            Bukkit.getPluginManager().registerEvents((Listener) this, BlightedMC.getInstance());
+            Bukkit.getPluginManager().registerEvents(
+                (Listener) this,
+                BlightedMC.getInstance()
+            );
         }
         startAbilityEffect();
     }
 
+    /** Deactivates the bonus and unregisters listeners if needed. */
     default void deactivate() {
         stopAbilityEffect();
         if (hasListener()) {
@@ -41,6 +56,7 @@ public interface FullSetBonus {
         }
     }
 
+    /** @return a new instance of this bonus bound to the given player */
     default FullSetBonus createNew(BlightedPlayer player) {
         try {
             FullSetBonus clone = this.getClass().getDeclaredConstructor().newInstance();
@@ -52,12 +68,10 @@ public interface FullSetBonus {
     }
 
     /**
-     * Checks whether the given player is the owner of this ability.
-     * <p>
-     * Use this inside event handlers to ensure only the owning player triggers the ability.
+     * Checks whether the given player owns this bonus.
      *
-     * @param eventPlayer the player from the event
-     * @return true if eventPlayer owns this ability
+     * @param eventPlayer player from an event
+     * @return {@code true} if the player owns this bonus
      */
     default boolean isAbilityOwner(Player eventPlayer) {
         BlightedPlayer owner = getAbilityOwner();
@@ -66,80 +80,10 @@ public interface FullSetBonus {
             && eventPlayer.getUniqueId().equals(owner.getPlayer().getUniqueId());
     }
 
-    /**
-     * Returns the owning {@link BlightedPlayer} of this ability.
-     * <p>
-     * Implement this in the ability class to allow {@link #isAbilityOwner(Player)} to work.
-     *
-     * @return owning BlightedPlayer
-     */
+    /** @return owning player of this bonus */
     default BlightedPlayer getAbilityOwner() {
         return null;
     }
 
-    enum SetType {NORMAL, SNEAK}
-}
-
-class SneakAbilityWrapper implements FullSetBonus {
-    private final FullSetBonus delegate;
-    private BlightedPlayer player;
-    private BukkitRunnable task;
-
-    public SneakAbilityWrapper(FullSetBonus delegate) {
-        this.delegate = delegate;
-    }
-
-    @Override
-    public void startAbilityEffect() {
-        if (player.getPlayer().isSneaking()) delegate.activate();
-        task = new BukkitRunnable() {
-            private boolean sneaking = player.getPlayer().isSneaking();
-
-            @Override
-            public void run() {
-                boolean nowSneaking = player.getPlayer().isSneaking();
-                if (sneaking && !nowSneaking) delegate.deactivate();
-                else if (!sneaking && nowSneaking) delegate.activate();
-                sneaking = nowSneaking;
-            }
-        };
-        task.runTaskTimer(BlightedMC.getInstance(), 0, 1);
-    }
-
-    @Override
-    public void stopAbilityEffect() {
-        if (task != null) {
-            task.cancel();
-            task = null;
-        }
-        delegate.deactivate();
-    }
-
-    @Override
-    public int getPieces() {
-        return delegate.getPieces();
-    }
-
-    @Override
-    public int getMaxPieces() {
-        return delegate.getMaxPieces();
-    }
-
-    @Override
-    public void setPlayer(BlightedPlayer player) {
-        this.player = player;
-        delegate.setPlayer(player);
-    }
-
-    @Override
-    public FullSetBonus createNew(BlightedPlayer player) {
-        SneakAbilityWrapper wrapper = new SneakAbilityWrapper(delegate);
-        wrapper.setPlayer(player);
-        return wrapper;
-    }
-
-    @Override
-    public SetType getType() {
-        return delegate.getType();
-    }
+    enum SetType { NORMAL, SNEAK }
 }

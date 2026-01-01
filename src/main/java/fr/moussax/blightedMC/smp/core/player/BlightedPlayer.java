@@ -1,14 +1,15 @@
 package fr.moussax.blightedMC.smp.core.player;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.server.database.PlayerDataHandler;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
+import fr.moussax.blightedMC.smp.core.items.abilities.ArmorManager;
 import fr.moussax.blightedMC.smp.core.items.abilities.CooldownEntry;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.smp.core.managers.ActionBarManager;
 import fr.moussax.blightedMC.smp.core.managers.GemsManager;
 import fr.moussax.blightedMC.smp.core.managers.ManaManager;
-import fr.moussax.blightedMC.server.database.PlayerDataHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,10 +18,10 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 
 public class BlightedPlayer {
-    private static BlightedMC instance = BlightedMC.getInstance();
     private static final Map<UUID, BlightedPlayer> players = new HashMap<>();
-    private static final double DEFAULT_MAX_MANA = instance.getSettings().getDefaultMaxMana();
-    private static final double DEFAULT_MANA_REGEN_RATE = instance.getSettings().getDefaultManaRegenerationRate();
+
+    private static volatile double DEFAULT_MAX_MANA = -1;
+    private static volatile double DEFAULT_MANA_REGEN_RATE = -1;
 
     private final Player player;
     private final UUID playerId;
@@ -38,6 +39,8 @@ public class BlightedPlayer {
     private int forgeFuel;
 
     public BlightedPlayer(Player player) {
+        initSettings();
+
         this.player = player;
         this.playerId = player.getUniqueId();
         this.dataHandler = new PlayerDataHandler(playerId, player.getName());
@@ -58,7 +61,15 @@ public class BlightedPlayer {
             20L
         );
 
-        initializeFullSetBonuses();
+        ArmorManager.updatePlayerArmor(this);
+    }
+
+    private static synchronized void initSettings() {
+        if (DEFAULT_MAX_MANA == -1) {
+            BlightedMC instance = BlightedMC.getInstance();
+            DEFAULT_MAX_MANA = instance.getSettings().getDefaultMaxMana();
+            DEFAULT_MANA_REGEN_RATE = instance.getSettings().getDefaultManaRegenerationRate();
+        }
     }
 
     public static BlightedPlayer getBlightedPlayer(Player player) {
@@ -90,21 +101,6 @@ public class BlightedPlayer {
 
     public void removeCooldown(CooldownEntry entry) {
         cooldowns.remove(entry);
-    }
-
-    public void initializeFullSetBonuses() {
-        clearActiveBonuses();
-
-        // Rebuild active bonuses based on equipped armor
-        for (BlightedItem piece : armorPieces.values()) {
-            if (piece == null) continue;
-
-            List<FullSetBonus> bonuses = Collections.singletonList(piece.getFullSetBonus());
-
-            for (FullSetBonus bonus : bonuses) {
-                addActiveBonus(bonus);
-            }
-        }
     }
 
     public void clearArmorPieces() {
@@ -140,6 +136,15 @@ public class BlightedPlayer {
         if (activeFullSetBonuses.remove(bonus)) {
             bonus.deactivate();
         }
+    }
+
+    public boolean hasFullSetBonus(Class<? extends FullSetBonus> bonusClass) {
+        for (FullSetBonus bonus : activeFullSetBonuses) {
+            if (bonusClass.isInstance(bonus)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void removeActiveBonusByClass(Class<? extends FullSetBonus> bonusClass) {
@@ -210,7 +215,7 @@ public class BlightedPlayer {
     }
 
     public void addItemToInventory(ItemStack item) {
-        if (item.getType().isAir()) return;
+        if (item == null || item.getType().isAir()) return;
         player.getInventory().addItem(item);
     }
 
@@ -226,6 +231,10 @@ public class BlightedPlayer {
     }
 
     public void setLastKnownArmor(ItemStack[] armor) {
+        if (armor == null) {
+            this.lastKnownArmor = new ItemStack[4];
+            return;
+        }
         this.lastKnownArmor = Arrays.copyOf(armor, 4);
     }
 

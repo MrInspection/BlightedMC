@@ -1,170 +1,96 @@
 package fr.moussax.blightedMC.smp.core.fishing;
 
-import fr.moussax.blightedMC.smp.core.fishing.loot.LootContext;
-import fr.moussax.blightedMC.smp.core.fishing.loot.LootEntry;
-import fr.moussax.blightedMC.smp.core.fishing.loot.LootPool;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
+import fr.moussax.blightedMC.smp.core.shared.loot.LootContext;
+import fr.moussax.blightedMC.smp.core.shared.loot.LootEntry;
+import fr.moussax.blightedMC.smp.core.shared.loot.LootTable;
+import fr.moussax.blightedMC.smp.core.shared.loot.strategies.WeightedSelectionStrategy;
 import org.bukkit.Location;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.World;
+import org.bukkit.block.Biome;
 import org.bukkit.util.Vector;
 
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * Represents a fishing loot table containing pools for entities and items.
- * <p>
- * Provides methods to roll for entities or items based on a player's context.
- * Can be constructed using the {@link Builder} pattern.
- */
-public class FishingLootTable {
-    private final LootPool entityPool;
-    private final LootPool itemPool;
-    private final Random randomizer = new Random();
+public final class FishingLootTable {
+    private final LootTable entityTable;
+    private final LootTable itemTable;
+    private final double entityRollChance;
 
-    /**
-     * Constructs a new FishingLootTable with specified entity and item pools.
-     *
-     * @param entityPool the pool of entities that can be spawned
-     * @param itemPool   the pool of items that can be dropped
-     */
-    public FishingLootTable(LootPool entityPool, LootPool itemPool) {
-        this.entityPool = entityPool;
-        this.itemPool = itemPool;
+    private FishingLootTable(LootTable entityTable, LootTable itemTable, double entityRollChance) {
+        this.entityTable = entityTable;
+        this.itemTable = itemTable;
+        this.entityRollChance = entityRollChance;
     }
 
-    /**
-     * Rolls the entity pool to determine which entity, if any, should spawn.
-     *
-     * @param player   the player performing the fishing action
-     * @param location the location to spawn the entity
-     * @param velocity the velocity vector to apply to the spawned entity
-     * @return the spawned entity, or {@code null} if no entity is rolled
-     */
-    public LivingEntity rollEntity(BlightedPlayer player, Location location, Vector velocity) {
-        LootContext context = createContext(player);
+    public boolean roll(BlightedPlayer player, Location location, Vector velocity) {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        World world = Objects.requireNonNull(location.getWorld());
+        Biome biome = world.getBiome(location);
+        LootContext context = new LootContext(player, world, biome, location, random, velocity);
 
-        Optional<LootEntry> entry = entityPool.roll(randomizer, context);
-        return entry.map(lootEntry -> lootEntry.spawnEntity(player, location, velocity)).orElse(null);
+        if (!entityTable.isEmpty() && random.nextDouble() <= entityRollChance) {
+            entityTable.execute(context);
+            return true;
+        }
+
+        if (!itemTable.isEmpty()) {
+            itemTable.execute(context);
+            return true;
+        }
+
+        return false;
     }
 
-    /**
-     * Rolls the item pool to determine which item, if any, should be given.
-     *
-     * @param player the player performing the fishing action
-     * @return the rolled item, or {@code null} if no item is rolled
-     */
-    public ItemStack rollItem(BlightedPlayer player) {
-        LootContext context = createContext(player);
-
-        Optional<LootEntry> entry = itemPool.roll(randomizer, context);
-        return entry.map(lootEntry -> lootEntry.createItem(player)).orElse(null);
-    }
-
-    /**
-     * Creates a new loot context for the specified player.
-     *
-     * @param blightedPlayer the player for which to create the context
-     * @return a new LootContext
-     */
-    private LootContext createContext(BlightedPlayer blightedPlayer) {
-        var player = Objects.requireNonNull(blightedPlayer.getPlayer());
-
-        return new LootContext(
-            blightedPlayer,
-            player.getLocation().getBlock().getBiome(),
-            player.getWorld().getEnvironment()
-        );
-    }
-
-    /**
-     * Returns a new {@link Builder} for constructing a FishingLootTable.
-     */
     public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * Builder class for creating {@link FishingLootTable} instances.
-     * <p>
-     * Supports adding entity and item entries, setting roll chances, and constructing the table.
-     */
-    public static class Builder {
+    public static final class Builder {
+        private final LootTable.Builder entityTableBuilder = LootTable.builder();
+        private final LootTable.Builder itemTableBuilder = LootTable.builder();
+        private double entityRollChance = 0.15;
 
-        private LootPool entityPool = new LootPool();
-        private LootPool itemPool = new LootPool();
-
-        /**
-         * Sets the entity pool for the table.
-         */
-        public Builder entityPool(LootPool pool) {
-            this.entityPool = pool;
-            return this;
-        }
-
-        /**
-         * Sets the item pool for the table.
-         */
-        public Builder itemPool(LootPool pool) {
-            this.itemPool = pool;
-            return this;
-        }
-
-        /**
-         * Adds a single entity entry to the entity pool.
-         */
-        public Builder addEntity(LootEntry entry) {
-            this.entityPool.add(entry);
-            return this;
-        }
-
-        /**
-         * Adds multiple entity entries to the entity pool.
-         */
-        public Builder addEntities(LootEntry... entries) {
-            this.entityPool.add(entries);
-            return this;
-        }
-
-        /**
-         * Adds a single item entry to the item pool.
-         */
-        public Builder addItem(LootEntry entry) {
-            this.itemPool.add(entry);
-            return this;
-        }
-
-        /**
-         * Adds multiple item entries to the item pool.
-         */
-        public Builder addItems(LootEntry... entries) {
-            this.itemPool.add(entries);
-            return this;
-        }
-
-        /**
-         * Sets the roll chance for the entity pool.
-         */
         public Builder setEntityRollChance(double chance) {
-            this.entityPool.setRollChance(chance);
+            this.entityRollChance = Math.max(0.0, Math.min(1.0, chance));
             return this;
         }
 
-        /**
-         * Sets the roll chance for the item pool.
-         */
-        public Builder setItemRollChance(double chance) {
-            this.itemPool.setRollChance(chance);
+        public Builder addEntity(LootEntry entry) {
+            entityTableBuilder.addEntry(entry);
             return this;
         }
 
-        /**
-         * Builds and returns the {@link FishingLootTable} instance.
-         */
+        public Builder addEntities(LootEntry... entries) {
+            entityTableBuilder.addEntries(entries);
+            return this;
+        }
+
+        public Builder addItem(LootEntry entry) {
+            itemTableBuilder.addEntry(entry);
+            return this;
+        }
+
+        public Builder addItems(LootEntry... entries) {
+            itemTableBuilder.addEntries(entries);
+            return this;
+        }
+
         public FishingLootTable build() {
-            return new FishingLootTable(entityPool, itemPool);
+            entityTableBuilder
+                .selectionStrategy(new WeightedSelectionStrategy())
+                .rollChance(1.0);
+
+            itemTableBuilder
+                .selectionStrategy(new WeightedSelectionStrategy())
+                .rollChance(1.0);
+
+            return new FishingLootTable(
+                entityTableBuilder.build(),
+                itemTableBuilder.build(),
+                entityRollChance
+            );
         }
     }
 }

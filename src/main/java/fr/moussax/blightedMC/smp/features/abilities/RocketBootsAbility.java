@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.smp.features.abilities;
 
+import fr.moussax.blightedMC.smp.core.items.abilities.ArmorManager;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import org.bukkit.GameMode;
@@ -34,7 +35,11 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
         if (player == null) return;
         Player p = player.getPlayer();
         if (p == null) return;
-        p.setAllowFlight(false);
+
+        if (p.getGameMode() != GameMode.CREATIVE && p.getGameMode() != GameMode.SPECTATOR) {
+            p.setAllowFlight(false);
+            p.setFlying(false);
+        }
     }
 
     @Override
@@ -59,19 +64,18 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
 
     @EventHandler
     public void onPlayerToggleFlight(PlayerToggleFlightEvent event) {
-        var p = event.getPlayer();
+        Player p = event.getPlayer();
 
-        if (!isAbilityOwner(p)) {
-            return;
-        }
-
-        if (p.getGameMode() == GameMode.CREATIVE) return;
+        if (!isAbilityOwner(p)) return;
+        if (p.getGameMode() == GameMode.CREATIVE || p.getGameMode() == GameMode.SPECTATOR) return;
 
         if (!p.isFlying()) {
             event.setCancelled(true);
             p.setAllowFlight(false);
             p.setVelocity(p.getLocation().getDirection().setY(0.5).multiply(1.25));
+
             applyDurabilityDamageToBoots(p);
+
             p.getWorld().spawnParticle(Particle.CLOUD, p.getLocation(), 12, 0.2, 0.05, 0.2, 0.001);
             p.getWorld().playSound(p.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 60f, 0f);
         }
@@ -81,9 +85,8 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
     public void onPlayerLand(PlayerMoveEvent event) {
         Player p = event.getPlayer();
 
-        if (!isAbilityOwner(p)) {
-            return;
-        }
+        if (!isAbilityOwner(p)) return;
+        if (p.getAllowFlight()) return;
 
         if (((Entity) p).isOnGround()) {
             p.setAllowFlight(true);
@@ -94,8 +97,7 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
         int damage = 1;
 
         ItemStack boots = player.getInventory().getBoots();
-        if (boots == null) return;
-        if (!boots.hasItemMeta()) return;
+        if (boots == null || !boots.hasItemMeta()) return;
 
         ItemMeta meta = boots.getItemMeta();
         if (!(meta instanceof Damageable damageable)) return;
@@ -107,7 +109,7 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
             if (unbreakingLevel > 0) {
                 double skipChance = (double) unbreakingLevel / (unbreakingLevel + 1);
                 if (ThreadLocalRandom.current().nextDouble() < skipChance) {
-                    continue; // durability loss skipped
+                    continue;
                 }
             }
             appliedDamage++;
@@ -119,9 +121,11 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
         int maxDurability = boots.getType().getMaxDurability();
 
         int durabilityDamage = currentDamage + appliedDamage;
+
         if (durabilityDamage >= maxDurability) {
             player.getInventory().setBoots(null);
             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
+            ArmorManager.updatePlayerArmor(this.player);
         } else {
             damageable.setDamage(durabilityDamage);
             boots.setItemMeta(meta);

@@ -117,7 +117,7 @@ public class WitherImpactAbility implements AbilityManager<PlayerInteractEvent>,
     private void notifyPlayerOfAbilityDamage(Player player, int entitiesDamaged) {
         if (entitiesDamaged > 0) {
             double totalDamage = (double) entitiesDamaged * (15000.0D + Math.random() * 135000.0D);
-            Formatter.inform(player, "Your implosion hit §d" + entitiesDamaged + " §7enem" + (entitiesDamaged > 1 ? "ies" : "y") + " for §d" + Formatter.formatDouble(totalDamage, 2) + " §7damage.");
+            Formatter.inform(player, "Your implosion hit §d" + entitiesDamaged + " §7enem" + (entitiesDamaged > 1 ? "ies" : "y") + " for §d" + Formatter.formatDecimalWithCommas(totalDamage) + " §7damage.");
         }
     }
 

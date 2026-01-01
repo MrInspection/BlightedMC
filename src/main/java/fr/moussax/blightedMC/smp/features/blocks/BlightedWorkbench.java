@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.smp.features.blocks;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.blocks.BlightedBlock;
 import fr.moussax.blightedMC.smp.core.items.crafting.menu.CraftingTableMenu;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
@@ -29,7 +30,7 @@ public class BlightedWorkbench extends BlightedBlock {
         Player player = event.getPlayer();
         if (event.getAction().toString().contains("RIGHT_CLICK")) {
             event.setCancelled(true);
-            player.openInventory(CraftingTableMenu.createInventory());
+            BlightedMC.menuManager().openMenu(new CraftingTableMenu(), player);
         }
     }
 }

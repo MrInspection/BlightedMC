@@ -18,6 +18,7 @@ public enum ItemType {
     HOE(Category.TOOLS),
     SHOVEL(Category.TOOLS),
     FISHING_ROD(Category.TOOLS),
+    LAVA_FISHING_ROD(Category.TOOLS),
 
     MATERIAL(Category.MATERIAL),
     GEMSTONE(Category.MATERIAL),

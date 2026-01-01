@@ -3,7 +3,6 @@ package fr.moussax.blightedMC.smp.core.items;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.abilities.Ability;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityExecutor;
-import fr.moussax.blightedMC.smp.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
@@ -12,7 +11,6 @@ import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Event;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -28,10 +26,6 @@ import java.util.List;
  * This class extends {@link ItemBuilder} to define items with specific identifiers, rarity,
  * type, abilities, interaction rules, and optional full set bonuses.
  * It handles persistent metadata storage and ability execution logic.
- *
- * @see fr.moussax.blightedMC.smp.core.items.abilities.Ability
- * @see fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus
- * @see fr.moussax.blightedMC.smp.core.items.rules.ItemRule
  */
 public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
     public static final NamespacedKey BLIGHTED_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_id");
@@ -163,36 +157,10 @@ public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
      */
     public void triggerAbilities(BlightedPlayer blightedPlayer, Event event) {
         for (Ability ability : abilities) {
-            if (shouldTriggerAbility(ability, event)) {
+            if (ability.type().matches(event)) {
                 AbilityExecutor.execute(ability, blightedPlayer, event);
             }
         }
-
-        for (FullSetBonus activeBonus : blightedPlayer.getActiveFullSetBonuses()) {
-            if (activeBonus.getPieces() >= activeBonus.getMaxPieces()) {
-                activeBonus.activate();
-            }
-        }
-    }
-
-    private boolean shouldTriggerAbility(Ability ability, Event event) {
-        if (event instanceof PlayerInteractEvent interactEvent) {
-            Action action = interactEvent.getAction();
-            AbilityType abilityType = ability.type();
-
-            if (abilityType.isSneak() && !interactEvent.getPlayer().isSneaking()) {
-                return false;
-            }
-
-            boolean rightClick = abilityType.isRightClick() &&
-                (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK);
-
-            boolean leftClick = abilityType.isLeftClick() &&
-                (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK);
-
-            return rightClick || leftClick;
-        }
-        return true;
     }
 
     @Override

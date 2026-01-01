@@ -19,6 +19,7 @@ public class ShapelessRecipeBuilder {
 
     private final BlightedItem result;
     private final List<CraftingObject> ingredients = new ArrayList<>();
+    private CraftingObject attributeSource = null;
 
     private ShapelessRecipeBuilder(BlightedItem result) {
         this.result = result;
@@ -52,7 +53,21 @@ public class ShapelessRecipeBuilder {
      * @return this builder
      */
     public ShapelessRecipeBuilder addIngredient(Material material, int amount) {
-        ingredients.add(new CraftingObject(material, amount));
+        return addIngredient(material, amount, false);
+    }
+
+    /**
+     * Adds a material ingredient with optional attribute transfer.
+     *
+     * @param material          the material to add
+     * @param amount            the required amount
+     * @param isAttributeSource if true, the result inherits attributes from this item
+     * @return this builder
+     */
+    public ShapelessRecipeBuilder addIngredient(Material material, int amount, boolean isAttributeSource) {
+        CraftingObject obj = new CraftingObject(material, amount);
+        ingredients.add(obj);
+        if (isAttributeSource) this.attributeSource = obj;
         return this;
     }
 
@@ -64,7 +79,21 @@ public class ShapelessRecipeBuilder {
      * @return this builder
      */
     public ShapelessRecipeBuilder addIngredient(BlightedItem item, int amount) {
-        ingredients.add(new CraftingObject(item, amount));
+        return addIngredient(item, amount, false);
+    }
+
+    /**
+     * Adds a custom item ingredient with optional attribute transfer.
+     *
+     * @param item              the item to add
+     * @param amount            the required amount
+     * @param isAttributeSource if true, the result inherits attributes from this item
+     * @return this builder
+     */
+    public ShapelessRecipeBuilder addIngredient(BlightedItem item, int amount, boolean isAttributeSource) {
+        CraftingObject obj = new CraftingObject(item, amount);
+        ingredients.add(obj);
+        if (isAttributeSource) this.attributeSource = obj;
         return this;
     }
 
@@ -76,7 +105,19 @@ public class ShapelessRecipeBuilder {
      * @return this builder
      */
     public ShapelessRecipeBuilder addIngredient(String itemId, int amount) {
-        return addIngredient(ItemRegistry.getItem(itemId), amount);
+        return addIngredient(ItemRegistry.getItem(itemId), amount, false);
+    }
+
+    /**
+     * Adds a custom item ingredient using its item ID with optional attribute transfer.
+     *
+     * @param itemId            the item identifier
+     * @param amount            the required amount
+     * @param isAttributeSource if true, the result inherits attributes from this item
+     * @return this builder
+     */
+    public ShapelessRecipeBuilder addIngredient(String itemId, int amount, boolean isAttributeSource) {
+        return addIngredient(ItemRegistry.getItem(itemId), amount, isAttributeSource);
     }
 
     /**
@@ -89,6 +130,11 @@ public class ShapelessRecipeBuilder {
         for (CraftingObject ingredient : ingredients) {
             recipe.addIngredient(ingredient);
         }
+
+        if (attributeSource != null) {
+            recipe.setAttributeSource(attributeSource);
+        }
+
         return recipe;
     }
 }

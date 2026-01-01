@@ -1,7 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
 
-import fr.moussax.blightedMC.smp.core.entities.loot.LootDropRarity;
-import fr.moussax.blightedMC.smp.core.entities.loot.LootTable;
+import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -15,13 +14,20 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.Objects;
 
+import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+
 public final class BlightedParched extends BlightedCreature {
     public BlightedParched() {
         super("BLIGHTED_PARCHED", "Blighted Parched", EntityType.PARCHED);
         itemInMainHand = new ItemStack(Material.BOW);
         setDamage(6);
         setDroppedExp(12);
-        setLootTable(createLootTable());
+        setLootTable(new BlightedLootBuilder()
+            .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
+            .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
+            .addGemsLoot(5, 0.03, VERY_RARE)
+            .build()
+        );
     }
 
     @Override
@@ -31,14 +37,6 @@ public final class BlightedParched extends BlightedCreature {
         Objects.requireNonNull(entity.getEquipment()).setItemInMainHand(
             new ItemBuilder(Material.BOW).addEnchantment(Enchantment.POWER, 1).toItemStack()
         );
-    }
-
-    private LootTable createLootTable() {
-        return new LootTable()
-            .setMaxDrop(4)
-            .addLoot(Material.BONE, 2, 5, 1.0, LootDropRarity.COMMON)
-            .addLoot(Material.ARROW, 2, 5, 1.0, LootDropRarity.COMMON)
-            .addGemsLoot(5, 0.03, LootDropRarity.VERY_RARE);
     }
 
     @Override

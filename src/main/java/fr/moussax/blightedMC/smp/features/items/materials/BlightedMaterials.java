@@ -1,0 +1,167 @@
+package fr.moussax.blightedMC.smp.features.items.materials;
+
+import fr.moussax.blightedMC.smp.core.items.BlightedItem;
+import fr.moussax.blightedMC.smp.core.items.ItemRarity;
+import fr.moussax.blightedMC.smp.core.items.ItemType;
+import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
+import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
+import org.bukkit.Material;
+
+public class BlightedMaterials implements ItemProvider {
+
+    @Override
+    public void register() {
+        BlightedItem enchantedIronIngot =
+            createMaterialItem("ENCHANTED_IRON_INGOT", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.IRON_INGOT,
+                "Enchanted Iron Ingot", false, false);
+
+        BlightedItem enchantedIronBlock =
+            createMaterialItem("ENCHANTED_IRON_BLOCK", ItemType.MATERIAL, ItemRarity.RARE, Material.IRON_BLOCK,
+                "Enchanted Iron Block", true, false);
+
+        BlightedItem enchantedCopperIngot =
+            createMaterialItem("ENCHANTED_COPPER_INGOT", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.COPPER_INGOT,
+                "Enchanted Copper Ingot", false, false);
+
+        BlightedItem enchantedGoldIngot =
+            createMaterialItem("ENCHANTED_GOLD_INGOT", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.GOLD_INGOT,
+                "Enchanted Gold Ingot", false, false);
+
+        BlightedItem enchantedLapisLazuli =
+            createMaterialItem("ENCHANTED_LAPIS_LAZULI", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.LAPIS_LAZULI,
+                "Enchanted Lapis Lazuli", false, false);
+
+        BlightedItem enchantedRedstone =
+            createMaterialItem("ENCHANTED_REDSTONE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.REDSTONE,
+                "Enchanted Redstone", false, false);
+
+        BlightedItem enchantedAmethystShard =
+            createMaterialItem("ENCHANTED_AMETHYST_SHARD", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.AMETHYST_SHARD,
+                "Enchanted Amethyst Shard", false, false);
+
+        BlightedItem enchantedEmerald =
+            createMaterialItem("ENCHANTED_EMERALD", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.EMERALD,
+                "Enchanted Emerald", false, false);
+
+        BlightedItem enchantedRottenFlesh =
+            createMaterialItem("ENCHANTED_ROTTEN_FLESH", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.ROTTEN_FLESH,
+                "Enchanted Rotten Flesh", false, false);
+
+        BlightedItem enchantedBone =
+            createMaterialItem("ENCHANTED_BONE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.BONE,
+                "Enchanted Bone", false, false);
+
+        BlightedItem enchantedString =
+            createMaterialItem("ENCHANTED_STRING", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.STRING,
+                "Enchanted String", false, false);
+
+        BlightedItem enchantedGunpowder =
+            createMaterialItem("ENCHANTED_GUNPOWDER", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.GUNPOWDER,
+                "Enchanted Gunpowder", false, false);
+
+        BlightedItem enchantedSpiderEye =
+            createMaterialItem("ENCHANTED_SPIDER_EYE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.SPIDER_EYE,
+                "Enchanted Spider Eye", false, false);
+
+        BlightedItem enchantedSlimeBall =
+            createMaterialItem("ENCHANTED_SLIME_BALL", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.SLIME_BALL,
+                "Enchanted Slime Ball", false, false);
+
+        BlightedItem enchantedPhantomMembrane =
+            createMaterialItem("ENCHANTED_PHANTOM_MEMBRANE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.PHANTOM_MEMBRANE,
+                "Enchanted Phantom Membrane", false, false);
+
+        BlightedItem enchantedResinClump =
+            createMaterialItem("ENCHANTED_RESIN_CLUMP", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.RESIN_CLUMP,
+                "Enchanted Resin Clump", false, false);
+
+        BlightedItem enchantedCobblestone =
+            createMaterialItem("ENCHANTED_COBBLESTONE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.COBBLESTONE,
+                "Enchanted Cobblestone", true, false);
+
+        BlightedItem enchantedObsidian =
+            createMaterialItem("ENCHANTED_OBSIDIAN", ItemType.MATERIAL, ItemRarity.RARE, Material.OBSIDIAN,
+                "Enchanted Obsidian", true, false);
+
+        BlightedItem enchantedPaper =
+            createMaterialItem("ENCHANTED_PAPER", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.PAPER,
+                "Enchanted Paper", false, false);
+
+        BlightedItem enchantedClayBall =
+            createMaterialItem("ENCHANTED_CLAY_BALL", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.CLAY_BALL,
+                "Enchanted Clay Ball", false, false);
+
+        BlightedItem enchantedCod =
+            createMaterialItem("ENCHANTED_COD", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.COD,
+                "Enchanted Cod", false, true);
+
+        BlightedItem enchantedSalmon =
+            createMaterialItem("ENCHANTED_SALMON", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.SALMON,
+                "Enchanted Salmon", false, true);
+
+        BlightedItem enchantedTropicalFish =
+            createMaterialItem("ENCHANTED_TROPICAL_FISH", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.TROPICAL_FISH,
+                "Enchanted Tropical Fish", false, true);
+
+        BlightedItem enchantedPufferfish =
+            createMaterialItem("ENCHANTED_PUFFERFISH", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.PUFFERFISH,
+                "Enchanted Pufferfish", false, true);
+
+        BlightedItem enchantedSeaPickle =
+            createMaterialItem("ENCHANTED_SEA_PICKLE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.SEA_PICKLE,
+                "Enchanted Sea Pickle", true, false);
+
+        add(
+            enchantedIronIngot,
+            enchantedIronBlock,
+            enchantedCopperIngot,
+            enchantedGoldIngot,
+            enchantedLapisLazuli,
+            enchantedRedstone,
+            enchantedAmethystShard,
+            enchantedEmerald,
+            enchantedRottenFlesh,
+            enchantedBone,
+            enchantedString,
+            enchantedGunpowder,
+            enchantedSpiderEye,
+            enchantedSlimeBall,
+            enchantedPhantomMembrane,
+            enchantedResinClump,
+            enchantedCobblestone,
+            enchantedObsidian,
+            enchantedPaper,
+            enchantedClayBall,
+            enchantedCod,
+            enchantedSalmon,
+            enchantedTropicalFish,
+            enchantedPufferfish,
+            enchantedSeaPickle
+        );
+    }
+
+    private BlightedItem createMaterialItem(
+        String id,
+        ItemType type,
+        ItemRarity rarity,
+        Material material,
+        String displayName,
+        boolean preventPlacement,
+        boolean preventConsume
+    ) {
+        BlightedItem item = new BlightedItem(id, type, rarity, material);
+        item.setDisplayName(displayName);
+        item.addLore(rarity.getName());
+        item.addEnchantmentGlint();
+
+        if (preventPlacement) {
+            item.addRule(ItemRule.PREVENT_PLACEMENT);
+        }
+
+        if (preventConsume) {
+            item.addRule(ItemRule.PREVENT_CONSUME);
+        }
+
+        return item;
+    }
+}
