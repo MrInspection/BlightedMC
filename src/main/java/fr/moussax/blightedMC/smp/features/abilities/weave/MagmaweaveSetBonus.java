@@ -44,7 +44,7 @@ public final class MagmaweaveSetBonus extends EmberWeaveSetBonus {
                     if (taskCounter % 10 == 0) {
                         player.getWorld().spawnParticle(
                             Particle.FALLING_OBSIDIAN_TEAR,
-                            player.getLocation().add(0, 1.2, 0),
+                            player.getLocation().clone().add(0, 1.2, 0),
                             1, 0.2, 0.1, 0.2, 0
                         );
                     }
@@ -52,7 +52,7 @@ public final class MagmaweaveSetBonus extends EmberWeaveSetBonus {
 
                 player.getWorld().spawnParticle(
                     Particle.FLAME,
-                    player.getLocation().add(0, 0.4, 0),
+                    player.getLocation().clone().add(0, 0.4, 0),
                     2, 0.3, 0.1, 0.3, 0.02
                 );
             }

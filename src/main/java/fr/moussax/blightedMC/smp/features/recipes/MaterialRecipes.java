@@ -195,6 +195,7 @@ public final class MaterialRecipes implements RecipeProvider {
             enchantedResinClumpRecipe,
             enchantedCobblestoneRecipe,
             enchantedObsidianRecipe,
+            enchantedClayBallRecipe,
             enchantedCodRecipe,
             enchantedSalmonRecipe,
             enchantedTropicalFishRecipe,

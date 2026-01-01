@@ -20,8 +20,8 @@ import java.util.*;
 public class BlightedPlayer {
     private static final Map<UUID, BlightedPlayer> players = new HashMap<>();
 
-    private static double DEFAULT_MAX_MANA = -1;
-    private static double DEFAULT_MANA_REGEN_RATE = -1;
+    private static volatile double DEFAULT_MAX_MANA = -1;
+    private static volatile double DEFAULT_MANA_REGEN_RATE = -1;
 
     private final Player player;
     private final UUID playerId;
@@ -64,7 +64,7 @@ public class BlightedPlayer {
         ArmorManager.updatePlayerArmor(this);
     }
 
-    private static void initSettings() {
+    private static synchronized void initSettings() {
         if (DEFAULT_MAX_MANA == -1) {
             BlightedMC instance = BlightedMC.getInstance();
             DEFAULT_MAX_MANA = instance.getSettings().getDefaultMaxMana();
