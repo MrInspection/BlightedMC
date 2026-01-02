@@ -18,7 +18,7 @@ public final class FishingLootSoundDecorator implements FeedbackDecorator {
     public void execute(LootContext context, int amount) {
         delegate.execute(context, amount);
 
-        if (context.player() == null || context.player().getPlayer() == null) {
+        if (context.blightedPlayer() == null || context.blightedPlayer().getPlayer() == null) {
             return;
         }
 
@@ -39,8 +39,8 @@ public final class FishingLootSoundDecorator implements FeedbackDecorator {
         };
 
         if (sound != null) {
-            context.player().getPlayer().playSound(
-                context.player().getPlayer().getLocation(),
+            context.blightedPlayer().getPlayer().playSound(
+                context.blightedPlayer().getPlayer().getLocation(),
                 sound,
                 1.0f,
                 pitch

@@ -61,14 +61,14 @@ public final class LootingAwareProbabilisticStrategy implements LootSelectionStr
      * Extracts the looting level from the player's main-hand weapon.
      *
      * @param context the loot context
-     * @return looting level (0 if player or weapon is null)
+     * @return looting level (0 if blightedPlayer or weapon is null)
      */
     private int extractLootingLevel(LootContext context) {
-        if (context.player() == null || context.player().getPlayer() == null) {
+        if (context.blightedPlayer() == null || context.blightedPlayer().getPlayer() == null) {
             return 0;
         }
 
-        ItemStack weapon = context.player().getPlayer().getInventory().getItemInMainHand();
+        ItemStack weapon = context.blightedPlayer().getPlayer().getInventory().getItemInMainHand();
         if (weapon.hasItemMeta() && Objects.requireNonNull(weapon.getItemMeta()).hasEnchant(Enchantment.LOOTING)) {
             return weapon.getItemMeta().getEnchantLevel(Enchantment.LOOTING);
         }

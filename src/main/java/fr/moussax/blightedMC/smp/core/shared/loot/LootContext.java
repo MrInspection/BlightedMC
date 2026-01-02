@@ -21,6 +21,6 @@ import java.util.concurrent.ThreadLocalRandom;
  * @param random RNG for the current loot roll
  * @param velocity the velocity for the current loot roll
  */
-public record LootContext(BlightedPlayer player, World world, Biome biome, Location origin,
+public record LootContext(BlightedPlayer blightedPlayer, World world, Biome biome, Location origin,
                           ThreadLocalRandom random, Vector velocity) {
 }

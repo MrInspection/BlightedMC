@@ -31,8 +31,8 @@ public final class MessageDecorator implements FeedbackDecorator {
      */
     @Override
     public void execute(LootContext context, int amount) {
-        if (context.player() != null && context.player().getPlayer() != null) {
-            context.player().getPlayer().sendMessage(message);
+        if (context.blightedPlayer() != null && context.blightedPlayer().getPlayer() != null) {
+            context.blightedPlayer().getPlayer().sendMessage(message);
         }
         delegate.execute(context, amount);
     }
