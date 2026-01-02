@@ -44,4 +44,15 @@ public interface LootCondition {
     static LootCondition environment(World.Environment environment) {
         return context -> context.world().getEnvironment() == environment;
     }
+
+    /**
+     * Returns a condition that passes only if the player's Y-coordinate
+     * is less than or equal to the specified maximum value.
+     *
+     * @param maxY the maximum allowed Y-coordinate (inclusive)
+     * @return a new condition
+     */
+    static LootCondition atMostY(int maxY){
+        return context -> context.blightedPlayer().getPlayer().getLocation().getY() <= maxY;
+    }
 }
