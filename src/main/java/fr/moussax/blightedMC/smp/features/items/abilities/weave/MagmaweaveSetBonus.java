@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.abilities.weave;
+package fr.moussax.blightedMC.smp.features.items.abilities.weave;
 
 import fr.moussax.blightedMC.BlightedMC;
 import org.bukkit.Material;

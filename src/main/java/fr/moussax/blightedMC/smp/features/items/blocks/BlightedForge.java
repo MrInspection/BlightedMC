@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.blocks;
+package fr.moussax.blightedMC.smp.features.items.blocks;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.items.blocks.BlightedBlock;

@@ -1,11 +1,11 @@
-package fr.moussax.blightedMC.smp.features.armors;
+package fr.moussax.blightedMC.smp.features.items.armors;
 
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
 import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
-import fr.moussax.blightedMC.smp.features.abilities.HomodeusFlightAbility;
+import fr.moussax.blightedMC.smp.features.items.abilities.HomodeusFlightAbility;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 

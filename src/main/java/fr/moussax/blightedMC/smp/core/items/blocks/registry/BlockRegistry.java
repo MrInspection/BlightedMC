@@ -1,8 +1,8 @@
 package fr.moussax.blightedMC.smp.core.items.blocks.registry;
 
 import fr.moussax.blightedMC.smp.core.items.blocks.BlightedBlock;
-import fr.moussax.blightedMC.smp.features.blocks.BlightedForge;
-import fr.moussax.blightedMC.smp.features.blocks.BlightedWorkbench;
+import fr.moussax.blightedMC.smp.features.items.blocks.BlightedForge;
+import fr.moussax.blightedMC.smp.features.items.blocks.BlightedWorkbench;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;

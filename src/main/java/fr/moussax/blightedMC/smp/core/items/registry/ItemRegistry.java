@@ -1,10 +1,10 @@
 package fr.moussax.blightedMC.smp.core.items.registry;
 
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
-import fr.moussax.blightedMC.smp.features.armors.FishingArmors;
-import fr.moussax.blightedMC.smp.features.armors.HomodeusArmor;
-import fr.moussax.blightedMC.smp.features.armors.RocketBoots;
-import fr.moussax.blightedMC.smp.features.blocks.BlightedBlockItems;
+import fr.moussax.blightedMC.smp.features.items.armors.FishingArmors;
+import fr.moussax.blightedMC.smp.features.items.armors.HomodeusArmor;
+import fr.moussax.blightedMC.smp.features.items.armors.RocketBoots;
+import fr.moussax.blightedMC.smp.features.items.blocks.BlightedBlockItems;
 import fr.moussax.blightedMC.smp.features.items.*;
 import fr.moussax.blightedMC.smp.features.items.materials.BlightedMaterials;
 import fr.moussax.blightedMC.smp.features.items.materials.EndMaterials;

@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.abilities;
+package fr.moussax.blightedMC.smp.features.items.abilities;
 
 import fr.moussax.blightedMC.smp.core.items.abilities.ArmorManager;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;

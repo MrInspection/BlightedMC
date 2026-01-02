@@ -13,7 +13,7 @@ import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuListener;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.smp.core.shared.ui.sign.SignInputListener;
-import fr.moussax.blightedMC.smp.features.abilities.WitherImpactAbility;
+import fr.moussax.blightedMC.smp.features.items.abilities.WitherImpactAbility;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 

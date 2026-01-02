@@ -7,7 +7,7 @@ import fr.moussax.blightedMC.smp.core.items.abilities.Ability;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
 import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
-import fr.moussax.blightedMC.smp.features.abilities.VoidStepAbility;
+import fr.moussax.blightedMC.smp.features.items.abilities.VoidStepAbility;
 import org.bukkit.Material;
 
 public class GlimmeringEye implements ItemProvider {

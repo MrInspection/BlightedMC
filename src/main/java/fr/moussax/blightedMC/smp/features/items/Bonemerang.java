@@ -6,7 +6,7 @@ import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.abilities.Ability;
 import fr.moussax.blightedMC.smp.core.items.abilities.AbilityType;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
-import fr.moussax.blightedMC.smp.features.abilities.BonemerangAbility;
+import fr.moussax.blightedMC.smp.features.items.abilities.BonemerangAbility;
 import org.bukkit.Material;
 
 public class Bonemerang implements ItemProvider {
