@@ -48,7 +48,7 @@ public final class CommandBuilder {
      * Registers a command using a command executor class instantiated via reflection.
      * <p>
      * If the class has {@link CommandArgument} or {@link CommandArguments} annotations,
-     * a {@link CommandTabSuggestionBuilder} is automatically set as its tab completer.
+     * a {@link TabSuggestionBuilder} is automatically set as its tab completer.
      *
      * @param command      the command name as defined in plugin.yml
      * @param commandClass the class implementing {@link CommandExecutor}
@@ -72,7 +72,7 @@ public final class CommandBuilder {
 
             if (commandClass.isAnnotationPresent(CommandArgument.class)
                 || commandClass.isAnnotationPresent(CommandArguments.class)) {
-                cmd.setTabCompleter(new CommandTabSuggestionBuilder(commandClass));
+                cmd.setTabCompleter(new TabSuggestionBuilder(commandClass));
             }
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Failed to instantiate command: " + commandClass.getSimpleName(), e);
@@ -80,7 +80,7 @@ public final class CommandBuilder {
     }
 
     /**
-     * Initializes all plugin commands by delegating to {@link CommandsRegistry#registerAll()}.
+     * Initializes all plugin commands by delegating to {@link CommandsRegistry#register()}.
      *
      * @throws IllegalStateException if the builder has not been initialized
      */
@@ -88,7 +88,7 @@ public final class CommandBuilder {
         if (instance == null) {
             throw new IllegalStateException("CommandBuilder not initialized. Call initialize() first.");
         }
-        CommandsRegistry.registerAll();
+        CommandsRegistry.register();
     }
 }
 

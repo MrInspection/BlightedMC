@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.commands.admin;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.utils.formatting.CommandInfo;
+import fr.moussax.blightedMC.utils.commands.CommandInfo;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;

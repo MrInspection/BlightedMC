@@ -2,12 +2,13 @@ package fr.moussax.blightedMC.commands.admin;
 
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
-import fr.moussax.blightedMC.utils.formatting.CommandInfo;
+import fr.moussax.blightedMC.utils.commands.CommandInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 
@@ -16,7 +17,7 @@ import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 public class GemsCommand implements CommandExecutor {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
         if (!(label.equalsIgnoreCase("gems") && sender instanceof Player player)) return false;
         if (!enforceAdminPermission(player)) return false;
 

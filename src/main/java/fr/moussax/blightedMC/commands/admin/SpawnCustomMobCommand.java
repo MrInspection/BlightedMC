@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.commands.admin;
 import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.smp.core.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
-import fr.moussax.blightedMC.utils.formatting.CommandInfo;
+import fr.moussax.blightedMC.utils.commands.CommandInfo;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

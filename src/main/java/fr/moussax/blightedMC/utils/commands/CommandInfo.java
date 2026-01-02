@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.utils.formatting;
+package fr.moussax.blightedMC.utils.commands;
 
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
@@ -16,7 +16,7 @@ import java.util.List;
  *
  * <p>Example usage:
  * <pre>{@code
- * CommandInfo.send(player, "Item Commands", "Manage custom items",
+ * CommandInfo.send(blightedPlayer, "Item Commands", "Manage custom items",
  *   CommandInfo.Entry.of("Give yourself an item", "item", "give", "<item>", "[amount]"),
  *   CommandInfo.Entry.of("List all items", "item", "list")
  * );
@@ -123,9 +123,9 @@ public final class CommandInfo {
     }
 
     /**
-     * Sends formatted help messages to a player.
+     * Sends formatted help messages to a blightedPlayer.
      *
-     * @param player      recipient player
+     * @param player      recipient blightedPlayer
      * @param title       help section title
      * @param description section description
      * @param entries     command entries to display
@@ -140,9 +140,9 @@ public final class CommandInfo {
     }
 
     /**
-     * Sends formatted help messages to a player.
+     * Sends formatted help messages to a blightedPlayer.
      *
-     * @param player      recipient player
+     * @param player      recipient blightedPlayer
      * @param title       help section title
      * @param description section description
      * @param entries     command entries to display
@@ -157,9 +157,9 @@ public final class CommandInfo {
     }
 
     /**
-     * Sends formatted single command help to a player.
+     * Sends formatted single command help to a blightedPlayer.
      *
-     * @param player      recipient player
+     * @param player      recipient blightedPlayer
      * @param description command description
      * @param usage       command usage tokens (base command followed by arguments)
      */

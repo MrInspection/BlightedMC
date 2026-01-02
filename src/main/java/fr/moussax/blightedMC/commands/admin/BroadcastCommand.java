@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.commands.admin;
 
-import fr.moussax.blightedMC.utils.formatting.CommandInfo;
+import fr.moussax.blightedMC.utils.commands.CommandInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
