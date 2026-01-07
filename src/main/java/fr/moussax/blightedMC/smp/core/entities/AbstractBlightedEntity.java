@@ -12,6 +12,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Biome;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -19,6 +20,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -35,6 +37,8 @@ import java.util.function.Supplier;
 public abstract class AbstractBlightedEntity implements Cloneable {
     public static final NamespacedKey ENTITY_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_entity_id");
     public static final String FAST_PASS_TAG = "blighted_opt";
+
+    private static final double BOSS_BAR_RANGE = 60.0;
 
     protected String entityId;
     protected String name;
@@ -55,7 +59,7 @@ public abstract class AbstractBlightedEntity implements Cloneable {
     protected EntityNameTag nameTagType = EntityNameTag.DEFAULT;
 
     protected BossBar bossBar;
-    protected BarColor bossBarColor = BarColor.PURPLE;
+    protected BarColor bossBarColor = BarColor.RED;
     protected BarStyle bossBarStyle = BarStyle.SOLID;
 
     protected Map<Attribute, Double> attributes = new HashMap<>();
@@ -160,6 +164,11 @@ public abstract class AbstractBlightedEntity implements Cloneable {
             entity.setCustomNameVisible(false);
             return;
         }
+
+        if (nameTagType == EntityNameTag.BOSS) {
+            createBossBar();
+        }
+
         updateNameTag();
         entity.setCustomNameVisible(true);
     }
@@ -167,7 +176,15 @@ public abstract class AbstractBlightedEntity implements Cloneable {
     private void initRuntime() {
         if (runtimeInitialized) return;
         runtimeInitialized = true;
+        onDefineBehavior();
+        if (bossBar != null) {
+            startBossBarTask();
+        }
         lifecycleTasks.scheduleAll();
+    }
+
+    protected void onDefineBehavior() {
+        // Override to define
     }
 
     public void kill() {
@@ -202,7 +219,12 @@ public abstract class AbstractBlightedEntity implements Cloneable {
 
     private void setAttribute(Attribute attribute, double value) {
         AttributeInstance instance = entity.getAttribute(attribute);
-        if (instance != null) instance.setBaseValue(value);
+        if (instance != null) {
+            for (AttributeModifier modifier : new ArrayList<>(instance.getModifiers())) {
+                instance.removeModifier(modifier);
+            }
+            instance.setBaseValue(value);
+        }
     }
 
     protected void initImmunityRules() {
@@ -247,13 +269,58 @@ public abstract class AbstractBlightedEntity implements Cloneable {
 
     protected void createBossBar() {
         if (bossBar != null) return;
+
+        if (entityType == EntityType.WITHER || entityType == EntityType.ENDER_DRAGON) {
+            return;
+        }
+
         bossBar = Bukkit.createBossBar(getBossBarTitle(), bossBarColor, bossBarStyle);
         bossBar.setProgress(1.0);
-        Bukkit.getOnlinePlayers().forEach(bossBar::addPlayer);
+    }
+
+    private void startBossBarTask() {
+        addRepeatingTask(() -> new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (entity == null || !entity.isValid()) {
+                    cleanup();
+                    cancel();
+                    return;
+                }
+
+                if (bossBar == null) {
+                    cancel();
+                    return;
+                }
+
+                manageBossBarViewers();
+            }
+        }, 10L, 20L); // Run every second (20 ticks)
+    }
+
+    private void manageBossBarViewers() {
+        World world = entity.getWorld();
+        Location loc = entity.getLocation();
+
+        for (Player player : bossBar.getPlayers()) {
+            if (!player.isOnline() ||
+                player.getWorld() != world ||
+                player.getLocation().distanceSquared(loc) > (BOSS_BAR_RANGE * BOSS_BAR_RANGE)) {
+                bossBar.removePlayer(player);
+            }
+        }
+
+        for (Player player : world.getPlayers()) {
+            if (player.getLocation().distanceSquared(loc) <= (BOSS_BAR_RANGE * BOSS_BAR_RANGE)) {
+                if (!bossBar.getPlayers().contains(player)) {
+                    bossBar.addPlayer(player);
+                }
+            }
+        }
     }
 
     protected String getBossBarTitle() {
-        return "§5" + getName();
+        return "§f§l" + getName();
     }
 
     public void setBossBarAppearance(BarColor color, BarStyle style) {

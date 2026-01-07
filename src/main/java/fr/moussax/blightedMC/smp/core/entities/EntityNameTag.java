@@ -22,7 +22,7 @@ public enum EntityNameTag {
 
         return switch (this) {
             case HIDDEN -> "";
-            case BOSS -> "§d﴾ §5" + name + " " + colorPrefix + toShortNumber(health) + "§c❤ §d﴿";
+            case BOSS -> "§4﴾ §f" + name + " " + colorPrefix + toShortNumber(health) + "§c❤ §4﴿";
             case ANCIENT -> "§4⚚ " + name + " " + colorPrefix + toShortNumber(health) + "§c❤";
             case BLIGHTED -> "§5" + name + " §d" + (int) health + "§r/§5" + maxHealth + "§c❤";
             case SMALL_NUMBER -> "§c" + name + " " + colorPrefix + toShortNumber(health) + "§c❤";
