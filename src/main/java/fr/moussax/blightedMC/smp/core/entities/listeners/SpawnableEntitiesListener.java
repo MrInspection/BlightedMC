@@ -68,7 +68,7 @@ public class SpawnableEntitiesListener implements Listener {
             cumulative += entity.getSpawnProbability();
             if (roll < cumulative) {
                 event.setCancelled(true);
-                entity.spawn(location, CreatureSpawnEvent.SpawnReason.CUSTOM);
+                entity.clone().spawn(location, CreatureSpawnEvent.SpawnReason.CUSTOM);
                 return;
             }
         }
