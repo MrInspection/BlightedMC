@@ -24,7 +24,7 @@ import java.util.List;
  * boolean allowed = profile.canSpawn(location, world);
  * }</pre>
  */
-public class SpawnProfile {
+public final class SpawnProfile {
     private final List<SpawnCondition> conditions;
 
     /**

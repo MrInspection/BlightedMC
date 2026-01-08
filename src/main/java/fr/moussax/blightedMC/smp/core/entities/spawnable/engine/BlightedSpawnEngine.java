@@ -22,7 +22,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * around online players, and attempts to spawn registered
  * {@link SpawnableEntity} instances based on their spawn rules.</p>
  */
-public class BlightedSpawnEngine extends BukkitRunnable {
+public final class BlightedSpawnEngine extends BukkitRunnable {
     private static final int CHUNKS_PER_PLAYER_PER_TICK = 1;
     private static final int MIN_CHUNK_DISTANCE = 3;
     private static final int MAX_CHUNK_DISTANCE = 8;

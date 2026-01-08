@@ -27,7 +27,7 @@ import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFe
  * <p>The resulting loot table is intended for entity drops and supports items, materials,
  * enchanted books, durability-variant items, and gem rewards.</p>
  */
-public final class BlightedLootBuilder {
+public final class EntityLootTableBuilder {
     private final LootTable.Builder builder = LootTable.builder();
     private int maxDrops = 3;
 
@@ -41,7 +41,7 @@ public final class BlightedLootBuilder {
      * @param rarity     visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addLoot(String itemId, int min, int max, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addLoot(String itemId, int min, int max, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -65,7 +65,7 @@ public final class BlightedLootBuilder {
      * @param rarity     visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addLoot(Material material, int min, int max, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addLoot(Material material, int min, int max, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -88,7 +88,7 @@ public final class BlightedLootBuilder {
      * @param rarity          visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addEnchantedBookFromPool(Map<Enchantment, Integer> enchantmentPool, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addEnchantedBookFromPool(Map<Enchantment, Integer> enchantmentPool, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -113,7 +113,7 @@ public final class BlightedLootBuilder {
      * @param rarity       visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addEnchantedBookWithLevelRange(List<Enchantment> enchantments, int minLevel, int maxLevel, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addEnchantedBookWithLevelRange(List<Enchantment> enchantments, int minLevel, int maxLevel, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -137,7 +137,7 @@ public final class BlightedLootBuilder {
      * @param rarity     visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addLootWithDurabilityRange(Material material, double minPercent, double maxPercent, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addLootWithDurabilityRange(Material material, double minPercent, double maxPercent, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -159,7 +159,7 @@ public final class BlightedLootBuilder {
      * @param rarity     visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addGemsLoot(int gems, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addGemsLoot(int gems, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(new GemsResult(), rarity),
@@ -177,7 +177,7 @@ public final class BlightedLootBuilder {
      * @param maxDrops maximum number of drops
      * @return this builder instance
      */
-    public BlightedLootBuilder setMaxDrop(int maxDrops) {
+    public EntityLootTableBuilder setMaxDrop(int maxDrops) {
         this.maxDrops = maxDrops;
         return this;
     }

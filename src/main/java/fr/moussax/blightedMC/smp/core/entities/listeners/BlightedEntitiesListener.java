@@ -31,7 +31,7 @@ import java.util.*;
 import static fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity.ENTITY_ID_KEY;
 import static fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity.FAST_PASS_TAG;
 
-public class BlightedEntitiesListener implements Listener {
+public final class BlightedEntitiesListener implements Listener {
 
     private static final Map<UUID, AbstractBlightedEntity> BLIGHTED_ENTITIES = new HashMap<>();
     private static final Map<UUID, AbstractBlightedEntity> ATTACHMENT_OWNERS = new HashMap<>();

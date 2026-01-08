@@ -34,10 +34,27 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
+/**
+ * Base abstraction for all custom entities.
+ *
+ * <p>This class encapsulates the full lifecycle of a custom entity, including
+ * spawning or attaching to an existing entity, attribute/equipment configuration,
+ * boss bar handling, immunity rules, attachments, scheduled tasks, loot drops,
+ * and cleanup.</p>
+ *
+ * <p>Concrete implementations are expected to define behavior by overriding
+ * {@link #onDefineBehavior()}, damage handling hooks, and configuration fields
+ * before spawning.</p>
+ */
 public abstract class AbstractBlightedEntity implements Cloneable {
+
+    /** Persistent data key used to identify a blighted entity instance. */
     public static final NamespacedKey ENTITY_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_entity_id");
+
+    /** Scoreboard tag used to skip expensive runtime checks. */
     public static final String FAST_PASS_TAG = "blighted_opt";
 
+    /** Maximum distance at which players can see the boss bar. */
     private static final double BOSS_BAR_RANGE = 60.0;
 
     protected String entityId;
@@ -68,17 +85,31 @@ public abstract class AbstractBlightedEntity implements Cloneable {
     private LifecycleTaskManager lifecycleTasks = new LifecycleTaskManager();
     private List<EntityImmunity> immunities = Collections.emptyList();
 
+    /** Prevents runtime initialization from executing more than once. */
     private boolean runtimeInitialized = false;
 
+    /**
+     * Creates a blighted entity definition.
+     *
+     * @param name entity display name
+     * @param maxHealth maximum health value
+     * @param entityType Bukkit entity type
+     */
     public AbstractBlightedEntity(@NonNull String name, int maxHealth, EntityType entityType) {
         this(name, maxHealth, 1, 0, entityType);
     }
 
-    public AbstractBlightedEntity(String name, int maxHealth, int damage, EntityType entityType) {
+    /**
+     * Creates a blighted entity definition with damage.
+     */
+    public AbstractBlightedEntity(@NonNull String name, int maxHealth, int damage, EntityType entityType) {
         this(name, maxHealth, damage, 0, entityType);
     }
 
-    public AbstractBlightedEntity(String name, int maxHealth, int damage, int defense, EntityType entityType) {
+    /**
+     * Creates a fully defined blighted entity.
+     */
+    public AbstractBlightedEntity(@NonNull String name, int maxHealth, int damage, int defense, EntityType entityType) {
         this.name = name;
         this.maxHealth = maxHealth;
         this.damage = damage;
@@ -86,6 +117,13 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         this.entityType = entityType;
     }
 
+    /**
+     * Spawns the entity at the given location and initializes its full runtime state.
+     *
+     * @param location spawn location
+     * @return spawned living entity
+     * @throws IllegalStateException if the entity type is not defined
+     */
     public LivingEntity spawn(Location location) {
         if (entityType == null) throw new IllegalStateException("EntityType cannot be null");
 
@@ -109,6 +147,11 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         return entity;
     }
 
+    /**
+     * Attaches this blighted entity wrapper to an already existing Bukkit entity.
+     *
+     * <p>No attributes or equipment are re-applied.</p>
+     */
     public void attachToExisting(LivingEntity existing) {
         this.entity = existing;
         if (!entity.getScoreboardTags().contains(FAST_PASS_TAG)) {
@@ -137,7 +180,7 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         applyEquipment();
     }
 
-    protected void applyEquipment() {
+    private void applyEquipment() {
         if (armor == null && itemInMainHand == null && itemInOffHand == null) return;
 
         EntityEquipment equipment = entity.getEquipment();
@@ -164,10 +207,7 @@ public abstract class AbstractBlightedEntity implements Cloneable {
             entity.setCustomNameVisible(false);
             return;
         }
-
-        if (nameTagType == EntityNameTag.BOSS) {
-            createBossBar();
-        }
+        if (nameTagType == EntityNameTag.BOSS) createBossBar();
 
         updateNameTag();
         entity.setCustomNameVisible(true);
@@ -177,22 +217,34 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         if (runtimeInitialized) return;
         runtimeInitialized = true;
         onDefineBehavior();
-        if (bossBar != null) {
-            startBossBarTask();
-        }
+
+        if (bossBar != null) startBossBarTask();
         lifecycleTasks.scheduleAll();
     }
 
+    /**
+     * Called once during runtime initialization.
+     *
+     * <p>Override to register AI logic, repeating tasks, or event-driven behavior.</p>
+     */
     protected void onDefineBehavior() {
-        // Override to define
+        // Override to define behavior
     }
 
+    /**
+     * Immediately kills the entity and triggers cleanup.
+     */
     public void kill() {
         if (isNotAlive()) return;
         cleanup();
         entity.setHealth(0);
     }
 
+    /**
+     * Performs full cleanup without forcing entity death.
+     *
+     * <p>Cancels tasks, removes boss bars, unregisters listeners, and kills attachments.</p>
+     */
     public void cleanup() {
         removeBossBar();
         killAllAttachments();
@@ -200,19 +252,36 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         BlightedEntitiesListener.unregisterEntity(entity);
     }
 
+    /**
+     * Called when the entity dies naturally.
+     *
+     * @param location death location
+     */
     public void onDeath(Location location) {
         cleanup();
     }
 
+    /**
+     * Hook invoked when this entity takes damage.
+     *
+     * <p>Override to modify or react to damage events.</p>
+     */
     public void onDamageTaken(EntityDamageEvent event) {
+        // Override to implement behavior
     }
 
+    /**
+     * Inflicts direct damage and refreshes visual state.
+     */
     public void damage(double amount) {
         if (isNotAlive()) return;
         entity.damage(amount);
         updateNameTag();
     }
 
+    /**
+     * Adds a base attribute override applied during spawn.
+     */
     public void addAttribute(Attribute attribute, double value) {
         attributes.put(attribute, value);
     }
@@ -227,7 +296,7 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         }
     }
 
-    protected void initImmunityRules() {
+    private void initImmunityRules() {
         EntityImmunities attribute = getClass().getAnnotation(EntityImmunities.class);
         if (attribute == null) return;
 
@@ -243,6 +312,11 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         this.immunities = tempList;
     }
 
+    /**
+     * Returns the immunity rule triggered by the given damage event, if any.
+     *
+     * @return matching immunity or {@code null}
+     */
     public EntityImmunity getTriggeredImmunity(LivingEntity entity, EntityDamageEvent event) {
         if (immunities.isEmpty()) return null;
         for (EntityImmunity rule : immunities) {
@@ -251,6 +325,9 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         return null;
     }
 
+    /**
+     * Updates the entity name tag and boss bar progress.
+     */
     public void updateNameTag() {
         if (entity == null || entity.isDead()) return;
         if (nameTagType != EntityNameTag.HIDDEN) entity.setCustomName(createNameTag());
@@ -262,17 +339,17 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         }
     }
 
-    protected String createNameTag() {
+    /**
+     * Creates the formatted name tag based on current health.
+     */
+    private String createNameTag() {
         if (entity == null) return name;
         return nameTagType.format(name, entity.getHealth(), maxHealth);
     }
 
-    protected void createBossBar() {
+    private void createBossBar() {
         if (bossBar != null) return;
-
-        if (entityType == EntityType.WITHER || entityType == EntityType.ENDER_DRAGON) {
-            return;
-        }
+        if (entityType == EntityType.WITHER || entityType == EntityType.ENDER_DRAGON) return;
 
         bossBar = Bukkit.createBossBar(getBossBarTitle(), bossBarColor, bossBarStyle);
         bossBar.setProgress(1.0);
@@ -319,7 +396,7 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         }
     }
 
-    protected String getBossBarTitle() {
+    private String getBossBarTitle() {
         return "§f§l" + getName();
     }
 
@@ -338,6 +415,9 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         bossBar = null;
     }
 
+    /**
+     * Drops loot using the configured loot table.
+     */
     public void dropLoot(Location location, BlightedPlayer player) {
         if (lootTable == null) return;
         World world = Objects.requireNonNull(location.getWorld());
@@ -346,11 +426,17 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         lootTable.execute(context);
     }
 
+    /**
+     * Registers a repeating task bound to this entity lifecycle.
+     */
     protected final void addRepeatingTask(Supplier<BukkitRunnable> factory, long delayTicks, long periodTicks) {
         lifecycleTasks.addRepeatingTask(factory, delayTicks, periodTicks);
         if (canScheduleTask()) lifecycleTasks.scheduleLast();
     }
 
+    /**
+     * Registers a delayed task bound to this entity lifecycle.
+     */
     protected final void addDelayedTask(Supplier<BukkitRunnable> factory, long delayTicks) {
         lifecycleTasks.addDelayedTask(factory, delayTicks);
         if (canScheduleTask()) lifecycleTasks.scheduleLast();
@@ -360,38 +446,52 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         return entity != null && !entity.isDead() && runtimeInitialized;
     }
 
+    /**
+     * Attaches an auxiliary entity owned by this entity.
+     *
+     * <p>Attachments are automatically cleaned up on death.</p>
+     */
     public void addAttachment(EntityAttachment attachment) {
         if (attachment == null || attachment.entity() == null) return;
         this.attachments.add(attachment);
         BlightedEntitiesListener.registerAttachment(attachment.entity(), this);
 
         if (attachment.entity() instanceof LivingEntity living) {
-            EntityEquipment eq = living.getEquipment();
-            if (eq != null) disableEquipmentDrops(eq);
+            EntityEquipment entityEquipment = living.getEquipment();
+            if (entityEquipment != null) disableEquipmentDrops(entityEquipment);
             living.addScoreboardTag(FAST_PASS_TAG);
         }
     }
 
+    /**
+     * Kills and unregisters all attached entities.
+     */
     public void killAllAttachments() {
         if (attachments.isEmpty()) return;
         for (EntityAttachment attachment : attachments) {
             Entity attachmentEntity = attachment.entity();
-            if (attachmentEntity != null) {
-                BlightedEntitiesListener.unregisterAttachment(attachmentEntity);
-                if (attachmentEntity instanceof LivingEntity living && !living.isDead()) {
-                    living.setHealth(0);
-                } else {
-                    attachmentEntity.remove();
-                }
+            if (attachmentEntity == null) return;
+
+            BlightedEntitiesListener.unregisterAttachment(attachmentEntity);
+            if (attachmentEntity instanceof LivingEntity living && !living.isDead()) {
+                living.setHealth(0);
+            } else {
+                attachmentEntity.remove();
             }
         }
         attachments.clear();
     }
 
+    /**
+     * @return {@code true} if the entity is null or dead
+     */
     protected boolean isNotAlive() {
         return entity == null || entity.isDead();
     }
 
+    /**
+     * @return the underlying Bukkit entity
+     */
     public LivingEntity getEntity() {
         return entity;
     }
@@ -448,6 +548,11 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         return damage;
     }
 
+    /**
+     * Creates a deep clone of this entity definition.
+     *
+     * <p>Runtime state, tasks, and live entities are not copied.</p>
+     */
     @Override
     public AbstractBlightedEntity clone() {
         try {
@@ -455,16 +560,14 @@ public abstract class AbstractBlightedEntity implements Cloneable {
             clone.entity = null;
             clone.bossBar = null;
             clone.runtimeInitialized = false;
-
             clone.attributes = new HashMap<>();
             clone.attributes.putAll(this.attributes);
-
             clone.attachments = new CopyOnWriteArraySet<>();
             clone.lifecycleTasks = new LifecycleTaskManager();
-
             clone.armor = cloneArmor();
             clone.itemInMainHand = cloneItem(this.itemInMainHand);
             clone.itemInOffHand = cloneItem(this.itemInOffHand);
+
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException("Clone failed", e);

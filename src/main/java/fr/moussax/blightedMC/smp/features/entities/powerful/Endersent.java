@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.powerful;
 
-import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
+import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
@@ -52,7 +52,7 @@ public class Endersent extends SpawnableEntity {
         addAttribute(Attribute.KNOCKBACK_RESISTANCE, 1.0);
         addAttribute(Attribute.MOVEMENT_SPEED, 0.25);
 
-        setLootTable(new BlightedLootBuilder()
+        setLootTable(new EntityLootTableBuilder()
             .setMaxDrop(2)
             .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, COMMON)
             .addLoot(Material.ENDER_EYE, 1, 3, 0.31, UNCOMMON)

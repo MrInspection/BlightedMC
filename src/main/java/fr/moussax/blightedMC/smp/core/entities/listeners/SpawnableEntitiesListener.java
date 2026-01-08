@@ -14,7 +14,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class SpawnableEntitiesListener implements Listener {
+public final class SpawnableEntitiesListener implements Listener {
     private volatile Map<EntityType, List<SpawnableEntity>> spawnCache = Collections.emptyMap();
     private volatile boolean cacheInitialized = false;
 

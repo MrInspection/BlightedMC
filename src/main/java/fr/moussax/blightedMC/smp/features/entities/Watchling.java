@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities;
 
-import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
+import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -42,7 +42,7 @@ public class Watchling extends SpawnableEntity {
         setDamage(10);
         setDroppedExp(10);
 
-        setLootTable(new BlightedLootBuilder()
+        setLootTable(new EntityLootTableBuilder()
             .setMaxDrop(2)
             .addLoot(Material.ENDER_PEARL, 1, 2, 1.0, COMMON)
             .addGemsLoot(5, 0.03, VERY_RARE)

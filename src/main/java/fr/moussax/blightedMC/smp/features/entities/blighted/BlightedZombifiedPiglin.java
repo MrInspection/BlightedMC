@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.smp.features.entities.blighted;
 
-import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
+import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -23,7 +23,7 @@ public final class BlightedZombifiedPiglin extends BlightedCreature {
         itemInMainHand = new ItemStack(Material.GOLDEN_SWORD);
         setDamage(8);
         setDroppedExp(16);
-        setLootTable(new BlightedLootBuilder()
+        setLootTable(new EntityLootTableBuilder()
             .setMaxDrop(3)
             .addLoot(Material.ROTTEN_FLESH, 2, 6, 1.0, COMMON)
             .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0, COMMON)
@@ -32,8 +32,6 @@ public final class BlightedZombifiedPiglin extends BlightedCreature {
             .build()
         );
     }
-
-
 
     @Override
     protected void onEnrage(LivingEntity entity) {

@@ -21,7 +21,6 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * @see AbstractBlightedEntity#initImmunityRules()
  * @see ImmunityType
  */
 @Target(ElementType.TYPE)
