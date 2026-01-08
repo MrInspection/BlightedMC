@@ -15,7 +15,7 @@ import java.util.Set;
  * Returned conditions are stateless lambdas and can be combined via
  * {@link SpawnCondition#and(SpawnCondition)},
  * {@link SpawnCondition#or(SpawnCondition)}, and
- * {@link SpawnCondition#not()}.
+ * {@link SpawnCondition#negate()}.
  *
  * <p>Example:
  * <pre>{@code
