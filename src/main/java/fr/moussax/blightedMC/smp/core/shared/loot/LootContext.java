@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * <p>Encapsulates the player, world, biome, loot origin, and random generator
  * for a single loot roll. Supports both player-driven and non-player-driven loot.</p>
  *
- * @param player the player responsible for the loot, or {@code null}
+ * @param blightedPlayer the player responsible for the loot, or {@code null}
  * @param world the world where the loot occurs
  * @param biome the biome at the loot origin
  * @param origin the location where loot is dropped or spawned

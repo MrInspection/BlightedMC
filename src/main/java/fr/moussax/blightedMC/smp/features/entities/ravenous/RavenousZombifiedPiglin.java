@@ -1,7 +1,7 @@
-package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
+package fr.moussax.blightedMC.smp.features.entities.ravenous;
 
-import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -17,23 +17,21 @@ import java.util.Objects;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class BlightedZombifiedPiglin extends BlightedCreature {
-    public BlightedZombifiedPiglin() {
-        super("BLIGHTED_ZOMBIFIED_PIGLIN", "Blighted Zombified Piglin", EntityType.ZOMBIFIED_PIGLIN);
+public final class RavenousZombifiedPiglin extends RavenousCreature {
+    public RavenousZombifiedPiglin() {
+        super("RAVENOUS_ZOMBIFIED_PIGLIN", "Ravenous Zombified Piglin", EntityType.ZOMBIFIED_PIGLIN);
         itemInMainHand = new ItemStack(Material.GOLDEN_SWORD);
         setDamage(8);
         setDroppedExp(16);
-        setLootTable(new BlightedLootBuilder()
+        setLootTable(new EntityLootTableBuilder()
             .setMaxDrop(3)
             .addLoot(Material.ROTTEN_FLESH, 2, 6, 1.0, COMMON)
             .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0, COMMON)
             .addLoot(Material.GOLD_INGOT, 1, 2, 0.15, RARE)
-            .addGemsLoot(5, 0.03, VERY_RARE)
+            .addGemsLoot(5, 0.04, VERY_RARE)
             .build()
         );
     }
-
-
 
     @Override
     protected void onEnrage(LivingEntity entity) {
@@ -47,10 +45,10 @@ public final class BlightedZombifiedPiglin extends BlightedCreature {
     @Override
     protected void defineSpawnConditions() {
         addCondition(
-            SpawnConditionFactory.biome(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST)
-                .or(SpawnConditionFactory.insideStructure(Structure.FORTRESS))
-                .and(SpawnConditionFactory.maxBlockLight(11))
-                .and(SpawnConditionFactory.notInLiquid())
+            SpawnRules.biome(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST)
+                .or(SpawnRules.insideStructure(Structure.FORTRESS))
+                .and(SpawnRules.maxBlockLight(11))
+                .and(SpawnRules.notInLiquid())
         );
     }
 }

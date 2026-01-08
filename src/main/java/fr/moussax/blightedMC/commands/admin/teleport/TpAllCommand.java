@@ -20,8 +20,9 @@ public class TpAllCommand implements CommandExecutor {
         int count = 0;
         for (Player target : Bukkit.getOnlinePlayers()) {
             if (target.getUniqueId().equals(player.getUniqueId())) continue;
-            target.teleport(player.getLocation());
-            count++;
+            if (target.teleport(player.getLocation())) {
+                count++;
+            }
         }
 
         inform(player, "Teleported §d" + count + " §7players to your location.");

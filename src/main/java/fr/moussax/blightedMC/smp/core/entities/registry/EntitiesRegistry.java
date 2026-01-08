@@ -2,16 +2,14 @@ package fr.moussax.blightedMC.smp.core.entities.registry;
 
 import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.smp.features.entities.bosses.Goldor;
+import fr.moussax.blightedMC.smp.features.entities.ravenous.*;
 import fr.moussax.blightedMC.smp.features.entities.bosses.RevenantHorror;
 import fr.moussax.blightedMC.smp.features.entities.bosses.TheAncientKnight;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.Illusioner;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.InfernalBlaze;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.LaserEngineer;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.Watchling;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.blighted.*;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.powerful.Endersent;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.powerful.VoidlingDefender;
+import fr.moussax.blightedMC.smp.features.entities.Illusioner;
+import fr.moussax.blightedMC.smp.features.entities.InfernalBlaze;
+import fr.moussax.blightedMC.smp.features.entities.LaserEngineer;
+import fr.moussax.blightedMC.smp.features.entities.Watchling;
+import fr.moussax.blightedMC.smp.features.entities.powerful.Endersent;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.Nullable;
 
@@ -34,23 +32,21 @@ public final class EntitiesRegistry {
     private static final List<AbstractBlightedEntity> DEFAULT_ENTITIES = List.of(
         new TheAncientKnight(),
         new RevenantHorror(),
-        new Goldor(),
-        new BlightedBogged(),
-        new BlightedDrowned(),
-        new BlightedHusk(),
-        new BlightedParched(),
-        new BlightedPiglin(),
-        new BlightedSkeleton(),
-        new BlightedStray(),
-        new BlightedWitherSkeleton(),
-        new BlightedZombie(),
-        new BlightedZombifiedPiglin(),
+        new RavenousBogged(),
+        new RavenousDrowned(),
+        new RavenousHusk(),
+        new RavenousParched(),
+        new RavenousPiglin(),
+        new RavenousSkeleton(),
+        new RavenousStray(),
+        new RavenousWitherSkeleton(),
+        new RavenousZombie(),
+        new RavenousZombifiedPiglin(),
         new LaserEngineer(),
         new InfernalBlaze(),
         new Endersent(),
         new Watchling(),
-        new Illusioner(),
-        new VoidlingDefender()
+        new Illusioner()
     );
 
     private EntitiesRegistry() {

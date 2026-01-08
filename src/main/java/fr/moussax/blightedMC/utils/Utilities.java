@@ -21,7 +21,10 @@ import static fr.moussax.blightedMC.smp.core.items.BlightedItem.BLIGHTED_ID_KEY;
  *
  * <p>Includes methods for delayed task execution using the Bukkit scheduler.</p>
  */
-public class Utilities {
+public final class Utilities {
+
+    private Utilities() {
+    }
 
     /**
      * Schedules a task to run after a specified number of server ticks.

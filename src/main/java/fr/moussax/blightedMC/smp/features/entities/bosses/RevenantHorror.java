@@ -29,6 +29,23 @@ public class RevenantHorror extends AbstractBlightedEntity {
         setNameTagType(EntityNameTag.BOSS);
         setDefense(35);
 
+        armor = new ItemStack[]{
+            new ItemBuilder(Material.DIAMOND_BOOTS).addEnchantmentGlint().toItemStack(),
+            new ItemBuilder(Material.CHAINMAIL_LEGGINGS).addEnchantmentGlint().toItemStack(),
+            new ItemBuilder(Material.DIAMOND_CHESTPLATE).addEnchantmentGlint().toItemStack(),
+            new ItemBuilder(Material.PLAYER_HEAD).setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDhiZWUyM2I1YzcyNmFlOGUzZDAyMWU4YjRmNzUyNTYxOWFiMTAyYTRlMDRiZTk4M2I2MTQxNDM0OWFhYWM2NyJ9fX0=").toItemStack(),
+        };
+
+        itemInMainHand = new ItemBuilder(Material.DIAMOND_HOE).addEnchantmentGlint().toItemStack();
+    }
+
+    @Override
+    protected void onDefineBehavior() {
+        super.onDefineBehavior();
+        setupBehavior();
+    }
+
+    private void setupBehavior() {
         addRepeatingTask(() -> {
             abilityRunnable = new BukkitRunnable() {
                 private int phase = 0;
@@ -52,18 +69,6 @@ public class RevenantHorror extends AbstractBlightedEntity {
             };
             return abilityRunnable;
         }, 20L * 10, 20L * 10);
-    }
-
-    @Override
-    protected void applyEquipment() {
-        this.itemInMainHand = new ItemBuilder(Material.DIAMOND_HOE).addEnchantmentGlint().toItemStack();
-        this.armor = new ItemStack[]{
-            new ItemBuilder(Material.DIAMOND_BOOTS).addEnchantmentGlint().toItemStack(),
-            new ItemBuilder(Material.CHAINMAIL_LEGGINGS).addEnchantmentGlint().toItemStack(),
-            new ItemBuilder(Material.DIAMOND_CHESTPLATE).addEnchantmentGlint().toItemStack(),
-            new ItemBuilder(Material.PLAYER_HEAD).setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDhiZWUyM2I1YzcyNmFlOGUzZDAyMWU4YjRmNzUyNTYxOWFiMTAyYTRlMDRiZTk4M2I2MTQxNDM0OWFhYWM2NyJ9fX0=").toItemStack(),
-        };
-        super.applyEquipment();
     }
 
     private void performLifeDrain() {
@@ -152,31 +157,6 @@ public class RevenantHorror extends AbstractBlightedEntity {
         RevenantHorror clone = (RevenantHorror) super.clone();
         clone.inEnrageState = false;
         clone.abilityRunnable = null;
-
-        clone.addRepeatingTask(() -> {
-            clone.abilityRunnable = new BukkitRunnable() {
-                private int phase = 0;
-
-                @Override
-                public void run() {
-                    if (clone.entity == null || clone.entity.isDead()) {
-                        clone.stopAbility();
-                        cancel();
-                        return;
-                    }
-
-                    switch (phase) {
-                        case 0 -> clone.performLifeDrain();
-                        case 1 -> clone.performPestilence();
-                        case 2 -> clone.startEnragePhase();
-                    }
-
-                    phase = (phase + 1) % 3;
-                }
-            };
-            return clone.abilityRunnable;
-        }, 20L * 10, 20L * 10);
-
         return clone;
     }
 }

@@ -8,11 +8,13 @@ import fr.moussax.blightedMC.smp.core.shared.loot.providers.AmountProvider;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.ItemResult;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.gems.GemsResult;
 import fr.moussax.blightedMC.smp.core.shared.loot.strategies.LootingAwareProbabilisticStrategy;
+import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity;
 
@@ -27,7 +29,7 @@ import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFe
  * <p>The resulting loot table is intended for entity drops and supports items, materials,
  * enchanted books, durability-variant items, and gem rewards.</p>
  */
-public final class BlightedLootBuilder {
+public final class EntityLootTableBuilder {
     private final LootTable.Builder builder = LootTable.builder();
     private int maxDrops = 3;
 
@@ -41,7 +43,7 @@ public final class BlightedLootBuilder {
      * @param rarity     visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addLoot(String itemId, int min, int max, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addLoot(String itemId, int min, int max, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -65,11 +67,40 @@ public final class BlightedLootBuilder {
      * @param rarity     visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addLoot(Material material, int min, int max, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addLoot(Material material, int min, int max, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
                     ItemResult.of(material), rarity
+                ),
+                dropChance,
+                AmountProvider.range(min, max),
+                LootCondition.alwaysTrue()
+            )
+        );
+        return this;
+    }
+
+    /**
+     * Adds a material-based loot entry with a custom item modifier.
+     *
+     * <p>The provided {@link ItemBuilder} consumer is applied to the generated item
+     * before it is added to the loot result, allowing customization such as name,
+     * lore, enchantments, or flags.</p>
+     *
+     * @param material   the Bukkit material to drop
+     * @param modifier   item builder modifier applied to the generated item
+     * @param min        minimum amount dropped
+     * @param max        maximum amount dropped
+     * @param dropChance probability for this entry to be selected
+     * @param rarity     visual and audio feedback rarity
+     * @return this builder instance
+     */
+    public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, int min, int max, double dropChance, EntityLootRarity rarity) {
+        builder.addEntry(
+            LootEntry.probabilistic(
+                new EntityLootFeedbackDecorator(
+                    ItemResult.of(material, modifier), rarity
                 ),
                 dropChance,
                 AmountProvider.range(min, max),
@@ -88,7 +119,7 @@ public final class BlightedLootBuilder {
      * @param rarity          visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addEnchantedBookFromPool(Map<Enchantment, Integer> enchantmentPool, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addEnchantedBookFromPool(Map<Enchantment, Integer> enchantmentPool, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -113,7 +144,7 @@ public final class BlightedLootBuilder {
      * @param rarity       visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addEnchantedBookWithLevelRange(List<Enchantment> enchantments, int minLevel, int maxLevel, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addEnchantedBookWithLevelRange(List<Enchantment> enchantments, int minLevel, int maxLevel, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -137,7 +168,7 @@ public final class BlightedLootBuilder {
      * @param rarity     visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addLootWithDurabilityRange(Material material, double minPercent, double maxPercent, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addLootWithDurabilityRange(Material material, double minPercent, double maxPercent, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -159,7 +190,7 @@ public final class BlightedLootBuilder {
      * @param rarity     visual and audio feedback rarity
      * @return this builder instance
      */
-    public BlightedLootBuilder addGemsLoot(int gems, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addGemsLoot(int gems, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(new GemsResult(), rarity),
@@ -177,7 +208,7 @@ public final class BlightedLootBuilder {
      * @param maxDrops maximum number of drops
      * @return this builder instance
      */
-    public BlightedLootBuilder setMaxDrop(int maxDrops) {
+    public EntityLootTableBuilder setMaxDrop(int maxDrops) {
         this.maxDrops = maxDrops;
         return this;
     }

@@ -1,8 +1,8 @@
-package fr.moussax.blightedMC.smp.features.entities.spawnable;
+package fr.moussax.blightedMC.smp.features.entities;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityImmunities;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
@@ -44,7 +44,15 @@ public class LaserEngineer extends SpawnableEntity {
             new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherColor("#7D807E").setUnbreakable(true).toItemStack(),
             new ItemBuilder(Material.OBSERVER).toItemStack()
         };
+    }
 
+    @Override
+    protected void onDefineBehavior() {
+        super.onDefineBehavior();
+        setupBehavior();
+    }
+
+    private void setupBehavior() {
         addRepeatingTask(() -> {
             BukkitRunnable task = new BukkitRunnable() {
                 @Override
@@ -69,11 +77,9 @@ public class LaserEngineer extends SpawnableEntity {
                         return;
                     }
 
-                    // If in attack mode
                     if (isAttacking) {
                         if (attackTarget == null || !attackTarget.isOnline() || attackTarget.getWorld() != self.getWorld()
                             || attackTarget.getLocation().distance(self.getLocation()) > LASER_RANGE) {
-                            // Lost target
                             isAttacking = false;
                             attackTicksRemaining = 0;
                             switchArmorMode(false);
@@ -88,7 +94,6 @@ public class LaserEngineer extends SpawnableEntity {
                         return;
                     }
 
-                    // Idle → roll to start attack
                     if (ThreadLocalRandom.current().nextDouble() < 0.3) { // 30% chance per cycle
                         attackTarget = nearbyPlayers.get(ThreadLocalRandom.current().nextInt(nearbyPlayers.size()));
                         isAttacking = true;
@@ -141,16 +146,13 @@ public class LaserEngineer extends SpawnableEntity {
 
         Particle.DustOptions dust = new Particle.DustOptions(Color.fromRGB(255, 0, 0), 1.5f);
 
-        // Face target
         Vector direction = player.getLocation().toVector().subtract(entity.getEyeLocation().toVector()).normalize();
         Location mobLocation = entity.getLocation();
         mobLocation.setDirection(direction.clone());
         entity.teleport(mobLocation);
 
-        // Damage target each tick
         player.damage(LASER_DAMAGE, origin);
 
-        // Draw beam
         Vector step = direction.multiply(0.2);
         Location current = entity.getEyeLocation().clone();
         int safety = 0;
@@ -179,67 +181,13 @@ public class LaserEngineer extends SpawnableEntity {
         clone.isAttacking = false;
         clone.attackTicksRemaining = 0;
         clone.attackTarget = null;
-
-        clone.addRepeatingTask(() -> {
-            BukkitRunnable task = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    LivingEntity self = clone.getEntity();
-                    if (self == null || !self.isValid()) {
-                        cancel();
-                        return;
-                    }
-
-                    List<Player> nearbyPlayers = self.getNearbyEntities(LASER_RANGE, LASER_RANGE, LASER_RANGE)
-                        .stream()
-                        .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-                        .map(e -> (Player) e)
-                        .toList();
-
-                    if (nearbyPlayers.isEmpty()) {
-                        if (clone.isAttacking) {
-                            clone.isAttacking = false;
-                            clone.switchArmorMode(false);
-                        }
-                        return;
-                    }
-
-                    if (clone.isAttacking) {
-                        if (clone.attackTarget == null || !clone.attackTarget.isOnline() ||
-                            clone.attackTarget.getWorld() != self.getWorld() ||
-                            clone.attackTarget.getLocation().distance(self.getLocation()) > LASER_RANGE) {
-                            clone.isAttacking = false;
-                            clone.attackTicksRemaining = 0;
-                            clone.switchArmorMode(false);
-                            return;
-                        }
-                        clone.startLaserFocus(self, BlightedPlayer.getBlightedPlayer(clone.attackTarget));
-                        if (--clone.attackTicksRemaining <= 0) {
-                            clone.isAttacking = false;
-                            clone.switchArmorMode(false);
-                        }
-                        return;
-                    }
-
-                    if (ThreadLocalRandom.current().nextDouble() < 0.3) {
-                        clone.attackTarget = nearbyPlayers.get(ThreadLocalRandom.current().nextInt(nearbyPlayers.size()));
-                        clone.isAttacking = true;
-                        clone.attackTicksRemaining = ThreadLocalRandom.current().nextInt(40, 61);
-                        clone.switchArmorMode(true);
-                    }
-                }
-            };
-            clone.laserAbilityTask = task;
-            return task;
-        }, TICK_DELAY, TICK_DELAY);
-
         return clone;
     }
 
     @Override
     protected void defineSpawnConditions() {
         addCondition(
-            SpawnConditionFactory.biome(
+            SpawnRules.biome(
                 Biome.FOREST,
                 Biome.BIRCH_FOREST,
                 Biome.DARK_FOREST,

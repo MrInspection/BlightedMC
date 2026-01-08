@@ -18,7 +18,7 @@ import java.util.Set;
  * <p>
  * Use {@link #initialize()} to load all rituals from registered providers.
  */
-public class RitualRegistry {
+public final class RitualRegistry {
 
     /** Set of all registered ancient rituals */
     public static final Set<AncientRitual> REGISTRY = new HashSet<>();

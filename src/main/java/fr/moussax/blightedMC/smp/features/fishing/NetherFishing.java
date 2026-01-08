@@ -11,7 +11,7 @@ import fr.moussax.blightedMC.smp.core.shared.loot.providers.AmountProvider;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.EntityResult;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.ItemResult;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.gems.GemsResult;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.blighted.BlightedZombifiedPiglin;
+import fr.moussax.blightedMC.smp.features.entities.ravenous.RavenousZombifiedPiglin;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
@@ -43,10 +43,10 @@ public class NetherFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new MessageDecorator(
                         new FishingLootSoundDecorator(
-                            EntityResult.blighted(new BlightedZombifiedPiglin()),
+                            EntityResult.blighted(new RavenousZombifiedPiglin()),
                             FishingLootSoundDecorator.FishingCatchQuality.COMMON
                         ),
-                        " §6§lOINK! §7You caught a §dBlighted Zombified Piglin§7!"
+                        " §6§lOINK! §7You caught a §dDreadforged Zombified Piglin§7!"
                     ),
                     15.0,
                     AmountProvider.fixed(1),

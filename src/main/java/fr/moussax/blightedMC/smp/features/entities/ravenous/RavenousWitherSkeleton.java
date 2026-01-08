@@ -1,7 +1,7 @@
-package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
+package fr.moussax.blightedMC.smp.features.entities.ravenous;
 
-import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -16,15 +16,15 @@ import java.util.Objects;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class BlightedWitherSkeleton extends BlightedCreature {
-    public BlightedWitherSkeleton() {
-        super("BLIGHTED_WITHER_SKELETON", "Blighted Wither Skeleton", EntityType.WITHER_SKELETON);
-        setLootTable(new BlightedLootBuilder()
+public final class RavenousWitherSkeleton extends RavenousCreature {
+    public RavenousWitherSkeleton() {
+        super("RAVENOUS_WITHER_SKELETON", "Ravenous Wither Skeleton", EntityType.WITHER_SKELETON);
+        setLootTable(new EntityLootTableBuilder()
             .setMaxDrop(4)
             .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
             .addLoot(Material.COAL, 1, 3, 0.5, UNCOMMON)
             .addLoot(Material.WITHER_SKELETON_SKULL, 1, 1, 0.03, VERY_RARE)
-            .addGemsLoot(5, 0.03, VERY_RARE)
+            .addGemsLoot(5, 0.04, VERY_RARE)
             .build()
         );
 
@@ -44,8 +44,8 @@ public final class BlightedWitherSkeleton extends BlightedCreature {
     @Override
     protected void defineSpawnConditions() {
         addCondition(
-            SpawnConditionFactory.insideStructure(Structure.FORTRESS)
-                .and(SpawnConditionFactory.maxBlockLight(0))
+            SpawnRules.insideStructure(Structure.FORTRESS)
+                .and(SpawnRules.maxBlockLight(0))
         );
     }
 }

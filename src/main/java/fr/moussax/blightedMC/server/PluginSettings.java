@@ -12,7 +12,7 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-public class PluginSettings {
+public final class PluginSettings {
     private double defaultMaxMana;
     private double defaultManaRegenerationRate;
     private double defaultPlayerHealth;

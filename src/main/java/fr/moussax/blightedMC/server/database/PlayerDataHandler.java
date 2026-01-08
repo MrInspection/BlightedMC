@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class PlayerDataHandler {
+public final class PlayerDataHandler {
     private final UUID playerId;
     private final String playerName;
     private final Connection connection;

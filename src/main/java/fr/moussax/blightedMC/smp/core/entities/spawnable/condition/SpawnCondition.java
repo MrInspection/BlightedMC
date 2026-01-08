@@ -8,7 +8,7 @@ import org.bukkit.World;
  * in a {@link World}.
  * <p>
  * Spawn conditions are composable via logical operations:
- * {@link #and(SpawnCondition)}, {@link #or(SpawnCondition)}, and {@link #not()}.
+ * {@link #and(SpawnCondition)}, {@link #or(SpawnCondition)}, and {@link #negate()}.
  *
  * <p>Example:
  * <pre>{@code
@@ -48,7 +48,7 @@ public interface SpawnCondition {
     /**
      * Returns the logical negation of this condition.
      */
-    default SpawnCondition not() {
+    default SpawnCondition negate() {
         return (location, world) -> !this.testCanSpawnAt(location, world);
     }
 }

@@ -1,11 +1,11 @@
-package fr.moussax.blightedMC.smp.features.entities.spawnable.powerful;
+package fr.moussax.blightedMC.smp.features.entities.powerful;
 
-import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
+import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.Watchling;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
+import fr.moussax.blightedMC.smp.features.entities.Watchling;
 import fr.moussax.blightedMC.utils.Utilities;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalLookAtPlayer;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalMeleeAttack;
@@ -52,7 +52,7 @@ public class Endersent extends SpawnableEntity {
         addAttribute(Attribute.KNOCKBACK_RESISTANCE, 1.0);
         addAttribute(Attribute.MOVEMENT_SPEED, 0.25);
 
-        setLootTable(new BlightedLootBuilder()
+        setLootTable(new EntityLootTableBuilder()
             .setMaxDrop(2)
             .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, COMMON)
             .addLoot(Material.ENDER_EYE, 1, 3, 0.31, UNCOMMON)
@@ -62,6 +62,11 @@ public class Endersent extends SpawnableEntity {
         );
 
         setNameTagType(EntityNameTag.BOSS);
+    }
+
+    @Override
+    protected void onDefineBehavior() {
+        super.onDefineBehavior();
         setupBehavior();
     }
 
@@ -226,7 +231,7 @@ public class Endersent extends SpawnableEntity {
 
     @Override
     protected void defineSpawnConditions() {
-        addCondition(SpawnConditionFactory.biome(Biome.END_MIDLANDS));
+        addCondition(SpawnRules.biome(Biome.END_MIDLANDS));
     }
 
     @Override
@@ -238,7 +243,6 @@ public class Endersent extends SpawnableEntity {
         clone.isEscaping = false;
         clone.lastTeleportSmash = 0;
         clone.escapeTicks = 0;
-        clone.setupBehavior();
         return clone;
     }
 }

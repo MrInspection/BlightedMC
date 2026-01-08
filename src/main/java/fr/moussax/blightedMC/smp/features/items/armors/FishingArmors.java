@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.armors;
+package fr.moussax.blightedMC.smp.features.items.armors;
 
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.ItemRarity;
@@ -6,12 +6,12 @@ import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemProvider;
 import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
-import fr.moussax.blightedMC.smp.features.abilities.weave.EmberWeaveSetBonus;
-import fr.moussax.blightedMC.smp.features.abilities.weave.MagmaweaveSetBonus;
+import fr.moussax.blightedMC.smp.features.items.abilities.weave.EmberWeaveSetBonus;
+import fr.moussax.blightedMC.smp.features.items.abilities.weave.MagmaweaveSetBonus;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
@@ -64,6 +64,7 @@ public final class FishingArmors implements ItemProvider {
             AttributeModifier.Operation.ADD_NUMBER,
             EquipmentSlotGroup.HEAD
         );
+        emberWeaveHelmet.editEquippable(equippable -> equippable.setSlot(EquipmentSlot.HEAD));
 
         BlightedItem emberWeaveChestplate = new BlightedItem("EMBERWEAVE_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.RARE, Material.LEATHER_CHESTPLATE);
         emberWeaveChestplate.setDisplayName("Emberweave Chestplate");
@@ -128,8 +129,7 @@ public final class FishingArmors implements ItemProvider {
         magmaWeaveHelmet.setFireResistant(true);
         magmaWeaveHelmet.addAttributeModifier(Attribute.ARMOR, 3.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
         magmaWeaveHelmet.addAttributeModifier(Attribute.ARMOR_TOUGHNESS, 2.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
-        magmaWeaveHelmet.addEnchantment(Enchantment.PROTECTION, 4);
-        magmaWeaveHelmet.addEnchantment(Enchantment.PROJECTILE_PROTECTION, 4);
+        magmaWeaveHelmet.editEquippable(equippable -> equippable.setSlot(EquipmentSlot.HEAD));
 
         BlightedItem magmaWeaveChestplate = new BlightedItem("MAGMAWEAVE_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.EPIC, Material.LEATHER_CHESTPLATE);
         magmaWeaveChestplate.setDisplayName("⚚ Magmaweave Chestplate");
@@ -175,14 +175,39 @@ public final class FishingArmors implements ItemProvider {
         magmaWeaveLeggins.setFullSetBonus(magmaWeaveSetBonus);
         magmaweaveBoots.setFullSetBonus(magmaWeaveSetBonus);
 
-        BlightedItem anglerHelmet = new BlightedItem("ANGLER_HELMET", ItemType.HELMET, ItemRarity.UNCOMMON, Material.DIAMOND_HELMET);
-        BlightedItem anglerChestplate = new BlightedItem("ANGLER_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.UNCOMMON, Material.LEATHER_CHESTPLATE);
-        BlightedItem anglerLeggings = new BlightedItem("ANGLER_LEGGINGS", ItemType.LEGGINGS, ItemRarity.UNCOMMON, Material.LEATHER_LEGGINGS);
-        BlightedItem anglerBoots = new BlightedItem("ANGLER_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS);
+        BlightedItem anglerHelmet = new BlightedItem("ANGLER_HELMET", ItemType.HELMET, ItemRarity.UNCOMMON, Material.COPPER_HELMET);
+        anglerHelmet.setDisplayName("Angler Helmet");
+        anglerHelmet.setMaxDurability(121);
+        anglerHelmet.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
+        anglerHelmet.addAttributeModifier(Attribute.WATER_MOVEMENT_EFFICIENCY, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
+        anglerHelmet.addLore(ItemRarity.UNCOMMON.getName() + " HELMET");
 
+        BlightedItem anglerChestplate = new BlightedItem("ANGLER_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.UNCOMMON, Material.LEATHER_CHESTPLATE);
+        anglerChestplate.setDisplayName("Angler Chestplate");
+        anglerChestplate.addLore(ItemRarity.UNCOMMON.getName() + " CHESTPLATE");
+        anglerChestplate.addItemFlag(ItemFlag.HIDE_DYE);
         anglerChestplate.setLeatherColor("#4B6D9E");
+        anglerChestplate.setMaxDurability(176);
+        anglerChestplate.addAttributeModifier(Attribute.ARMOR, 4.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST);
+        anglerChestplate.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST);
+
+        BlightedItem anglerLeggings = new BlightedItem("ANGLER_LEGGINGS", ItemType.LEGGINGS, ItemRarity.UNCOMMON, Material.LEATHER_LEGGINGS);
+        anglerLeggings.setDisplayName("Angler Leggings");
+        anglerLeggings.addLore(ItemRarity.UNCOMMON.getName() + " LEGGINGS");
+        anglerLeggings.addItemFlag(ItemFlag.HIDE_DYE);
         anglerLeggings.setLeatherColor("#4B6D9E");
+        anglerLeggings.setMaxDurability(165);
+        anglerLeggings.addAttributeModifier(Attribute.ARMOR, 3.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.LEGS);
+        anglerLeggings.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.LEGS);
+
+        BlightedItem anglerBoots = new BlightedItem("ANGLER_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS);
+        anglerBoots.setDisplayName("Angler Boots");
+        anglerBoots.addLore(ItemRarity.UNCOMMON.getName() + " BOOTS");
+        anglerBoots.addItemFlag(ItemFlag.HIDE_DYE);
         anglerBoots.setLeatherColor("#4B6D9E");
+        anglerBoots.setMaxDurability(143);
+        anglerBoots.addAttributeModifier(Attribute.ARMOR, 1.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.FEET);
+        anglerBoots.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.FEET);
 
         add(
             emberWeaveHelmet,
@@ -192,7 +217,11 @@ public final class FishingArmors implements ItemProvider {
             magmaWeaveHelmet,
             magmaWeaveChestplate,
             magmaWeaveLeggins,
-            magmaweaveBoots
+            magmaweaveBoots,
+            anglerHelmet,
+            anglerChestplate,
+            anglerLeggings,
+            anglerBoots
         );
     }
 }

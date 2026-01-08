@@ -1,7 +1,7 @@
-package fr.moussax.blightedMC.smp.features.entities.spawnable;
+package fr.moussax.blightedMC.smp.features.entities;
 
-import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.utils.Utilities;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalLookAtPlayer;
@@ -42,12 +42,17 @@ public class Watchling extends SpawnableEntity {
         setDamage(10);
         setDroppedExp(10);
 
-        setLootTable(new BlightedLootBuilder()
+        setLootTable(new EntityLootTableBuilder()
             .setMaxDrop(2)
             .addLoot(Material.ENDER_PEARL, 1, 2, 1.0, COMMON)
             .addGemsLoot(5, 0.03, VERY_RARE)
             .build()
         );
+    }
+
+    @Override
+    protected void onDefineBehavior() {
+        super.onDefineBehavior();
         setupBehavior();
     }
 
@@ -149,9 +154,9 @@ public class Watchling extends SpawnableEntity {
 
     @Override
     protected void defineSpawnConditions() {
-        addCondition(SpawnConditionFactory
+        addCondition(SpawnRules
             .biome(Biome.END_BARRENS, Biome.END_MIDLANDS)
-            .or(SpawnConditionFactory.insideStructure(Structure.END_CITY))
+            .or(SpawnRules.insideStructure(Structure.END_CITY))
         );
     }
 
@@ -159,7 +164,6 @@ public class Watchling extends SpawnableEntity {
     public Watchling clone() {
         Watchling clone = (Watchling) super.clone();
         clone.lastTeleportTime = 0;
-        clone.setupBehavior();
         return clone;
     }
 }

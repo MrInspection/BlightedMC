@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.server.database;
 import java.sql.*;
 import java.util.UUID;
 
-public class PluginDatabase {
+public final class PluginDatabase {
     private final Connection connection;
 
     public PluginDatabase(String path) throws SQLException {
@@ -54,7 +54,6 @@ public class PluginDatabase {
             try {
                 statement.execute("ALTER TABLE players ADD COLUMN forge_fuel INTEGER NOT NULL DEFAULT 0");
             } catch (SQLException ignored) {
-                // Column likely exists
             }
         }
     }
