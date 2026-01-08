@@ -1,11 +1,11 @@
-package fr.moussax.blightedMC.smp.features.entities.spawnable.powerful;
+package fr.moussax.blightedMC.smp.features.entities.powerful;
 
 import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.Watchling;
+import fr.moussax.blightedMC.smp.features.entities.Watchling;
 import fr.moussax.blightedMC.utils.Utilities;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalLookAtPlayer;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalMeleeAttack;

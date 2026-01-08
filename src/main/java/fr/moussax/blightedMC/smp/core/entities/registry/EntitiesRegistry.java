@@ -2,14 +2,14 @@ package fr.moussax.blightedMC.smp.core.entities.registry;
 
 import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
+import fr.moussax.blightedMC.smp.features.entities.blighted.*;
 import fr.moussax.blightedMC.smp.features.entities.bosses.RevenantHorror;
 import fr.moussax.blightedMC.smp.features.entities.bosses.TheAncientKnight;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.Illusioner;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.InfernalBlaze;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.LaserEngineer;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.Watchling;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.blighted.*;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.powerful.Endersent;
+import fr.moussax.blightedMC.smp.features.entities.Illusioner;
+import fr.moussax.blightedMC.smp.features.entities.InfernalBlaze;
+import fr.moussax.blightedMC.smp.features.entities.LaserEngineer;
+import fr.moussax.blightedMC.smp.features.entities.Watchling;
+import fr.moussax.blightedMC.smp.features.entities.powerful.Endersent;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.Nullable;
 

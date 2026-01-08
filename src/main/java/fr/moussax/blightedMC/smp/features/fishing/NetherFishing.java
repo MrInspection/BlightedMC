@@ -11,7 +11,7 @@ import fr.moussax.blightedMC.smp.core.shared.loot.providers.AmountProvider;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.EntityResult;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.ItemResult;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.gems.GemsResult;
-import fr.moussax.blightedMC.smp.features.entities.spawnable.blighted.BlightedZombifiedPiglin;
+import fr.moussax.blightedMC.smp.features.entities.blighted.BlightedZombifiedPiglin;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;

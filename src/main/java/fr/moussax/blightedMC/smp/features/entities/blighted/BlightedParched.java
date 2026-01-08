@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
+package fr.moussax.blightedMC.smp.features.entities.blighted;
 
 import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
@@ -16,18 +16,18 @@ import java.util.Objects;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class BlightedBogged extends BlightedCreature {
-    public BlightedBogged() {
-        super("BLIGHTED_BOGGED", "Blighted Bogged", EntityType.BOGGED);
+public final class BlightedParched extends BlightedCreature {
+    public BlightedParched() {
+        super("BLIGHTED_PARCHED", "Blighted Parched", EntityType.PARCHED);
+        itemInMainHand = new ItemStack(Material.BOW);
         setDamage(6);
         setDroppedExp(12);
-        itemInMainHand = new ItemStack(Material.BOW);
         setLootTable(new BlightedLootBuilder()
-            .addLoot(Material.BONE, 2, 4, 1.0, COMMON)
+            .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
             .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
-            .addLoot(Material.BOW, 1, 1, 0.15, RARE)
             .addGemsLoot(5, 0.03, VERY_RARE)
-            .build());
+            .build()
+        );
     }
 
     @Override
@@ -42,12 +42,10 @@ public final class BlightedBogged extends BlightedCreature {
     @Override
     protected void defineSpawnConditions() {
         addCondition(
-            SpawnConditionFactory.biome(
-                    Biome.SWAMP,
-                    Biome.MANGROVE_SWAMP
-                )
+            SpawnConditionFactory.biome(Biome.DESERT)
                 .and(SpawnConditionFactory.maxBlockLight(0))
                 .and(SpawnConditionFactory.maxLightLevel(7))
+                .and(SpawnConditionFactory.skyExposed())
                 .and(SpawnConditionFactory.notInLiquid())
         );
     }

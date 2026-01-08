@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.entities.spawnable;
+package fr.moussax.blightedMC.smp.features.entities;
 
 import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
