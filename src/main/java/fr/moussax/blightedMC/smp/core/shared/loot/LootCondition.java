@@ -20,7 +20,9 @@ public interface LootCondition {
      */
     boolean test(LootContext ctx);
 
-    /** Always returns {@code true}. */
+    /**
+     * Always returns {@code true}.
+     */
     static LootCondition alwaysTrue() {
         return ctx -> true;
     }
@@ -52,7 +54,12 @@ public interface LootCondition {
      * @param maxY the maximum allowed Y-coordinate (inclusive)
      * @return a new condition
      */
-    static LootCondition atMostY(int maxY){
-        return context -> context.blightedPlayer().getPlayer().getLocation().getY() <= maxY;
+    static LootCondition atMostY(int maxY) {
+        return context -> {
+            if (context.blightedPlayer() == null || context.blightedPlayer().getPlayer() == null) {
+                return false;
+            }
+            return context.blightedPlayer().getPlayer().getLocation().getY() <= maxY;
+        };
     }
 }

@@ -9,7 +9,6 @@ import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
 import fr.moussax.blightedMC.smp.features.items.abilities.weave.EmberWeaveSetBonus;
 import fr.moussax.blightedMC.smp.features.items.abilities.weave.MagmaweaveSetBonus;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlot;
@@ -176,10 +175,9 @@ public final class FishingArmors implements ItemProvider {
         magmaWeaveLeggins.setFullSetBonus(magmaWeaveSetBonus);
         magmaweaveBoots.setFullSetBonus(magmaWeaveSetBonus);
 
-        BlightedItem anglerHelmet = new BlightedItem("ANGLER_HELMET", ItemType.HELMET, ItemRarity.UNCOMMON, Material.DIAMOND_HELMET);
+        BlightedItem anglerHelmet = new BlightedItem("ANGLER_HELMET", ItemType.HELMET, ItemRarity.UNCOMMON, Material.COPPER_HELMET);
         anglerHelmet.setDisplayName("Angler Helmet");
         anglerHelmet.setMaxDurability(121);
-        anglerHelmet.addAttributeModifier(Attribute.ARMOR, 2.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
         anglerHelmet.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
         anglerHelmet.addAttributeModifier(Attribute.WATER_MOVEMENT_EFFICIENCY, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
         anglerHelmet.addLore(ItemRarity.UNCOMMON.getName() + " HELMET");

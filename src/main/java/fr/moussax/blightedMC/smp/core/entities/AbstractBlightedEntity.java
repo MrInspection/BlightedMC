@@ -379,7 +379,7 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         World world = entity.getWorld();
         Location loc = entity.getLocation();
 
-        for (Player player : bossBar.getPlayers()) {
+        for (Player player : new ArrayList<>(bossBar.getPlayers())) {
             if (!player.isOnline() ||
                 player.getWorld() != world ||
                 player.getLocation().distanceSquared(loc) > (BOSS_BAR_RANGE * BOSS_BAR_RANGE)) {
@@ -470,7 +470,7 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         if (attachments.isEmpty()) return;
         for (EntityAttachment attachment : attachments) {
             Entity attachmentEntity = attachment.entity();
-            if (attachmentEntity == null) return;
+            if (attachmentEntity == null) continue;
 
             BlightedEntitiesListener.unregisterAttachment(attachmentEntity);
             if (attachmentEntity instanceof LivingEntity living && !living.isDead()) {

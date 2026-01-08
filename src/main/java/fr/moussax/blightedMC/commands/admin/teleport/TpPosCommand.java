@@ -46,7 +46,7 @@ public class TpPosCommand implements CommandExecutor {
 
             if (args.length < coordIndex + 3) {
                 warn(player, "Missing arguments! Please provide coordinates (x y z).");
-                return false;
+                return true;
             }
 
             double x = Double.parseDouble(args[coordIndex]);
@@ -75,7 +75,7 @@ public class TpPosCommand implements CommandExecutor {
             } else {
                 inform(player, "§7Teleported §f" + target.getName() + " §7to " + coordinates);
                 inform(target, "§7Teleported to " + coordinates);
-                player.playSound(target.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 0.75f);
+                target.playSound(target.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 0.75f);
             }
         } catch (NumberFormatException e) {
             warn(player, "Invalid coordinates. Please provide valid numbers.");
