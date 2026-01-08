@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.entities.blighted;
+package fr.moussax.blightedMC.smp.features.entities.ravenous;
 
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -11,21 +11,23 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.trim.TrimMaterial;
+import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Objects;
 
-public sealed abstract class BlightedCreature extends SpawnableEntity
-    permits BlightedBogged, BlightedDrowned, BlightedHusk, BlightedParched, BlightedPiglin,
-    BlightedSkeleton, BlightedStray, BlightedWitherSkeleton, BlightedZombie, BlightedZombifiedPiglin {
+public sealed abstract class RavenousCreature extends SpawnableEntity
+    permits RavenousBogged, RavenousDrowned, RavenousHusk, RavenousParched, RavenousPiglin,
+    RavenousSkeleton, RavenousStray, RavenousWitherSkeleton, RavenousZombie, RavenousZombifiedPiglin {
 
     private static final double ENRAGE_THRESHOLD = 0.50;
 
     protected boolean isEnraged;
     private int particleTicks = 0;
 
-    protected BlightedCreature(String entityId, String name, EntityType entityType) {
-        super(entityId, name, 30, entityType, 0.04);
+    protected RavenousCreature(String entityId, String name, EntityType entityType) {
+        super(entityId, name, 30, entityType, 0.05);
         setupDefaultArmor();
     }
 
@@ -39,8 +41,8 @@ public sealed abstract class BlightedCreature extends SpawnableEntity
         armor = new ItemStack[]{
             new ItemStack(Material.AIR),
             new ItemStack(Material.AIR),
-            new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherColor("#B584D4").toItemStack(),
-            new ItemBuilder(Material.LEATHER_HELMET).setLeatherColor("#A565C9").toItemStack()
+            new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherColor("#BF5985").toItemStack(),
+            new ItemBuilder(Material.LEATHER_HELMET).setLeatherColor("#BF5985").toItemStack()
         };
     }
 
@@ -86,16 +88,23 @@ public sealed abstract class BlightedCreature extends SpawnableEntity
     private void equipEnragedArmor(EntityEquipment equipment) {
         if (equipment == null) return;
 
-        equipment.setBoots(new ItemBuilder(Material.IRON_BOOTS).setUnbreakable(true).toItemStack());
-        equipment.setLeggings(new ItemBuilder(Material.IRON_LEGGINGS).setUnbreakable(true).toItemStack());
+        equipment.setBoots(new ItemBuilder(Material.IRON_BOOTS)
+            .addEnchantment(Enchantment.DEPTH_STRIDER, 4)
+            .setUnbreakable(true)
+            .toItemStack());
+        equipment.setLeggings(new ItemBuilder(Material.IRON_LEGGINGS)
+            .setUnbreakable(true)
+            .toItemStack());
         equipment.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
             .addEnchantment(Enchantment.PROTECTION, 1)
-            .setLeatherColor("#B74355")
+            .setLeatherColor("#BB4BB4")
+            .setArmorTrim(TrimMaterial.REDSTONE, TrimPattern.FLOW)
             .setUnbreakable(true)
             .toItemStack());
         equipment.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
             .addEnchantment(Enchantment.PROTECTION, 1)
-            .setLeatherColor("#B53C45")
+            .setLeatherColor("#BB4BB4")
+            .setArmorTrim(TrimMaterial.REDSTONE, TrimPattern.FLOW)
             .setUnbreakable(true)
             .toItemStack());
     }
@@ -105,8 +114,8 @@ public sealed abstract class BlightedCreature extends SpawnableEntity
     }
 
     @Override
-    public BlightedCreature clone() {
-        BlightedCreature clone = (BlightedCreature) super.clone();
+    public RavenousCreature clone() {
+        RavenousCreature clone = (RavenousCreature) super.clone();
         clone.isEnraged = false;
         clone.particleTicks = 0;
         return clone;

@@ -1,13 +1,13 @@
-package fr.moussax.blightedMC.smp.features.entities.blighted;
+package fr.moussax.blightedMC.smp.features.entities.ravenous;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
+import org.bukkit.block.Biome;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.generator.structure.Structure;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -16,36 +16,37 @@ import java.util.Objects;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class BlightedWitherSkeleton extends BlightedCreature {
-    public BlightedWitherSkeleton() {
-        super("BLIGHTED_WITHER_SKELETON", "Blighted Wither Skeleton", EntityType.WITHER_SKELETON);
+public final class RavenousParched extends RavenousCreature {
+    public RavenousParched() {
+        super("RAVENOUS_PARCHED", "Ravenous Parched", EntityType.PARCHED);
+        itemInMainHand = new ItemStack(Material.BOW);
+        setDamage(6);
+        setDroppedExp(12);
         setLootTable(new EntityLootTableBuilder()
-            .setMaxDrop(4)
             .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
-            .addLoot(Material.COAL, 1, 3, 0.5, UNCOMMON)
-            .addLoot(Material.WITHER_SKELETON_SKULL, 1, 1, 0.03, VERY_RARE)
-            .addGemsLoot(5, 0.03, VERY_RARE)
+            .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
+            .addGemsLoot(5, 0.04, VERY_RARE)
             .build()
         );
-
-        setDamage(8);
-        setDroppedExp(20);
-        itemInMainHand = new ItemStack(Material.STONE_SWORD);
     }
 
     @Override
     protected void onEnrage(LivingEntity entity) {
         entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PotionEffect.INFINITE_DURATION, 1));
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 0));
         Objects.requireNonNull(entity.getEquipment()).setItemInMainHand(
-            new ItemBuilder(Material.STONE_SWORD).addEnchantment(Enchantment.FIRE_ASPECT, 1).toItemStack()
+            new ItemBuilder(Material.BOW).addEnchantment(Enchantment.POWER, 2).toItemStack()
         );
     }
 
     @Override
     protected void defineSpawnConditions() {
         addCondition(
-            SpawnRules.insideStructure(Structure.FORTRESS)
+            SpawnRules.biome(Biome.DESERT)
                 .and(SpawnRules.maxBlockLight(0))
+                .and(SpawnRules.maxLightLevel(7))
+                .and(SpawnRules.skyExposed())
+                .and(SpawnRules.notInLiquid())
         );
     }
 }

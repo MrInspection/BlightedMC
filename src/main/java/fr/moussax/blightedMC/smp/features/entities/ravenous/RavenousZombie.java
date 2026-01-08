@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.entities.blighted;
+package fr.moussax.blightedMC.smp.features.entities.ravenous;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
@@ -11,19 +11,19 @@ import org.bukkit.potion.PotionEffectType;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class BlightedZombie extends BlightedCreature {
+public final class RavenousZombie extends RavenousCreature {
 
-    public BlightedZombie() {
-        super("BLIGHTED_ZOMBIE", "Blighted Zombie", EntityType.ZOMBIE);
+    public RavenousZombie() {
+        super("RAVENOUS_ZOMBIE", "Ravenous Zombie", EntityType.ZOMBIE);
         setDamage(6);
         setDroppedExp(12);
         setLootTable(new EntityLootTableBuilder()
             .setMaxDrop(3)
             .addLoot(Material.ROTTEN_FLESH, 2, 6, 1.0, COMMON)
-            .addLoot(Material.POTATO, 1, 2, 0.15, UNCOMMON)
-            .addLoot(Material.CARROT, 1, 2, 0.15, UNCOMMON)
+            .addLoot(Material.POTATO, 1, 2, 0.075, UNCOMMON)
+            .addLoot(Material.CARROT, 1, 2, 0.075, UNCOMMON)
             .addLoot(Material.IRON_INGOT, 1, 2, 0.1, RARE)
-            .addGemsLoot(5, 0.03, VERY_RARE)
+            .addGemsLoot(5, 0.04, VERY_RARE)
             .build()
         );
     }

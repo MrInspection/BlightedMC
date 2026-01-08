@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.entities.blighted;
+package fr.moussax.blightedMC.smp.features.entities.ravenous;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
@@ -16,9 +16,9 @@ import java.util.Objects;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class BlightedSkeleton extends BlightedCreature {
-    public BlightedSkeleton() {
-        super("BLIGHTED_SKELETON", "Blighted Skeleton", EntityType.SKELETON);
+public final class RavenousSkeleton extends RavenousCreature {
+    public RavenousSkeleton() {
+        super("RAVENOUS_SKELETON", "Ravenous Skeleton", EntityType.SKELETON);
         itemInMainHand = new ItemStack(Material.BOW);
         setDamage(6);
         setDroppedExp(12);
@@ -26,7 +26,7 @@ public final class BlightedSkeleton extends BlightedCreature {
             .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
             .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
             .addLootWithDurabilityRange(Material.BOW, 0.1, 0.8, 0.15, RARE)
-            .addGemsLoot(5, 0.03, VERY_RARE)
+            .addGemsLoot(5, 0.04, VERY_RARE)
             .build()
         );
     }
@@ -36,7 +36,7 @@ public final class BlightedSkeleton extends BlightedCreature {
         entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PotionEffect.INFINITE_DURATION, 1));
         entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 0));
         Objects.requireNonNull(entity.getEquipment()).setItemInMainHand(
-            new ItemBuilder(Material.BOW).addEnchantment(Enchantment.POWER, 1).toItemStack()
+            new ItemBuilder(Material.BOW).addEnchantment(Enchantment.POWER, 2).toItemStack()
         );
     }
 

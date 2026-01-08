@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.entities.blighted;
+package fr.moussax.blightedMC.smp.features.entities.ravenous;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
@@ -18,27 +18,28 @@ import java.util.Objects;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class BlightedBogged extends BlightedCreature {
-    public BlightedBogged() {
-        super("BLIGHTED_BOGGED", "Blighted Bogged", EntityType.BOGGED);
+public final class RavenousStray extends RavenousCreature {
+    public RavenousStray() {
+        super("RAVENOUS_STRAY", "Ravenous Stray", EntityType.STRAY);
+        itemInMainHand = new ItemStack(Material.BOW);
         setDamage(6);
         setDroppedExp(12);
-        itemInMainHand = new ItemStack(Material.BOW);
         setLootTable(new EntityLootTableBuilder()
-            .addLoot(Material.BONE, 2, 4, 1.0, COMMON)
+            .setMaxDrop(4)
+            .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
             .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
             .addLoot(
                 Material.TIPPED_ARROW, b -> b.setItemMeta(
-                    meta -> ((PotionMeta) meta).setBasePotionType(PotionType.POISON)
+                    meta -> ((PotionMeta) meta).setBasePotionType(PotionType.SLOWNESS)
                 ),
                 1,
                 3,
                 0.4,
                 UNCOMMON
             )
-            .addLootWithDurabilityRange(Material.BOW, 0.10, 0.75, 0.15, RARE)
-            .addGemsLoot(5, 0.03, VERY_RARE)
-            .build());
+            .addGemsLoot(5, 0.04, VERY_RARE)
+            .build()
+        );
     }
 
     @Override
@@ -46,7 +47,7 @@ public final class BlightedBogged extends BlightedCreature {
         entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PotionEffect.INFINITE_DURATION, 1));
         entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 0));
         Objects.requireNonNull(entity.getEquipment()).setItemInMainHand(
-            new ItemBuilder(Material.BOW).addEnchantment(Enchantment.POWER, 1).toItemStack()
+            new ItemBuilder(Material.BOW).addEnchantment(Enchantment.POWER, 2).toItemStack()
         );
     }
 
@@ -54,11 +55,18 @@ public final class BlightedBogged extends BlightedCreature {
     protected void defineSpawnConditions() {
         addCondition(
             SpawnRules.biome(
-                    Biome.SWAMP,
-                    Biome.MANGROVE_SWAMP
+                    Biome.SNOWY_PLAINS,
+                    Biome.ICE_SPIKES,
+                    Biome.FROZEN_OCEAN,
+                    Biome.DEEP_FROZEN_OCEAN,
+                    Biome.FROZEN_RIVER,
+                    Biome.SNOWY_SLOPES,
+                    Biome.JAGGED_PEAKS,
+                    Biome.FROZEN_PEAKS
                 )
                 .and(SpawnRules.maxBlockLight(0))
                 .and(SpawnRules.maxLightLevel(7))
+                .and(SpawnRules.skyExposed())
                 .and(SpawnRules.notInLiquid())
         );
     }

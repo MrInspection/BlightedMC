@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.entities.blighted;
+package fr.moussax.blightedMC.smp.features.entities.ravenous;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
@@ -18,15 +18,15 @@ import java.util.Objects;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class BlightedPiglin extends BlightedCreature {
-    public BlightedPiglin() {
-        super("BLIGHTED_PIGLIN", "Blighted Piglin", EntityType.PIGLIN);
+public final class RavenousPiglin extends RavenousCreature {
+    public RavenousPiglin() {
+        super("RAVENOUS_PIGLIN", "Ravenous Piglin", EntityType.PIGLIN);
         itemInMainHand = new ItemStack(Material.GOLDEN_SWORD);
         setLootTable(new EntityLootTableBuilder()
             .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0, COMMON)
             .addLoot(Material.GOLD_INGOT, 1, 3, 0.4, UNCOMMON)
             .addLootWithDurabilityRange(Material.CROSSBOW, 0.10, 0.80, 0.1, RARE)
-            .addGemsLoot(5, 0.03, VERY_RARE)
+            .addGemsLoot(5, 0.04, VERY_RARE)
             .build()
         );
         setDamage(8);

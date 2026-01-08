@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.features.entities.blighted;
+package fr.moussax.blightedMC.smp.features.entities.ravenous;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
@@ -17,22 +17,21 @@ import java.util.Objects;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class BlightedDrowned extends BlightedCreature {
-    public BlightedDrowned() {
-        super("BLIGHTED_DROWNED", "Blighted Drowned", EntityType.DROWNED);
+public final class RavenousDrowned extends RavenousCreature {
+    public RavenousDrowned() {
+        super("RAVENOUS_DROWNED", "Ravenous Drowned", EntityType.DROWNED);
         setLootTable(new EntityLootTableBuilder()
             .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, COMMON)
             .addLoot(Material.COPPER_INGOT, 1, 3, 0.4, UNCOMMON)
             .addLoot(Material.NAUTILUS_SHELL, 1, 1, 0.08, RARE)
             .addLootWithDurabilityRange(Material.TRIDENT, 0.05, 0.80, 0.02, VERY_RARE)
-            .addGemsLoot(5, 0.03, VERY_RARE)
+            .addGemsLoot(5, 0.04, VERY_RARE)
             .build()
         );
         setDamage(6);
         setDroppedExp(12);
-        itemInMainHand = new ItemStack(Material.AIR);
-        addAttribute(Attribute.WATER_MOVEMENT_EFFICIENCY, 1.8);
-
+        itemInMainHand = new ItemStack(Material.TRIDENT);
+        addAttribute(Attribute.WATER_MOVEMENT_EFFICIENCY, 2);
     }
 
     @Override
@@ -62,7 +61,7 @@ public final class BlightedDrowned extends BlightedCreature {
                 )
                 .and(SpawnRules.maxBlockLight(0))
                 .and(SpawnRules.maxLightLevel(7))
-                .and(SpawnRules.notInLiquid().not())
+                .and(SpawnRules.notInLiquid().negate())
         );
     }
 }
