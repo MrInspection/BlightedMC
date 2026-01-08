@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.smp.features.entities.blighted;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -44,8 +44,8 @@ public final class BlightedWitherSkeleton extends BlightedCreature {
     @Override
     protected void defineSpawnConditions() {
         addCondition(
-            SpawnConditionFactory.insideStructure(Structure.FORTRESS)
-                .and(SpawnConditionFactory.maxBlockLight(0))
+            SpawnRules.insideStructure(Structure.FORTRESS)
+                .and(SpawnRules.maxBlockLight(0))
         );
     }
 }

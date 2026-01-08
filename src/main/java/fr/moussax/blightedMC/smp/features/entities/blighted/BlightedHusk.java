@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.smp.features.entities.blighted;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -41,11 +41,11 @@ public final class BlightedHusk extends BlightedCreature {
     @Override
     protected void defineSpawnConditions() {
         addCondition(
-            SpawnConditionFactory.biome(Biome.DESERT)
-                .and(SpawnConditionFactory.maxBlockLight(0))
-                .and(SpawnConditionFactory.maxLightLevel(7))
-                .and(SpawnConditionFactory.skyExposed())
-                .and(SpawnConditionFactory.notInLiquid())
+            SpawnRules.biome(Biome.DESERT)
+                .and(SpawnRules.maxBlockLight(0))
+                .and(SpawnRules.maxLightLevel(7))
+                .and(SpawnRules.skyExposed())
+                .and(SpawnRules.notInLiquid())
         );
     }
 }

@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * Factory utility for common {@link SpawnCondition} predicates.
+ * Static utility for common {@link SpawnCondition} predicates.
  * <p>
  * Provides reusable, composable conditions for entity spawning logic.
  * Returned conditions are stateless lambdas and can be combined via
@@ -19,13 +19,13 @@ import java.util.Set;
  *
  * <p>Example:
  * <pre>{@code
- * SpawnCondition condition = SpawnConditions.biome(Biome.PLAINS)
- *     .and(SpawnConditions.nightTime())
- *     .and(SpawnConditions.clearWeather());
+ * SpawnCondition condition = SpawnRules.biome(Biome.PLAINS)
+ *     .and(SpawnRules.nightTime())
+ *     .and(SpawnRules.isOpenSky());
  * }</pre>
  */
-public final class SpawnConditionFactory {
-    private SpawnConditionFactory() {
+public final class SpawnRules {
+    private SpawnRules() {
     }
 
     /**

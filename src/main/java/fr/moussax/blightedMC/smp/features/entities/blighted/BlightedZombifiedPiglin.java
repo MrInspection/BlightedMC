@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.smp.features.entities.blighted;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -45,10 +45,10 @@ public final class BlightedZombifiedPiglin extends BlightedCreature {
     @Override
     protected void defineSpawnConditions() {
         addCondition(
-            SpawnConditionFactory.biome(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST)
-                .or(SpawnConditionFactory.insideStructure(Structure.FORTRESS))
-                .and(SpawnConditionFactory.maxBlockLight(11))
-                .and(SpawnConditionFactory.notInLiquid())
+            SpawnRules.biome(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST)
+                .or(SpawnRules.insideStructure(Structure.FORTRESS))
+                .and(SpawnRules.maxBlockLight(11))
+                .and(SpawnRules.notInLiquid())
         );
     }
 }

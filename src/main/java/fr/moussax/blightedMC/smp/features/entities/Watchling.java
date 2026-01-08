@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.smp.features.entities;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.utils.Utilities;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalLookAtPlayer;
@@ -154,9 +154,9 @@ public class Watchling extends SpawnableEntity {
 
     @Override
     protected void defineSpawnConditions() {
-        addCondition(SpawnConditionFactory
+        addCondition(SpawnRules
             .biome(Biome.END_BARRENS, Biome.END_MIDLANDS)
-            .or(SpawnConditionFactory.insideStructure(Structure.END_CITY))
+            .or(SpawnRules.insideStructure(Structure.END_CITY))
         );
     }
 

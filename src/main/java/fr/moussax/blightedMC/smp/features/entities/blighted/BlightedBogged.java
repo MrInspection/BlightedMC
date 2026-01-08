@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.smp.features.entities.blighted;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -9,8 +9,10 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 import java.util.Objects;
 
@@ -25,7 +27,16 @@ public final class BlightedBogged extends BlightedCreature {
         setLootTable(new EntityLootTableBuilder()
             .addLoot(Material.BONE, 2, 4, 1.0, COMMON)
             .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
-            .addLoot(Material.BOW, 1, 1, 0.15, RARE)
+            .addLoot(
+                Material.TIPPED_ARROW, b -> b.setItemMeta(
+                    meta -> ((PotionMeta) meta).setBasePotionType(PotionType.POISON)
+                ),
+                1,
+                3,
+                0.4,
+                UNCOMMON
+            )
+            .addLootWithDurabilityRange(Material.BOW, 0.10, 0.75, 0.15, RARE)
             .addGemsLoot(5, 0.03, VERY_RARE)
             .build());
     }
@@ -42,13 +53,13 @@ public final class BlightedBogged extends BlightedCreature {
     @Override
     protected void defineSpawnConditions() {
         addCondition(
-            SpawnConditionFactory.biome(
+            SpawnRules.biome(
                     Biome.SWAMP,
                     Biome.MANGROVE_SWAMP
                 )
-                .and(SpawnConditionFactory.maxBlockLight(0))
-                .and(SpawnConditionFactory.maxLightLevel(7))
-                .and(SpawnConditionFactory.notInLiquid())
+                .and(SpawnRules.maxBlockLight(0))
+                .and(SpawnRules.maxLightLevel(7))
+                .and(SpawnRules.notInLiquid())
         );
     }
 }

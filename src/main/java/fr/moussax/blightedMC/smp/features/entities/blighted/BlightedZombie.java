@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.smp.features.entities.blighted;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
@@ -37,7 +37,7 @@ public final class BlightedZombie extends BlightedCreature {
     @Override
     protected void defineSpawnConditions() {
         addCondition(
-            SpawnConditionFactory.biome(
+            SpawnRules.biome(
                     Biome.PLAINS,
                     Biome.SUNFLOWER_PLAINS,
                     Biome.FOREST,
@@ -82,9 +82,9 @@ public final class BlightedZombie extends BlightedCreature {
                     Biome.LUSH_CAVES,
                     Biome.DRIPSTONE_CAVES
                 )
-                .and(SpawnConditionFactory.maxBlockLight(0))
-                .and(SpawnConditionFactory.maxLightLevel(7))
-                .and(SpawnConditionFactory.notInLiquid())
+                .and(SpawnRules.maxBlockLight(0))
+                .and(SpawnRules.maxLightLevel(7))
+                .and(SpawnRules.notInLiquid())
         );
     }
 }

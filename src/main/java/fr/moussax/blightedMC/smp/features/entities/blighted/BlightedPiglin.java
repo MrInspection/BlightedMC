@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.smp.features.entities.blighted;
 
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,7 +25,7 @@ public final class BlightedPiglin extends BlightedCreature {
         setLootTable(new EntityLootTableBuilder()
             .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0, COMMON)
             .addLoot(Material.GOLD_INGOT, 1, 3, 0.4, UNCOMMON)
-            .addLoot(Material.CROSSBOW, 1, 1, 0.1, RARE)
+            .addLootWithDurabilityRange(Material.CROSSBOW, 0.10, 0.80, 0.1, RARE)
             .addGemsLoot(5, 0.03, VERY_RARE)
             .build()
         );
@@ -51,10 +51,10 @@ public final class BlightedPiglin extends BlightedCreature {
     @Override
     protected void defineSpawnConditions() {
         addCondition(
-            SpawnConditionFactory
+            SpawnRules
                 .biome(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST)
-                .and(SpawnConditionFactory.maxBlockLight(11))
-                .and(SpawnConditionFactory.notInLiquid())
+                .and(SpawnRules.maxBlockLight(11))
+                .and(SpawnRules.notInLiquid())
         );
     }
 }
