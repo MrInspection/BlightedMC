@@ -28,7 +28,15 @@ public class RevenantHorror extends AbstractBlightedEntity {
         this.entityId = "REVENANT_HORROR";
         setNameTagType(EntityNameTag.BOSS);
         setDefense(35);
+    }
 
+    @Override
+    protected void onDefineBehavior() {
+        super.onDefineBehavior();
+        setupBehavior();
+    }
+
+    private void setupBehavior() {
         addRepeatingTask(() -> {
             abilityRunnable = new BukkitRunnable() {
                 private int phase = 0;
@@ -152,31 +160,6 @@ public class RevenantHorror extends AbstractBlightedEntity {
         RevenantHorror clone = (RevenantHorror) super.clone();
         clone.inEnrageState = false;
         clone.abilityRunnable = null;
-
-        clone.addRepeatingTask(() -> {
-            clone.abilityRunnable = new BukkitRunnable() {
-                private int phase = 0;
-
-                @Override
-                public void run() {
-                    if (clone.entity == null || clone.entity.isDead()) {
-                        clone.stopAbility();
-                        cancel();
-                        return;
-                    }
-
-                    switch (phase) {
-                        case 0 -> clone.performLifeDrain();
-                        case 1 -> clone.performPestilence();
-                        case 2 -> clone.startEnragePhase();
-                    }
-
-                    phase = (phase + 1) % 3;
-                }
-            };
-            return clone.abilityRunnable;
-        }, 20L * 10, 20L * 10);
-
         return clone;
     }
 }

@@ -48,6 +48,11 @@ public class Watchling extends SpawnableEntity {
             .addGemsLoot(5, 0.03, VERY_RARE)
             .build()
         );
+    }
+
+    @Override
+    protected void onDefineBehavior() {
+        super.onDefineBehavior();
         setupBehavior();
     }
 
@@ -159,7 +164,6 @@ public class Watchling extends SpawnableEntity {
     public Watchling clone() {
         Watchling clone = (Watchling) super.clone();
         clone.lastTeleportTime = 0;
-        clone.setupBehavior();
         return clone;
     }
 }

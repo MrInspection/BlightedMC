@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC.smp.features.entities.spawnable.blighted;
 
-import fr.moussax.blightedMC.smp.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -27,8 +26,12 @@ public sealed abstract class BlightedCreature extends SpawnableEntity
 
     protected BlightedCreature(String entityId, String name, EntityType entityType) {
         super(entityId, name, 30, entityType, 0.04);
-        setNameTagType(EntityNameTag.BLIGHTED);
         setupDefaultArmor();
+    }
+
+    @Override
+    protected void onDefineBehavior() {
+        super.onDefineBehavior();
         setupEnrageTask();
     }
 
@@ -106,7 +109,6 @@ public sealed abstract class BlightedCreature extends SpawnableEntity
         BlightedCreature clone = (BlightedCreature) super.clone();
         clone.isEnraged = false;
         clone.particleTicks = 0;
-        clone.setupEnrageTask();
         return clone;
     }
 }

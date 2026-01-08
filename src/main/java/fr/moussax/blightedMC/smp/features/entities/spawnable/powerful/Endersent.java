@@ -3,8 +3,8 @@ package fr.moussax.blightedMC.smp.features.entities.spawnable.powerful;
 import fr.moussax.blightedMC.smp.core.entities.BlightedLootBuilder;
 import fr.moussax.blightedMC.smp.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
+import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnConditionFactory;
 import fr.moussax.blightedMC.smp.features.entities.spawnable.Watchling;
 import fr.moussax.blightedMC.utils.Utilities;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalLookAtPlayer;
@@ -62,6 +62,11 @@ public class Endersent extends SpawnableEntity {
         );
 
         setNameTagType(EntityNameTag.BOSS);
+    }
+
+    @Override
+    protected void onDefineBehavior() {
+        super.onDefineBehavior();
         setupBehavior();
     }
 
@@ -238,7 +243,6 @@ public class Endersent extends SpawnableEntity {
         clone.isEscaping = false;
         clone.lastTeleportSmash = 0;
         clone.escapeTicks = 0;
-        clone.setupBehavior();
         return clone;
     }
 }

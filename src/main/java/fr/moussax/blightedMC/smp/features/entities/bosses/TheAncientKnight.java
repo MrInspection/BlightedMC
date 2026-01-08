@@ -34,7 +34,15 @@ public class TheAncientKnight extends AbstractBlightedEntity {
         };
 
         itemInMainHand = new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack();
+    }
 
+    @Override
+    protected void onDefineBehavior() {
+        super.onDefineBehavior();
+        setupBehavior();
+    }
+
+    private void setupBehavior() {
         addRepeatingTask(() -> {
             BukkitRunnable task = new BukkitRunnable() {
                 @Override
@@ -70,31 +78,6 @@ public class TheAncientKnight extends AbstractBlightedEntity {
         TheAncientKnight clone = (TheAncientKnight) super.clone();
         clone.abilityRunnable = null;
         clone.swords = new ArrayList<>();
-
-        clone.addRepeatingTask(() -> {
-            BukkitRunnable task = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (clone.entity == null || clone.entity.isDead()) {
-                        clone.stopAbility();
-                        cancel();
-                        return;
-                    }
-
-                    List<Player> nearbyPlayers = clone.entity.getNearbyEntities(20, 20, 20).stream()
-                        .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-                        .map(e -> (Player) e)
-                        .toList();
-                    if (nearbyPlayers.isEmpty()) return;
-
-                    BlightedPlayer target = BlightedPlayer.getBlightedPlayer(nearbyPlayers.getFirst());
-                    clone.stabAbility(target);
-                }
-            };
-            clone.abilityRunnable = task;
-            return task;
-        }, 100L, 300L);
-
         return clone;
     }
 
