@@ -9,7 +9,7 @@ import fr.moussax.blightedMC.smp.core.shared.loot.providers.AmountProvider;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.EntityResult;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.ItemResult;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.gems.GemsResult;
-import fr.moussax.blightedMC.smp.features.entities.blighted.BlightedHusk;
+import fr.moussax.blightedMC.smp.features.entities.ravenous.RavenousHusk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
@@ -104,7 +104,7 @@ public class OverworldLavaFishing implements FishingLootProvider {
                 ),
                 LootEntry.weighted(
                     new FishingLootFeedbackDecorator(
-                        EntityResult.blighted(new BlightedHusk()),
+                        EntityResult.blighted(new RavenousHusk()),
                         GREAT_CATCH
                     ),
                     10.0,
