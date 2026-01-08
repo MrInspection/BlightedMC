@@ -8,11 +8,13 @@ import fr.moussax.blightedMC.smp.core.shared.loot.providers.AmountProvider;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.ItemResult;
 import fr.moussax.blightedMC.smp.core.shared.loot.results.gems.GemsResult;
 import fr.moussax.blightedMC.smp.core.shared.loot.strategies.LootingAwareProbabilisticStrategy;
+import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static fr.moussax.blightedMC.smp.core.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity;
 
@@ -70,6 +72,35 @@ public final class EntityLootTableBuilder {
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
                     ItemResult.of(material), rarity
+                ),
+                dropChance,
+                AmountProvider.range(min, max),
+                LootCondition.alwaysTrue()
+            )
+        );
+        return this;
+    }
+
+    /**
+     * Adds a material-based loot entry with a custom item modifier.
+     *
+     * <p>The provided {@link ItemBuilder} consumer is applied to the generated item
+     * before it is added to the loot result, allowing customization such as name,
+     * lore, enchantments, or flags.</p>
+     *
+     * @param material   the Bukkit material to drop
+     * @param modifier   item builder modifier applied to the generated item
+     * @param min        minimum amount dropped
+     * @param max        maximum amount dropped
+     * @param dropChance probability for this entry to be selected
+     * @param rarity     visual and audio feedback rarity
+     * @return this builder instance
+     */
+    public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, int min, int max, double dropChance, EntityLootRarity rarity) {
+        builder.addEntry(
+            LootEntry.probabilistic(
+                new EntityLootFeedbackDecorator(
+                    ItemResult.of(material, modifier), rarity
                 ),
                 dropChance,
                 AmountProvider.range(min, max),
