@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.commands.admin;
 
+import fr.moussax.blightedMC.server.PluginPermissions;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -14,12 +15,12 @@ import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 
 public class KaboomCommand implements CommandExecutor {
     private static final int LIGHTNING_STRIKE_AMOUNT = 10;
-    private static final float LAUNCH_HEIGHT = 10.55f;
+    private static final float LAUNCH_HEIGHT = 5.55f;
 
     @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
-        if (!(label.equalsIgnoreCase("kaboom") && sender instanceof Player player)) return false;
-        if (!enforceAdminPermission(player)) return false;
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
+        if (!(sender instanceof Player player)) return false;
+        if (!hasRequiredPermission(player, PluginPermissions.ADMIN)) return false;
 
         if (args.length == 0) {
             return launchAllPlayers(player);

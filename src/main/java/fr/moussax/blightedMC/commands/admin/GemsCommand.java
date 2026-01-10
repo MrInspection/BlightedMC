@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.commands.admin;
 
+import fr.moussax.blightedMC.server.PluginPermissions;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import fr.moussax.blightedMC.utils.commands.CommandInfo;
@@ -19,7 +20,7 @@ public class GemsCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
         if (!(label.equalsIgnoreCase("gems") && sender instanceof Player player)) return false;
-        if (!enforceAdminPermission(player)) return false;
+        if (!hasRequiredPermission(player, PluginPermissions.ADMIN)) return false;
 
         if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
             CommandInfo.sendCommands(player, "COMMANDS", "Gems Currency",

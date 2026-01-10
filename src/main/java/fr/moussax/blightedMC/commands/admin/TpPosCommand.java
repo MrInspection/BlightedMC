@@ -1,5 +1,6 @@
-package fr.moussax.blightedMC.commands.admin.teleport;
+package fr.moussax.blightedMC.commands.admin;
 
+import fr.moussax.blightedMC.server.PluginPermissions;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import fr.moussax.blightedMC.utils.commands.CommandArguments;
 import fr.moussax.blightedMC.utils.commands.CommandInfo;
@@ -24,7 +25,7 @@ public class TpPosCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
         if (!(sender instanceof Player player)) return false;
-        if (!enforceAdminPermission(player)) return false;
+        if (!hasRequiredPermission(player, PluginPermissions.ADMIN)) return false;
 
         if (args.length < 3) {
             CommandInfo.sendUsage(player,
