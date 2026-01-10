@@ -96,7 +96,7 @@ public final class ItemRegistryMenu {
 
         private static String formatCategoryName(ItemType.Category category) {
             return switch (category) {
-                case ARMOR -> "Armor Categories";
+                case ARMOR -> "Armors";
                 case MELEE_WEAPON -> "Melee Weapons";
                 case RANGE_WEAPON -> "Ranged Weapons";
                 case TOOLS -> "Tools";
