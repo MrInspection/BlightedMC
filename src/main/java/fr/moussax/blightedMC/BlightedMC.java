@@ -7,6 +7,7 @@ import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
 import fr.moussax.blightedMC.server.database.PluginDatabase;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.engine.BlightedSpawnEngine;
+import fr.moussax.blightedMC.smp.core.managers.TabManager;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.utils.commands.CommandBuilder;
@@ -22,6 +23,7 @@ public final class BlightedMC extends JavaPlugin {
     private PluginSettings settings;
     private PluginDatabase database;
     private EventsRegistry eventsRegistry;
+    private TabManager tabManager;
 
     @Override
     public void onEnable() {
@@ -30,6 +32,9 @@ public final class BlightedMC extends JavaPlugin {
         Log.info("Plugin", "Initializing BlightedMC plugin...");
         BlightedServer.initialize(this);
         BlightedServer.getInstance().configureServer();
+
+        tabManager = new TabManager(this);
+        tabManager.start();
 
         String config = PluginFiles.CONFIG.getFileName();
         saveResourcesAs(config, config);
@@ -53,6 +58,9 @@ public final class BlightedMC extends JavaPlugin {
         eventsRegistry.shutdownMenus();
         eventsRegistry.cleanup();
         RegistrySystem.clear();
+        if (this.tabManager != null) {
+            this.tabManager.stop();
+        }
     }
 
     /**
