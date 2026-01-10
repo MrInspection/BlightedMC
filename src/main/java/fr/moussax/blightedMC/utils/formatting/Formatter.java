@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.utils.formatting;
 
+import fr.moussax.blightedMC.server.PluginPermissions;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -32,7 +33,6 @@ import static com.google.common.base.Strings.repeat;
  */
 public final class Formatter {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###");
-    private static final String ADMIN_PERMISSION = "blightedmc.admin";
     private static final String INFO_PREFIX = "§8 ■ §7";
     private static final String WARN_PREFIX = "§4 ■ §c";
 
@@ -237,18 +237,18 @@ public final class Formatter {
     }
 
     /**
-     * Verifies admin permission for a player.
+     * Verifies the provided permission for a player.
      *
-     * <p>Requires both operator status and the admin permission.
+     * <p>Requires both operator status and the provided permission.
      * Sends a warning message if the check fails.
      *
      * @param player the player to check
-     * @return {@code true} if player has admin permission
+     * @param permission the permission to check
+     * @return {@code true} if player has the required permission
      */
-    public static boolean enforceAdminPermission(@NonNull Player player) {
-        if (!player.isOp() || !player.hasPermission(ADMIN_PERMISSION)) {
-            warn(player, "You must be an §4ADMIN §cto use this command.");
-            return false;
+    public static boolean hasRequiredPermission(@NonNull Player player, @NonNull PluginPermissions permission) {
+        if(!player.isOp() || !player.hasPermission(permission.getPermission())) {
+            warn(player, "You must be §4" + permission.name() + "§c to use this command.");
         }
         return true;
     }
