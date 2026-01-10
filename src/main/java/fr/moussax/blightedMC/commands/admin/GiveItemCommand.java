@@ -1,10 +1,12 @@
 package fr.moussax.blightedMC.commands.admin;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.server.PluginPermissions;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.items.registry.menu.ItemRegistryMenu;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,15 +19,27 @@ import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 @CommandArgument(suggestions = {"$items"})
 public class GiveItemCommand implements CommandExecutor {
 
+    // Usage: /giveitem <player> <itemId> <amount>
+
     @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
-        if (!(label.equalsIgnoreCase("giveitem") && sender instanceof Player player)) return false;
-        if (!enforceAdminPermission(player)) return false;
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
+        if (!(sender instanceof Player player)) return false;
+        if (!hasRequiredPermission(player, PluginPermissions.ADMIN)) return false;
 
         if (args.length == 0) {
             BlightedMC.menuManager().openMenu(new ItemRegistryMenu.ItemCategoriesMenu(), player);
             return true;
         }
+
+
+        Player target = player;
+        Player potentialTarget = Bukkit.getPlayerExact(args[0]);
+
+        if(potentialTarget != null) {
+            target = potentialTarget;
+        }
+
+
 
         String itemId = args[0].toUpperCase();
         BlightedItem blightedItem = ItemRegistry.getItem(itemId);
