@@ -7,9 +7,10 @@ import fr.moussax.blightedMC.smp.core.items.ItemType;
 import fr.moussax.blightedMC.smp.core.items.abilities.ArmorManager;
 import fr.moussax.blightedMC.smp.core.items.abilities.CooldownEntry;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.smp.core.managers.ActionBarManager;
+import fr.moussax.blightedMC.smp.core.shared.ui.actionbar.ActionBarManager;
 import fr.moussax.blightedMC.smp.core.managers.GemsManager;
 import fr.moussax.blightedMC.smp.core.managers.ManaManager;
+import fr.moussax.blightedMC.smp.core.player.mod.BlightedModerator;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +18,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
-public class BlightedPlayer {
+public final class BlightedPlayer {
     private static final Map<UUID, BlightedPlayer> players = new HashMap<>();
 
     private static volatile double DEFAULT_MAX_MANA = -1;
@@ -29,6 +30,7 @@ public class BlightedPlayer {
     private final PlayerDataHandler dataHandler;
     private final ActionBarManager actionBarManager;
     private final ManaManager manaManager;
+    private final BlightedModerator moderator;
 
     private final List<FullSetBonus> activeFullSetBonuses = new ArrayList<>();
     private final List<CooldownEntry> cooldowns = new ArrayList<>();
@@ -53,6 +55,13 @@ public class BlightedPlayer {
         this.forgeFuel = dataHandler.getForgeFuel();
 
         this.actionBarManager = new ActionBarManager(this);
+
+        if (player.hasPermission("blightedmc.moderator")) {
+            this.moderator = new BlightedModerator(this);
+        } else {
+            this.moderator = null;
+        }
+
         players.put(playerId, this);
 
         this.actionBarTask = Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(),
@@ -240,5 +249,13 @@ public class BlightedPlayer {
 
     public ActionBarManager getActionBarManager() {
         return actionBarManager;
+    }
+
+    public BlightedModerator getModerator() {
+        return moderator;
+    }
+
+    public boolean isModerator() {
+        return moderator != null;
     }
 }
