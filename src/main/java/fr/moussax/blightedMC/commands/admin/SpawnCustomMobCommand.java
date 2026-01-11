@@ -35,7 +35,7 @@ public class SpawnCustomMobCommand implements CommandExecutor {
 
         try {
             entity.spawn(player.getLocation());
-            inform(player, "You summoned §d" + entity.getName() + "§7.");
+            inform(player, "Summoned §e" + entity.getName() + "§7.");
             return true;
         } catch (Exception e) {
             warn(player, "Unable to spawn the entity §4" + entity.getName() + "§c.");

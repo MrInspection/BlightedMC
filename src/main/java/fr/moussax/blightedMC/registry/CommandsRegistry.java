@@ -51,14 +51,7 @@ public final class CommandsRegistry {
         CommandBuilder.register("mtphere", new ModTPCommands());
         CommandBuilder.register("endersee", new EnderSeeCommand());
         CommandBuilder.register("invsee", new InvSeeCommand());
-        CommandBuilder.register("ban", new BanCommand());
-        CommandBuilder.register("banip", new BanCommand());
-        CommandBuilder.register("unban", new BanCommand());
-        CommandBuilder.register("unbanip", new BanCommand());
         CommandBuilder.register("vanish", new VanishCommand());
-        CommandBuilder.register("mute", new MuteCommand());
-        CommandBuilder.register("unmute", new MuteCommand());
-        CommandBuilder.register("kick", new KickCommand());
     }
 
     private static void registerTabSuggestions() {

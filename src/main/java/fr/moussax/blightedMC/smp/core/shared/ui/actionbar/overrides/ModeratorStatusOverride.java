@@ -27,12 +27,9 @@ public class ModeratorStatusOverride implements ActionBarOverride {
         boolean isVanished = player.getModerator().isVanished();
 
         String vanishStatus = isVanished ? "§a§lVANISHED" : "§c§lVISIBLE";
-        String vanishCountInfo = vanishedCount > 0 ? " §8(" + vanishedCount + " vanished)" : "";
-
         return String.format(
-            "§fMode: §9§lMODERATOR     §fStatus: %s%s",
-            vanishStatus,
-            vanishCountInfo
+            "§fGamemode: §9§lMODERATOR     §fStatus: %s",
+            vanishStatus
         );
     }
 }

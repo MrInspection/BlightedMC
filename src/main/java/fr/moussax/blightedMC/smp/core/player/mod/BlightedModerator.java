@@ -34,6 +34,7 @@ public final class BlightedModerator {
     }
 
     public void enable() {
+        if (this.moderationMode) return;
         saveState();
         clearPlayerState();
         applyModerationState();
@@ -45,13 +46,19 @@ public final class BlightedModerator {
     }
 
     public void disable() {
-        blightedPlayer.getPlayer().getInventory().clear();
-        blightedPlayer.getActionBarManager().clearModTarget();
+        if (!this.moderationMode) return;
+
+        if (blightedPlayer.getPlayer().isOnline()) {
+            blightedPlayer.getActionBarManager().clearModTarget();
+        }
+
         restoreState();
         setVanished(false, true);
         this.moderationMode = false;
 
-        blightedPlayer.getPlayer().sendMessage(PREFIX + "You are no longer in §9moderation §7mode.");
+        if (blightedPlayer.getPlayer().isOnline()) {
+            blightedPlayer.getPlayer().sendMessage(PREFIX + "You are no longer in §9moderation §7mode.");
+        }
     }
 
     public boolean isModerationMode() {
@@ -61,9 +68,10 @@ public final class BlightedModerator {
     private void saveState() {
         Player player = blightedPlayer.getPlayer();
         PlayerInventory inventory = player.getInventory();
-        this.savedInventory = inventory.getContents();
-        this.savedArmor = inventory.getArmorContents();
-        this.savedOffHand = inventory.getItemInOffHand();
+        this.savedInventory = inventory.getContents().clone();
+        this.savedArmor = inventory.getArmorContents().clone();
+        inventory.getItemInOffHand();
+        this.savedOffHand = inventory.getItemInOffHand().clone();
         this.savedGameMode = player.getGameMode();
         this.savedExperience = player.getExp();
         this.savedLevel = player.getLevel();
@@ -73,22 +81,24 @@ public final class BlightedModerator {
     private void restoreState() {
         Player player = blightedPlayer.getPlayer();
         PlayerInventory inventory = player.getInventory();
-        inventory.setContents(savedInventory);
-        inventory.setArmorContents(savedArmor);
-        inventory.setItemInOffHand(savedOffHand);
 
-        player.setGameMode(savedGameMode);
+        inventory.clear();
+        if (savedInventory != null) inventory.setContents(savedInventory);
+        if (savedArmor != null) inventory.setArmorContents(savedArmor);
+        if (savedOffHand != null) inventory.setItemInOffHand(savedOffHand);
+
+        if (savedGameMode != null) player.setGameMode(savedGameMode);
         player.setExp(savedExperience);
         player.setLevel(savedLevel);
 
-        player.getActivePotionEffects().forEach(
-            effect -> player.removePotionEffect(effect.getType())
-        );
-        player.addPotionEffects(savedEffects);
+        player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
+        if (savedEffects != null) player.addPotionEffects(savedEffects);
 
-        player.setInvulnerable(false);
-        player.setAllowFlight(false);
-        player.setFlying(false);
+        if (savedGameMode != GameMode.CREATIVE && savedGameMode != GameMode.SPECTATOR) {
+            player.setInvulnerable(false);
+            player.setAllowFlight(false);
+            player.setFlying(false);
+        }
     }
 
     private void clearPlayerState() {
@@ -96,9 +106,7 @@ public final class BlightedModerator {
         player.getInventory().clear();
         player.setExp(0);
         player.setLevel(0);
-        player.getActivePotionEffects().forEach(
-            effect -> player.removePotionEffect(effect.getType())
-        );
+        player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
         player.setHealth(20);
         player.setFoodLevel(20);
     }

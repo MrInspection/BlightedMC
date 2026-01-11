@@ -1,8 +1,8 @@
 package fr.moussax.blightedMC.smp.core.player.mod;
 
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
-import fr.moussax.blightedMC.smp.core.player.mod.punishments.PunishmentManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -10,19 +10,13 @@ import java.util.*;
 public final class ModerationManager {
     private static ModerationManager instance;
     private final Set<UUID> moderatorsInMode;
-    private final Set<UUID> frozenPlayers;
+    private final Map<UUID, Location> frozenPlayers;
     private final Set<UUID> vanishedPlayers;
-    private final PunishmentManager punishmentManager;
 
     private ModerationManager() {
         this.moderatorsInMode = new HashSet<>();
-        this.frozenPlayers = new HashSet<>();
+        this.frozenPlayers = new HashMap<>();
         this.vanishedPlayers = new HashSet<>();
-        this.punishmentManager = new PunishmentManager();
-    }
-
-    public PunishmentManager getPunishmentManager() {
-        return punishmentManager;
     }
 
     public boolean isModerator(Player player) {
@@ -60,9 +54,7 @@ public final class ModerationManager {
         if (!moderator.isModerationMode()) return;
 
         moderator.disable();
-        moderatorsInMode.remove(player.getUniqueId());
-        frozenPlayers.remove(player.getUniqueId());
-        vanishedPlayers.remove(player.getUniqueId());
+        cleanupPlayer(player);
     }
 
     public void toggleModerationMode(Player player) {
@@ -73,6 +65,13 @@ public final class ModerationManager {
         enableModeration(player);
     }
 
+    public void cleanupPlayer(Player player) {
+        UUID playerId = player.getUniqueId();
+        moderatorsInMode.remove(playerId);
+        frozenPlayers.remove(playerId);
+        vanishedPlayers.remove(playerId);
+    }
+
     public void disableAll() {
         moderatorsInMode.clear();
         frozenPlayers.clear();
@@ -81,19 +80,28 @@ public final class ModerationManager {
 
     public boolean toggleFreeze(Player target) {
         UUID targetId = target.getUniqueId();
-        if (frozenPlayers.remove(targetId)) {
+        if (frozenPlayers.containsKey(targetId)) {
+            frozenPlayers.remove(targetId);
             return false;
         }
-        frozenPlayers.add(targetId);
+        frozenPlayers.put(targetId, target.getLocation().clone());
         return true;
     }
 
     public boolean isFrozen(UUID playerId) {
-        return frozenPlayers.contains(playerId);
+        return frozenPlayers.containsKey(playerId);
     }
 
     public boolean isFrozen(Player player) {
         return isFrozen(player.getUniqueId());
+    }
+
+    public Location getFreezeLocation(UUID playerId) {
+        return frozenPlayers.get(playerId);
+    }
+
+    public Location getFreezeLocation(Player player) {
+        return getFreezeLocation(player.getUniqueId());
     }
 
     public void setVanished(Player player, boolean vanished) {

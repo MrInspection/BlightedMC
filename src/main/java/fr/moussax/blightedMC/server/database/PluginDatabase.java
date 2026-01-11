@@ -53,35 +53,6 @@ public final class PluginDatabase {
                 """
             );
 
-            statement.execute("""
-                CREATE TABLE IF NOT EXISTS punishments (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    player_uuid TEXT NOT NULL,
-                    player_name TEXT NOT NULL,
-                    punishment_type TEXT NOT NULL,
-                    reason TEXT NOT NULL,
-                    moderator_uuid TEXT NOT NULL,
-                    moderator_name TEXT NOT NULL,
-                    created_at INTEGER NOT NULL,
-                    expires_at INTEGER,
-                    is_active INTEGER NOT NULL DEFAULT 1,
-                    ip_address TEXT
-                )
-                """
-            );
-
-            statement.execute("""
-                CREATE INDEX IF NOT EXISTS idx_punishments_player 
-                ON punishments(player_uuid, is_active)
-                """
-            );
-
-            statement.execute("""
-                CREATE INDEX IF NOT EXISTS idx_punishments_ip 
-                ON punishments(ip_address, is_active)
-                """
-            );
-
             try {
                 statement.execute("ALTER TABLE players ADD COLUMN forge_fuel INTEGER NOT NULL DEFAULT 0");
             } catch (SQLException ignored) {

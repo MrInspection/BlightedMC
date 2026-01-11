@@ -30,7 +30,7 @@ public class BroadcastCommand implements CommandExecutor {
 
         String message = messageBuilder.toString().trim();
         Bukkit.broadcastMessage(" ");
-        Bukkit.broadcastMessage(" §6§lBROADCAST! §f" + player.getName() + " §8» §e" + message);
+        Bukkit.broadcastMessage(" §6§lBROADCAST! §f" + player.getName() + " §f§l» §e" + message);
         Bukkit.broadcastMessage(" ");
 
         return true;
