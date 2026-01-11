@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.commands.admin;
 
+import fr.moussax.blightedMC.server.PluginPermissions;
 import fr.moussax.blightedMC.utils.commands.CommandInfo;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -17,9 +18,9 @@ import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 public class ForceCommand implements CommandExecutor {
 
     @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
-        if (!(label.equalsIgnoreCase("forcecommand") && sender instanceof Player player)) return false;
-        if (!enforceAdminPermission(player)) return false;
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
+        if (!(sender instanceof Player player)) return false;
+        if (!hasRequiredPermission(player, PluginPermissions.ADMIN)) return false;
 
         if (args.length < 2) {
             CommandInfo.sendUsage(player, "Force a player to execute a command",

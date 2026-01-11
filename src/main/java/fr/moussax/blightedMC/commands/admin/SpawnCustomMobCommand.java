@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.commands.admin;
 
+import fr.moussax.blightedMC.server.PluginPermissions;
 import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.smp.core.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
@@ -16,9 +17,9 @@ import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 public class SpawnCustomMobCommand implements CommandExecutor {
 
     @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
-        if (!(label.equalsIgnoreCase("spawncustommob") && sender instanceof Player player)) return false;
-        if (!enforceAdminPermission(player)) return false;
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
+        if (!(sender instanceof Player player)) return false;
+        if (!hasRequiredPermission(player, PluginPermissions.ADMIN)) return false;
 
         if (args.length == 0) {
             CommandInfo.sendUsage(player, "Summon a custom mob", "spawncustommob", "<entity>");
@@ -34,7 +35,7 @@ public class SpawnCustomMobCommand implements CommandExecutor {
 
         try {
             entity.spawn(player.getLocation());
-            inform(player, "You summoned §d" + entity.getName() + "§7.");
+            inform(player, "Summoned §e" + entity.getName() + "§7.");
             return true;
         } catch (Exception e) {
             warn(player, "Unable to spawn the entity §4" + entity.getName() + "§c.");

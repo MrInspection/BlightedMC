@@ -27,7 +27,7 @@ import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.*;
 
-public class BlightedPlayerListener implements Listener {
+public final class PlayerListener implements Listener {
     private final Map<UUID, Entity> lastDamagerMap = new HashMap<>();
 
     @EventHandler

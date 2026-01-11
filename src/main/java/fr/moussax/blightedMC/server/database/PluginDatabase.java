@@ -1,5 +1,7 @@
 package fr.moussax.blightedMC.server.database;
 
+import fr.moussax.blightedMC.utils.debug.Log;
+
 import java.sql.*;
 import java.util.UUID;
 
@@ -21,7 +23,7 @@ public final class PluginDatabase {
                 connection.close();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error("PluginDatabase", e.getMessage());
             throw new RuntimeException("Unable to close the database connection");
         }
     }
@@ -68,7 +70,7 @@ public final class PluginDatabase {
             statement.setString(5, blockId);
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error("PluginDatabase", e.getMessage());
         }
     }
 
@@ -82,7 +84,7 @@ public final class PluginDatabase {
             statement.setInt(4, z);
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error("PluginDatabase", e.getMessage());
         }
     }
 
@@ -100,7 +102,7 @@ public final class PluginDatabase {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error("PluginDatabase", e.getMessage());
         }
         return null;
     }
