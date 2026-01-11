@@ -2,9 +2,9 @@ package fr.moussax.blightedMC.utils.formatting;
 
 import fr.moussax.blightedMC.server.PluginPermissions;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
@@ -242,13 +242,14 @@ public final class Formatter {
      * <p>Requires both operator status and the provided permission.
      * Sends a warning message if the check fails.
      *
-     * @param player the player to check
+     * @param player     the player to check
      * @param permission the permission to check
      * @return {@code true} if player has the required permission
      */
     public static boolean hasRequiredPermission(@NonNull Player player, @NonNull PluginPermissions permission) {
-        if(!player.isOp() || !player.hasPermission(permission.getPermission())) {
-            warn(player, "You must be §4" + permission.name() + "§c to use this command.");
+        if (!player.isOp() || !player.hasPermission(permission.getPermission())) {
+            warn(player, "You must be §4" + permission.name() + "§c or higher to use this command.");
+            return false;
         }
         return true;
     }
@@ -262,12 +263,11 @@ public final class Formatter {
      * @param clickValue  the value for the click action (or {@code null})
      * @return configured text component
      */
-    @SuppressWarnings("deprecation")
     public static TextComponent createInteractiveText(String text, String hoverText, ClickEvent.Action clickAction, String clickValue) {
         TextComponent component = new TextComponent(text);
         component.setHoverEvent(new HoverEvent(
             HoverEvent.Action.SHOW_TEXT,
-            new ComponentBuilder(hoverText).create()
+            new Text(hoverText)
         ));
 
         if (clickAction != null && clickValue != null) {

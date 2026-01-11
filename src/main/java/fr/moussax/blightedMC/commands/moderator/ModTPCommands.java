@@ -41,14 +41,11 @@ public class ModTPCommands implements CommandExecutor {
                 }
 
                 player.teleport(target.getLocation());
-                player.sendMessage(PREFIX + "Teleported to §9" + target.getName() + "§7.");
+                player.sendMessage(PREFIX + "Teleported to §d" + target.getName() + "§7.");
 
-                String notification = PREFIX + "§9" + player.getName() + "§7 teleported to §9" + target.getName();
-                moderationManager.broadcastToModerators(notification);
-
-                BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(player);
-                if (bp != null) {
-                    bp.getActionBarManager().setModTarget(target);
+                BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+                if (blightedPlayer != null && moderationManager.isInModerationMode(player)) {
+                    blightedPlayer.getActionBarManager().setModTarget(target);
                 }
 
                 return true;
@@ -73,14 +70,11 @@ public class ModTPCommands implements CommandExecutor {
                 }
 
                 target.teleport(player.getLocation());
-                player.sendMessage(PREFIX + "Teleported §9" + target.getName() + "§7 to you.");
+                player.sendMessage(PREFIX + "Teleported §d" + target.getName() + "§7 to you.");
 
-                String notification = PREFIX + "§9" + player.getName() + "§7 teleported §9" + target.getName() + "§7 to them";
-                moderationManager.broadcastToModerators(notification);
-
-                BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(player);
-                if (bp != null) {
-                    bp.getActionBarManager().setModTarget(target);
+                BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+                if (blightedPlayer != null && moderationManager.isInModerationMode(player)) {
+                    blightedPlayer.getActionBarManager().setModTarget(target);
                 }
 
                 return true;

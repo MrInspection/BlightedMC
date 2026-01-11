@@ -53,15 +53,3 @@ commands:
     description: Moderator command
   vanish:
     description: Moderator command
-  mute:
-    description: Moderator command
-  unmute:
-    description: Moderator command
-  ban:
-    description: Moderator command
-  banip:
-    description: Moderator command
-  unban:
-    description: Moderator command
-  unbanip:
-    description: Moderator command

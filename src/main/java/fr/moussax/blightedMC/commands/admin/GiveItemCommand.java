@@ -6,6 +6,7 @@ import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.items.registry.menu.ItemRegistryMenu;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
+import fr.moussax.blightedMC.utils.commands.CommandArguments;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -16,10 +17,11 @@ import org.jspecify.annotations.NonNull;
 
 import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 
-@CommandArgument(suggestions = {"$items"})
+@CommandArguments({
+    @CommandArgument(suggestions = {"$players"}),
+    @CommandArgument(position = 1, suggestions = {"$items"})
+})
 public class GiveItemCommand implements CommandExecutor {
-
-    // Usage: /giveitem <player> <itemId> <amount>
 
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
@@ -31,33 +33,38 @@ public class GiveItemCommand implements CommandExecutor {
             return true;
         }
 
-
         Player target = player;
-        Player potentialTarget = Bukkit.getPlayerExact(args[0]);
+        int argumentIndex = 0;
 
-        if(potentialTarget != null) {
+        Player potentialTarget = Bukkit.getPlayerExact(args[0]);
+        if (potentialTarget != null) {
             target = potentialTarget;
+            argumentIndex = 1;
         }
 
+        if (args.length < argumentIndex + 1) {
+            warn(player, "Missing argument. Please provide an item Id.");
+            return false;
+        }
 
-
-        String itemId = args[0].toUpperCase();
+        String itemId = args[argumentIndex].toUpperCase();
         BlightedItem blightedItem = ItemRegistry.getItem(itemId);
 
         int amount = 1;
-        if (args.length > 1) {
+        if (args.length > argumentIndex + 1) {
             try {
-                amount = Math.max(1, Integer.parseInt(args[1]));
+                amount = Math.max(1, Integer.parseInt(args[argumentIndex + 1]));
             } catch (NumberFormatException e) {
-                warn(player, "Please provide a valid amount. Provided: §4" + args[1]);
+                warn(player, "Please provide a valid amount. Provided: §4" + args[argumentIndex + 1]);
                 return false;
             }
         }
 
         ItemStack stack = blightedItem.toItemStack().clone();
         stack.setAmount(amount);
-        player.getInventory().addItem(stack);
-        inform(player, "You receive §5" + amount + "x §d" + blightedItem.getItemId() + "§7.");
+        target.getInventory().addItem(stack);
+
+        inform(player, "Gave §ex" + amount + " §f" + formatEnumName(blightedItem.getItemId()) + " §7to §e" + target.getName() + "§7.");
         return true;
     }
 }

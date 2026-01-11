@@ -15,7 +15,7 @@ import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
 
 public class KaboomCommand implements CommandExecutor {
     private static final int LIGHTNING_STRIKE_AMOUNT = 10;
-    private static final float LAUNCH_HEIGHT = 5.55f;
+    private static final float LAUNCH_HEIGHT = 3.55f;
 
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
@@ -33,7 +33,7 @@ public class KaboomCommand implements CommandExecutor {
         World world = commandSender.getWorld();
 
         for (Player target : world.getPlayers()) {
-            inform(commandSender, "Launched §d" + target.getName() + " §7into the sky!");
+            inform(commandSender, "Launched §e" + target.getName() + " §7into the sky!");
             launchPlayer(target);
             strikeLightning(world, target.getLocation());
         }
@@ -47,7 +47,7 @@ public class KaboomCommand implements CommandExecutor {
             return false;
         }
 
-        inform(commandSender, "You launched §d" + target.getName() + "§7 into the sky!");
+        inform(commandSender, "Launched §e" + target.getName() + "§7 into the sky!");
         launchPlayer(target);
         strikeLightning(target.getWorld(), target.getLocation());
         return true;
