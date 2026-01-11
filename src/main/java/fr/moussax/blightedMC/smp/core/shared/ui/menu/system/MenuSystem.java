@@ -73,7 +73,8 @@ public final class MenuSystem {
         } else {
             Menu previousMenu = stack.peek();
             if (previousMenu != null) {
-                previousMenu.open(player);
+                previousMenu.refresh(player);
+                activeMenus.put(playerId, previousMenu);
             }
         }
     }
