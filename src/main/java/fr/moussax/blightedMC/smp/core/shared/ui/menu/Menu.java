@@ -311,7 +311,7 @@ public abstract class Menu implements InventoryHolder {
      * @param player player to refresh
      */
     @SuppressWarnings("UnstableApiUsage")
-    protected void refresh(@NonNull Player player) {
+    public void refresh(@NonNull Player player) {
         if (menuSystem != null && menuSystem.isShuttingDown()) {
             return;
         }
