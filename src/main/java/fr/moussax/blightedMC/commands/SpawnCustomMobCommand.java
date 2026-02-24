@@ -1,6 +1,5 @@
-package fr.moussax.blightedMC.commands.admin;
+package fr.moussax.blightedMC.commands;
 
-import fr.moussax.blightedMC.server.PluginPermissions;
 import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.smp.core.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
@@ -19,7 +18,7 @@ public class SpawnCustomMobCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
         if (!(sender instanceof Player player)) return false;
-        if (!hasRequiredPermission(player, PluginPermissions.ADMIN)) return false;
+        if (!hasRequiredPermission(player)) return false;
 
         if (args.length == 0) {
             CommandInfo.sendUsage(player, "Summon a custom mob", "spawncustommob", "<entity>");

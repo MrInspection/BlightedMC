@@ -1,8 +1,7 @@
-package fr.moussax.blightedMC.commands.moderator;
+package fr.moussax.blightedMC.commands.see;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.server.PluginPermissions;
-import fr.moussax.blightedMC.smp.core.player.mod.menus.EnderSeeMenu;
+import fr.moussax.blightedMC.smp.core.player.menus.EnderSeeMenu;
 import fr.moussax.blightedMC.utils.formatting.Formatter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -17,7 +16,7 @@ public class EnderSeeCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
         if (!(sender instanceof Player player)) return false;
-        if (!hasRequiredPermission(player, PluginPermissions.MODERATOR)) return false;
+        if (!hasRequiredPermission(player)) return false;
 
         if (args.length == 0) {
             Formatter.warn(player, "Usage: /endersee <player>");

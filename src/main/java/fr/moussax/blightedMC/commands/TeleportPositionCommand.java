@@ -1,6 +1,5 @@
-package fr.moussax.blightedMC.commands.admin;
+package fr.moussax.blightedMC.commands;
 
-import fr.moussax.blightedMC.server.PluginPermissions;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import fr.moussax.blightedMC.utils.commands.CommandArguments;
 import fr.moussax.blightedMC.utils.commands.CommandInfo;
@@ -21,16 +20,16 @@ import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
     @CommandArgument(position = 3, suggestions = {"OVERWORLD", "NETHER", "THE_END"}),
     @CommandArgument(position = 4, suggestions = {"OVERWORLD", "NETHER", "THE_END"})
 })
-public class TpPosCommand implements CommandExecutor {
+public class TeleportPositionCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
         if (!(sender instanceof Player player)) return false;
-        if (!hasRequiredPermission(player, PluginPermissions.ADMIN)) return false;
+        if (!hasRequiredPermission(player)) return false;
 
         if (args.length < 3) {
             CommandInfo.sendUsage(player,
                 "Teleport to coordinates. World is optional.",
-                "tppos", "[blightedPlayer]", "<x>", "<y>", "<z>", "[world]"
+                "tppos", "[player]", "<x>", "<y>", "<z>", "[world]"
             );
             return true;
         }

@@ -1,6 +1,7 @@
-package fr.moussax.blightedMC.smp.core.player.mod.menus;
+package fr.moussax.blightedMC.smp.core.player.menus;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuItemInteraction;

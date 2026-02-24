@@ -11,7 +11,7 @@ import org.jspecify.annotations.NonNull;
 public class AltarCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
-        if (!(label.equalsIgnoreCase("altar") && sender instanceof Player player)) return false;
+        if (!(sender instanceof Player player)) return false;
         BlightedMC.menuManager().openMenu(new RitualAltarMenu(null), player);
         return true;
     }

@@ -5,10 +5,6 @@ api-version: '1.21'
 authors: [ MrInspection ]
 
 commands:
-  broadcast:
-    description: Broadcast a message to the server
-    aliases:
-      - bc
   spawncustommob:
     description: Spawn a BlightedMC creature
     aliases:
@@ -21,16 +17,10 @@ commands:
     description: Open the BlightedMC custom crafting table
   loop:
     description: Bulk execute a specific command
-  forcecommand:
-    description: Force another player to execute a command
-  kaboom:
-    description: Launch all players or a specific player into the sky
   giveitem:
     description: Open or give yourself a custom item
   god:
     description: Toggle god mode for yourself or another player
-  tpall:
-    description: Teleport all players to you
   tppos:
     description: Teleport to a position
   fly:
@@ -39,17 +29,7 @@ commands:
     description: Forge command
   altar:
     description: Altar command
-  mod:
-    description: Toggle moderation mode or broadcast a message as a moderator with arguments
-  mtp:
-    description: Teleport to a target. Toggles Moderator Focus
-  mtphere:
-    description: Moderator command
   endersee:
     description: Moderator command
   invsee:
-    description: Moderator command
-  kick:
-    description: Moderator command
-  vanish:
     description: Moderator command

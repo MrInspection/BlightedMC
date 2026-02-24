@@ -10,8 +10,8 @@ import org.jspecify.annotations.NonNull;
 
 public class CraftCommand implements CommandExecutor {
     @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, String label, String @NonNull [] args) {
-        if (!(label.equalsIgnoreCase("craft") && sender instanceof Player player)) return false;
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
+        if (!(sender instanceof Player player)) return false;
         BlightedMC.menuManager().openMenu(new CraftingTableMenu(), player);
         return true;
     }

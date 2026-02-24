@@ -1,6 +1,5 @@
-package fr.moussax.blightedMC.commands.admin;
+package fr.moussax.blightedMC.commands;
 
-import fr.moussax.blightedMC.server.PluginPermissions;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,7 +13,7 @@ public class FlyCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
         if (!(sender instanceof Player player)) return false;
-        if (!hasRequiredPermission(player, PluginPermissions.ADMIN)) return false;
+        if (!hasRequiredPermission(player)) return false;
 
         toggleFlightMode(player);
         return true;

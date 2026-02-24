@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC.utils.formatting;
 
-import fr.moussax.blightedMC.server.PluginPermissions;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -246,9 +245,9 @@ public final class Formatter {
      * @param permission the permission to check
      * @return {@code true} if player has the required permission
      */
-    public static boolean hasRequiredPermission(@NonNull Player player, @NonNull PluginPermissions permission) {
-        if (!player.isOp() || !player.hasPermission(permission.getPermission())) {
-            warn(player, "You must be §4" + permission.name() + "§c or higher to use this command.");
+    public static boolean hasRequiredPermission(@NonNull Player player) {
+        if (!player.isOp()) {
+            warn(player, "You must be an administrator to use this command.");
             return false;
         }
         return true;

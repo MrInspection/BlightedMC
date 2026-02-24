@@ -3,17 +3,12 @@ package fr.moussax.blightedMC.smp.core.shared.ui.actionbar;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.smp.core.shared.ui.actionbar.components.GemsComponent;
 import fr.moussax.blightedMC.smp.core.shared.ui.actionbar.components.ManaComponent;
-import fr.moussax.blightedMC.smp.core.shared.ui.actionbar.overrides.ModeratorStatusOverride;
-import fr.moussax.blightedMC.smp.core.shared.ui.actionbar.overrides.ModeratorTargetOverride;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.entity.Player;
 
 public class ActionBarManager implements Runnable {
     private final BlightedPlayer player;
     private final ActionBarComposer composer = new ActionBarComposer();
-    private final ModeratorTargetOverride moderatorTargetOverride = new ModeratorTargetOverride();
-    private final ModeratorStatusOverride moderatorStatusOverride = new ModeratorStatusOverride();
 
     public ActionBarManager(BlightedPlayer player) {
         this.player = player;
@@ -23,16 +18,6 @@ public class ActionBarManager implements Runnable {
     private void initializeComponents() {
         composer.registerComponent(new GemsComponent());
         composer.registerComponent(new ManaComponent());
-        composer.setOverride("moderator_status", moderatorStatusOverride);
-        composer.setOverride("moderator_target", moderatorTargetOverride);
-    }
-
-    public void setModTarget(Player target) {
-        moderatorTargetOverride.setTarget(target);
-    }
-
-    public void clearModTarget() {
-        moderatorTargetOverride.clearTarget();
     }
 
     public void setInsufficientMana(boolean insufficient) {

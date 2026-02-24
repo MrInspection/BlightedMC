@@ -9,7 +9,6 @@ import fr.moussax.blightedMC.smp.core.items.blocks.BlightedBlockListener;
 import fr.moussax.blightedMC.smp.core.items.listeners.UnsafeAnvilListener;
 import fr.moussax.blightedMC.smp.core.items.rules.ItemRuleListener;
 import fr.moussax.blightedMC.smp.core.player.PlayerListener;
-import fr.moussax.blightedMC.smp.core.player.mod.ModerationListener;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuListener;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuSystem;
@@ -43,7 +42,6 @@ public final class EventsRegistry {
         pm.registerEvents(new FishingListener(), instance);
         pm.registerEvents(new UnsafeAnvilListener(), instance);
         pm.registerEvents(new WitherImpactAbility(), instance);
-        pm.registerEvents(new ModerationListener(), instance);
     }
 
     public void buildSpawnCache() {

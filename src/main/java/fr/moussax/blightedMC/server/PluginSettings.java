@@ -13,9 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 public final class PluginSettings {
-    private double defaultMaxMana;
     private double defaultManaRegenerationRate;
-    private double defaultPlayerHealth;
     private double customLootChance;
     private boolean bannersOnJoin;
 
@@ -40,16 +38,8 @@ public final class PluginSettings {
         }
     }
 
-    public double getDefaultMaxMana() {
-        return defaultMaxMana;
-    }
-
     public double getDefaultManaRegenerationRate() {
         return defaultManaRegenerationRate;
-    }
-
-    public double getDefaultPlayerHealth() {
-        return defaultPlayerHealth;
     }
 
     public double getCustomLootChance() {

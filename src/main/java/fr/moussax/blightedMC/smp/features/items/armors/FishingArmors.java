@@ -175,39 +175,44 @@ public final class FishingArmors implements ItemProvider {
         magmaWeaveLeggins.setFullSetBonus(magmaWeaveSetBonus);
         magmaweaveBoots.setFullSetBonus(magmaWeaveSetBonus);
 
-        BlightedItem anglerHelmet = new BlightedItem("ANGLER_HELMET", ItemType.HELMET, ItemRarity.UNCOMMON, Material.COPPER_HELMET);
+        BlightedItem anglerHelmet = new BlightedItem("ANGLER_HELMET", ItemType.HELMET, ItemRarity.COMMON, Material.COPPER_HELMET);
         anglerHelmet.setDisplayName("Angler Helmet");
         anglerHelmet.setMaxDurability(121);
+        anglerHelmet.addAttributeModifier(Attribute.ARMOR, 2.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
         anglerHelmet.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
         anglerHelmet.addAttributeModifier(Attribute.WATER_MOVEMENT_EFFICIENCY, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
-        anglerHelmet.addLore(ItemRarity.UNCOMMON.getName() + " HELMET");
+        anglerHelmet.addAttributeModifier(Attribute.LUCK, 0.25, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
+        anglerHelmet.addLore(ItemRarity.COMMON.getName() + " HELMET");
 
-        BlightedItem anglerChestplate = new BlightedItem("ANGLER_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.UNCOMMON, Material.LEATHER_CHESTPLATE);
+        BlightedItem anglerChestplate = new BlightedItem("ANGLER_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.COMMON, Material.LEATHER_CHESTPLATE);
         anglerChestplate.setDisplayName("Angler Chestplate");
-        anglerChestplate.addLore(ItemRarity.UNCOMMON.getName() + " CHESTPLATE");
+        anglerChestplate.addLore(ItemRarity.COMMON.getName() + " CHESTPLATE");
         anglerChestplate.addItemFlag(ItemFlag.HIDE_DYE);
         anglerChestplate.setLeatherColor("#4B6D9E");
         anglerChestplate.setMaxDurability(176);
         anglerChestplate.addAttributeModifier(Attribute.ARMOR, 4.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST);
         anglerChestplate.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST);
+        anglerChestplate.addAttributeModifier(Attribute.LUCK, 0.25, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST);
 
-        BlightedItem anglerLeggings = new BlightedItem("ANGLER_LEGGINGS", ItemType.LEGGINGS, ItemRarity.UNCOMMON, Material.LEATHER_LEGGINGS);
+        BlightedItem anglerLeggings = new BlightedItem("ANGLER_LEGGINGS", ItemType.LEGGINGS, ItemRarity.COMMON, Material.LEATHER_LEGGINGS);
         anglerLeggings.setDisplayName("Angler Leggings");
-        anglerLeggings.addLore(ItemRarity.UNCOMMON.getName() + " LEGGINGS");
+        anglerLeggings.addLore(ItemRarity.COMMON.getName() + " LEGGINGS");
         anglerLeggings.addItemFlag(ItemFlag.HIDE_DYE);
         anglerLeggings.setLeatherColor("#4B6D9E");
         anglerLeggings.setMaxDurability(165);
         anglerLeggings.addAttributeModifier(Attribute.ARMOR, 3.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.LEGS);
         anglerLeggings.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.LEGS);
+        anglerLeggings.addAttributeModifier(Attribute.LUCK, 0.25, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.LEGS);
 
-        BlightedItem anglerBoots = new BlightedItem("ANGLER_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS);
+        BlightedItem anglerBoots = new BlightedItem("ANGLER_BOOTS", ItemType.BOOTS, ItemRarity.COMMON, Material.LEATHER_BOOTS);
         anglerBoots.setDisplayName("Angler Boots");
-        anglerBoots.addLore(ItemRarity.UNCOMMON.getName() + " BOOTS");
+        anglerBoots.addLore(ItemRarity.COMMON.getName() + " BOOTS");
         anglerBoots.addItemFlag(ItemFlag.HIDE_DYE);
         anglerBoots.setLeatherColor("#4B6D9E");
         anglerBoots.setMaxDurability(143);
         anglerBoots.addAttributeModifier(Attribute.ARMOR, 1.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.FEET);
         anglerBoots.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.FEET);
+        anglerBoots.addAttributeModifier(Attribute.LUCK, 0.25, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.FEET);
 
         add(
             emberWeaveHelmet,

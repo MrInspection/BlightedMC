@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.smp.core.managers;
+package fr.moussax.blightedMC.smp.core.player.managers;
 
 public class GemsManager {
     private int gems = 0;

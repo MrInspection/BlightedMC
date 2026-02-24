@@ -1,7 +1,6 @@
-package fr.moussax.blightedMC.commands.admin;
+package fr.moussax.blightedMC.commands;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.server.PluginPermissions;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.items.registry.menu.ItemRegistryMenu;
@@ -26,7 +25,7 @@ public class GiveItemCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
         if (!(sender instanceof Player player)) return false;
-        if (!hasRequiredPermission(player, PluginPermissions.ADMIN)) return false;
+        if (!hasRequiredPermission(player)) return false;
 
         if (args.length == 0) {
             BlightedMC.menuManager().openMenu(new ItemRegistryMenu.ItemCategoriesMenu(), player);

@@ -1,7 +1,6 @@
-package fr.moussax.blightedMC.commands.admin;
+package fr.moussax.blightedMC.commands;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.server.PluginPermissions;
 import fr.moussax.blightedMC.utils.commands.CommandInfo;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -25,7 +24,7 @@ public class LoopCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
         if (!(sender instanceof Player player)) return false;
-        if (!hasRequiredPermission(player, PluginPermissions.ADMIN)) return false;
+        if (!hasRequiredPermission(player)) return false;
 
         if (args.length < 3) {
             CommandInfo.sendUsage(player, "Bulk execute a command",

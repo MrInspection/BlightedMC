@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.commands.testing;
+package fr.moussax.blightedMC.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

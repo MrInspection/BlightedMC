@@ -12,7 +12,7 @@ public class ForgeCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
         if (!(label.equalsIgnoreCase("forge") && sender instanceof Player player)) return false;
-        BlightedMC.getInstance().getMenuManager().openMenu(new ForgeMenu(null), player);
+        BlightedMC.menuManager().openMenu(new ForgeMenu(null), player);
         return true;
     }
 }

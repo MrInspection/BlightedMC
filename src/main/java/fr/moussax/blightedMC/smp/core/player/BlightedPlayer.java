@@ -8,9 +8,8 @@ import fr.moussax.blightedMC.smp.core.items.abilities.ArmorManager;
 import fr.moussax.blightedMC.smp.core.items.abilities.CooldownEntry;
 import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.smp.core.shared.ui.actionbar.ActionBarManager;
-import fr.moussax.blightedMC.smp.core.managers.GemsManager;
-import fr.moussax.blightedMC.smp.core.managers.ManaManager;
-import fr.moussax.blightedMC.smp.core.player.mod.BlightedModerator;
+import fr.moussax.blightedMC.smp.core.player.managers.GemsManager;
+import fr.moussax.blightedMC.smp.core.player.managers.ManaManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -21,8 +20,8 @@ import java.util.*;
 public final class BlightedPlayer {
     private static final Map<UUID, BlightedPlayer> players = new HashMap<>();
 
-    private static volatile double DEFAULT_MAX_MANA = -1;
-    private static volatile double DEFAULT_MANA_REGEN_RATE = -1;
+    private static final double DEFAULT_MAX_MANA = 20;
+    private static final double DEFAULT_MANA_REGEN_RATE = 1.0;
 
     private final Player player;
     private final UUID playerId;
@@ -30,7 +29,6 @@ public final class BlightedPlayer {
     private final PlayerDataHandler dataHandler;
     private final ActionBarManager actionBarManager;
     private final ManaManager manaManager;
-    private final BlightedModerator moderator;
 
     private final List<FullSetBonus> activeFullSetBonuses = new ArrayList<>();
     private final List<CooldownEntry> cooldowns = new ArrayList<>();
@@ -41,8 +39,6 @@ public final class BlightedPlayer {
     private int forgeFuel;
 
     public BlightedPlayer(Player player) {
-        initSettings();
-
         this.player = player;
         this.playerId = player.getUniqueId();
         this.dataHandler = new PlayerDataHandler(playerId, player.getName());
@@ -56,12 +52,6 @@ public final class BlightedPlayer {
 
         this.actionBarManager = new ActionBarManager(this);
 
-        if (player.hasPermission("blightedmc.moderator")) {
-            this.moderator = new BlightedModerator(this);
-        } else {
-            this.moderator = null;
-        }
-
         players.put(playerId, this);
 
         this.actionBarTask = Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(),
@@ -71,14 +61,6 @@ public final class BlightedPlayer {
         );
 
         ArmorManager.updatePlayerArmor(this);
-    }
-
-    private static synchronized void initSettings() {
-        if (DEFAULT_MAX_MANA == -1) {
-            BlightedMC instance = BlightedMC.getInstance();
-            DEFAULT_MAX_MANA = instance.getSettings().getDefaultMaxMana();
-            DEFAULT_MANA_REGEN_RATE = instance.getSettings().getDefaultManaRegenerationRate();
-        }
     }
 
     public static BlightedPlayer getBlightedPlayer(Player player) {
@@ -249,13 +231,5 @@ public final class BlightedPlayer {
 
     public ActionBarManager getActionBarManager() {
         return actionBarManager;
-    }
-
-    public BlightedModerator getModerator() {
-        return moderator;
-    }
-
-    public boolean isModerator() {
-        return moderator != null;
     }
 }
