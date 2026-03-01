@@ -21,7 +21,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.generator.structure.Structure;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Random;
 
@@ -52,21 +51,7 @@ public class Watchling extends SpawnableEntity {
 
     @Override
     protected void onDefineBehavior() {
-        super.onDefineBehavior();
-        setupBehavior();
-    }
-
-    private void setupBehavior() {
-        addRepeatingTask(() -> new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (isNotAlive()) {
-                    cancel();
-                    return;
-                }
-                handleCombatLogic();
-            }
-        }, 5L, 5L);
+        addAbility(5L, 5L, this::handleCombatLogic);
     }
 
     private void handleCombatLogic() {
@@ -86,7 +71,6 @@ public class Watchling extends SpawnableEntity {
     private void teleportToTarget(Player target) {
         lastTeleportTime = System.currentTimeMillis();
 
-        // Find a location slightly offset from the target
         Location loc = target.getLocation().add(
             (random.nextDouble() - 0.5) * 2,
             0,
@@ -96,7 +80,6 @@ public class Watchling extends SpawnableEntity {
         entity.teleport(loc);
         entity.getWorld().playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.5f);
 
-        // Decide between Basic or Heavy attack immediately after teleport
         if (random.nextDouble() < 0.3) {
             performHeavyAttack(target);
         }
@@ -128,15 +111,13 @@ public class Watchling extends SpawnableEntity {
         entity.setInvisible(true);
         Utilities.delay(() -> {
             if (!isNotAlive()) entity.setInvisible(false);
-        }, 40); // Reappear after 2 seconds
+        }, 40);
     }
 
     @Override
     public LivingEntity spawn(Location location) {
         LivingEntity spawnedEntity = super.spawn(location);
-        if (!(spawnedEntity instanceof CraftMob craftMob)) {
-            return spawnedEntity;
-        }
+        if (!(spawnedEntity instanceof CraftMob craftMob)) return spawnedEntity;
 
         EntityEnderman nmsWatchling = (EntityEnderman) craftMob.getHandle();
 

@@ -13,7 +13,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Objects;
 
@@ -33,8 +32,7 @@ public sealed abstract class RavenousCreature extends SpawnableEntity
 
     @Override
     protected void onDefineBehavior() {
-        super.onDefineBehavior();
-        setupEnrageTask();
+        addAbility(1L, 1L, this::tickEnrage);
     }
 
     private void setupDefaultArmor() {
@@ -46,32 +44,21 @@ public sealed abstract class RavenousCreature extends SpawnableEntity
         };
     }
 
-    private void setupEnrageTask() {
-        addRepeatingTask(() -> new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (entity == null || entity.isDead()) {
-                    cancel();
-                    return;
-                }
-
-                if (!isEnraged) {
-                    checkHealthAndEnrage();
-                } else if (++particleTicks >= 5) {
-                    playEnrageParticles();
-                    particleTicks = 0;
-                }
-            }
-        }, 1L, 1L);
+    private void tickEnrage() {
+        if (!isEnraged) {
+            checkHealthAndEnrage();
+        } else if (++particleTicks >= 5) {
+            playEnrageParticles();
+            particleTicks = 0;
+        }
     }
 
     protected abstract void onEnrage(LivingEntity entity);
 
     private void checkHealthAndEnrage() {
-        if (entity == null) return;
-
-        double maxHealth = Objects.requireNonNull(entity
-            .getAttribute(Attribute.MAX_HEALTH)).getValue();
+        double maxHealth = Objects.requireNonNull(
+            entity.getAttribute(Attribute.MAX_HEALTH)
+        ).getValue();
 
         if (entity.getHealth() / maxHealth <= ENRAGE_THRESHOLD) {
             triggerEnrage();
@@ -110,7 +97,11 @@ public sealed abstract class RavenousCreature extends SpawnableEntity
     }
 
     private void playEnrageParticles() {
-        entity.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, entity.getLocation().add(0, 1.8, 0), 1, 0.2, 0.1, 0.2, 0.0);
+        entity.getWorld().spawnParticle(
+            Particle.ANGRY_VILLAGER,
+            entity.getLocation().add(0, 1.8, 0),
+            1, 0.2, 0.1, 0.2, 0.0
+        );
     }
 
     @Override

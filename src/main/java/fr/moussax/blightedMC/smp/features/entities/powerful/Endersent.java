@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.smp.features.entities.powerful;
 
+import fr.moussax.blightedMC.smp.core.entities.BlightedType;
 import fr.moussax.blightedMC.smp.core.entities.EntityLootTableBuilder;
-import fr.moussax.blightedMC.smp.core.entities.EntityNameTag;
 import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.condition.SpawnRules;
@@ -22,7 +22,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,39 +60,27 @@ public class Endersent extends SpawnableEntity {
             .build()
         );
 
-        setNameTagType(EntityNameTag.BOSS);
+        setBlightedType(BlightedType.BOSS);
     }
 
     @Override
     protected void onDefineBehavior() {
-        super.onDefineBehavior();
-        setupBehavior();
+        addAbility(20L, 20L, this::tickCombat);
     }
 
-    private void setupBehavior() {
-        addRepeatingTask(() -> new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (isNotAlive()) {
-                    cancel();
-                    return;
-                }
-                tickSmash();
-                tickEscape();
-            }
-        }, 20L, 20L);
+    private void tickCombat() {
+        tickSmash();
+        tickEscape();
     }
 
     private void tickSmash() {
         if (!enraged || isEscaping) return;
-
         if (System.currentTimeMillis() - lastTeleportSmash < SMASH_COOLDOWN) return;
 
-        Player target = Utilities.getNearestPlayer(entity, 30);
+        Player target = getNearestPlayer(30);
         if (target == null) return;
 
-        double distance = entity.getLocation().distance(target.getLocation());
-        if (distance > 4) {
+        if (entity.getLocation().distance(target.getLocation()) > 4) {
             performTeleportSmash(target);
         }
     }
@@ -115,10 +102,10 @@ public class Endersent extends SpawnableEntity {
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.8f);
 
             for (Entity nearby : entity.getNearbyEntities(3, 2, 3)) {
-                if (nearby instanceof LivingEntity living && living != entity && !(nearby instanceof Player p && p.getGameMode().equals(GameMode.SPECTATOR))) {
-                    if (BlightedEntitiesListener.getBlightedEntity(living) instanceof Watchling) continue;
-                    living.damage(14, entity);
-                }
+                if (!(nearby instanceof LivingEntity living) || living == entity) continue;
+                if (nearby instanceof Player p && p.getGameMode() == GameMode.SPECTATOR) continue;
+                if (BlightedEntitiesListener.getBlightedEntity(living) instanceof Watchling) continue;
+                living.damage(14, entity);
             }
         }, 9);
     }
@@ -127,7 +114,6 @@ public class Endersent extends SpawnableEntity {
         if (!isEscaping) return;
 
         escapeTicks += 20;
-
         watchlings.removeIf(e -> e.isDead() || !e.isValid());
 
         if (watchlings.isEmpty() || escapeTicks >= 300) {
@@ -144,14 +130,10 @@ public class Endersent extends SpawnableEntity {
             trigger = true;
         } else if (event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE) {
             projectileHits++;
-            if (projectileHits >= 7) {
-                trigger = true;
-            }
+            if (projectileHits >= 7) trigger = true;
         }
 
-        if (trigger) {
-            startDeadlyEscape();
-        }
+        if (trigger) startDeadlyEscape();
     }
 
     private void startDeadlyEscape() {
@@ -163,11 +145,11 @@ public class Endersent extends SpawnableEntity {
 
         Objects.requireNonNull(loc.getWorld()).spawnParticle(Particle.EXPLOSION_EMITTER, loc, 1);
         loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
+
         for (Entity nearby : entity.getNearbyEntities(4, 3, 4)) {
-            if (nearby instanceof LivingEntity living && living != entity) {
-                if (BlightedEntitiesListener.getBlightedEntity(living) instanceof Watchling) continue;
-                living.damage(18, entity);
-            }
+            if (!(nearby instanceof LivingEntity living) || living == entity) continue;
+            if (BlightedEntitiesListener.getBlightedEntity(living) instanceof Watchling) continue;
+            living.damage(18, entity);
         }
 
         entity.setInvisible(true);
@@ -175,10 +157,11 @@ public class Endersent extends SpawnableEntity {
         entity.setAI(false);
         entity.teleport(loc.clone().add(0, 50, 0));
 
-        int count = 3 + new Random().nextInt(4); // 3 to 6
+        int count = 3 + new Random().nextInt(4);
         for (int i = 0; i < count; i++) {
-            Watchling watchling = new Watchling();
-            LivingEntity wEntity = watchling.spawn(loc.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2));
+            LivingEntity wEntity = new Watchling().spawn(
+                loc.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
+            );
             watchlings.add(wEntity);
         }
     }
@@ -195,9 +178,8 @@ public class Endersent extends SpawnableEntity {
         }
         watchlings.clear();
 
-        Player target = Utilities.getNearestPlayer(entity, 60);
+        Player target = getNearestPlayer(60);
         Location targetLoc = (target != null) ? target.getLocation() : entity.getLocation().subtract(0, 50, 0);
-
         Location reappearLoc = targetLoc.clone().add((Math.random() - 0.5) * 4, 0, (Math.random() - 0.5) * 4);
         reappearLoc.setY(targetLoc.getY());
 
@@ -212,9 +194,7 @@ public class Endersent extends SpawnableEntity {
     @Override
     public LivingEntity spawn(Location location) {
         LivingEntity spawnedEntity = super.spawn(location);
-        if (!(spawnedEntity instanceof CraftMob craftMob)) {
-            return spawnedEntity;
-        }
+        if (!(spawnedEntity instanceof CraftMob craftMob)) return spawnedEntity;
 
         EntityEnderman nmsEndersent = (EntityEnderman) craftMob.getHandle();
         nmsEndersent.cs.a(goal -> true);

@@ -3,12 +3,13 @@ package fr.moussax.blightedMC.smp.features.entities.bosses;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.smp.core.entities.EntityImmunities;
-import fr.moussax.blightedMC.smp.core.entities.EntityNameTag;
+import fr.moussax.blightedMC.smp.core.entities.BlightedType;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -18,13 +19,13 @@ import java.util.Objects;
 
 @EntityImmunities(EntityImmunities.ImmunityType.PROJECTILE)
 public class TheAncientKnight extends AbstractBlightedEntity {
-    private BukkitRunnable abilityRunnable;
-    public ArrayList<StabPlayer> swords = new ArrayList<>();
+
+    private final List<StabPlayer> activeStabs = new ArrayList<>();
 
     public TheAncientKnight() {
         super("The Ancient Knight", 250, 30, EntityType.ZOMBIE);
         addAttribute(Attribute.SCALE, 4);
-        setNameTagType(EntityNameTag.BOSS);
+        setBlightedType(BlightedType.BOSS);
 
         armor = new ItemStack[]{
             new ItemStack(Material.NETHERITE_BOOTS),
@@ -38,34 +39,39 @@ public class TheAncientKnight extends AbstractBlightedEntity {
 
     @Override
     protected void onDefineBehavior() {
-        super.onDefineBehavior();
-        setupBehavior();
+        transitionToPhase(1);
     }
 
-    private void setupBehavior() {
-        addRepeatingTask(() -> {
-            BukkitRunnable task = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (entity == null || entity.isDead()) {
-                        stopAbility();
-                        cancel();
-                        return;
-                    }
+    @Override
+    protected void onPhaseTransition(int phase) {
+        if (phase == 1) {
+            // Phase 1 — slow stab every 15s
+            addAbility(100L, 300L, this::stabNearestPlayer);
+        } else if (phase == 2) {
+            // Phase 2 (≤50% HP) — faster stab + melee targeting
+            addAbility(60L, 180L, this::stabNearestPlayer);
+            addAbility(20L, 40L, this::meleeNearestPlayer);
+        }
+    }
 
-                    List<Player> nearbyPlayers = entity.getNearbyEntities(20, 20, 20).stream()
-                        .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-                        .map(e -> (Player) e)
-                        .toList();
-                    if (nearbyPlayers.isEmpty()) return;
+    @Override
+    public void onDamageTaken(EntityDamageEvent event) {
+        double remaining = entity.getHealth() - event.getFinalDamage();
+        if (remaining <= maxHealth * 0.5 && getCurrentPhase() < 2) {
+            transitionToPhase(2);
+        }
+    }
 
-                    BlightedPlayer target = BlightedPlayer.getBlightedPlayer(nearbyPlayers.getFirst());
-                    stabAbility(target);
-                }
-            };
-            abilityRunnable = task;
-            return task;
-        }, 100L, 300L);
+    private void stabNearestPlayer() {
+        Player target = getNearestPlayer(20);
+        if (target == null) return;
+        activeStabs.add(new StabPlayer(BlightedPlayer.getBlightedPlayer(target), this));
+    }
+
+    private void meleeNearestPlayer() {
+        Player target = getNearestPlayer(5);
+        if (target == null) return;
+        meleeAttack(target);
     }
 
     @Override
@@ -76,135 +82,121 @@ public class TheAncientKnight extends AbstractBlightedEntity {
     @Override
     public TheAncientKnight clone() {
         TheAncientKnight clone = (TheAncientKnight) super.clone();
-        clone.abilityRunnable = null;
-        clone.swords = new ArrayList<>();
+        clone.activeStabs.clear();
         return clone;
     }
 
     @Override
     public LivingEntity spawn(Location location) {
         super.spawn(location);
-        if (entity instanceof Zombie) {
-            ((Zombie) entity).setBaby(false);
-        }
+        if (entity instanceof Zombie zombie) zombie.setBaby(false);
         return entity;
     }
 
     @Override
-    public void kill() {
-        stopAbility();
-        super.kill();
+    public void onDeath(Location location) {
+        stopAllStabs();
     }
 
-    private void stabAbility(BlightedPlayer target) {
-        swords.add(new StabPlayer(target, this));
-    }
-
-    private void stopAbility() {
-        if (abilityRunnable != null) {
-            try {
-                abilityRunnable.cancel();
-            } catch (IllegalStateException ignored) {
-            }
-            abilityRunnable = null;
+    private void stopAllStabs() {
+        for (StabPlayer stab : new ArrayList<>(activeStabs)) {
+            try { stab.cancel(); } catch (IllegalStateException ignored) {}
         }
-
-        for (StabPlayer sword : new ArrayList<>(swords)) {
-            try {
-                sword.cancel();
-            } catch (IllegalStateException ignored) {
-            }
-        }
-        swords.clear();
+        activeStabs.clear();
     }
+
+    // -------------------------------------------------------------------------
 
     private static class StabPlayer extends BukkitRunnable {
-        private final BlightedPlayer blightedPlayer;
-        private final TheAncientKnight giant;
-        private Location location;
-        private Giant sword;
-        private int runTime = 0;
+        private final BlightedPlayer target;
+        private final TheAncientKnight owner;
+        private Location stabledLocation;
+        private Giant swordEntity;
+        private int tick = 0;
 
-        public StabPlayer(BlightedPlayer player, TheAncientKnight giant) {
-            this.blightedPlayer = player;
-            this.giant = giant;
-            summonGiantSword();
-            this.runTaskTimer(BlightedMC.getInstance(), 1, 1);
+        StabPlayer(BlightedPlayer target, TheAncientKnight owner) {
+            this.target = target;
+            this.owner = owner;
+            summonSwordEntity();
+            runTaskTimer(BlightedMC.getInstance(), 1L, 1L);
         }
 
-        private void summonGiantSword() {
-            Location targetLocation = blightedPlayer.getPlayer().getLocation().clone();
-            targetLocation.setPitch(0);
-            targetLocation.setYaw(0);
+        private void summonSwordEntity() {
+            Location spawnLocation = target.getPlayer().getLocation().clone();
+            spawnLocation.setPitch(0);
+            spawnLocation.setYaw(0);
 
-            sword = blightedPlayer.getPlayer().getWorld().spawn(targetLocation, Giant.class, g -> {
+            swordEntity = target.getPlayer().getWorld().spawn(spawnLocation, Giant.class, g -> {
                 g.setAI(false);
                 g.setCustomName("Dinnerbone");
                 g.setCustomNameVisible(false);
                 g.setInvisible(true);
                 g.setInvulnerable(true);
                 g.setSilent(true);
+                g.setGravity(false);
                 Objects.requireNonNull(g.getEquipment())
                     .setItemInMainHand(new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack());
-                g.setGravity(false);
             });
         }
 
         @Override
         public void run() {
-            if (giant.entity == null || giant.entity.isDead()
-                || blightedPlayer.getPlayer() == null || !blightedPlayer.getPlayer().isOnline()) {
+            if (owner.isNotAlive() || !target.getPlayer().isOnline()) {
                 cancel();
                 return;
             }
 
-            if (runTime == 0) {
-                location = blightedPlayer.getPlayer().getLocation();
-                Objects.requireNonNull(location.getWorld())
-                    .playSound(location, Sound.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, 1f, 0.75f);
+            if (tick == 0) {
+                stabledLocation = target.getPlayer().getLocation();
+                Objects.requireNonNull(stabledLocation.getWorld())
+                    .playSound(stabledLocation, Sound.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, 1f, 0.75f);
             }
 
-            if (runTime < 90) {
-                Location swordLocation = blightedPlayer.getPlayer().getLocation().clone();
-                swordLocation.setPitch(0);
-                swordLocation.setYaw(0);
-                swordLocation.subtract(2, -4, 4);
-                if (sword != null && !sword.isDead()) sword.teleport(swordLocation);
-                location = blightedPlayer.getPlayer().getLocation();
-            } else if (runTime == 101) {
-                Location swordLocation = blightedPlayer.getPlayer().getLocation().clone();
-                swordLocation.setPitch(0);
-                swordLocation.setYaw(0);
-                swordLocation.subtract(2, 1, 4);
-                if (sword != null && !sword.isDead()) sword.teleport(swordLocation);
-
-                Objects.requireNonNull(location.getWorld())
-                    .spawnParticle(Particle.EXPLOSION_EMITTER, location, 1);
-
-                List<Player> nearbyPlayers = location.getWorld()
-                    .getNearbyEntities(location, 6, 6, 6).stream()
-                    .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-                    .map(e -> (Player) e)
-                    .toList();
-
-                for (Player nearbyPlayer : nearbyPlayers) {
-                    BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(nearbyPlayer);
-                    blightedPlayer.getPlayer().damage(16, sword);
-                }
-
-                location.getWorld().playSound(location, Sound.BLOCK_ANVIL_LAND, 1f, 0.5f);
-            } else if (runTime > 200) {
+            if (tick < 90) {
+                trackSwordAbovePlayer();
+                stabledLocation = target.getPlayer().getLocation();
+            } else if (tick == 101) {
+                plungeAndDamage();
+            } else if (tick > 200) {
                 cancel();
             }
 
-            runTime++;
+            tick++;
+        }
+
+        private void trackSwordAbovePlayer() {
+            if (swordEntity == null || swordEntity.isDead()) return;
+            Location above = target.getPlayer().getLocation().clone();
+            above.setPitch(0);
+            above.setYaw(0);
+            above.subtract(2, -4, 4);
+            swordEntity.teleport(above);
+        }
+
+        private void plungeAndDamage() {
+            if (swordEntity != null && !swordEntity.isDead()) {
+                Location plungeLocation = target.getPlayer().getLocation().clone();
+                plungeLocation.setPitch(0);
+                plungeLocation.setYaw(0);
+                plungeLocation.subtract(2, 1, 4);
+                swordEntity.teleport(plungeLocation);
+            }
+
+            World world = Objects.requireNonNull(stabledLocation.getWorld());
+            world.spawnParticle(Particle.EXPLOSION_EMITTER, stabledLocation, 1);
+            world.playSound(stabledLocation, Sound.BLOCK_ANVIL_LAND, 1f, 0.5f);
+
+            world.getNearbyEntities(stabledLocation, 6, 6, 6).stream()
+                .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+                .map(e -> (Player) e)
+                .forEach(player -> player.damage(16, swordEntity));
         }
 
         @Override
         public synchronized void cancel() throws IllegalStateException {
             super.cancel();
-            if (sword != null && !sword.isDead()) sword.remove();
-            giant.swords.remove(this);
+            if (swordEntity != null && !swordEntity.isDead()) swordEntity.remove();
+            owner.activeStabs.remove(this);
         }
     }
 }
