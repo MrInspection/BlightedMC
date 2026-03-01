@@ -26,6 +26,7 @@ public class TheAncientKnight extends AbstractBlightedEntity {
         super("The Ancient Knight", 250, 30, EntityType.ZOMBIE);
         addAttribute(Attribute.SCALE, 4);
         setBlightedType(BlightedType.BOSS);
+        setPersistent(true);
 
         armor = new ItemStack[]{
             new ItemStack(Material.NETHERITE_BOOTS),

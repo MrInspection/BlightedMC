@@ -1,5 +1,8 @@
 package fr.moussax.blightedMC.smp.core.items;
 
+import lombok.Getter;
+
+@Getter
 public enum ItemType {
     HELMET(Category.ARMOR),
     CHESTPLATE(Category.ARMOR),
@@ -32,10 +35,6 @@ public enum ItemType {
 
     ItemType(Category category) {
         this.category = category;
-    }
-
-    public Category getCategory() {
-        return category;
     }
 
     public enum Category {

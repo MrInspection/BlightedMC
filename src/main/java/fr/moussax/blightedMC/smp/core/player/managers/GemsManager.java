@@ -1,14 +1,15 @@
 package fr.moussax.blightedMC.smp.core.player.managers;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class GemsManager {
     private int gems = 0;
 
     public void addGems(int value) {
         gems += value;
-    }
-
-    public void setGems(int value) {
-        this.gems = value;
     }
 
     public void removeGems(int value) {
@@ -19,7 +20,4 @@ public class GemsManager {
         return gems >= value;
     }
 
-    public int getGems() {
-        return gems;
-    }
 }

@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.smp.core.shared.ui.actionbar;
 
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
+import lombok.Setter;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 public final class ActionBarComposer {
     private final Map<String, ActionBarComponent> components = new LinkedHashMap<>();
     private final Map<String, ActionBarOverride> overrides = new HashMap<>();
+    @Setter
     private String separator = "     ";
 
     public void registerComponent(ActionBarComponent component) {
@@ -26,10 +28,6 @@ public final class ActionBarComposer {
 
     public void clearOverride(String componentId) {
         overrides.remove(componentId);
-    }
-
-    public void setSeparator(String separator) {
-        this.separator = separator;
     }
 
     @Nullable

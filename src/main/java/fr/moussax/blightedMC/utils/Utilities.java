@@ -115,28 +115,4 @@ public final class Utilities {
             }
         }
     }
-
-    /**
-     * Finds the nearest survival/adventure player to a specific entity within a given range.
-     *
-     * @param source The entity scanning for players (e.g., the Boss).
-     * @param range  The maximum radius to scan.
-     * @return The nearest valid player, or null if none are found.
-     */
-    public static Player getNearestPlayer(@NonNull Entity source, double range) {
-        Player nearest = null;
-        double nearestDistanceSquared = range * range;
-
-        for (Player player : source.getWorld().getPlayers()) {
-            if (player.getGameMode() == org.bukkit.GameMode.SPECTATOR || player.getGameMode() == org.bukkit.GameMode.CREATIVE)
-                continue;
-
-            double distanceSquared = player.getLocation().distanceSquared(source.getLocation());
-            if (distanceSquared <= nearestDistanceSquared) {
-                nearest = player;
-                nearestDistanceSquared = distanceSquared;
-            }
-        }
-        return nearest;
-    }
 }

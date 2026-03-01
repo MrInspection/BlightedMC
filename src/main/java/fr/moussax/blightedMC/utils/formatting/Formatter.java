@@ -242,7 +242,6 @@ public final class Formatter {
      * Sends a warning message if the check fails.
      *
      * @param player     the player to check
-     * @param permission the permission to check
      * @return {@code true} if player has the required permission
      */
     public static boolean hasRequiredPermission(@NonNull Player player) {

@@ -10,6 +10,8 @@ import fr.moussax.blightedMC.smp.core.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.smp.core.shared.ui.actionbar.ActionBarManager;
 import fr.moussax.blightedMC.smp.core.player.managers.GemsManager;
 import fr.moussax.blightedMC.smp.core.player.managers.ManaManager;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -21,12 +23,16 @@ public final class BlightedPlayer {
     private static final Map<UUID, BlightedPlayer> players = new HashMap<>();
 
     private static final double DEFAULT_MAX_MANA = 20;
-    private static final double DEFAULT_MANA_REGEN_RATE = 1.0;
+    private static final double DEFAULT_MANA_REGEN_RATE = 0.5;
 
+    @Getter
     private final Player player;
+    @Getter
     private final UUID playerId;
+    @Getter
     private final GemsManager gemsManager;
     private final PlayerDataHandler dataHandler;
+    @Getter
     private final ActionBarManager actionBarManager;
     private final ManaManager manaManager;
 
@@ -36,6 +42,8 @@ public final class BlightedPlayer {
 
     private ItemStack[] lastKnownArmor = new ItemStack[4];
     private final BukkitTask actionBarTask;
+    @Getter
+    @Setter
     private int forgeFuel;
 
     public BlightedPlayer(Player player) {
@@ -156,18 +164,6 @@ public final class BlightedPlayer {
         return armorPieces.get(type);
     }
 
-    public Player getPlayer() {
-        return player;
-    }
-
-    public UUID getPlayerId() {
-        return playerId;
-    }
-
-    public GemsManager getGemsManager() {
-        return gemsManager;
-    }
-
     public void addGems(int value) {
         if (value == 0) return;
         gemsManager.addGems(value);
@@ -189,20 +185,12 @@ public final class BlightedPlayer {
         return manaManager;
     }
 
-    public int getForgeFuel() {
-        return forgeFuel;
-    }
-
     public void addForgeFuel(int amount) {
         this.forgeFuel += amount;
     }
 
     public void removeForgeFuel(int amount) {
         this.forgeFuel = Math.max(0, this.forgeFuel - amount);
-    }
-
-    public void setForgeFuel(int amount) {
-        this.forgeFuel = amount;
     }
 
     public void addItemToInventory(ItemStack item) {
@@ -227,9 +215,5 @@ public final class BlightedPlayer {
             return;
         }
         this.lastKnownArmor = Arrays.copyOf(armor, 4);
-    }
-
-    public ActionBarManager getActionBarManager() {
-        return actionBarManager;
     }
 }

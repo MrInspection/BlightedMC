@@ -1,8 +1,14 @@
 package fr.moussax.blightedMC.smp.core.player.managers;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class ManaManager {
+    @Getter
     private double currentMana;
+    @Getter
     private double maxMana;
+    @Setter
     private double manaRegenerationRate;
 
     public ManaManager(double maxMana, double manaRegenRate) {
@@ -11,27 +17,15 @@ public class ManaManager {
         this.currentMana = maxMana;
     }
 
-    public double getCurrentMana() {
-        return currentMana;
-    }
-
     public void setCurrentMana(double currentMana) {
         if (currentMana < 0) currentMana = 0;
         if (currentMana > maxMana) currentMana = maxMana;
         this.currentMana = currentMana;
     }
 
-    public double getMaxMana() {
-        return maxMana;
-    }
-
     public void setMaxMana(double maxMana) {
         this.maxMana = maxMana;
         if (this.currentMana > maxMana) this.currentMana = maxMana;
-    }
-
-    public void setManaRegenerationRate(double manaRegenRate) {
-        this.manaRegenerationRate = manaRegenRate;
     }
 
     public void consumeMana(double amount) {

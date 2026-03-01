@@ -1,10 +1,12 @@
 package fr.moussax.blightedMC.smp.core.items.abilities;
 
+import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+@Getter
 public enum AbilityType {
     RIGHT_CLICK("§d§lRIGHT CLICK"),
     LEFT_CLICK("§d§lLEFT CLICK"),
@@ -22,10 +24,6 @@ public enum AbilityType {
 
     AbilityType(String displayName) {
         this.displayName = displayName;
-    }
-
-    public String getDisplayName() {
-        return displayName;
     }
 
     public boolean matches(Event event) {

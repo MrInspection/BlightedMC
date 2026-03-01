@@ -8,6 +8,8 @@ import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.smp.core.items.rules.ItemRule;
 import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Event;
@@ -31,11 +33,16 @@ public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
     public static final NamespacedKey BLIGHTED_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_id");
     public static final NamespacedKey BLIGHTED_RARITY_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_rarity");
 
+    @Getter
     private final String itemId;
+    @Getter
     private final ItemRarity itemRarity;
+    @Getter
     private final ItemType itemType;
+    @Setter
+    @Getter
     private FullSetBonus fullSetBonus;
-
+    @Getter
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemRule> rules = new ArrayList<>();
 
@@ -87,15 +94,6 @@ public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
         rules.add(rule);
     }
 
-    /**
-     * Returns the list of abilities associated with this item.
-     *
-     * @return the list of abilities
-     */
-    public List<Ability> getAbilities() {
-        return abilities;
-    }
-
     @Override
     public BlightedItem setDisplayName(@NonNull String displayName) {
         super.setDisplayName(itemRarity.getColorPrefix() + displayName);
@@ -110,24 +108,6 @@ public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
     public BlightedItem isUnstackable() {
         super.setUnstackable(true);
         return this;
-    }
-
-    /**
-     * Assigns a full set bonus to this item.
-     *
-     * @param bonus the full set bonus to assign
-     */
-    public void setFullSetBonus(FullSetBonus bonus) {
-        this.fullSetBonus = bonus;
-    }
-
-    /**
-     * Returns the full set bonus of this item, if any.
-     *
-     * @return the full set bonus or {@code null}
-     */
-    public FullSetBonus getFullSetBonus() {
-        return fullSetBonus;
     }
 
     /**
@@ -205,17 +185,5 @@ public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
     @Override
     public ItemStack createItemStack() {
         return this.toItemStack();
-    }
-
-    public String getItemId() {
-        return itemId;
-    }
-
-    public ItemRarity getItemRarity() {
-        return itemRarity;
-    }
-
-    public ItemType getItemType() {
-        return itemType;
     }
 }

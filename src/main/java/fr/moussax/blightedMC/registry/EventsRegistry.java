@@ -14,12 +14,16 @@ import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.smp.core.shared.ui.sign.SignInputListener;
 import fr.moussax.blightedMC.smp.features.items.abilities.WitherImpactAbility;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
 public final class EventsRegistry {
+
     private final BlightedMC instance = BlightedMC.getInstance();
+    @Getter
     private MenuSystem menuSystem;
+    @Getter
     private MenuManager menuManager;
     private SpawnableEntitiesListener spawnableEntitiesListener;
     private SignInputListener signInputListener;
@@ -48,14 +52,6 @@ public final class EventsRegistry {
         if (spawnableEntitiesListener != null) {
             spawnableEntitiesListener.rebuildCache();
         }
-    }
-
-    public MenuManager getMenuManager() {
-        return menuManager;
-    }
-
-    public MenuSystem getMenuSystem() {
-        return menuSystem;
     }
 
     public void cleanup() {

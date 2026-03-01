@@ -34,7 +34,7 @@ public final class FishingLootFeedbackDecorator implements FeedbackDecorator {
     public void execute(LootContext context, int amount) {
         delegate.execute(context, amount);
 
-        if (context.blightedPlayer() == null || context.blightedPlayer().getPlayer() == null) {
+        if (context.blightedPlayer() == null) {
             return;
         }
 

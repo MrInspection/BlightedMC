@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.smp.core.items.crafting;
 
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -9,8 +10,11 @@ import org.bukkit.inventory.ItemStack;
  * a custom item managed by {@link BlightedItem} or a vanilla {@link Material}.
  */
 public class CraftingObject {
+
+    @Getter
     private final BlightedItem manager;
     private final ItemStack vanillaItem;
+    @Getter
     private final int amount;
     private final String itemId;
 
@@ -41,30 +45,12 @@ public class CraftingObject {
     }
 
     /**
-     * Returns the {@link BlightedItem} if this is a custom item.
-     *
-     * @return the item manager or {@code null} if this is a vanilla item
-     */
-    public BlightedItem getManager() {
-        return manager;
-    }
-
-    /**
      * Returns a clone of the vanilla item stack.
      *
      * @return a cloned {@link ItemStack} or {@code null} if this is a custom item
      */
     public ItemStack getVanillaItem() {
         return vanillaItem == null ? null : vanillaItem.clone();
-    }
-
-    /**
-     * Returns the quantity of this crafting object.
-     *
-     * @return the required amount
-     */
-    public int getAmount() {
-        return amount;
     }
 
     /**

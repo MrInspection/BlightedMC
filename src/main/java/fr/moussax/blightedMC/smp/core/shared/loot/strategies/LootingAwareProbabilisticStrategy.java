@@ -64,7 +64,7 @@ public final class LootingAwareProbabilisticStrategy implements LootSelectionStr
      * @return looting level (0 if blightedPlayer or weapon is null)
      */
     private int extractLootingLevel(LootContext context) {
-        if (context.blightedPlayer() == null || context.blightedPlayer().getPlayer() == null) {
+        if (context.blightedPlayer() == null) {
             return 0;
         }
 

@@ -5,6 +5,7 @@ import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuElementPres
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.utils.ItemBuilder;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -32,6 +33,7 @@ import java.util.function.Consumer;
 public abstract class Menu implements InventoryHolder {
     protected final String title;
     protected final int size;
+    @Getter
     protected final Map<Integer, MenuSlot> slots = new HashMap<>();
     protected Inventory inventory;
     protected UUID viewerId;
@@ -286,10 +288,6 @@ public abstract class Menu implements InventoryHolder {
         if (player != null && menuSystem != null) {
             menuSystem.goBack(player);
         }
-    }
-
-    public Map<Integer, MenuSlot> getSlots() {
-        return slots;
     }
 
     /**

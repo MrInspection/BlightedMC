@@ -1,11 +1,14 @@
 package fr.moussax.blightedMC.smp.core.items;
 
+import lombok.Getter;
+
 /**
  * Represents the rarity levels of custom items in BlightedMC.
  * <p>
  * Each rarity defines a formatted display name and a color prefix
  * used for item naming and visual distinction.
  */
+@Getter
 public enum ItemRarity {
     COMMON("§f§lCOMMON", "§f"),
     UNCOMMON("§e§lUNCOMMON", "§e"),
@@ -20,23 +23,5 @@ public enum ItemRarity {
     ItemRarity(String name, String colorPrefix) {
         this.name = name;
         this.colorPrefix = colorPrefix;
-    }
-
-    /**
-     * Returns the formatted rarity name.
-     *
-     * @return the display name of the rarity
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Returns the color prefix associated with this rarity.
-     *
-     * @return the color prefix string
-     */
-    public String getColorPrefix() {
-        return colorPrefix;
     }
 }

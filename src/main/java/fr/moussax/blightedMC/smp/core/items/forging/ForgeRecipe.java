@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.smp.core.items.forging;
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
 import fr.moussax.blightedMC.smp.core.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
+import lombok.Getter;
 import org.bukkit.Material;
 
 import java.util.ArrayList;
@@ -19,9 +20,12 @@ import java.util.List;
  */
 public final class ForgeRecipe {
 
+    @Getter
     private final BlightedItem forgedItem;
+    @Getter
     private final int forgedAmount;
     private final List<CraftingObject> ingredients;
+    @Getter
     private final int fuelCost;
 
     private ForgeRecipe(
@@ -37,39 +41,12 @@ public final class ForgeRecipe {
     }
 
     /**
-     * Returns the item produced by this forge recipe.
-     *
-     * @return the resulting BlightedItem
-     */
-    public BlightedItem getForgedItem() {
-        return forgedItem;
-    }
-
-    /**
-     * Returns the quantity of items produced.
-     *
-     * @return number of items produced
-     */
-    public int getForgedAmount() {
-        return forgedAmount;
-    }
-
-    /**
      * Returns the required ingredients to forge this item.
      *
      * @return unmodifiable list of ingredients
      */
     public List<CraftingObject> getIngredients() {
         return Collections.unmodifiableList(ingredients);
-    }
-
-    /**
-     * Returns the fuel cost required to perform this forging operation.
-     *
-     * @return fuel cost
-     */
-    public int getFuelCost() {
-        return fuelCost;
     }
 
     /**

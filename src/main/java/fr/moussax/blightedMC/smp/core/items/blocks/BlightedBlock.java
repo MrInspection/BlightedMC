@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.smp.core.items.blocks;
 
 import fr.moussax.blightedMC.smp.core.items.BlightedItem;
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -15,6 +16,7 @@ import org.jspecify.annotations.NonNull;
  * for block events such as placement, interaction, and breaking.
  * Subclasses can override event methods to implement custom behavior.
  */
+@Getter
 public abstract class BlightedBlock {
 
     protected final Material material;
@@ -38,24 +40,6 @@ public abstract class BlightedBlock {
      */
     public String getId() {
         return blightedItem.getItemId();
-    }
-
-    /**
-     * Returns the custom item representing this block.
-     *
-     * @return the associated BlightedItem
-     */
-    public BlightedItem getBlightedItem() {
-        return blightedItem;
-    }
-
-    /**
-     * Returns the material type of this block.
-     *
-     * @return block material
-     */
-    public Material getMaterial() {
-        return material;
     }
 
     /**

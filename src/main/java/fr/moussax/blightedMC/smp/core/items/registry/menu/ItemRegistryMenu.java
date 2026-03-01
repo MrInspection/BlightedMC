@@ -149,7 +149,7 @@ public final class ItemRegistryMenu {
         }
 
         @Override
-        protected int getTotalItems(Player player) {
+        protected int getTotalItems(@NonNull Player player) {
             return blightedItems.size();
         }
 
