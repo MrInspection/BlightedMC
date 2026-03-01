@@ -3,11 +3,8 @@ package fr.moussax.blightedMC.smp.core.entities.registry;
 import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.smp.core.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.smp.features.entities.ravenous.*;
-import fr.moussax.blightedMC.smp.features.entities.bosses.RevenantHorror;
 import fr.moussax.blightedMC.smp.features.entities.bosses.TheAncientKnight;
 import fr.moussax.blightedMC.smp.features.entities.Illusioner;
-import fr.moussax.blightedMC.smp.features.entities.InfernalBlaze;
-import fr.moussax.blightedMC.smp.features.entities.LaserEngineer;
 import fr.moussax.blightedMC.smp.features.entities.Watchling;
 import fr.moussax.blightedMC.smp.features.entities.powerful.Endersent;
 import fr.moussax.blightedMC.utils.debug.Log;
@@ -31,7 +28,6 @@ public final class EntitiesRegistry {
 
     private static final List<AbstractBlightedEntity> DEFAULT_ENTITIES = List.of(
         new TheAncientKnight(),
-        new RevenantHorror(),
         new RavenousBogged(),
         new RavenousDrowned(),
         new RavenousHusk(),
@@ -42,8 +38,6 @@ public final class EntitiesRegistry {
         new RavenousWitherSkeleton(),
         new RavenousZombie(),
         new RavenousZombifiedPiglin(),
-        new LaserEngineer(),
-        new InfernalBlaze(),
         new Endersent(),
         new Watchling(),
         new Illusioner()

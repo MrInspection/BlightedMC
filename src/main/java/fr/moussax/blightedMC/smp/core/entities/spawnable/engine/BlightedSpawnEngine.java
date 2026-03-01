@@ -15,14 +15,17 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Periodic engine responsible for spawning custom entities outside of
- * vanilla Minecraft spawning mechanics.
+ * Periodic engine responsible for spawning custom entities outside of vanilla spawning mechanics.
  *
- * <p>The engine runs on a fixed schedule, selects nearby loaded chunks
- * around online players, and attempts to spawn registered
- * {@link SpawnableEntity} instances based on their spawn rules.</p>
+ * <p>Selects loaded chunks around online players and attempts to spawn registered
+ * {@link SpawnableEntity} instances with {@link SpawnMode#INDEPENDENT} or {@link SpawnMode#HYBRID}
+ * modes based on their configured spawn rules.</p>
+ *
+ * <p>Y selection uses the highest block at the target column to avoid wasteful
+ * checks deep inside solid terrain.</p>
  */
 public final class BlightedSpawnEngine extends BukkitRunnable {
+
     private static final int CHUNKS_PER_PLAYER_PER_TICK = 1;
     private static final int MIN_CHUNK_DISTANCE = 3;
     private static final int MAX_CHUNK_DISTANCE = 8;
@@ -50,16 +53,12 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
                 int distance = random.nextInt(MIN_CHUNK_DISTANCE, MAX_CHUNK_DISTANCE + 1);
                 double angle = random.nextDouble() * 2 * Math.PI;
 
-                int offsetX = (int) Math.round(distance * Math.cos(angle));
-                int offsetZ = (int) Math.round(distance * Math.sin(angle));
-
-                int targetChunkX = playerChunk.getX() + offsetX;
-                int targetChunkZ = playerChunk.getZ() + offsetZ;
+                int targetChunkX = playerChunk.getX() + (int) Math.round(distance * Math.cos(angle));
+                int targetChunkZ = playerChunk.getZ() + (int) Math.round(distance * Math.sin(angle));
 
                 if (!world.isChunkLoaded(targetChunkX, targetChunkZ)) continue;
 
-                Chunk chunk = world.getChunkAt(targetChunkX, targetChunkZ);
-                attemptSpawnInChunk(chunk, world, random);
+                attemptSpawnInChunk(world.getChunkAt(targetChunkX, targetChunkZ), world, random);
             }
         }
     }
@@ -81,9 +80,8 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
         int x = (chunk.getX() << 4) + random.nextInt(16);
         int z = (chunk.getZ() << 4) + random.nextInt(16);
 
-        int minHeight = world.getMinHeight();
-        int maxHeight = world.getMaxHeight();
-        int y = random.nextInt(minHeight, maxHeight);
+        int surfaceY = world.getHighestBlockYAt(x, z);
+        int y = surfaceY + 1;
 
         Location location = new Location(world, x + 0.5, y, z + 0.5);
 
@@ -100,7 +98,7 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
             if (!entity.canSpawnAt(location, world)) continue;
 
             if (random.nextDouble() <= entity.getSpawnProbability()) {
-                entity.spawn(location);
+                entity.clone().spawn(location);
                 return;
             }
         }

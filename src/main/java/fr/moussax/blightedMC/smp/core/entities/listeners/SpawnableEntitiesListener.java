@@ -15,24 +15,21 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class SpawnableEntitiesListener implements Listener {
+
     private volatile Map<EntityType, List<SpawnableEntity>> spawnCache = Collections.emptyMap();
     private volatile boolean cacheInitialized = false;
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onCreatureSpawn(CreatureSpawnEvent event) {
-        if (!cacheInitialized) {
-            rebuildCache();
-        }
+        if (!cacheInitialized) rebuildCache();
 
         CreatureSpawnEvent.SpawnReason reason = event.getSpawnReason();
-        if (reason != CreatureSpawnEvent.SpawnReason.NATURAL &&
-            reason != CreatureSpawnEvent.SpawnReason.REINFORCEMENTS) {
+        if (reason != CreatureSpawnEvent.SpawnReason.NATURAL
+            && reason != CreatureSpawnEvent.SpawnReason.REINFORCEMENTS) {
             return;
         }
 
-        EntityType vanillaType = event.getEntityType();
-
-        List<SpawnableEntity> candidates = spawnCache.get(vanillaType);
+        List<SpawnableEntity> candidates = spawnCache.get(event.getEntityType());
         if (candidates == null || candidates.isEmpty()) return;
 
         Location location = event.getLocation();
@@ -40,14 +37,10 @@ public final class SpawnableEntitiesListener implements Listener {
         if (world == null) return;
 
         List<SpawnableEntity> eligible = null;
-
         for (SpawnableEntity entity : candidates) {
-            if (entity.canSpawnAt(location, world)) {
-                if (eligible == null) {
-                    eligible = new ArrayList<>(candidates.size());
-                }
-                eligible.add(entity);
-            }
+            if (!entity.canSpawnAt(location, world)) continue;
+            if (eligible == null) eligible = new ArrayList<>(candidates.size());
+            eligible.add(entity);
         }
 
         if (eligible == null) return;
@@ -56,19 +49,22 @@ public final class SpawnableEntitiesListener implements Listener {
         for (SpawnableEntity entity : eligible) {
             totalChance += entity.getSpawnProbability();
         }
-
         totalChance = Math.min(totalChance, 1.0);
 
-        if (ThreadLocalRandom.current().nextDouble() > totalChance) return;
+        ThreadLocalRandom random = ThreadLocalRandom.current();
 
-        double roll = ThreadLocalRandom.current().nextDouble() * totalChance;
+        // Single roll: first check if anything spawns at all, then pick which one.
+        double roll = random.nextDouble();
+        if (roll >= totalChance) return;
+
+        // Re-use the same roll scaled into [0, totalChance] to select the candidate.
+        double scaled = roll;
         double cumulative = 0.0;
-
         for (SpawnableEntity entity : eligible) {
             cumulative += entity.getSpawnProbability();
-            if (roll < cumulative) {
+            if (scaled < cumulative) {
                 event.setCancelled(true);
-                entity.clone().spawn(location, CreatureSpawnEvent.SpawnReason.CUSTOM);
+                entity.clone().spawn(location);
                 return;
             }
         }
@@ -78,7 +74,6 @@ public final class SpawnableEntitiesListener implements Listener {
         if (cacheInitialized) return;
 
         Map<EntityType, List<SpawnableEntity>> newCache = new EnumMap<>(EntityType.class);
-
         for (SpawnableEntity entity : SpawnableEntitiesRegistry.getAll()) {
             SpawnMode mode = entity.getSpawnMode();
             if (mode == SpawnMode.REPLACEMENT || mode == SpawnMode.HYBRID) {
