@@ -5,10 +5,10 @@ api-version: '1.21'
 authors: [ MrInspection ]
 
 commands:
-  broadcast:
-    description: Broadcast a message to the server
   spawncustommob:
     description: Spawn a BlightedMC creature
+    aliases:
+      - scm
   test:
     description: General testing command
   gems:
@@ -16,17 +16,11 @@ commands:
   craft:
     description: Open the BlightedMC custom crafting table
   loop:
-    description: Execute multiple times a command
-  forcecommand:
-    description: Force another player to execute a command
-  kaboom:
-    description: Launch all players or a specific player into the sky
+    description: Bulk execute a specific command
   giveitem:
     description: Open or give yourself a custom item
   god:
     description: Toggle god mode for yourself or another player
-  tpall:
-    description: Teleport all players to you
   tppos:
     description: Teleport to a position
   fly:
@@ -35,3 +29,7 @@ commands:
     description: Forge command
   altar:
     description: Altar command
+  endersee:
+    description: Moderator command
+  invsee:
+    description: Moderator command

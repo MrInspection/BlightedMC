@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.commands;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.smp.core.items.forging.menu.ForgeMenu;
+import fr.moussax.blightedMC.engine.items.forging.menu.ForgeMenu;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,7 +12,7 @@ public class ForgeCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
         if (!(label.equalsIgnoreCase("forge") && sender instanceof Player player)) return false;
-        BlightedMC.getInstance().getMenuManager().openMenu(new ForgeMenu(null), player);
+        BlightedMC.menuManager().openMenu(new ForgeMenu(null), player);
         return true;
     }
 }

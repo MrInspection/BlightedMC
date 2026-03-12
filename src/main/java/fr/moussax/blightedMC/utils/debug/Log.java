@@ -1,5 +1,7 @@
 package fr.moussax.blightedMC.utils.debug;
 
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -18,13 +20,10 @@ public final class Log {
     private static final String LOG_ERROR_COLOR = "\u001B[31m";
     private static final String LOG_DEBUG_COLOR = "\u001B[1;35m";
 
+    @Setter
     private static boolean includeTimestamp = false;
 
     private Log() {
-    }
-
-    public static void setIncludeTimestamp(boolean include) {
-        includeTimestamp = include;
     }
 
     private static void print(String level, String message, String color) {

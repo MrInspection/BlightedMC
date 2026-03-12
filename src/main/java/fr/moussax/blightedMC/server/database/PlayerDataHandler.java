@@ -1,6 +1,8 @@
 package fr.moussax.blightedMC.server.database;
 
 import fr.moussax.blightedMC.BlightedMC;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,13 +10,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class PlayerDataHandler {
+public final class PlayerDataHandler {
     private final UUID playerId;
     private final String playerName;
     private final Connection connection;
 
+    @Setter
+    @Getter
     private int gems;
+    @Setter
+    @Getter
     private double mana;
+    @Getter
+    @Setter
     private int forgeFuel;
 
     public PlayerDataHandler(UUID playerId, String playerName) {
@@ -23,30 +31,6 @@ public class PlayerDataHandler {
         this.connection = BlightedMC.getInstance().getDatabase().getConnection();
 
         load();
-    }
-
-    public int getGems() {
-        return gems;
-    }
-
-    public double getMana() {
-        return mana;
-    }
-
-    public int getForgeFuel() {
-        return forgeFuel;
-    }
-
-    public void setGems(int gems) {
-        this.gems = gems;
-    }
-
-    public void setMana(double mana) {
-        this.mana = mana;
-    }
-
-    public void setForgeFuel(int forgeFuel) {
-        this.forgeFuel = forgeFuel;
     }
 
     public void save() {

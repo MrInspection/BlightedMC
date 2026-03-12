@@ -6,11 +6,12 @@ import fr.moussax.blightedMC.server.BlightedServer;
 import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
 import fr.moussax.blightedMC.server.database.PluginDatabase;
-import fr.moussax.blightedMC.smp.core.entities.spawnable.engine.BlightedSpawnEngine;
-import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
-import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuSystem;
+import fr.moussax.blightedMC.engine.entities.spawnable.engine.BlightedSpawnEngine;
+import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
+import fr.moussax.blightedMC.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 import fr.moussax.blightedMC.utils.debug.Log;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,8 +19,12 @@ import java.io.*;
 import java.sql.SQLException;
 
 public final class BlightedMC extends JavaPlugin {
+
+    @Getter
     private static BlightedMC instance;
+    @Getter
     private PluginSettings settings;
+    @Getter
     private PluginDatabase database;
     private EventsRegistry eventsRegistry;
 
@@ -55,58 +60,16 @@ public final class BlightedMC extends JavaPlugin {
         RegistrySystem.clear();
     }
 
-    /**
-     * Retrieves the plugin settings.
-     *
-     * @return the plugin settings instance
-     */
-    public PluginSettings getSettings() {
-        return settings;
-    }
-
-    /**
-     * Retrieves the plugin database connection.
-     *
-     * @return the plugin database instance
-     */
-    public PluginDatabase getDatabase() {
-        return database;
-    }
-
-    /**
-     * Retrieves the instance of the menu manager.
-     *
-     * @return the menu manager
-     */
     public MenuManager getMenuManager() {
         return eventsRegistry.getMenuManager();
     }
 
-    /**
-     * Retrieves the instance of the menu system.
-     *
-     * @return the menu system
-     */
     public MenuSystem getMenuSystem() {
         return eventsRegistry.getMenuSystem();
     }
 
-    /**
-     * Static accessor to the plugin's menu manager.
-     *
-     * @return the menu manager
-     */
     public static MenuManager menuManager() {
         return instance.getMenuManager();
-    }
-
-    /**
-     * Retrieves the singleton instance of the plugin.
-     *
-     * @return the plugin instance
-     */
-    public static BlightedMC getInstance() {
-        return instance;
     }
 
     private void initializeDatabase() {

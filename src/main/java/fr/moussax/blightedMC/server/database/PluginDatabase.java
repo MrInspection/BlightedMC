@@ -1,18 +1,18 @@
 package fr.moussax.blightedMC.server.database;
 
+import fr.moussax.blightedMC.utils.debug.Log;
+import lombok.Getter;
+
 import java.sql.*;
 import java.util.UUID;
 
-public class PluginDatabase {
+@Getter
+public final class PluginDatabase {
     private final Connection connection;
 
     public PluginDatabase(String path) throws SQLException {
         this.connection = DriverManager.getConnection("jdbc:sqlite:" + path);
         initializeSchema();
-    }
-
-    public Connection getConnection() {
-        return connection;
     }
 
     public void closeConnection() {
@@ -21,7 +21,7 @@ public class PluginDatabase {
                 connection.close();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error("PluginDatabase", e.getMessage());
             throw new RuntimeException("Unable to close the database connection");
         }
     }
@@ -54,7 +54,6 @@ public class PluginDatabase {
             try {
                 statement.execute("ALTER TABLE players ADD COLUMN forge_fuel INTEGER NOT NULL DEFAULT 0");
             } catch (SQLException ignored) {
-                // Column likely exists
             }
         }
     }
@@ -69,7 +68,7 @@ public class PluginDatabase {
             statement.setString(5, blockId);
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error("PluginDatabase", e.getMessage());
         }
     }
 
@@ -83,7 +82,7 @@ public class PluginDatabase {
             statement.setInt(4, z);
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error("PluginDatabase", e.getMessage());
         }
     }
 
@@ -101,7 +100,7 @@ public class PluginDatabase {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error("PluginDatabase", e.getMessage());
         }
         return null;
     }
