@@ -1,26 +1,29 @@
 package fr.moussax.blightedMC.registry;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedMC.smp.core.entities.listeners.SpawnableEntitiesListener;
-import fr.moussax.blightedMC.smp.core.fishing.listeners.FishingListener;
-import fr.moussax.blightedMC.smp.core.items.abilities.AbilityListener;
-import fr.moussax.blightedMC.smp.core.items.blocks.BlightedBlockListener;
-import fr.moussax.blightedMC.smp.core.items.listeners.UnsafeAnvilListener;
-import fr.moussax.blightedMC.smp.core.items.rules.ItemRuleListener;
-import fr.moussax.blightedMC.smp.core.player.PlayerListener;
-import fr.moussax.blightedMC.smp.core.player.mod.ModerationListener;
-import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuListener;
-import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuManager;
-import fr.moussax.blightedMC.smp.core.shared.ui.menu.system.MenuSystem;
-import fr.moussax.blightedMC.smp.core.shared.ui.sign.SignInputListener;
-import fr.moussax.blightedMC.smp.features.items.abilities.WitherImpactAbility;
+import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedMC.engine.entities.listeners.SpawnableEntitiesListener;
+import fr.moussax.blightedMC.engine.fishing.listeners.FishingListener;
+import fr.moussax.blightedMC.engine.items.abilities.AbilityListener;
+import fr.moussax.blightedMC.engine.items.blocks.BlightedBlockListener;
+import fr.moussax.blightedMC.engine.items.listeners.UnsafeAnvilListener;
+import fr.moussax.blightedMC.engine.items.rules.ItemRuleListener;
+import fr.moussax.blightedMC.engine.player.PlayerListener;
+import fr.moussax.blightedMC.shared.ui.menu.system.MenuListener;
+import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
+import fr.moussax.blightedMC.shared.ui.menu.system.MenuSystem;
+import fr.moussax.blightedMC.shared.ui.sign.SignInputListener;
+import fr.moussax.blightedMC.content.items.abilities.WitherImpactAbility;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
 public final class EventsRegistry {
+
     private final BlightedMC instance = BlightedMC.getInstance();
+    @Getter
     private MenuSystem menuSystem;
+    @Getter
     private MenuManager menuManager;
     private SpawnableEntitiesListener spawnableEntitiesListener;
     private SignInputListener signInputListener;
@@ -43,21 +46,12 @@ public final class EventsRegistry {
         pm.registerEvents(new FishingListener(), instance);
         pm.registerEvents(new UnsafeAnvilListener(), instance);
         pm.registerEvents(new WitherImpactAbility(), instance);
-        pm.registerEvents(new ModerationListener(), instance);
     }
 
     public void buildSpawnCache() {
         if (spawnableEntitiesListener != null) {
             spawnableEntitiesListener.rebuildCache();
         }
-    }
-
-    public MenuManager getMenuManager() {
-        return menuManager;
-    }
-
-    public MenuSystem getMenuSystem() {
-        return menuSystem;
     }
 
     public void cleanup() {

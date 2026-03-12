@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.server;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.utils.config.FlexiblePropertyUtils;
 import fr.moussax.blightedMC.utils.debug.Log;
+import lombok.Getter;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
@@ -13,9 +14,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 public final class PluginSettings {
-    private double defaultMaxMana;
+
+    @Getter
     private double defaultManaRegenerationRate;
-    private double defaultPlayerHealth;
+    @Getter
     private double customLootChance;
     private boolean bannersOnJoin;
 
@@ -38,22 +40,6 @@ public final class PluginSettings {
             Log.error("Config", "Failed to load configuration: " + e.getMessage());
             return new PluginSettings();
         }
-    }
-
-    public double getDefaultMaxMana() {
-        return defaultMaxMana;
-    }
-
-    public double getDefaultManaRegenerationRate() {
-        return defaultManaRegenerationRate;
-    }
-
-    public double getDefaultPlayerHealth() {
-        return defaultPlayerHealth;
-    }
-
-    public double getCustomLootChance() {
-        return customLootChance;
     }
 
     public boolean hasBannersOnJoin() {

@@ -1,20 +1,18 @@
 package fr.moussax.blightedMC.server.database;
 
 import fr.moussax.blightedMC.utils.debug.Log;
+import lombok.Getter;
 
 import java.sql.*;
 import java.util.UUID;
 
+@Getter
 public final class PluginDatabase {
     private final Connection connection;
 
     public PluginDatabase(String path) throws SQLException {
         this.connection = DriverManager.getConnection("jdbc:sqlite:" + path);
         initializeSchema();
-    }
-
-    public Connection getConnection() {
-        return connection;
     }
 
     public void closeConnection() {

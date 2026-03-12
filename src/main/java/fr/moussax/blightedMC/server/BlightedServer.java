@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.server;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.smp.core.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.*;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -25,7 +25,6 @@ public final class BlightedServer {
     }
 
     public void configureServer() {
-        Log.info("BlightedServer", "Configuring server for a Blighted Survival...");
         for (World world : Bukkit.getWorlds()) {
             world.setDifficulty(Difficulty.HARD);
             world.setGameRule(GameRule.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0);

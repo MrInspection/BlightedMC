@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.server;
 
 import fr.moussax.blightedMC.BlightedMC;
+import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -9,9 +10,9 @@ import java.io.IOException;
 
 public enum PluginFiles {
     CONFIG("config.yml"),
-    DATABASE("blighted_database.db"),
-    CUSTOM_BLOCKS("custom_blocks.yml");
+    DATABASE("blighted_database.db");
 
+    @Getter
     private final String fileName;
     private final File dataFolder;
 
@@ -34,9 +35,5 @@ public enum PluginFiles {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public String getFileName() {
-        return fileName;
     }
 }
