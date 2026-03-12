@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.commands;
 
-import fr.moussax.blightedMC.smp.core.entities.AbstractBlightedEntity;
-import fr.moussax.blightedMC.smp.core.entities.registry.EntitiesRegistry;
+import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import fr.moussax.blightedMC.utils.commands.CommandInfo;
 import org.bukkit.command.Command;
@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
-import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
+import static fr.moussax.blightedMC.shared.formatting.Formatter.*;
 
 @CommandArgument(suggestions = {"$entities"})
 public class SpawnCustomMobCommand implements CommandExecutor {

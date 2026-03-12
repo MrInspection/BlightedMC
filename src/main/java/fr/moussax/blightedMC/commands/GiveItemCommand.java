@@ -1,9 +1,9 @@
 package fr.moussax.blightedMC.commands;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.smp.core.items.BlightedItem;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.smp.core.items.registry.menu.ItemRegistryMenu;
+import fr.moussax.blightedMC.engine.items.BlightedItem;
+import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
+import fr.moussax.blightedMC.engine.items.registry.menu.ItemRegistryMenu;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import fr.moussax.blightedMC.utils.commands.CommandArguments;
 import org.bukkit.Bukkit;
@@ -14,7 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 
-import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
+import static fr.moussax.blightedMC.shared.formatting.Formatter.*;
 
 @CommandArguments({
     @CommandArgument(suggestions = {"$players"}),

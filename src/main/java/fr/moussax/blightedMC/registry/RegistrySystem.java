@@ -1,12 +1,12 @@
 package fr.moussax.blightedMC.registry;
 
-import fr.moussax.blightedMC.smp.core.entities.registry.EntitiesRegistry;
-import fr.moussax.blightedMC.smp.core.entities.rituals.registry.RitualRegistry;
-import fr.moussax.blightedMC.smp.core.fishing.registry.FishingLootRegistry;
-import fr.moussax.blightedMC.smp.core.items.blocks.registry.BlockRegistry;
-import fr.moussax.blightedMC.smp.core.items.crafting.registry.RecipeRegistry;
-import fr.moussax.blightedMC.smp.core.items.forging.registry.ForgeRegistry;
-import fr.moussax.blightedMC.smp.core.items.registry.ItemRegistry;
+import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
+import fr.moussax.blightedMC.engine.entities.rituals.registry.RitualRegistry;
+import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
+import fr.moussax.blightedMC.engine.items.blocks.registry.BlockRegistry;
+import fr.moussax.blightedMC.engine.items.crafting.registry.RecipeRegistry;
+import fr.moussax.blightedMC.engine.items.forging.registry.ForgeRegistry;
+import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 
 public final class RegistrySystem {
 

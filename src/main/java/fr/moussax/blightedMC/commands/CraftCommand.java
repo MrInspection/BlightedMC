@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.commands;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.smp.core.items.crafting.menu.CraftingTableMenu;
+import fr.moussax.blightedMC.engine.items.crafting.menu.CraftingTableMenu;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

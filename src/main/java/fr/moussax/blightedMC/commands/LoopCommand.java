@@ -13,7 +13,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 
-import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
+import static fr.moussax.blightedMC.shared.formatting.Formatter.*;
 
 public class LoopCommand implements CommandExecutor {
     private static final int MIN_AMOUNT = 2;

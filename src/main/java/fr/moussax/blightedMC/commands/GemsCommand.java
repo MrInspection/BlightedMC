@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.commands;
 
-import fr.moussax.blightedMC.smp.core.player.BlightedPlayer;
+import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import fr.moussax.blightedMC.utils.commands.CommandInfo;
 import org.bukkit.Bukkit;
@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
-import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
+import static fr.moussax.blightedMC.shared.formatting.Formatter.*;
 
 @CommandArgument(suggestions = {"add", "remove", "set", "reset", "resetall", "giveall", "help"})
 @CommandArgument(position = 1, after = {"add", "remove", "set", "reset"}, suggestions = {"$players"})

@@ -1,8 +1,8 @@
 package fr.moussax.blightedMC.commands.see;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.smp.core.player.menus.InvSeeMenu;
-import fr.moussax.blightedMC.utils.formatting.Formatter;
+import fr.moussax.blightedMC.engine.player.menus.InvSeeMenu;
+import fr.moussax.blightedMC.shared.formatting.Formatter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
-import static fr.moussax.blightedMC.utils.formatting.Formatter.hasRequiredPermission;
+import static fr.moussax.blightedMC.shared.formatting.Formatter.hasRequiredPermission;
 
 public class InvSeeCommand implements CommandExecutor {
     @Override

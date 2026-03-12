@@ -13,7 +13,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
-import static fr.moussax.blightedMC.utils.formatting.Formatter.*;
+import static fr.moussax.blightedMC.shared.formatting.Formatter.*;
 
 @CommandArguments({
     @CommandArgument(suggestions = {"$players"}),
