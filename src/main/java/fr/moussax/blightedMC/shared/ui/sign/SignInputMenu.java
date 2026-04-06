@@ -1,19 +1,17 @@
 package fr.moussax.blightedMC.shared.ui.sign;
 
 import fr.moussax.blightedMC.BlightedMC;
-import net.minecraft.core.BlockPosition;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
-import net.minecraft.network.protocol.game.PacketPlayOutBlockChange;
-import net.minecraft.network.protocol.game.PacketPlayOutOpenSignEditor;
-import net.minecraft.network.protocol.game.PacketPlayOutTileEntityData;
-import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.TileEntityTypes;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_21_R7.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
@@ -32,35 +30,35 @@ public final class SignInputMenu {
 
     public void open(@NonNull Player player) {
         Location location = player.getLocation();
-        BlockPosition blockPosition = new BlockPosition(location.getBlockX(), (int) location.getY() + 3, location.getBlockZ());
+        BlockPos blockPosition = new BlockPos(location.getBlockX(), (int) location.getY() + 3, location.getBlockZ());
 
-        EntityPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
+        ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
 
-        nmsPlayer.g.b(new PacketPlayOutBlockChange(blockPosition, Blocks.di.m()));
+        nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.OAK_SIGN.defaultBlockState()));
 
-        NBTTagCompound nbt = new NBTTagCompound();
-        nbt.a("id", "minecraft:sign");
-        nbt.a("x", blockPosition.u());
-        nbt.a("y", blockPosition.v());
-        nbt.a("z", blockPosition.w());
+        CompoundTag nbt = new CompoundTag();
+        nbt.putString("id", "minecraft:sign");
+        nbt.putInt("x", blockPosition.getX());
+        nbt.putInt("y", blockPosition.getY());
+        nbt.putInt("z", blockPosition.getZ());
 
-        NBTTagCompound frontText = new NBTTagCompound();
-        NBTTagList messages = new NBTTagList();
+        CompoundTag frontText = new CompoundTag();
+        ListTag messages = new ListTag();
 
         for (int i = 0; i < 4; i++) {
             String line = (i < lines.length) ? lines[i] : "";
-            messages.add(NBTTagString.a(line));
+            messages.add(StringTag.valueOf(line));
         }
 
-        frontText.a("messages", messages);
-        nbt.a("front_text", frontText);
+        frontText.put("messages", messages);
+        nbt.put("front_text", frontText);
 
-        nmsPlayer.g.b(new PacketPlayOutTileEntityData(blockPosition, TileEntityTypes.h, nbt));
+        nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.OAK_SIGN.defaultBlockState()));
 
         Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> {
             if (!player.isOnline()) return;
-            nmsPlayer.g.b(new PacketPlayOutBlockChange(blockPosition, Blocks.di.m()));
-            nmsPlayer.g.b(new PacketPlayOutOpenSignEditor(blockPosition, frontSide));
+            nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.OAK_SIGN.defaultBlockState()));
+            nmsPlayer.connection.send(new ClientboundOpenSignEditorPacket(blockPosition, frontSide));
             SignInputManager.register(player.getUniqueId(), this, blockPosition);
         }, 1L);
     }

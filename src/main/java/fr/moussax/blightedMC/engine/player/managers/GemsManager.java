@@ -19,5 +19,4 @@ public class GemsManager {
     public boolean hasEnoughGems(int value) {
         return gems >= value;
     }
-
 }

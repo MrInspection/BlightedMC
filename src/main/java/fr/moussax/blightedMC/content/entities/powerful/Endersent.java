@@ -1,22 +1,21 @@
 package fr.moussax.blightedMC.content.entities.powerful;
 
+import fr.moussax.blightedMC.content.entities.Watchling;
 import fr.moussax.blightedMC.engine.entities.BlightedType;
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
-import fr.moussax.blightedMC.content.entities.Watchling;
 import fr.moussax.blightedMC.utils.Utilities;
-import net.minecraft.world.entity.ai.goal.PathfinderGoalLookAtPlayer;
-import net.minecraft.world.entity.ai.goal.PathfinderGoalMeleeAttack;
-import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomStrollLand;
-import net.minecraft.world.entity.ai.goal.target.PathfinderGoalNearestAttackableTarget;
-import net.minecraft.world.entity.monster.EntityEnderman;
-import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.EnderMan;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.v1_21_R7.entity.CraftMob;
+import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -196,15 +195,15 @@ public class Endersent extends SpawnableEntity {
         LivingEntity spawnedEntity = super.spawn(location);
         if (!(spawnedEntity instanceof CraftMob craftMob)) return spawnedEntity;
 
-        EntityEnderman nmsEndersent = (EntityEnderman) craftMob.getHandle();
-        nmsEndersent.cs.a(goal -> true);
-        nmsEndersent.ct.a(goal -> true);
+        EnderMan nmsEndersent = (EnderMan) craftMob.getHandle();
+        nmsEndersent.goalSelector.removeAllGoals(goal -> true);
+        nmsEndersent.targetSelector.removeAllGoals(goal -> true);
 
-        nmsEndersent.cs.a(1, new PathfinderGoalMeleeAttack(nmsEndersent, 1.0D, false));
-        nmsEndersent.cs.a(7, new PathfinderGoalRandomStrollLand(nmsEndersent, 1.0D));
-        nmsEndersent.cs.a(8, new PathfinderGoalLookAtPlayer(nmsEndersent, EntityHuman.class, 8.0F));
+        nmsEndersent.goalSelector.addGoal(1, new MeleeAttackGoal(nmsEndersent, 1.0D, false));
+        nmsEndersent.goalSelector.addGoal(7, new RandomStrollGoal(nmsEndersent, 1.0D));
+        nmsEndersent.goalSelector.addGoal(8, new LookAtPlayerGoal(nmsEndersent, net.minecraft.world.entity.player.Player.class, 8.0F));
 
-        nmsEndersent.ct.a(2, new PathfinderGoalNearestAttackableTarget<>(nmsEndersent, EntityHuman.class, true));
+        nmsEndersent.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(nmsEndersent, net.minecraft.world.entity.player.Player.class, true));
 
         return spawnedEntity;
     }

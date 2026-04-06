@@ -20,6 +20,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 
 public final class BlightedPlayer {
+
     private static final Map<UUID, BlightedPlayer> players = new HashMap<>();
 
     private static final double DEFAULT_MAX_MANA = 20;

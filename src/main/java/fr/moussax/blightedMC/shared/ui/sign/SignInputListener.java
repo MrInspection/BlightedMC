@@ -4,11 +4,12 @@ import fr.moussax.blightedMC.utils.debug.Log;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.protocol.game.PacketPlayInUpdateSign;
-import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_21_R7.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,14 +22,14 @@ import java.util.NoSuchElementException;
 
 public final class SignInputListener implements Listener {
     private static final String HANDLER_NAME = "blighted_sign_input";
-    private static final Field NETWORK_MANAGER_FIELD;
+    private static final Field NETWORK_CONNECTION_FIELD;
 
     static {
         try {
-            NETWORK_MANAGER_FIELD = Class.forName("net.minecraft.server.network.ServerCommonPacketListenerImpl").getDeclaredField("e");
-            NETWORK_MANAGER_FIELD.setAccessible(true);
+            NETWORK_CONNECTION_FIELD = ServerCommonPacketListenerImpl.class.getDeclaredField("connection");
+            NETWORK_CONNECTION_FIELD.setAccessible(true);
         } catch (Exception e) {
-            throw new RuntimeException("SIGN: Could not find NetworkManager field 'e'", e);
+            throw new RuntimeException("Failed to locate NMS connection field via reflection", e);
         }
     }
 
@@ -50,16 +51,14 @@ public final class SignInputListener implements Listener {
     public void inject(Player player) {
         try {
             ChannelPipeline pipeline = getPipeline(player);
-
-            if (pipeline == null) return;
-            if (pipeline.get(HANDLER_NAME) != null) return;
+            if (pipeline == null || pipeline.get(HANDLER_NAME) != null) return;
 
             pipeline.addBefore("packet_handler", HANDLER_NAME, new ChannelDuplexHandler() {
                 @Override
                 public void channelRead(ChannelHandlerContext ctx, Object packet) throws Exception {
-                    if (packet instanceof PacketPlayInUpdateSign signPacket) {
+                    if (packet instanceof ServerboundSignUpdatePacket signPacket) {
                         if (SignInputManager.hasActiveSession(player.getUniqueId())) {
-                            SignInputManager.handleSignUpdate(player, signPacket.f());
+                            SignInputManager.handleSignUpdate(player, signPacket.getLines());
                             return;
                         }
                     }
@@ -85,9 +84,9 @@ public final class SignInputListener implements Listener {
 
     private ChannelPipeline getPipeline(Player player) {
         try {
-            EntityPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
-            NetworkManager networkManager = (NetworkManager) NETWORK_MANAGER_FIELD.get(nmsPlayer.g);
-            return networkManager.k.pipeline();
+            ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
+            Connection connection = (Connection) NETWORK_CONNECTION_FIELD.get(nmsPlayer.connection);
+            return connection.channel.pipeline();
         } catch (Exception e) {
             return null;
         }

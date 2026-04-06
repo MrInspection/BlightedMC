@@ -4,18 +4,17 @@ import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.utils.Utilities;
-import net.minecraft.world.entity.ai.goal.PathfinderGoalLookAtPlayer;
-import net.minecraft.world.entity.ai.goal.PathfinderGoalMeleeAttack;
-import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomStrollLand;
-import net.minecraft.world.entity.ai.goal.target.PathfinderGoalNearestAttackableTarget;
-import net.minecraft.world.entity.monster.EntityEnderman;
-import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.EnderMan;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.v1_21_R7.entity.CraftMob;
+import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
@@ -119,16 +118,16 @@ public class Watchling extends SpawnableEntity {
         LivingEntity spawnedEntity = super.spawn(location);
         if (!(spawnedEntity instanceof CraftMob craftMob)) return spawnedEntity;
 
-        EntityEnderman nmsWatchling = (EntityEnderman) craftMob.getHandle();
+        EnderMan nmsWatchling = (EnderMan) craftMob.getHandle();
 
-        nmsWatchling.cs.a(goal -> true);
-        nmsWatchling.ct.a(goal -> true);
+        nmsWatchling.goalSelector.removeAllGoals(goal -> true);
+        nmsWatchling.targetSelector.removeAllGoals(goal -> true);
 
-        nmsWatchling.cs.a(1, new PathfinderGoalMeleeAttack(nmsWatchling, 1.2D, false));
-        nmsWatchling.cs.a(7, new PathfinderGoalRandomStrollLand(nmsWatchling, 1.0D));
-        nmsWatchling.cs.a(8, new PathfinderGoalLookAtPlayer(nmsWatchling, EntityHuman.class, 8.0F));
+        nmsWatchling.goalSelector.addGoal(1, new MeleeAttackGoal(nmsWatchling, 1.0D, false));
+        nmsWatchling.goalSelector.addGoal(7, new RandomStrollGoal(nmsWatchling, 1.0D));
+        nmsWatchling.goalSelector.addGoal(8, new LookAtPlayerGoal(nmsWatchling, net.minecraft.world.entity.player.Player.class, 8.0F));
 
-        nmsWatchling.ct.a(2, new PathfinderGoalNearestAttackableTarget<>(nmsWatchling, EntityHuman.class, true));
+        nmsWatchling.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(nmsWatchling, net.minecraft.world.entity.player.Player.class, true));
 
         return spawnedEntity;
     }
