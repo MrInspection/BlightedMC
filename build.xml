@@ -8,4 +8,3 @@
         basedir="./target/classes/" includes="**/*"/>
   </target>
 </project>
-

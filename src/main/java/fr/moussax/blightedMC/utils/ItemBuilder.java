@@ -755,7 +755,7 @@ public class ItemBuilder {
     private void applyBannerPatterns() {
         if (bannerPatterns != null && itemMeta instanceof BannerMeta bannerMeta) {
             bannerMeta.setPatterns(bannerPatterns);
-            item.setItemMeta(bannerMeta);
+            this.itemMeta = bannerMeta;
         }
     }
 
