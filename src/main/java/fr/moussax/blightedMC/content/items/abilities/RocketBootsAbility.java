@@ -26,7 +26,6 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
     public void startAbilityEffect() {
         if (player == null) return;
         Player p = player.getPlayer();
-        if (p == null) return;
         p.setAllowFlight(true);
     }
 
@@ -34,7 +33,6 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
     public void stopAbilityEffect() {
         if (player == null) return;
         Player p = player.getPlayer();
-        if (p == null) return;
 
         if (p.getGameMode() != GameMode.CREATIVE && p.getGameMode() != GameMode.SPECTATOR) {
             p.setAllowFlight(false);
@@ -83,14 +81,16 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
 
     @EventHandler
     public void onPlayerLand(PlayerMoveEvent event) {
-        Player p = event.getPlayer();
+        Player landedPlayer = event.getPlayer();
 
-        if (!isAbilityOwner(p)) return;
-        if (p.getAllowFlight()) return;
+        if (!isAbilityOwner(landedPlayer)) return;
+        if (landedPlayer.getAllowFlight()) return;
+        if (!((Entity) landedPlayer).isOnGround()) return;
 
-        if (((Entity) p).isOnGround()) {
-            p.setAllowFlight(true);
-        }
+        assert event.getTo() != null;
+        if (event.getFrom().getBlockY() == event.getTo().getBlockY()) return; // no vertical change
+
+        landedPlayer.setAllowFlight(true);
     }
 
     private void applyDurabilityDamageToBoots(Player player) {
