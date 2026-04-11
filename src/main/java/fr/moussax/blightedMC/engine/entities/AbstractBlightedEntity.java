@@ -87,7 +87,7 @@ public abstract class AbstractBlightedEntity implements Cloneable {
      */
     public static final String FAST_PASS_TAG = "blighted_opt";
     private static final double BOSS_BAR_RANGE = 60.0;
-
+    public Set<EntityAttachment> attachments = new CopyOnWriteArraySet<>();
     @Getter
     protected String entityId;
     @Getter
@@ -96,7 +96,6 @@ public abstract class AbstractBlightedEntity implements Cloneable {
     protected EntityType entityType;
     @Getter
     protected LivingEntity entity;
-
     @Getter
     protected int maxHealth;
     @Getter
@@ -107,26 +106,17 @@ public abstract class AbstractBlightedEntity implements Cloneable {
     @Setter
     @Getter
     protected int droppedExp = 0;
-    @Getter
-    @Setter
-    protected boolean persistent = false;
-
     protected ItemStack itemInMainHand;
     protected ItemStack itemInOffHand;
     protected ItemStack[] armor;
-
     @Setter
     protected LootTable lootTable;
     @Setter
     protected BlightedType blightedType = BlightedType.DEFAULT;
-
     protected BossBar bossBar;
     protected BarColor bossBarColor = BarColor.RED;
     protected BarStyle bossBarStyle = BarStyle.SOLID;
-
     protected Map<Attribute, Double> attributes = new HashMap<>();
-    public Set<EntityAttachment> attachments = new CopyOnWriteArraySet<>();
-
     private LifecycleTaskManager lifecycleTasks = new LifecycleTaskManager();
     private List<EntityImmunity> immunities = Collections.emptyList();
     private boolean runtimeInitialized = false;
@@ -196,7 +186,7 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         attributes.forEach(this::setAttribute);
         entity.setHealth(maxHealth);
         entity.setRemoveWhenFarAway(false);
-        entity.setPersistent(persistent);
+        entity.setPersistent(true);
     }
 
     private void configureEquipment() {

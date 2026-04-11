@@ -2,12 +2,6 @@ package fr.moussax.blightedMC.engine.items;
 
 import lombok.Getter;
 
-/**
- * Represents the rarity levels of custom items in BlightedMC.
- * <p>
- * Each rarity defines a formatted display name and a color prefix
- * used for item naming and visual distinction.
- */
 @Getter
 public enum ItemRarity {
     COMMON("§f§lCOMMON", "§f"),

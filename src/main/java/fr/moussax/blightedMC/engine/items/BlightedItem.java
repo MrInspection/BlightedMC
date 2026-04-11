@@ -22,14 +22,7 @@ import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a customizable item template in BlightedMC.
- * <p>
- * This class extends {@link ItemBuilder} to define items with specific identifiers, rarity,
- * type, abilities, interaction rules, and optional full set bonuses.
- * It handles persistent metadata storage and ability execution logic.
- */
-public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
+public final class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
     public static final NamespacedKey BLIGHTED_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_id");
     public static final NamespacedKey BLIGHTED_RARITY_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_rarity");
 
@@ -46,14 +39,6 @@ public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemRule> rules = new ArrayList<>();
 
-    /**
-     * Creates a new item template with the given parameters.
-     *
-     * @param itemId   the unique item identifier
-     * @param type     the item type
-     * @param rarity   the item rarity
-     * @param material the base material
-     */
     public BlightedItem(@NonNull String itemId, @NonNull ItemType type, @NonNull ItemRarity rarity, @NonNull Material material) {
         super(material);
         this.itemId = itemId;
@@ -61,14 +46,6 @@ public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
         this.itemRarity = rarity;
     }
 
-    /**
-     * Creates a new item template from an existing {@link ItemStack}.
-     *
-     * @param itemId    the unique item identifier
-     * @param type      the item type
-     * @param rarity    the item rarity
-     * @param itemStack the source item stack
-     */
     public BlightedItem(@NonNull String itemId, @NonNull ItemType type, @NonNull ItemRarity rarity, @NonNull ItemStack itemStack) {
         super(itemStack);
         this.itemId = itemId;
@@ -76,20 +53,10 @@ public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
         this.itemRarity = rarity;
     }
 
-    /**
-     * Adds an ability to this item.
-     *
-     * @param ability the ability to add
-     */
     public void addAbility(Ability ability) {
         abilities.add(ability);
     }
 
-    /**
-     * Adds a rule governing how the item can be used or placed.
-     *
-     * @param rule the rule to add
-     */
     public void addRule(ItemRule rule) {
         rules.add(rule);
     }
@@ -100,22 +67,12 @@ public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
         return this;
     }
 
-    /**
-     * Marks this item as unstackable.
-     *
-     * @return this instance for chaining
-     */
+    @SuppressWarnings("UnusedReturnValue")
     public BlightedItem isUnstackable() {
         super.setUnstackable(true);
         return this;
     }
 
-    /**
-     * Builds an {@link BlightedItem} from an existing {@link ItemStack}.
-     *
-     * @param itemStack the item stack
-     * @return the corresponding item template or {@code null} if not registered
-     */
     public static BlightedItem fromItemStack(@NonNull ItemStack itemStack) {
         if (itemStack.getType().isAir()) return null;
 
@@ -129,12 +86,6 @@ public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
         return ItemRegistry.getItem(itemId);
     }
 
-    /**
-     * Triggers all abilities of this item that match the provided event.
-     *
-     * @param blightedPlayer the player using the item
-     * @param event          the event triggering abilities
-     */
     public void triggerAbilities(BlightedPlayer blightedPlayer, Event event) {
         for (Ability ability : abilities) {
             if (ability.type().matches(event)) {
@@ -167,11 +118,6 @@ public class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
         return false;
     }
 
-    /**
-     * Converts this item template to a Bukkit {@link ItemStack} with persistent metadata.
-     *
-     * @return the generated item stack
-     */
     @Override
     public ItemStack toItemStack() {
         this.setItemMeta(itemMeta -> {

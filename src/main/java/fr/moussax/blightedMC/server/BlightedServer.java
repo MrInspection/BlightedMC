@@ -68,7 +68,7 @@ public final class BlightedServer {
 
                 if (!iterator.hasNext()) {
                     long duration = System.currentTimeMillis() - startTime;
-                    Log.info("Entity System", "Rehydration complete: " + processedCount + " chunks processed in " + duration + "ms (Async-like feel).");
+                    Log.info("Entity System", "Rehydration complete: " + processedCount + " chunks processed in " + duration + "ms.");
                     this.cancel();
                 }
             }

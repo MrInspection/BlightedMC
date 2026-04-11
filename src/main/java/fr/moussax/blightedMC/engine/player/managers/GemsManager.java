@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class GemsManager {
+public final class GemsManager {
     private int gems = 0;
 
     public void addGems(int value) {

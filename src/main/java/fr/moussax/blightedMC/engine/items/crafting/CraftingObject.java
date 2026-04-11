@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
  * Represents an ingredient used in a crafting recipe, which can be either
  * a custom item managed by {@link BlightedItem} or a vanilla {@link Material}.
  */
-public class CraftingObject {
+public final class CraftingObject {
 
     @Getter
     private final BlightedItem manager;

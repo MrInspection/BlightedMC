@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 
-public class MaceImmunity implements EntityImmunity {
+public final class MaceImmunity implements EntityImmunity {
     @Override
     public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
         if (!(event instanceof EntityDamageByEntityEvent damageByEntity)) return false;

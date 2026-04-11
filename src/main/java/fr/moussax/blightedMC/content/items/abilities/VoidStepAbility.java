@@ -28,7 +28,6 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
         Location targetLocation = getTargetedEyeLocation(blightedPlayer);
 
         if (targetLocation == null) {
-            // FIX: Add feedback so you know why it didn't work
             blightedPlayer.getPlayer().sendMessage("§cObstructed destination!");
             return false;
         }
@@ -122,8 +121,6 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
         if (head.getType().isSolid()) return false;
 
         // 2. Ground check (Only if required)
-        if (requireGround && !below.getType().isSolid()) return false;
-
-        return true;
+        return !requireGround || below.getType().isSolid();
     }
 }

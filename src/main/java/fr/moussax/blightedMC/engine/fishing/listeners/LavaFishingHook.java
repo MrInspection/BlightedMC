@@ -19,7 +19,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class LavaFishingHook {
+public final class LavaFishingHook {
     private static final Map<UUID, LavaFishingHook> ACTIVE_HOOKS = new HashMap<>();
 
     private static final double FLOAT_TARGET_HIGH = 0.85;

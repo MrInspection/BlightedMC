@@ -22,12 +22,6 @@ public abstract class BlightedBlock {
     protected final Material material;
     protected final BlightedItem blightedItem;
 
-    /**
-     * Constructs a new BlightedBlock with the given material and associated custom item.
-     *
-     * @param material     the block material
-     * @param blightedItem the custom item representing this block
-     */
     public BlightedBlock(@NonNull Material material, @NonNull BlightedItem blightedItem) {
         this.material = material;
         this.blightedItem = blightedItem;
@@ -50,7 +44,6 @@ public abstract class BlightedBlock {
      * @param event the block placement event
      */
     public void onPlace(BlockPlaceEvent event) {
-        // Override to add placement logic
     }
 
     /**
@@ -61,7 +54,6 @@ public abstract class BlightedBlock {
      * @param event the player interaction event
      */
     public void onInteract(PlayerInteractEvent event) {
-        // Override to add interaction logic
     }
 
     /**

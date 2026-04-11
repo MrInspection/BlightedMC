@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class RitualsDirectoryMenu extends PaginatedMenu {
+public final class RitualsDirectoryMenu extends PaginatedMenu {
 
     private static final int[] RECIPE_SLOTS = {
         10, 11, 12, 13, 14, 15, 16,

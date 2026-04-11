@@ -19,17 +19,6 @@ import java.util.List;
 
 import static com.google.common.base.Strings.repeat;
 
-/**
- * Unified utility class for text formatting, number formatting, and player messaging.
- *
- * <p>Provides methods for:
- * <ul>
- *   <li>String formatting (capitalization, enum names, time)</li>
- *   <li>Number formatting (decimals, compact notation, Roman numerals)</li>
- *   <li>Player messaging (info, warnings, admin checks)</li>
- *   <li>Interactive chat components (clickable, hoverable text)</li>
- * </ul>
- */
 public final class Formatter {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###");
     private static final String INFO_PREFIX = "§8 ■ §7";

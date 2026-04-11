@@ -17,7 +17,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import static fr.moussax.blightedMC.engine.items.BlightedItem.BLIGHTED_ID_KEY;
 
-public class ItemRuleListener implements Listener {
+public final class ItemRuleListener implements Listener {
 
     private BlightedItem getManager(ItemStack stack) {
         if (stack == null || !stack.hasItemMeta()) return null;

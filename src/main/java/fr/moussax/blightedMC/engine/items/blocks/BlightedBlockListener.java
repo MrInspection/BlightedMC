@@ -23,7 +23,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
-public class BlightedBlockListener implements Listener {
+public final class BlightedBlockListener implements Listener {
     private final BlightedMC plugin = BlightedMC.getInstance();
     private final NamespacedKey BLOCK_ID_KEY = new NamespacedKey(plugin, "blighted_block_id");
     private final PluginDatabase database;

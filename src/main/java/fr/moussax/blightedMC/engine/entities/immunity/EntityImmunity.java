@@ -25,9 +25,6 @@ public interface EntityImmunity {
      */
     boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event);
 
-    /**
-     * @return The message sent to the player when this immunity blocks damage.
-     */
     default String getImmunityMessage() {
         return "§4 ■ §cThis creature is immune to this type of damage!";
     }

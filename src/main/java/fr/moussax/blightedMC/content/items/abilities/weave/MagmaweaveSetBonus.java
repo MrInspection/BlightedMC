@@ -17,8 +17,6 @@ public final class MagmaweaveSetBonus extends EmberWeaveSetBonus {
         if (isActive) return;
 
         Player player = blightedPlayer.getPlayer();
-        if (player == null) return;
-
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_AMBIENT, 2.0f, 0.5f);
 
         this.isActive = true;

@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class RitualAltarMenu extends Menu {
+public final class RitualAltarMenu extends Menu {
     private static final int[] GRID_SLOTS = {19, 20, 21, 28, 29, 30};
     private static final int[] REQUIRED_ITEM_INDICATOR_SLOTS = {10, 11, 12, 13};
     private static final int[] INVOKED_MOB_INDICATOR_SLOTS = {15, 16};

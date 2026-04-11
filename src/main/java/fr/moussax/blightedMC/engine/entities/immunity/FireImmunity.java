@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.engine.entities.immunity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
 
-public class FireImmunity implements EntityImmunity {
+public final class FireImmunity implements EntityImmunity {
     @Override
     public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
         return event.getCause() == EntityDamageEvent.DamageCause.FIRE ||

@@ -75,9 +75,7 @@ public interface FullSetBonus {
      */
     default boolean isAbilityOwner(Player eventPlayer) {
         BlightedPlayer owner = getAbilityOwner();
-        return owner != null
-            && owner.getPlayer() != null
-            && eventPlayer.getUniqueId().equals(owner.getPlayer().getUniqueId());
+        return owner != null && eventPlayer.getUniqueId().equals(owner.getPlayer().getUniqueId());
     }
 
     /** @return owning player of this bonus */

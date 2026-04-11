@@ -27,7 +27,7 @@ import org.bukkit.util.Vector;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class FishingListener implements Listener {
+public final class FishingListener implements Listener {
     private static final double CUSTOM_LOOT_CHANCE = BlightedMC.getInstance().getSettings().getCustomLootChance();
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

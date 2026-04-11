@@ -15,7 +15,6 @@ public class HomodeusFlightAbility implements FullSetBonus {
         if (isActive) return;
 
         Player bukkitPlayer = player.getPlayer();
-        if (bukkitPlayer == null) return;
 
         if (bukkitPlayer.getGameMode() == GameMode.SURVIVAL) {
             bukkitPlayer.setAllowFlight(true);
@@ -32,7 +31,6 @@ public class HomodeusFlightAbility implements FullSetBonus {
         if (!isActive) return;
 
         Player bukkitPlayer = player.getPlayer();
-        if (bukkitPlayer == null) return;
 
         bukkitPlayer.setAllowFlight(false);
         bukkitPlayer.setFlying(false);
