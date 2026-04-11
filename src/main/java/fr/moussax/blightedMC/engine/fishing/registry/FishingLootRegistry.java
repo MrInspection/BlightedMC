@@ -1,21 +1,23 @@
 package fr.moussax.blightedMC.engine.fishing.registry;
 
-import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
-import fr.moussax.blightedMC.engine.fishing.FishingMethod;
 import fr.moussax.blightedMC.content.fishing.EndFishing;
 import fr.moussax.blightedMC.content.fishing.NetherFishing;
 import fr.moussax.blightedMC.content.fishing.OverworldFishing;
 import fr.moussax.blightedMC.content.fishing.OverworldLavaFishing;
+import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
+import fr.moussax.blightedMC.engine.fishing.FishingMethod;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.World;
 
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class FishingLootRegistry {
 
     private static final Map<World.Environment, Map<FishingMethod, FishingLootProvider>> REGISTRY = new EnumMap<>(World.Environment.class);
+    private static final Map<String, FishingLootTable> TABLE_CACHE = new HashMap<>();
     private static final FishingLootTable EMPTY_TABLE = FishingLootTable.builder().build();
 
     private static final List<FishingLootProvider> PROVIDERS = List.of(
@@ -61,7 +63,10 @@ public class FishingLootRegistry {
         if (envMap == null) return EMPTY_TABLE;
 
         FishingLootProvider provider = envMap.get(method);
-        return provider != null ? provider.provide() : EMPTY_TABLE;
+        if (provider == null) return EMPTY_TABLE;
+
+        String cacheKey = environment.name() + ":" + method.name();
+        return TABLE_CACHE.computeIfAbsent(cacheKey, k -> provider.provide());
     }
 
     /**
@@ -71,6 +76,7 @@ public class FishingLootRegistry {
      */
     public static void clear() {
         REGISTRY.clear();
+        TABLE_CACHE.clear();
     }
 
     /**
