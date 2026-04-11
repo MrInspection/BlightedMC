@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.content.entities.powerful;
 
 import fr.moussax.blightedMC.content.entities.Watchling;
+import fr.moussax.blightedMC.content.utils.ai.EndermanAI;
 import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.engine.entities.BlightedType;
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
@@ -9,15 +10,9 @@ import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.Utilities;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.monster.EnderMan;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -196,16 +191,7 @@ public class Endersent extends SpawnableEntity {
 
     @Override
     protected void onConfigureAI(LivingEntity spawned) {
-        if (!(spawned instanceof CraftMob craftMob)) return;
-        EnderMan nms = (EnderMan) craftMob.getHandle();
-
-        nms.goalSelector.removeAllGoals(goal -> true);
-        nms.targetSelector.removeAllGoals(goal -> true);
-
-        nms.goalSelector.addGoal(1, new MeleeAttackGoal(nms, 1.0D, false));
-        nms.goalSelector.addGoal(7, new RandomStrollGoal(nms, 1.0D));
-        nms.goalSelector.addGoal(8, new LookAtPlayerGoal(nms, net.minecraft.world.entity.player.Player.class, 8.0F));
-        nms.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(nms, net.minecraft.world.entity.player.Player.class, true));
+        EndermanAI.init(spawned);
     }
 
     @Override
