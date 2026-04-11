@@ -34,7 +34,7 @@ public final class SignInputMenu {
 
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
 
-        nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.OAK_SIGN.defaultBlockState()));
+        nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.PALE_OAK_SIGN.defaultBlockState()));
 
         CompoundTag nbt = new CompoundTag();
         nbt.putString("id", "minecraft:sign");
@@ -53,11 +53,11 @@ public final class SignInputMenu {
         frontText.put("messages", messages);
         nbt.put("front_text", frontText);
 
-        nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.OAK_SIGN.defaultBlockState()));
+        nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.PALE_OAK_SIGN.defaultBlockState()));
 
         Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> {
             if (!player.isOnline()) return;
-            nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.OAK_SIGN.defaultBlockState()));
+            nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.PALE_OAK_SIGN.defaultBlockState()));
             nmsPlayer.connection.send(new ClientboundOpenSignEditorPacket(blockPosition, frontSide));
             SignInputManager.register(player.getUniqueId(), this, blockPosition);
         }, 1L);
