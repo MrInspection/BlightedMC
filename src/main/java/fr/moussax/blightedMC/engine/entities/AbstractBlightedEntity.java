@@ -161,6 +161,7 @@ public abstract class AbstractBlightedEntity implements Cloneable {
 
         configureAttributes();
         configureEquipment();
+        onConfigureAI(entity);
         if (blightedType == BlightedType.BOSS) createBossBar();
 
         BlightedEntitiesListener.registerEntity(entity, this);
@@ -178,8 +179,11 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         if (!entity.getScoreboardTags().contains(FAST_PASS_TAG)) {
             entity.addScoreboardTag(FAST_PASS_TAG);
         }
+
         initImmunityRules();
         configureAttributes();
+        onConfigureAI(existing);
+
         if (blightedType == BlightedType.BOSS) createBossBar();
         BlightedEntitiesListener.registerEntity(existing, this);
         initRuntime();
@@ -223,6 +227,24 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         onDefineBehavior();
         if (bossBar != null) startBossBarTask();
         lifecycleTasks.scheduleAll();
+    }
+
+    /**
+     * Called after spawn and chunk reload.
+     * Override to modify or replace NMS AI goals.
+     * The entity is fully initialized.
+     *
+     * <pre>{@code
+     * @Override
+     * protected void onConfigureAI(LivingEntity spawned) {
+     *     if (!(spawned instanceof CraftMob craftMob)) return;
+     *     EnderMan nms = (EnderMan) craftMob.getHandle();
+     *     nms.goalSelector.removeAllGoals(goal -> true);
+     *     nms.goalSelector.addGoal(1, new MeleeAttackGoal(nms, 1.0D, false));
+     * }
+     * }</pre>
+     */
+    protected void onConfigureAI(LivingEntity spawned) {
     }
 
     /**

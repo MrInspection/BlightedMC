@@ -28,14 +28,15 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity.ENTITY_ID_KEY;
 import static fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity.FAST_PASS_TAG;
 
 public final class BlightedEntitiesListener implements Listener {
 
-    private static final Map<UUID, AbstractBlightedEntity> BLIGHTED_ENTITIES = new HashMap<>();
-    private static final Map<UUID, AbstractBlightedEntity> ATTACHMENT_OWNERS = new HashMap<>();
+    private static final Map<UUID, AbstractBlightedEntity> BLIGHTED_ENTITIES = new ConcurrentHashMap<>();
+    private static final Map<UUID, AbstractBlightedEntity> ATTACHMENT_OWNERS = new ConcurrentHashMap<>();
     private final ThreadLocal<Set<UUID>> processingDamageIds = ThreadLocal.withInitial(HashSet::new);
 
     public static void registerEntity(LivingEntity entity, AbstractBlightedEntity blighted) {

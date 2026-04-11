@@ -85,6 +85,7 @@ public final class LifecycleTaskManager {
     private void onTaskComplete(ScheduledTask task) {
         if (tasks == null) return;
         tasks.remove(task);
+        task.current = null;
     }
 
     /**
