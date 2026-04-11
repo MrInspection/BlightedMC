@@ -16,11 +16,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @EntityImmunities(EntityImmunities.ImmunityType.PROJECTILE)
 public class TheAncientKnight extends AbstractBlightedEntity {
 
-    private final List<StabPlayer> activeStabs = new ArrayList<>();
+    private final List<StabPlayer> activeStabs = new CopyOnWriteArrayList<>();
 
     public TheAncientKnight() {
         super("The Ancient Knight", 250, 30, EntityType.ZOMBIE);

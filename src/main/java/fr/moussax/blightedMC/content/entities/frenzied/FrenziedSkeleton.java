@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.content.entities.ravenous;
+package fr.moussax.blightedMC.content.entities.frenzied;
 
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
@@ -16,9 +16,9 @@ import java.util.Objects;
 
 import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class RavenousSkeleton extends RavenousCreature {
-    public RavenousSkeleton() {
-        super("RAVENOUS_SKELETON", "Ravenous Skeleton", EntityType.SKELETON);
+public final class FrenziedSkeleton extends FrenziedSkirmisher {
+    public FrenziedSkeleton() {
+        super("FRENZIED_SKELETON", "Frenzied Skeleton", EntityType.SKELETON);
         itemInMainHand = new ItemStack(Material.BOW);
         setDamage(6);
         setDroppedExp(12);

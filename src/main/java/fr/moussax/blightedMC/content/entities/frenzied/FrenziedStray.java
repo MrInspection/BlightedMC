@@ -1,44 +1,53 @@
-package fr.moussax.blightedMC.content.entities.ravenous;
+package fr.moussax.blightedMC.content.entities.frenzied;
 
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 import java.util.Objects;
 
 import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class RavenousDrowned extends RavenousCreature {
-    public RavenousDrowned() {
-        super("RAVENOUS_DROWNED", "Ravenous Drowned", EntityType.DROWNED);
+public final class FrenziedStray extends FrenziedSkirmisher {
+    public FrenziedStray() {
+        super("FRENZIED_STRAY", "Frenzied Stray", EntityType.STRAY);
+        itemInMainHand = new ItemStack(Material.BOW);
+        setDamage(6);
+        setDroppedExp(12);
         setLootTable(new EntityLootTableBuilder()
-            .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, COMMON)
-            .addLoot(Material.COPPER_INGOT, 1, 3, 0.4, UNCOMMON)
-            .addLoot(Material.NAUTILUS_SHELL, 1, 1, 0.08, RARE)
-            .addLootWithDurabilityRange(Material.TRIDENT, 0.05, 0.80, 0.02, VERY_RARE)
+            .setMaxDrop(4)
+            .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
+            .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
+            .addLoot(
+                Material.TIPPED_ARROW, b -> b.setItemMeta(
+                    meta -> ((PotionMeta) meta).setBasePotionType(PotionType.SLOWNESS)
+                ),
+                1,
+                3,
+                0.4,
+                UNCOMMON
+            )
             .addGemsLoot(5, 0.04, VERY_RARE)
             .build()
         );
-        setDamage(6);
-        setDroppedExp(12);
-        itemInMainHand = new ItemStack(Material.TRIDENT);
-        addAttribute(Attribute.WATER_MOVEMENT_EFFICIENCY, 2);
     }
 
     @Override
     protected void onEnrage(LivingEntity entity) {
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PotionEffect.INFINITE_DURATION, 1));
         entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 0));
         Objects.requireNonNull(entity.getEquipment()).setItemInMainHand(
-            new ItemBuilder(Material.TRIDENT).addEnchantment(Enchantment.IMPALING, 2).toItemStack()
+            new ItemBuilder(Material.BOW).addEnchantment(Enchantment.POWER, 2).toItemStack()
         );
     }
 
@@ -46,22 +55,19 @@ public final class RavenousDrowned extends RavenousCreature {
     protected void defineSpawnConditions() {
         addCondition(
             SpawnRules.biome(
-                    Biome.RIVER,
-                    Biome.FROZEN_RIVER,
-                    Biome.OCEAN,
-                    Biome.COLD_OCEAN,
+                    Biome.SNOWY_PLAINS,
+                    Biome.ICE_SPIKES,
                     Biome.FROZEN_OCEAN,
-                    Biome.LUKEWARM_OCEAN,
-                    Biome.WARM_OCEAN,
-                    Biome.DEEP_OCEAN,
-                    Biome.DEEP_COLD_OCEAN,
                     Biome.DEEP_FROZEN_OCEAN,
-                    Biome.DEEP_LUKEWARM_OCEAN,
-                    Biome.DRIPSTONE_CAVES
+                    Biome.FROZEN_RIVER,
+                    Biome.SNOWY_SLOPES,
+                    Biome.JAGGED_PEAKS,
+                    Biome.FROZEN_PEAKS
                 )
                 .and(SpawnRules.maxBlockLight(0))
                 .and(SpawnRules.maxLightLevel(7))
-                .and(SpawnRules.notInLiquid().negate())
+                .and(SpawnRules.skyExposed())
+                .and(SpawnRules.notInLiquid())
         );
     }
 }

@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.content.entities.ravenous;
+package fr.moussax.blightedMC.content.entities.frenzied;
 
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -16,23 +16,44 @@ import org.bukkit.inventory.meta.trim.TrimPattern;
 
 import java.util.Objects;
 
-public sealed abstract class RavenousCreature extends SpawnableEntity
-    permits RavenousBogged, RavenousDrowned, RavenousHusk, RavenousParched, RavenousPiglin,
-    RavenousSkeleton, RavenousStray, RavenousWitherSkeleton, RavenousZombie, RavenousZombifiedPiglin {
+public sealed abstract class FrenziedCreature extends SpawnableEntity
+    permits FrenziedDrowned, FrenziedMeleeBruiser, FrenziedSkirmisher, FrenziedAmbusher {
 
-    private static final double ENRAGE_THRESHOLD = 0.50;
+    private static final double ENRAGE_HEALTH_THRESHOLD = 0.50;
 
-    protected boolean isEnraged;
+    protected boolean isEnraged = false;
     private int particleTicks = 0;
 
-    protected RavenousCreature(String entityId, String name, EntityType entityType) {
+    protected FrenziedCreature(String entityId, String name, EntityType entityType) {
         super(entityId, name, 30, entityType, 0.05);
         setupDefaultArmor();
     }
 
     @Override
-    protected void onDefineBehavior() {
+    protected final void onDefineBehavior() {
         addAbility(1L, 1L, this::tickEnrage);
+        onDefineCombatBehavior();
+    }
+
+    /**
+     * Override to register pre- and post-enrage combat abilities.
+     * Called after the base enrage ticker is registered.
+     */
+    protected void onDefineCombatBehavior() {
+    }
+
+    /**
+     * Called when the mob crosses the enrage health threshold.
+     * Override to apply enrage-specific effects (potions, equipment swaps, etc.)
+     */
+    protected abstract void onEnrage(LivingEntity entity);
+
+    /**
+     * Called every tick after enraged triggers.
+     * Override to register enrage-specific repeating behaviors.
+     * Default is a no-op.
+     */
+    protected void onEnrageBehavior() {
     }
 
     private void setupDefaultArmor() {
@@ -47,20 +68,21 @@ public sealed abstract class RavenousCreature extends SpawnableEntity
     private void tickEnrage() {
         if (!isEnraged) {
             checkHealthAndEnrage();
-        } else if (++particleTicks >= 5) {
+            return;
+        }
+
+        if (++particleTicks >= 5) {
             playEnrageParticles();
             particleTicks = 0;
         }
     }
-
-    protected abstract void onEnrage(LivingEntity entity);
 
     private void checkHealthAndEnrage() {
         double maxHealth = Objects.requireNonNull(
             entity.getAttribute(Attribute.MAX_HEALTH)
         ).getValue();
 
-        if (entity.getHealth() / maxHealth <= ENRAGE_THRESHOLD) {
+        if (entity.getHealth() / maxHealth <= ENRAGE_HEALTH_THRESHOLD) {
             triggerEnrage();
         }
     }
@@ -70,6 +92,7 @@ public sealed abstract class RavenousCreature extends SpawnableEntity
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.5f);
         equipEnragedArmor(entity.getEquipment());
         onEnrage(entity);
+        onEnrageBehavior();
     }
 
     private void equipEnragedArmor(EntityEquipment equipment) {
@@ -105,8 +128,8 @@ public sealed abstract class RavenousCreature extends SpawnableEntity
     }
 
     @Override
-    public RavenousCreature clone() {
-        RavenousCreature clone = (RavenousCreature) super.clone();
+    public FrenziedCreature clone() {
+        FrenziedCreature clone = (FrenziedCreature) super.clone();
         clone.isEnraged = false;
         clone.particleTicks = 0;
         return clone;

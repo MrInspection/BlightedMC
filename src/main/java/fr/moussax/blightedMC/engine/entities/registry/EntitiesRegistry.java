@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.engine.entities.registry;
 
 import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.content.entities.ravenous.*;
+import fr.moussax.blightedMC.content.entities.frenzied.*;
 import fr.moussax.blightedMC.content.entities.bosses.TheAncientKnight;
 import fr.moussax.blightedMC.content.entities.Illusioner;
 import fr.moussax.blightedMC.content.entities.Watchling;
@@ -28,16 +28,16 @@ public final class EntitiesRegistry {
 
     private static final List<AbstractBlightedEntity> DEFAULT_ENTITIES = List.of(
         new TheAncientKnight(),
-        new RavenousBogged(),
-        new RavenousDrowned(),
-        new RavenousHusk(),
-        new RavenousParched(),
-        new RavenousPiglin(),
-        new RavenousSkeleton(),
-        new RavenousStray(),
-        new RavenousWitherSkeleton(),
-        new RavenousZombie(),
-        new RavenousZombifiedPiglin(),
+        new FrenziedBogged(),
+        new FrenziedDrowned(),
+        new FrenziedHusk(),
+        new FrenziedParched(),
+        new FrenziedPiglin(),
+        new FrenziedSkeleton(),
+        new FrenziedStray(),
+        new FrenziedWitherSkeleton(),
+        new FrenziedZombie(),
+        new FrenziedZombifiedPiglin(),
         new Endersent(),
         new Watchling(),
         new Illusioner()

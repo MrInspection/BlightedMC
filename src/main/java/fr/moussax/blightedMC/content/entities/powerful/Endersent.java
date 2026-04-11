@@ -1,9 +1,11 @@
 package fr.moussax.blightedMC.content.entities.powerful;
 
 import fr.moussax.blightedMC.content.entities.Watchling;
+import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
 import fr.moussax.blightedMC.engine.entities.BlightedType;
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -158,7 +160,9 @@ public class Endersent extends SpawnableEntity {
 
         int count = 3 + new Random().nextInt(4);
         for (int i = 0; i < count; i++) {
-            LivingEntity wEntity = new Watchling().spawn(
+            AbstractBlightedEntity prototype = EntitiesRegistry.get("WATCHLING");
+            if (prototype == null) continue;
+            LivingEntity wEntity = prototype.spawn(
                 loc.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
             );
             watchlings.add(wEntity);
@@ -191,21 +195,17 @@ public class Endersent extends SpawnableEntity {
     }
 
     @Override
-    public LivingEntity spawn(Location location) {
-        LivingEntity spawnedEntity = super.spawn(location);
-        if (!(spawnedEntity instanceof CraftMob craftMob)) return spawnedEntity;
+    protected void onConfigureAI(LivingEntity spawned) {
+        if (!(spawned instanceof CraftMob craftMob)) return;
+        EnderMan nms = (EnderMan) craftMob.getHandle();
 
-        EnderMan nmsEndersent = (EnderMan) craftMob.getHandle();
-        nmsEndersent.goalSelector.removeAllGoals(goal -> true);
-        nmsEndersent.targetSelector.removeAllGoals(goal -> true);
+        nms.goalSelector.removeAllGoals(goal -> true);
+        nms.targetSelector.removeAllGoals(goal -> true);
 
-        nmsEndersent.goalSelector.addGoal(1, new MeleeAttackGoal(nmsEndersent, 1.0D, false));
-        nmsEndersent.goalSelector.addGoal(7, new RandomStrollGoal(nmsEndersent, 1.0D));
-        nmsEndersent.goalSelector.addGoal(8, new LookAtPlayerGoal(nmsEndersent, net.minecraft.world.entity.player.Player.class, 8.0F));
-
-        nmsEndersent.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(nmsEndersent, net.minecraft.world.entity.player.Player.class, true));
-
-        return spawnedEntity;
+        nms.goalSelector.addGoal(1, new MeleeAttackGoal(nms, 1.0D, false));
+        nms.goalSelector.addGoal(7, new RandomStrollGoal(nms, 1.0D));
+        nms.goalSelector.addGoal(8, new LookAtPlayerGoal(nms, net.minecraft.world.entity.player.Player.class, 8.0F));
+        nms.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(nms, net.minecraft.world.entity.player.Player.class, true));
     }
 
     @Override

@@ -1,8 +1,8 @@
 package fr.moussax.blightedMC.content.entities;
 
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
-import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
+import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.Utilities;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -114,22 +114,17 @@ public class Watchling extends SpawnableEntity {
     }
 
     @Override
-    public LivingEntity spawn(Location location) {
-        LivingEntity spawnedEntity = super.spawn(location);
-        if (!(spawnedEntity instanceof CraftMob craftMob)) return spawnedEntity;
+    protected void onConfigureAI(LivingEntity spawned) {
+        if (!(spawned instanceof CraftMob craftMob)) return;
+        EnderMan nms = (EnderMan) craftMob.getHandle();
 
-        EnderMan nmsWatchling = (EnderMan) craftMob.getHandle();
+        nms.goalSelector.removeAllGoals(goal -> true);
+        nms.targetSelector.removeAllGoals(goal -> true);
 
-        nmsWatchling.goalSelector.removeAllGoals(goal -> true);
-        nmsWatchling.targetSelector.removeAllGoals(goal -> true);
-
-        nmsWatchling.goalSelector.addGoal(1, new MeleeAttackGoal(nmsWatchling, 1.0D, false));
-        nmsWatchling.goalSelector.addGoal(7, new RandomStrollGoal(nmsWatchling, 1.0D));
-        nmsWatchling.goalSelector.addGoal(8, new LookAtPlayerGoal(nmsWatchling, net.minecraft.world.entity.player.Player.class, 8.0F));
-
-        nmsWatchling.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(nmsWatchling, net.minecraft.world.entity.player.Player.class, true));
-
-        return spawnedEntity;
+        nms.goalSelector.addGoal(1, new MeleeAttackGoal(nms, 1.0D, false));
+        nms.goalSelector.addGoal(7, new RandomStrollGoal(nms, 1.0D));
+        nms.goalSelector.addGoal(8, new LookAtPlayerGoal(nms, net.minecraft.world.entity.player.Player.class, 8.0F));
+        nms.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(nms, net.minecraft.world.entity.player.Player.class, true));
     }
 
     @Override
