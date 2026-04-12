@@ -213,13 +213,6 @@ public final class EntityLootTableBuilder {
         return this;
     }
 
-    /**
-     * Builds the final {@link LootTable} instance.
-     *
-     * <p>The table uses a looting-aware probabilistic selection strategy and a guaranteed roll chance.</p>
-     *
-     * @return the constructed loot table
-     */
     public LootTable build() {
         return builder
             .selectionStrategy(new LootingAwareProbabilisticStrategy(maxDrops))

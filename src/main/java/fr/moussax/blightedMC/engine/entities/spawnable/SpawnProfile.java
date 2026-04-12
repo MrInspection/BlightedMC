@@ -29,18 +29,10 @@ public final class SpawnProfile {
         this.conditions.addAll(conditions);
     }
 
-    /**
-     * Adds a spawn condition. All conditions must pass for spawning to be allowed.
-     */
     public void addCondition(@NonNull SpawnCondition condition) {
         conditions.add(condition);
     }
 
-    /**
-     * Evaluates all conditions at the given location.
-     *
-     * @return {@code true} if all conditions pass or no conditions are registered
-     */
     public boolean canSpawn(Location location, World world) {
         for (SpawnCondition condition : conditions) {
             if (!condition.testCanSpawnAt(location, world)) return false;
@@ -48,7 +40,6 @@ public final class SpawnProfile {
         return true;
     }
 
-    /** Returns a copy of this profile with the same conditions. */
     public SpawnProfile copy() {
         return new SpawnProfile(this.conditions);
     }

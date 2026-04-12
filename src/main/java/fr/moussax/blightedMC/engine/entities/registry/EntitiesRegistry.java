@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.engine.entities.registry;
 
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.content.entities.frenzied.*;
 import fr.moussax.blightedMC.content.entities.bosses.TheAncientKnight;
@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 public final class EntitiesRegistry {
-    private static final Map<String, AbstractBlightedEntity> ENTITIES = new HashMap<>();
+    private static final Map<String, BlightedEntity> ENTITIES = new HashMap<>();
 
-    private static final List<AbstractBlightedEntity> DEFAULT_ENTITIES = List.of(
+    private static final List<BlightedEntity> DEFAULT_ENTITIES = List.of(
         new TheAncientKnight(),
         new FrenziedBogged(),
         new FrenziedDrowned(),
@@ -43,7 +43,7 @@ public final class EntitiesRegistry {
         Log.success("EntitiesRegistry", "Registered " + ENTITIES.size() + " entities (spawnable: " + SpawnableEntitiesRegistry.count() + ").");
     }
 
-    public static void register(AbstractBlightedEntity entity) {
+    public static void register(BlightedEntity entity) {
         if (ENTITIES.containsKey(entity.getEntityId())) {
             Log.warn("EntitiesRegistry", "Duplicate entity ID detected: " + entity.getEntityId() + ". Skipping.");
             return;
@@ -57,14 +57,14 @@ public final class EntitiesRegistry {
     }
 
     @Nullable
-    public static AbstractBlightedEntity get(String entityId) {
-        AbstractBlightedEntity prototype = ENTITIES.get(entityId);
+    public static BlightedEntity get(String entityId) {
+        BlightedEntity prototype = ENTITIES.get(entityId);
         return prototype != null ? prototype.clone() : null;
     }
 
-    public static List<AbstractBlightedEntity> getAll() {
+    public static List<BlightedEntity> getAll() {
         return ENTITIES.values().stream()
-            .map(AbstractBlightedEntity::clone)
+            .map(BlightedEntity::clone)
             .toList();
     }
 

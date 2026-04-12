@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.shared.loot.results;
 
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.shared.loot.LootContext;
 import fr.moussax.blightedMC.shared.loot.LootResult;
 import fr.moussax.blightedMC.shared.formatting.Formatter;
@@ -12,14 +12,14 @@ import java.util.function.Consumer;
 
 /**
  * A {@link LootResult} that spawns an entity at the loot origin.
- * Supports both vanilla {@link EntityType} and custom {@link AbstractBlightedEntity}.
+ * Supports both vanilla {@link EntityType} and custom {@link BlightedEntity}.
  */
 public final class EntityResult implements LootResult {
     private final EntityType entityType;
-    private final AbstractBlightedEntity blightedEntity;
+    private final BlightedEntity blightedEntity;
     private final Consumer<LivingEntity> entityModifier;
 
-    private EntityResult(EntityType entityType, AbstractBlightedEntity blightedEntity, Consumer<LivingEntity> entityModifier) {
+    private EntityResult(EntityType entityType, BlightedEntity blightedEntity, Consumer<LivingEntity> entityModifier) {
         this.entityType = entityType;
         this.blightedEntity = blightedEntity;
         this.entityModifier = entityModifier;
@@ -52,7 +52,7 @@ public final class EntityResult implements LootResult {
      * @param blightedEntity the Blighted entity to spawn
      * @return a new EntityResult
      */
-    public static EntityResult blighted(AbstractBlightedEntity blightedEntity) {
+    public static EntityResult blighted(BlightedEntity blightedEntity) {
         return new EntityResult(null, Objects.requireNonNull(blightedEntity), null);
     }
 

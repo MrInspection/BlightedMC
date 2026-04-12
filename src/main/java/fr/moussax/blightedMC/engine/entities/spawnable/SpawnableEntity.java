@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.engine.entities.spawnable;
 
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnCondition;
 import fr.moussax.blightedMC.engine.entities.spawnable.engine.SpawnMode;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import org.bukkit.entity.EntityType;
 /**
  * Defines spawning rules and probability for a blighted entity type.
  *
- * <p>Layered on top of {@link AbstractBlightedEntity}, adding spawn conditions,
+ * <p>Layered on top of {@link BlightedEntity}, adding spawn conditions,
  * probability, and spawn mode. Subclasses define their conditions by overriding
  * {@link #defineSpawnConditions()}.</p>
  *
@@ -29,7 +29,7 @@ import org.bukkit.entity.EntityType;
  * }
  * }</pre>
  */
-public abstract class SpawnableEntity extends AbstractBlightedEntity {
+public abstract class SpawnableEntity extends BlightedEntity {
 
     @Getter
     private final double spawnProbability;
@@ -84,7 +84,7 @@ public abstract class SpawnableEntity extends AbstractBlightedEntity {
         if (probability < 0.0 || probability > 1.0) {
             throw new IllegalArgumentException("spawnProbability must be in [0.0, 1.0], got: " + probability);
         }
-        // entityId is declared in AbstractBlightedEntity — assign it directly
+
         this.entityId = entityId;
         this.spawnProbability = probability;
         this.spawnMode = mode;
@@ -92,21 +92,12 @@ public abstract class SpawnableEntity extends AbstractBlightedEntity {
         defineSpawnConditions();
     }
 
-    /**
-     * Called during construction. Override to register spawn conditions via {@link #addCondition}.
-     */
     protected abstract void defineSpawnConditions();
 
-    /**
-     * Adds a spawn condition. All conditions must pass for spawning to be allowed.
-     */
     protected void addCondition(SpawnCondition condition) {
         spawnProfile.addCondition(condition);
     }
 
-    /**
-     * Evaluates whether this entity may spawn at the given location.
-     */
     public boolean canSpawnAt(Location location, World world) {
         return spawnProfile.canSpawn(location, world);
     }

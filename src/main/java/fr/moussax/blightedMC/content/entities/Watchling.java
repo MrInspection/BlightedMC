@@ -23,9 +23,9 @@ import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDec
 
 public class Watchling extends SpawnableEntity {
 
-    private long lastTeleportTime = 0;
     private static final long TELEPORT_COOLDOWN = 4000;
     private final Random random = new Random();
+    private long lastTeleportTime = 0;
 
     public Watchling() {
         super("WATCHLING", "§dWatchling", 20, EntityType.ENDERMAN, 0.001);

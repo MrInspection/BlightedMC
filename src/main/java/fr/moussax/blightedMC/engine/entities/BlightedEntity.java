@@ -75,18 +75,12 @@ import java.util.concurrent.ThreadLocalRandom;
  *       does not affect the owner otherwise.</li>
  * </ul>
  */
-public abstract class AbstractBlightedEntity implements Cloneable {
+public abstract class BlightedEntity implements Cloneable {
 
-    /**
-     * Persistent data key used to identify a blighted entity across chunk reloads.
-     */
     public static final NamespacedKey ENTITY_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_entity_id");
-
-    /**
-     * Scoreboard tag used as a fast pre-check before map lookups.
-     */
     public static final String FAST_PASS_TAG = "blighted_opt";
     private static final double BOSS_BAR_RANGE = 60.0;
+
     public Set<EntityAttachment> attachments = new CopyOnWriteArraySet<>();
     @Getter
     protected String entityId;
@@ -124,15 +118,15 @@ public abstract class AbstractBlightedEntity implements Cloneable {
     @Getter
     private int currentPhase = 0;
 
-    public AbstractBlightedEntity(@NonNull String name, int maxHealth, EntityType entityType) {
+    public BlightedEntity(@NonNull String name, int maxHealth, EntityType entityType) {
         this(name, maxHealth, 1, 0, entityType);
     }
 
-    public AbstractBlightedEntity(@NonNull String name, int maxHealth, int damage, EntityType entityType) {
+    public BlightedEntity(@NonNull String name, int maxHealth, int damage, EntityType entityType) {
         this(name, maxHealth, damage, 0, entityType);
     }
 
-    public AbstractBlightedEntity(@NonNull String name, int maxHealth, int damage, int defense, EntityType entityType) {
+    public BlightedEntity(@NonNull String name, int maxHealth, int damage, int defense, EntityType entityType) {
         this.name = name;
         this.maxHealth = maxHealth;
         this.damage = damage;
@@ -321,9 +315,6 @@ public abstract class AbstractBlightedEntity implements Cloneable {
         return entity != null && !entity.isDead() && runtimeInitialized;
     }
 
-    /**
-     * Immediately kills the entity and triggers cleanup.
-     */
     public void kill() {
         if (isNotAlive()) return;
         cleanup();
@@ -350,9 +341,6 @@ public abstract class AbstractBlightedEntity implements Cloneable {
     public void onDamageTaken(EntityDamageEvent event) {
     }
 
-    /**
-     * Inflicts direct damage on the entity.
-     */
     public void damage(double amount) {
         if (isNotAlive()) return;
         entity.damage(amount);
@@ -569,9 +557,9 @@ public abstract class AbstractBlightedEntity implements Cloneable {
     }
 
     @Override
-    public AbstractBlightedEntity clone() {
+    public BlightedEntity clone() {
         try {
-            AbstractBlightedEntity clone = (AbstractBlightedEntity) super.clone();
+            BlightedEntity clone = (BlightedEntity) super.clone();
             clone.entity = null;
             clone.bossBar = null;
             clone.runtimeInitialized = false;

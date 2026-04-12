@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Manages scheduler tasks bound to the lifecycle of an {@link AbstractBlightedEntity}.
+ * Manages scheduler tasks bound to the lifecycle of an {@link BlightedEntity}.
  * <p>
  * Allows entities to register delayed or repeating {@link BukkitRunnable} tasks that
  * are automatically scheduled on initialization and canceled on destruction.

@@ -1,10 +1,10 @@
 package fr.moussax.blightedMC.content.items.armors;
 
+import fr.moussax.blightedMC.content.items.abilities.RocketBootsAbility;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.registry.ItemProvider;
-import fr.moussax.blightedMC.content.items.abilities.RocketBootsAbility;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.trim.TrimMaterial;

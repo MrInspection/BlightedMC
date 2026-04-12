@@ -1,9 +1,9 @@
 package fr.moussax.blightedMC.content.entities.bosses;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
-import fr.moussax.blightedMC.engine.entities.EntityImmunities;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.BlightedType;
+import fr.moussax.blightedMC.engine.entities.EntityImmunities;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
@@ -19,7 +19,7 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @EntityImmunities(EntityImmunities.ImmunityType.PROJECTILE)
-public class TheAncientKnight extends AbstractBlightedEntity {
+public class TheAncientKnight extends BlightedEntity {
 
     private final List<StabPlayer> activeStabs = new CopyOnWriteArrayList<>();
 
@@ -101,7 +101,10 @@ public class TheAncientKnight extends AbstractBlightedEntity {
 
     private void stopAllStabs() {
         for (StabPlayer stab : new ArrayList<>(activeStabs)) {
-            try { stab.cancel(); } catch (IllegalStateException ignored) {}
+            try {
+                stab.cancel();
+            } catch (IllegalStateException ignored) {
+            }
         }
         activeStabs.clear();
     }

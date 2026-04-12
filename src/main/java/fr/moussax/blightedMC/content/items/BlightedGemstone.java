@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC.content.items;
 
-import fr.moussax.blightedMC.shared.loot.results.gems.GemsItem;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
@@ -8,6 +7,7 @@ import fr.moussax.blightedMC.engine.items.abilities.Ability;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
 import fr.moussax.blightedMC.engine.items.registry.ItemProvider;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
+import fr.moussax.blightedMC.shared.loot.results.gems.GemsItem;
 import org.bukkit.Material;
 
 public class BlightedGemstone implements ItemProvider {

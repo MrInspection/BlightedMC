@@ -69,10 +69,12 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
     }
 
     @Override
-    public void start(BlightedPlayer player) {}
+    public void start(BlightedPlayer player) {
+    }
 
     @Override
-    public void stop(BlightedPlayer player) {}
+    public void stop(BlightedPlayer player) {
+    }
 
     private Location getTargetedEyeLocation(BlightedPlayer blightedPlayer) {
         var player = blightedPlayer.getPlayer();
@@ -108,7 +110,8 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
 
     /**
      * Checks if a location is safe to teleport to.
-     * @param location The feet location
+     *
+     * @param location      The feet location
      * @param requireGround Whether we strictly require a solid block below (true for landing, false for air dash)
      */
     private boolean isSafe(Location location, boolean requireGround) {

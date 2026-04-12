@@ -1,13 +1,13 @@
 package fr.moussax.blightedMC.content.items.armors;
 
+import fr.moussax.blightedMC.content.items.abilities.weave.EmberWeaveSetBonus;
+import fr.moussax.blightedMC.content.items.abilities.weave.MagmaweaveSetBonus;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.engine.items.registry.ItemProvider;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
-import fr.moussax.blightedMC.content.items.abilities.weave.EmberWeaveSetBonus;
-import fr.moussax.blightedMC.content.items.abilities.weave.MagmaweaveSetBonus;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;

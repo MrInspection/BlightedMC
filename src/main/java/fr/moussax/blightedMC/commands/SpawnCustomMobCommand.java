@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.commands;
 
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.utils.commands.CommandArgument;
 import fr.moussax.blightedMC.utils.commands.CommandInfo;
@@ -25,7 +25,7 @@ public class SpawnCustomMobCommand implements CommandExecutor {
             return false;
         }
 
-        AbstractBlightedEntity entity = EntitiesRegistry.get(args[0].toUpperCase());
+        BlightedEntity entity = EntitiesRegistry.get(args[0].toUpperCase());
 
         if (entity == null) {
             warn(player, "Unable to find §4" + args[0].toUpperCase() + " §cin the registry.");

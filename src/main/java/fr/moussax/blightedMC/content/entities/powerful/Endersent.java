@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.content.entities.powerful;
 
 import fr.moussax.blightedMC.content.entities.Watchling;
 import fr.moussax.blightedMC.content.utils.ai.EndermanAI;
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.BlightedType;
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
@@ -28,14 +28,13 @@ import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDec
 
 public class Endersent extends SpawnableEntity {
 
+    private static final long SMASH_COOLDOWN = 5000;
     private int projectileHits = 0;
     private boolean enraged = false;
     private boolean isEscaping = false;
     private List<LivingEntity> watchlings = new ArrayList<>();
     private long lastTeleportSmash = 0;
     private int escapeTicks = 0;
-
-    private static final long SMASH_COOLDOWN = 5000;
 
     public Endersent() {
         super("ENDERSENT", "Endersent", 200, EntityType.ENDERMAN, 0.002);
@@ -155,7 +154,7 @@ public class Endersent extends SpawnableEntity {
 
         int count = 3 + new Random().nextInt(4);
         for (int i = 0; i < count; i++) {
-            AbstractBlightedEntity prototype = EntitiesRegistry.get("WATCHLING");
+            BlightedEntity prototype = EntitiesRegistry.get("WATCHLING");
             if (prototype == null) continue;
             LivingEntity wEntity = prototype.spawn(
                 loc.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)

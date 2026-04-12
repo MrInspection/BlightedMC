@@ -14,7 +14,8 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.Objects;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.COMMON;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.VERY_RARE;
 
 public final class FrenziedParched extends FrenziedSkirmisher {
     public FrenziedParched() {
