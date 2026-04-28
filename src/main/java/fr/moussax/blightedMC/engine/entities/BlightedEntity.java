@@ -143,7 +143,7 @@ public abstract class BlightedEntity implements Cloneable {
         entity.addScoreboardTag(FAST_PASS_TAG);
         entity.getPersistentDataContainer().set(ENTITY_ID_KEY, PersistentDataType.STRING, getEntityId());
 
-        configureAttributes();
+        configureAttributes(true);
         configureEquipment();
         onConfigureAI(entity);
         if (blightedType == BlightedType.BOSS) createBossBar();
@@ -165,7 +165,7 @@ public abstract class BlightedEntity implements Cloneable {
         }
 
         initImmunityRules();
-        configureAttributes();
+        configureAttributes(false);
         onConfigureAI(existing);
 
         if (blightedType == BlightedType.BOSS) createBossBar();
@@ -173,12 +173,19 @@ public abstract class BlightedEntity implements Cloneable {
         initRuntime();
     }
 
-    private void configureAttributes() {
+    private void configureAttributes(boolean resetHealth) {
         setAttribute(Attribute.MAX_HEALTH, maxHealth);
         setAttribute(Attribute.ATTACK_DAMAGE, damage);
         if (defense > 0) setAttribute(Attribute.ARMOR, defense);
         attributes.forEach(this::setAttribute);
-        entity.setHealth(maxHealth);
+
+        AttributeInstance maxHealthAttribute = entity.getAttribute(Attribute.MAX_HEALTH);
+        if (maxHealthAttribute != null) {
+            double max = maxHealthAttribute.getValue();
+            double current = entity.getHealth();
+            entity.setHealth(resetHealth ? max : Math.min(current, max));
+        }
+
         entity.setRemoveWhenFarAway(false);
         entity.setPersistent(true);
     }

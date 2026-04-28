@@ -62,12 +62,6 @@ public final class ArmorManager {
 
                 newBonus.setPlayer(player);
                 player.addActiveBonus(newBonus);
-
-                if (newBonus.getType() == FullSetBonus.SetType.NORMAL) {
-                    newBonus.activate();
-                } else if (newBonus.getType() == FullSetBonus.SetType.SNEAK && player.getPlayer().isSneaking()) {
-                    newBonus.activate();
-                }
             } catch (Exception e) {
                 Log.error("ArmorManager", "Failed to activate bonus " + bonusClass.getSimpleName());
             }
