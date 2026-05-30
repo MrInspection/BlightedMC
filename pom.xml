@@ -12,7 +12,7 @@
   <name>BlightedMC</name>
 
   <properties>
-    <java.version>25</java.version>
+    <java.version>26</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -72,13 +72,13 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>26.1.1-R0.1-SNAPSHOT</version>
+      <version>26.1.2-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot</artifactId>
-      <version>26.1.1-R0.1-SNAPSHOT</version>
+      <version>26.1.2-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
