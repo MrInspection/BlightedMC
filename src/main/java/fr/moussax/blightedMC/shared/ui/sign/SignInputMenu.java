@@ -5,10 +5,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -53,6 +55,7 @@ public final class SignInputMenu {
         frontText.put("messages", messages);
         nbt.put("front_text", frontText);
 
+        nmsPlayer.connection.send(new ClientboundBlockEntityDataPacket(blockPosition, BlockEntityType.SIGN, nbt));
         nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.PALE_OAK_SIGN.defaultBlockState()));
 
         Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> {
