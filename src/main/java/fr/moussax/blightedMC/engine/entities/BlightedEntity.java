@@ -173,7 +173,12 @@ public abstract class BlightedEntity implements Cloneable {
         if (blightedType == BlightedType.BOSS) createBossBar();
         BlightedEntitiesListener.registerEntity(existing, this);
         onRehydrate(existing);
-        initRuntime();
+
+        if (!runtimeInitialized) {
+            initRuntime();
+        } else {
+            lifecycleTasks.scheduleAll();
+        }
     }
 
     private void configureAttributes(boolean resetHealth) {
@@ -605,7 +610,7 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     protected boolean isNotAlive() {
-        return entity == null || entity.isDead();
+        return entity == null || !entity.isValid() || entity.isDead();
     }
 
     @Override

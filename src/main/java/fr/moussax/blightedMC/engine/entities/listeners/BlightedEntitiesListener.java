@@ -270,6 +270,10 @@ public final class BlightedEntitiesListener implements Listener {
         );
     }
 
+    public static Collection<BlightedEntity> getActiveEntities() {
+        return BLIGHTED_ENTITIES.values();
+    }
+
     public static void rehydrateChunk(Chunk chunk) {
         Entity[] entities = chunk.getEntities();
 
