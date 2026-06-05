@@ -27,9 +27,9 @@ public enum AbilityType {
     }
 
     public boolean matches(Event event) {
-        if (event instanceof PlayerInteractEvent ie) {
-            Action action = ie.getAction();
-            boolean isSneaking = ie.getPlayer().isSneaking();
+        if (event instanceof PlayerInteractEvent interactEvent) {
+            Action action = interactEvent.getAction();
+            boolean isSneaking = interactEvent.getPlayer().isSneaking();
             boolean isLeft = (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK);
             boolean isRight = (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK);
 

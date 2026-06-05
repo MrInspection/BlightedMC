@@ -1,12 +1,10 @@
 package fr.moussax.blightedMC.engine.player;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.engine.items.abilities.*;
 import fr.moussax.blightedMC.server.database.PlayerDataHandler;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemType;
-import fr.moussax.blightedMC.engine.items.abilities.ArmorManager;
-import fr.moussax.blightedMC.engine.items.abilities.CooldownEntry;
-import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.shared.ui.actionbar.ActionBarManager;
 import fr.moussax.blightedMC.engine.player.managers.GemsManager;
 import fr.moussax.blightedMC.engine.player.managers.ManaManager;
@@ -101,6 +99,23 @@ public final class BlightedPlayer {
 
     public void removeCooldown(CooldownEntry entry) {
         cooldowns.remove(entry);
+    }
+
+    public void setCooldown(Class<? extends AbilityManager> managerClass, AbilityType type, int seconds) {
+        long expire = System.currentTimeMillis() + (seconds * 1000L);
+        cooldowns.removeIf(c -> c.abilityManager().equals(managerClass) && c.abilityType() == type);
+        cooldowns.add(new CooldownEntry(managerClass, type, expire));
+    }
+
+    public double getRemainingCooldown(Class<? extends AbilityManager> managerClass, AbilityType type) {
+        cooldowns.removeIf(CooldownEntry::isExpired); // Lazy cleanup
+
+        for (CooldownEntry entry : cooldowns) {
+            if (entry.abilityManager().equals(managerClass) && entry.abilityType() == type) {
+                return entry.getRemainingCooldownTimeInSeconds();
+            }
+        }
+        return 0;
     }
 
     public void clearArmorPieces() {

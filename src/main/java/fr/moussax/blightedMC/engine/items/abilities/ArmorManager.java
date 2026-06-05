@@ -41,18 +41,13 @@ public final class ArmorManager {
             int equippedCount = bonusCount.getOrDefault(active.getClass(), 0);
 
             if (equippedCount < active.getMaxPieces()) {
-                try {
-                    active.deactivate();
-                } catch (Exception e) {
-                    Log.error("ArmorManager", "Error stopping ability: " + active.getClass().getSimpleName());
-                }
                 player.removeActiveBonusByClass(active.getClass());
             }
         }
 
         bonusCount.forEach((bonusClass, count) -> {
             boolean isRunning = player.getActiveFullSetBonuses().stream()
-                .anyMatch(b -> b.getClass().equals(bonusClass));
+                    .anyMatch(b -> b.getClass().equals(bonusClass));
 
             if (isRunning) return;
 
