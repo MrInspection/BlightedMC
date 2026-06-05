@@ -11,10 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,6 +19,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -30,6 +28,8 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static fr.moussax.blightedMC.engine.entities.BlightedEntity.ATTACHMENT_OWNER_KEY;
+import static fr.moussax.blightedMC.engine.entities.BlightedEntity.ATTACHMENT_ROLE_KEY;
 import static fr.moussax.blightedMC.engine.entities.BlightedEntity.ENTITY_ID_KEY;
 import static fr.moussax.blightedMC.engine.entities.BlightedEntity.FAST_PASS_TAG;
 
@@ -202,7 +202,7 @@ public final class BlightedEntitiesListener implements Listener {
 
         blighted.updateBossBar();
 
-        // Sync heal to BODY attachments
+        // Sync health to BODY attachments
         if (!blighted.attachments.isEmpty()) {
             double newHealth = clampedHealth(entity, event.getAmount());
             for (EntityAttachment attachment : blighted.attachments) {
@@ -263,24 +263,63 @@ public final class BlightedEntitiesListener implements Listener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
-        Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> rehydrateChunk(event.getChunk()), 1L);
+        Bukkit.getScheduler().runTaskLater(
+                BlightedMC.getInstance(),
+                () -> rehydrateChunk(event.getChunk()),
+                1L
+        );
     }
 
     public static void rehydrateChunk(Chunk chunk) {
-        for (Entity entity : chunk.getEntities()) {
+        Entity[] entities = chunk.getEntities();
+
+        // Pass 1: rehydrate main blighted entities.
+        for (Entity entity : entities) {
             if (!(entity instanceof LivingEntity living)) continue;
             if (!living.getScoreboardTags().contains(FAST_PASS_TAG)) continue;
-            if (BLIGHTED_ENTITIES.containsKey(living.getUniqueId())) continue;
 
             PersistentDataContainer pdc = living.getPersistentDataContainer();
             if (!pdc.has(ENTITY_ID_KEY, PersistentDataType.STRING)) continue;
 
-            String entityId = pdc.get(ENTITY_ID_KEY, PersistentDataType.STRING);
+            BlightedEntity existing = BLIGHTED_ENTITIES.get(living.getUniqueId());
+            if (existing != null) {
+                if (existing.getEntity() != living) {
+                    existing.attachToExisting(living);
+                }
+                continue;
+            }
 
+            String entityId = pdc.get(ENTITY_ID_KEY, PersistentDataType.STRING);
             BlightedEntity prototype = EntitiesRegistry.get(entityId);
             if (prototype == null) continue;
 
             prototype.clone().attachToExisting(living);
+        }
+
+        // Pass 2: re-register attachment entities whose owner is now in BLIGHTED_ENTITIES.
+        for (Entity entity : entities) {
+            if (!(entity instanceof LivingEntity living)) continue;
+            if (!living.getScoreboardTags().contains(FAST_PASS_TAG)) continue;
+
+            PersistentDataContainer pdc = living.getPersistentDataContainer();
+            if (!pdc.has(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING)) continue;
+
+            String ownerUuidStr = pdc.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
+            String roleStr = pdc.get(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING);
+            if (ownerUuidStr == null || roleStr == null) continue;
+
+            UUID ownerUuid;
+            try { ownerUuid = UUID.fromString(ownerUuidStr); } catch (IllegalArgumentException ignored) { continue; }
+
+            BlightedEntity owner = BLIGHTED_ENTITIES.get(ownerUuid);
+            if (owner == null) continue;
+
+            AttachmentRole role;
+            try { role = AttachmentRole.valueOf(roleStr); } catch (IllegalArgumentException ignored) { role = AttachmentRole.DEPENDENT; }
+
+            owner.attachments.removeIf(a -> a.entity() != null && a.entity().getUniqueId().equals(living.getUniqueId()));
+            owner.attachments.add(new EntityAttachment(living, role));
+            registerAttachment(living, owner);
         }
     }
 

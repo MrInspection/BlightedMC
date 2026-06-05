@@ -78,6 +78,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class BlightedEntity implements Cloneable {
 
     public static final NamespacedKey ENTITY_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_entity_id");
+    public static final NamespacedKey ATTACHMENT_OWNER_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_attachment_owner");
+    public static final NamespacedKey ATTACHMENT_ROLE_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_attachment_role");
     public static final String FAST_PASS_TAG = "blighted_opt";
     private static final double BOSS_BAR_RANGE = 60.0;
 
@@ -170,14 +172,22 @@ public abstract class BlightedEntity implements Cloneable {
 
         if (blightedType == BlightedType.BOSS) createBossBar();
         BlightedEntitiesListener.registerEntity(existing, this);
+        onRehydrate(existing);
         initRuntime();
     }
 
     private void configureAttributes(boolean resetHealth) {
-        setAttribute(Attribute.MAX_HEALTH, maxHealth);
-        setAttribute(Attribute.ATTACK_DAMAGE, damage);
-        if (defense > 0) setAttribute(Attribute.ARMOR, defense);
-        attributes.forEach(this::setAttribute);
+        if (resetHealth) {
+            setAttribute(Attribute.MAX_HEALTH, maxHealth);
+            setAttribute(Attribute.ATTACK_DAMAGE, damage);
+            if (defense > 0) setAttribute(Attribute.ARMOR, defense);
+            attributes.forEach(this::setAttribute);
+        } else {
+            setAttributeBaseOnly(Attribute.MAX_HEALTH, maxHealth);
+            setAttributeBaseOnly(Attribute.ATTACK_DAMAGE, damage);
+            if (defense > 0) setAttributeBaseOnly(Attribute.ARMOR, defense);
+            attributes.forEach(this::setAttributeBaseOnly);
+        }
 
         AttributeInstance maxHealthAttribute = entity.getAttribute(Attribute.MAX_HEALTH);
         if (maxHealthAttribute != null) {
@@ -188,6 +198,7 @@ public abstract class BlightedEntity implements Cloneable {
 
         entity.setRemoveWhenFarAway(false);
         entity.setPersistent(true);
+        entity.setCanPickupItems(false);
     }
 
     private void configureEquipment() {
@@ -212,11 +223,17 @@ public abstract class BlightedEntity implements Cloneable {
         instance.setBaseValue(value);
     }
 
+    private void setAttributeBaseOnly(Attribute attribute, double value) {
+        AttributeInstance instance = entity.getAttribute(attribute);
+        if (instance == null) return;
+        instance.setBaseValue(value);
+    }
+
     private void initRuntime() {
         if (runtimeInitialized) return;
-        runtimeInitialized = true;
         onDefineBehavior();
         if (bossBar != null) startBossBarTask();
+        runtimeInitialized = true;
         lifecycleTasks.scheduleAll();
     }
 
@@ -236,6 +253,15 @@ public abstract class BlightedEntity implements Cloneable {
      * }</pre>
      */
     protected void onConfigureAI(LivingEntity spawned) {
+    }
+
+    /**
+     * Called after {@code attachToExisting} completes, just before runtime initialization.
+     * Override to restore transient state that cannot be derived from the entity's persistent data.
+     *
+     * @param existing the already-living entity being rehydrated
+     */
+    protected void onRehydrate(LivingEntity existing) {
     }
 
     /**
@@ -289,7 +315,13 @@ public abstract class BlightedEntity implements Cloneable {
                     cancel();
                     return;
                 }
-                action.run();
+                try {
+                    action.run();
+                } catch (Exception exception) {
+                    BlightedMC.getInstance().getLogger().warning(
+                            "[BlightedEntity] Ability threw an exception on entity '" + name + "': " + exception.getMessage()
+                    );
+                }
             }
         }, delayTicks, periodTicks);
 
@@ -311,7 +343,13 @@ public abstract class BlightedEntity implements Cloneable {
             @Override
             public void run() {
                 if (isNotAlive()) return;
-                action.run();
+                try {
+                    action.run();
+                } catch (Exception exception) {
+                    BlightedMC.getInstance().getLogger().warning(
+                            "[BlightedEntity] Delayed action threw an exception on entity '" + name + "': " + exception.getMessage()
+                    );
+                }
             }
         }, delayTicks);
 
@@ -387,9 +425,9 @@ public abstract class BlightedEntity implements Cloneable {
     public List<Player> getNearbyPlayers(double radius) {
         if (isNotAlive()) return Collections.emptyList();
         return entity.getNearbyEntities(radius, radius, radius).stream()
-            .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-            .map(e -> (Player) e)
-            .toList();
+                .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+                .map(e -> (Player) e)
+                .toList();
     }
 
     /**
@@ -398,8 +436,8 @@ public abstract class BlightedEntity implements Cloneable {
     public Player getNearestPlayer(double radius) {
         Location origin = entity.getLocation();
         return getNearbyPlayers(radius).stream()
-            .min(Comparator.comparingDouble(p -> p.getLocation().distanceSquared(origin)))
-            .orElse(null);
+                .min(Comparator.comparingDouble(player -> player.getLocation().distanceSquared(origin)))
+                .orElse(null);
     }
 
     /**
@@ -420,6 +458,13 @@ public abstract class BlightedEntity implements Cloneable {
 
         attachments.add(new EntityAttachment(attachmentEntity, role));
         BlightedEntitiesListener.registerAttachment(attachmentEntity, this);
+
+        if (entity != null) {
+            attachmentEntity.getPersistentDataContainer().set(
+                    ATTACHMENT_OWNER_KEY, PersistentDataType.STRING, entity.getUniqueId().toString());
+            attachmentEntity.getPersistentDataContainer().set(
+                    ATTACHMENT_ROLE_KEY, PersistentDataType.STRING, role.name());
+        }
 
         if (attachmentEntity instanceof LivingEntity living) {
             EntityEquipment equipment = living.getEquipment();
@@ -450,8 +495,8 @@ public abstract class BlightedEntity implements Cloneable {
     public boolean hasLivingBodyAttachment() {
         for (EntityAttachment attachment : attachments) {
             if (attachment.role() == AttachmentRole.BODY
-                && attachment.entity() instanceof LivingEntity living
-                && !living.isDead()) {
+                    && attachment.entity() instanceof LivingEntity living
+                    && !living.isDead()) {
                 return true;
             }
         }
@@ -503,15 +548,15 @@ public abstract class BlightedEntity implements Cloneable {
 
         for (Player player : new ArrayList<>(bossBar.getPlayers())) {
             if (!player.isOnline()
-                || player.getWorld() != world
-                || player.getLocation().distanceSquared(loc) > rangeSquared) {
+                    || player.getWorld() != world
+                    || player.getLocation().distanceSquared(loc) > rangeSquared) {
                 bossBar.removePlayer(player);
             }
         }
 
         for (Player player : world.getPlayers()) {
             if (player.getLocation().distanceSquared(loc) <= rangeSquared
-                && !bossBar.getPlayers().contains(player)) {
+                    && !bossBar.getPlayers().contains(player)) {
                 bossBar.addPlayer(player);
             }
         }
