@@ -10,6 +10,7 @@ import fr.moussax.blightedMC.content.entities.powerful.Endersent;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,13 @@ public final class EntitiesRegistry {
         new Illusioner()
     );
 
+    private static final List<Runnable> onRegisterCallbacks = new ArrayList<>();
+
     private EntitiesRegistry() {
+    }
+
+    public static void addOnRegisterCallback(Runnable callback) {
+        onRegisterCallbacks.add(callback);
     }
 
     public static void initialize() {
@@ -54,6 +61,8 @@ public final class EntitiesRegistry {
         if (entity instanceof SpawnableEntity spawnable) {
             SpawnableEntitiesRegistry.register(spawnable);
         }
+
+        onRegisterCallbacks.forEach(Runnable::run);
     }
 
     @Nullable
@@ -71,5 +80,6 @@ public final class EntitiesRegistry {
     public static void clear() {
         ENTITIES.clear();
         SpawnableEntitiesRegistry.clear();
+        onRegisterCallbacks.clear();
     }
 }
