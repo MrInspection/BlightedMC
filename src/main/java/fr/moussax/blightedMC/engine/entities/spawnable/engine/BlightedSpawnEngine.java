@@ -33,7 +33,7 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
 
     private final List<SpawnableEntity> cachedIndependentEntities = new ArrayList<>();
     private final List<Player> cachedPlayers = new ArrayList<>();
-    private int tickCounter = 0;
+    private int tickCounter = CACHE_REFRESH_INTERVAL;
 
     @Override
     public void run() {
@@ -80,26 +80,43 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
         int x = (chunk.getX() << 4) + random.nextInt(16);
         int z = (chunk.getZ() << 4) + random.nextInt(16);
 
-        int surfaceY = world.getHighestBlockYAt(x, z);
-        int y = surfaceY + 1;
+        // Scan from world max height down to min height
+        for (int y = world.getMaxHeight() - 1; y >= world.getMinHeight() + 1; y--) {
+            Location location = new Location(world, x + 0.5, y, z + 0.5);
 
-        Location location = new Location(world, x + 0.5, y, z + 0.5);
+            Block block = location.getBlock();
+            if (!block.getType().isAir()) continue;
 
-        Block block = location.getBlock();
-        if (!block.getType().isAir()) return;
+            Block below = block.getRelative(0, -1, 0);
+            if (!below.getType().isSolid()) continue;
 
-        Block below = block.getRelative(0, -1, 0);
-        if (!below.getType().isSolid()) return;
+            Block above = block.getRelative(0, 1, 0);
+            if (!above.getType().isAir()) continue;
 
-        Block above = block.getRelative(0, 1, 0);
-        if (!above.getType().isAir()) return;
+            List<SpawnableEntity> eligible = null;
+            for (SpawnableEntity entity : cachedIndependentEntities) {
+                if (!entity.canSpawnAt(location, world)) continue;
+                if (eligible == null) eligible = new ArrayList<>(cachedIndependentEntities.size());
+                eligible.add(entity);
+            }
 
-        for (SpawnableEntity entity : cachedIndependentEntities) {
-            if (!entity.canSpawnAt(location, world)) continue;
+            if (eligible == null) continue;
 
-            if (random.nextDouble() <= entity.getSpawnProbability()) {
-                entity.clone().spawn(location);
-                return;
+            double totalChance = 0.0;
+            for (SpawnableEntity entity : eligible) {
+                totalChance += entity.getSpawnProbability();
+            }
+
+            if (random.nextDouble() >= Math.min(totalChance, 1.0)) continue;
+
+            double selectionRoll = random.nextDouble() * totalChance;
+            double cumulative = 0.0;
+            for (SpawnableEntity entity : eligible) {
+                cumulative += entity.getSpawnProbability();
+                if (selectionRoll < cumulative) {
+                    entity.clone().spawn(location);
+                    return; // Stop scanning column once an entity spawns
+                }
             }
         }
     }
