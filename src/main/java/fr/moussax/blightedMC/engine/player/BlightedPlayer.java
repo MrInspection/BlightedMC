@@ -190,6 +190,9 @@ public final class BlightedPlayer {
     }
 
     public void setGems(int value) {
+        if (value < 0) {
+            throw new IllegalArgumentException("Gems value cannot be negative");
+        }
         int current = gemsManager.getGems();
         if (value > current) {
             addGems(value - current);

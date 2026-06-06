@@ -7,7 +7,10 @@ public final class GemsManager {
     private int gems;
 
     public GemsManager(int initialGems) {
-        this.gems = Math.max(0, initialGems);
+        if (initialGems < 0) {
+            throw new IllegalArgumentException("Initial gems value cannot be negative");
+        }
+        this.gems = initialGems;
     }
 
     public void addGems(int value) {
