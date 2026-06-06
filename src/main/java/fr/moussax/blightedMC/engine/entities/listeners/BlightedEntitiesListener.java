@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.engine.entities.listeners;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.attachment.AttachmentRole;
 import fr.moussax.blightedMC.engine.entities.attachment.EntityAttachment;
 import fr.moussax.blightedMC.engine.entities.immunity.EntityImmunity;
@@ -11,10 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -28,17 +25,20 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-import static fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity.ENTITY_ID_KEY;
-import static fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity.FAST_PASS_TAG;
+import static fr.moussax.blightedMC.engine.entities.BlightedEntity.ATTACHMENT_OWNER_KEY;
+import static fr.moussax.blightedMC.engine.entities.BlightedEntity.ATTACHMENT_ROLE_KEY;
+import static fr.moussax.blightedMC.engine.entities.BlightedEntity.ENTITY_ID_KEY;
+import static fr.moussax.blightedMC.engine.entities.BlightedEntity.FAST_PASS_TAG;
 
 public final class BlightedEntitiesListener implements Listener {
 
-    private static final Map<UUID, AbstractBlightedEntity> BLIGHTED_ENTITIES = new HashMap<>();
-    private static final Map<UUID, AbstractBlightedEntity> ATTACHMENT_OWNERS = new HashMap<>();
+    private static final Map<UUID, BlightedEntity> BLIGHTED_ENTITIES = new ConcurrentHashMap<>();
+    private static final Map<UUID, BlightedEntity> ATTACHMENT_OWNERS = new ConcurrentHashMap<>();
     private final ThreadLocal<Set<UUID>> processingDamageIds = ThreadLocal.withInitial(HashSet::new);
 
-    public static void registerEntity(LivingEntity entity, AbstractBlightedEntity blighted) {
+    public static void registerEntity(LivingEntity entity, BlightedEntity blighted) {
         if (entity == null || blighted == null) return;
         BLIGHTED_ENTITIES.put(entity.getUniqueId(), blighted);
     }
@@ -48,7 +48,7 @@ public final class BlightedEntitiesListener implements Listener {
         BLIGHTED_ENTITIES.remove(entity.getUniqueId());
     }
 
-    public static void registerAttachment(Entity attachment, AbstractBlightedEntity owner) {
+    public static void registerAttachment(Entity attachment, BlightedEntity owner) {
         if (attachment == null || owner == null) return;
         ATTACHMENT_OWNERS.put(attachment.getUniqueId(), owner);
     }
@@ -58,10 +58,10 @@ public final class BlightedEntitiesListener implements Listener {
         ATTACHMENT_OWNERS.remove(attachment.getUniqueId());
     }
 
-    public static AbstractBlightedEntity getBlightedEntity(Entity entity) {
+    public static BlightedEntity getBlightedEntity(Entity entity) {
         if (entity == null) return null;
         UUID id = entity.getUniqueId();
-        AbstractBlightedEntity blighted = BLIGHTED_ENTITIES.get(id);
+        BlightedEntity blighted = BLIGHTED_ENTITIES.get(id);
         return blighted != null ? blighted : ATTACHMENT_OWNERS.get(id);
     }
 
@@ -76,13 +76,13 @@ public final class BlightedEntitiesListener implements Listener {
 
         processing.add(entityId);
         try {
-            AbstractBlightedEntity owner = ATTACHMENT_OWNERS.get(entityId);
+            BlightedEntity owner = ATTACHMENT_OWNERS.get(entityId);
             if (owner != null) {
                 handleAttachmentDamage(owner, entity, event);
                 return;
             }
 
-            AbstractBlightedEntity blighted = BLIGHTED_ENTITIES.get(entityId);
+            BlightedEntity blighted = BLIGHTED_ENTITIES.get(entityId);
             if (blighted != null) {
                 handleBlightedEntityDamage(blighted, entity, event);
             }
@@ -92,7 +92,7 @@ public final class BlightedEntitiesListener implements Listener {
     }
 
     private void handleAttachmentDamage(
-        AbstractBlightedEntity owner,
+        BlightedEntity owner,
         LivingEntity attachmentEntity,
         EntityDamageEvent event
     ) {
@@ -113,7 +113,7 @@ public final class BlightedEntitiesListener implements Listener {
     }
 
     private void handleBlightedEntityDamage(
-        AbstractBlightedEntity blighted,
+        BlightedEntity blighted,
         LivingEntity entity,
         EntityDamageEvent event
     ) {
@@ -147,7 +147,7 @@ public final class BlightedEntitiesListener implements Listener {
         blighted.killAllAttachments();
     }
 
-    private void forwardDamageToBodyAttachments(AbstractBlightedEntity blighted, EntityDamageEvent event) {
+    private void forwardDamageToBodyAttachments(BlightedEntity blighted, EntityDamageEvent event) {
         if (blighted.attachments.isEmpty()) return;
 
         for (EntityAttachment attachment : new ArrayList<>(blighted.attachments)) {
@@ -160,7 +160,7 @@ public final class BlightedEntitiesListener implements Listener {
     }
 
     private boolean handleImmunity(
-        AbstractBlightedEntity blighted,
+        BlightedEntity blighted,
         LivingEntity entity,
         EntityDamageByEntityEvent event
     ) {
@@ -184,7 +184,7 @@ public final class BlightedEntitiesListener implements Listener {
 
         UUID id = entity.getUniqueId();
 
-        AbstractBlightedEntity owner = ATTACHMENT_OWNERS.get(id);
+        BlightedEntity owner = ATTACHMENT_OWNERS.get(id);
         if (owner != null) {
             // BODY attachment healed — sync health to owner
             if (resolveAttachmentRole(owner, entity) == AttachmentRole.BODY) {
@@ -196,12 +196,12 @@ public final class BlightedEntitiesListener implements Listener {
             return;
         }
 
-        AbstractBlightedEntity blighted = BLIGHTED_ENTITIES.get(id);
+        BlightedEntity blighted = BLIGHTED_ENTITIES.get(id);
         if (blighted == null) return;
 
         blighted.updateBossBar();
 
-        // Sync heal to BODY attachments
+        // Sync health to BODY attachments
         if (!blighted.attachments.isEmpty()) {
             double newHealth = clampedHealth(entity, event.getAmount());
             for (EntityAttachment attachment : blighted.attachments) {
@@ -220,13 +220,13 @@ public final class BlightedEntitiesListener implements Listener {
 
         UUID uuid = dead.getUniqueId();
 
-        AbstractBlightedEntity owner = ATTACHMENT_OWNERS.remove(uuid);
+        BlightedEntity owner = ATTACHMENT_OWNERS.remove(uuid);
         if (owner != null) {
             handleAttachmentDeath(owner, dead, event);
             return;
         }
 
-        AbstractBlightedEntity blighted = BLIGHTED_ENTITIES.remove(uuid);
+        BlightedEntity blighted = BLIGHTED_ENTITIES.remove(uuid);
         if (blighted == null) return;
 
         blighted.cleanup();
@@ -243,7 +243,7 @@ public final class BlightedEntitiesListener implements Listener {
     }
 
     private void handleAttachmentDeath(
-        AbstractBlightedEntity owner,
+        BlightedEntity owner,
         LivingEntity deadAttachment,
         EntityDeathEvent event
     ) {
@@ -262,28 +262,71 @@ public final class BlightedEntitiesListener implements Listener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
-        Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> rehydrateChunk(event.getChunk()), 1L);
+        Bukkit.getScheduler().runTaskLater(
+                BlightedMC.getInstance(),
+                () -> rehydrateChunk(event.getChunk()),
+                1L
+        );
+    }
+
+    public static Collection<BlightedEntity> getActiveEntities() {
+        return List.copyOf(BLIGHTED_ENTITIES.values());
     }
 
     public static void rehydrateChunk(Chunk chunk) {
-        for (Entity entity : chunk.getEntities()) {
+        Entity[] entities = chunk.getEntities();
+
+        // Pass 1: rehydrate main blighted entities.
+        for (Entity entity : entities) {
             if (!(entity instanceof LivingEntity living)) continue;
             if (!living.getScoreboardTags().contains(FAST_PASS_TAG)) continue;
-            if (BLIGHTED_ENTITIES.containsKey(living.getUniqueId())) continue;
 
             PersistentDataContainer pdc = living.getPersistentDataContainer();
             if (!pdc.has(ENTITY_ID_KEY, PersistentDataType.STRING)) continue;
 
-            String entityId = pdc.get(ENTITY_ID_KEY, PersistentDataType.STRING);
+            BlightedEntity existing = BLIGHTED_ENTITIES.get(living.getUniqueId());
+            if (existing != null) {
+                if (existing.getEntity() != living) {
+                    existing.attachToExisting(living);
+                }
+                continue;
+            }
 
-            AbstractBlightedEntity prototype = EntitiesRegistry.get(entityId);
+            String entityId = pdc.get(ENTITY_ID_KEY, PersistentDataType.STRING);
+            BlightedEntity prototype = EntitiesRegistry.get(entityId);
             if (prototype == null) continue;
 
             prototype.clone().attachToExisting(living);
         }
+
+        // Pass 2: re-register attachment entities whose owner is now in BLIGHTED_ENTITIES.
+        for (Entity entity : entities) {
+            if (!(entity instanceof LivingEntity living)) continue;
+            if (!living.getScoreboardTags().contains(FAST_PASS_TAG)) continue;
+
+            PersistentDataContainer pdc = living.getPersistentDataContainer();
+            if (!pdc.has(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING)) continue;
+
+            String ownerUuidStr = pdc.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
+            String roleStr = pdc.get(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING);
+            if (ownerUuidStr == null || roleStr == null) continue;
+
+            UUID ownerUuid;
+            try { ownerUuid = UUID.fromString(ownerUuidStr); } catch (IllegalArgumentException ignored) { continue; }
+
+            BlightedEntity owner = BLIGHTED_ENTITIES.get(ownerUuid);
+            if (owner == null) continue;
+
+            AttachmentRole role;
+            try { role = AttachmentRole.valueOf(roleStr); } catch (IllegalArgumentException ignored) { role = AttachmentRole.DEPENDENT; }
+
+            owner.attachments.removeIf(a -> a.entity() != null && a.entity().getUniqueId().equals(living.getUniqueId()));
+            owner.attachments.add(new EntityAttachment(living, role));
+            registerAttachment(living, owner);
+        }
     }
 
-    private AttachmentRole resolveAttachmentRole(AbstractBlightedEntity owner, LivingEntity attachmentEntity) {
+    private AttachmentRole resolveAttachmentRole(BlightedEntity owner, LivingEntity attachmentEntity) {
         UUID targetId = attachmentEntity.getUniqueId();
         for (EntityAttachment attachment : owner.attachments) {
             if (attachment.entity() != null

@@ -1,14 +1,9 @@
 package fr.moussax.blightedMC.shared.loot;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-/**
- * Represents a table of loot entries that can be rolled and executed.
- *
- * <p>The table applies a global condition, a roll chance, and a
- * {@link LootSelectionStrategy} to determine which entries are selected.
- * Selected entries are then executed via their {@link LootResult}.</p>
- */
 public final class LootTable {
     private final List<LootEntry> entries;
     private final LootCondition globalCondition;
@@ -27,13 +22,6 @@ public final class LootTable {
         this.rollChance = rollChance;
     }
 
-    /**
-     * Rolls the loot table for the given context, returning the selected loot
-     * with rolled amounts.
-     *
-     * @param context the loot context
-     * @return list of selected loot, empty if none selected
-     */
     public List<SelectedLoot> roll(LootContext context) {
         if (!globalCondition.test(context)) {
             return Collections.emptyList();
@@ -62,11 +50,6 @@ public final class LootTable {
         return results;
     }
 
-    /**
-     * Rolls and executes all selected loot for the given context.
-     *
-     * @param context the loot context
-     */
     public void execute(LootContext context) {
         List<SelectedLoot> selected = roll(context);
         for (SelectedLoot loot : selected) {
@@ -74,12 +57,10 @@ public final class LootTable {
         }
     }
 
-    /** @return true if the table contains no entries */
     public boolean isEmpty() {
         return entries.isEmpty();
     }
 
-    /** @return a new builder for constructing a LootTable */
     public static Builder builder() {
         return new Builder();
     }
@@ -90,43 +71,36 @@ public final class LootTable {
         private LootSelectionStrategy selectionStrategy;
         private double rollChance = 1.0;
 
-        /** Adds a single loot entry to the table. */
         public Builder addEntry(LootEntry entry) {
             entries.add(entry);
             return this;
         }
 
-        /** Adds multiple loot entries to the table. */
         public Builder addEntries(LootEntry... entries) {
             Collections.addAll(this.entries, entries);
             return this;
         }
 
-        /** Adds a list of loot entries to the table. */
         public Builder addEntries(List<LootEntry> entries) {
             this.entries.addAll(entries);
             return this;
         }
 
-        /** Sets the global condition applied to all entries. */
         public Builder globalCondition(LootCondition condition) {
             this.globalCondition = condition;
             return this;
         }
 
-        /** Sets the selection strategy for this table. */
         public Builder selectionStrategy(LootSelectionStrategy strategy) {
             this.selectionStrategy = strategy;
             return this;
         }
 
-        /** Sets the overall chance that the table will completely roll (0.0-1.0). */
         public Builder rollChance(double chance) {
-            this.rollChance = Math.max(0.0, Math.min(1.0, chance));
+            this.rollChance = Math.clamp(chance, 0.0, 1.0);
             return this;
         }
 
-        /** Builds the {@link LootTable}. Must have a selection strategy. */
         public LootTable build() {
             if (selectionStrategy == null) {
                 throw new IllegalStateException("Selection strategy must be set");
@@ -135,11 +109,6 @@ public final class LootTable {
         }
     }
 
-    /**
-     * Represents a single selected loot result with its rolled amount.
-     *
-     * @param result the loot result
-     * @param amount the amount rolled
-     */
-    public record SelectedLoot(LootResult result, int amount) {}
+    public record SelectedLoot(LootResult result, int amount) {
+    }
 }

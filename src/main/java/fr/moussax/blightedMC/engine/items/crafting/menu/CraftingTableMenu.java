@@ -18,7 +18,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
-public class CraftingTableMenu extends InteractiveMenu {
+public final class CraftingTableMenu extends InteractiveMenu {
 
     private static final int OUTPUT_SLOT = 23;
     private static final int[] INPUT_SLOTS = {10, 11, 12, 19, 20, 21, 28, 29, 30};

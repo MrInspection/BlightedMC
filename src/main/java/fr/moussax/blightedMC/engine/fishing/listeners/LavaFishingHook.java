@@ -16,13 +16,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class LavaFishingHook {
+public final class LavaFishingHook {
     private static final Map<UUID, LavaFishingHook> ACTIVE_HOOKS = new HashMap<>();
 
     private static final double FLOAT_TARGET_HIGH = 0.85;
@@ -219,5 +216,9 @@ public class LavaFishingHook {
 
     public static LavaFishingHook get(FishHook hook) {
         return ACTIVE_HOOKS.get(hook.getUniqueId());
+    }
+
+    public static void cleanupAll() {
+        new ArrayList<>(ACTIVE_HOOKS.values()).forEach(LavaFishingHook::remove);
     }
 }

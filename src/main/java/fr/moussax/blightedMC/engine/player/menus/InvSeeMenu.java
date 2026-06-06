@@ -15,7 +15,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
-public class InvSeeMenu extends Menu {
+public final class InvSeeMenu extends Menu {
     private final Player target;
     private BukkitTask refreshTask;
 

@@ -9,13 +9,7 @@ import org.bukkit.Material;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Fluent builder for constructing {@link BlightedShapelessRecipe} instances.
- * <p>
- * Allows incremental declaration of ingredients without positional
- * constraints.
- */
-public class ShapelessRecipeBuilder {
+public final class ShapelessRecipeBuilder {
 
     private final BlightedItem result;
     private final List<CraftingObject> ingredients = new ArrayList<>();
@@ -25,45 +19,18 @@ public class ShapelessRecipeBuilder {
         this.result = result;
     }
 
-    /**
-     * Creates a builder for a shapeless recipe producing the given item.
-     *
-     * @param result the resulting item
-     * @return a new builder instance
-     */
     public static ShapelessRecipeBuilder of(BlightedItem result) {
         return new ShapelessRecipeBuilder(result);
     }
 
-    /**
-     * Creates a builder for a shapeless recipe using a result item ID.
-     *
-     * @param resultId the result item identifier
-     * @return a new builder instance
-     */
     public static ShapelessRecipeBuilder of(String resultId) {
         return new ShapelessRecipeBuilder(ItemRegistry.getItem(resultId));
     }
 
-    /**
-     * Adds a material ingredient.
-     *
-     * @param material the material to add
-     * @param amount   the required amount
-     * @return this builder
-     */
     public ShapelessRecipeBuilder addIngredient(Material material, int amount) {
         return addIngredient(material, amount, false);
     }
 
-    /**
-     * Adds a material ingredient with optional attribute transfer.
-     *
-     * @param material          the material to add
-     * @param amount            the required amount
-     * @param isAttributeSource if true, the result inherits attributes from this item
-     * @return this builder
-     */
     public ShapelessRecipeBuilder addIngredient(Material material, int amount, boolean isAttributeSource) {
         CraftingObject obj = new CraftingObject(material, amount);
         ingredients.add(obj);
@@ -71,25 +38,10 @@ public class ShapelessRecipeBuilder {
         return this;
     }
 
-    /**
-     * Adds a custom item ingredient.
-     *
-     * @param item   the item to add
-     * @param amount the required amount
-     * @return this builder
-     */
     public ShapelessRecipeBuilder addIngredient(BlightedItem item, int amount) {
         return addIngredient(item, amount, false);
     }
 
-    /**
-     * Adds a custom item ingredient with optional attribute transfer.
-     *
-     * @param item              the item to add
-     * @param amount            the required amount
-     * @param isAttributeSource if true, the result inherits attributes from this item
-     * @return this builder
-     */
     public ShapelessRecipeBuilder addIngredient(BlightedItem item, int amount, boolean isAttributeSource) {
         CraftingObject obj = new CraftingObject(item, amount);
         ingredients.add(obj);
@@ -97,34 +49,14 @@ public class ShapelessRecipeBuilder {
         return this;
     }
 
-    /**
-     * Adds a custom item ingredient using its item ID.
-     *
-     * @param itemId the item identifier
-     * @param amount the required amount
-     * @return this builder
-     */
     public ShapelessRecipeBuilder addIngredient(String itemId, int amount) {
         return addIngredient(ItemRegistry.getItem(itemId), amount, false);
     }
 
-    /**
-     * Adds a custom item ingredient using its item ID with optional attribute transfer.
-     *
-     * @param itemId            the item identifier
-     * @param amount            the required amount
-     * @param isAttributeSource if true, the result inherits attributes from this item
-     * @return this builder
-     */
     public ShapelessRecipeBuilder addIngredient(String itemId, int amount, boolean isAttributeSource) {
         return addIngredient(ItemRegistry.getItem(itemId), amount, isAttributeSource);
     }
 
-    /**
-     * Builds the shapeless recipe.
-     *
-     * @return the constructed {@link BlightedShapelessRecipe}
-     */
     public BlightedShapelessRecipe build() {
         BlightedShapelessRecipe recipe = new BlightedShapelessRecipe(result);
         for (CraftingObject ingredient : ingredients) {

@@ -78,6 +78,10 @@ public class GemsCommand implements CommandExecutor {
         int amount;
         try {
             amount = Integer.parseInt(args[2]);
+            if (amount < 0) {
+                warn(sender, "Amount must be a positive number.");
+                return false;
+            }
         } catch (NumberFormatException e) {
             warn(sender, "Amount must be a positive number.");
             return false;
@@ -116,6 +120,10 @@ public class GemsCommand implements CommandExecutor {
         int amount;
         try {
             amount = Integer.parseInt(args[2]);
+            if (amount < 0) {
+                warn(sender, "Amount must be a positive number.");
+                return false;
+            }
         } catch (NumberFormatException e) {
             warn(sender, "Amount must be a positive number.");
             return false;
@@ -165,6 +173,10 @@ public class GemsCommand implements CommandExecutor {
         int amount;
         try {
             amount = Integer.parseInt(args[1]);
+            if (amount < 0) {
+                warn(sender, "Amount must be a positive number.");
+                return false;
+            }
         } catch (NumberFormatException e) {
             warn(sender, "Amount must be a positive number.");
             return false;

@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.engine.entities.spawnable.condition;
 import org.bukkit.Material;
 import org.bukkit.Raid;
 import org.bukkit.World;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.TrialSpawner.State;
 import org.bukkit.generator.structure.GeneratedStructure;
@@ -26,54 +27,42 @@ import java.util.Set;
  */
 public final class SpawnRules {
 
-    private SpawnRules() {}
+    private SpawnRules() {
+    }
 
-    /**
-     * Restricts spawning to the given biomes.
-     */
-    public static SpawnCondition biome(org.bukkit.block.Biome... allowed) {
-        Set<org.bukkit.block.Biome> biomeSet = Set.of(allowed);
+    public static SpawnCondition biome(Biome... allowed) {
+        Set<Biome> biomeSet = Set.of(allowed);
         return (loc, world) -> biomeSet.contains(loc.getBlock().getBiome());
     }
 
-    /**
-     * Restricts spawning to the given world environment (e.g. NETHER, THE_END, NORMAL).
-     */
     public static SpawnCondition environment(World.Environment environment) {
         return (loc, world) -> world.getEnvironment() == environment;
     }
 
-    /** Requires the spawn Y level to be at least {@code minY}. */
     public static SpawnCondition atLeastY(int minY) {
         return (loc, world) -> loc.getBlockY() >= minY;
     }
 
-    /** Requires the spawn Y level to be at most {@code maxY}. */
     public static SpawnCondition atMostY(int maxY) {
         return (loc, world) -> loc.getBlockY() <= maxY;
     }
 
-    /** Requires block light (from torches, lava, etc.) to be at most {@code max}. */
     public static SpawnCondition maxBlockLight(int max) {
         return (loc, world) -> loc.getBlock().getLightFromBlocks() <= max;
     }
 
-    /** Requires total light level (block + sky) to be at most {@code max}. */
     public static SpawnCondition maxLightLevel(int max) {
         return (loc, world) -> loc.getBlock().getLightLevel() <= max;
     }
 
-    /** Requires the spawn location to be directly exposed to the sky. */
     public static SpawnCondition skyExposed() {
         return (loc, world) -> world.getHighestBlockYAt(loc) <= loc.getBlockY();
     }
 
-    /** Disallows spawning in liquid blocks. */
     public static SpawnCondition notInLiquid() {
         return (loc, world) -> !loc.getBlock().isLiquid();
     }
 
-    /** Allows spawning only at night (world time between 13000 and 23000). */
     public static SpawnCondition nightTime() {
         return (loc, world) -> {
             long time = world.getTime();
@@ -81,27 +70,18 @@ public final class SpawnRules {
         };
     }
 
-    /** Allows spawning only when no storm is active. */
     public static SpawnCondition clearSky() {
         return (loc, world) -> !world.hasStorm();
     }
 
-    /** Allows spawning only during a storm. */
     public static SpawnCondition isRaining() {
         return (loc, world) -> world.hasStorm();
     }
 
-    /** Allows spawning only during a thunderstorm. */
     public static SpawnCondition isThundering() {
         return (loc, world) -> world.isThundering();
     }
 
-    /**
-     * Allows spawning only inside the bounding box of the given structure.
-     *
-     * @param structure target structure type
-     * @return condition matching locations within structure pieces
-     */
     public static SpawnCondition insideStructure(Structure structure) {
         return (loc, world) -> {
             int chunkX = loc.getBlockX() >> 4;

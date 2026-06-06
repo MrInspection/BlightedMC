@@ -17,22 +17,28 @@ public interface AbilityManager<T extends Event> {
      */
     boolean triggerAbility(T event);
 
-    /** @return cooldown duration in seconds */
+    /**
+     * @return cooldown duration in seconds
+     */
     int getCooldownSeconds();
 
-    /** @return mana cost required to activate the ability */
     int getManaCost();
 
-    /** @return whether the ability can currently be triggered */
+    /**
+     * @return whether the ability can currently be triggered
+     */
     boolean canTrigger(BlightedPlayer player);
 
-    /** Called after a successful activation */
+    /**
+     * Called after a successful activation
+     */
     void start(BlightedPlayer player);
 
-    /** Stops and cleans up the ability */
+    /**
+     * Stops and cleans up the ability
+     */
     void stop(BlightedPlayer player);
 
-    /** @return ability description lines */
     default String[] getDescription() {
         return new String[0];
     }

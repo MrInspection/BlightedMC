@@ -1,12 +1,12 @@
 package fr.moussax.blightedMC.content.items;
 
+import fr.moussax.blightedMC.content.items.abilities.WitherImpactAbility;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
 import fr.moussax.blightedMC.engine.items.registry.ItemProvider;
-import fr.moussax.blightedMC.content.items.abilities.WitherImpactAbility;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 

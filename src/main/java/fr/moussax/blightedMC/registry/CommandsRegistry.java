@@ -5,7 +5,7 @@ import fr.moussax.blightedMC.commands.TeleportPositionCommand;
 import fr.moussax.blightedMC.commands.TestCommand;
 import fr.moussax.blightedMC.commands.see.EnderSeeCommand;
 import fr.moussax.blightedMC.commands.see.InvSeeCommand;
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
@@ -40,6 +40,6 @@ public final class CommandsRegistry {
     private static void registerTabSuggestions() {
         TabSuggestionRegistry.register("$players", () -> Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
         TabSuggestionRegistry.register("$items", () -> ItemRegistry.getAllItems().stream().map(BlightedItem::getItemId).toList());
-        TabSuggestionRegistry.register("$entities", () -> EntitiesRegistry.getAll().stream().map(AbstractBlightedEntity::getEntityId).toList());
+        TabSuggestionRegistry.register("$entities", () -> EntitiesRegistry.getAll().stream().map(BlightedEntity::getEntityId).toList());
     }
 }

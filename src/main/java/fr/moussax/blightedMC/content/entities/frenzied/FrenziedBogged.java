@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.content.entities.ravenous;
+package fr.moussax.blightedMC.content.entities.frenzied;
 
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
@@ -18,28 +18,27 @@ import java.util.Objects;
 
 import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class RavenousStray extends RavenousCreature {
-    public RavenousStray() {
-        super("RAVENOUS_STRAY", "Ravenous Stray", EntityType.STRAY);
-        itemInMainHand = new ItemStack(Material.BOW);
+public final class FrenziedBogged extends FrenziedSkirmisher {
+    public FrenziedBogged() {
+        super("FRENZIED_BOGGED", "Frenzied Bogged", EntityType.BOGGED);
         setDamage(6);
         setDroppedExp(12);
+        itemInMainHand = new ItemStack(Material.BOW);
         setLootTable(new EntityLootTableBuilder()
-            .setMaxDrop(4)
-            .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
+            .addLoot(Material.BONE, 2, 4, 1.0, COMMON)
             .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
             .addLoot(
                 Material.TIPPED_ARROW, b -> b.setItemMeta(
-                    meta -> ((PotionMeta) meta).setBasePotionType(PotionType.SLOWNESS)
+                    meta -> ((PotionMeta) meta).setBasePotionType(PotionType.POISON)
                 ),
                 1,
                 3,
                 0.4,
                 UNCOMMON
             )
+            .addLootWithDurabilityRange(Material.BOW, 0.10, 0.75, 0.15, RARE)
             .addGemsLoot(5, 0.04, VERY_RARE)
-            .build()
-        );
+            .build());
     }
 
     @Override
@@ -47,7 +46,7 @@ public final class RavenousStray extends RavenousCreature {
         entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PotionEffect.INFINITE_DURATION, 1));
         entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 0));
         Objects.requireNonNull(entity.getEquipment()).setItemInMainHand(
-            new ItemBuilder(Material.BOW).addEnchantment(Enchantment.POWER, 2).toItemStack()
+            new ItemBuilder(Material.BOW).addEnchantment(Enchantment.POWER, 1).toItemStack()
         );
     }
 
@@ -55,18 +54,11 @@ public final class RavenousStray extends RavenousCreature {
     protected void defineSpawnConditions() {
         addCondition(
             SpawnRules.biome(
-                    Biome.SNOWY_PLAINS,
-                    Biome.ICE_SPIKES,
-                    Biome.FROZEN_OCEAN,
-                    Biome.DEEP_FROZEN_OCEAN,
-                    Biome.FROZEN_RIVER,
-                    Biome.SNOWY_SLOPES,
-                    Biome.JAGGED_PEAKS,
-                    Biome.FROZEN_PEAKS
+                    Biome.SWAMP,
+                    Biome.MANGROVE_SWAMP
                 )
                 .and(SpawnRules.maxBlockLight(0))
                 .and(SpawnRules.maxLightLevel(7))
-                .and(SpawnRules.skyExposed())
                 .and(SpawnRules.notInLiquid())
         );
     }

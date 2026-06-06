@@ -53,7 +53,7 @@ public final class FishingLootTable {
         private double entityRollChance = 0.15;
 
         public Builder setEntityRollChance(double chance) {
-            this.entityRollChance = Math.max(0.0, Math.min(1.0, chance));
+            this.entityRollChance = Math.clamp(chance, 0.0, 1.0);
             return this;
         }
 

@@ -23,7 +23,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
-public class BlightedBlockListener implements Listener {
+public final class BlightedBlockListener implements Listener {
     private final BlightedMC plugin = BlightedMC.getInstance();
     private final NamespacedKey BLOCK_ID_KEY = new NamespacedKey(plugin, "blighted_block_id");
     private final PluginDatabase database;
@@ -33,14 +33,12 @@ public class BlightedBlockListener implements Listener {
     }
 
     private String getBlockId(Block block) {
-        // 1. Check Metadata (Cache)
         if (block.hasMetadata("blighted_id")) {
             for (MetadataValue value : block.getMetadata("blighted_id")) {
                 if (value.getOwningPlugin() == plugin) return value.asString();
             }
         }
 
-        // 2. Check PDC
         BlockState state = block.getState();
         if (state instanceof TileState tile) {
             PersistentDataContainer pdc = tile.getPersistentDataContainer();
@@ -51,13 +49,11 @@ public class BlightedBlockListener implements Listener {
             }
         }
 
-        // 3. Check Database (Fallback)
         String id = database.getBlockId(block.getWorld().getUID(), block.getX(), block.getY(), block.getZ());
         if (id != null) {
             cacheMetadata(block, id);
             return id;
         }
-
         return null;
     }
 
@@ -76,17 +72,14 @@ public class BlightedBlockListener implements Listener {
 
         Block placed = event.getBlockPlaced();
 
-        // Save to PDC if applicable
         BlockState state = placed.getState();
         if (state instanceof TileState tile) {
             tile.getPersistentDataContainer().set(BLOCK_ID_KEY, PersistentDataType.STRING, id);
             tile.update();
         }
 
-        // Save to Database
         database.addBlock(placed.getWorld().getUID(), placed.getX(), placed.getY(), placed.getZ(), id);
 
-        // Cache Metadata
         cacheMetadata(placed, id);
         customBlock.onPlace(event);
     }
@@ -119,7 +112,6 @@ public class BlightedBlockListener implements Listener {
 
         Location blockLocation = block.getLocation();
 
-        // Handle Drops
         ItemStack drop = customBlock.onBreak(event, customBlock.getBlightedItem().toItemStack());
         if (drop != null) {
             block.getWorld().dropItemNaturally(blockLocation, drop);

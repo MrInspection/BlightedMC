@@ -4,13 +4,13 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.engine.items.forging.ForgeRecipe;
 import fr.moussax.blightedMC.engine.items.forging.registry.ForgeRegistry;
+import fr.moussax.blightedMC.shared.formatting.Formatter;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.PaginatedMenu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.utils.Utilities;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -21,14 +21,6 @@ import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Paginated menu displaying all registered forge recipes.
- * <p>
- * Allows players to browse available forge recipes, view required ingredients
- * and fuel cost, and select a recipe to open the {@link ForgeMenu} for forging.
- * Navigation buttons for paging, closing, and returning to a previous menu are included.
- * </p>
- */
 public final class ForgeRecipesMenu extends PaginatedMenu {
     private static final int[] RECIPE_SLOTS = {
         10, 11, 12, 13, 14, 15, 16,
@@ -52,11 +44,6 @@ public final class ForgeRecipesMenu extends PaginatedMenu {
     private final Menu previousMenu;
     private final List<ForgeRecipe> cachedRecipes;
 
-    /**
-     * Constructs a ForgeRecipesMenu.
-     *
-     * @param previousMenu the menu to return to when pressing back
-     */
     public ForgeRecipesMenu(Menu previousMenu) {
         super("Forge Recipes", 54);
         this.previousMenu = previousMenu;

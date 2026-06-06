@@ -13,7 +13,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
-public class EnderSeeMenu extends Menu {
+public final class EnderSeeMenu extends Menu {
     private final Player target;
     private BukkitTask refreshTask;
     private Menu previousMenu;

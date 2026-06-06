@@ -1,8 +1,8 @@
 package fr.moussax.blightedMC.engine.entities.registry;
 
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.content.entities.ravenous.*;
+import fr.moussax.blightedMC.content.entities.frenzied.*;
 import fr.moussax.blightedMC.content.entities.bosses.TheAncientKnight;
 import fr.moussax.blightedMC.content.entities.Illusioner;
 import fr.moussax.blightedMC.content.entities.Watchling;
@@ -10,61 +10,47 @@ import fr.moussax.blightedMC.content.entities.powerful.Endersent;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Central registry for all custom entities in BlightedMC.
- * <p>
- * Maintains a mapping of entity IDs to entity prototypes and handles registration,
- * retrieval, and automatic delegation to {@link SpawnableEntitiesRegistry} for spawnable entities.
- * <p>
- * The registry supports cloning of prototypes on retrieval to prevent shared state between instances.
- */
 public final class EntitiesRegistry {
+    private static final Map<String, BlightedEntity> ENTITIES = new HashMap<>();
 
-    private static final Map<String, AbstractBlightedEntity> ENTITIES = new HashMap<>();
-
-    private static final List<AbstractBlightedEntity> DEFAULT_ENTITIES = List.of(
+    private static final List<BlightedEntity> DEFAULT_ENTITIES = List.of(
         new TheAncientKnight(),
-        new RavenousBogged(),
-        new RavenousDrowned(),
-        new RavenousHusk(),
-        new RavenousParched(),
-        new RavenousPiglin(),
-        new RavenousSkeleton(),
-        new RavenousStray(),
-        new RavenousWitherSkeleton(),
-        new RavenousZombie(),
-        new RavenousZombifiedPiglin(),
+        new FrenziedBogged(),
+        new FrenziedDrowned(),
+        new FrenziedHusk(),
+        new FrenziedParched(),
+        new FrenziedPiglin(),
+        new FrenziedSkeleton(),
+        new FrenziedStray(),
+        new FrenziedWitherSkeleton(),
+        new FrenziedZombie(),
+        new FrenziedZombifiedPiglin(),
         new Endersent(),
         new Watchling(),
         new Illusioner()
     );
 
+    private static final List<Runnable> onRegisterCallbacks = new ArrayList<>();
+
     private EntitiesRegistry() {
     }
 
-    /**
-     * Initializes the entity registry by clearing existing entries and registering default entities.
-     * Automatically registers spawnable entities in {@link SpawnableEntitiesRegistry}.
-     */
+    public static void addOnRegisterCallback(Runnable callback) {
+        onRegisterCallbacks.add(callback);
+    }
+
     public static void initialize() {
         clear();
         DEFAULT_ENTITIES.forEach(EntitiesRegistry::register);
         Log.success("EntitiesRegistry", "Registered " + ENTITIES.size() + " entities (spawnable: " + SpawnableEntitiesRegistry.count() + ").");
     }
 
-    /**
-     * Registers a single entity prototype.
-     * <p>
-     * If the entity implements {@link SpawnableEntity}, it is also registered in
-     * {@link SpawnableEntitiesRegistry}.
-     *
-     * @param entity the entity prototype to register
-     */
-    public static void register(AbstractBlightedEntity entity) {
+    public static void register(BlightedEntity entity) {
         if (ENTITIES.containsKey(entity.getEntityId())) {
             Log.warn("EntitiesRegistry", "Duplicate entity ID detected: " + entity.getEntityId() + ". Skipping.");
             return;
@@ -75,36 +61,31 @@ public final class EntitiesRegistry {
         if (entity instanceof SpawnableEntity spawnable) {
             SpawnableEntitiesRegistry.register(spawnable);
         }
+
+        onRegisterCallbacks.forEach(callback -> {
+            try {
+                callback.run();
+            } catch (Throwable t) {
+                Log.error("EntitiesRegistry", "Failed to execute onRegister callback: " + t.getMessage());
+            }
+        });
     }
 
-    /**
-     * Retrieves a cloned instance of the entity by its ID.
-     *
-     * @param entityId the unique entity ID
-     * @return a cloned entity, or null if not found
-     */
     @Nullable
-    public static AbstractBlightedEntity get(String entityId) {
-        AbstractBlightedEntity prototype = ENTITIES.get(entityId);
+    public static BlightedEntity get(String entityId) {
+        BlightedEntity prototype = ENTITIES.get(entityId);
         return prototype != null ? prototype.clone() : null;
     }
 
-    /**
-     * Retrieves clones of all registered entities.
-     *
-     * @return a list of cloned entities
-     */
-    public static List<AbstractBlightedEntity> getAll() {
+    public static List<BlightedEntity> getAll() {
         return ENTITIES.values().stream()
-            .map(AbstractBlightedEntity::clone)
+            .map(BlightedEntity::clone)
             .toList();
     }
 
-    /**
-     * Clears all registered entities and resets the spawnable entity registry.
-     */
     public static void clear() {
         ENTITIES.clear();
         SpawnableEntitiesRegistry.clear();
+        onRegisterCallbacks.clear();
     }
 }

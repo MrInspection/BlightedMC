@@ -1,12 +1,12 @@
 package fr.moussax.blightedMC.engine.entities.rituals;
 
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.shared.sound.SoundSequence;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.jspecify.annotations.NonNull;
 
-public abstract class AncientCreature extends AbstractBlightedEntity {
+public abstract class AncientCreature extends BlightedEntity {
     public AncientCreature(@NonNull String name, int maxHealth, EntityType entityType) {
         super(name, maxHealth, entityType);
     }

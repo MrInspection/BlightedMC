@@ -1,38 +1,37 @@
 package fr.moussax.blightedMC.content.entities.bosses;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
-import fr.moussax.blightedMC.engine.entities.EntityImmunities;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.BlightedType;
+import fr.moussax.blightedMC.engine.entities.EntityImmunities;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @EntityImmunities(EntityImmunities.ImmunityType.PROJECTILE)
-public class TheAncientKnight extends AbstractBlightedEntity {
+public class TheAncientKnight extends BlightedEntity {
 
-    private final List<StabPlayer> activeStabs = new ArrayList<>();
+    private final List<StabPlayer> activeStabs = new CopyOnWriteArrayList<>();
 
     public TheAncientKnight() {
         super("The Ancient Knight", 250, 30, EntityType.ZOMBIE);
         addAttribute(Attribute.SCALE, 4);
         setBlightedType(BlightedType.BOSS);
-        setPersistent(true);
 
         armor = new ItemStack[]{
-            new ItemStack(Material.NETHERITE_BOOTS),
-            new ItemStack(Material.NETHERITE_LEGGINGS),
-            new ItemStack(Material.NETHERITE_CHESTPLATE),
-            new ItemStack(Material.NETHERITE_HELMET)
+                new ItemStack(Material.NETHERITE_BOOTS),
+                new ItemStack(Material.NETHERITE_LEGGINGS),
+                new ItemStack(Material.NETHERITE_CHESTPLATE),
+                new ItemStack(Material.NETHERITE_HELMET)
         };
 
         itemInMainHand = new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack();
@@ -40,33 +39,26 @@ public class TheAncientKnight extends AbstractBlightedEntity {
 
     @Override
     protected void onDefineBehavior() {
-        transitionToPhase(1);
-    }
+        registerPhase(1.0, () -> addPhaseAbility(100L, 300L, this::stabNearestPlayer));
+        registerPhase(0.5, () -> {
+            addPhaseAbility(60L, 180L, this::stabNearestPlayer);
+            addPhaseAbility(20L, 40L, this::meleeNearestPlayer);
 
-    @Override
-    protected void onPhaseTransition(int phase) {
-        if (phase == 1) {
-            // Phase 1 — slow stab every 15s
-            addAbility(100L, 300L, this::stabNearestPlayer);
-        } else if (phase == 2) {
-            // Phase 2 (≤50% HP) — faster stab + melee targeting
-            addAbility(60L, 180L, this::stabNearestPlayer);
-            addAbility(20L, 40L, this::meleeNearestPlayer);
-        }
-    }
-
-    @Override
-    public void onDamageTaken(EntityDamageEvent event) {
-        double remaining = entity.getHealth() - event.getFinalDamage();
-        if (remaining <= maxHealth * 0.5 && getCurrentPhase() < 2) {
-            transitionToPhase(2);
-        }
+            if (entity != null) {
+                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1.0f, 0.8f);
+                entity.getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 50, 1.0, 2.0, 1.0, 0.1);
+            }
+        });
     }
 
     private void stabNearestPlayer() {
         Player target = getNearestPlayer(20);
         if (target == null) return;
-        activeStabs.add(new StabPlayer(BlightedPlayer.getBlightedPlayer(target), this));
+
+        BlightedPlayer blightedTarget = BlightedPlayer.getBlightedPlayer(target);
+        if (blightedTarget == null) return;
+
+        activeStabs.add(new StabPlayer(blightedTarget, this));
     }
 
     private void meleeNearestPlayer() {
@@ -83,7 +75,13 @@ public class TheAncientKnight extends AbstractBlightedEntity {
     @Override
     public TheAncientKnight clone() {
         TheAncientKnight clone = (TheAncientKnight) super.clone();
-        clone.activeStabs.clear();
+        try {
+            var field = TheAncientKnight.class.getDeclaredField("activeStabs");
+            field.setAccessible(true);
+            field.set(clone, new CopyOnWriteArrayList<>());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to clone activeStabs", e);
+        }
         return clone;
     }
 
@@ -101,12 +99,13 @@ public class TheAncientKnight extends AbstractBlightedEntity {
 
     private void stopAllStabs() {
         for (StabPlayer stab : new ArrayList<>(activeStabs)) {
-            try { stab.cancel(); } catch (IllegalStateException ignored) {}
+            try {
+                stab.cancel();
+            } catch (IllegalStateException ignored) {
+            }
         }
         activeStabs.clear();
     }
-
-    // -------------------------------------------------------------------------
 
     private static class StabPlayer extends BukkitRunnable {
         private final BlightedPlayer target;
@@ -136,7 +135,7 @@ public class TheAncientKnight extends AbstractBlightedEntity {
                 g.setSilent(true);
                 g.setGravity(false);
                 Objects.requireNonNull(g.getEquipment())
-                    .setItemInMainHand(new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack());
+                        .setItemInMainHand(new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack());
             });
         }
 
@@ -150,7 +149,7 @@ public class TheAncientKnight extends AbstractBlightedEntity {
             if (tick == 0) {
                 stabledLocation = target.getPlayer().getLocation();
                 Objects.requireNonNull(stabledLocation.getWorld())
-                    .playSound(stabledLocation, Sound.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, 1f, 0.75f);
+                        .playSound(stabledLocation, Sound.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, 1f, 0.75f);
             }
 
             if (tick < 90) {
@@ -188,9 +187,9 @@ public class TheAncientKnight extends AbstractBlightedEntity {
             world.playSound(stabledLocation, Sound.BLOCK_ANVIL_LAND, 1f, 0.5f);
 
             world.getNearbyEntities(stabledLocation, 6, 6, 6).stream()
-                .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-                .map(e -> (Player) e)
-                .forEach(player -> player.damage(16, swordEntity));
+                    .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+                    .map(e -> (Player) e)
+                    .forEach(player -> player.damage(16, swordEntity));
         }
 
         @Override

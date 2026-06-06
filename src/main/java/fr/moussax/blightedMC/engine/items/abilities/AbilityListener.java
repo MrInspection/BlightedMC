@@ -9,11 +9,13 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseArmorEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.HashSet;
 import java.util.List;
@@ -53,8 +55,11 @@ public final class AbilityListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
+
         boolean isArmorSlot = event.getSlotType() == InventoryType.SlotType.ARMOR;
-        if (isArmorSlot || event.isShiftClick()) {
+        boolean isNumberKey = event.getClick().name().contains("NUMBER_KEY");
+
+        if (isArmorSlot || event.isShiftClick() || isNumberKey) {
             scheduleArmorUpdate(player);
         }
     }
@@ -64,10 +69,17 @@ public final class AbilityListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) return;
 
         for (int slot : event.getRawSlots()) {
-            if (slot >= 5 && slot <= 8) {
+            if (slot >= 5 && slot <= 8) { // Standard survival inventory armor slots
                 scheduleArmorUpdate(player);
                 return;
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockDispenseArmor(BlockDispenseArmorEvent event) {
+        if (event.getTargetEntity() instanceof Player player) {
+            scheduleArmorUpdate(player);
         }
     }
 
@@ -75,13 +87,6 @@ public final class AbilityListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID uniqueId = event.getPlayer().getUniqueId();
         dirtyArmorPlayers.remove(uniqueId);
-
-        BlightedPlayer player = BlightedPlayer.getBlightedPlayer(event.getPlayer());
-        if (player == null) return;
-
-        for (FullSetBonus bonus : player.getActiveFullSetBonuses()) {
-            bonus.deactivate();
-        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -117,12 +122,16 @@ public final class AbilityListener implements Listener {
         if (event.getItem() != null && isArmorMaterial(event.getItem().getType().name())) {
             scheduleArmorUpdate(event.getPlayer());
         }
+
+        // Prevent double triggering from off-hand interactions
+        if (event.getHand() != EquipmentSlot.HAND) return;
+
         trigger(event.getPlayer(), event);
     }
 
     private boolean isArmorMaterial(String name) {
         return name.endsWith("_HELMET") || name.endsWith("_CHESTPLATE")
-            || name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS");
+                || name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS") || name.equals("ELYTRA");
     }
 
     private <T extends Event> void trigger(Player player, T event) {

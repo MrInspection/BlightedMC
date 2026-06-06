@@ -1,10 +1,10 @@
 package fr.moussax.blightedMC.engine.entities.attachment;
 
-import fr.moussax.blightedMC.engine.entities.AbstractBlightedEntity;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import org.bukkit.entity.Entity;
 
 /**
- * Associates a Bukkit {@link Entity} with its role in a parent {@link AbstractBlightedEntity}.
+ * Associates a Bukkit {@link Entity} with its role in a parent {@link BlightedEntity}.
  *
  * <p>The {@link AttachmentRole} determines the lifecycle relationship:
  * {@link AttachmentRole#BODY} attachments are structural and their death triggers the owner's death,

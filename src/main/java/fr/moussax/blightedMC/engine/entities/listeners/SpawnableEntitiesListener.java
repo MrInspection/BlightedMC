@@ -17,11 +17,11 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class SpawnableEntitiesListener implements Listener {
 
     private volatile Map<EntityType, List<SpawnableEntity>> spawnCache = Collections.emptyMap();
-    private volatile boolean cacheInitialized = false;
+    private volatile boolean cacheDirty = true;
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onCreatureSpawn(CreatureSpawnEvent event) {
-        if (!cacheInitialized) rebuildCache();
+        if (cacheDirty) rebuildCache();
 
         CreatureSpawnEvent.SpawnReason reason = event.getSpawnReason();
         if (reason != CreatureSpawnEvent.SpawnReason.NATURAL
@@ -45,24 +45,22 @@ public final class SpawnableEntitiesListener implements Listener {
 
         if (eligible == null) return;
 
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+
+        // First roll: does any replacement spawn happen at all?
         double totalChance = 0.0;
         for (SpawnableEntity entity : eligible) {
             totalChance += entity.getSpawnProbability();
         }
-        totalChance = Math.min(totalChance, 1.0);
 
-        ThreadLocalRandom random = ThreadLocalRandom.current();
+        if (random.nextDouble() >= Math.min(totalChance, 1.0)) return;
 
-        // Single roll: first check if anything spawns at all, then pick which one.
-        double roll = random.nextDouble();
-        if (roll >= totalChance) return;
-
-        // Re-use the same roll scaled into [0, totalChance] to select the candidate.
-        double scaled = roll;
+        // Second roll: which entity wins, weighted by individual probability.
+        double selectionRoll = random.nextDouble() * totalChance;
         double cumulative = 0.0;
         for (SpawnableEntity entity : eligible) {
             cumulative += entity.getSpawnProbability();
-            if (scaled < cumulative) {
+            if (selectionRoll < cumulative) {
                 event.setCancelled(true);
                 entity.clone().spawn(location);
                 return;
@@ -71,7 +69,7 @@ public final class SpawnableEntitiesListener implements Listener {
     }
 
     public synchronized void rebuildCache() {
-        if (cacheInitialized) return;
+        if (!cacheDirty) return;
 
         Map<EntityType, List<SpawnableEntity>> newCache = new EnumMap<>(EntityType.class);
         for (SpawnableEntity entity : SpawnableEntitiesRegistry.getAll()) {
@@ -82,10 +80,10 @@ public final class SpawnableEntitiesListener implements Listener {
         }
 
         this.spawnCache = newCache;
-        this.cacheInitialized = true;
+        this.cacheDirty = false;
     }
 
     public void invalidateCache() {
-        cacheInitialized = false;
+        this.cacheDirty = true;
     }
 }

@@ -10,7 +10,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
-public class RitualAnimations {
+public final class RitualAnimations {
 
     public static void playRiteAnimation(BlightedMC instance, Location spawnLoc, @NonNull Runnable onAnimationComplete) {
         new BukkitRunnable() {

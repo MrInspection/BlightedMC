@@ -41,18 +41,13 @@ public final class ArmorManager {
             int equippedCount = bonusCount.getOrDefault(active.getClass(), 0);
 
             if (equippedCount < active.getMaxPieces()) {
-                try {
-                    active.deactivate();
-                } catch (Exception e) {
-                    Log.error("ArmorManager", "Error stopping ability: " + active.getClass().getSimpleName());
-                }
                 player.removeActiveBonusByClass(active.getClass());
             }
         }
 
         bonusCount.forEach((bonusClass, count) -> {
             boolean isRunning = player.getActiveFullSetBonuses().stream()
-                .anyMatch(b -> b.getClass().equals(bonusClass));
+                    .anyMatch(b -> b.getClass().equals(bonusClass));
 
             if (isRunning) return;
 
@@ -62,12 +57,6 @@ public final class ArmorManager {
 
                 newBonus.setPlayer(player);
                 player.addActiveBonus(newBonus);
-
-                if (newBonus.getType() == FullSetBonus.SetType.NORMAL) {
-                    newBonus.activate();
-                } else if (newBonus.getType() == FullSetBonus.SetType.SNEAK && player.getPlayer().isSneaking()) {
-                    newBonus.activate();
-                }
             } catch (Exception e) {
                 Log.error("ArmorManager", "Failed to activate bonus " + bonusClass.getSimpleName());
             }

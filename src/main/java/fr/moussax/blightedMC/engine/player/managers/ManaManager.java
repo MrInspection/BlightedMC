@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.engine.player.managers;
 import lombok.Getter;
 import lombok.Setter;
 
-public class ManaManager {
+public final class ManaManager {
     @Getter
     private double currentMana;
     @Getter

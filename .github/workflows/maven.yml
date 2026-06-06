@@ -16,6 +16,21 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Cache Spigot BuildTools artifacts
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/spigotmc
+          key: spigot-26.1.2
+          restore-keys: spigot-
+
+      - name: Build and install Spigot via BuildTools
+        uses: SpraxDev/Action-SpigotMC@v5
+        with:
+          versions: 26.1.2
+          remapped: true
+          generateSrc: false
+          generateDoc: false
+
       - name: Build and Run Tests
         run: mvn -B package --file pom.xml
 

@@ -1,12 +1,10 @@
 package fr.moussax.blightedMC.engine.player;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.engine.items.abilities.*;
 import fr.moussax.blightedMC.server.database.PlayerDataHandler;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemType;
-import fr.moussax.blightedMC.engine.items.abilities.ArmorManager;
-import fr.moussax.blightedMC.engine.items.abilities.CooldownEntry;
-import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.shared.ui.actionbar.ActionBarManager;
 import fr.moussax.blightedMC.engine.player.managers.GemsManager;
 import fr.moussax.blightedMC.engine.player.managers.ManaManager;
@@ -51,10 +49,7 @@ public final class BlightedPlayer {
         this.player = player;
         this.playerId = player.getUniqueId();
         this.dataHandler = new PlayerDataHandler(playerId, player.getName());
-
-        this.gemsManager = new GemsManager();
-        this.gemsManager.setGems(dataHandler.getGems());
-
+        this.gemsManager = new GemsManager(dataHandler.getGems());
         this.manaManager = new ManaManager(DEFAULT_MAX_MANA, DEFAULT_MANA_REGEN_RATE);
         this.manaManager.setCurrentMana(dataHandler.getMana());
         this.forgeFuel = dataHandler.getForgeFuel();
@@ -101,6 +96,23 @@ public final class BlightedPlayer {
 
     public void removeCooldown(CooldownEntry entry) {
         cooldowns.remove(entry);
+    }
+
+    public void setCooldown(Class<? extends AbilityManager> managerClass, AbilityType type, int seconds) {
+        long expire = System.currentTimeMillis() + (seconds * 1000L);
+        cooldowns.removeIf(c -> c.abilityManager().equals(managerClass) && c.abilityType() == type);
+        cooldowns.add(new CooldownEntry(managerClass, type, expire));
+    }
+
+    public double getRemainingCooldown(Class<? extends AbilityManager> managerClass, AbilityType type) {
+        cooldowns.removeIf(CooldownEntry::isExpired); // Lazy cleanup
+
+        for (CooldownEntry entry : cooldowns) {
+            if (entry.abilityManager().equals(managerClass) && entry.abilityType() == type) {
+                return entry.getRemainingCooldownTimeInSeconds();
+            }
+        }
+        return 0;
     }
 
     public void clearArmorPieces() {
@@ -178,8 +190,15 @@ public final class BlightedPlayer {
     }
 
     public void setGems(int value) {
-        gemsManager.setGems(value);
-        actionBarManager.tick();
+        if (value < 0) {
+            throw new IllegalArgumentException("Gems value cannot be negative");
+        }
+        int current = gemsManager.getGems();
+        if (value > current) {
+            addGems(value - current);
+        } else if (value < current) {
+            removeGems(current - value);
+        }
     }
 
     public ManaManager getMana() {

@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.content.entities.ravenous;
+package fr.moussax.blightedMC.content.entities.frenzied;
 
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
@@ -11,9 +11,10 @@ import org.bukkit.potion.PotionEffectType;
 
 import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
 
-public final class RavenousHusk extends RavenousCreature {
-    public RavenousHusk() {
-        super("RAVENOUS_HUSK", "Ravenous Husk", EntityType.HUSK);
+public final class FrenziedHusk extends FrenziedMeleeBruiser {
+
+    public FrenziedHusk() {
+        super("FRENZIED_HUSK", "Frenzied Husk", EntityType.HUSK);
         setDamage(6);
         setDroppedExp(12);
         setLootTable(new EntityLootTableBuilder()

@@ -7,6 +7,8 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -20,20 +22,20 @@ import java.util.concurrent.ThreadLocalRandom;
  * <p>Selects loaded chunks around online players and attempts to spawn registered
  * {@link SpawnableEntity} instances with {@link SpawnMode#INDEPENDENT} or {@link SpawnMode#HYBRID}
  * modes based on their configured spawn rules.</p>
- *
- * <p>Y selection uses the highest block at the target column to avoid wasteful
- * checks deep inside solid terrain.</p>
  */
 public final class BlightedSpawnEngine extends BukkitRunnable {
 
     private static final int CHUNKS_PER_PLAYER_PER_TICK = 1;
-    private static final int MIN_CHUNK_DISTANCE = 3;
-    private static final int MAX_CHUNK_DISTANCE = 8;
+    private static final int MIN_CHUNK_DISTANCE = 3; // ~48 blocks away minimum
+    private static final int MAX_CHUNK_DISTANCE = 8; // ~128 blocks away maximum
     private static final int CACHE_REFRESH_INTERVAL = 200;
+
+    private static final int MAX_MONSTERS_PER_PLAYER = 70;
+    private static final int MAX_MONSTERS_PER_CHUNK = 5;
 
     private final List<SpawnableEntity> cachedIndependentEntities = new ArrayList<>();
     private final List<Player> cachedPlayers = new ArrayList<>();
-    private int tickCounter = 0;
+    private int tickCounter = CACHE_REFRESH_INTERVAL;
 
     @Override
     public void run() {
@@ -46,6 +48,15 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
         ThreadLocalRandom random = ThreadLocalRandom.current();
 
         for (Player player : cachedPlayers) {
+            int nearbyMonsters = 0;
+            for (Entity entity : player.getNearbyEntities(128.0, 128.0, 128.0)) {
+                if (entity instanceof Monster) {
+                    nearbyMonsters++;
+                }
+            }
+
+            if (nearbyMonsters >= MAX_MONSTERS_PER_PLAYER) continue;
+
             World world = player.getWorld();
             Chunk playerChunk = player.getLocation().getChunk();
 
@@ -57,7 +68,6 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
                 int targetChunkZ = playerChunk.getZ() + (int) Math.round(distance * Math.sin(angle));
 
                 if (!world.isChunkLoaded(targetChunkX, targetChunkZ)) continue;
-
                 attemptSpawnInChunk(world.getChunkAt(targetChunkX, targetChunkZ), world, random);
             }
         }
@@ -77,29 +87,54 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
     }
 
     private void attemptSpawnInChunk(Chunk chunk, World world, ThreadLocalRandom random) {
+        int monsterCount = 0;
+        for (Entity entity : chunk.getEntities()) {
+            if (entity instanceof Monster) {
+                monsterCount++;
+            }
+        }
+        if (monsterCount >= MAX_MONSTERS_PER_CHUNK) return;
+
         int x = (chunk.getX() << 4) + random.nextInt(16);
         int z = (chunk.getZ() << 4) + random.nextInt(16);
 
-        int surfaceY = world.getHighestBlockYAt(x, z);
-        int y = surfaceY + 1;
+        // Scan from world max height down to min height
+        for (int y = world.getMaxHeight() - 1; y >= world.getMinHeight() + 1; y--) {
+            Location location = new Location(world, x + 0.5, y, z + 0.5);
 
-        Location location = new Location(world, x + 0.5, y, z + 0.5);
+            Block block = location.getBlock();
+            if (!block.getType().isAir()) continue;
 
-        Block block = location.getBlock();
-        if (!block.getType().isAir()) return;
+            Block below = block.getRelative(0, -1, 0);
+            if (!below.getType().isSolid()) continue;
 
-        Block below = block.getRelative(0, -1, 0);
-        if (!below.getType().isSolid()) return;
+            Block above = block.getRelative(0, 1, 0);
+            if (!above.getType().isAir()) continue;
 
-        Block above = block.getRelative(0, 1, 0);
-        if (!above.getType().isAir()) return;
+            List<SpawnableEntity> eligible = null;
+            for (SpawnableEntity entity : cachedIndependentEntities) {
+                if (!entity.canSpawnAt(location, world)) continue;
+                if (eligible == null) eligible = new ArrayList<>(cachedIndependentEntities.size());
+                eligible.add(entity);
+            }
 
-        for (SpawnableEntity entity : cachedIndependentEntities) {
-            if (!entity.canSpawnAt(location, world)) continue;
+            if (eligible == null) continue;
 
-            if (random.nextDouble() <= entity.getSpawnProbability()) {
-                entity.clone().spawn(location);
-                return;
+            double totalChance = 0.0;
+            for (SpawnableEntity entity : eligible) {
+                totalChance += entity.getSpawnProbability();
+            }
+
+            if (random.nextDouble() >= Math.min(totalChance, 1.0)) continue;
+
+            double selectionRoll = random.nextDouble() * totalChance;
+            double cumulative = 0.0;
+            for (SpawnableEntity entity : eligible) {
+                cumulative += entity.getSpawnProbability();
+                if (selectionRoll < cumulative) {
+                    entity.clone().spawn(location);
+                    return; // Stop scanning column once an entity spawns
+                }
             }
         }
     }

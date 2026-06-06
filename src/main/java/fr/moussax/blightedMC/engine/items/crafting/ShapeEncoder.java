@@ -13,7 +13,7 @@ import java.util.HashMap;
  * where each character represents a crafting ingredient bound to a {@link CraftingObject}.
  * Spaces or unbound characters are treated as empty slots.
  */
-public class ShapeEncoder {
+public final class ShapeEncoder {
     private final String line1;
     private final String line2;
     private final String line3;

@@ -28,7 +28,6 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
         Location targetLocation = getTargetedEyeLocation(blightedPlayer);
 
         if (targetLocation == null) {
-            // FIX: Add feedback so you know why it didn't work
             blightedPlayer.getPlayer().sendMessage("§cObstructed destination!");
             return false;
         }
@@ -70,10 +69,12 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
     }
 
     @Override
-    public void start(BlightedPlayer player) {}
+    public void start(BlightedPlayer player) {
+    }
 
     @Override
-    public void stop(BlightedPlayer player) {}
+    public void stop(BlightedPlayer player) {
+    }
 
     private Location getTargetedEyeLocation(BlightedPlayer blightedPlayer) {
         var player = blightedPlayer.getPlayer();
@@ -109,7 +110,8 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
 
     /**
      * Checks if a location is safe to teleport to.
-     * @param location The feet location
+     *
+     * @param location      The feet location
      * @param requireGround Whether we strictly require a solid block below (true for landing, false for air dash)
      */
     private boolean isSafe(Location location, boolean requireGround) {
@@ -122,8 +124,6 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
         if (head.getType().isSolid()) return false;
 
         // 2. Ground check (Only if required)
-        if (requireGround && !below.getType().isSolid()) return false;
-
-        return true;
+        return !requireGround || below.getType().isSolid();
     }
 }

@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC;
 
+import fr.moussax.blightedMC.engine.fishing.listeners.LavaFishingHook;
 import fr.moussax.blightedMC.registry.EventsRegistry;
 import fr.moussax.blightedMC.registry.RegistrySystem;
 import fr.moussax.blightedMC.server.BlightedServer;
@@ -54,6 +55,7 @@ public final class BlightedMC extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        LavaFishingHook.cleanupAll();
         database.closeConnection();
         eventsRegistry.shutdownMenus();
         eventsRegistry.cleanup();

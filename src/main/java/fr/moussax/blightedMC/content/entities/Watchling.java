@@ -1,20 +1,15 @@
 package fr.moussax.blightedMC.content.entities;
 
+import fr.moussax.blightedMC.content.utils.ai.EndermanAI;
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
-import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
+import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.Utilities;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.monster.EnderMan;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
@@ -28,9 +23,9 @@ import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDec
 
 public class Watchling extends SpawnableEntity {
 
-    private long lastTeleportTime = 0;
     private static final long TELEPORT_COOLDOWN = 4000;
     private final Random random = new Random();
+    private long lastTeleportTime = 0;
 
     public Watchling() {
         super("WATCHLING", "§dWatchling", 20, EntityType.ENDERMAN, 0.001);
@@ -50,7 +45,7 @@ public class Watchling extends SpawnableEntity {
 
     @Override
     protected void onDefineBehavior() {
-        addAbility(5L, 5L, this::handleCombatLogic);
+        addCoreAbility(5L, 5L, this::handleCombatLogic);
     }
 
     private void handleCombatLogic() {
@@ -114,22 +109,8 @@ public class Watchling extends SpawnableEntity {
     }
 
     @Override
-    public LivingEntity spawn(Location location) {
-        LivingEntity spawnedEntity = super.spawn(location);
-        if (!(spawnedEntity instanceof CraftMob craftMob)) return spawnedEntity;
-
-        EnderMan nmsWatchling = (EnderMan) craftMob.getHandle();
-
-        nmsWatchling.goalSelector.removeAllGoals(goal -> true);
-        nmsWatchling.targetSelector.removeAllGoals(goal -> true);
-
-        nmsWatchling.goalSelector.addGoal(1, new MeleeAttackGoal(nmsWatchling, 1.0D, false));
-        nmsWatchling.goalSelector.addGoal(7, new RandomStrollGoal(nmsWatchling, 1.0D));
-        nmsWatchling.goalSelector.addGoal(8, new LookAtPlayerGoal(nmsWatchling, net.minecraft.world.entity.player.Player.class, 8.0F));
-
-        nmsWatchling.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(nmsWatchling, net.minecraft.world.entity.player.Player.class, true));
-
-        return spawnedEntity;
+    protected void onConfigureAI(LivingEntity spawned) {
+        EndermanAI.init(spawned);
     }
 
     @Override

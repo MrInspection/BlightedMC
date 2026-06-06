@@ -1,8 +1,10 @@
 name: BlightedMC
-version: '1.0-SNAPSHOT'
-main: fr.moussax.blightedMC.BlightedMC
-api-version: '1.21'
+version: '${version}'
 authors: [ MrInspection ]
+
+main: fr.moussax.blightedMC.BlightedMC
+api-version: '26.1'
+load: STARTUP
 
 commands:
   spawncustommob:
@@ -19,8 +21,6 @@ commands:
     description: Bulk execute a specific command
   giveitem:
     description: Open or give yourself a custom item
-  god:
-    description: Toggle god mode for yourself or another player
   tppos:
     description: Teleport to a position
   fly:

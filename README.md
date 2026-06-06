@@ -2,7 +2,6 @@
 
 BlightedMC is a open-source project inspired by Hypixel Skyblock for some core mechanics. It aims to create some similar experience, adapted for Minecraft Survival with more punishing mobs, custom items, bosses and more...
 
-
 > [!IMPORTANT]
 > This project is still under development, the entire gameplay isn't finished yet. The current state of the project is to work on the early game phase and squash bugs
 
@@ -21,12 +20,9 @@ This project is also a way for me to practice in java with design patterns, effi
 * Custom mobs creation system
 * Custom menu creation system
 
-> [!INFO]
-> I'm planning to creature 2-3 core API elements before creating all the gameplay mechanics. Right now you can test all those elements in game by checking the `/giveitem` command to open the in-game items directory.
-
 ### Development Environment
 
-* Download and install [IntelliJ IDEA](https://www.jetbrains.com/idea/download/) with JDK 23.
+* Download and install [IntelliJ IDEA](https://www.jetbrains.com/idea/download/) with JDK 25.
 * Clone the GitHub repository
 * Modify the code as desired
 * Go to `File > Project Structures > Artifacts` then
@@ -36,7 +32,7 @@ This project is also a way for me to practice in java with design patterns, effi
 * Enjoy!
 
 ### Server Setup
-* Download and install Spigot's build tools for version `1.21.8` from [here](https://www.spigotmc.org/wiki/buildtools/)
+* Download and install Spigot's build tools for version `26.1.2` from [here](https://www.spigotmc.org/wiki/buildtools/)
 * From the build tools, compile the desired spigot version.
   * Create a directory and place the **compiled spigot jar**, then rename it to `server.jar`
   * Create `start.bat` file and add the following content:

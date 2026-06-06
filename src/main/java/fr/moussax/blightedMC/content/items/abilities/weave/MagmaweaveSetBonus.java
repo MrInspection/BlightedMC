@@ -13,12 +13,28 @@ public final class MagmaweaveSetBonus extends EmberWeaveSetBonus {
     private int taskCounter = 0;
 
     @Override
+    public String getName() {
+        return "Blazing Shield";
+    }
+
+    @Override
+    public String[] getDescription() {
+        return new String[]{
+                "Flames coalesce into a protective",
+                "mantle, fortifying you against",
+                "hostile attacks.",
+                "",
+                "Grants immunity to §cfire §7and §clava§7.",
+                "Grants §dResistance §5I §7while in lava.",
+                "Grants §b+30% §3Lava Fishing Speed§7."
+        };
+    }
+
+    @Override
     public void startAbilityEffect() {
-        if (isActive) return;
+        if (isActive || blightedPlayer == null) return;
 
         Player player = blightedPlayer.getPlayer();
-        if (player == null) return;
-
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_AMBIENT, 2.0f, 0.5f);
 
         this.isActive = true;
@@ -43,17 +59,17 @@ public final class MagmaweaveSetBonus extends EmberWeaveSetBonus {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 40, 0, true, false, true));
                     if (taskCounter % 10 == 0) {
                         player.getWorld().spawnParticle(
-                            Particle.FALLING_OBSIDIAN_TEAR,
-                            player.getLocation().clone().add(0, 1.2, 0),
-                            1, 0.2, 0.1, 0.2, 0
+                                Particle.FALLING_OBSIDIAN_TEAR,
+                                player.getLocation().clone().add(0, 1.2, 0),
+                                1, 0.2, 0.1, 0.2, 0
                         );
                     }
                 }
 
                 player.getWorld().spawnParticle(
-                    Particle.FLAME,
-                    player.getLocation().clone().add(0, 0.4, 0),
-                    2, 0.3, 0.1, 0.3, 0.02
+                        Particle.FLAME,
+                        player.getLocation().clone().add(0, 0.4, 0),
+                        2, 0.3, 0.1, 0.3, 0.02
                 );
             }
         }.runTaskTimer(BlightedMC.getInstance(), 0L, 5L);

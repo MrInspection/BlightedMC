@@ -1,21 +1,17 @@
 package fr.moussax.blightedMC.content.entities.powerful;
 
 import fr.moussax.blightedMC.content.entities.Watchling;
+import fr.moussax.blightedMC.content.utils.ai.EndermanAI;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.BlightedType;
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
-import fr.moussax.blightedMC.utils.Utilities;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.monster.EnderMan;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -31,14 +27,13 @@ import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDec
 
 public class Endersent extends SpawnableEntity {
 
+    private static final long SMASH_COOLDOWN = 5000;
     private int projectileHits = 0;
     private boolean enraged = false;
     private boolean isEscaping = false;
     private List<LivingEntity> watchlings = new ArrayList<>();
     private long lastTeleportSmash = 0;
     private int escapeTicks = 0;
-
-    private static final long SMASH_COOLDOWN = 5000;
 
     public Endersent() {
         super("ENDERSENT", "Endersent", 200, EntityType.ENDERMAN, 0.002);
@@ -51,12 +46,12 @@ public class Endersent extends SpawnableEntity {
         addAttribute(Attribute.MOVEMENT_SPEED, 0.25);
 
         setLootTable(new EntityLootTableBuilder()
-            .setMaxDrop(2)
-            .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, COMMON)
-            .addLoot(Material.ENDER_EYE, 1, 3, 0.31, UNCOMMON)
-            .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, RARE)
-            .addGemsLoot(30, 0.03, VERY_RARE)
-            .build()
+                .setMaxDrop(2)
+                .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, COMMON)
+                .addLoot(Material.ENDER_EYE, 1, 3, 0.31, UNCOMMON)
+                .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, RARE)
+                .addGemsLoot(30, 0.03, VERY_RARE)
+                .build()
         );
 
         setBlightedType(BlightedType.BOSS);
@@ -64,7 +59,7 @@ public class Endersent extends SpawnableEntity {
 
     @Override
     protected void onDefineBehavior() {
-        addAbility(20L, 20L, this::tickCombat);
+        addCoreAbility(20L, 20L, this::tickCombat);
     }
 
     private void tickCombat() {
@@ -95,7 +90,7 @@ public class Endersent extends SpawnableEntity {
         entity.teleport(behind);
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
 
-        Utilities.delay(() -> {
+        addCoreDelayedAction(9L, () -> {
             if (isNotAlive()) return;
             entity.getWorld().spawnParticle(Particle.EXPLOSION, entity.getLocation(), 1);
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.8f);
@@ -106,7 +101,7 @@ public class Endersent extends SpawnableEntity {
                 if (BlightedEntitiesListener.getBlightedEntity(living) instanceof Watchling) continue;
                 living.damage(14, entity);
             }
-        }, 9);
+        });
     }
 
     private void tickEscape() {
@@ -158,8 +153,10 @@ public class Endersent extends SpawnableEntity {
 
         int count = 3 + new Random().nextInt(4);
         for (int i = 0; i < count; i++) {
-            LivingEntity wEntity = new Watchling().spawn(
-                loc.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
+            BlightedEntity prototype = EntitiesRegistry.get("WATCHLING");
+            if (prototype == null) continue;
+            LivingEntity wEntity = prototype.spawn(
+                    loc.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
             );
             watchlings.add(wEntity);
         }
@@ -191,21 +188,8 @@ public class Endersent extends SpawnableEntity {
     }
 
     @Override
-    public LivingEntity spawn(Location location) {
-        LivingEntity spawnedEntity = super.spawn(location);
-        if (!(spawnedEntity instanceof CraftMob craftMob)) return spawnedEntity;
-
-        EnderMan nmsEndersent = (EnderMan) craftMob.getHandle();
-        nmsEndersent.goalSelector.removeAllGoals(goal -> true);
-        nmsEndersent.targetSelector.removeAllGoals(goal -> true);
-
-        nmsEndersent.goalSelector.addGoal(1, new MeleeAttackGoal(nmsEndersent, 1.0D, false));
-        nmsEndersent.goalSelector.addGoal(7, new RandomStrollGoal(nmsEndersent, 1.0D));
-        nmsEndersent.goalSelector.addGoal(8, new LookAtPlayerGoal(nmsEndersent, net.minecraft.world.entity.player.Player.class, 8.0F));
-
-        nmsEndersent.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(nmsEndersent, net.minecraft.world.entity.player.Player.class, true));
-
-        return spawnedEntity;
+    protected void onConfigureAI(LivingEntity spawned) {
+        EndermanAI.init(spawned);
     }
 
     @Override
@@ -223,5 +207,16 @@ public class Endersent extends SpawnableEntity {
         clone.lastTeleportSmash = 0;
         clone.escapeTicks = 0;
         return clone;
+    }
+
+    @Override
+    public void cleanup() {
+        super.cleanup();
+        for (LivingEntity watchling : watchlings) {
+            if (watchling != null && !watchling.isDead()) {
+                watchling.remove();
+            }
+        }
+        watchlings.clear();
     }
 }
