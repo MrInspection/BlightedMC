@@ -32,7 +32,7 @@ public final class MagmaweaveSetBonus extends EmberWeaveSetBonus {
 
     @Override
     public void startAbilityEffect() {
-        if (isActive) return;
+        if (isActive || blightedPlayer == null) return;
 
         Player player = blightedPlayer.getPlayer();
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_AMBIENT, 2.0f, 0.5f);

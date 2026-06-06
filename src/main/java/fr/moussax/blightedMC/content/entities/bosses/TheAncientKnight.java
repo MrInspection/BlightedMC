@@ -75,7 +75,13 @@ public class TheAncientKnight extends BlightedEntity {
     @Override
     public TheAncientKnight clone() {
         TheAncientKnight clone = (TheAncientKnight) super.clone();
-        clone.activeStabs.clear();
+        try {
+            var field = TheAncientKnight.class.getDeclaredField("activeStabs");
+            field.setAccessible(true);
+            field.set(clone, new CopyOnWriteArrayList<>());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to clone activeStabs", e);
+        }
         return clone;
     }
 

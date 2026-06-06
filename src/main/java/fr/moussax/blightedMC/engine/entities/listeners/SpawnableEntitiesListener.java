@@ -16,8 +16,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class SpawnableEntitiesListener implements Listener {
 
-    private Map<EntityType, List<SpawnableEntity>> spawnCache = Collections.emptyMap();
-    private boolean cacheDirty = true;
+    private volatile Map<EntityType, List<SpawnableEntity>> spawnCache = Collections.emptyMap();
+    private volatile boolean cacheDirty = true;
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onCreatureSpawn(CreatureSpawnEvent event) {
@@ -68,7 +68,9 @@ public final class SpawnableEntitiesListener implements Listener {
         }
     }
 
-    public void rebuildCache() {
+    public synchronized void rebuildCache() {
+        if (!cacheDirty) return;
+
         Map<EntityType, List<SpawnableEntity>> newCache = new EnumMap<>(EntityType.class);
         for (SpawnableEntity entity : SpawnableEntitiesRegistry.getAll()) {
             SpawnMode mode = entity.getSpawnMode();

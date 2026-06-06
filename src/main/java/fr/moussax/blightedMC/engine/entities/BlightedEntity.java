@@ -92,6 +92,7 @@ public abstract class BlightedEntity implements Cloneable {
 
     private List<EntityImmunity> immunities = Collections.emptyList();
     private boolean runtimeInitialized = false;
+    private boolean componentsInitialized = false;
 
     public BlightedEntity(@NonNull String name, int maxHealth, EntityType entityType) {
         this(name, maxHealth, 1, 0, entityType);
@@ -423,7 +424,7 @@ public abstract class BlightedEntity implements Cloneable {
      */
     public void addComponent(EntityComponent component) {
         components.put(component.getId(), component);
-        if (entity != null) component.onInit(entity);
+        if (componentsInitialized && entity != null) component.onInit(entity);
     }
 
     /**
@@ -509,11 +510,14 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     private void initComponents() {
+        if (componentsInitialized) return;
+        componentsInitialized = true;
         components.values().forEach(component -> component.onInit(entity));
     }
 
     private void destroyComponents() {
         components.values().forEach(component -> component.onDestroy(entity));
+        componentsInitialized = false;
     }
 
     /**
@@ -693,6 +697,7 @@ public abstract class BlightedEntity implements Cloneable {
             clone.entity = null;
             clone.bossBar = null;
             clone.runtimeInitialized = false;
+            clone.componentsInitialized = false;
             clone.attributes = new HashMap<>(this.attributes);
             clone.attachments = new CopyOnWriteArraySet<>();
             clone.coreTasks = new LifecycleTaskManager();

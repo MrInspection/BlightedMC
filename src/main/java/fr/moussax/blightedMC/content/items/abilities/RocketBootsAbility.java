@@ -106,7 +106,7 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
         if (landedPlayer.getAllowFlight()) return;
         if (!((Entity) landedPlayer).isOnGround()) return;
 
-        assert event.getTo() != null;
+        if (event.getTo() == null) return;
         if (event.getFrom().getBlockY() == event.getTo().getBlockY()) return; // no vertical change
 
         landedPlayer.setAllowFlight(true);

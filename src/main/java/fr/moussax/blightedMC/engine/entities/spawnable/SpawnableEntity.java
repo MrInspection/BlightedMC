@@ -22,8 +22,15 @@ public abstract class SpawnableEntity extends BlightedEntity {
     private final SpawnMode spawnMode;
     private SpawnProfile spawnProfile;
 
-    @Getter @Setter
+    @Getter
     private double affixChance = 0.0;
+
+    public void setAffixChance(double affixChance) {
+        if (affixChance < 0.0 || affixChance > 1.0) {
+            throw new IllegalArgumentException("affixChance must be in [0.0, 1.0], got: " + affixChance);
+        }
+        this.affixChance = affixChance;
+    }
 
     protected SpawnableEntity(String entityId, String name, int maxHealth, EntityType entityType, double probability) {
         this(entityId, name, maxHealth, 1, 0, entityType, probability, SpawnMode.REPLACEMENT);

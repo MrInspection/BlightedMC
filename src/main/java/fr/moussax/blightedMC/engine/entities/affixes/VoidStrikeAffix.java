@@ -79,19 +79,24 @@ public final class VoidStrikeAffix implements EntityComponent {
         UUID playerId = player.getUniqueId();
         long now = System.currentTimeMillis();
 
-        if (markedPlayers.containsKey(playerId)) {
-            long timeApplied = markedPlayers.get(playerId);
-            double secondsElapsed = (now - timeApplied) / 1000.0;
-            double multiplier = 1.0 + Math.min(MAX_MULTIPLIER - 1.0, secondsElapsed * 0.4);
+        Long timeApplied = markedPlayers.get(playerId);
+        if (timeApplied != null) {
+            long elapsed = now - timeApplied;
+            if (elapsed <= MARK_DURATION_MS) {
+                double secondsElapsed = elapsed / 1000.0;
+                double multiplier = 1.0 + Math.min(MAX_MULTIPLIER - 1.0, secondsElapsed * 0.4);
 
-            event.setDamage(event.getDamage() * multiplier);
+                event.setDamage(event.getDamage() * multiplier);
 
-            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_HURT, 0.4f, 0.5f);
-            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.6f, 0.5f);
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_HURT, 0.4f, 0.5f);
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.6f, 0.5f);
 
-            player.getWorld().spawnParticle(Particle.SQUID_INK, player.getLocation().add(0, 1, 0), 20, 0.3, 0.5, 0.3, 0.1);
-            player.getWorld().spawnParticle(Particle.LARGE_SMOKE, player.getLocation().add(0, 1, 0), 10, 0.2, 0.2, 0.2, 0.02);
-            player.getWorld().spawnParticle(Particle.FLASH, player.getLocation().add(0, 1, 0), 1, 0, 0, 0, 0);
+                player.getWorld().spawnParticle(Particle.SQUID_INK, player.getLocation().add(0, 1, 0), 20, 0.3, 0.5, 0.3, 0.1);
+                player.getWorld().spawnParticle(Particle.LARGE_SMOKE, player.getLocation().add(0, 1, 0), 10, 0.2, 0.2, 0.2, 0.02);
+                player.getWorld().spawnParticle(Particle.FLASH, player.getLocation().add(0, 1, 0), 1, 0, 0, 0, 0);
+            } else {
+                markedPlayers.remove(playerId);
+            }
         }
 
         markedPlayers.put(playerId, now);

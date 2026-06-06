@@ -45,7 +45,7 @@ public final class ColorUtils {
      * @throws IllegalArgumentException if the color is invalid
      */
     public static Color fromHex(String hex) {
-        if (!hex.matches("^#?[0-9a-fA-F]{6}$")) {
+        if (hex == null || !hex.matches("^#?[0-9a-fA-F]{6}$")) {
             throw new IllegalArgumentException("Invalid hex color: " + hex);
         }
         String cleaned = hex.startsWith("#") ? hex.substring(1) : hex;

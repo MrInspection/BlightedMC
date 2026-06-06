@@ -62,7 +62,13 @@ public final class EntitiesRegistry {
             SpawnableEntitiesRegistry.register(spawnable);
         }
 
-        onRegisterCallbacks.forEach(Runnable::run);
+        onRegisterCallbacks.forEach(callback -> {
+            try {
+                callback.run();
+            } catch (Throwable t) {
+                Log.error("EntitiesRegistry", "Failed to execute onRegister callback: " + t.getMessage());
+            }
+        });
     }
 
     @Nullable

@@ -37,7 +37,7 @@ public sealed class EmberWeaveSetBonus implements FullSetBonus permits Magmaweav
 
     @Override
     public void startAbilityEffect() {
-        if (isActive) return;
+        if (isActive || blightedPlayer == null) return;
 
         Player player = blightedPlayer.getPlayer();
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_FIRECHARGE_USE, 1.0f, 0.5f);
@@ -95,6 +95,7 @@ public sealed class EmberWeaveSetBonus implements FullSetBonus permits Magmaweav
             passiveTask = null;
         }
 
+        if (blightedPlayer == null) return;
         Player player = blightedPlayer.getPlayer();
         player.removePotionEffect(PotionEffectType.FIRE_RESISTANCE);
     }

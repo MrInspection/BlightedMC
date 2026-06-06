@@ -49,10 +49,7 @@ public final class BlightedPlayer {
         this.player = player;
         this.playerId = player.getUniqueId();
         this.dataHandler = new PlayerDataHandler(playerId, player.getName());
-
-        this.gemsManager = new GemsManager();
-        this.gemsManager.setGems(dataHandler.getGems());
-
+        this.gemsManager = new GemsManager(dataHandler.getGems());
         this.manaManager = new ManaManager(DEFAULT_MAX_MANA, DEFAULT_MANA_REGEN_RATE);
         this.manaManager.setCurrentMana(dataHandler.getMana());
         this.forgeFuel = dataHandler.getForgeFuel();
@@ -193,8 +190,12 @@ public final class BlightedPlayer {
     }
 
     public void setGems(int value) {
-        gemsManager.setGems(value);
-        actionBarManager.tick();
+        int current = gemsManager.getGems();
+        if (value > current) {
+            addGems(value - current);
+        } else if (value < current) {
+            removeGems(current - value);
+        }
     }
 
     public ManaManager getMana() {
