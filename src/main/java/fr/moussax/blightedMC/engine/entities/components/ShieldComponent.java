@@ -40,7 +40,7 @@ public class ShieldComponent implements EntityComponent {
         Location location = entity.getLocation().add(0, 1.8, 0);
 
         if (source instanceof Player player && isAttackBlocked(entity, source)) {
-            if (player.getLocation().getY() > player.getLocation().getBlockY() || player.getVelocity().getY() > 0) {
+            if (player.getLocation().getY() > player.getLocation().getBlockY() || player.getVelocity().getY() > 0.5) {
                 disable(5000L);
                 entity.getWorld().spawnParticle(Particle.EXPLOSION, location, 1, 0, 0, 0, 0);
                 entity.getWorld().spawnParticle(Particle.WITCH, location, 30, 0.5, 0.5, 0.5, 0.1);
@@ -55,6 +55,11 @@ public class ShieldComponent implements EntityComponent {
             entity.getWorld().spawnParticle(Particle.BLOCK_CRUMBLE, location, 20, 0.2, 0.2, 0.2, 0.1, Material.IRON_BLOCK.createBlockData());
             entity.getWorld().playSound(location, Sound.ITEM_SHIELD_BLOCK, 1.0f, 1.2f);
         }
+    }
+
+    @Override
+    public EntityComponent clone() {
+        return new ShieldComponent(this.arcDegrees);
     }
 
     public boolean isAttackBlocked(Entity defender, Entity attacker) {
