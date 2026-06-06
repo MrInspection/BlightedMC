@@ -166,6 +166,13 @@ public abstract class BlightedEntity implements Cloneable {
      * Stops all runtime systems and detaches framework state from the entity.
      */
     public void cleanup() {
+        Location currentLoc = entity != null ? entity.getLocation() : null;
+        if (currentLoc != null) {
+            for (EntityComponent component : components.values()) {
+                component.onDeath(this, currentLoc);
+            }
+        }
+
         removeBossBar();
         killAllAttachments();
         destroyComponents();
@@ -414,8 +421,12 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     /**
-     * Updates boss bar progress from current health.
+     * Exposes registered components for external generic listeners.
      */
+    public Collection<EntityComponent> getComponents() {
+        return components.values();
+    }
+
     public void updateBossBar() {
         if (bossBar == null || entity == null || entity.isDead()) return;
         double progress = entity.getHealth() / Math.max(1, maxHealth);
@@ -494,6 +505,13 @@ public abstract class BlightedEntity implements Cloneable {
         if (runtimeInitialized) return;
         onDefineBehavior();
         if (bossBar != null) startBossBarTask();
+
+        addCoreAbility(5L, 5L, () -> {
+            for (EntityComponent component : components.values()) {
+                component.onTick(this);
+            }
+        });
+
         runtimeInitialized = true;
         coreTasks.scheduleAll();
         evaluatePhases(maxHealth);
