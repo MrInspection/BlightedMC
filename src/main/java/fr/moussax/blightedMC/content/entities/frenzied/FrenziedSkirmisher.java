@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 public sealed abstract class FrenziedSkirmisher extends FrenziedCreature
-    permits FrenziedSkeleton, FrenziedStray, FrenziedBogged, FrenziedParched {
+        permits FrenziedSkeleton, FrenziedStray, FrenziedBogged, FrenziedParched {
 
     private static final double STRAFE_RADIUS = 10.0;
     private static final double STRAFE_SPEED = 0.45;
@@ -22,27 +22,27 @@ public sealed abstract class FrenziedSkirmisher extends FrenziedCreature
 
     @Override
     protected final void onDefineCombatBehavior() {
-        addAbility(5L, STRAFE_PERIOD_TICKS, this::performStrafe);
+        addPhaseAbility(5L, STRAFE_PERIOD_TICKS, this::performStrafe);
     }
 
     @Override
     protected final void onEnrageBehavior() {
-        addAbility(0L, VOLLEY_ENRAGED_PERIOD_TICKS, this::performDoubleVolley);
+        // Because Phase 2 cancels Phase 1 tasks, persistent abilities must be intentionally re-registered.
+        addPhaseAbility(5L, STRAFE_PERIOD_TICKS, this::performStrafe);
+        addPhaseAbility(0L, VOLLEY_ENRAGED_PERIOD_TICKS, this::performDoubleVolley);
     }
 
     private void performStrafe() {
         Player target = getNearestPlayer(STRAFE_RADIUS);
         if (target == null) return;
 
-        // Perpendicular vector to the direction toward the target.
         Vector toTarget = target.getLocation().toVector()
-            .subtract(entity.getLocation().toVector())
-            .normalize();
+                .subtract(entity.getLocation().toVector())
+                .normalize();
 
         Vector strafe = new Vector(-toTarget.getZ(), 0, toTarget.getX())
-            .multiply(STRAFE_SPEED);
+                .multiply(STRAFE_SPEED);
 
-        // Alternate strafe direction each call using entity tick count parity.
         if (entity.getTicksLived() % 30 < 15) strafe.multiply(-1);
 
         entity.setVelocity(entity.getVelocity().add(strafe));
@@ -62,30 +62,30 @@ public sealed abstract class FrenziedSkirmisher extends FrenziedCreature
 
             Location eyeLoc = entity.getEyeLocation();
             Vector direction = target.getEyeLocation().toVector()
-                .subtract(eyeLoc.toVector())
-                .normalize();
+                    .subtract(eyeLoc.toVector())
+                    .normalize();
 
             Arrow arrow = entity.getWorld().spawnArrow(
-                eyeLoc, direction, 1.6f, 4.0f
+                    eyeLoc, direction, 1.6f, 4.0f
             );
             arrow.setShooter(entity);
             arrow.setDamage(getDamage() * 0.75);
 
             entity.getWorld().playSound(
-                entity.getLocation(),
-                org.bukkit.Sound.ENTITY_ARROW_SHOOT,
-                0.8f, 1.1f
+                    entity.getLocation(),
+                    org.bukkit.Sound.ENTITY_ARROW_SHOOT,
+                    0.8f, 1.1f
             );
             entity.getWorld().spawnParticle(
-                Particle.CRIT,
-                eyeLoc, 3, 0.1, 0.1, 0.1, 0.02
+                    Particle.CRIT,
+                    eyeLoc, 3, 0.1, 0.1, 0.1, 0.02
             );
         };
 
         if (delayTicks == 0) {
             fire.run();
         } else {
-            fr.moussax.blightedMC.utils.Utilities.delay(fire, delayTicks);
+            addPhaseDelayedAction(delayTicks, fire);
         }
     }
 }

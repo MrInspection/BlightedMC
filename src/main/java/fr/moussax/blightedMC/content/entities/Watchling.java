@@ -45,7 +45,7 @@ public class Watchling extends SpawnableEntity {
 
     @Override
     protected void onDefineBehavior() {
-        addAbility(5L, 5L, this::handleCombatLogic);
+        addCoreAbility(5L, 5L, this::handleCombatLogic);
     }
 
     private void handleCombatLogic() {

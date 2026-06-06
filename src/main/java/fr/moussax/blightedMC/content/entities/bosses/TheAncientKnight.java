@@ -9,7 +9,6 @@ import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -29,10 +28,10 @@ public class TheAncientKnight extends BlightedEntity {
         setBlightedType(BlightedType.BOSS);
 
         armor = new ItemStack[]{
-            new ItemStack(Material.NETHERITE_BOOTS),
-            new ItemStack(Material.NETHERITE_LEGGINGS),
-            new ItemStack(Material.NETHERITE_CHESTPLATE),
-            new ItemStack(Material.NETHERITE_HELMET)
+                new ItemStack(Material.NETHERITE_BOOTS),
+                new ItemStack(Material.NETHERITE_LEGGINGS),
+                new ItemStack(Material.NETHERITE_CHESTPLATE),
+                new ItemStack(Material.NETHERITE_HELMET)
         };
 
         itemInMainHand = new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack();
@@ -40,27 +39,16 @@ public class TheAncientKnight extends BlightedEntity {
 
     @Override
     protected void onDefineBehavior() {
-        transitionToPhase(1);
-    }
+        registerPhase(1.0, () -> addPhaseAbility(100L, 300L, this::stabNearestPlayer));
+        registerPhase(0.5, () -> {
+            addPhaseAbility(60L, 180L, this::stabNearestPlayer);
+            addPhaseAbility(20L, 40L, this::meleeNearestPlayer);
 
-    @Override
-    protected void onPhaseTransition(int phase) {
-        if (phase == 1) {
-            // Phase 1 — slow stab every 15s
-            addAbility(100L, 300L, this::stabNearestPlayer);
-        } else if (phase == 2) {
-            // Phase 2 (≤50% HP) — faster stab + melee targeting
-            addAbility(60L, 180L, this::stabNearestPlayer);
-            addAbility(20L, 40L, this::meleeNearestPlayer);
-        }
-    }
-
-    @Override
-    public void onDamageTaken(EntityDamageEvent event) {
-        double remaining = entity.getHealth() - event.getFinalDamage();
-        if (remaining <= maxHealth * 0.5 && getCurrentPhase() < 2) {
-            transitionToPhase(2);
-        }
+            if (entity != null) {
+                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1.0f, 0.8f);
+                entity.getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 50, 1.0, 2.0, 1.0, 0.1);
+            }
+        });
     }
 
     private void stabNearestPlayer() {
@@ -141,7 +129,7 @@ public class TheAncientKnight extends BlightedEntity {
                 g.setSilent(true);
                 g.setGravity(false);
                 Objects.requireNonNull(g.getEquipment())
-                    .setItemInMainHand(new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack());
+                        .setItemInMainHand(new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack());
             });
         }
 
@@ -155,7 +143,7 @@ public class TheAncientKnight extends BlightedEntity {
             if (tick == 0) {
                 stabledLocation = target.getPlayer().getLocation();
                 Objects.requireNonNull(stabledLocation.getWorld())
-                    .playSound(stabledLocation, Sound.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, 1f, 0.75f);
+                        .playSound(stabledLocation, Sound.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, 1f, 0.75f);
             }
 
             if (tick < 90) {
@@ -193,9 +181,9 @@ public class TheAncientKnight extends BlightedEntity {
             world.playSound(stabledLocation, Sound.BLOCK_ANVIL_LAND, 1f, 0.5f);
 
             world.getNearbyEntities(stabledLocation, 6, 6, 6).stream()
-                .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
-                .map(e -> (Player) e)
-                .forEach(player -> player.damage(16, swordEntity));
+                    .filter(e -> e instanceof Player p && p.getGameMode() == GameMode.SURVIVAL)
+                    .map(e -> (Player) e)
+                    .forEach(player -> player.damage(16, swordEntity));
         }
 
         @Override

@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 public sealed abstract class FrenziedAmbusher extends FrenziedCreature
-    permits FrenziedWitherSkeleton, FrenziedPiglin {
+        permits FrenziedWitherSkeleton, FrenziedPiglin {
 
     private static final double CHARGE_TRIGGER_RADIUS = 8.0;
     private static final double CHARGE_SPEED = 1.4;
@@ -24,12 +24,12 @@ public sealed abstract class FrenziedAmbusher extends FrenziedCreature
 
     @Override
     protected final void onDefineCombatBehavior() {
-        addAbility(20L, CHARGE_PERIOD_TICKS, this::attemptCharge);
+        addPhaseAbility(20L, CHARGE_PERIOD_TICKS, this::attemptCharge);
     }
 
     @Override
     protected final void onEnrageBehavior() {
-        addAbility(0L, CHARGE_ENRAGED_PERIOD_TICKS, this::attemptCharge);
+        addPhaseAbility(0L, CHARGE_ENRAGED_PERIOD_TICKS, this::attemptCharge);
     }
 
     private void attemptCharge() {
@@ -42,19 +42,18 @@ public sealed abstract class FrenziedAmbusher extends FrenziedCreature
 
         Location origin = entity.getLocation();
         Vector chargeDirection = target.getLocation().toVector()
-            .subtract(origin.toVector())
-            .normalize()
-            .multiply(CHARGE_SPEED)
-            .setY(0.15);
+                .subtract(origin.toVector())
+                .normalize()
+                .multiply(CHARGE_SPEED)
+                .setY(0.15);
 
         entity.setVelocity(chargeDirection);
         entity.getWorld().playSound(origin, Sound.ENTITY_RAVAGER_ROAR, 0.8f, 1.4f);
         entity.getWorld().spawnParticle(
-            Particle.SWEEP_ATTACK, origin, 5, 0.3, 0.1, 0.3, 0.05
+                Particle.SWEEP_ATTACK, origin, 5, 0.3, 0.1, 0.3, 0.05
         );
 
-        // Damage window — check for nearby players one tick after the lunge lands.
-        fr.moussax.blightedMC.utils.Utilities.delay(() -> {
+        addPhaseDelayedAction(8L, () -> {
             if (isNotAlive()) {
                 isCharging = false;
                 return;
@@ -63,13 +62,13 @@ public sealed abstract class FrenziedAmbusher extends FrenziedCreature
             if (hit != null) {
                 hit.damage(getDamage() + CHARGE_DAMAGE_BONUS, entity);
                 entity.getWorld().playSound(
-                    entity.getLocation(),
-                    Sound.ENTITY_PLAYER_ATTACK_STRONG,
-                    1.0f, 0.8f
+                        entity.getLocation(),
+                        Sound.ENTITY_PLAYER_ATTACK_STRONG,
+                        1.0f, 0.8f
                 );
             }
             isCharging = false;
-        }, 8L);
+        });
     }
 
     @Override

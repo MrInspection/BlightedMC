@@ -9,7 +9,6 @@ import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
-import fr.moussax.blightedMC.utils.Utilities;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
@@ -47,12 +46,12 @@ public class Endersent extends SpawnableEntity {
         addAttribute(Attribute.MOVEMENT_SPEED, 0.25);
 
         setLootTable(new EntityLootTableBuilder()
-            .setMaxDrop(2)
-            .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, COMMON)
-            .addLoot(Material.ENDER_EYE, 1, 3, 0.31, UNCOMMON)
-            .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, RARE)
-            .addGemsLoot(30, 0.03, VERY_RARE)
-            .build()
+                .setMaxDrop(2)
+                .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, COMMON)
+                .addLoot(Material.ENDER_EYE, 1, 3, 0.31, UNCOMMON)
+                .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, RARE)
+                .addGemsLoot(30, 0.03, VERY_RARE)
+                .build()
         );
 
         setBlightedType(BlightedType.BOSS);
@@ -60,7 +59,7 @@ public class Endersent extends SpawnableEntity {
 
     @Override
     protected void onDefineBehavior() {
-        addAbility(20L, 20L, this::tickCombat);
+        addCoreAbility(20L, 20L, this::tickCombat);
     }
 
     private void tickCombat() {
@@ -91,7 +90,7 @@ public class Endersent extends SpawnableEntity {
         entity.teleport(behind);
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
 
-        Utilities.delay(() -> {
+        addCoreDelayedAction(9L, () -> {
             if (isNotAlive()) return;
             entity.getWorld().spawnParticle(Particle.EXPLOSION, entity.getLocation(), 1);
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.8f);
@@ -102,7 +101,7 @@ public class Endersent extends SpawnableEntity {
                 if (BlightedEntitiesListener.getBlightedEntity(living) instanceof Watchling) continue;
                 living.damage(14, entity);
             }
-        }, 9);
+        });
     }
 
     private void tickEscape() {
@@ -157,7 +156,7 @@ public class Endersent extends SpawnableEntity {
             BlightedEntity prototype = EntitiesRegistry.get("WATCHLING");
             if (prototype == null) continue;
             LivingEntity wEntity = prototype.spawn(
-                loc.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
+                    loc.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
             );
             watchlings.add(wEntity);
         }
@@ -208,5 +207,16 @@ public class Endersent extends SpawnableEntity {
         clone.lastTeleportSmash = 0;
         clone.escapeTicks = 0;
         return clone;
+    }
+
+    @Override
+    public void cleanup() {
+        super.cleanup();
+        for (LivingEntity watchling : watchlings) {
+            if (watchling != null && !watchling.isDead()) {
+                watchling.remove();
+            }
+        }
+        watchlings.clear();
     }
 }
