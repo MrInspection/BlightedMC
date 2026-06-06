@@ -9,6 +9,8 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntitySnapshot;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.inventory.meta.components.*;
@@ -16,6 +18,9 @@ import org.bukkit.inventory.meta.components.consumable.ConsumableComponent;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionType;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
 import org.bukkit.tag.DamageTypeTags;
@@ -27,31 +32,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 
-/**
- * Fluent builder for creating and customizing {@link ItemStack} instances.
- *
- * <p>Supports display name, item name, lore, durability, enchantments, item flags,
- * unbreakable state, glint, leather colors, armor trims, banner patterns,
- * attributes, player skulls with custom textures, damage resistance, item model,
- * tooltip style, use cooldown, use remainder, consumable, enchantable, and weapon components.</p>
- *
- * <p>All methods return {@code this} for fluent chaining.</p>
- *
- * <p><b>Example:</b></p>
- * <pre>{@code
- * ItemStack sword = new ItemBuilder(Material.DIAMOND_SWORD)
- *     .setDisplayName("§dTechnoblade's Sword")
- *     .addEnchantment(Enchantment.SHARPNESS, 10)
- *     .addLore("§7Forged by the ancients")
- *     .setUnbreakable(true)
- *     .toItemStack();
- * }</pre>
- */
 @SuppressWarnings({"UnstableApiUsage", "UnusedReturnValue"})
 public class ItemBuilder {
+
     private final ItemStack item;
     private final Map<Enchantment, Integer> enchantments = new HashMap<>();
     private final Map<Attribute, Collection<AttributeModifier>> attributes = new HashMap<>();
+    private final List<PotionEffect> customEffects = new ArrayList<>();
     private ItemMeta itemMeta;
     private boolean unstackable;
     private List<Pattern> bannerPatterns;
@@ -59,6 +46,7 @@ public class ItemBuilder {
     private UUID skullOwnerUUID;
     private String base64Texture;
     private Color leatherColor;
+    private Color potionColor;
     private ArmorTrim armorTrim;
 
     public ItemBuilder(@NonNull Material material) {
@@ -71,12 +59,12 @@ public class ItemBuilder {
 
     public ItemBuilder(@NonNull Material material, @NonNull String displayName) {
         this(new ItemStack(material));
-        this.itemMeta.setDisplayName(displayName);
+        this.itemMeta.setDisplayName(ColorUtils.colorize(displayName));
     }
 
     public ItemBuilder(@NonNull Material material, int amount, @NonNull String displayName) {
         this(new ItemStack(material, validateAmount(material, amount)));
-        this.itemMeta.setDisplayName(displayName);
+        this.itemMeta.setDisplayName(ColorUtils.colorize(displayName));
     }
 
     public ItemBuilder(@NonNull ItemStack itemStack) {
@@ -105,8 +93,8 @@ public class ItemBuilder {
     private static void applyBase64Texture(SkullMeta meta, String base64Texture) {
         String json = new String(Base64.getDecoder().decode(base64Texture), StandardCharsets.UTF_8);
         JsonObject object = JsonParser.parseString(json)
-            .getAsJsonObject().getAsJsonObject("textures")
-            .getAsJsonObject("SKIN");
+                .getAsJsonObject().getAsJsonObject("textures")
+                .getAsJsonObject("SKIN");
 
         String url = object.get("url").getAsString();
         UUID id = UUID.randomUUID();
@@ -123,15 +111,6 @@ public class ItemBuilder {
         meta.setOwnerProfile(profile);
     }
 
-    private static Color fromHex(String hex) {
-        if (!hex.matches("^#?[0-9a-fA-F]{6}$")) {
-            throw new IllegalArgumentException("Invalid hex color: " + hex);
-        }
-
-        String cleaned = hex.startsWith("#") ? hex.substring(1) : hex;
-        return Color.fromRGB(Integer.parseInt(cleaned, 16));
-    }
-
     private static boolean isLeatherDyeable(Material material) {
         return switch (material) {
             case LEATHER_HELMET, LEATHER_CHESTPLATE, LEATHER_LEGGINGS,
@@ -141,20 +120,25 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setItemName(@NonNull String name) {
-        this.itemMeta.setItemName(name);
+        this.itemMeta.setItemName(ColorUtils.colorize(name));
+        return this;
+    }
+
+    public ItemBuilder setDisplayName(@NonNull String displayName) {
+        this.itemMeta.setDisplayName(ColorUtils.colorize(displayName));
         return this;
     }
 
     public ItemBuilder addLore(String line) {
         List<String> lore = itemMeta.getLore() != null ? new ArrayList<>(itemMeta.getLore()) : new ArrayList<>();
-        lore.add(line);
+        lore.add(ColorUtils.colorize(line));
         itemMeta.setLore(lore);
         return this;
     }
 
     public ItemBuilder addLore(List<String> lines) {
         List<String> lore = itemMeta.getLore() != null ? new ArrayList<>(itemMeta.getLore()) : new ArrayList<>();
-        lore.addAll(lines);
+        lore.addAll(ColorUtils.colorize(lines));
         itemMeta.setLore(lore);
         return this;
     }
@@ -168,17 +152,13 @@ public class ItemBuilder {
         if (lore == null || index < 0 || index >= lore.size()) {
             throw new IndexOutOfBoundsException("Invalid lore index: " + index);
         }
-
-        lore.set(index, line);
+        lore.set(index, ColorUtils.colorize(line));
         itemMeta.setLore(lore);
         return this;
     }
 
     public ItemBuilder setAmount(int amount) {
-        int effectiveMax = itemMeta.hasMaxStackSize()
-            ? itemMeta.getMaxStackSize()
-            : item.getType().getMaxStackSize();
-
+        int effectiveMax = itemMeta.hasMaxStackSize() ? itemMeta.getMaxStackSize() : item.getType().getMaxStackSize();
         if (amount < 1 || amount > effectiveMax) {
             throw new IllegalArgumentException("Amount must be between 1 and " + effectiveMax);
         }
@@ -207,11 +187,7 @@ public class ItemBuilder {
 
     public ItemBuilder setDurabilityPercent(double percent) {
         if (!(itemMeta instanceof Damageable damageable)) return this;
-
-        int maxDurability = damageable.hasMaxDamage()
-            ? damageable.getMaxDamage()
-            : item.getType().getMaxDurability();
-
+        int maxDurability = damageable.hasMaxDamage() ? damageable.getMaxDamage() : item.getType().getMaxDurability();
         int damage = (int) Math.round(maxDurability * (1.0 - percent));
         damageable.setDamage(Math.min(damage, maxDurability - 1));
         return this;
@@ -228,20 +204,10 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setFireResistant(boolean fireResistant) {
-        if (fireResistant) {
-            itemMeta.setDamageResistant(DamageTypeTags.IS_FIRE);
-        } else {
-            itemMeta.setDamageResistant((Tag<DamageType>) null);
-        }
+        itemMeta.setDamageResistant(fireResistant ? DamageTypeTags.IS_FIRE : null);
         return this;
     }
 
-    /**
-     * Sets the damage type tag this item is resistant to when in entity (dropped item) form.
-     * Use tags from {@link org.bukkit.tag.DamageTypeTags}.
-     *
-     * @param tag the damage type tag, or {@code null} to clear
-     */
     public ItemBuilder setDamageResistant(@Nullable Tag<DamageType> tag) {
         itemMeta.setDamageResistant(tag);
         return this;
@@ -276,6 +242,19 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder setCustomModelData(@Nullable Integer data) {
+        if (data == null) {
+            itemMeta.setCustomModelDataComponent(null);
+            return this;
+        }
+
+        CustomModelDataComponent component = itemMeta.getCustomModelDataComponent();
+        component.setFloats(List.of(data.floatValue()));
+        itemMeta.setCustomModelDataComponent(component);
+
+        return this;
+    }
+
     public ItemBuilder setTooltipStyle(@NonNull NamespacedKey tooltipStyle) {
         itemMeta.setTooltipStyle(tooltipStyle);
         return this;
@@ -283,6 +262,16 @@ public class ItemBuilder {
 
     public ItemBuilder clearTooltipStyle() {
         itemMeta.setTooltipStyle(null);
+        return this;
+    }
+
+    public <T, Z> ItemBuilder setPersistentData(@NonNull NamespacedKey key, @NonNull PersistentDataType<T, Z> type, @NonNull Z value) {
+        itemMeta.getPersistentDataContainer().set(key, type, value);
+        return this;
+    }
+
+    public ItemBuilder removePersistentData(@NonNull NamespacedKey key) {
+        itemMeta.getPersistentDataContainer().remove(key);
         return this;
     }
 
@@ -310,11 +299,6 @@ public class ItemBuilder {
         return setEnchantmentGlint(true);
     }
 
-    public ItemBuilder addItemFlag(ItemFlag flag) {
-        itemMeta.addItemFlags(flag);
-        return this;
-    }
-
     public ItemBuilder addItemFlag(ItemFlag... flags) {
         itemMeta.addItemFlags(flags);
         return this;
@@ -332,10 +316,10 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addAttributeModifier(
-        Attribute attribute,
-        double amount,
-        AttributeModifier.Operation operation,
-        EquipmentSlotGroup slotGroup
+            Attribute attribute,
+            double amount,
+            AttributeModifier.Operation operation,
+            EquipmentSlotGroup slotGroup
     ) {
         NamespacedKey key = new NamespacedKey(BlightedMC.getInstance(), UUID.randomUUID().toString());
         AttributeModifier modifier = new AttributeModifier(key, amount, operation, slotGroup);
@@ -370,6 +354,13 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder editWeapon(Consumer<WeaponComponent> consumer) {
+        WeaponComponent weapon = itemMeta.getWeapon();
+        consumer.accept(weapon);
+        itemMeta.setWeapon(weapon);
+        return this;
+    }
+
     public ItemBuilder editJukeboxPlayable(Consumer<JukeboxPlayableComponent> consumer) {
         JukeboxPlayableComponent jukebox = itemMeta.getJukeboxPlayable();
         consumer.accept(jukebox);
@@ -401,8 +392,50 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder addBundleItems(ItemStack... items) {
+        if (this.itemMeta instanceof BundleMeta bundleMeta) {
+            for (ItemStack i : items) {
+                if (i != null && !i.getType().isAir()) {
+                    bundleMeta.addItem(i);
+                }
+            }
+        }
+        return this;
+    }
+
+    public ItemBuilder addPotionEffect(PotionEffect effect) {
+        this.customEffects.add(effect);
+        return this;
+    }
+
+    public ItemBuilder setPotionColor(@NonNull String hex) {
+        this.potionColor = ColorUtils.fromHex(hex);
+        return this;
+    }
+
+    public ItemBuilder setBasePotionType(@NonNull PotionType type) {
+        if (this.itemMeta instanceof PotionMeta potionMeta) {
+            potionMeta.setBasePotionType(type);
+        }
+        return this;
+    }
+
+    public ItemBuilder setSpawnedType(@NonNull EntityType type) {
+        if (this.itemMeta instanceof SpawnEggMeta eggMeta) {
+            try {
+                String nbtString = "{id:\"" + type.getKeyOrThrow() + "\"}";
+                EntitySnapshot snapshot = Bukkit.getEntityFactory().createEntitySnapshot(nbtString);
+
+                eggMeta.setSpawnedEntity(snapshot);
+            } catch (IllegalArgumentException e) {
+                BlightedMC.getInstance().getLogger().warning("Failed to create EntitySnapshot for type: " + type.name());
+            }
+        }
+        return this;
+    }
+
     public ItemBuilder setLeatherColor(@NonNull String hex) {
-        this.leatherColor = fromHex(hex);
+        this.leatherColor = ColorUtils.fromHex(hex);
         return this;
     }
 
@@ -444,6 +477,7 @@ public class ItemBuilder {
         applyBannerPatterns();
         applyArmorTrim();
         applyLeatherColor();
+        applyPotionProperties();
         applySkullProperties();
 
         if (unstackable) {
@@ -476,37 +510,22 @@ public class ItemBuilder {
         return itemMeta.getDisplayName();
     }
 
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
-
-    public ItemBuilder setDisplayName(@NonNull String displayName) {
-        this.itemMeta.setDisplayName(displayName);
-        return this;
-    }
-
     public Map<Enchantment, Integer> getEnchantments() {
         return Collections.unmodifiableMap(enchantments);
     }
 
     public List<Pattern> getBannerPatterns() {
-        return bannerPatterns != null
-            ? Collections.unmodifiableList(bannerPatterns)
-            : Collections.emptyList();
+        return bannerPatterns != null ? Collections.unmodifiableList(bannerPatterns) : Collections.emptyList();
     }
 
     private void applyEnchantments() {
         if (enchantments.isEmpty()) return;
 
         if (itemMeta instanceof EnchantmentStorageMeta storageMeta) {
-            enchantments.forEach((enchantment, level) ->
-                storageMeta.addStoredEnchant(enchantment, level, true)
-            );
+            enchantments.forEach((enchantment, level) -> storageMeta.addStoredEnchant(enchantment, level, true));
             return;
         }
-        enchantments.forEach((enchantment, level) ->
-            itemMeta.addEnchant(enchantment, level, true)
-        );
+        enchantments.forEach((enchantment, level) -> itemMeta.addEnchant(enchantment, level, true));
     }
 
     private void applyAttributes() {
@@ -536,16 +555,27 @@ public class ItemBuilder {
     }
 
     private void applyLeatherColor() {
-        if (leatherColor != null && isLeatherDyeable(item.getType())
-            && itemMeta instanceof LeatherArmorMeta lam) {
+        if (leatherColor != null && isLeatherDyeable(item.getType()) && itemMeta instanceof LeatherArmorMeta lam) {
             lam.setColor(leatherColor);
+        }
+    }
+
+    private void applyPotionProperties() {
+        if (itemMeta instanceof PotionMeta potionMeta) {
+            if (potionColor != null) {
+                potionMeta.setColor(potionColor);
+            }
+            for (PotionEffect effect : customEffects) {
+                potionMeta.addCustomEffect(effect, true);
+            }
         }
     }
 
     private void applySkullProperties() {
         if (item.getType() == Material.PLAYER_HEAD && itemMeta instanceof SkullMeta skullMeta) {
             if (skullOwnerUUID != null) {
-                skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(skullOwnerUUID));
+                PlayerProfile profile = Bukkit.createPlayerProfile(skullOwnerUUID);
+                skullMeta.setOwnerProfile(profile);
             } else if (base64Texture != null) {
                 applyBase64Texture(skullMeta, base64Texture);
             }
