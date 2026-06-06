@@ -22,13 +22,13 @@ public final class LootingAwareProbabilisticStrategy implements LootSelectionStr
     public LootingAwareProbabilisticStrategy(int maxDrops) {
         if (maxDrops <= 0) {
             throw new IllegalArgumentException("maxDrops must be positive, got: " + maxDrops);
-
         }
         this.maxDrops = maxDrops;
     }
 
     /**
      * Selects loot entries probabilistically, adjusting each entry's chance based on looting level.
+     * Guaranteed/non-probabilistic items are always included prior to filtering.
      *
      * @param validEntries the list of valid entries after condition checks
      * @param context      the loot context, used for randomness and player looting level
@@ -41,6 +41,7 @@ public final class LootingAwareProbabilisticStrategy implements LootSelectionStr
 
         for (LootEntry entry : validEntries) {
             if (!entry.isProbabilistic()) {
+                selected.add(entry);
                 continue;
             }
             double adjustedProbability = adjustForLooting(entry.probability(), lootingLevel);
@@ -51,6 +52,11 @@ public final class LootingAwareProbabilisticStrategy implements LootSelectionStr
 
         if (selected.size() > maxDrops) {
             Collections.shuffle(selected, context.random());
+            selected.sort((e1, e2) -> {
+                double p1 = e1.isProbabilistic() ? e1.probability() : 1.0;
+                double p2 = e2.isProbabilistic() ? e2.probability() : 1.0;
+                return Double.compare(p2, p1);
+            });
             return selected.subList(0, maxDrops);
         }
 
