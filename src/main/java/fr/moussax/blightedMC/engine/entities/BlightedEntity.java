@@ -51,7 +51,7 @@ public abstract class BlightedEntity implements Cloneable {
     public static final String FAST_PASS_TAG = "blighted_opt";
     private static final double BOSS_BAR_RANGE = 60.0;
 
-    private final NavigableMap<Double, Runnable> phaseThresholds = new TreeMap<>(Collections.reverseOrder());
+    private NavigableMap<Double, Runnable> phaseThresholds = new TreeMap<>(Collections.reverseOrder());
 
     private LifecycleTaskManager coreTasks = new LifecycleTaskManager();
     private LifecycleTaskManager phaseTasks = new LifecycleTaskManager();
@@ -154,8 +154,9 @@ public abstract class BlightedEntity implements Cloneable {
 
         if (blightedType == BlightedType.BOSS) createBossBar();
         BlightedEntitiesListener.registerEntity(existing, this);
-        onRehydrate(existing);
+
         initComponents();
+        onRehydrate(existing);
 
         if (!runtimeInitialized) {
             initRuntime();
@@ -441,7 +442,7 @@ public abstract class BlightedEntity implements Cloneable {
      * Exposes registered components for external generic listeners.
      */
     public Collection<EntityComponent> getComponents() {
-        return components.values();
+        return new ArrayList<>(components.values());
     }
 
     public void updateBossBar() {
@@ -699,6 +700,7 @@ public abstract class BlightedEntity implements Cloneable {
             clone.armor = cloneArmor();
             clone.itemInMainHand = cloneItem(this.itemInMainHand);
             clone.itemInOffHand = cloneItem(this.itemInOffHand);
+            clone.phaseThresholds = new TreeMap<>(this.phaseThresholds);
 
             clone.components = new HashMap<>();
             for (Map.Entry<String, EntityComponent> entry : this.components.entrySet()) {

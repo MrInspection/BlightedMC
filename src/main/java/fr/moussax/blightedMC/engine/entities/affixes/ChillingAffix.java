@@ -81,7 +81,12 @@ public final class ChillingAffix implements EntityComponent {
 
     @Override
     public EntityComponent clone() {
-        try { return (EntityComponent) super.clone(); }
-        catch (CloneNotSupportedException e) { throw new AssertionError(e); }
+        try {
+            ChillingAffix clone = (ChillingAffix) super.clone();
+            clone.tickCounter = 0;
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
     }
 }

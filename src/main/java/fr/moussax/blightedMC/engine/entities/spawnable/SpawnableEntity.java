@@ -57,7 +57,7 @@ public abstract class SpawnableEntity extends BlightedEntity {
         if (affixChance > 0.0 && Math.random() <= affixChance) {
             EntityComponent affix = AffixRegistry.getRandomAffix();
             if (affix != null) {
-                addComponent(affix);
+                addComponent(affix.clone());
                 spawned.getPersistentDataContainer().set(AFFIXES_KEY, PersistentDataType.STRING, affix.getId());
                 startEliteAura();
             }
@@ -71,10 +71,10 @@ public abstract class SpawnableEntity extends BlightedEntity {
         super.onRehydrate(existing);
 
         String affixId = existing.getPersistentDataContainer().get(AFFIXES_KEY, PersistentDataType.STRING);
-        if (affixId != null) {
+        if (affixId != null && getComponent(affixId) == null) {
             EntityComponent affix = AffixRegistry.getAffixById(affixId);
             if (affix != null) {
-                addComponent(affix);
+                addComponent(affix.clone());
                 startEliteAura();
             }
         }

@@ -19,7 +19,7 @@ public final class BurningAffix implements EntityComponent {
 
     private static final double BURN_RADIUS = 3.0;
     private static final double BASE_DAMAGE = 2.0;
-    private final Map<UUID, Long> playerHeatMap = new HashMap<>();
+    private Map<UUID, Long> playerHeatMap = new HashMap<>();
     private int tickCounter = 0;
 
     @Override
@@ -74,7 +74,13 @@ public final class BurningAffix implements EntityComponent {
 
     @Override
     public EntityComponent clone() {
-        try { return (EntityComponent) super.clone(); }
-        catch (CloneNotSupportedException e) { throw new AssertionError(e); }
+        try {
+            BurningAffix clone = (BurningAffix) super.clone();
+            clone.playerHeatMap = new HashMap<>(this.playerHeatMap);
+            clone.tickCounter = 0;
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
     }
 }

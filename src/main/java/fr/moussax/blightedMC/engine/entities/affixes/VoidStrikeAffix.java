@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public final class VoidStrikeAffix implements EntityComponent {
 
-    private final Map<UUID, Long> markedPlayers = new HashMap<>();
+    private Map<UUID, Long> markedPlayers = new HashMap<>();
     private static final long MARK_DURATION_MS = 5000L;
     private static final double MAX_MULTIPLIER = 3.0;
 
@@ -99,7 +99,12 @@ public final class VoidStrikeAffix implements EntityComponent {
 
     @Override
     public EntityComponent clone() {
-        try { return (EntityComponent) super.clone(); }
-        catch (CloneNotSupportedException e) { throw new AssertionError("Affix cloning failed", e); }
+        try {
+            VoidStrikeAffix clone = (VoidStrikeAffix) super.clone();
+            clone.markedPlayers = new HashMap<>(this.markedPlayers);
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError("Affix cloning failed", e);
+        }
     }
 }

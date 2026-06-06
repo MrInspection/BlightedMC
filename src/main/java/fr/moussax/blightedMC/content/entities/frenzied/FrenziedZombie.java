@@ -17,6 +17,7 @@ public final class FrenziedZombie extends FrenziedMeleeBruiser {
         super("FRENZIED_ZOMBIE", "Frenzied Zombie", EntityType.ZOMBIE);
         setDamage(6);
         setDroppedExp(12);
+        setAffixChance(0.40);
         setLootTable(new EntityLootTableBuilder()
             .setMaxDrop(3)
             .addLoot(Material.ROTTEN_FLESH, 2, 6, 1.0, COMMON)

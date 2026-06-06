@@ -5,7 +5,6 @@ import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -13,8 +12,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
-
-import java.util.Objects;
 
 public sealed abstract class FrenziedCreature extends SpawnableEntity
         permits FrenziedDrowned, FrenziedMeleeBruiser, FrenziedSkirmisher, FrenziedAmbusher {
@@ -47,6 +44,7 @@ public sealed abstract class FrenziedCreature extends SpawnableEntity
 
     @Override
     protected void onRehydrate(LivingEntity existing) {
+        super.onRehydrate(existing);
         evaluatePhases(existing.getHealth());
     }
 

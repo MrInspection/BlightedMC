@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.content.entities;
 
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
+import fr.moussax.blightedMC.engine.entities.components.ShieldComponent;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.engine.entities.spawnable.engine.SpawnMode;
@@ -15,25 +16,31 @@ import java.util.List;
 public class Illusioner extends SpawnableEntity {
 
     public Illusioner() {
-        super("ILLUSIONER", "Illusioner", 35, EntityType.ILLUSIONER, 0.3, SpawnMode.INDEPENDENT);
+        super("PILLAGER", "Pillager", 35, EntityType.PILLAGER, 0.5, SpawnMode.INDEPENDENT);
 
         this.lootTable = new EntityLootTableBuilder()
-            .addLoot(Material.SPECTRAL_ARROW, 4, 12, 0.6, EntityLootFeedbackDecorator.EntityLootRarity.COMMON)
-            .addLoot(Material.GLASS_BOTTLE, 1, 2, 0.4, EntityLootFeedbackDecorator.EntityLootRarity.COMMON)
-            .addLoot(Material.TOTEM_OF_UNDYING, 1, 1, 0.02, EntityLootFeedbackDecorator.EntityLootRarity.VERY_RARE)
-            .addLoot(Material.OMINOUS_BOTTLE, 1, 1, 0.15, EntityLootFeedbackDecorator.EntityLootRarity.UNCOMMON)
-            .addGemsLoot(12, 0.25, EntityLootFeedbackDecorator.EntityLootRarity.UNCOMMON)
-            .addEnchantedBookWithLevelRange(
-                List.of(Enchantment.QUICK_CHARGE, Enchantment.PIERCING, Enchantment.POWER),
-                1, 7, 0.07, EntityLootFeedbackDecorator.EntityLootRarity.RARE
-            )
-            .setMaxDrop(4)
-            .build();
+                .addLoot(Material.SPECTRAL_ARROW, 4, 12, 0.6, EntityLootFeedbackDecorator.EntityLootRarity.COMMON)
+                .addLoot(Material.GLASS_BOTTLE, 1, 2, 0.4, EntityLootFeedbackDecorator.EntityLootRarity.COMMON)
+                .addLoot(Material.TOTEM_OF_UNDYING, 1, 1, 0.02, EntityLootFeedbackDecorator.EntityLootRarity.VERY_RARE)
+                .addLoot(Material.OMINOUS_BOTTLE, 1, 1, 0.15, EntityLootFeedbackDecorator.EntityLootRarity.UNCOMMON)
+                .addGemsLoot(12, 0.25, EntityLootFeedbackDecorator.EntityLootRarity.UNCOMMON)
+                .addEnchantedBookWithLevelRange(
+                        List.of(Enchantment.QUICK_CHARGE, Enchantment.PIERCING, Enchantment.POWER),
+                        1, 7, 0.07, EntityLootFeedbackDecorator.EntityLootRarity.RARE
+                )
+                .setMaxDrop(4)
+                .build();
+    }
+
+    @Override
+    protected void onDefineBehavior() {
+        if (getComponent("BLIGHTED_SHIELD") == null) {
+            addComponent(new ShieldComponent(120));
+        }
     }
 
     @Override
     protected void defineSpawnConditions() {
-        addCondition(SpawnRules.insideStructure(Structure.MANSION).or(SpawnRules.insideStructure(Structure.TRIAL_CHAMBERS))
-        );
+        addCondition(SpawnRules.insideStructure(Structure.MANSION).or(SpawnRules.insideStructure(Structure.TRIAL_CHAMBERS)));
     }
 }
