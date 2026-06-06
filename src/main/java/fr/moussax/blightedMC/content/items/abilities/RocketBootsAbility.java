@@ -23,6 +23,25 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
     private BlightedPlayer player;
 
     @Override
+    public String getName() {
+        return "Rocket Flight";
+    }
+
+    @Override
+    public String[] getDescription() {
+        return new String[]{
+                "Double jump in the air to launch",
+                "yourself forward and take flight.",
+                "Consumes durability on use."
+        };
+    }
+
+    @Override
+    public BonusCategory getCategory() {
+        return BonusCategory.ABILITY; // Overrides the default label
+    }
+
+    @Override
     public void startAbilityEffect() {
         if (player == null) return;
         Player p = player.getPlayer();

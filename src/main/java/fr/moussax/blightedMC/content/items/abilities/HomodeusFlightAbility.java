@@ -11,6 +11,25 @@ public class HomodeusFlightAbility implements FullSetBonus {
     private boolean isActive = false;
 
     @Override
+    public String getName() {
+        return "Homodeus";
+    }
+
+    @Override
+    public String[] getDescription() {
+        return new String[]{
+                "Ascend beyond mortal limits, harnessing",
+                "divine technology to defy gravity and soar",
+                "through the skies."
+        };
+    }
+
+    @Override
+    public BonusCategory getCategory() {
+        return BonusCategory.FULL_SET;
+    }
+
+    @Override
     public void startAbilityEffect() {
         if (isActive) return;
 

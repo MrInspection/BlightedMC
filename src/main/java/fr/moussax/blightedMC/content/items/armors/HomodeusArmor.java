@@ -17,80 +17,30 @@ public class HomodeusArmor implements ItemProvider {
 
         BlightedItem homodeusHelmet = new BlightedItem("HOMODEUS_HELMET", ItemType.HELMET, ItemRarity.LEGENDARY, Material.LEATHER_HELMET);
         homodeusHelmet.setDisplayName("Homodeus Helmet");
-        homodeusHelmet.addLore(
-            "",
-            " §5Full Set Bonus: Homodeus",
-            " §7Ascend beyond mortal limits, harnessing",
-            " §7divine technology to defy gravity and soar",
-            " §7through the skies.",
-            "",
-            ItemRarity.LEGENDARY.getName()
-        );
-        homodeusHelmet.setUnbreakable(true);
-        homodeusHelmet.addEnchantmentGlint();
-        homodeusHelmet.setLeatherColor("#ffffff");
-        homodeusHelmet.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
-
+        setupHomodeusPiece(homodeusHelmet, homodeusFlightBonus);
 
         BlightedItem homodeusChestplate = new BlightedItem("HOMODEUS_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.LEGENDARY, Material.LEATHER_CHESTPLATE);
         homodeusChestplate.setDisplayName("Homodeus Chestplate");
-        homodeusChestplate.addLore(
-            "",
-            " §5Full Set Bonus: Homodeus",
-            " §7Ascend beyond mortal limits, harnessing",
-            " §7divine technology to defy gravity and soar",
-            " §7through the skies.",
-            "",
-            ItemRarity.LEGENDARY.getName()
-        );
-        homodeusChestplate.addEnchantmentGlint();
-        homodeusChestplate.setLeatherColor("#ffffff");
-        homodeusChestplate.setUnbreakable(true);
-        homodeusChestplate.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
+        setupHomodeusPiece(homodeusChestplate, homodeusFlightBonus);
 
         BlightedItem homodeusLeggings = new BlightedItem("HOMODEUS_LEGGINGS", ItemType.LEGGINGS, ItemRarity.LEGENDARY, Material.LEATHER_LEGGINGS);
         homodeusLeggings.setDisplayName("Homodeus Leggings");
-        homodeusLeggings.addLore(
-            "",
-            " §5Full Set Bonus: Homodeus",
-            " §7Ascend beyond mortal limits, harnessing",
-            " §7divine technology to defy gravity and soar",
-            " §7through the skies.",
-            "",
-            ItemRarity.LEGENDARY.getName()
-        );
-        homodeusLeggings.addEnchantmentGlint();
-        homodeusLeggings.setLeatherColor("#ffffff");
-        homodeusLeggings.setUnbreakable(true);
-        homodeusLeggings.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
+        setupHomodeusPiece(homodeusLeggings, homodeusFlightBonus);
 
         BlightedItem homodeusBoots = new BlightedItem("HOMODEUS_BOOTS", ItemType.BOOTS, ItemRarity.LEGENDARY, Material.LEATHER_BOOTS);
         homodeusBoots.setDisplayName("Homodeus Boots");
+        setupHomodeusPiece(homodeusBoots, homodeusFlightBonus);
 
-        homodeusBoots.addLore(
-            "",
-            " §5Full Set Bonus: Homodeus",
-            " §7Ascend beyond mortal limits, harnessing",
-            " §7divine technology to defy gravity and soar",
-            " §7through the skies.",
-            "",
-            ItemRarity.LEGENDARY.getName()
-        );
-        homodeusBoots.addEnchantmentGlint();
-        homodeusBoots.setLeatherColor("#ffffff");
-        homodeusBoots.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
-        homodeusBoots.setUnbreakable(true);
+        add(homodeusHelmet, homodeusChestplate, homodeusLeggings, homodeusBoots);
+    }
 
-        homodeusHelmet.setFullSetBonus(homodeusFlightBonus);
-        homodeusChestplate.setFullSetBonus(homodeusFlightBonus);
-        homodeusLeggings.setFullSetBonus(homodeusFlightBonus);
-        homodeusBoots.setFullSetBonus(homodeusFlightBonus);
+    private void setupHomodeusPiece(BlightedItem piece, FullSetBonus bonus) {
+        piece.setUnbreakable(true);
+        piece.addEnchantmentGlint();
+        piece.setLeatherColor("#ffffff");
+        piece.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
 
-        add(
-            homodeusHelmet,
-            homodeusChestplate,
-            homodeusLeggings,
-            homodeusBoots
-        );
+        piece.setFullSetBonus(bonus);
+        piece.addLore("", ItemRarity.LEGENDARY.getName());
     }
 }

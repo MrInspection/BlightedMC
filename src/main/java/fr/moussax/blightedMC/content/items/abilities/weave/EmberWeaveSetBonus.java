@@ -19,6 +19,23 @@ public sealed class EmberWeaveSetBonus implements FullSetBonus permits Magmaweav
     protected boolean isActive = false;
 
     @Override
+    public String getName() {
+        return "Molten Attunement";
+    }
+
+    @Override
+    public String[] getDescription() {
+        return new String[]{
+                "Impervious to the inferno, your",
+                "heat signature synchronizes",
+                "with §6molten currents§7.",
+                "",
+                "Grants immunity to §cfire §7and §clava§7.",
+                "Grants §b+15% §3Lava Fishing Speed§7."
+        };
+    }
+
+    @Override
     public void startAbilityEffect() {
         if (isActive) return;
 
@@ -34,37 +51,37 @@ public sealed class EmberWeaveSetBonus implements FullSetBonus permits Magmaweav
                     return;
                 }
                 player.addPotionEffect(
-                    new PotionEffect(
-                        PotionEffectType.FIRE_RESISTANCE,
-                        70,
-                        0,
-                        true,
-                        false,
-                        true
-                    )
+                        new PotionEffect(
+                                PotionEffectType.FIRE_RESISTANCE,
+                                70,
+                                0,
+                                true,
+                                false,
+                                true
+                        )
                 );
 
                 player.getWorld().spawnParticle(
-                    Particle.SMALL_FLAME,
-                    player.getLocation(),
-                    2,
-                    0.3,
-                    0.1,
-                    0.3,
-                    0.02
+                        Particle.SMALL_FLAME,
+                        player.getLocation(),
+                        2,
+                        0.3,
+                        0.1,
+                        0.3,
+                        0.02
                 );
 
                 if (ThreadLocalRandom.current().nextBoolean()) {
                     player.getWorld().spawnParticle(
-                        Particle.SMOKE,
-                        player.getLocation().add(0, 0.2, 0),
-                        2,
-                        0.2, 0.3, 0.2,
-                        0.01
+                            Particle.SMOKE,
+                            player.getLocation().add(0, 0.2, 0),
+                            2,
+                            0.2, 0.3, 0.2,
+                            0.01
                     );
                 }
             }
-        }.runTaskTimer(BlightedMC.getInstance(), 0L, 5L);
+        }.runTaskTimer(BlightedMC.getInstance(), 0L, 20L);
     }
 
     @Override
