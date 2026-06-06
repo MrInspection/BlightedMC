@@ -8,10 +8,7 @@ import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnCondition;
 import fr.moussax.blightedMC.engine.entities.spawnable.engine.SpawnMode;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.persistence.PersistentDataType;
@@ -62,10 +59,6 @@ public abstract class SpawnableEntity extends BlightedEntity {
             if (affix != null) {
                 addComponent(affix);
                 spawned.getPersistentDataContainer().set(AFFIXES_KEY, PersistentDataType.STRING, affix.getId());
-
-                spawned.setCustomName("§d§l" + name);
-                spawned.setCustomNameVisible(true);
-
                 startEliteAura();
             }
         }
@@ -88,12 +81,22 @@ public abstract class SpawnableEntity extends BlightedEntity {
     }
 
     private void startEliteAura() {
-        addCoreAbility(5L, 15L, () -> {
+        addCoreAbility(5L, 3L, () -> {
             if (isNotAlive()) return;
 
+            long time = entity.getTicksLived();
             Location center = entity.getLocation().add(0, entity.getHeight() / 2.0, 0);
-            entity.getWorld().spawnParticle(Particle.ENCHANT, center, 10, 0.5, 0.5, 0.5, 0.1);
-            entity.getWorld().spawnParticle(Particle.WITCH, center, 2, 0.4, 0.4, 0.4, 0.05);
+            World world = entity.getWorld();
+
+            double angle = time * 0.2;
+            double x = Math.cos(angle) * 0.6;
+            double z = Math.sin(angle) * 0.6;
+
+            world.spawnParticle(Particle.SCULK_SOUL, center, 2, 0.3, 0.4, 0.3, 0.05);
+
+            if (time % 10 == 0) {
+                world.spawnParticle(Particle.ENCHANT, center, 5, 0.5, 0.5, 0.5, 0.01);
+            }
         });
     }
 

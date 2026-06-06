@@ -51,28 +51,40 @@ public abstract class BlightedEntity implements Cloneable {
     public static final String FAST_PASS_TAG = "blighted_opt";
     private static final double BOSS_BAR_RANGE = 60.0;
 
-    private final Map<String, EntityComponent> components = new HashMap<>();
     private final NavigableMap<Double, Runnable> phaseThresholds = new TreeMap<>(Collections.reverseOrder());
 
     private LifecycleTaskManager coreTasks = new LifecycleTaskManager();
     private LifecycleTaskManager phaseTasks = new LifecycleTaskManager();
     public Set<EntityAttachment> attachments = new CopyOnWriteArraySet<>();
+    private Map<String, EntityComponent> components = new HashMap<>();
 
-    @Getter protected String entityId;
-    @Getter protected String name;
-    @Getter protected EntityType entityType;
-    @Getter protected LivingEntity entity;
-    @Getter protected int maxHealth;
-    @Getter @Setter protected int damage;
-    @Setter protected int defense;
-    @Setter @Getter protected int droppedExp = 0;
+    @Getter
+    protected String entityId;
+    @Getter
+    protected String name;
+    @Getter
+    protected EntityType entityType;
+    @Getter
+    protected LivingEntity entity;
+    @Getter
+    protected int maxHealth;
+    @Getter
+    @Setter
+    protected int damage;
+    @Setter
+    protected int defense;
+    @Setter
+    @Getter
+    protected int droppedExp = 0;
 
     protected ItemStack itemInMainHand;
     protected ItemStack itemInOffHand;
     protected ItemStack[] armor;
 
-    @Setter protected LootTable lootTable;
-    @Setter protected BlightedType blightedType = BlightedType.DEFAULT;
+    @Setter
+    protected LootTable lootTable;
+    @Setter
+    protected BlightedType blightedType = BlightedType.DEFAULT;
     protected BossBar bossBar;
     protected BarColor bossBarColor = BarColor.RED;
     protected BarStyle bossBarStyle = BarStyle.SOLID;
@@ -184,33 +196,38 @@ public abstract class BlightedEntity implements Cloneable {
     /**
      * Lifecycle hook invoked on entity death.
      */
-    public void onDeath(Location location) {}
+    public void onDeath(Location location) {
+    }
 
     /**
      * Lifecycle hook invoked when entity takes damage.
      */
-    public void onDamageTaken(EntityDamageEvent event) {}
+    public void onDamageTaken(EntityDamageEvent event) {
+    }
 
     /**
      * AI configuration hook executed after spawn or attach.
      */
-    protected void onConfigureAI(LivingEntity spawned) {}
+    protected void onConfigureAI(LivingEntity spawned) {
+    }
 
     /**
      * Hook for restoring behavior on an existing entity.
      */
-    protected void onRehydrate(LivingEntity existing) {}
+    protected void onRehydrate(LivingEntity existing) {
+    }
 
     /**
      * Defines scheduled behaviors and runtime abilities.
      */
-    protected void onDefineBehavior() {}
+    protected void onDefineBehavior() {
+    }
 
     /**
      * Registers a phase triggered when health ratio is below or equal to threshold.
      *
      * @param healthPercentage normalized threshold (0.0–1.0)
-     * @param onTransition phase logic
+     * @param onTransition     phase logic
      */
     protected final void registerPhase(double healthPercentage, Runnable onTransition) {
         phaseThresholds.put(healthPercentage, onTransition);
@@ -240,9 +257,9 @@ public abstract class BlightedEntity implements Cloneable {
     /**
      * Registers a repeating ability in the core/phase lifecycle.
      *
-     * @param delayTicks initial delay
+     * @param delayTicks  initial delay
      * @param periodTicks execution interval
-     * @param action task logic
+     * @param action      task logic
      */
     @SuppressWarnings("SameParameterValue")
     protected final void addCoreAbility(long delayTicks, long periodTicks, Runnable action) {
@@ -252,9 +269,9 @@ public abstract class BlightedEntity implements Cloneable {
     /**
      * Registers a repeating ability in the core/phase lifecycle.
      *
-     * @param delayTicks initial delay
+     * @param delayTicks  initial delay
      * @param periodTicks execution interval
-     * @param action task logic
+     * @param action      task logic
      */
     protected final void addPhaseAbility(long delayTicks, long periodTicks, Runnable action) {
         scheduleAbility(phaseTasks, delayTicks, periodTicks, action);
@@ -264,7 +281,7 @@ public abstract class BlightedEntity implements Cloneable {
      * Registers a delayed execution in the core/phase lifecycle.
      *
      * @param delayTicks delay before execution
-     * @param action task logic
+     * @param action     task logic
      */
     protected final void addCoreDelayedAction(long delayTicks, Runnable action) {
         scheduleDelayedAction(coreTasks, delayTicks, action);
@@ -274,7 +291,7 @@ public abstract class BlightedEntity implements Cloneable {
      * Registers a delayed execution in the core/phase lifecycle.
      *
      * @param delayTicks delay before execution
-     * @param action task logic
+     * @param action     task logic
      */
     protected final void addPhaseDelayedAction(long delayTicks, Runnable action) {
         scheduleDelayedAction(phaseTasks, delayTicks, action);
@@ -344,7 +361,7 @@ public abstract class BlightedEntity implements Cloneable {
      * Attaches an entity with a defined role.
      *
      * @param attachmentEntity entity to attach
-     * @param role attachment role
+     * @param role             attachment role
      */
     public void addAttachment(Entity attachmentEntity, AttachmentRole role) {
         if (attachmentEntity == null) return;
@@ -411,7 +428,7 @@ public abstract class BlightedEntity implements Cloneable {
     /**
      * Retrieves a registered component by id.
      *
-     * @param id component identifier
+     * @param id  component identifier
      * @param <T> component type
      * @return component or null
      */
@@ -461,7 +478,7 @@ public abstract class BlightedEntity implements Cloneable {
      * Executes loot table at location context.
      *
      * @param location drop location
-     * @param player associated player
+     * @param player   associated player
      */
     public void dropLoot(Location location, BlightedPlayer player) {
         if (lootTable == null) return;
@@ -479,7 +496,7 @@ public abstract class BlightedEntity implements Cloneable {
      * Evaluates immunity rules against a damage event.
      *
      * @param target entity
-     * @param event damage event
+     * @param event  damage event
      * @return matched immunity or null
      */
     public EntityImmunity getTriggeredImmunity(LivingEntity target, EntityDamageEvent event) {
@@ -602,9 +619,13 @@ public abstract class BlightedEntity implements Cloneable {
         manager.addRepeatingTask(() -> new BukkitRunnable() {
             @Override
             public void run() {
-                if (isNotAlive()) { cancel(); return; }
-                try { action.run(); }
-                catch (Exception exception) {
+                if (isNotAlive()) {
+                    cancel();
+                    return;
+                }
+                try {
+                    action.run();
+                } catch (Exception exception) {
                     BlightedMC.getInstance().getLogger().warning("[BlightedEntity] Ability threw an exception on entity '" + name + "': " + exception.getMessage());
                 }
             }
@@ -617,8 +638,9 @@ public abstract class BlightedEntity implements Cloneable {
             @Override
             public void run() {
                 if (isNotAlive()) return;
-                try { action.run(); }
-                catch (Exception exception) {
+                try {
+                    action.run();
+                } catch (Exception exception) {
                     BlightedMC.getInstance().getLogger().warning("[BlightedEntity] Delayed action threw an exception on entity '" + name + "': " + exception.getMessage());
                 }
             }
@@ -677,6 +699,12 @@ public abstract class BlightedEntity implements Cloneable {
             clone.armor = cloneArmor();
             clone.itemInMainHand = cloneItem(this.itemInMainHand);
             clone.itemInOffHand = cloneItem(this.itemInOffHand);
+
+            clone.components = new HashMap<>();
+            for (Map.Entry<String, EntityComponent> entry : this.components.entrySet()) {
+                clone.components.put(entry.getKey(), entry.getValue().clone());
+            }
+
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException("Clone failed", e);
