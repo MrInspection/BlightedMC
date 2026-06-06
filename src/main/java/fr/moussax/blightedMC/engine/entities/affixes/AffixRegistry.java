@@ -13,10 +13,7 @@ public final class AffixRegistry {
 
     static {
         register(new BurningAffix());
-        register(new ChillingAffix());
-        register(new DeflectAffix());
         register(new VoidStrikeAffix());
-        register(new ThornsAffix());
         register(new ChillingAffix());
     }
 

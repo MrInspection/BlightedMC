@@ -2,24 +2,28 @@ package fr.moussax.blightedMC.engine.entities.affixes;
 
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.components.EntityComponent;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class BurningAffix implements EntityComponent {
 
     private static final double BURN_RADIUS = 3.0;
-    private static final int FIRE_TICKS = 60; // 3 seconds of fire
+    private static final double BASE_DAMAGE = 2.0;
+    private final Map<UUID, Long> playerHeatMap = new HashMap<>();
     private int tickCounter = 0;
 
     @Override
-    public String getId() {
-        return "AFFIX_BURNING";
-    }
+    public String getId() { return "AFFIX_BURNING"; }
 
     @Override
     public void onInit(LivingEntity entity) {}
@@ -31,37 +35,46 @@ public final class BurningAffix implements EntityComponent {
     public void onTick(BlightedEntity owner) {
         tickCounter++;
         LivingEntity entity = owner.getEntity();
-        Location center = entity.getLocation();
 
-        if (tickCounter % 2 == 0) {
-            drawFireAura(center);
-        }
+        drawVolcanicAura(entity.getLocation(), tickCounter);
 
-        if (tickCounter >= 2) {
-            tickCounter = 0;
-            applyCombustion(entity);
+        if (tickCounter % 5 == 0) {
+            applyAuraDamage(entity);
         }
     }
 
-    private void drawFireAura(Location center) {
-        Objects.requireNonNull(center.getWorld()).spawnParticle(Particle.FLAME, center.add(0, 0.1, 0), 8, BURN_RADIUS / 2, 0.1, BURN_RADIUS / 2, 0.02);
-        center.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, center, 2, BURN_RADIUS / 2, 0.5, BURN_RADIUS / 2, 0.01);
+    private void drawVolcanicAura(Location center, int tick) {
+        for (int i = 0; i < 24; i++) {
+            double angle = (tick * 0.1) + (i * Math.PI * 2 / 24);
+            double x = Math.cos(angle) * BURN_RADIUS;
+            double z = Math.sin(angle) * BURN_RADIUS;
+
+            Color color = (i % 2 == 0) ? Color.fromRGB(255, 69, 0) : Color.fromRGB(139, 0, 0);
+            Particle.DustOptions dust = new Particle.DustOptions(color, 1.5f);
+
+            Objects.requireNonNull(center.getWorld()).spawnParticle(Particle.DUST, center.clone().add(x, 0.1, z), 1, 0, 0, 0, 0, dust);
+        }
+
+        double rx = ThreadLocalRandom.current().nextDouble(-BURN_RADIUS, BURN_RADIUS);
+        double rz = ThreadLocalRandom.current().nextDouble(-BURN_RADIUS, BURN_RADIUS);
+
+        center.getWorld().spawnParticle(Particle.LAVA, center.clone().add(rx, 0.2, rz), 1, 0.1, 0.1, 0.1, 0.05);
+        center.getWorld().spawnParticle(Particle.FLAME, center.clone().add(rx, 0.3, rz), 3, 0.2, 0.2, 0.2, 0.02);
     }
 
-    private void applyCombustion(LivingEntity entity) {
-        boolean ignitedSomeone = false;
-
+    private void applyAuraDamage(LivingEntity entity) {
         for (org.bukkit.entity.Entity nearby : entity.getNearbyEntities(BURN_RADIUS, 2.0, BURN_RADIUS)) {
             if (!(nearby instanceof Player player)) continue;
-
-            if (player.getFireTicks() <= 0) {
-                player.setFireTicks(FIRE_TICKS);
-                ignitedSomeone = true;
-            }
+            player.setFireTicks(40);
+            player.damage(BASE_DAMAGE, entity);
+            entity.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 1, 0), 10, 0.2, 0.5, 0.2, 0.05);
+            entity.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 0.6f);
         }
+    }
 
-        if (ignitedSomeone) {
-            entity.getWorld().playSound(entity.getLocation(), Sound.ITEM_FIRECHARGE_USE, 0.6f, 1.2f);
-        }
+    @Override
+    public EntityComponent clone() {
+        try { return (EntityComponent) super.clone(); }
+        catch (CloneNotSupportedException e) { throw new AssertionError(e); }
     }
 }
