@@ -35,7 +35,7 @@ public class BlightedGemstone implements ItemProvider {
         blightedGemstone.addNotEquippable();
         blightedGemstone.isUnstackable();
         blightedGemstone.addRule(ItemRule.PREVENT_PLACEMENT);
-        blightedGemstone.addAbility(new Ability(new GemsItem.BlightedGemstoneAbility(), "Consume Gems", AbilityType.RIGHT_CLICK));
+        blightedGemstone.addAbility(new Ability(new GemsItem.BlightedGemstoneAbility(), "Consume Gems", AbilityType.RIGHT_CLICK), false);
 
         add(blightedGemstone);
     }

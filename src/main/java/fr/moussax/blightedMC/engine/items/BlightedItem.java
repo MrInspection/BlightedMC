@@ -52,11 +52,17 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, ItemFac
     }
 
     public void addAbility(Ability ability) {
+        addAbility(ability, true);
+    }
+
+    public void addAbility(Ability ability, boolean injectLore) {
         if (ability == null) return;
         this.abilities.add(ability);
 
-        List<String> formattedLore = ability.getAbilityLore();
-        this.addLore(formattedLore.toArray(new String[0]));
+        if (injectLore) {
+            List<String> formattedLore = ability.getAbilityLore();
+            this.addLore(formattedLore.toArray(new String[0]));
+        }
     }
 
     public void setFullSetBonus(FullSetBonus fullSetBonus) {
