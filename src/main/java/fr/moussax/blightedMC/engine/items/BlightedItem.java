@@ -9,7 +9,6 @@ import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Event;
@@ -32,7 +31,6 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, ItemFac
     private final ItemRarity itemRarity;
     @Getter
     private final ItemType itemType;
-    @Setter
     @Getter
     private FullSetBonus fullSetBonus;
     @Getter
@@ -54,7 +52,19 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, ItemFac
     }
 
     public void addAbility(Ability ability) {
-        abilities.add(ability);
+        if (ability == null) return;
+        this.abilities.add(ability);
+
+        List<String> formattedLore = ability.getAbilityLore();
+        this.addLore(formattedLore.toArray(new String[0]));
+    }
+
+    public void setFullSetBonus(FullSetBonus fullSetBonus) {
+        this.fullSetBonus = fullSetBonus;
+        if (fullSetBonus == null) return;
+
+        List<String> formattedLore = fullSetBonus.getBonusLore();
+        this.addLore(formattedLore.toArray(new String[0]));
     }
 
     public void addRule(ItemRule rule) {

@@ -2,53 +2,49 @@ package fr.moussax.blightedMC.engine.items.abilities;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
-/**
- * Represents a bonus granted when wearing a complete or partial armor set.
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public interface FullSetBonus {
 
-    /** Starts the bonus effect. */
     void startAbilityEffect();
-
-    /** Stops the bonus effect. */
     void stopAbilityEffect();
-
-    /** @return number of equipped pieces contributing to this bonus */
     int getPieces();
-
-    /** @return required number of pieces to activate this bonus */
     int getMaxPieces();
-
-    /** Assigns the owning player. */
     void setPlayer(BlightedPlayer player);
 
-    /** @return activation type of this bonus */
+    String getName();
+    String[] getDescription();
+
+    /** @return Defines how the lore label is formatted. */
+    default BonusCategory getCategory() {
+        return getMaxPieces() > 1 ? BonusCategory.FULL_SET : BonusCategory.PIECE;
+    }
+
     default SetType getType() {
         return SetType.NORMAL;
     }
 
-    /** @return whether this bonus registers Bukkit listeners */
     default boolean hasListener() {
         return this instanceof Listener;
     }
 
-    /** Activates the bonus and registers listeners if needed. */
     default void activate() {
         if (hasListener()) {
             Bukkit.getPluginManager().registerEvents(
-                (Listener) this,
-                BlightedMC.getInstance()
+                    (Listener) this,
+                    BlightedMC.getInstance()
             );
         }
         startAbilityEffect();
     }
 
-    /** Deactivates the bonus and unregisters listeners if needed. */
     default void deactivate() {
         stopAbilityEffect();
         if (hasListener()) {
@@ -56,7 +52,6 @@ public interface FullSetBonus {
         }
     }
 
-    /** @return a new instance of this bonus bound to the given player */
     default FullSetBonus createNew(BlightedPlayer player) {
         try {
             FullSetBonus clone = this.getClass().getDeclaredConstructor().newInstance();
@@ -67,21 +62,45 @@ public interface FullSetBonus {
         }
     }
 
-    /**
-     * Checks whether the given player owns this bonus.
-     *
-     * @param eventPlayer player from an event
-     * @return {@code true} if the player owns this bonus
-     */
     default boolean isAbilityOwner(Player eventPlayer) {
         BlightedPlayer owner = getAbilityOwner();
         return owner != null && eventPlayer.getUniqueId().equals(owner.getPlayer().getUniqueId());
     }
 
-    /** @return owning player of this bonus */
     default BlightedPlayer getAbilityOwner() {
         return null;
     }
 
+    default List<String> getBonusLore() {
+        List<String> lore = new ArrayList<>();
+
+        String prefix = getCategory().getLabel();
+        if (getType() == SetType.SNEAK) {
+            prefix = "Sneak " + prefix;
+        }
+
+        lore.add("");
+        lore.add(" §5" + prefix + ": " + getName());
+
+        for (String line : getDescription()) {
+            lore.add(" §7" + line);
+        }
+        return lore;
+    }
+
     enum SetType { NORMAL, SNEAK }
+
+    @Getter
+    enum BonusCategory {
+        FULL_SET("Full Set Bonus"),
+        PIECE("Piece Bonus"),
+        PASSIVE("Passive"),
+        ABILITY("Ability");
+
+        private final String label;
+
+        BonusCategory(String label) {
+            this.label = label;
+        }
+    }
 }
