@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.registry;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedMC.engine.entities.listeners.EntityComponentListener;
 import fr.moussax.blightedMC.engine.entities.listeners.SpawnableEntitiesListener;
 import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.engine.fishing.listeners.FishingListener;
@@ -40,6 +41,7 @@ public final class EventsRegistry {
         pm.registerEvents(new MenuListener(menuSystem), instance);
         pm.registerEvents(signInputListener, instance);
         pm.registerEvents(new BlightedEntitiesListener(), instance);
+        pm.registerEvents(new EntityComponentListener(), instance);
         pm.registerEvents(spawnableEntitiesListener, instance);
         pm.registerEvents(new BlightedBlockListener(), instance);
         pm.registerEvents(new PlayerListener(), instance);

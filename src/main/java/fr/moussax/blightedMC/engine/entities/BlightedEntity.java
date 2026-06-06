@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.engine.entities;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.entities.attachment.AttachmentRole;
 import fr.moussax.blightedMC.engine.entities.attachment.EntityAttachment;
+import fr.moussax.blightedMC.engine.entities.components.EntityComponent;
 import fr.moussax.blightedMC.engine.entities.immunity.EntityImmunity;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
@@ -83,6 +84,8 @@ public abstract class BlightedEntity implements Cloneable {
     public static final String FAST_PASS_TAG = "blighted_opt";
     private static final double BOSS_BAR_RANGE = 60.0;
 
+    private final Map<String, EntityComponent> components = new HashMap<>();
+
     public Set<EntityAttachment> attachments = new CopyOnWriteArraySet<>();
     @Getter
     protected String entityId;
@@ -136,6 +139,17 @@ public abstract class BlightedEntity implements Cloneable {
         this.entityType = entityType;
     }
 
+    public void addComponent(EntityComponent component) {
+        components.put(component.getId(), component);
+        if (entity != null) component.onInit(entity);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends EntityComponent> T getComponent(String id) {
+        return (T) components.get(id);
+    }
+
+
     public LivingEntity spawn(Location location) {
         if (entityType == null) throw new IllegalStateException("EntityType cannot be null");
 
@@ -151,6 +165,7 @@ public abstract class BlightedEntity implements Cloneable {
         if (blightedType == BlightedType.BOSS) createBossBar();
 
         BlightedEntitiesListener.registerEntity(entity, this);
+        initComponents();
         initRuntime();
 
         return entity;
@@ -173,12 +188,21 @@ public abstract class BlightedEntity implements Cloneable {
         if (blightedType == BlightedType.BOSS) createBossBar();
         BlightedEntitiesListener.registerEntity(existing, this);
         onRehydrate(existing);
+        initComponents();
 
         if (!runtimeInitialized) {
             initRuntime();
         } else {
             lifecycleTasks.scheduleAll();
         }
+    }
+
+    private void initComponents() {
+        components.values().forEach(component -> component.onInit(entity));
+    }
+
+    private void destroyComponents() {
+        components.values().forEach(component -> component.onDestroy(entity));
     }
 
     private void configureAttributes(boolean resetHealth) {
@@ -374,6 +398,7 @@ public abstract class BlightedEntity implements Cloneable {
     public void cleanup() {
         removeBossBar();
         killAllAttachments();
+        destroyComponents();
         lifecycleTasks.cancelAll();
         BlightedEntitiesListener.unregisterEntity(entity);
     }
