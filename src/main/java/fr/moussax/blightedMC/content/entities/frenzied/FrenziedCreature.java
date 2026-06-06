@@ -1,12 +1,15 @@
 package fr.moussax.blightedMC.content.entities.frenzied;
 
+import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
@@ -20,6 +23,7 @@ public sealed abstract class FrenziedCreature extends SpawnableEntity
     permits FrenziedDrowned, FrenziedMeleeBruiser, FrenziedSkirmisher, FrenziedAmbusher {
 
     private static final double ENRAGE_HEALTH_THRESHOLD = 0.50;
+    private static final NamespacedKey ENRAGED_KEY = new NamespacedKey(BlightedMC.getInstance(), "frenzied_enraged");
 
     protected boolean isEnraged = false;
     private int particleTicks = 0;
@@ -40,6 +44,16 @@ public sealed abstract class FrenziedCreature extends SpawnableEntity
      * Called after the base enrage ticker is registered.
      */
     protected void onDefineCombatBehavior() {
+    }
+
+    @Override
+    protected void onRehydrate(LivingEntity existing) {
+        Boolean persisted = existing.getPersistentDataContainer().get(ENRAGED_KEY, PersistentDataType.BOOLEAN);
+        if (Boolean.TRUE.equals(persisted)) {
+            isEnraged = true;
+            equipEnragedArmor(existing.getEquipment());
+            onEnrageBehavior();
+        }
     }
 
     /**
@@ -89,6 +103,7 @@ public sealed abstract class FrenziedCreature extends SpawnableEntity
 
     private void triggerEnrage() {
         isEnraged = true;
+        entity.getPersistentDataContainer().set(ENRAGED_KEY, PersistentDataType.BOOLEAN, true);
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.5f);
         equipEnragedArmor(entity.getEquipment());
         onEnrage(entity);

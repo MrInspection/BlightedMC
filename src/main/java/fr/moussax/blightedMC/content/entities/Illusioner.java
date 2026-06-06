@@ -24,8 +24,8 @@ public class Illusioner extends SpawnableEntity {
             .addLoot(Material.OMINOUS_BOTTLE, 1, 1, 0.15, EntityLootFeedbackDecorator.EntityLootRarity.UNCOMMON)
             .addGemsLoot(12, 0.25, EntityLootFeedbackDecorator.EntityLootRarity.UNCOMMON)
             .addEnchantedBookWithLevelRange(
-                List.of(Enchantment.QUICK_CHARGE, Enchantment.PIERCING),
-                1, 3, 0.07, EntityLootFeedbackDecorator.EntityLootRarity.RARE
+                List.of(Enchantment.QUICK_CHARGE, Enchantment.PIERCING, Enchantment.POWER),
+                1, 7, 0.07, EntityLootFeedbackDecorator.EntityLootRarity.RARE
             )
             .setMaxDrop(4)
             .build();
@@ -33,7 +33,7 @@ public class Illusioner extends SpawnableEntity {
 
     @Override
     protected void defineSpawnConditions() {
-        addCondition(SpawnRules.insideStructure(Structure.MANSION));
-        addCondition(SpawnRules.insideStructure(Structure.TRIAL_CHAMBERS));
+        addCondition(SpawnRules.insideStructure(Structure.MANSION).or(SpawnRules.insideStructure(Structure.TRIAL_CHAMBERS))
+        );
     }
 }

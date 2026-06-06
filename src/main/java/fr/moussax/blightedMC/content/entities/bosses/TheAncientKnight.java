@@ -66,7 +66,11 @@ public class TheAncientKnight extends BlightedEntity {
     private void stabNearestPlayer() {
         Player target = getNearestPlayer(20);
         if (target == null) return;
-        activeStabs.add(new StabPlayer(BlightedPlayer.getBlightedPlayer(target), this));
+
+        BlightedPlayer blightedTarget = BlightedPlayer.getBlightedPlayer(target);
+        if (blightedTarget == null) return;
+
+        activeStabs.add(new StabPlayer(blightedTarget, this));
     }
 
     private void meleeNearestPlayer() {
