@@ -4,11 +4,11 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 
-public class BlightedShieldComponent implements EntityComponent {
+public class ShieldComponent implements EntityComponent {
     private final double arcDegrees;
     private long disableUntil = 0;
 
-    public BlightedShieldComponent(double arcDegrees) {
+    public ShieldComponent(double arcDegrees) {
         this.arcDegrees = arcDegrees;
     }
 

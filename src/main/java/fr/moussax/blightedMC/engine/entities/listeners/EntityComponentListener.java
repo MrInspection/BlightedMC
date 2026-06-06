@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.engine.entities.listeners;
 
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
-import fr.moussax.blightedMC.engine.entities.components.BlightedShieldComponent;
+import fr.moussax.blightedMC.engine.entities.components.ShieldComponent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -23,7 +23,7 @@ public final class EntityComponentListener implements Listener {
         BlightedEntity wrapper = getBlightedEntity(event.getEntity());
         if (wrapper == null) return;
 
-        BlightedShieldComponent shield = wrapper.getComponent("BLIGHTED_SHIELD");
+        ShieldComponent shield = wrapper.getComponent("BLIGHTED_SHIELD");
         if (shield == null) return;
 
         Entity entity = event.getEntity();
