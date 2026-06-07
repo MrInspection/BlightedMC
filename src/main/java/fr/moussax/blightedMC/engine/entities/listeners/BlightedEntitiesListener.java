@@ -36,7 +36,7 @@ public final class BlightedEntitiesListener implements Listener {
 
     private static final Map<UUID, BlightedEntity> BLIGHTED_ENTITIES = new ConcurrentHashMap<>();
     private static final Map<UUID, BlightedEntity> ATTACHMENT_OWNERS = new ConcurrentHashMap<>();
-    private final Set<UUID> processingDamageIds = new HashSet<>();
+    private final Set<UUID> processingDamageIds = ConcurrentHashMap.newKeySet();
 
     public static void registerEntity(LivingEntity entity, BlightedEntity blighted) {
         if (entity == null || blighted == null) return;
