@@ -124,7 +124,7 @@ public final class ItemResult implements LootResult {
         return new ItemResult(new ItemStack(Material.ENCHANTED_BOOK), builder -> {
             List<Map.Entry<Enchantment, Integer>> entries = List.copyOf(enchantmentPool.entrySet());
             Map.Entry<Enchantment, Integer> selected = entries.get((int) (Math.random() * entries.size()));
-            builder.asEnchantedBook().addEnchantment(selected.getKey(), selected.getValue());
+            builder.enchantedBook().addEnchantment(selected.getKey(), selected.getValue());
         });
     }
 
@@ -140,7 +140,7 @@ public final class ItemResult implements LootResult {
         return new ItemResult(new ItemStack(Material.ENCHANTED_BOOK), builder -> {
             Enchantment selected = enchantments.get((int) (Math.random() * enchantments.size()));
             int level = minLevel + (int) (Math.random() * (maxLevel - minLevel + 1));
-            builder.asEnchantedBook().addEnchantment(selected, level);
+            builder.enchantedBook().addEnchantment(selected, level);
         });
     }
 
