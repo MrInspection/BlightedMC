@@ -32,12 +32,33 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * Fluent builder for constructing Bukkit {@link ItemStack} instances with staged configuration.
+ *
+ * <p>This builder accumulates modifications in memory and applies them only when
+ * {@link #toItemStack()} is invoked. This includes metadata-driven features such as
+ * enchantments, potion effects, banner patterns, armor trims, skull textures, and other
+ * component-based properties.</p>
+ *
+ * <p>Key characteristics:</p>
+ * <ul>
+ *   <li>Mutations are deferred until build time ({@link #toItemStack()}).</li>
+ *   <li>Returned {@link ItemStack} is a defensive copy.</li>
+ *   <li>Builder is not thread-safe.</li>
+ *   <li>Some operations are type-dependent and ignored if the underlying {@link ItemMeta} does not support them.</li>
+ * </ul>
+ *
+ * <p>Important contract:</p>
+ * <ul>
+ *   <li>{@link #toItemStack()} finalizes all staged state into the underlying item.</li>
+ *   <li>Until build time, internal state may not reflect final item metadata.</li>
+ * </ul>
+ */
 @SuppressWarnings({"UnstableApiUsage", "UnusedReturnValue"})
 public class ItemBuilder {
 
     private final ItemStack item;
     private final Map<Enchantment, Integer> enchantments = new HashMap<>();
-    private final Map<Attribute, Collection<AttributeModifier>> attributes = new HashMap<>();
     private final List<PotionEffect> customEffects = new ArrayList<>();
     private ItemMeta itemMeta;
     private boolean unstackable;
@@ -198,14 +219,26 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder unbreakable() {
+        return setUnbreakable(true);
+    }
+
     public ItemBuilder setUnstackable(boolean unstackable) {
         this.unstackable = unstackable;
         return this;
     }
 
+    public ItemBuilder unstackable() {
+        return setUnstackable(true);
+    }
+
     public ItemBuilder setFireResistant(boolean fireResistant) {
         itemMeta.setDamageResistant(fireResistant ? DamageTypeTags.IS_FIRE : null);
         return this;
+    }
+
+    public ItemBuilder fireResistant() {
+        return setFireResistant(true);
     }
 
     public ItemBuilder setDamageResistant(@Nullable Tag<DamageType> tag) {
@@ -218,12 +251,16 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder glider() {
+        return setGlider(true);
+    }
+
     public ItemBuilder setHideTooltip(boolean hideTooltip) {
         itemMeta.setHideTooltip(hideTooltip);
         return this;
     }
 
-    public ItemBuilder setHideTooltip() {
+    public ItemBuilder hideTooltip() {
         return setHideTooltip(true);
     }
 
@@ -425,7 +462,6 @@ public class ItemBuilder {
             try {
                 String nbtString = "{id:\"" + type.getKeyOrThrow() + "\"}";
                 EntitySnapshot snapshot = Bukkit.getEntityFactory().createEntitySnapshot(nbtString);
-
                 eggMeta.setSpawnedEntity(snapshot);
             } catch (IllegalArgumentException e) {
                 BlightedMC.getInstance().getLogger().warning("Failed to create EntitySnapshot for type: " + type.name());
@@ -463,7 +499,7 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder asEnchantedBook() {
+    public ItemBuilder enchantedBook() {
         if (item.getType() != Material.ENCHANTED_BOOK) {
             item.setType(Material.ENCHANTED_BOOK);
             this.itemMeta = this.item.getItemMeta();
@@ -473,7 +509,6 @@ public class ItemBuilder {
 
     public ItemStack toItemStack() {
         applyEnchantments();
-        applyAttributes();
         applyBannerPatterns();
         applyArmorTrim();
         applyLeatherColor();
@@ -520,25 +555,11 @@ public class ItemBuilder {
 
     private void applyEnchantments() {
         if (enchantments.isEmpty()) return;
-
         if (itemMeta instanceof EnchantmentStorageMeta storageMeta) {
             enchantments.forEach((enchantment, level) -> storageMeta.addStoredEnchant(enchantment, level, true));
             return;
         }
         enchantments.forEach((enchantment, level) -> itemMeta.addEnchant(enchantment, level, true));
-    }
-
-    private void applyAttributes() {
-        if (attributes.isEmpty()) return;
-        attributes.forEach((attr, mods) -> {
-            if (itemMeta.getAttributeModifiers() != null) {
-                Collection<AttributeModifier> existing = itemMeta.getAttributeModifiers().get(attr);
-                for (AttributeModifier old : new ArrayList<>(existing)) {
-                    itemMeta.removeAttributeModifier(attr, old);
-                }
-            }
-            mods.forEach(mod -> itemMeta.addAttributeModifier(attr, mod));
-        });
     }
 
     private void applyBannerPatterns() {
