@@ -50,11 +50,6 @@ public final class FrenziedPiglin extends FrenziedAmbusher {
 
     @Override
     protected void defineSpawnConditions() {
-        addCondition(
-            SpawnRules
-                .biome(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST)
-                .and(SpawnRules.maxBlockLight(11))
-                .and(SpawnRules.notInLiquid())
-        );
+        addCondition(SpawnRules.biome(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST).and(SpawnRules.netherHostile()));
     }
 }

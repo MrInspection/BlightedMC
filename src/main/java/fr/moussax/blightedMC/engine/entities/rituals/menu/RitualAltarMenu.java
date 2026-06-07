@@ -131,7 +131,7 @@ public final class RitualAltarMenu extends Menu {
             .addLore("§7The items required to invoke", "§7the §4⚚ Ancient Creature §7are ", "§7displayed in this side.").toItemStack();
         ItemStack invokedPane = new ItemBuilder(indicator, "§5Creature to Invoke")
             .addLore("§7The §4⚚ Ancient Creature §7you will", "§7invoke with your offerings.").toItemStack();
-        ItemStack fillerPane = new ItemBuilder(indicator, "§r").setHideTooltip().toItemStack();
+        ItemStack fillerPane = new ItemBuilder(indicator, "§r").hideTooltip().toItemStack();
 
         fillSlots(REQUIRED_ITEM_INDICATOR_SLOTS, sacrificedPane);
         fillSlots(INVOKED_MOB_INDICATOR_SLOTS, invokedPane);

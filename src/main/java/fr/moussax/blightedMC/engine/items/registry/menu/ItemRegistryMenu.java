@@ -79,7 +79,7 @@ public final class ItemRegistryMenu {
 
             setItem(SEARCH_SLOT, buildMenuItem(new ItemStack(Material.PALE_OAK_SIGN), "§eSearch Items", List.of("§7Click to search for items!")),
                 MenuItemInteraction.ANY_CLICK, (p, t) -> openSearchSign(p, this));
-            setItem(40, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
+            setCloseButton(40);
         }
 
         private static ItemStack getCategoryIcon(ItemType.Category category) {
@@ -206,20 +206,22 @@ public final class ItemRegistryMenu {
         }
 
         private void setNavigation() {
-            if (currentPage > 0) setItem(48, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
-                currentPage--;
-                manager.openMenu(this, p);
-            });
-            else
-                setItem(48, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> manager.openMenu(previousMenu, p));
+            if (currentPage > 0) {
+                setBackButton(48, (p, t) -> {
+                    currentPage--;
+                    manager.openMenu(this, p);
+                });
+            } else {
+                setBackButton(48, previousMenu);
+            }
 
             if ((currentPage + 1) * getItemsPerPage() < getTotalItems(null))
-                setItem(50, MenuElementPreset.NEXT_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                setItem(50, MenuElementPreset.NEXT_BUTTON, (p, t) -> {
                     currentPage++;
                     manager.openMenu(this, p);
                 });
 
-            setItem(49, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
+            setCloseButton(49);
         }
 
         @Override

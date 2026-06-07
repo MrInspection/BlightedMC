@@ -32,20 +32,10 @@ public final class EnderSeeMenu extends Menu {
 
     @Override
     public void build(Player player) {
-        setItem(
-            0,
-            MenuElementPreset.CLOSE_BUTTON,
-            MenuItemInteraction.ANY_CLICK,
-            (_, _) -> close()
-        );
+        setCloseButton(0);
         fillSlots(new int[]{1, 2, 3, 4, 5, 6, 7, 8}, MenuElementPreset.EMPTY_SLOT_FILLER);
         if (previousMenu != null) {
-            setItem(
-                1,
-                MenuElementPreset.BACK_BUTTON,
-                MenuItemInteraction.ANY_CLICK,
-                (p, _) -> BlightedMC.menuManager().openMenu(previousMenu, p)
-            );
+            setBackButton(1, previousMenu);
         }
         updateContents();
     }

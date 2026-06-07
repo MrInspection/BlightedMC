@@ -222,7 +222,7 @@ public final class BlightedPlayer {
         dataHandler.setGems(gemsManager.getGems());
         dataHandler.setMana(manaManager.getCurrentMana());
         dataHandler.setForgeFuel(forgeFuel);
-        dataHandler.save();
+        Bukkit.getScheduler().runTaskAsynchronously(BlightedMC.getInstance(), dataHandler::save);
     }
 
     public ItemStack[] getLastKnownArmor() {

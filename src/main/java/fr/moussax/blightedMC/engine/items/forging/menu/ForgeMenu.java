@@ -6,7 +6,6 @@ import fr.moussax.blightedMC.engine.items.forging.ForgeFuel;
 import fr.moussax.blightedMC.engine.items.forging.ForgeRecipe;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
-import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -78,14 +77,14 @@ public final class ForgeMenu extends Menu {
             ItemStack noRecipe = new ItemBuilder(Material.BARRIER, "§cRecipe Required")
                 .addLore("§7Select a recipe from the", "§7recipe book to start forging.")
                 .toItemStack();
-            setItem(25, noRecipe, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+            setItem(25, noRecipe, (_, _) -> {
             });
             return;
         }
 
         ItemStack result = recipe.getForgedItem().toItemStack().clone();
         result.setAmount(recipe.getForgedAmount());
-        setItem(25, result, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        setItem(25, result, (_, _) -> {
         });
     }
 
@@ -127,7 +126,7 @@ public final class ForgeMenu extends Menu {
         for (int i = 0; i < recipe.getIngredients().size() && i < GRID_SLOTS.length; i++) {
             CraftingObject ingredient = recipe.getIngredients().get(i);
             ItemStack displayItem = createDisplayItem(ingredient);
-            setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+            setItem(GRID_SLOTS[i], displayItem, (_, _) -> {
             });
         }
     }
@@ -154,13 +153,13 @@ public final class ForgeMenu extends Menu {
         fillSlots(REQUIRED_ITEM_INDICATOR_SLOTS, sacrificedItemPane);
         fillSlots(FORGED_ITEM_INDICATOR_SLOTS, forgedItemPane);
 
-        setItem(ITEM_INDICATOR, new ItemBuilder(indicator, "§r").setHideTooltip().toItemStack(), MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        setItem(ITEM_INDICATOR, new ItemBuilder(indicator, "§r").hideTooltip().toItemStack(), (_, _) -> {
         });
 
         ItemStack forgeIcon = new ItemBuilder(Material.BLAST_FURNACE, "§dBlighted Forge")
             .addLore("§7Combine materials to forge ", "§7items beyond the reach of", "§7ordinary furnaces.")
             .toItemStack();
-        setItem(14, forgeIcon, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        setItem(14, forgeIcon, (_, _) -> {
         });
     }
 
@@ -195,7 +194,7 @@ public final class ForgeMenu extends Menu {
                 .setEnchantmentGlint(canForge);
         }
 
-        setItem(32, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, _) -> {
+        setItem(32, builder.toItemStack(), (p, _) -> {
             if (isForging) return;
 
             if (recipe != null && canForge) {
@@ -211,8 +210,8 @@ public final class ForgeMenu extends Menu {
             .addLore("§7View all §6Forge Recipes §7and ", "§7their requirements.", "", "§eClick to view!")
             .toItemStack();
 
-        setItem(49, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (_, _) -> close());
-        setItem(50, recipeBook, MenuItemInteraction.ANY_CLICK, (p, _) ->
+        setCloseButton(49);
+        setItem(50, recipeBook, (p, _) ->
             BlightedMC.menuManager().openMenu(new ForgeRecipesMenu(this), p));
     }
 
@@ -221,11 +220,11 @@ public final class ForgeMenu extends Menu {
         int currentFuel = blightedPlayer.getForgeFuel();
         int requiredFuel = recipe != null ? recipe.getFuelCost() : 0;
 
-        setItem(34, createFuelMeter(currentFuel, requiredFuel), MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        setItem(34, createFuelMeter(currentFuel, requiredFuel), (_, _) -> {
         });
-        setItem(51, createFuelGuide(), MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        setItem(51, createFuelGuide(), (_, _) -> {
         });
-        setItem(53, createInsertFuelButton(player), MenuItemInteraction.ANY_CLICK, (p, _) -> handleFuelInsertion(blightedPlayer));
+        setItem(53, createInsertFuelButton(player), (p, _) -> handleFuelInsertion(blightedPlayer));
     }
 
     private ItemStack createFuelMeter(int currentFuel, int requiredFuel) {
@@ -432,7 +431,7 @@ public final class ForgeMenu extends Menu {
         if (!(inventory.getHolder() instanceof ForgeMenu)) return;
 
         ItemStack pane = new ItemBuilder(material, "§6Forging...")
-            .setHideTooltip()
+            .hideTooltip()
             .toItemStack();
 
         for (int slot : slots) {
@@ -444,7 +443,7 @@ public final class ForgeMenu extends Menu {
         if (!(inventory.getHolder() instanceof ForgeMenu)) return;
 
         ItemStack pane = new ItemBuilder(material, "§6Forging...")
-            .setHideTooltip()
+            .hideTooltip()
             .toItemStack();
 
         inventory.setItem(slot, pane);

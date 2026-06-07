@@ -36,7 +36,7 @@ public final class BlightedEntitiesListener implements Listener {
 
     private static final Map<UUID, BlightedEntity> BLIGHTED_ENTITIES = new ConcurrentHashMap<>();
     private static final Map<UUID, BlightedEntity> ATTACHMENT_OWNERS = new ConcurrentHashMap<>();
-    private final ThreadLocal<Set<UUID>> processingDamageIds = ThreadLocal.withInitial(HashSet::new);
+    private final Set<UUID> processingDamageIds = ConcurrentHashMap.newKeySet();
 
     public static void registerEntity(LivingEntity entity, BlightedEntity blighted) {
         if (entity == null || blighted == null) return;
@@ -70,11 +70,10 @@ public final class BlightedEntitiesListener implements Listener {
         if (!(event.getEntity() instanceof LivingEntity entity)) return;
         if (!entity.getScoreboardTags().contains(FAST_PASS_TAG)) return;
 
-        Set<UUID> processing = processingDamageIds.get();
         UUID entityId = entity.getUniqueId();
-        if (processing.contains(entityId)) return;
+        if (processingDamageIds.contains(entityId)) return;
 
-        processing.add(entityId);
+        processingDamageIds.add(entityId);
         try {
             BlightedEntity owner = ATTACHMENT_OWNERS.get(entityId);
             if (owner != null) {
@@ -87,7 +86,7 @@ public final class BlightedEntitiesListener implements Listener {
                 handleBlightedEntityDamage(blighted, entity, event);
             }
         } finally {
-            processing.remove(entityId);
+            processingDamageIds.remove(entityId);
         }
     }
 

@@ -50,8 +50,7 @@ public final class FrenziedZombifiedPiglin extends FrenziedMeleeBruiser {
         addCondition(
             SpawnRules.biome(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST)
                 .or(SpawnRules.insideStructure(Structure.FORTRESS))
-                .and(SpawnRules.maxBlockLight(11))
-                .and(SpawnRules.notInLiquid())
+                .and(SpawnRules.netherHostile())
         );
     }
 }

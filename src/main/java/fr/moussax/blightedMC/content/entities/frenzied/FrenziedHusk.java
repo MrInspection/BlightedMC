@@ -34,12 +34,6 @@ public final class FrenziedHusk extends FrenziedMeleeBruiser {
 
     @Override
     protected void defineSpawnConditions() {
-        addCondition(
-            SpawnRules.biome(Biome.DESERT)
-                .and(SpawnRules.maxBlockLight(0))
-                .and(SpawnRules.maxLightLevel(7))
-                .and(SpawnRules.skyExposed())
-                .and(SpawnRules.notInLiquid())
-        );
+        addCondition(SpawnRules.biome(Biome.DESERT).and(SpawnRules.overworldSurfaceHostile()));
     }
 }

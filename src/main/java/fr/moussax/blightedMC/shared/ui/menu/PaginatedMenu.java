@@ -55,46 +55,35 @@ public abstract class PaginatedMenu extends Menu {
         for (int i = startIndex; i < endIndex; i++) {
             final int index = i;
             setItem(
-                slot++,
-                getItem(player, index),
-                MenuItemInteraction.ANY_CLICK,
-                (p, click) -> onItemClick(p, index, click)
+                    slot++,
+                    getItem(player, index),
+                    MenuItemInteraction.ANY_CLICK,
+                    (p, click) -> onItemClick(p, index, click)
             );
         }
 
         // Previous page
         if (currentPage > 0) {
-            setItem(
-                size - 9,
-                MenuElementPreset.BACK_BUTTON,
-                MenuItemInteraction.ANY_CLICK,
-                (p, t) -> {
-                    currentPage--;
-                    refresh(p);
-                }
+            setBackButton(
+                    size - 9,
+                    (p, t) -> {
+                        currentPage--;
+                        refresh(p);
+                    }
             );
         }
 
         // Next page
         if (endIndex < totalItems) {
-            setItem(
-                size - 1,
-                MenuElementPreset.NEXT_BUTTON,
-                MenuItemInteraction.ANY_CLICK,
-                (p, t) -> {
-                    currentPage++;
-                    refresh(p);
-                }
+            setItem(size - 1, MenuElementPreset.NEXT_BUTTON, (p, t) -> {
+                        currentPage++;
+                        refresh(p);
+                    }
             );
         }
 
         // Close button
-        setItem(
-            size - 5,
-            MenuElementPreset.CLOSE_BUTTON,
-            MenuItemInteraction.ANY_CLICK,
-            (p, t) -> close()
-        );
+        setCloseButton(size - 5);
     }
 
     /**

@@ -5,6 +5,7 @@ import org.bukkit.Raid;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.type.TrialSpawner;
 import org.bukkit.block.data.type.TrialSpawner.State;
 import org.bukkit.generator.structure.GeneratedStructure;
 import org.bukkit.generator.structure.Structure;
@@ -127,7 +128,7 @@ public final class SpawnRules {
                         Block block = world.getBlockAt(originX + dx, originY + dy, originZ + dz);
                         if (block.getType() != Material.TRIAL_SPAWNER) continue;
 
-                        if (block.getBlockData() instanceof org.bukkit.block.data.type.TrialSpawner trialData
+                        if (block.getBlockData() instanceof TrialSpawner trialData
                             && trialData.getTrialSpawnerState() == State.ACTIVE) {
                             return true;
                         }
@@ -150,7 +151,7 @@ public final class SpawnRules {
                         Block block = world.getBlockAt(originX + dx, originY + dy, originZ + dz);
                         if (block.getType() != Material.TRIAL_SPAWNER) continue;
 
-                        if (block.getBlockData() instanceof org.bukkit.block.data.type.TrialSpawner trialData
+                        if (block.getBlockData() instanceof TrialSpawner trialData
                             && trialData.isOminous()
                             && trialData.getTrialSpawnerState() == State.ACTIVE) {
                             return true;
@@ -160,5 +161,17 @@ public final class SpawnRules {
             }
             return false;
         };
+    }
+
+    public static SpawnCondition overworldHostile() {
+        return maxBlockLight(0).and(maxLightLevel(7)).and(notInLiquid());
+    }
+
+    public static SpawnCondition overworldSurfaceHostile() {
+        return maxBlockLight(0).and(maxLightLevel(7)).and(skyExposed()).and(notInLiquid());
+    }
+
+    public static SpawnCondition netherHostile() {
+        return maxBlockLight(11).and(notInLiquid());
     }
 }
