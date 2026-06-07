@@ -44,7 +44,7 @@ public final class InvSeeMenu extends Menu {
             .setSkullOwner(target.getUniqueId())
             .toItemStack();
 
-        setItem(7, playerInformation, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        setItem(7, playerInformation, (_, _) -> {
         });
         setItem(
             8,
@@ -52,7 +52,6 @@ public final class InvSeeMenu extends Menu {
                 .setDisplayName("§dView Ender Chest")
                 .addLore("§7Click to view ender chest.")
                 .toItemStack(),
-            MenuItemInteraction.ANY_CLICK,
             (p, _) -> BlightedMC.menuManager().openMenu(
                 new EnderSeeMenu(target, this), p
             )
@@ -103,7 +102,7 @@ public final class InvSeeMenu extends Menu {
         if (!Objects.equals(getInventory().getItem(slot), displayItem)) {
             getInventory().setItem(slot, displayItem);
         }
-        setItem(slot, displayItem, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        setItem(slot, displayItem, (_, _) -> {
         });
     }
 }

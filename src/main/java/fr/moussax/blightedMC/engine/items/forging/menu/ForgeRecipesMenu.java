@@ -157,7 +157,7 @@ public final class ForgeRecipesMenu extends PaginatedMenu {
 
     private void setupBackButton() {
         if (currentPage > 0) {
-            setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, _) -> {
+            setBackButton(BACK_BUTTON_SLOT, (p, _) -> {
                 currentPage--;
                 manager.openMenu(this, p);
             });
@@ -165,26 +165,22 @@ public final class ForgeRecipesMenu extends PaginatedMenu {
         }
 
         if (previousMenu != null) {
-            setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, _) -> {
-                close();
-                manager.openMenu(previousMenu, p);
-            });
+            setBackButton(BACK_BUTTON_SLOT, previousMenu);
         }
     }
 
     private void setupNextButton(int end) {
         if (end < totalItems) {
-            setItem(NEXT_BUTTON_SLOT, MenuElementPreset.NEXT_BUTTON, MenuItemInteraction.ANY_CLICK, (p, _) -> {
+            setItem(NEXT_BUTTON_SLOT, MenuElementPreset.NEXT_BUTTON, (p, _) -> {
                 currentPage++;
                 manager.openMenu(this, p);
             });
         } else {
-            setItem(NEXT_BUTTON_SLOT, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), MenuItemInteraction.ANY_CLICK, (_, _) -> {
-            });
+            setItem(NEXT_BUTTON_SLOT, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), (p, t) -> {});
         }
     }
 
     private void setupCloseButton() {
-        setItem(CLOSE_BUTTON_SLOT, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (_, _) -> close());
+        setCloseButton(CLOSE_BUTTON_SLOT);
     }
 }

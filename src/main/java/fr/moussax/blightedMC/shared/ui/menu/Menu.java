@@ -131,6 +131,65 @@ public abstract class Menu implements InventoryHolder {
     }
 
     /**
+     * Places an item in the given slot with an ANY_CLICK action.
+     * Shorthand for {@link #setItem(int, ItemStack, MenuItemInteraction, MenuAction)}.
+     *
+     * @param slot   slot index
+     * @param item   displayed item
+     * @param action action to execute when clicked
+     */
+    public void setItem(int slot, @NonNull ItemStack item, @NonNull MenuAction action) {
+        setItem(slot, item, MenuItemInteraction.ANY_CLICK, action);
+    }
+
+    /**
+     * Places a preset item in the given slot with an ANY_CLICK action.
+     *
+     * @param slot   slot index
+     * @param preset displayed preset item
+     * @param action action to execute when clicked
+     */
+    public void setItem(int slot, @NonNull MenuElementPreset preset, @NonNull MenuAction action) {
+        setItem(slot, preset.getItem(), MenuItemInteraction.ANY_CLICK, action);
+    }
+
+    /**
+     * Places the standard close button at the given slot, wired to {@link #close()}.
+     *
+     * @param slot slot index
+     */
+    public void setCloseButton(int slot) {
+        setItem(slot, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
+    }
+
+    /**
+     * Places the standard back button at the given slot, wired to the given action.
+     *
+     * @param slot   slot index
+     * @param action action to execute when clicked
+     */
+    public void setBackButton(int slot, @NonNull MenuAction action) {
+        setItem(slot, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, action);
+    }
+
+    /**
+     * Places the standard back button at the given slot, wired to open the given previous menu.
+     * Closes the current menu first.
+     *
+     * @param slot         slot index
+     * @param previousMenu menu to open
+     */
+    public void setBackButton(int slot, @NonNull Menu previousMenu) {
+        setBackButton(slot, (p, t) -> {
+            close();
+            if (menuSystem != null) {
+                previousMenu.setMenuSystem(menuSystem);
+                previousMenu.open(p);
+            }
+        });
+    }
+
+    /**
      * Places a dynamically generated item in a slot with an associated action.
      *
      * @param slot        slot index
@@ -153,8 +212,7 @@ public abstract class Menu implements InventoryHolder {
      * @param builder consumer that configures the item using {@link ItemBuilder}
      */
     public void setItem(int slot, @NonNull Consumer<ItemBuilder> builder) {
-        setItem(slot, builder, MenuItemInteraction.ANY_CLICK, (player, type) -> {
-        });
+        setItem(slot, builder, MenuItemInteraction.ANY_CLICK, (p, t) -> {});
     }
 
     /**
@@ -178,8 +236,7 @@ public abstract class Menu implements InventoryHolder {
      */
     public void fillSlots(int[] slots, @NonNull ItemStack item, @NonNull MenuItemInteraction interaction) {
         for (int slot : slots) {
-            setItem(slot, item, interaction, (player, type) -> {
-            });
+            setItem(slot, item, interaction, (player, type) -> {});
         }
     }
 

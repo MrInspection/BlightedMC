@@ -40,21 +40,21 @@ public final class CraftingTableMenu extends InteractiveMenu {
 
         setItem(25, new ItemBuilder(Material.KNOWLEDGE_BOOK, "§6Crafting Recipes")
             .addLore("§7A tainted book that holds", "§7secrets of §5blighted §7items.", "", "§eClick to view!")
-            .toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> BlightedMC.menuManager().openMenu(
+            .toItemStack(), (p, t) -> BlightedMC.menuManager().openMenu(
             new RecipeBookMenu.RecipeListMenu(new CraftingTableMenu()), p)
         );
 
-        setItem(49, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
+        setCloseButton(49);
 
         ItemStack indicator = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
             .setDisplayName("§r").setHideTooltip(true).toItemStack();
 
         for (int slot : INDICATOR_SLOTS_LEFT)
-            setItem(slot, indicator, MenuItemInteraction.ANY_CLICK, (p, t) -> {
+            setItem(slot, indicator, (p, t) -> {
             });
 
         for (int slot : INDICATOR_SLOTS_RIGHT)
-            setItem(slot, indicator, MenuItemInteraction.ANY_CLICK, (p, t) -> {
+            setItem(slot, indicator, (p, t) -> {
             });
 
         setupOutputSlot();

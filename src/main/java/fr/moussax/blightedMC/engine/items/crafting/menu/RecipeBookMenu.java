@@ -118,28 +118,25 @@ public final class RecipeBookMenu {
 
         private void setupNavigationButtons(Player player, int end) {
             if (currentPage > 0) {
-                setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                setBackButton(BACK_BUTTON_SLOT, (p, t) -> {
                     currentPage--;
                     manager.openMenu(this, p);
                 });
             } else {
-                setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
-                    close();
-                    manager.openMenu(new CraftingTableMenu(), player);
-                });
+                setBackButton(BACK_BUTTON_SLOT, new CraftingTableMenu());
             }
 
             if (end < totalItems) {
-                setItem(NEXT_BUTTON_SLOT, MenuElementPreset.NEXT_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                setItem(NEXT_BUTTON_SLOT, MenuElementPreset.NEXT_BUTTON, (p, t) -> {
                     currentPage++;
                     manager.openMenu(this, p);
                 });
             } else {
-                setItem(NEXT_BUTTON_SLOT, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                setItem(NEXT_BUTTON_SLOT, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), (p, t) -> {
                 });
             }
 
-            setItem(CLOSE_BUTTON_SLOT, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
+            setCloseButton(CLOSE_BUTTON_SLOT);
         }
 
         @Override
@@ -258,10 +255,8 @@ public final class RecipeBookMenu {
         }
 
         private void setupNavigation() {
-            setItem(BACK_BUTTON_SLOT, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK,
-                (p, t) -> manager.openMenu(previousMenu, p));
-            setItem(CLOSE_BUTTON_SLOT, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK,
-                (p, t) -> close());
+            setBackButton(BACK_BUTTON_SLOT, previousMenu);
+            setCloseButton(CLOSE_BUTTON_SLOT);
 
             fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
         }
