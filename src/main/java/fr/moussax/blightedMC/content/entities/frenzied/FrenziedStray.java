@@ -64,10 +64,7 @@ public final class FrenziedStray extends FrenziedSkirmisher {
                     Biome.JAGGED_PEAKS,
                     Biome.FROZEN_PEAKS
                 )
-                .and(SpawnRules.maxBlockLight(0))
-                .and(SpawnRules.maxLightLevel(7))
-                .and(SpawnRules.skyExposed())
-                .and(SpawnRules.notInLiquid())
+                .and(SpawnRules.overworldSurfaceHostile())
         );
     }
 }

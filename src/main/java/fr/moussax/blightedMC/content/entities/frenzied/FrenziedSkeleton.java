@@ -89,9 +89,7 @@ public final class FrenziedSkeleton extends FrenziedSkirmisher {
                     Biome.DRIPSTONE_CAVES,
                     Biome.SOUL_SAND_VALLEY
                 )
-                .and(SpawnRules.maxBlockLight(0))
-                .and(SpawnRules.maxLightLevel(7))
-                .and(SpawnRules.notInLiquid())
+                .and(SpawnRules.overworldHostile())
         );
     }
 }

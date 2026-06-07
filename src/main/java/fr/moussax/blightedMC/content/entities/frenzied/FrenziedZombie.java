@@ -54,9 +54,7 @@ public final class FrenziedZombie extends FrenziedMeleeBruiser {
                     Biome.DEEP_COLD_OCEAN, Biome.DEEP_FROZEN_OCEAN, Biome.DEEP_LUKEWARM_OCEAN,
                     Biome.LUSH_CAVES, Biome.DRIPSTONE_CAVES
                 )
-                .and(SpawnRules.maxBlockLight(0))
-                .and(SpawnRules.maxLightLevel(7))
-                .and(SpawnRules.notInLiquid())
+                .and(SpawnRules.overworldHostile())
         );
     }
 }

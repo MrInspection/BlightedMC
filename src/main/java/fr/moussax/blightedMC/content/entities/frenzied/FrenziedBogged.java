@@ -57,9 +57,7 @@ public final class FrenziedBogged extends FrenziedSkirmisher {
                     Biome.SWAMP,
                     Biome.MANGROVE_SWAMP
                 )
-                .and(SpawnRules.maxBlockLight(0))
-                .and(SpawnRules.maxLightLevel(7))
-                .and(SpawnRules.notInLiquid())
+                .and(SpawnRules.overworldHostile())
         );
     }
 }
