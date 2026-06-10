@@ -1,0 +1,164 @@
+package fr.moussax.blightedMC.content.entities.factions.blightsworn;
+
+import fr.moussax.blightedMC.utils.ItemBuilder;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.meta.trim.TrimMaterial;
+import org.bukkit.inventory.meta.trim.TrimPattern;
+import org.bukkit.util.Vector;
+
+import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
+
+public sealed abstract class BlightswornArcherArchetype extends BlightswornCreature
+        permits BlightswornBogged, BlightswornParched, BlightswornSkeleton, BlightswornStray {
+
+    private static final double SCATTER_TRIGGER_RADIUS = 5.0;
+    private static final double AIMED_SHOT_RANGE = 20.0;
+    private static final int SCATTER_COOLDOWN_TICKS = 100;
+    private static final int MAX_HEALTH = 25;
+
+    private boolean isAiming = false;
+    private long nextScatterTick = 0;
+
+    protected BlightswornArcherArchetype(String entityId, String name, EntityType entityType) {
+        super(entityId, name, entityType, MAX_HEALTH);
+    }
+
+    @Override
+    protected void onDefineAdditionalBehavior() {
+        addCoreAbility(20L, 5L, this::performScatterEvasion);
+    }
+
+    @Override
+    protected void onNormalBehavior() {
+        addPhaseAbility(80L, 80L, () -> executeAimedShot(false));
+    }
+
+    @Override
+    protected void onEnrageBehavior() {
+        addPhaseAbility(70L, 70L, () -> executeAimedShot(true));
+    }
+
+    /**
+     * Delegates arrow effect application to the concrete mob.
+     * Called once per arrow fired, including the second Phase 2 arrow.
+     *
+     * @param arrow      the fired arrow
+     * @param isPhaseTwo whether the mob is in Phase 2
+     */
+    protected abstract void applyArrowEffects(Arrow arrow, boolean isPhaseTwo);
+
+    private void executeAimedShot(boolean isPhaseTwo) {
+        if (isNotAlive() || isAiming) return;
+
+        Player target = getNearestPlayer(AIMED_SHOT_RANGE);
+        if (target == null || !hasLineOfSight(target)) return;
+
+        isAiming = true;
+
+        double originalSpeed = Objects.requireNonNull(
+                entity.getAttribute(Attribute.MOVEMENT_SPEED)).getBaseValue();
+        Objects.requireNonNull(entity.getAttribute(Attribute.MOVEMENT_SPEED)).setBaseValue(0.0);
+
+        entity.getWorld().playSound(entity.getLocation(), Sound.ITEM_CROSSBOW_LOADING_MIDDLE, 1.0f, 1.0f);
+        entity.getWorld().spawnParticle(
+                Particle.CRIT,
+                entity.getLocation().add(0, 1.5, 0),
+                15, 0.3, 0.3, 0.3, 0.02
+        );
+
+        addCoreDelayedAction(20L, () -> {
+            if (isNotAlive()) return;
+
+            isAiming = false;
+            Objects.requireNonNull(entity.getAttribute(Attribute.MOVEMENT_SPEED))
+                    .setBaseValue(originalSpeed);
+
+            if (target.isDead() || target.getWorld() != entity.getWorld()) return;
+
+            fireArrowAt(target, isPhaseTwo);
+
+            if (isPhaseTwo) {
+                addCoreDelayedAction(6L, () -> fireArrowAt(target, true));
+            }
+        });
+    }
+
+    private void fireArrowAt(Player target, boolean isPhaseTwo) {
+        if (isNotAlive()) return;
+
+        Arrow arrow = entity.launchProjectile(Arrow.class);
+        Vector trajectory = target.getEyeLocation().toVector()
+                .subtract(entity.getEyeLocation().toVector())
+                .normalize()
+                .multiply(1.8);
+        arrow.setVelocity(trajectory);
+        arrow.setDamage(this.damage * 1.5);
+        arrow.setShooter(entity);
+
+        entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_SKELETON_SHOOT, 1.0f, 0.8f);
+        applyArrowEffects(arrow, isPhaseTwo);
+    }
+
+    private void performScatterEvasion() {
+        if (isNotAlive() || isAiming || entity.getTicksLived() < nextScatterTick) return;
+
+        Player threat = getNearestPlayer(SCATTER_TRIGGER_RADIUS);
+        if (threat == null || !hasLineOfSight(threat)) return;
+
+        Vector awayFromThreat = entity.getLocation().toVector()
+                .subtract(threat.getLocation().toVector())
+                .setY(0);
+
+        if (awayFromThreat.lengthSquared() == 0) return;
+
+        awayFromThreat.normalize();
+
+        double x = awayFromThreat.getX();
+        double z = awayFromThreat.getZ();
+        Vector perpendicular = ThreadLocalRandom.current().nextBoolean()
+                ? new Vector(-z, 0, x)
+                : new Vector(z, 0, -x);
+
+        perpendicular.multiply(1.2).setY(0.3);
+        entity.setVelocity(perpendicular);
+        entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.5f, 1.8f);
+
+        nextScatterTick = entity.getTicksLived() + SCATTER_COOLDOWN_TICKS;
+    }
+
+    @Override
+    protected void equipEnragedArmor(EntityEquipment equipment) {
+        if (equipment == null) return;
+
+        equipment.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
+                .setArmorTrim(TrimMaterial.COPPER, TrimPattern.SENTRY)
+                .setLeatherColor(PHASE_TWO_COLOR)
+                .unbreakable()
+                .toItemStack()
+        );
+        equipment.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
+                .setArmorTrim(TrimMaterial.COPPER, TrimPattern.SENTRY)
+                .setLeatherColor(PHASE_TWO_COLOR)
+                .unbreakable()
+                .toItemStack()
+        );
+        equipment.setLeggings(new ItemBuilder(Material.IRON_LEGGINGS).unbreakable().toItemStack());
+        equipment.setBoots(new ItemBuilder(Material.IRON_BOOTS).unbreakable().toItemStack());
+    }
+
+    @Override
+    public BlightswornArcherArchetype clone() {
+        BlightswornArcherArchetype clone = (BlightswornArcherArchetype) super.clone();
+        clone.isAiming = false;
+        clone.nextScatterTick = 0;
+        return clone;
+    }
+}
