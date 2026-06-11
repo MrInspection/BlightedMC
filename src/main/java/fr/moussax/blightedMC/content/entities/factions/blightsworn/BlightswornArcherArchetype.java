@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.content.entities.factions.blightsworn;
 
 import fr.moussax.blightedMC.utils.ItemBuilder;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -21,7 +22,7 @@ public sealed abstract class BlightswornArcherArchetype extends BlightswornCreat
 
     private static final double SCATTER_TRIGGER_RADIUS = 5.0;
     private static final double AIMED_SHOT_RANGE = 20.0;
-    private static final int SCATTER_COOLDOWN_TICKS = 100;
+    private static final int SCATTER_COOLDOWN_TICKS = 160;
     private static final int MAX_HEALTH = 25;
 
     private boolean isAiming = false;
@@ -38,21 +39,14 @@ public sealed abstract class BlightswornArcherArchetype extends BlightswornCreat
 
     @Override
     protected void onNormalBehavior() {
-        addPhaseAbility(80L, 80L, () -> executeAimedShot(false));
+        addPhaseAbility(100L, 100L, () -> executeAimedShot(false));
     }
 
     @Override
     protected void onEnrageBehavior() {
-        addPhaseAbility(70L, 70L, () -> executeAimedShot(true));
+        addPhaseAbility(80L, 80L, () -> executeAimedShot(true));
     }
 
-    /**
-     * Delegates arrow effect application to the concrete mob.
-     * Called once per arrow fired, including the second Phase 2 arrow.
-     *
-     * @param arrow      the fired arrow
-     * @param isPhaseTwo whether the mob is in Phase 2
-     */
     protected abstract void applyArrowEffects(Arrow arrow, boolean isPhaseTwo);
 
     private void executeAimedShot(boolean isPhaseTwo) {
@@ -86,7 +80,7 @@ public sealed abstract class BlightswornArcherArchetype extends BlightswornCreat
             fireArrowAt(target, isPhaseTwo);
 
             if (isPhaseTwo) {
-                addCoreDelayedAction(6L, () -> fireArrowAt(target, true));
+                addCoreDelayedAction(15L, () -> fireArrowAt(target, true));
             }
         });
     }
@@ -100,7 +94,9 @@ public sealed abstract class BlightswornArcherArchetype extends BlightswornCreat
                 .normalize()
                 .multiply(1.8);
         arrow.setVelocity(trajectory);
-        arrow.setDamage(this.damage * 1.5);
+
+        // Scales the base damage by 1.5x while neutralizing the 1.8 velocity multiplier
+        arrow.setDamage((this.damage * 1.5) / 1.8);
         arrow.setShooter(entity);
 
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_SKELETON_SHOOT, 1.0f, 0.8f);
@@ -123,15 +119,48 @@ public sealed abstract class BlightswornArcherArchetype extends BlightswornCreat
 
         double x = awayFromThreat.getX();
         double z = awayFromThreat.getZ();
-        Vector perpendicular = ThreadLocalRandom.current().nextBoolean()
-                ? new Vector(-z, 0, x)
-                : new Vector(z, 0, -x);
 
-        perpendicular.multiply(1.2).setY(0.3);
-        entity.setVelocity(perpendicular);
+        Vector left = new Vector(-z, 0, x);
+        Vector right = new Vector(z, 0, -x);
+
+        boolean preferLeft = ThreadLocalRandom.current().nextBoolean();
+        Vector primary = preferLeft ? left : right;
+        Vector secondary = preferLeft ? right : left;
+
+        Vector chosenDirection = null;
+
+        if (isSafeEvasionDirection(primary)) {
+            chosenDirection = primary;
+        } else if (isSafeEvasionDirection(secondary)) {
+            chosenDirection = secondary;
+        } else if (isSafeEvasionDirection(awayFromThreat)) {
+            chosenDirection = awayFromThreat;
+        }
+
+        if (chosenDirection == null) return;
+
+        chosenDirection.multiply(1.2).setY(0.3);
+        entity.setVelocity(chosenDirection);
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.5f, 1.8f);
 
         nextScatterTick = entity.getTicksLived() + SCATTER_COOLDOWN_TICKS;
+    }
+
+    private boolean isSafeEvasionDirection(Vector direction) {
+        Location targetLoc = entity.getLocation().add(direction.getX() * 2.0, 0, direction.getZ() * 2.0);
+
+        for (int y = 0; y <= 3; y++) {
+            Material type = targetLoc.getBlock().getType();
+            if (type.isSolid() && type != Material.MAGMA_BLOCK && type != Material.CACTUS) {
+                return true;
+            }
+            if (type == Material.LAVA) {
+                return false;
+            }
+            targetLoc.subtract(0, 1, 0);
+        }
+
+        return false;
     }
 
     @Override
@@ -139,13 +168,13 @@ public sealed abstract class BlightswornArcherArchetype extends BlightswornCreat
         if (equipment == null) return;
 
         equipment.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
-                .setArmorTrim(TrimMaterial.COPPER, TrimPattern.SENTRY)
+                .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.SENTRY)
                 .setLeatherColor(PHASE_TWO_COLOR)
                 .unbreakable()
                 .toItemStack()
         );
         equipment.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                .setArmorTrim(TrimMaterial.COPPER, TrimPattern.SENTRY)
+                .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.SENTRY)
                 .setLeatherColor(PHASE_TWO_COLOR)
                 .unbreakable()
                 .toItemStack()

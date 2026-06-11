@@ -159,13 +159,13 @@ public sealed abstract class BlightswornBruteArchetype extends BlightswornCreatu
         if (equipment == null) return;
 
         equipment.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
-                .setArmorTrim(TrimMaterial.IRON, TrimPattern.WARD)
+                .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.FLOW)
                 .setLeatherColor(PHASE_TWO_COLOR)
                 .unbreakable()
                 .toItemStack()
         );
         equipment.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                .setArmorTrim(TrimMaterial.IRON, TrimPattern.WARD)
+                .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.SNOUT)
                 .setLeatherColor(PHASE_TWO_COLOR)
                 .unbreakable()
                 .toItemStack()

@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.engine.entities.registry;
 
-import fr.moussax.blightedMC.content.entities.factions.blightsworn.BlightswornDrowned;
+import fr.moussax.blightedMC.content.entities.factions.blightsworn.*;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.content.entities.bosses.TheAncientKnight;
@@ -19,7 +19,16 @@ public final class EntitiesRegistry {
     private static final Map<String, BlightedEntity> ENTITIES = new HashMap<>();
 
     private static final List<BlightedEntity> DEFAULT_ENTITIES = List.of(
+            new BlightswornBogged(),
             new BlightswornDrowned(),
+            new BlightswornHusk(),
+            new BlightswornParched(),
+            new BlightswornPiglin(),
+            new BlightswornSkeleton(),
+            new BlightswornStray(),
+            new BlightswornWitherSkeleton(),
+            new BlightswornZombie(),
+            new BlightswornZombifiedPiglin(),
 
             new TheAncientKnight(),
             new Endersent(),

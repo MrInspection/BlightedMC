@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.content.entities.factions.blightsworn;
 
+import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.GameMode;
@@ -21,6 +22,8 @@ import org.bukkit.util.Vector;
 
 import java.util.Objects;
 
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+
 public final class BlightswornDrowned extends BlightswornCreature {
     private static final int MAX_HEALTH = 28;
     private static final double GEYSER_RANGE = 20.0;
@@ -31,9 +34,18 @@ public final class BlightswornDrowned extends BlightswornCreature {
 
     public BlightswornDrowned() {
         super("BLIGHTSWORN_DROWNED", "Blightsworn Drowned", EntityType.DROWNED, MAX_HEALTH);
-        itemInMainHand = new ItemBuilder(Material.TRIDENT).unbreakable().toItemStack();
+        setDamage(6);
+        setDroppedExp(10);
+        setLootTable(new EntityLootTableBuilder()
+                .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, COMMON)
+                .addLoot(Material.COPPER_INGOT, 1, 3, 0.4, UNCOMMON)
+                .addLoot(Material.NAUTILUS_SHELL, 1, 1, 0.08, RARE)
+                .addLootWithDurabilityRange(Material.TRIDENT, 0.05, 0.80, 0.02, VERY_RARE)
+                .addGemsLoot(5, 0.04, VERY_RARE)
+                .build()
+        );
 
-        // TODO: Loot Table and final elements
+        itemInMainHand = new ItemBuilder(Material.TRIDENT).unbreakable().toItemStack();
     }
 
     @Override
@@ -54,12 +66,12 @@ public final class BlightswornDrowned extends BlightswornCreature {
 
     @Override
     protected void onEnrage(LivingEntity entity) {
-        Location loc = entity.getLocation().add(0, 1, 0);
-        entity.getWorld().playSound(loc, Sound.ENTITY_DROWNED_DEATH, 1.5f, 0.5f);
-        entity.getWorld().playSound(loc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.5f);
+        Location location = entity.getLocation().add(0, 1, 0);
+        entity.getWorld().playSound(location, Sound.ENTITY_DROWNED_DEATH, 1.5f, 0.5f);
+        entity.getWorld().playSound(location, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.5f);
 
-        entity.getWorld().spawnParticle(Particle.SPLASH, loc, 150, 1.0, 1.0, 1.0, 0.2);
-        entity.getWorld().spawnParticle(Particle.DUST, loc, 50, 1.0, 1.0, 1.0, 0.0, BLIGHT_DUST);
+        entity.getWorld().spawnParticle(Particle.SPLASH, location, 150, 1.0, 1.0, 1.0, 0.2);
+        entity.getWorld().spawnParticle(Particle.DUST, location, 50, 1.0, 1.0, 1.0, 0.0, BLIGHT_DUST);
 
         Objects.requireNonNull(entity.getEquipment()).setItemInMainHand(
                 new ItemBuilder(Material.TRIDENT).addEnchantment(Enchantment.IMPALING, 2).unbreakable().toItemStack()
@@ -77,12 +89,12 @@ public final class BlightswornDrowned extends BlightswornCreature {
             pushDirection.normalize().multiply(0.8).setY(0.2);
             threat.setVelocity(threat.getVelocity().add(pushDirection));
 
-            Location loc = entity.getLocation().add(0, 1, 0);
-            entity.getWorld().playSound(loc, Sound.ITEM_TRIDENT_RIPTIDE_1, 1.0f, 0.8f);
-            entity.getWorld().playSound(loc, Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 1.0f, 0.5f);
+            Location location = entity.getLocation().add(0, 1, 0);
+            entity.getWorld().playSound(location, Sound.ITEM_TRIDENT_RIPTIDE_1, 1.0f, 0.8f);
+            entity.getWorld().playSound(location, Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 1.0f, 0.5f);
 
-            entity.getWorld().spawnParticle(Particle.SPLASH, loc, 60, 1.0, 0.5, 1.0, 0.2);
-            entity.getWorld().spawnParticle(Particle.NAUTILUS, loc, 15, 0.5, 0.5, 0.5, 0.05);
+            entity.getWorld().spawnParticle(Particle.SPLASH, location, 60, 1.0, 0.5, 1.0, 0.2);
+            entity.getWorld().spawnParticle(Particle.NAUTILUS, location, 15, 0.5, 0.5, 0.5, 0.05);
 
             nextRepelTick = entity.getTicksLived() + REPEL_COOLDOWN_TICKS;
         }
@@ -123,8 +135,8 @@ public final class BlightswornDrowned extends BlightswornCreature {
         double radius = isPhaseTwo ? 3.5 : 2.5;
 
         center.getWorld().getNearbyEntities(center, radius, radius, radius).stream()
-                .filter(e -> e instanceof Player player && player.getGameMode() == GameMode.SURVIVAL)
-                .map(e -> (Player) e)
+                .filter(entity -> entity instanceof Player player && player.getGameMode() == GameMode.SURVIVAL)
+                .map(entity -> (Player) entity)
                 .forEach(player -> {
                     player.damage(this.damage * 1.5, entity);
                     player.setVelocity(player.getVelocity().add(new Vector(0, 1.2, 0)));
