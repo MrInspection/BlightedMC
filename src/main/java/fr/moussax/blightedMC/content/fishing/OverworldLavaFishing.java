@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC.content.fishing;
 
-import fr.moussax.blightedMC.content.entities.frenzied.FrenziedHusk;
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootProvider;
 import fr.moussax.blightedMC.shared.loot.LootCondition;
@@ -96,15 +95,6 @@ public class OverworldLavaFishing implements FishingLootProvider {
                 LootEntry.weighted(
                     new FishingLootFeedbackDecorator(
                         EntityResult.vanilla(EntityType.ILLUSIONER, applyFireResistance),
-                        GREAT_CATCH
-                    ),
-                    10.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        EntityResult.blighted(new FrenziedHusk()),
                         GREAT_CATCH
                     ),
                     10.0,

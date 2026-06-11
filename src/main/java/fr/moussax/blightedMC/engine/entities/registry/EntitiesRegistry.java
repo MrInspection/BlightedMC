@@ -3,7 +3,6 @@ package fr.moussax.blightedMC.engine.entities.registry;
 import fr.moussax.blightedMC.content.entities.factions.blightsworn.BlightswornDrowned;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.content.entities.frenzied.*;
 import fr.moussax.blightedMC.content.entities.bosses.TheAncientKnight;
 import fr.moussax.blightedMC.content.entities.Illusioner;
 import fr.moussax.blightedMC.content.entities.Watchling;
@@ -23,16 +22,6 @@ public final class EntitiesRegistry {
             new BlightswornDrowned(),
 
             new TheAncientKnight(),
-            new FrenziedBogged(),
-            new FrenziedDrowned(),
-            new FrenziedHusk(),
-            new FrenziedParched(),
-            new FrenziedPiglin(),
-            new FrenziedSkeleton(),
-            new FrenziedStray(),
-            new FrenziedWitherSkeleton(),
-            new FrenziedZombie(),
-            new FrenziedZombifiedPiglin(),
             new Endersent(),
             new Watchling(),
             new Illusioner()

@@ -1,13 +1,10 @@
 package fr.moussax.blightedMC.content.fishing;
 
-import fr.moussax.blightedMC.content.entities.frenzied.FrenziedZombifiedPiglin;
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootProvider;
 import fr.moussax.blightedMC.shared.loot.LootCondition;
 import fr.moussax.blightedMC.shared.loot.LootEntry;
 import fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator;
-import fr.moussax.blightedMC.shared.loot.decorators.FishingLootSoundDecorator;
-import fr.moussax.blightedMC.shared.loot.decorators.MessageDecorator;
 import fr.moussax.blightedMC.shared.loot.providers.AmountProvider;
 import fr.moussax.blightedMC.shared.loot.results.EntityResult;
 import fr.moussax.blightedMC.shared.loot.results.ItemResult;
@@ -40,18 +37,6 @@ public class NetherFishing implements FishingLootProvider {
         return FishingLootTable.builder()
             .setEntityRollChance(0.15)
             .addEntities(
-                LootEntry.weighted(
-                    new MessageDecorator(
-                        new FishingLootSoundDecorator(
-                            EntityResult.blighted(new FrenziedZombifiedPiglin()),
-                            FishingLootSoundDecorator.FishingCatchQuality.COMMON
-                        ),
-                        " §6§lOINK! §7You caught a §dDreadforged Zombified Piglin§7!"
-                    ),
-                    15.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
                 LootEntry.weighted(
                     new FishingLootFeedbackDecorator(
                         EntityResult.vanilla(EntityType.MAGMA_CUBE),
