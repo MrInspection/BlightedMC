@@ -26,7 +26,7 @@ public class Bonemerang implements ItemProvider {
         );
         bonemerang.addAbility(new Ability(new BonemerangAbility(), "Swing", AbilityType.RIGHT_CLICK));
         bonemerang.addEnchantmentGlint();
-        bonemerang.isUnstackable();
+        bonemerang.unstackable();
 
         add(bonemerang);
     }

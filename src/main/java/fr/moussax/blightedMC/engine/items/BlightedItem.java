@@ -21,7 +21,9 @@ import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class BlightedItem extends ItemBuilder implements ItemRule, ItemFactory {
+import java.util.function.Supplier;
+
+public final class BlightedItem extends ItemBuilder implements ItemRule, Supplier<ItemStack> {
     public static final NamespacedKey BLIGHTED_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_id");
     public static final NamespacedKey BLIGHTED_RARITY_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_rarity");
 
@@ -83,12 +85,6 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, ItemFac
         return this;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    public BlightedItem isUnstackable() {
-        super.setUnstackable(true);
-        return this;
-    }
-
     public static BlightedItem fromItemStack(@NonNull ItemStack itemStack) {
         if (itemStack.getType().isAir()) return null;
 
@@ -110,6 +106,9 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, ItemFac
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean canPlace(BlockPlaceEvent event, ItemStack itemStack) {
         for (ItemRule rule : rules) {
@@ -118,6 +117,9 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, ItemFac
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean canInteract(PlayerInteractEvent event, ItemStack itemStack) {
         for (ItemRule rule : rules) {
@@ -126,6 +128,9 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, ItemFac
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean canUse(Event event, ItemStack itemStack) {
         for (ItemRule rule : rules) {
@@ -145,7 +150,7 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, ItemFac
     }
 
     @Override
-    public ItemStack createItemStack() {
+    public ItemStack get() {
         return this.toItemStack();
     }
 }
