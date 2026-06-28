@@ -2,7 +2,6 @@ package fr.moussax.blightedMC.content.entities.bosses;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
-import fr.moussax.blightedMC.engine.entities.BlightedType;
 import fr.moussax.blightedMC.engine.entities.EntityImmunities;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -25,7 +24,7 @@ public class TheAncientKnight extends BlightedEntity {
     public TheAncientKnight() {
         super("The Ancient Knight", 250, 30, EntityType.ZOMBIE);
         addAttribute(Attribute.SCALE, 4);
-        setBlightedType(BlightedType.BOSS);
+        setBoss(true);
 
         armor = new ItemStack[]{
                 new ItemStack(Material.NETHERITE_BOOTS),

@@ -84,7 +84,7 @@ public abstract class BlightedEntity implements Cloneable {
     @Setter
     protected LootTable lootTable;
     @Setter
-    protected BlightedType blightedType = BlightedType.DEFAULT;
+    protected boolean isBoss = false;
     protected BossBar bossBar;
     protected BarColor bossBarColor = BarColor.RED;
     protected BarStyle bossBarStyle = BarStyle.SOLID;
@@ -129,7 +129,7 @@ public abstract class BlightedEntity implements Cloneable {
         initializeAttributes();
         configureEquipment();
         onConfigureAI(entity);
-        if (blightedType == BlightedType.BOSS) createBossBar();
+        if (isBoss) createBossBar();
 
         BlightedEntitiesListener.registerEntity(entity, this);
         initComponents();
@@ -153,7 +153,7 @@ public abstract class BlightedEntity implements Cloneable {
         rehydrateAttributes();
         onConfigureAI(existing);
 
-        if (blightedType == BlightedType.BOSS) createBossBar();
+        if (isBoss) createBossBar();
         BlightedEntitiesListener.registerEntity(existing, this);
 
         initComponents();
