@@ -3,16 +3,9 @@ package fr.moussax.blightedMC.content.fishing;
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
 import fr.moussax.blightedMC.registry.RegistryModule;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingRegistryHandler;
-import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.engine.fishing.FishingMethod;
 import fr.moussax.blightedMC.shared.loot.LootCondition;
-import fr.moussax.blightedMC.shared.loot.LootEntry;
-import fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator;
 import fr.moussax.blightedMC.shared.loot.decorators.FishingLootSoundDecorator;
-import fr.moussax.blightedMC.shared.loot.decorators.MessageDecorator;
-import fr.moussax.blightedMC.shared.loot.providers.AmountProvider;
-import fr.moussax.blightedMC.shared.loot.results.EntityResult;
-import fr.moussax.blightedMC.shared.loot.results.ItemResult;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
@@ -30,160 +23,21 @@ public class OverworldFishing implements RegistryModule<FishingRegistryHandler> 
     public FishingLootTable provide() {
         return FishingLootTable.builder()
             .setEntityRollChance(0.10)
-            .addEntities(
-                LootEntry.weighted(
-                    new MessageDecorator(
-                        new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.SQUID),
-                            COMMON
-                        ),
-                        "§b§lSPLASH! §7You caught a §9Squid§7!"
-                    ),
-                    8.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new MessageDecorator(
-                        new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.SALMON),
-                            GOOD_CATCH
-                        ),
-                        "§e§lNICE! §7You caught a §6Salmon§7!"
-                    ),
-                    5.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new MessageDecorator(
-                        new FishingLootSoundDecorator(
-                            EntityResult.vanilla(EntityType.TROPICAL_FISH),
-                            FishingLootSoundDecorator.FishingCatchQuality.GOOD_CATCH
-                        ),
-                        "§d§lCOLORFUL! §7You caught a §bTropical Fish§7!"
-                    ),
-                    4.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.biome(Biome.WARM_OCEAN)
-                ),
-                LootEntry.weighted(
-                    new MessageDecorator(
-                        new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.PUFFERFISH),
-                            GREAT_CATCH
-                        ),
-                        "§e§lCAREFUL! §7You caught a §ePufferfish§7!"
-                    ),
-                    2.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new MessageDecorator(
-                        new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.DOLPHIN),
-                            OUTSTANDING_CATCH
-                        ),
-                        "§b§lAMAZING! §7You caught a §9Dolphin§7!"
-                    ),
-                    0.5,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                )
-            )
-            .addItems(
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ACACIA_BOAT),
-                        COMMON
-                    ),
-                    50.0,
-                    AmountProvider.range(1, 2),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ACACIA_BUTTON),
-                        COMMON
-                    ),
-                    35.0,
-                    AmountProvider.range(1, 2),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ACACIA_PLANKS),
-                        COMMON
-                    ),
-                    30.0,
-                    AmountProvider.range(2, 5),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ACACIA_FENCE),
-                        COMMON
-                    ),
-                    25.0,
-                    AmountProvider.range(3, 6),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ACACIA_FENCE_GATE),
-                        GOOD_CATCH
-                    ),
-                    15.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ACACIA_LEAVES),
-                        GOOD_CATCH
-                    ),
-                    12.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.PRISMARINE_SHARD),
-                        GREAT_CATCH
-                    ),
-                    8.0,
-                    AmountProvider.range(1, 3),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.PRISMARINE_CRYSTALS),
-                        GREAT_CATCH
-                    ),
-                    5.0,
-                    AmountProvider.range(1, 2),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.NAUTILUS_SHELL),
-                        OUTSTANDING_CATCH
-                    ),
-                    2.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.HEART_OF_THE_SEA),
-                        OUTSTANDING_CATCH
-                    ),
-                    0.5,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                )
-            )
+            .addVanillaEntity(EntityType.SQUID, 8.0, COMMON, "§b§lSPLASH! §7You caught a §9Squid§7!")
+            .addVanillaEntity(EntityType.SALMON, 5.0, GOOD_CATCH, "§e§lNICE! §7You caught a §6Salmon§7!")
+            .addVanillaEntityWithSound(EntityType.TROPICAL_FISH, 4.0, FishingLootSoundDecorator.FishingCatchQuality.GOOD_CATCH, "§d§lCOLORFUL! §7You caught a §bTropical Fish§7!", LootCondition.biome(Biome.WARM_OCEAN))
+            .addVanillaEntity(EntityType.PUFFERFISH, 2.0, GREAT_CATCH, "§e§lCAREFUL! §7You caught a §ePufferfish§7!")
+            .addVanillaEntity(EntityType.DOLPHIN, 0.5, OUTSTANDING_CATCH, "§b§lAMAZING! §7You caught a §9Dolphin§7!")
+            .addItem(Material.ACACIA_BOAT, 1, 2, 50.0, COMMON)
+            .addItem(Material.ACACIA_BUTTON, 1, 2, 35.0, COMMON)
+            .addItem(Material.ACACIA_PLANKS, 2, 5, 30.0, COMMON)
+            .addItem(Material.ACACIA_FENCE, 3, 6, 25.0, COMMON)
+            .addItem(Material.ACACIA_FENCE_GATE, 1, 15.0, GOOD_CATCH)
+            .addItem(Material.ACACIA_LEAVES, 1, 12.0, GOOD_CATCH)
+            .addItem(Material.PRISMARINE_SHARD, 1, 3, 8.0, GREAT_CATCH)
+            .addItem(Material.PRISMARINE_CRYSTALS, 1, 2, 5.0, GREAT_CATCH)
+            .addItem(Material.NAUTILUS_SHELL, 1, 2.0, OUTSTANDING_CATCH)
+            .addItem(Material.HEART_OF_THE_SEA, 1, 0.5, OUTSTANDING_CATCH)
             .build();
     }
 }

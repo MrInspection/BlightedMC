@@ -67,9 +67,6 @@ public final class AncientRitual {
 
         public Builder addOffering(String itemId, int amount) {
             BlightedItem item = ItemRegistry.getItem(itemId);
-            if (item == null) {
-                throw new IllegalArgumentException("Unknown offering itemId in AncientRitual.Builder: " + itemId);
-            }
             return addOffering(item, amount);
         }
 
@@ -98,9 +95,6 @@ public final class AncientRitual {
 
         public Builder summoningItem(String itemId) {
             var item = ItemRegistry.getItem(itemId);
-            if (item == null) {
-                throw new IllegalArgumentException("Unknown summoning itemId in AncientRitual.Builder: " + itemId);
-            }
             this.summoningItem = item.toItemStack();
             return this;
         }

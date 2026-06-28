@@ -28,7 +28,7 @@ public final class BlightswornWitherSkeleton extends BlightswornEliteArchetype {
                 .setMaxDrop(4)
                 .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
                 .addLoot(Material.COAL, 1, 3, 0.5, UNCOMMON)
-                .addLoot(Material.WITHER_SKELETON_SKULL, 1, 1, 0.03, VERY_RARE)
+                .addLoot(Material.WITHER_SKELETON_SKULL, 1, 0.03, VERY_RARE)
                 .addGemsLoot(5, 0.04, VERY_RARE)
                 .build()
         );

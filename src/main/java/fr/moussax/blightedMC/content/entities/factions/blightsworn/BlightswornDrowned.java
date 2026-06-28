@@ -39,7 +39,7 @@ public final class BlightswornDrowned extends BlightswornCreature {
         setLootTable(new EntityLootTableBuilder()
                 .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, COMMON)
                 .addLoot(Material.COPPER_INGOT, 1, 3, 0.4, UNCOMMON)
-                .addLoot(Material.NAUTILUS_SHELL, 1, 1, 0.08, RARE)
+                .addLoot(Material.NAUTILUS_SHELL, 1, 0.08, RARE)
                 .addLootWithDurabilityRange(Material.TRIDENT, 0.05, 0.80, 0.02, VERY_RARE)
                 .addGemsLoot(5, 0.04, VERY_RARE)
                 .build()

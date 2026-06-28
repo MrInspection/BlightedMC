@@ -18,9 +18,9 @@ public final class BlightswornZombie extends BlightswornBruteArchetype {
         setLootTable(new EntityLootTableBuilder()
                 .setMaxDrop(3)
                 .addLoot(Material.ROTTEN_FLESH, 1, 2, 1.0, COMMON)
-                .addLoot(Material.POTATO, 1, 1, 0.025, UNCOMMON)
-                .addLoot(Material.CARROT, 1, 1, 0.025, UNCOMMON)
-                .addLoot(Material.IRON_INGOT, 1, 1, 0.02, RARE)
+                .addLoot(Material.POTATO, 1, 0.025, UNCOMMON)
+                .addLoot(Material.CARROT, 1, 0.025, UNCOMMON)
+                .addLoot(Material.IRON_INGOT, 1, 0.02, RARE)
                 .addGemsLoot(2, 0.01, VERY_RARE)
                 .build()
         );

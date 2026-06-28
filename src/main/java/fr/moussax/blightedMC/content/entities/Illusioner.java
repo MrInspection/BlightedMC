@@ -21,8 +21,8 @@ public class Illusioner extends SpawnableEntity {
         this.lootTable = new EntityLootTableBuilder()
                 .addLoot(Material.SPECTRAL_ARROW, 4, 12, 0.6, EntityLootFeedbackDecorator.EntityLootRarity.COMMON)
                 .addLoot(Material.GLASS_BOTTLE, 1, 2, 0.4, EntityLootFeedbackDecorator.EntityLootRarity.COMMON)
-                .addLoot(Material.TOTEM_OF_UNDYING, 1, 1, 0.02, EntityLootFeedbackDecorator.EntityLootRarity.VERY_RARE)
-                .addLoot(Material.OMINOUS_BOTTLE, 1, 1, 0.15, EntityLootFeedbackDecorator.EntityLootRarity.UNCOMMON)
+                .addLoot(Material.TOTEM_OF_UNDYING, 1, 0.02, EntityLootFeedbackDecorator.EntityLootRarity.VERY_RARE)
+                .addLoot(Material.OMINOUS_BOTTLE, 1, 0.15, EntityLootFeedbackDecorator.EntityLootRarity.UNCOMMON)
                 .addGemsLoot(12, 0.25, EntityLootFeedbackDecorator.EntityLootRarity.UNCOMMON)
                 .addEnchantedBookWithLevelRange(
                         List.of(Enchantment.QUICK_CHARGE, Enchantment.PIERCING, Enchantment.POWER),

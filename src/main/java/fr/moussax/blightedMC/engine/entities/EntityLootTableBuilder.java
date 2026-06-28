@@ -33,17 +33,11 @@ public final class EntityLootTableBuilder {
     private final LootTable.Builder builder = LootTable.builder();
     private int maxDrops = 3;
 
-    /**
-     * Adds an item-based loot entry identified by a registry item ID.
-     *
-     * @param itemId     the item identifier registered in {@link fr.moussax.blightedMC.engine.items.registry.ItemRegistry}
-     * @param min        minimum amount dropped
-     * @param max        maximum amount dropped
-     * @param dropChance probability for this entry to be selected
-     * @param rarity     visual and audio feedback rarity
-     * @return this builder instance
-     */
     public EntityLootTableBuilder addLoot(String itemId, int min, int max, double dropChance, EntityLootRarity rarity) {
+        return addLoot(itemId, min, max, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder addLoot(String itemId, int min, int max, double dropChance, EntityLootRarity rarity, LootCondition condition) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -51,23 +45,25 @@ public final class EntityLootTableBuilder {
                 ),
                 dropChance,
                 AmountProvider.range(min, max),
-                LootCondition.alwaysTrue()
+                condition
             )
         );
         return this;
     }
 
-    /**
-     * Adds a material-based loot entry.
-     *
-     * @param material   the Bukkit material to drop
-     * @param min        minimum amount dropped
-     * @param max        maximum amount dropped
-     * @param dropChance probability for this entry to be selected
-     * @param rarity     visual and audio feedback rarity
-     * @return this builder instance
-     */
+    public EntityLootTableBuilder addLoot(String itemId, int amount, double dropChance, EntityLootRarity rarity) {
+        return addLoot(itemId, amount, amount, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder addLoot(String itemId, int amount, double dropChance, EntityLootRarity rarity, LootCondition condition) {
+        return addLoot(itemId, amount, amount, dropChance, rarity, condition);
+    }
+
     public EntityLootTableBuilder addLoot(Material material, int min, int max, double dropChance, EntityLootRarity rarity) {
+        return addLoot(material, min, max, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder addLoot(Material material, int min, int max, double dropChance, EntityLootRarity rarity, LootCondition condition) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -75,28 +71,25 @@ public final class EntityLootTableBuilder {
                 ),
                 dropChance,
                 AmountProvider.range(min, max),
-                LootCondition.alwaysTrue()
+                condition
             )
         );
         return this;
     }
 
-    /**
-     * Adds a material-based loot entry with a custom item modifier.
-     *
-     * <p>The provided {@link ItemBuilder} consumer is applied to the generated item
-     * before it is added to the loot result, allowing customization such as name,
-     * lore, enchantments, or flags.</p>
-     *
-     * @param material   the Bukkit material to drop
-     * @param modifier   item builder modifier applied to the generated item
-     * @param min        minimum amount dropped
-     * @param max        maximum amount dropped
-     * @param dropChance probability for this entry to be selected
-     * @param rarity     visual and audio feedback rarity
-     * @return this builder instance
-     */
+    public EntityLootTableBuilder addLoot(Material material, int amount, double dropChance, EntityLootRarity rarity) {
+        return addLoot(material, amount, amount, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder addLoot(Material material, int amount, double dropChance, EntityLootRarity rarity, LootCondition condition) {
+        return addLoot(material, amount, amount, dropChance, rarity, condition);
+    }
+
     public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, int min, int max, double dropChance, EntityLootRarity rarity) {
+        return addLoot(material, modifier, min, max, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, int min, int max, double dropChance, EntityLootRarity rarity, LootCondition condition) {
         builder.addEntry(
             LootEntry.probabilistic(
                 new EntityLootFeedbackDecorator(
@@ -104,10 +97,18 @@ public final class EntityLootTableBuilder {
                 ),
                 dropChance,
                 AmountProvider.range(min, max),
-                LootCondition.alwaysTrue()
+                condition
             )
         );
         return this;
+    }
+
+    public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, int amount, double dropChance, EntityLootRarity rarity) {
+        return addLoot(material, modifier, amount, amount, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, int amount, double dropChance, EntityLootRarity rarity, LootCondition condition) {
+        return addLoot(material, modifier, amount, amount, dropChance, rarity, condition);
     }
 
     /**
