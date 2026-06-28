@@ -4,16 +4,17 @@ import fr.moussax.blightedMC.content.items.abilities.RocketBootsAbility;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
-import fr.moussax.blightedMC.engine.items.registry.ItemProvider;
+import fr.moussax.blightedMC.registry.RegistryModule;
+import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 
-public class RocketBoots implements ItemProvider {
+public class RocketBoots implements RegistryModule<ItemRegistryHandler> {
 
     @Override
-    public void register() {
+    public void register(ItemRegistryHandler registry) {
         BlightedItem rocketBoots = new BlightedItem("ROCKET_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS);
         rocketBoots.setDisplayName("Rocket Boots");
 
@@ -23,6 +24,6 @@ public class RocketBoots implements ItemProvider {
         rocketBoots.setFullSetBonus(new RocketBootsAbility());
         rocketBoots.addLore("", ItemRarity.UNCOMMON.getName() + " BOOTS");
 
-        add(rocketBoots);
+        registry.register(rocketBoots);
     }
 }

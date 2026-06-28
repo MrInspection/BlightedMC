@@ -90,7 +90,7 @@ public abstract class BlightedEntity implements Cloneable {
     protected BarStyle bossBarStyle = BarStyle.SOLID;
     protected Map<Attribute, Double> attributes = new HashMap<>();
 
-    private List<EntityImmunity> immunities = Collections.emptyList();
+    private final List<EntityImmunity> immunities = new ArrayList<>();
     private boolean runtimeInitialized = false;
     private boolean componentsInitialized = false;
 
@@ -608,16 +608,11 @@ public abstract class BlightedEntity implements Cloneable {
     private void initImmunityRules() {
         EntityImmunities annotation = getClass().getAnnotation(EntityImmunities.class);
         if (annotation == null) return;
-        List<EntityImmunity> tempList = new ArrayList<>(4);
-        for (EntityImmunities.ImmunityType type : annotation.value()) {
-            switch (type) {
-                case MELEE -> tempList.add(EntityImmunity.MELEE);
-                case FIRE -> tempList.add(EntityImmunity.FIRE);
-                case PROJECTILE -> tempList.add(EntityImmunity.PROJECTILE);
-                case MACE -> tempList.add(EntityImmunity.MACE);
-            }
-        }
-        this.immunities = tempList;
+        Collections.addAll(this.immunities, annotation.value());
+    }
+
+    public void addImmunity(EntityImmunity immunity) {
+        this.immunities.add(immunity);
     }
 
     private void scheduleAbility(LifecycleTaskManager manager, long delayTicks, long periodTicks, Runnable action) {

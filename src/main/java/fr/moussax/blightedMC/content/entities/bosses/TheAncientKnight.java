@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@EntityImmunities(EntityImmunities.ImmunityType.PROJECTILE)
+import fr.moussax.blightedMC.engine.entities.immunity.DamageType;
+
+@EntityImmunities(DamageType.PROJECTILE)
 public class TheAncientKnight extends BlightedEntity {
 
     private final List<StabPlayer> activeStabs = new CopyOnWriteArrayList<>();

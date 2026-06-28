@@ -3,13 +3,14 @@ package fr.moussax.blightedMC.content.items.materials;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
-import fr.moussax.blightedMC.engine.items.registry.ItemProvider;
+import fr.moussax.blightedMC.registry.RegistryModule;
+import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import org.bukkit.Material;
 
-public class EndMaterials implements ItemProvider {
+public class EndMaterials implements RegistryModule<ItemRegistryHandler> {
     @Override
-    public void register() {
+    public void register(ItemRegistryHandler registry) {
         BlightedItem enchantedEnderPearl = new BlightedItem("ENCHANTED_ENDER_PEARL", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.ENDER_PEARL);
         enchantedEnderPearl.setDisplayName("Enchanted Ender Pearl");
         enchantedEnderPearl.addLore(ItemRarity.UNCOMMON.getName());
@@ -30,19 +31,17 @@ public class EndMaterials implements ItemProvider {
         BlightedItem voidResidue = new BlightedItem("VOID_RESIDUE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.PURPLE_DYE);
         voidResidue.setDisplayName("Voidling Residue");
         voidResidue.addLore("",
-            " §7The tangible byproduct of entropy,",
-            " §7harvested from the §5Outer Islands",
-            " §7where reality begins to fray.",
-            "",
-            ItemRarity.UNCOMMON.getName()
+                " §7The tangible byproduct of entropy,",
+                " §7harvested from the §5Outer Islands",
+                " §7where reality begins to fray.",
+                "",
+                ItemRarity.UNCOMMON.getName()
         );
         voidResidue.addEnchantmentGlint();
 
-        add(
-            enchantedEnderPearl,
-            enchantedEndstone,
-            enchantedChorusFruit,
-            voidResidue
-        );
+        registry.register(enchantedEnderPearl);
+        registry.register(enchantedEndstone);
+        registry.register(enchantedChorusFruit);
+        registry.register(voidResidue);
     }
 }

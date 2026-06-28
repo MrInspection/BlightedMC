@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC.shared.ui.menu.system;
 
-import fr.moussax.blightedMC.engine.items.crafting.menu.CraftingTableMenu;
 import fr.moussax.blightedMC.shared.ui.menu.InteractiveMenu;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -68,9 +67,7 @@ public final class MenuListener implements Listener {
         if (!(event.getPlayer() instanceof Player player)) return;
         if (!(event.getView().getTopInventory().getHolder() instanceof Menu menu)) return;
 
-        if (menu instanceof CraftingTableMenu craftingMenu) {
-            craftingMenu.returnItems(player);
-        }
+        menu.onClose(player);
 
         Menu activeMenu = menuSystem.getActiveMenu(player);
         if (activeMenu != null && activeMenu.getInventory().equals(event.getInventory())) {

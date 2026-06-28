@@ -212,7 +212,8 @@ public abstract class Menu implements InventoryHolder {
      * @param builder consumer that configures the item using {@link ItemBuilder}
      */
     public void setItem(int slot, @NonNull Consumer<ItemBuilder> builder) {
-        setItem(slot, builder, MenuItemInteraction.ANY_CLICK, (p, t) -> {});
+        setItem(slot, builder, MenuItemInteraction.ANY_CLICK, (p, t) -> {
+        });
     }
 
     /**
@@ -236,7 +237,8 @@ public abstract class Menu implements InventoryHolder {
      */
     public void fillSlots(int[] slots, @NonNull ItemStack item, @NonNull MenuItemInteraction interaction) {
         for (int slot : slots) {
-            setItem(slot, item, interaction, (player, type) -> {});
+            setItem(slot, item, interaction, (player, type) -> {
+            });
         }
     }
 
@@ -355,6 +357,15 @@ public abstract class Menu implements InventoryHolder {
         if (player != null) {
             player.closeInventory();
         }
+    }
+
+    /**
+     * Called when the menu inventory is closed by a player.
+     * Override this to clean up resources, return items, etc.
+     *
+     * @param player the player who closed the menu
+     */
+    public void onClose(Player player) {
     }
 
     /**

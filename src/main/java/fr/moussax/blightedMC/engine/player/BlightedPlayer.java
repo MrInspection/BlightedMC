@@ -59,9 +59,9 @@ public final class BlightedPlayer {
         players.put(playerId, this);
 
         this.actionBarTask = Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(),
-            actionBarManager::tick,
-            0L,
-            20L
+                actionBarManager::tick,
+                0L,
+                20L
         );
 
         ArmorManager.updatePlayerArmor(this);
@@ -100,7 +100,7 @@ public final class BlightedPlayer {
 
     public void setCooldown(Class<? extends AbilityManager> managerClass, AbilityType type, int seconds) {
         long expire = System.currentTimeMillis() + (seconds * 1000L);
-        cooldowns.removeIf(c -> c.abilityManager().equals(managerClass) && c.abilityType() == type);
+        cooldowns.removeIf(currentCooldown -> currentCooldown.abilityManager().equals(managerClass) && currentCooldown.abilityType() == type);
         cooldowns.add(new CooldownEntry(managerClass, type, expire));
     }
 

@@ -1,7 +1,10 @@
 package fr.moussax.blightedMC.content.fishing;
 
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
-import fr.moussax.blightedMC.engine.fishing.registry.FishingLootProvider;
+import fr.moussax.blightedMC.registry.RegistryModule;
+import fr.moussax.blightedMC.engine.fishing.registry.FishingRegistryHandler;
+import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
+import fr.moussax.blightedMC.engine.fishing.FishingMethod;
 import fr.moussax.blightedMC.shared.loot.LootCondition;
 import fr.moussax.blightedMC.shared.loot.LootEntry;
 import fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator;
@@ -17,14 +20,13 @@ import org.bukkit.entity.EntityType;
 
 import static fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
 
-public class OverworldFishing implements FishingLootProvider {
+public class OverworldFishing implements RegistryModule<FishingRegistryHandler> {
 
     @Override
-    public void register() {
-        addWater(World.Environment.NORMAL);
+    public void register(FishingRegistryHandler registry) {
+        registry.register(World.Environment.NORMAL, FishingMethod.WATER, provide());
     }
 
-    @Override
     public FishingLootTable provide() {
         return FishingLootTable.builder()
             .setEntityRollChance(0.10)

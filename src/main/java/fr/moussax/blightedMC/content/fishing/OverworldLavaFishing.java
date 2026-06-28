@@ -1,7 +1,10 @@
 package fr.moussax.blightedMC.content.fishing;
 
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
-import fr.moussax.blightedMC.engine.fishing.registry.FishingLootProvider;
+import fr.moussax.blightedMC.registry.RegistryModule;
+import fr.moussax.blightedMC.engine.fishing.registry.FishingRegistryHandler;
+import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
+import fr.moussax.blightedMC.engine.fishing.FishingMethod;
 import fr.moussax.blightedMC.shared.loot.LootCondition;
 import fr.moussax.blightedMC.shared.loot.LootEntry;
 import fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator;
@@ -23,15 +26,14 @@ import java.util.function.Consumer;
 
 import static fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
 
-public class OverworldLavaFishing implements FishingLootProvider {
+public class OverworldLavaFishing implements RegistryModule<FishingRegistryHandler> {
 
 
     @Override
-    public void register() {
-        addLava(World.Environment.NORMAL);
+    public void register(FishingRegistryHandler registry) {
+        registry.register(World.Environment.NORMAL, FishingMethod.LAVA, provide());
     }
 
-    @Override
     public FishingLootTable provide() {
         Consumer<LivingEntity> applyFireResistance = entity ->
             entity.addPotionEffect(

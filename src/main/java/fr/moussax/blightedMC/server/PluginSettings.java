@@ -1,17 +1,9 @@
 package fr.moussax.blightedMC.server;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.utils.config.FlexiblePropertyUtils;
 import fr.moussax.blightedMC.utils.debug.Log;
 import lombok.Getter;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
-import org.yaml.snakeyaml.introspector.BeanAccess;
-
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public final class PluginSettings {
 
@@ -22,24 +14,20 @@ public final class PluginSettings {
     private boolean bannersOnJoin;
 
     public static PluginSettings load(BlightedMC plugin) {
-        try (Reader reader = Files.newBufferedReader(PluginFiles.CONFIG.getFile().toPath(), StandardCharsets.UTF_8)) {
-            CustomClassLoaderConstructor constructor = new CustomClassLoaderConstructor(
-                plugin.getClass().getClassLoader(),
-                new LoaderOptions()
-            );
-            constructor.setPropertyUtils(new FlexiblePropertyUtils());
-
-            Yaml yaml = new Yaml(constructor);
-            yaml.setBeanAccess(BeanAccess.FIELD);
-
-            PluginSettings settings = yaml.loadAs(reader, PluginSettings.class);
+        PluginSettings settings = new PluginSettings();
+        try {
+            plugin.reloadConfig();
+            FileConfiguration config = plugin.getConfig();
+            
+            settings.bannersOnJoin = config.getBoolean("banners_on_join", true);
+            settings.customLootChance = config.getDouble("custom_loot_chance", 0.50);
+            settings.defaultManaRegenerationRate = config.getDouble("default_mana_regeneration_rate", 2.0);
+            
             Log.success("Config", "Successfully loaded the configuration file.");
-
-            return settings;
         } catch (Exception e) {
             Log.error("Config", "Failed to load configuration: " + e.getMessage());
-            return new PluginSettings();
         }
+        return settings;
     }
 
     public boolean hasBannersOnJoin() {

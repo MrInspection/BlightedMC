@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.engine.items.forging.registry;
 
 import fr.moussax.blightedMC.content.recipes.ForgeRecipes;
 import fr.moussax.blightedMC.engine.items.forging.ForgeRecipe;
+import fr.moussax.blightedMC.registry.RegistryModule;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.NonNull;
 
@@ -14,17 +15,20 @@ public final class ForgeRegistry {
 
     public static final Set<ForgeRecipe> RECIPES = new HashSet<>();
 
-    private static final List<ForgeProvider> PROVIDERS = List.of(
-        new ForgeRecipes()
+    private static final List<RegistryModule<ForgeRegistryHandler>> PROVIDERS = List.of(
+            new ForgeRecipes()
     );
 
+    private ForgeRegistry() {
+    }
+
     public static void initialize() {
-        RECIPES.clear();
-        PROVIDERS.forEach(ForgeProvider::register);
+        clear();
+        PROVIDERS.forEach(module -> module.register(ForgeRegistry::register));
         Log.success("ForgeRegistry", "Registered " + RECIPES.size() + " forge recipes.");
     }
 
-    static void register(@NonNull ForgeRecipe recipe) {
+    public static void register(@NonNull ForgeRecipe recipe) {
         RECIPES.add(recipe);
     }
 
