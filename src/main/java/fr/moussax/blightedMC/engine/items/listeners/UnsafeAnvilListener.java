@@ -67,7 +67,7 @@ public final class UnsafeAnvilListener implements Listener {
         ItemMeta leftMeta = leftItem.getItemMeta();
         if (resultMeta instanceof Repairable resultRepairable && leftMeta instanceof Repairable leftRepairable) {
             int leftRepairCost = leftRepairable.getRepairCost();
-            int rightRepairCost = rightMeta instanceof Repairable r ? r.getRepairCost() : 0;
+            int rightRepairCost = rightMeta instanceof Repairable repairable ? repairable.getRepairCost() : 0;
             resultRepairable.setRepairCost(leftRepairCost + rightRepairCost + 5);
         }
 

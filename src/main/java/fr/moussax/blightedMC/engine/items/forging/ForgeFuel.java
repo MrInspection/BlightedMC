@@ -29,7 +29,6 @@ public final class ForgeFuel {
         if (item.getType() == Material.AIR) return 0;
 
         String id = Utilities.resolveItemId(item, "");
-
         return FORGE_FUELS.getOrDefault(id, 0) * item.getAmount();
     }
 

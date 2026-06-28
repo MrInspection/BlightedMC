@@ -82,7 +82,7 @@ public final class Utilities {
         if (ingredient.isCustom()) {
             return Objects.requireNonNull(ingredient.getManager().toItemStack().getItemMeta()).getDisplayName();
         }
-        return "§f" + Formatter.formatEnumName(ingredient.getVanillaItem().getType().name());
+        return "§f" + Formatter.formatEnumName(Objects.requireNonNull(ingredient.getVanillaItem()).getType().name());
     }
 
     /**

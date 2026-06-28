@@ -304,7 +304,6 @@ public final class ForgeMenu extends Menu {
 
     private void handleFuelInsertion(BlightedPlayer blightedPlayer) {
         Player player = blightedPlayer.getPlayer();
-        if (player == null) return;
 
         int currentFuel = blightedPlayer.getForgeFuel();
         int availableSpace = MAXIMUM_FORGE_FUEL - currentFuel;
