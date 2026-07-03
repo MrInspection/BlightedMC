@@ -3,7 +3,7 @@ version: '${version}'
 authors: [ MrInspection ]
 
 main: fr.moussax.blightedMC.BlightedMC
-api-version: '26.1'
+api-version: '26.2'
 load: STARTUP
 
 commands:
