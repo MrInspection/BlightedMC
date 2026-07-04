@@ -23,6 +23,7 @@ public class RocketBoots implements RegistryModule<ItemRegistryHandler> {
 
         rocketBoots.setFullSetBonus(new RocketBootsAbility());
         rocketBoots.addLore("", ItemRarity.UNCOMMON.getName() + " BOOTS");
+        rocketBoots.setMaxDurability(140);
 
         registry.register(rocketBoots);
     }
