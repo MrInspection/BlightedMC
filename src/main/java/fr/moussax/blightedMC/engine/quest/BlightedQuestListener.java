@@ -5,6 +5,8 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.content.entities.factions.blightsworn.BlightswornCreature;
+import fr.moussax.blightedMC.shared.formatting.Formatter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -92,7 +94,7 @@ public final class BlightedQuestListener implements Listener {
         codexItem.setItemMeta(meta);
 
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 0.5f);
-        player.sendMessage("§dThe Blighted Codex has absorbed a Blighted soul!");
+        player.sendMessage("§d ⚚ §fThe §dBlighted Codex§f has absorbed a §5Blighted soul§f!");
     }
 
     @EventHandler
@@ -129,11 +131,36 @@ public final class BlightedQuestListener implements Listener {
         if (isBlightedCodex(mainHandItem)) {
             event.setCancelled(true);
 
+            if (!hasClearWorkspace(clickedBlock)) {
+                Formatter.warn(player,"The ritual requires a clear space of 5 blocks on all sides and 5 blocks above the table.");
+                return;
+            }
+
             if (hasAbsorbedSoul(mainHandItem) && hasAmethystShard(player) && hasBlightedBanner(player)) {
                 consumeRitualItems(player);
+
+                player.sendMessage("§d ⚚ §fYou have solved the §dCodex Riddle§f. The ritual begins...");
+                for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    if(!onlinePlayer.equals(player)) {
+                        onlinePlayer.sendMessage("§d ⚚ §7" + player.getName() + " §fhas solved the §dCodex Riddle§f.");
+                    }
+                }
                 new BlightedRitualAnimation(plugin, player, clickedBlock).runTaskTimer(plugin, 0L, 1L);
             }
         }
+    }
+
+    private boolean hasClearWorkspace(Block center) {
+        for (int offsetX = -5; offsetX <= 5; offsetX++) {
+            for (int offsetY = 1; offsetY <= 5; offsetY++) {
+                for (int offsetZ = -5; offsetZ <= 5; offsetZ++) {
+                    if (!center.getRelative(offsetX, offsetY, offsetZ).isPassable()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private boolean isBlightedCodex(ItemStack item) {

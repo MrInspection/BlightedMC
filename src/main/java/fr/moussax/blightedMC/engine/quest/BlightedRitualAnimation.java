@@ -2,12 +2,14 @@ package fr.moussax.blightedMC.engine.quest;
 
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
@@ -35,6 +37,11 @@ public final class BlightedRitualAnimation extends BukkitRunnable {
 
     @Override
     public void run() {
+        if (targetBlock.getType() != Material.ENCHANTING_TABLE) {
+            this.cancel();
+            return;
+        }
+
         if (elapsedTicks == 0) {
             executeArrivalPhase();
         } else if (elapsedTicks < 70) {
@@ -49,83 +56,108 @@ public final class BlightedRitualAnimation extends BukkitRunnable {
         elapsedTicks++;
     }
 
+    @Override
+    public synchronized void cancel() throws IllegalStateException {
+        super.cancel();
+        for (Enderman ritualist : summonedRitualists) {
+            if (ritualist != null && ritualist.isValid()) {
+                ritualist.remove();
+            }
+        }
+        summonedRitualists.clear();
+    }
+
     private void executeArrivalPhase() {
         double spawnRadius = 4.0;
         for (int index = 0; index < 8; index++) {
-            double angleInRadians = index * (Math.PI / 4);
-            double xOffset = Math.cos(angleInRadians) * spawnRadius;
-            double zOffset = Math.sin(angleInRadians) * spawnRadius;
+            double angle = index * (Math.PI / 4);
+            double x = Math.cos(angle) * spawnRadius;
+            double z = Math.sin(angle) * spawnRadius;
 
-            Location endermanLocation = centerLocation.clone().add(xOffset, -1.0, zOffset);
-            endermanLocation.setDirection(centerLocation.toVector().subtract(endermanLocation.toVector()));
+            Location spawnLocation = centerLocation.clone().add(x, -1.0, z);
+            faceTarget(spawnLocation, centerLocation);
 
-            Enderman ritualist = (Enderman) Objects.requireNonNull(centerLocation.getWorld()).spawnEntity(endermanLocation, EntityType.ENDERMAN);
+            Enderman ritualist = (Enderman) Objects.requireNonNull(centerLocation.getWorld()).spawnEntity(spawnLocation, EntityType.ENDERMAN);
             ritualist.setAI(false);
             ritualist.setSilent(true);
             ritualist.setInvulnerable(true);
             ritualist.setAware(false);
+            ritualist.setPersistent(false);
             summonedRitualists.add(ritualist);
 
-            centerLocation.getWorld().spawnParticle(Particle.PORTAL, endermanLocation.add(0, 1.0, 0), 20, 0.5, 1.0, 0.5, 0.1);
+            centerLocation.getWorld().spawnParticle(Particle.PORTAL, spawnLocation.add(0, 1.0, 0), 30, 0.2, 1.0, 0.2, 0.5);
         }
+
         centerLocation.getWorld().playSound(centerLocation, Sound.BLOCK_END_PORTAL_SPAWN, 1.0f, 0.5f);
         centerLocation.getWorld().playSound(centerLocation, Sound.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, 1.2f, 0.5f);
     }
 
     private void executeChannelingPhase() {
+        double vortexRadius = 1.2 * (1.0 - (elapsedTicks / 70.0));
+        double vortexAngle = elapsedTicks * 0.6;
+
+        Location vortexLocation = centerLocation.clone().add(
+                Math.cos(vortexAngle) * vortexRadius,
+                (elapsedTicks / 35.0),
+                Math.sin(vortexAngle) * vortexRadius
+        );
+        Objects.requireNonNull(centerLocation.getWorld()).spawnParticle(Particle.SOUL_FIRE_FLAME, vortexLocation, 1, 0, 0, 0, 0);
+
         for (Enderman ritualist : summonedRitualists) {
             if (!ritualist.isValid()) continue;
 
             Location handLocation = ritualist.getLocation().add(0, 1.8, 0);
-            Vector directionVector = centerLocation.toVector().subtract(handLocation.toVector()).normalize();
+            Vector direction = centerLocation.toVector().subtract(handLocation.toVector()).normalize();
 
-            for (double trailStep = 0; trailStep < 1.0; trailStep += 0.2) {
-                Location trailParticleLocation = handLocation.clone().add(directionVector.clone().multiply(trailStep * centerLocation.distance(handLocation)));
-                Objects.requireNonNull(centerLocation.getWorld()).spawnParticle(Particle.WITCH, trailParticleLocation, 1, 0, 0, 0, 0);
+            if (elapsedTicks % 3 == 0) {
+                double distance = centerLocation.distance(handLocation);
+                double step = (elapsedTicks % 10) / 10.0;
+                Location beamPoint = handLocation.clone().add(direction.multiply(distance * step));
+                centerLocation.getWorld().spawnParticle(Particle.WITCH, beamPoint, 1, 0, 0, 0, 0);
             }
         }
 
-        double spiralAngle = elapsedTicks * 0.5;
-        double xOffset = Math.cos(spiralAngle) * 0.8;
-        double zOffset = Math.sin(spiralAngle) * 0.8;
-        double yOffset = (elapsedTicks / 70.0) * 2.0;
-
-        Location flameLocation = centerLocation.clone().add(xOffset, yOffset, zOffset);
-        Objects.requireNonNull(centerLocation.getWorld()).spawnParticle(Particle.SOUL_FIRE_FLAME, flameLocation, 2, 0, 0, 0, 0.02);
-        centerLocation.getWorld().spawnParticle(Particle.PORTAL, centerLocation, 5, 0.2, 0.5, 0.2, 0.1);
-
-        int soundInterval = Math.max(2, 10 - (elapsedTicks / 10));
-        if (elapsedTicks % soundInterval == 0) {
-            float soundPitch = 0.5f + (elapsedTicks / 70.0f);
-            centerLocation.getWorld().playSound(centerLocation, Sound.BLOCK_AMETHYST_CLUSTER_STEP, 0.8f, soundPitch);
+        if (elapsedTicks % 10 == 0) {
+            float pitch = 0.5f + (elapsedTicks / 70.0f);
+            centerLocation.getWorld().playSound(centerLocation, Sound.BLOCK_AMETHYST_CLUSTER_STEP, 0.8f, pitch);
         }
     }
 
     private void executeSacrificeWarning() {
         Objects.requireNonNull(centerLocation.getWorld()).playSound(centerLocation, Sound.ENTITY_ENDERMAN_STARE, 1.5f, 0.6f);
+        centerLocation.getWorld().spawnParticle(Particle.SONIC_BOOM, centerLocation.clone().add(0, 1, 0), 1, 0, 0, 0, 0);
     }
 
     private void executeSacrificePull() {
-        for (Enderman ritualist : summonedRitualists) {
+        int pullDuration = 20;
+        int currentPullTick = elapsedTicks - 70;
+        double progress = (double) currentPullTick / pullDuration;
+
+        double radius = 4.0 * (1.0 - Math.pow(progress, 2));
+        double elevation = -1.0 + (progress * 2.0);
+
+        Objects.requireNonNull(centerLocation.getWorld()).spawnParticle(
+                Particle.PORTAL, centerLocation.clone().add(0, 1.0, 0),
+                (int) (10 * progress), 0.1, 0.1, 0.1, 1.5
+        );
+
+        for (int i = 0; i < summonedRitualists.size(); i++) {
+            Enderman ritualist = summonedRitualists.get(i);
             if (!ritualist.isValid()) continue;
 
-            Location currentLocation = ritualist.getLocation();
-            double distance = centerLocation.distance(currentLocation);
-            if (distance < 0.25) continue;
+            double angle = (i * (Math.PI / 4)) + (progress * Math.PI * 1.5);
+            double x = Math.cos(angle) * radius;
+            double z = Math.sin(angle) * radius;
 
-            Vector pullVector = centerLocation.toVector().subtract(currentLocation.toVector()).normalize().multiply(0.25);
-            Location newLocation = currentLocation.clone().add(pullVector);
-
-            Vector direction = centerLocation.toVector().subtract(newLocation.toVector());
-            if (direction.lengthSquared() > 0.0001) {
-                newLocation.setDirection(direction);
-            }
+            Location newLocation = centerLocation.clone().add(x, elevation, z);
+            faceTarget(newLocation, centerLocation);
 
             ritualist.teleport(newLocation);
 
-            Location particleLocation = ritualist.getLocation().add(0, 1.0, 0);
-            Objects.requireNonNull(centerLocation.getWorld()).spawnParticle(
-                    Particle.REVERSE_PORTAL, particleLocation, 10, 0.3, 0.5, 0.3, 0.1
+            Vector velocity = newLocation.getDirection().multiply(-0.2);
+            centerLocation.getWorld().spawnParticle(
+                    Particle.SOUL_FIRE_FLAME, newLocation.clone().add(0, 1.5, 0),
+                    0, velocity.getX(), velocity.getY(), velocity.getZ(), 0.1
             );
         }
     }
@@ -133,33 +165,45 @@ public final class BlightedRitualAnimation extends BukkitRunnable {
     private void executeManifestationClimax() {
         this.cancel();
 
-        for (Enderman ritualist : summonedRitualists) {
-            if (ritualist.isValid()) {
-                Location deathParticleLocation = ritualist.getLocation().add(0, 1.0, 0);
-                try {
-                    Objects.requireNonNull(centerLocation.getWorld()).spawnParticle(Particle.SOUL, deathParticleLocation, 15, 0.2, 0.5, 0.2, 0.05);
-                } catch (IllegalArgumentException exception) {
-                    plugin.getLogger().warning("Ritualist death particle failed (registry mismatch?): " + exception.getMessage());
-                }
-                ritualist.remove();
+        for (Player player : Objects.requireNonNull(centerLocation.getWorld()).getPlayers()) {
+            if (player.getLocation().distanceSquared(centerLocation) < 4096) {
+                player.playSound(centerLocation, Sound.ENTITY_WITHER_SPAWN, 1.0f, 0.5f);
+                player.playSound(centerLocation, Sound.BLOCK_SCULK_SHRIEKER_SHRIEK, 1.5f, 0.5f);
+                player.playSound(centerLocation, Sound.ENTITY_WARDEN_SONIC_BOOM, 2.0f, 0.8f);
+                player.stopSound(Sound.ENTITY_ENDERMAN_STARE);
             }
         }
 
         if (!player.isOnline()) return;
+
         Objects.requireNonNull(centerLocation.getWorld()).strikeLightningEffect(centerLocation);
-        centerLocation.getWorld().dropItem(targetBlock.getLocation().add(0, 1.5, 0), ItemRegistry.getItem("BLIGHTED_WORKBENCH").toItemStack());
-        centerLocation.getWorld().playSound(centerLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.2f, 0.8f);
-        centerLocation.getWorld().playSound(centerLocation, Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 0.9f);
+
+        ItemStack rewardItem = ItemRegistry.getItem("BLIGHTED_WORKBENCH").toItemStack();
+        centerLocation.getWorld().dropItem(targetBlock.getLocation().add(0, 1.5, 0), rewardItem);
+
         spawnClimaxParticles();
     }
 
     private void spawnClimaxParticles() {
-        try {
-            centerLocation.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, centerLocation, 1);
-            centerLocation.getWorld().spawnParticle(Particle.FLASH, centerLocation, 3);
-            centerLocation.getWorld().spawnParticle(Particle.CHERRY_LEAVES, centerLocation, 60, 0.5, 0.5, 0.5, 0.1);
-        } catch (IllegalArgumentException exception) {
-            plugin.getLogger().warning("Climax particle failed (registry mismatch?): " + exception.getMessage());
+        Objects.requireNonNull(centerLocation.getWorld()).spawnParticle(Particle.EXPLOSION, centerLocation, 2, 0.2, 0.2, 0.2, 0);
+        centerLocation.getWorld().spawnParticle(Particle.LARGE_SMOKE, centerLocation, 40, 0.5, 0.5, 0.5, 0.15);
+
+        for (int i = 0; i < 36; i++) {
+            double angle = i * (Math.PI / 18);
+            double x = Math.cos(angle);
+            double z = Math.sin(angle);
+
+            centerLocation.getWorld().spawnParticle(
+                    Particle.END_ROD, centerLocation.clone().add(0, 0.5, 0),
+                    0, x, 0.1, z, 0.35
+            );
+        }
+    }
+
+    private void faceTarget(Location source, Location target) {
+        Vector lookDirection = target.toVector().subtract(source.toVector());
+        if (lookDirection.lengthSquared() > 0.0001) {
+            source.setDirection(lookDirection);
         }
     }
 }
