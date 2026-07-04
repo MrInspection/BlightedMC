@@ -23,7 +23,6 @@ public final class ItemRegistry {
     private static final Map<String, BlightedItem> REGISTERED_ITEMS = new HashMap<>();
 
     private static final List<RegistryModule<ItemRegistryHandler>> MODULES = List.of(
-            new BlightedGemstone(),
             new BlightedMaterials(),
             new Bonemerang(),
             new GlimmeringEye(),
@@ -36,7 +35,8 @@ public final class ItemRegistry {
             new BlightedTools(),
             new NetherMaterials(),
             new EndMaterials(),
-            new FishingArmors()
+            new FishingArmors(),
+            new BlightedItems()
     );
 
     private ItemRegistry() {
