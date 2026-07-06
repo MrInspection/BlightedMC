@@ -83,6 +83,7 @@ public abstract class BlightedEntity implements Cloneable {
 
     @Setter
     protected LootTable lootTable;
+
     @Setter
     protected boolean isBoss = false;
     protected BossBar bossBar;
@@ -545,8 +546,8 @@ public abstract class BlightedEntity implements Cloneable {
         if (defense > 0) setAttribute(Attribute.ARMOR, defense);
         attributes.forEach(this::setAttribute);
 
-        AttributeInstance maxHealthAttr = entity.getAttribute(Attribute.MAX_HEALTH);
-        if (maxHealthAttr != null) entity.setHealth(maxHealthAttr.getValue());
+        AttributeInstance maxHealthAttribute = entity.getAttribute(Attribute.MAX_HEALTH);
+        if (maxHealthAttribute != null) entity.setHealth(maxHealthAttribute.getValue());
 
         lockEntityProperties();
     }
@@ -564,8 +565,8 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     private void lockEntityProperties() {
-        entity.setRemoveWhenFarAway(false);
-        entity.setPersistent(true);
+        entity.setRemoveWhenFarAway(!isBoss);
+        entity.setPersistent(isBoss);
         entity.setCanPickupItems(false);
     }
 
