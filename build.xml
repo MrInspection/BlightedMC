@@ -1,10 +1,11 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <!DOCTYPE xml>
 <!--suppress XmlWrongRootElement -->
 <project name="BlightedMC" default="Build">
-  <target name="Build">
-    <jar
-        jarfile="C:\Users\mouss\OneDrive\Documents\Apps\Minecraft\Server\plugins/${ant.project.name}.jar"
-        basedir="./target/classes/" includes="**/*"/>
-  </target>
+    <target name="Build">
+        <jar jarfile="/Users/moussax/Developer/Minecraft/Server/plugins/${ant.project.name}.jar"
+             basedir="./target/classes/"
+             includes="**/*"
+        />
+    </target>
 </project>
