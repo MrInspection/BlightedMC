@@ -10,7 +10,7 @@ import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
+import fr.moussax.blightedMC.utils.Formatter;
 import fr.moussax.blightedMC.shared.sound.SoundSequence;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

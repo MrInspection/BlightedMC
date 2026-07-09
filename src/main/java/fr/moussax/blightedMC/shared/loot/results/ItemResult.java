@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.shared.loot.LootContext;
 import fr.moussax.blightedMC.shared.loot.LootResult;
 import fr.moussax.blightedMC.utils.ItemBuilder;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
+import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;

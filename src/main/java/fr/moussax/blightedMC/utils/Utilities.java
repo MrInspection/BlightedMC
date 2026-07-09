@@ -2,7 +2,6 @@ package fr.moussax.blightedMC.utils;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;

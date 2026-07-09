@@ -1,9 +1,8 @@
 package fr.moussax.blightedMC.commands;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.utils.Formatter;
 import fr.moussax.blightedMC.utils.commands.CommandInfo;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,7 +12,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 
-import static fr.moussax.blightedMC.shared.formatting.Formatter.*;
+import static fr.moussax.blightedMC.utils.Formatter.*;
 
 public class LoopCommand implements CommandExecutor {
     private static final int MIN_AMOUNT = 2;
@@ -65,19 +64,11 @@ public class LoopCommand implements CommandExecutor {
             Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> Bukkit.dispatchCommand(player, commandToExecute), ticksDelay);
         }
 
-        TextComponent message = new TextComponent("\n§8 ■ §7Looping your §f");
-        TextComponent commandWord = createInteractiveText(
-            "§f§lCOMMAND",
-            "§7Click to fill §dcommand §7in chat",
-            ClickEvent.Action.SUGGEST_COMMAND,
-            "/" + commandToExecute
-        );
-        TextComponent afterCommand = new TextComponent(" §7with §d" + delay + " tick§7 delay. §d(Repeat " + amount + "x)\n");
+        Formatter.text("\n§8 ■ §7Looping your ")
+                .hoverAndSuggest("§f§lCOMMAND", "§7Click to fill §dcommand §7in chat", "/" + commandToExecute)
+                .append(" §7with §d" + delay + " tick§7 delay. §d(Repeat " + amount + "x)\n")
+                .send(player);
 
-        message.addExtra(commandWord);
-        message.addExtra(afterCommand);
-
-        player.spigot().sendMessage(message);
         return true;
     }
 }

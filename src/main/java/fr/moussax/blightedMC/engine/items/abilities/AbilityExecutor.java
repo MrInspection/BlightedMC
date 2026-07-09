@@ -6,7 +6,7 @@ import org.bukkit.Sound;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
-import static fr.moussax.blightedMC.shared.formatting.Formatter.warn;
+import static fr.moussax.blightedMC.utils.Formatter.warn;
 
 public final class AbilityExecutor {
     private AbilityExecutor() {}

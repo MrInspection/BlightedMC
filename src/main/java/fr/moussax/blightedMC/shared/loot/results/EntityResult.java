@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.shared.loot.results;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.shared.loot.LootContext;
 import fr.moussax.blightedMC.shared.loot.LootResult;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
+import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 

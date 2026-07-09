@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
+import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;

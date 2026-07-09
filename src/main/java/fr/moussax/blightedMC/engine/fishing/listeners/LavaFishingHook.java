@@ -5,7 +5,7 @@ import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
 import fr.moussax.blightedMC.engine.fishing.FishingMethod;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
+import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;

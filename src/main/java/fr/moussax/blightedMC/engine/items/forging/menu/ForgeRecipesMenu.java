@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.engine.items.forging.ForgeRecipe;
 import fr.moussax.blightedMC.engine.items.forging.registry.ForgeRegistry;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
+import fr.moussax.blightedMC.utils.Formatter;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.PaginatedMenu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;

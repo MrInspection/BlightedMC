@@ -1,6 +1,5 @@
-package fr.moussax.blightedMC.shared.formatting;
+package fr.moussax.blightedMC.utils;
 
-import fr.moussax.blightedMC.utils.ColorUtils;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -21,6 +20,9 @@ import java.util.List;
 
 import static com.google.common.base.Strings.repeat;
 
+/**
+ * Utility class for formatting values and constructing chat messages.
+ */
 public final class Formatter {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###");
     private static final String INFO_PREFIX = "§8 ■ §7";
@@ -74,7 +76,6 @@ public final class Formatter {
      * @param timeInSeconds time in seconds
      * @return formatted time string (e.g., 123 → "02:03")
      */
-
     public static String formatTime(long timeInSeconds) {
         long minutes = timeInSeconds / 60;
         long seconds = timeInSeconds % 60;
@@ -88,7 +89,6 @@ public final class Formatter {
      * @param decimalPlaces number of decimal places
      * @return formatted string (e.g., 1.97349873, 3 → "1.973")
      */
-
     public static String formatDouble(double value, int decimalPlaces) {
         if (decimalPlaces == 0 || value == Math.floor(value)) {
             return String.format("%.0f", value);
@@ -103,7 +103,6 @@ public final class Formatter {
      * @param value the value to format
      * @return formatted string with commas (e.g., 1234.56 → "1,235")
      */
-
     public static String formatDecimalWithCommas(double value) {
         return DECIMAL_FORMAT.format(value);
     }
@@ -114,7 +113,6 @@ public final class Formatter {
      * @param value the number to compact
      * @return compact notation (e.g., 1500 → "1.5k", 2_000_000 → "2M")
      */
-
     public static String compactNumber(int value) {
         String[] units = {"", "k", "M", "B"};
         int unitIndex = 0;
@@ -139,7 +137,6 @@ public final class Formatter {
      * @return Roman numeral string
      * @throws IllegalArgumentException if the number is out of the valid range
      */
-
     public static String toRomanNumeral(int number) {
         if (number <= 0 || number > 3999) {
             throw new IllegalArgumentException("Number out of range for Roman numerals: " + number);
@@ -319,6 +316,19 @@ public final class Formatter {
          */
         public InteractiveMessage hoverAndOpenUrl(@NonNull String text, @NonNull String hoverText, @NonNull String url) {
             return apply(text, hoverText, ClickEvent.Action.OPEN_URL, url);
+        }
+
+        /**
+         * Appends text with a hover tooltip and custom click action.
+         *
+         * @param text      the visible text
+         * @param hoverText the text displayed on hover
+         * @param action    the click action
+         * @param value     the value associated with the click action
+         * @return this builder
+         */
+        public InteractiveMessage hoverAndClick(@NonNull String text, @NonNull String hoverText, ClickEvent.@NonNull Action action, @NonNull String value) {
+            return apply(text, hoverText, action, value);
         }
 
         private InteractiveMessage apply(String text, String hoverText, ClickEvent.@Nullable Action action, @Nullable String value) {
