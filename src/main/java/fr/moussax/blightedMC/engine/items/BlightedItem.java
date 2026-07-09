@@ -23,7 +23,19 @@ import java.util.List;
 
 import java.util.function.Supplier;
 
+/**
+ * Represents a custom BlightedMC item with persistent identity, rarity, abilities,
+ * and gameplay rules.
+ *
+ * <p>This class extends {@link ItemBuilder} to provide fluent item construction
+ * while adding custom item system behavior such as ability execution, set bonuses,
+ * placement restrictions, interaction rules, and persistent item identification.</p>
+ *
+ * <p>Built items are identified through {@link #BLIGHTED_ID_KEY} and store their
+ * rarity through {@link #BLIGHTED_RARITY_KEY} when {@link #toItemStack()} is called.</p>
+ */
 public final class BlightedItem extends ItemBuilder implements ItemRule, Supplier<ItemStack> {
+
     public static final NamespacedKey BLIGHTED_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_id");
     public static final NamespacedKey BLIGHTED_RARITY_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_rarity");
 
@@ -39,6 +51,14 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemRule> rules = new ArrayList<>();
 
+    /**
+     * Creates a Blighted item from a material.
+     *
+     * @param itemId   the unique item identifier
+     * @param type     the item category
+     * @param rarity   the item rarity
+     * @param material the base material
+     */
     public BlightedItem(@NonNull String itemId, @NonNull ItemType type, @NonNull ItemRarity rarity, @NonNull Material material) {
         super(material);
         this.itemId = itemId;
@@ -46,6 +66,16 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
         this.itemRarity = rarity;
     }
 
+    /**
+     * Creates a Blighted item from an existing item stack.
+     *
+     * <p>The provided item is copied through {@link ItemBuilder}.</p>
+     *
+     * @param itemId    the unique item identifier
+     * @param type      the item category
+     * @param rarity    the item rarity
+     * @param itemStack the base item stack
+     */
     public BlightedItem(@NonNull String itemId, @NonNull ItemType type, @NonNull ItemRarity rarity, @NonNull ItemStack itemStack) {
         super(itemStack);
         this.itemId = itemId;
@@ -53,10 +83,21 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
         this.itemRarity = rarity;
     }
 
+    /**
+     * Adds an ability to this item and injects its lore representation.
+     *
+     * @param ability the ability to add
+     */
     public void addAbility(Ability ability) {
         addAbility(ability, true);
     }
 
+    /**
+     * Adds an ability to this item.
+     *
+     * @param ability    the ability to add
+     * @param injectLore whether the ability description should be added to the item lore
+     */
     public void addAbility(Ability ability, boolean injectLore) {
         if (ability == null) return;
         this.abilities.add(ability);
@@ -67,6 +108,13 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
         }
     }
 
+    /**
+     * Sets the full set bonus of this item.
+     *
+     * <p>The bonus description is automatically added to the item lore.</p>
+     *
+     * @param fullSetBonus the set bonus, or {@code null} to remove it
+     */
     public void setFullSetBonus(FullSetBonus fullSetBonus) {
         this.fullSetBonus = fullSetBonus;
         if (fullSetBonus == null) return;
@@ -75,6 +123,11 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
         this.addLore(formattedLore.toArray(new String[0]));
     }
 
+    /**
+     * Adds a gameplay rule to this item.
+     *
+     * @param rule the rule to add
+     */
     public void addRule(ItemRule rule) {
         rules.add(rule);
     }
@@ -85,6 +138,15 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
         return this;
     }
 
+    /**
+     * Resolves a Blighted item from an item stack.
+     *
+     * <p>The item stack must contain a valid {@link #BLIGHTED_ID_KEY} value.
+     * Returns {@code null} when the stack is not a registered Blighted item.</p>
+     *
+     * @param itemStack the item stack to resolve
+     * @return the registered Blighted item, or {@code null} if none exists
+     */
     public static BlightedItem fromItemStack(@NonNull ItemStack itemStack) {
         if (itemStack.getType().isAir()) return null;
 
@@ -98,6 +160,12 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
         return ItemRegistry.getItem(itemId);
     }
 
+    /**
+     * Triggers all abilities matching the provided event.
+     *
+     * @param blightedPlayer the player owning the item
+     * @param event the event that may trigger abilities
+     */
     public void triggerAbilities(BlightedPlayer blightedPlayer, Event event) {
         for (Ability ability : abilities) {
             if (ability.type().matches(event)) {
@@ -139,16 +207,25 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
         return false;
     }
 
+    /**
+     * Builds the item stack and applies BlightedMC persistent metadata.
+     *
+     * @return the configured item stack
+     */
     @Override
     public ItemStack toItemStack() {
-        this.setItemMeta(itemMeta -> {
-            var container = itemMeta.getPersistentDataContainer();
-            container.set(BLIGHTED_ID_KEY, PersistentDataType.STRING, itemId);
-            container.set(BLIGHTED_RARITY_KEY, PersistentDataType.STRING, itemRarity.name());
-        });
+        setPersistentData(BLIGHTED_ID_KEY, PersistentDataType.STRING, itemId);
+        setPersistentData(BLIGHTED_RARITY_KEY, PersistentDataType.STRING, itemRarity.name());
         return super.toItemStack();
     }
 
+    /**
+     * Creates an item stack instance.
+     *
+     * <p>This method delegates to {@link #toItemStack()}.</p>
+     *
+     * @return a newly built item stack
+     */
     @Override
     public ItemStack get() {
         return this.toItemStack();
