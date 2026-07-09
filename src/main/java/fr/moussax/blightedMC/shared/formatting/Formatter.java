@@ -1,5 +1,7 @@
 package fr.moussax.blightedMC.shared.formatting;
 
+import fr.moussax.blightedMC.utils.ColorUtils;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -57,7 +59,7 @@ public final class Formatter {
         for (int i = 0; i < words.length; i++) {
             String word = words[i].toLowerCase();
             formatted.append(Character.toUpperCase(word.charAt(0)))
-                .append(word.substring(1));
+                    .append(word.substring(1));
             if (i < words.length - 1) {
                 formatted.append(' ');
             }
@@ -149,9 +151,9 @@ public final class Formatter {
         String[] ones = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
 
         return thousands[number / 1000]
-            + hundreds[(number % 1000) / 100]
-            + tens[(number % 100) / 10]
-            + ones[number % 10];
+                + hundreds[(number % 1000) / 100]
+                + tens[(number % 100) / 10]
+                + ones[number % 10];
     }
 
     /**
@@ -230,7 +232,7 @@ public final class Formatter {
      * <p>Requires both operator status and the provided permission.
      * Sends a warning message if the check fails.
      *
-     * @param player     the player to check
+     * @param player the player to check
      * @return {@code true} if player has the required permission
      */
     public static boolean hasRequiredPermission(@NonNull Player player) {
@@ -242,26 +244,110 @@ public final class Formatter {
     }
 
     /**
-     * Creates an interactive text component with hover and optional click action.
+     * Creates a new interactive chat message builder with automatic color processing.
      *
-     * @param text        the visible text
-     * @param hoverText   text displayed on hover
-     * @param clickAction the click action type (or {@code null})
-     * @param clickValue  the value for the click action (or {@code null})
-     * @return configured text component
+     * @param initialText the initial text component
+     * @return a new interactive message builder
      */
-    public static TextComponent createInteractiveText(String text, String hoverText, ClickEvent.Action clickAction, String clickValue) {
-        TextComponent component = new TextComponent(text);
-        component.setHoverEvent(new HoverEvent(
-            HoverEvent.Action.SHOW_TEXT,
-            new Text(hoverText)
-        ));
+    public static InteractiveMessage text(@NonNull String initialText) {
+        return new InteractiveMessage(initialText);
+    }
 
-        if (clickAction != null && clickValue != null) {
-            component.setClickEvent(new ClickEvent(clickAction, clickValue));
+    /**
+     * Fluent builder for interactive chat messages.
+     */
+    public static class InteractiveMessage {
+        private final TextComponent root = new TextComponent("");
+
+        private InteractiveMessage(String initialText) {
+            root.addExtra(new TextComponent(ColorUtils.colorize(initialText)));
         }
 
-        return component;
+        /**
+         * Appends plain text to the message.
+         *
+         * @param text the text to append
+         * @return this builder
+         */
+        public InteractiveMessage append(@NonNull String text) {
+            root.addExtra(new TextComponent(ColorUtils.colorize(text)));
+            return this;
+        }
+
+        /**
+         * Appends text with a hover tooltip.
+         *
+         * @param text      the visible text
+         * @param hoverText the text displayed on hover
+         * @return this builder
+         */
+        public InteractiveMessage hover(@NonNull String text, @NonNull String hoverText) {
+            return apply(text, hoverText, null, null);
+        }
+
+        /**
+         * Appends text with a hover tooltip and command suggestion.
+         *
+         * @param text      the visible text
+         * @param hoverText the text displayed on hover
+         * @param input     the command to suggest
+         * @return this builder
+         */
+        public InteractiveMessage hoverAndSuggest(@NonNull String text, @NonNull String hoverText, @NonNull String input) {
+            return apply(text, hoverText, ClickEvent.Action.SUGGEST_COMMAND, input);
+        }
+
+        /**
+         * Appends text with a hover tooltip and command execution.
+         *
+         * @param text      the visible text
+         * @param hoverText the text displayed on hover
+         * @param command   the command to execute
+         * @return this builder
+         */
+        public InteractiveMessage hoverAndExecute(@NonNull String text, @NonNull String hoverText, @NonNull String command) {
+            return apply(text, hoverText, ClickEvent.Action.RUN_COMMAND, command);
+        }
+
+        /**
+         * Appends text with a hover tooltip and URL action.
+         *
+         * @param text      the visible text
+         * @param hoverText the text displayed on hover
+         * @param url       the URL to open
+         * @return this builder
+         */
+        public InteractiveMessage hoverAndOpenUrl(@NonNull String text, @NonNull String hoverText, @NonNull String url) {
+            return apply(text, hoverText, ClickEvent.Action.OPEN_URL, url);
+        }
+
+        private InteractiveMessage apply(String text, String hoverText, ClickEvent.@Nullable Action action, @Nullable String value) {
+            TextComponent component = new TextComponent(ColorUtils.colorize(text));
+            component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ColorUtils.colorize(hoverText))));
+            if (action != null && value != null) {
+                component.setClickEvent(new ClickEvent(action, value));
+            }
+            root.addExtra(component);
+            return this;
+        }
+
+        /**
+         * Sends the message to a player.
+         *
+         * @param player the recipient
+         */
+        public void send(@NonNull Player player) {
+            player.spigot().sendMessage(root);
+        }
+
+        /**
+         * Builds the message as Bungee chat components.
+         *
+         * @return the built chat components
+         */
+        public BaseComponent[] build() {
+            return new BaseComponent[]{root};
+        }
     }
 
     /**
