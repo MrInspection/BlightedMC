@@ -19,12 +19,9 @@ public class GlimmeringEye implements RegistryModule<ItemRegistryHandler> {
         glimmeringEye.setDisplayName("Glimmering Eye");
 
         Ability voidStep = new Ability(new VoidStepAbility(), "Voidstep", AbilityType.RIGHT_CLICK);
-
-        glimmeringEye.addLore("§8Consumable Item", "");
-        glimmeringEye.addLore(voidStep.getAbilityLore());
-        glimmeringEye.addLore("", ItemRarity.RARE.getName());
         glimmeringEye.addEnchantmentGlint();
         glimmeringEye.addAbility(voidStep);
+        glimmeringEye.addLore("", ItemRarity.RARE.getName());
         glimmeringEye.addRule(ItemRule.PREVENT_PROJECTILE_LAUNCH);
 
         registry.register(glimmeringEye);
