@@ -91,7 +91,7 @@ public class BlightedItems implements RegistryModule<ItemRegistryHandler> {
                 ItemRarity.SPECIAL.getName()
         );
 
-        blightedGemstone.addNotEquippable();
+        blightedGemstone.preventEquipping();
         blightedGemstone.unstackable();
         blightedGemstone.addRule(ItemRule.PREVENT_PLACEMENT);
         blightedGemstone.addAbility(
