@@ -10,7 +10,7 @@ import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
 import fr.moussax.blightedMC.utils.Formatter;
-import fr.moussax.blightedMC.shared.sound.SoundSequence;
+import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;

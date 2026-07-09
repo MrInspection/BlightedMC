@@ -6,7 +6,7 @@ import fr.moussax.blightedMC.engine.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.Formatter;
-import fr.moussax.blightedMC.shared.sound.SoundSequence;
+import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;

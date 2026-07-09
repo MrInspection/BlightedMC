@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.engine.entities.rituals;
 
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
-import fr.moussax.blightedMC.shared.sound.SoundSequence;
+import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.jspecify.annotations.NonNull;

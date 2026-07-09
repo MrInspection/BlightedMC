@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.shared.sound;
+package fr.moussax.blightedMC.utils.sound;
 
 import org.bukkit.Location;
 import org.bukkit.Sound;
