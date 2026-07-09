@@ -21,7 +21,7 @@ public final class BlightedPlayer {
 
     private static final Map<UUID, BlightedPlayer> players = new HashMap<>();
 
-    private static final double DEFAULT_MAX_MANA = 20;
+    private static final double DEFAULT_MAX_MANA = 100;
     private static final double DEFAULT_MANA_REGEN_RATE = 0.5;
 
     @Getter
