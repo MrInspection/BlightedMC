@@ -90,8 +90,19 @@ public final class ItemRuleListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onItemConsume(PlayerItemConsumeEvent event) {
         BlightedItem manager = getManager(event.getItem());
-        if (manager != null && manager.canUse(event, event.getItem())) {
-            event.setCancelled(true);
+        if (manager != null) {
+            if (manager.canUse(event, event.getItem())) {
+                event.setCancelled(true);
+                return;
+            }
+            if ("FISHERMANS_STEW".equals(manager.getItemId())) {
+                event.getPlayer().addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.WATER_BREATHING, 2400, 0));
+            } else if ("BLIGHTED_SUSHI".equals(manager.getItemId())) {
+                event.getPlayer().addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.WATER_BREATHING, 1200, 0));
+                if (java.util.concurrent.ThreadLocalRandom.current().nextDouble() < 0.5) {
+                    event.getPlayer().addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.HUNGER, 300, 0));
+                }
+            }
         }
     }
 

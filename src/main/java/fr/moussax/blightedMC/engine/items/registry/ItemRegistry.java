@@ -8,6 +8,7 @@ import fr.moussax.blightedMC.content.items.blocks.BlightedBlockItems;
 import fr.moussax.blightedMC.content.items.materials.BlightedMaterials;
 import fr.moussax.blightedMC.content.items.materials.EndMaterials;
 import fr.moussax.blightedMC.content.items.materials.NetherMaterials;
+import fr.moussax.blightedMC.content.items.materials.FishingMaterials;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.registry.RegistryModule;
 import fr.moussax.blightedMC.utils.debug.Log;
@@ -36,7 +37,8 @@ public final class ItemRegistry {
             new NetherMaterials(),
             new EndMaterials(),
             new FishingArmors(),
-            new BlightedItems()
+            new BlightedItems(),
+            new FishingMaterials()
     );
 
     private ItemRegistry() {
