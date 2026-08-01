@@ -23,7 +23,7 @@ public final class PlayerListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         new BlightedPlayer(event.getPlayer());
-        event.setJoinMessage("§8 ■ §f" + event.getPlayer().getName() + " §7joined the SMP.");
+        event.setJoinMessage(" §f" + event.getPlayer().getName() + " §7joined the SMP.");
 
         if (!player.hasPlayedBefore()) {
             player.getInventory().setHelmet(ItemRegistry.getItem("BLIGHTED_BANNER").toItemStack());
@@ -67,7 +67,7 @@ public final class PlayerListener implements Listener {
             blighted.saveData();
             BlightedPlayer.removePlayer(player);
         }
-        event.setQuitMessage("§8 ■ §f" + player.getName() + " §7left the SMP.");
+        event.setQuitMessage(" §f" + player.getName() + " §7left the SMP.");
     }
 
     @EventHandler

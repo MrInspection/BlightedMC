@@ -25,8 +25,6 @@ import static com.google.common.base.Strings.repeat;
  */
 public final class Formatter {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###");
-    private static final String INFO_PREFIX = "§8 ■ §7";
-    private static final String WARN_PREFIX = "§4 ■ §c";
 
     private Formatter() {
     }
@@ -160,7 +158,7 @@ public final class Formatter {
      * @param messages list of messages to send
      */
     public static void inform(CommandSender sender, @NonNull List<String> messages) {
-        messages.forEach(message -> sender.sendMessage(INFO_PREFIX + message));
+        messages.forEach(sender::sendMessage);
     }
 
     /**
@@ -195,7 +193,7 @@ public final class Formatter {
         if (sender instanceof Player player) {
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 100f, 0.5f);
         }
-        messages.forEach(message -> sender.sendMessage(WARN_PREFIX + message));
+        messages.forEach(message -> sender.sendMessage(" §c" + message));
     }
 
     /**
