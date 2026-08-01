@@ -3,16 +3,13 @@ package fr.moussax.blightedMC.commands.impl;
 import fr.moussax.blightedMC.commands.AdminCommand;
 import fr.moussax.blightedMC.commands.utils.CommandArgument;
 import fr.moussax.blightedMC.commands.utils.CommandArguments;
-import fr.moussax.blightedMC.commands.CommandFormatter;
+import fr.moussax.blightedMC.commands.utils.CommandFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jspecify.annotations.NonNull;
 
 import static fr.moussax.blightedMC.utils.Formatter.*;
 
@@ -27,9 +24,12 @@ public final class TeleportPositionCommand extends AdminCommand {
     protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
 
         if (args.length < 3) {
-            CommandFormatter.sendUsage(player,
-                    "Teleport to coordinates. World is optional.",
-                    "tppos", "[player]", "<x>", "<y>", "<z>", "[world]"
+            CommandFormatter.sendUsage(
+                    player,
+                    CommandFormatter.CommandInfo.of(
+                            "tppos [player] <x> <y> <z> [world]",
+                            "Teleport to coordinates. World is optional."
+                    )
             );
             return true;
         }

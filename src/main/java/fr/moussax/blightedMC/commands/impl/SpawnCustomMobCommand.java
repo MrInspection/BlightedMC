@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.commands.impl;
 
 import fr.moussax.blightedMC.commands.AdminCommand;
-import fr.moussax.blightedMC.commands.CommandFormatter;
+import fr.moussax.blightedMC.commands.utils.CommandFormatter;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.commands.utils.CommandArgument;
@@ -15,7 +15,13 @@ public final class SpawnCustomMobCommand extends AdminCommand {
     @Override
     protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
         if (args.length == 0) {
-            CommandFormatter.sendUsage(player, "Summon a custom mob", "spawncustommob", "<entity>");
+            CommandFormatter.sendUsage(
+                    player,
+                    CommandFormatter.CommandInfo.of(
+                            "spawncustommob <entity>",
+                            "Summon a custom mob"
+                    )
+            );
             return false;
         }
 
