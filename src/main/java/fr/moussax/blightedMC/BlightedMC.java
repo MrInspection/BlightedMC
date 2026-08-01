@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC;
 
 import fr.moussax.blightedMC.engine.fishing.listeners.LavaFishingHook;
+import fr.moussax.blightedMC.registry.CommandsRegistry;
 import fr.moussax.blightedMC.registry.EventsRegistry;
 import fr.moussax.blightedMC.registry.RegistrySystem;
 import fr.moussax.blightedMC.server.BlightedServer;
@@ -10,11 +11,11 @@ import fr.moussax.blightedMC.server.database.PluginDatabase;
 import fr.moussax.blightedMC.engine.entities.spawnable.engine.BlightedSpawnEngine;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuSystem;
-import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 import fr.moussax.blightedMC.utils.debug.Log;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jline.console.CommandRegistry;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -43,7 +44,7 @@ public final class BlightedMC extends JavaPlugin {
         settings = PluginSettings.load(this);
         initializeDatabase();
 
-        CommandBuilder.initializeCommands();
+        CommandsRegistry.register(this);
         RegistrySystem.initialize();
         eventsRegistry = new EventsRegistry();
         eventsRegistry.initializeListeners();
