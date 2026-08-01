@@ -1,33 +1,28 @@
-package fr.moussax.blightedMC.commands;
+package fr.moussax.blightedMC.commands.impl;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.commands.AdminCommand;
+import fr.moussax.blightedMC.commands.CommandFormatter;
 import fr.moussax.blightedMC.utils.Formatter;
-import fr.moussax.blightedMC.utils.commands.CommandInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 
 import static fr.moussax.blightedMC.utils.Formatter.*;
 
-public class LoopCommand implements CommandExecutor {
+public final class LoopCommand extends AdminCommand {
     private static final int MIN_AMOUNT = 2;
     private static final int MAX_AMOUNT = 50;
     private static final int MIN_DELAY_TICKS = 1;
     private static final int MAX_DELAY_TICKS = 180;
 
     @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
-        if (!(sender instanceof Player player)) return false;
-        if (!hasRequiredPermission(player)) return false;
-
+    protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
         if (args.length < 3) {
-            CommandInfo.sendUsage(player, "Bulk execute a command",
-                "loop", "[" + MIN_AMOUNT + "-" + MAX_AMOUNT + "]", "[" + MIN_DELAY_TICKS + "-" + MAX_DELAY_TICKS + "]", "<command>");
+            CommandFormatter.sendUsage(player, "Bulk execute a command",
+                    "loop", "[" + MIN_AMOUNT + "-" + MAX_AMOUNT + "]", "[" + MIN_DELAY_TICKS + "-" + MAX_DELAY_TICKS + "]", "<command>");
             return false;
         }
 
@@ -38,24 +33,24 @@ public class LoopCommand implements CommandExecutor {
             amount = Integer.parseInt(args[0]);
             delay = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
-            warn(sender, "Amount and delay must be numbers.");
+            warn(player, "Amount and delay must be numbers.");
             return false;
         }
 
         if (amount < MIN_AMOUNT || amount > MAX_AMOUNT) {
-            warn(sender, "Amount must be between §d" + MIN_AMOUNT + "§c and §d" + MAX_AMOUNT + "§c.");
+            warn(player, "Amount must be between §d" + MIN_AMOUNT + "§c and §d" + MAX_AMOUNT + "§c.");
             return false;
         }
 
         if (delay < MIN_DELAY_TICKS || delay > MAX_DELAY_TICKS) {
-            warn(sender, "Delay must be between §d" + MIN_DELAY_TICKS + "§c and §d" + MAX_DELAY_TICKS + "§c ticks.");
+            warn(player, "Delay must be between §d" + MIN_DELAY_TICKS + "§c and §d" + MAX_DELAY_TICKS + "§c ticks.");
             return false;
         }
 
         String commandToExecute = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
 
         if (commandToExecute.startsWith("loop ")) {
-            warn(sender, "You cannot loop the §4loop §ccommand.");
+            warn(player, "You cannot loop the §4loop §ccommand.");
             return false;
         }
 
@@ -64,9 +59,9 @@ public class LoopCommand implements CommandExecutor {
             Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> Bukkit.dispatchCommand(player, commandToExecute), ticksDelay);
         }
 
-        Formatter.text("\n§8 ■ §7Looping your ")
-                .hoverAndSuggest("§f§lCOMMAND", "§7Click to fill §dcommand §7in chat", "/" + commandToExecute)
-                .append(" §7with §d" + delay + " tick§7 delay. §d(Repeat " + amount + "x)\n")
+        Formatter.text("\n§e Looping §7x" + amount + " §eyour ")
+                .hoverAndSuggest("§fCOMMAND", "§eClick to fill §dcommand §ein chat", "/" + commandToExecute)
+                .append(" §ewith §d" + delay + " tick§e delay...\n")
                 .send(player);
 
         return true;

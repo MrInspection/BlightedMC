@@ -1,8 +1,9 @@
-package fr.moussax.blightedMC.commands;
+package fr.moussax.blightedMC.commands.impl;
 
-import fr.moussax.blightedMC.utils.commands.CommandArgument;
-import fr.moussax.blightedMC.utils.commands.CommandArguments;
-import fr.moussax.blightedMC.utils.commands.CommandInfo;
+import fr.moussax.blightedMC.commands.AdminCommand;
+import fr.moussax.blightedMC.commands.utils.CommandArgument;
+import fr.moussax.blightedMC.commands.utils.CommandArguments;
+import fr.moussax.blightedMC.commands.CommandFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -16,20 +17,19 @@ import org.jspecify.annotations.NonNull;
 import static fr.moussax.blightedMC.utils.Formatter.*;
 
 @CommandArguments({
-    @CommandArgument(suggestions = {"$players"}),
+    @CommandArgument(position = 0, suggestions = {"$players"}),
     @CommandArgument(position = 3, suggestions = {"OVERWORLD", "NETHER", "THE_END"}),
     @CommandArgument(position = 4, suggestions = {"OVERWORLD", "NETHER", "THE_END"})
 })
-public class TeleportPositionCommand implements CommandExecutor {
+public final class TeleportPositionCommand extends AdminCommand {
+
     @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
-        if (!(sender instanceof Player player)) return false;
-        if (!hasRequiredPermission(player)) return false;
+    protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
 
         if (args.length < 3) {
-            CommandInfo.sendUsage(player,
-                "Teleport to coordinates. World is optional.",
-                "tppos", "[player]", "<x>", "<y>", "<z>", "[world]"
+            CommandFormatter.sendUsage(player,
+                    "Teleport to coordinates. World is optional.",
+                    "tppos", "[player]", "<x>", "<y>", "<z>", "[world]"
             );
             return true;
         }
@@ -81,6 +81,7 @@ public class TeleportPositionCommand implements CommandExecutor {
             warn(player, "Invalid coordinates. Please provide valid numbers.");
             return false;
         }
+
         return true;
     }
 

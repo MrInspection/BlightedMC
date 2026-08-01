@@ -1,31 +1,27 @@
-package fr.moussax.blightedMC.commands;
+package fr.moussax.blightedMC.commands.impl;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.commands.AdminCommand;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.engine.items.registry.menu.ItemRegistryMenu;
-import fr.moussax.blightedMC.utils.commands.CommandArgument;
-import fr.moussax.blightedMC.utils.commands.CommandArguments;
+import fr.moussax.blightedMC.commands.utils.CommandArgument;
+import fr.moussax.blightedMC.commands.utils.CommandArguments;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jspecify.annotations.NonNull;
 
 import static fr.moussax.blightedMC.utils.Formatter.*;
 
 @CommandArguments({
-    @CommandArgument(suggestions = {"$players"}),
-    @CommandArgument(position = 1, suggestions = {"$items"})
+        @CommandArgument(position = 0, suggestions = {"$players"}),
+        @CommandArgument(position = 1, suggestions = {"$items"})
 })
-public class GiveItemCommand implements CommandExecutor {
+public final class GiveItemCommand extends AdminCommand {
 
     @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NonNull [] args) {
-        if (!(sender instanceof Player player)) return false;
-        if (!hasRequiredPermission(player)) return false;
+    protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
 
         if (args.length == 0) {
             BlightedMC.menuManager().openMenu(new ItemRegistryMenu.ItemCategoriesMenu(), player);
@@ -63,7 +59,8 @@ public class GiveItemCommand implements CommandExecutor {
         stack.setAmount(amount);
         target.getInventory().addItem(stack);
 
-        inform(player, "Gave §ex" + amount + " §f" + formatEnumName(blightedItem.getItemId()) + " §7to §e" + target.getName() + "§7.");
+        inform(player, " §eGave §7x" + amount + " §f" + formatEnumName(blightedItem.getItemId()) + " §eto §d" + target.getName() + "§7.");
+
         return true;
     }
 }
