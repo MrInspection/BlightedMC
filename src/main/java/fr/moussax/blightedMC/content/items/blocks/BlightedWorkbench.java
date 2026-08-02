@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.blocks.BlightedBlock;
 import fr.moussax.blightedMC.engine.items.crafting.menu.CraftingTableMenu;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
+import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;

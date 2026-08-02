@@ -11,10 +11,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
  */
 @FunctionalInterface
 public interface EntityImmunity {
-    EntityImmunity FIRE = new FireImmunity();
-    EntityImmunity MELEE = new MeleeImmunity();
-    EntityImmunity PROJECTILE = new ProjectileImmunity();
-    EntityImmunity MACE = new MaceImmunity();
 
     /**
      * Determines whether the specified entity is immune to the given damage event.

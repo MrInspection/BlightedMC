@@ -6,7 +6,8 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.engine.items.registry.ItemProvider;
+import fr.moussax.blightedMC.registry.RegistryModule;
+import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -17,11 +18,11 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 
-public final class FishingArmors implements ItemProvider {
+public final class FishingArmors implements RegistryModule<ItemRegistryHandler> {
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public void register() {
+    public void register(ItemRegistryHandler registry) {
 
         FullSetBonus emberWeaveSetBonus = new EmberWeaveSetBonus();
 
@@ -167,19 +168,17 @@ public final class FishingArmors implements ItemProvider {
         anglerBoots.setMaxDurability(143);
         anglerBoots.addLore("", ItemRarity.UNCOMMON.getName() + " BOOTS");
 
-        add(
-                emberWeaveHelmet,
-                emberWeaveChestplate,
-                emberWeaveLeggins,
-                emberWeaveBoots,
-                ashfangHelmet,
-                ashfangChestplate,
-                ashfangLeggins,
-                ashfangBoots,
-                anglerHelmet,
-                anglerChestplate,
-                anglerLeggings,
-                anglerBoots
-        );
+        registry.register(emberWeaveHelmet);
+        registry.register(emberWeaveChestplate);
+        registry.register(emberWeaveLeggins);
+        registry.register(emberWeaveBoots);
+        registry.register(ashfangHelmet);
+        registry.register(ashfangChestplate);
+        registry.register(ashfangLeggins);
+        registry.register(ashfangBoots);
+        registry.register(anglerHelmet);
+        registry.register(anglerChestplate);
+        registry.register(anglerLeggings);
+        registry.register(anglerBoots);
     }
 }

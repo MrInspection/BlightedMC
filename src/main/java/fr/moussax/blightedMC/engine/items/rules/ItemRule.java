@@ -1,9 +1,13 @@
 package fr.moussax.blightedMC.engine.items.rules;
 
-import fr.moussax.blightedMC.engine.items.rules.common.*;
 import org.bukkit.event.Event;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -13,12 +17,52 @@ import org.bukkit.inventory.ItemStack;
  * Defaults are set to prevent placement but allow interaction.
  */
 public interface ItemRule {
-    ItemRule PREVENT_BUCKET_INTERACTIONS = new PreventBucketInteractionsRule();
-    ItemRule PREVENT_CONSUME = new PreventConsumeRule();
-    ItemRule PREVENT_DROP = new PreventDropRule();
-    ItemRule PREVENT_INTERACTION = new PreventInteractionRule();
-    ItemRule PREVENT_PLACEMENT = new PreventPlacementRule();
-    ItemRule PREVENT_PROJECTILE_LAUNCH = new PreventProjectileLaunchRule();
+    ItemRule PREVENT_BUCKET_INTERACTIONS = new ItemRule() {
+        @Override
+        public boolean canUse(Event event, ItemStack itemStack) {
+            return event instanceof PlayerBucketEmptyEvent;
+        }
+    };
+
+    ItemRule PREVENT_CONSUME = new ItemRule() {
+        @Override
+        public boolean canUse(Event event, ItemStack itemStack) {
+            return event instanceof PlayerItemConsumeEvent;
+        }
+    };
+
+    ItemRule PREVENT_DROP = new ItemRule() {
+        @Override
+        public boolean canUse(Event event, ItemStack itemStack) {
+            return event instanceof PlayerDropItemEvent;
+        }
+    };
+
+    ItemRule PREVENT_INTERACTION = new ItemRule() {
+        @Override
+        public boolean canInteract(PlayerInteractEvent event, ItemStack itemStack) {
+            return false;
+        }
+    };
+
+    ItemRule PREVENT_PLACEMENT = new ItemRule() {
+        @Override
+        public boolean canPlace(BlockPlaceEvent event, ItemStack itemStack) {
+            return true; // FORBIDDEN
+        }
+
+        @Override
+        public boolean canInteract(PlayerInteractEvent event, ItemStack itemStack) {
+            return event.getAction() != Action.RIGHT_CLICK_BLOCK;
+        }
+    };
+
+    ItemRule PREVENT_PROJECTILE_LAUNCH = new ItemRule() {
+        @Override
+        public boolean canUse(Event event, ItemStack itemStack) {
+            return event instanceof ProjectileLaunchEvent;
+        }
+    };
 
     /**
      * Determines whether the item can be placed as a block.

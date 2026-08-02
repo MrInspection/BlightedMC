@@ -91,9 +91,9 @@ public final class BlightedEntitiesListener implements Listener {
     }
 
     private void handleAttachmentDamage(
-        BlightedEntity owner,
-        LivingEntity attachmentEntity,
-        EntityDamageEvent event
+            BlightedEntity owner,
+            LivingEntity attachmentEntity,
+            EntityDamageEvent event
     ) {
         LivingEntity ownerEntity = owner.getEntity();
         if (ownerEntity == null || ownerEntity.isDead()) {
@@ -112,9 +112,9 @@ public final class BlightedEntitiesListener implements Listener {
     }
 
     private void handleBlightedEntityDamage(
-        BlightedEntity blighted,
-        LivingEntity entity,
-        EntityDamageEvent event
+            BlightedEntity blighted,
+            LivingEntity entity,
+            EntityDamageEvent event
     ) {
         forwardDamageToBodyAttachments(blighted, event);
 
@@ -123,14 +123,18 @@ public final class BlightedEntitiesListener implements Listener {
         }
 
         blighted.onDamageTaken(event);
-
         double remainingHealth = entity.getHealth() - event.getFinalDamage();
 
         if (remainingHealth > 0) {
             Bukkit.getScheduler().runTaskLater(
-                BlightedMC.getInstance(),
-                blighted::updateBossBar,
-                1L
+                    BlightedMC.getInstance(),
+                    () -> {
+                        if (entity.isValid() && !entity.isDead()) {
+                            blighted.updateBossBar();
+                            blighted.evaluatePhases(entity.getHealth());
+                        }
+                    },
+                    1L
             );
             return;
         }
@@ -140,6 +144,7 @@ public final class BlightedEntitiesListener implements Listener {
             event.setCancelled(true);
             entity.setHealth(1.0);
             blighted.updateBossBar();
+            blighted.evaluatePhases(1.0);
             return;
         }
 
@@ -159,9 +164,9 @@ public final class BlightedEntitiesListener implements Listener {
     }
 
     private boolean handleImmunity(
-        BlightedEntity blighted,
-        LivingEntity entity,
-        EntityDamageByEntityEvent event
+            BlightedEntity blighted,
+            LivingEntity entity,
+            EntityDamageByEntityEvent event
     ) {
         EntityImmunity triggered = blighted.getTriggeredImmunity(entity, event);
         if (triggered == null) return false;
@@ -231,8 +236,8 @@ public final class BlightedEntitiesListener implements Listener {
         blighted.cleanup();
 
         BlightedPlayer killer = dead.getKiller() != null
-            ? BlightedPlayer.getBlightedPlayer(dead.getKiller())
-            : null;
+                ? BlightedPlayer.getBlightedPlayer(dead.getKiller())
+                : null;
 
         blighted.dropLoot(dead.getLocation(), killer);
         blighted.onDeath(dead.getLocation());
@@ -242,9 +247,9 @@ public final class BlightedEntitiesListener implements Listener {
     }
 
     private void handleAttachmentDeath(
-        BlightedEntity owner,
-        LivingEntity deadAttachment,
-        EntityDeathEvent event
+            BlightedEntity owner,
+            LivingEntity deadAttachment,
+            EntityDeathEvent event
     ) {
         event.getDrops().clear();
         event.setDroppedExp(0);
@@ -311,13 +316,21 @@ public final class BlightedEntitiesListener implements Listener {
             if (ownerUuidStr == null || roleStr == null) continue;
 
             UUID ownerUuid;
-            try { ownerUuid = UUID.fromString(ownerUuidStr); } catch (IllegalArgumentException ignored) { continue; }
+            try {
+                ownerUuid = UUID.fromString(ownerUuidStr);
+            } catch (IllegalArgumentException ignored) {
+                continue;
+            }
 
             BlightedEntity owner = BLIGHTED_ENTITIES.get(ownerUuid);
             if (owner == null) continue;
 
             AttachmentRole role;
-            try { role = AttachmentRole.valueOf(roleStr); } catch (IllegalArgumentException ignored) { role = AttachmentRole.DEPENDENT; }
+            try {
+                role = AttachmentRole.valueOf(roleStr);
+            } catch (IllegalArgumentException ignored) {
+                role = AttachmentRole.DEPENDENT;
+            }
 
             owner.attachments.removeIf(a -> a.entity() != null && a.entity().getUniqueId().equals(living.getUniqueId()));
             owner.attachments.add(new EntityAttachment(living, role));
@@ -329,7 +342,7 @@ public final class BlightedEntitiesListener implements Listener {
         UUID targetId = attachmentEntity.getUniqueId();
         for (EntityAttachment attachment : owner.attachments) {
             if (attachment.entity() != null
-                && attachment.entity().getUniqueId().equals(targetId)) {
+                    && attachment.entity().getUniqueId().equals(targetId)) {
                 return attachment.role();
             }
         }
@@ -338,7 +351,7 @@ public final class BlightedEntitiesListener implements Listener {
 
     private double clampedHealth(LivingEntity entity, double healAmount) {
         double maxHealth = Objects.requireNonNull(
-            entity.getAttribute(Attribute.MAX_HEALTH)
+                entity.getAttribute(Attribute.MAX_HEALTH)
         ).getValue();
         return Math.min(entity.getHealth() + healAmount, maxHealth);
     }
@@ -346,7 +359,7 @@ public final class BlightedEntitiesListener implements Listener {
     private Player getPlayerDamager(Entity damager) {
         if (damager instanceof Player player) return player;
         if (damager instanceof Projectile projectile
-            && projectile.getShooter() instanceof Player shooter) {
+                && projectile.getShooter() instanceof Player shooter) {
             return shooter;
         }
         return null;

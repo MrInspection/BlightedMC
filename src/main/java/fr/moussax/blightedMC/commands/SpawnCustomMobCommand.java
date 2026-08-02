@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
-import static fr.moussax.blightedMC.shared.formatting.Formatter.*;
+import static fr.moussax.blightedMC.utils.Formatter.*;
 
 @CommandArgument(suggestions = {"$entities"})
 public class SpawnCustomMobCommand implements CommandExecutor {

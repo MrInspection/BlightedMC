@@ -16,6 +16,7 @@ import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.shared.ui.sign.SignInputListener;
 import fr.moussax.blightedMC.content.items.abilities.WitherImpactAbility;
+import fr.moussax.blightedMC.engine.quest.BlightedQuestListener;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -50,6 +51,7 @@ public final class EventsRegistry {
         pm.registerEvents(new FishingListener(), instance);
         pm.registerEvents(new UnsafeAnvilListener(), instance);
         pm.registerEvents(new WitherImpactAbility(), instance);
+        pm.registerEvents(new BlightedQuestListener(), instance);
     }
 
     public void buildSpawnCache() {

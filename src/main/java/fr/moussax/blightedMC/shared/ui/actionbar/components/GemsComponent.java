@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.shared.ui.actionbar.components;
 
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.shared.ui.actionbar.BaseComponent;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
+import fr.moussax.blightedMC.utils.Formatter;
 
 public class GemsComponent extends BaseComponent {
     public GemsComponent() {

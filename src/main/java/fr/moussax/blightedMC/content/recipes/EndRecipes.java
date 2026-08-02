@@ -1,40 +1,42 @@
 package fr.moussax.blightedMC.content.recipes;
 
 import fr.moussax.blightedMC.engine.items.crafting.BlightedRecipe;
-import fr.moussax.blightedMC.engine.items.crafting.registry.RecipeProvider;
+import fr.moussax.blightedMC.registry.RegistryModule;
+import fr.moussax.blightedMC.engine.items.crafting.registry.RecipeRegistryHandler;
+
+import static fr.moussax.blightedMC.engine.items.crafting.registry.RecipeRegistry.shapedRecipe;
+
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import org.bukkit.Material;
 
-public class EndRecipes implements RecipeProvider {
+public class EndRecipes implements RegistryModule<RecipeRegistryHandler> {
     @Override
-    public void register() {
+    public void register(RecipeRegistryHandler registry) {
 
         BlightedRecipe enchantedEnderPearlRecipe = shapedRecipe("ENCHANTED_ENDER_PEARL", 2)
-            .shape(" i ", "iii", " i ")
-            .bind('i', Material.ENDER_PEARL, 16)
-            .build();
+                .shape(" i ", "iii", " i ")
+                .bind('i', Material.ENDER_PEARL, 16)
+                .build();
 
         BlightedRecipe enchantedEndstoneRecipe = shapedRecipe("ENCHANTED_END_STONE", 1)
-            .shape(" i ", "iii", " i ")
-            .bind('i', Material.END_STONE, 12)
-            .build();
+                .shape(" i ", "iii", " i ")
+                .bind('i', Material.END_STONE, 12)
+                .build();
 
         BlightedRecipe enchantedChorusFruitRecipe = shapedRecipe("ENCHANTED_CHORUS_FRUIT", 1)
-            .shape(" i ", "iii", " i ")
-            .bind('i', Material.CHORUS_FRUIT, 12)
-            .build();
+                .shape(" i ", "iii", " i ")
+                .bind('i', Material.CHORUS_FRUIT, 12)
+                .build();
 
         BlightedRecipe glimmeringEyeRecipe = shapedRecipe("GLIMMERING_EYE", 1)
-            .shape(" i ", "iji", " i ")
-            .bind('i', ItemRegistry.getItem("ENCHANTED_ENDER_PEARL"), 1)
-            .bind('j', Material.OPEN_EYEBLOSSOM, 1)
-            .build();
+                .shape(" i ", "iji", " i ")
+                .bind('i', ItemRegistry.getItem("ENCHANTED_ENDER_PEARL"), 1)
+                .bind('j', Material.OPEN_EYEBLOSSOM, 1)
+                .build();
 
-        add(
-            enchantedEnderPearlRecipe,
-            enchantedEndstoneRecipe,
-            enchantedChorusFruitRecipe,
-            glimmeringEyeRecipe
-        );
+        registry.register(enchantedEnderPearlRecipe);
+        registry.register(enchantedEndstoneRecipe);
+        registry.register(enchantedChorusFruitRecipe);
+        registry.register(glimmeringEyeRecipe);
     }
 }

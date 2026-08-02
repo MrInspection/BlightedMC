@@ -5,14 +5,15 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.engine.items.registry.ItemProvider;
+import fr.moussax.blightedMC.registry.RegistryModule;
+import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 
-public class HomodeusArmor implements ItemProvider {
+public class HomodeusArmor implements RegistryModule<ItemRegistryHandler> {
 
     @Override
-    public void register() {
+    public void register(ItemRegistryHandler registry) {
         FullSetBonus homodeusFlightBonus = new HomodeusFlightAbility();
 
         BlightedItem homodeusHelmet = new BlightedItem("HOMODEUS_HELMET", ItemType.HELMET, ItemRarity.LEGENDARY, Material.LEATHER_HELMET);
@@ -31,7 +32,10 @@ public class HomodeusArmor implements ItemProvider {
         homodeusBoots.setDisplayName("Homodeus Boots");
         setupHomodeusPiece(homodeusBoots, homodeusFlightBonus);
 
-        add(homodeusHelmet, homodeusChestplate, homodeusLeggings, homodeusBoots);
+        registry.register(homodeusHelmet);
+        registry.register(homodeusChestplate);
+        registry.register(homodeusLeggings);
+        registry.register(homodeusBoots);
     }
 
     private void setupHomodeusPiece(BlightedItem piece, FullSetBonus bonus) {

@@ -9,7 +9,7 @@ import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.content.items.abilities.weave.EmberWeaveSetBonus;
 import fr.moussax.blightedMC.content.items.abilities.weave.MagmaweaveSetBonus;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
+import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;

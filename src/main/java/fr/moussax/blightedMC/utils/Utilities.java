@@ -2,7 +2,6 @@ package fr.moussax.blightedMC.utils;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -82,7 +81,7 @@ public final class Utilities {
         if (ingredient.isCustom()) {
             return Objects.requireNonNull(ingredient.getManager().toItemStack().getItemMeta()).getDisplayName();
         }
-        return "§f" + Formatter.formatEnumName(ingredient.getVanillaItem().getType().name());
+        return "§f" + Formatter.formatEnumName(Objects.requireNonNull(ingredient.getVanillaItem()).getType().name());
     }
 
     /**

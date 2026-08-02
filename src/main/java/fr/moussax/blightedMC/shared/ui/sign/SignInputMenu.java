@@ -2,17 +2,11 @@ package fr.moussax.blightedMC.shared.ui.sign;
 
 import fr.moussax.blightedMC.BlightedMC;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
@@ -31,39 +25,25 @@ public final class SignInputMenu {
     }
 
     public void open(@NonNull Player player) {
-        Location location = player.getLocation();
-        BlockPos blockPosition = new BlockPos(location.getBlockX(), (int) location.getY() + 3, location.getBlockZ());
+        Location location = player.getLocation().clone();
+        location.setY(location.getY() + 3);
+        player.sendBlockChange(location, Material.PALE_OAK_SIGN.createBlockData());
 
-        ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
-
-        nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.PALE_OAK_SIGN.defaultBlockState()));
-
-        CompoundTag nbt = new CompoundTag();
-        nbt.putString("id", "minecraft:sign");
-        nbt.putInt("x", blockPosition.getX());
-        nbt.putInt("y", blockPosition.getY());
-        nbt.putInt("z", blockPosition.getZ());
-
-        CompoundTag frontText = new CompoundTag();
-        ListTag messages = new ListTag();
-
-        for (int i = 0; i < 4; i++) {
-            String line = (i < lines.length) ? lines[i] : "";
-            messages.add(StringTag.valueOf(line));
+        String[] safeLines = new String[]{"", "", "", ""};
+        for (int i = 0; i < Math.min(4, lines.length); i++) {
+            safeLines[i] = lines[i] != null ? lines[i] : "";
         }
+        player.sendSignChange(location, safeLines);
 
-        frontText.put("messages", messages);
-        nbt.put("front_text", frontText);
-
-        nmsPlayer.connection.send(new ClientboundBlockEntityDataPacket(blockPosition, BlockEntityType.SIGN, nbt));
-        nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.PALE_OAK_SIGN.defaultBlockState()));
+        BlockPos blockPosition = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
 
         Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> {
             if (!player.isOnline()) return;
-            nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, Blocks.PALE_OAK_SIGN.defaultBlockState()));
+
             nmsPlayer.connection.send(new ClientboundOpenSignEditorPacket(blockPosition, frontSide));
             SignInputManager.register(player.getUniqueId(), this, blockPosition);
-        }, 1L);
+        }, 2L);
     }
 
     void handleComplete(@NonNull Player player, @NonNull String[] lines) {

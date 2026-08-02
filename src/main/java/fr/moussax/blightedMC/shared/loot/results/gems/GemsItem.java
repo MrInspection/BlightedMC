@@ -2,19 +2,19 @@ package fr.moussax.blightedMC.shared.loot.results.gems;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
-import fr.moussax.blightedMC.engine.items.ItemFactory;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
-import fr.moussax.blightedMC.shared.sound.SoundSequence;
+import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import java.util.function.Supplier;
 
-public record GemsItem(int amount) implements ItemFactory {
+public record GemsItem(int amount) implements Supplier<ItemStack> {
 
     public GemsItem(ItemStack itemStack) {
         ItemMeta meta = itemStack.getItemMeta();
@@ -75,7 +75,7 @@ public record GemsItem(int amount) implements ItemFactory {
     }
 
     @Override
-    public ItemStack createItemStack() {
+    public ItemStack get() {
         BlightedItem blightedItem = ItemRegistry.getItem("BLIGHTED_GEMSTONE");
 
         blightedItem.setLore(7, "§8 Gems: §d" + this.amount + "✵");

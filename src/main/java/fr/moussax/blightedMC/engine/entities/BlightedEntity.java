@@ -83,14 +83,15 @@ public abstract class BlightedEntity implements Cloneable {
 
     @Setter
     protected LootTable lootTable;
+
     @Setter
-    protected BlightedType blightedType = BlightedType.DEFAULT;
+    protected boolean isBoss = false;
     protected BossBar bossBar;
     protected BarColor bossBarColor = BarColor.RED;
     protected BarStyle bossBarStyle = BarStyle.SOLID;
     protected Map<Attribute, Double> attributes = new HashMap<>();
 
-    private List<EntityImmunity> immunities = Collections.emptyList();
+    private final List<EntityImmunity> immunities = new ArrayList<>();
     private boolean runtimeInitialized = false;
     private boolean componentsInitialized = false;
 
@@ -129,7 +130,7 @@ public abstract class BlightedEntity implements Cloneable {
         initializeAttributes();
         configureEquipment();
         onConfigureAI(entity);
-        if (blightedType == BlightedType.BOSS) createBossBar();
+        if (isBoss) createBossBar();
 
         BlightedEntitiesListener.registerEntity(entity, this);
         initComponents();
@@ -153,7 +154,7 @@ public abstract class BlightedEntity implements Cloneable {
         rehydrateAttributes();
         onConfigureAI(existing);
 
-        if (blightedType == BlightedType.BOSS) createBossBar();
+        if (isBoss) createBossBar();
         BlightedEntitiesListener.registerEntity(existing, this);
 
         initComponents();
@@ -545,8 +546,8 @@ public abstract class BlightedEntity implements Cloneable {
         if (defense > 0) setAttribute(Attribute.ARMOR, defense);
         attributes.forEach(this::setAttribute);
 
-        AttributeInstance maxHealthAttr = entity.getAttribute(Attribute.MAX_HEALTH);
-        if (maxHealthAttr != null) entity.setHealth(maxHealthAttr.getValue());
+        AttributeInstance maxHealthAttribute = entity.getAttribute(Attribute.MAX_HEALTH);
+        if (maxHealthAttribute != null) entity.setHealth(maxHealthAttribute.getValue());
 
         lockEntityProperties();
     }
@@ -564,8 +565,8 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     private void lockEntityProperties() {
-        entity.setRemoveWhenFarAway(false);
-        entity.setPersistent(true);
+        entity.setRemoveWhenFarAway(!isBoss);
+        entity.setPersistent(isBoss);
         entity.setCanPickupItems(false);
     }
 
@@ -608,16 +609,11 @@ public abstract class BlightedEntity implements Cloneable {
     private void initImmunityRules() {
         EntityImmunities annotation = getClass().getAnnotation(EntityImmunities.class);
         if (annotation == null) return;
-        List<EntityImmunity> tempList = new ArrayList<>(4);
-        for (EntityImmunities.ImmunityType type : annotation.value()) {
-            switch (type) {
-                case MELEE -> tempList.add(EntityImmunity.MELEE);
-                case FIRE -> tempList.add(EntityImmunity.FIRE);
-                case PROJECTILE -> tempList.add(EntityImmunity.PROJECTILE);
-                case MACE -> tempList.add(EntityImmunity.MACE);
-            }
-        }
-        this.immunities = tempList;
+        Collections.addAll(this.immunities, annotation.value());
+    }
+
+    public void addImmunity(EntityImmunity immunity) {
+        this.immunities.add(immunity);
     }
 
     private void scheduleAbility(LifecycleTaskManager manager, long delayTicks, long periodTicks, Runnable action) {

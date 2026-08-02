@@ -3,13 +3,15 @@ package fr.moussax.blightedMC.content.items.materials;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
-import fr.moussax.blightedMC.engine.items.registry.ItemProvider;
-import fr.moussax.blightedMC.engine.items.rules.common.PreventPlacementRule;
+import fr.moussax.blightedMC.registry.RegistryModule;
+import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
+import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import org.bukkit.Material;
 
-public class NetherMaterials implements ItemProvider {
+public class NetherMaterials implements RegistryModule<ItemRegistryHandler> {
     @Override
-    public void register() {
+    public void register(ItemRegistryHandler registry) {
 
         BlightedItem enchantedGhastTear = new BlightedItem("ENCHANTED_GHAST_TEAR", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.GHAST_TEAR);
         enchantedGhastTear.setDisplayName("Enchanted Ghast Tear");
@@ -82,7 +84,7 @@ public class NetherMaterials implements ItemProvider {
         vengefulEye.setDisplayName("Vengeful Eye");
         vengefulEye.setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjkzZWMyODVmNWM2NzcwZTdkZmMxZjI3NzVkMGU5NTYzOTk3Mzc4Njk5OWJkZDM2Y2M4ZTk5OGIyNWU3NTNmYiJ9fX0=");
         vengefulEye.addLore(ItemRarity.EPIC.getName());
-        vengefulEye.addRule(new PreventPlacementRule());
+        vengefulEye.addRule(ItemRule.PREVENT_PLACEMENT);
 
         BlightedItem cremeBrulee = new BlightedItem("CREME_BRULEE", ItemType.UNCATEGORIZED, ItemRarity.UNCOMMON, Material.PUMPKIN_PIE);
         cremeBrulee.setDisplayName("Crème brûlée");
@@ -109,24 +111,22 @@ public class NetherMaterials implements ItemProvider {
         BlightedItem suspiciousFungus = new BlightedItem("SUSPICIOUS_FUNGUS", ItemType.UNCATEGORIZED, ItemRarity.RARE, Material.CRIMSON_FUNGUS);
         suspiciousFungus.setDisplayName("SuSpIcIoUs Fungus");
         suspiciousFungus.addLore(ItemRarity.RARE.getName());
-        suspiciousFungus.addRule(new PreventPlacementRule());
+        suspiciousFungus.addRule(ItemRule.PREVENT_PLACEMENT);
         suspiciousFungus.addEnchantmentGlint();
 
-        add(
-            enchantedGhastTear,
-            enchantedMagmaCream,
-            enchantedQuartz,
-            enchantedBlazePowder,
-            enchantedBlazeRod,
-            enchantedGlowstoneDust,
-            enchantedNetherWart,
-            flames,
-            sulfur,
-            enchantedSulfur,
-            enchantedNetherrack,
-            vengefulEye,
-            cremeBrulee,
-            suspiciousFungus
-        );
+                registry.register(enchantedGhastTear);
+        registry.register(enchantedMagmaCream);
+        registry.register(enchantedQuartz);
+        registry.register(enchantedBlazePowder);
+        registry.register(enchantedBlazeRod);
+        registry.register(enchantedGlowstoneDust);
+        registry.register(enchantedNetherWart);
+        registry.register(flames);
+        registry.register(sulfur);
+        registry.register(enchantedSulfur);
+        registry.register(enchantedNetherrack);
+        registry.register(vengefulEye);
+        registry.register(cremeBrulee);
+        registry.register(suspiciousFungus);
     }
 }

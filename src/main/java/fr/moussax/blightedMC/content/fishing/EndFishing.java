@@ -1,84 +1,30 @@
 package fr.moussax.blightedMC.content.fishing;
 
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
-import fr.moussax.blightedMC.engine.fishing.registry.FishingLootProvider;
-import fr.moussax.blightedMC.shared.loot.LootCondition;
-import fr.moussax.blightedMC.shared.loot.LootEntry;
-import fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator;
-import fr.moussax.blightedMC.shared.loot.decorators.MessageDecorator;
-import fr.moussax.blightedMC.shared.loot.providers.AmountProvider;
-import fr.moussax.blightedMC.shared.loot.results.EntityResult;
-import fr.moussax.blightedMC.shared.loot.results.ItemResult;
+import fr.moussax.blightedMC.registry.RegistryModule;
+import fr.moussax.blightedMC.engine.fishing.registry.FishingRegistryHandler;
+import fr.moussax.blightedMC.engine.fishing.FishingMethod;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 
-public class EndFishing implements FishingLootProvider {
+import static fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
+
+public class EndFishing implements RegistryModule<FishingRegistryHandler> {
 
     @Override
-    public void register() {
-        addWater(World.Environment.THE_END);
+    public void register(FishingRegistryHandler registry) {
+        registry.register(World.Environment.THE_END, FishingMethod.WATER, provide());
     }
 
-    @Override
     public FishingLootTable provide() {
         return FishingLootTable.builder()
-            .setEntityRollChance(0.20)
-            .addEntities(
-                LootEntry.weighted(
-                    new MessageDecorator(
-                        new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.ENDERMITE),
-                            FishingLootFeedbackDecorator.FishingCatchQuality.GOOD_CATCH
-                        ),
-                        "§b§lYUCK! §7You caught an §5Endermite§7!"
-                    ),
-                    3.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new MessageDecorator(
-                        new FishingLootFeedbackDecorator(
-                            EntityResult.vanilla(EntityType.SHULKER),
-                            FishingLootFeedbackDecorator.FishingCatchQuality.OUTSTANDING_CATCH
-                        ),
-                        "§d§lRARE CATCH! §7You caught a §5Shulker§7!"
-                    ),
-                    0.8,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                )
-            )
-            .addItems(
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.END_STONE),
-                        FishingLootFeedbackDecorator.FishingCatchQuality.COMMON
-                    ),
-                    50.0,
-                    AmountProvider.fixed(3),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.CHORUS_FRUIT),
-                        FishingLootFeedbackDecorator.FishingCatchQuality.GOOD_CATCH
-                    ),
-                    40.0,
-                    AmountProvider.fixed(2),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ENDER_PEARL),
-                        FishingLootFeedbackDecorator.FishingCatchQuality.GREAT_CATCH
-                    ),
-                    10.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                )
-            )
-            .build();
+                .setEntityRollChance(0.20)
+                .addVanillaEntity(EntityType.ENDERMITE, 3.0, GOOD_CATCH, "§b§lYUCK! §7You caught an §5Endermite§7!")
+                .addVanillaEntity(EntityType.SHULKER, 0.8, OUTSTANDING_CATCH, "§d§lRARE CATCH! §7You caught a §5Shulker§7!")
+                .addItem(Material.END_STONE, 3, 50.0, COMMON)
+                .addItem(Material.CHORUS_FRUIT, 2, 40.0, GOOD_CATCH)
+                .addItem(Material.ENDER_PEARL, 1, 10.0, GREAT_CATCH)
+                .build();
     }
 }

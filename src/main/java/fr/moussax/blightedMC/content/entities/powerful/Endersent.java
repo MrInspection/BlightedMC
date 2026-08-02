@@ -3,7 +3,6 @@ package fr.moussax.blightedMC.content.entities.powerful;
 import fr.moussax.blightedMC.content.entities.Watchling;
 import fr.moussax.blightedMC.content.utils.ai.EndermanAI;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
-import fr.moussax.blightedMC.engine.entities.BlightedType;
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
@@ -54,7 +53,7 @@ public class Endersent extends SpawnableEntity {
                 .build()
         );
 
-        setBlightedType(BlightedType.BOSS);
+        setBoss(true);
     }
 
     @Override

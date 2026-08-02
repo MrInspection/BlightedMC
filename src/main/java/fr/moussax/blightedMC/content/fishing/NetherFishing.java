@@ -1,15 +1,10 @@
 package fr.moussax.blightedMC.content.fishing;
 
-import fr.moussax.blightedMC.content.entities.frenzied.FrenziedZombifiedPiglin;
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
-import fr.moussax.blightedMC.engine.fishing.registry.FishingLootProvider;
+import fr.moussax.blightedMC.registry.RegistryModule;
+import fr.moussax.blightedMC.engine.fishing.registry.FishingRegistryHandler;
+import fr.moussax.blightedMC.engine.fishing.FishingMethod;
 import fr.moussax.blightedMC.shared.loot.LootCondition;
-import fr.moussax.blightedMC.shared.loot.LootEntry;
-import fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator;
-import fr.moussax.blightedMC.shared.loot.decorators.FishingLootSoundDecorator;
-import fr.moussax.blightedMC.shared.loot.decorators.MessageDecorator;
-import fr.moussax.blightedMC.shared.loot.providers.AmountProvider;
-import fr.moussax.blightedMC.shared.loot.results.EntityResult;
 import fr.moussax.blightedMC.shared.loot.results.ItemResult;
 import fr.moussax.blightedMC.shared.loot.results.gems.GemsResult;
 import org.bukkit.Material;
@@ -28,591 +23,93 @@ import java.util.List;
 
 import static fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
 
-public class NetherFishing implements FishingLootProvider {
+public class NetherFishing implements RegistryModule<FishingRegistryHandler> {
 
     @Override
-    public void register() {
-        addLava(World.Environment.NETHER);
+    public void register(FishingRegistryHandler registry) {
+        registry.register(World.Environment.NETHER, FishingMethod.LAVA, provide());
     }
 
-    @Override
     public FishingLootTable provide() {
         return FishingLootTable.builder()
-            .setEntityRollChance(0.15)
-            .addEntities(
-                LootEntry.weighted(
-                    new MessageDecorator(
-                        new FishingLootSoundDecorator(
-                            EntityResult.blighted(new FrenziedZombifiedPiglin()),
-                            FishingLootSoundDecorator.FishingCatchQuality.COMMON
-                        ),
-                        " §6§lOINK! §7You caught a §dDreadforged Zombified Piglin§7!"
-                    ),
-                    15.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        EntityResult.vanilla(EntityType.MAGMA_CUBE),
-                        GREAT_CATCH
-                    ),
-                    2.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        EntityResult.vanilla(EntityType.GHAST),
-                        GREAT_CATCH
-                    ),
-                    20,
-                    AmountProvider.fixed(1),
-                    LootCondition.biome(Biome.SOUL_SAND_VALLEY)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        EntityResult.vanilla(EntityType.HOGLIN),
-                        GREAT_CATCH
-                    ),
-                    30,
-                    AmountProvider.fixed(1),
-                    LootCondition.biome(Biome.CRIMSON_FOREST)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        EntityResult.vanilla(EntityType.ENDERMAN),
-                        GREAT_CATCH
-                    ),
-                    30,
-                    AmountProvider.fixed(1),
-                    LootCondition.biome(Biome.WARPED_FOREST)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        EntityResult.vanilla(EntityType.SKELETON),
-                        GREAT_CATCH
-                    ),
-                    30,
-                    AmountProvider.fixed(1),
-                    LootCondition.biome(Biome.SOUL_SAND_VALLEY)
-                )
-            )
-            .addItems(
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ROTTEN_FLESH),
-                        COMMON
-                    ),
-                    120.0,
-                    AmountProvider.range(2, 6),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.QUARTZ),
-                        COMMON
-                    ),
-                    110.0,
-                    AmountProvider.range(4, 12),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.MUSHROOM_STEW),
-                        COMMON
-                    ),
-                    110.0,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.GLOWSTONE_DUST),
-                        COMMON
-                    ),
-                    110.0,
-                    AmountProvider.range(4, 12),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.COAL),
-                        COMMON
-                    ),
-                    100.0,
-                    AmountProvider.range(3, 8),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.GOLD_NUGGET),
-                        COMMON
-                    ),
-                    100.0,
-                    AmountProvider.range(5, 15),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.IRON_NUGGET),
-                        COMMON
-                    ),
-                    100.0,
-                    AmountProvider.range(3, 9),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.COOKED_CHICKEN),
-                        COMMON
-                    ),
-                    100.0,
-                    AmountProvider.range(2, 6),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.COOKED_PORKCHOP),
-                        COMMON
-                    ),
-                    100.0,
-                    AmountProvider.range(2, 6),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.BAKED_POTATO),
-                        COMMON
-                    ),
-                    90.0,
-                    AmountProvider.range(3, 8),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.STRING),
-                        COMMON
-                    ),
-                    80.0,
-                    AmountProvider.range(1, 4),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.LEATHER),
-                        COMMON
-                    ),
-                    80.0,
-                    AmountProvider.range(1, 3),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of("SULFUR"),
-                        COMMON
-                    ),
-                    60.0,
-                    AmountProvider.range(2, 4),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        new GemsResult(),
-                        GOOD_CATCH
-                    ),
-                    60,
-                    AmountProvider.range(2, 5),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.EXPERIENCE_BOTTLE),
-                        GOOD_CATCH
-                    ),
-                    55,
-                    AmountProvider.range(3, 8),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.GOLD_INGOT),
-                        GOOD_CATCH
-                    ),
-                    55,
-                    AmountProvider.range(2, 5),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of("ENCHANTED_QUARTZ"),
-                        GOOD_CATCH
-                    ),
-                    50,
-                    AmountProvider.range(1, 3),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of("ENCHANTED_GLOWSTONE_DUST"),
-                        GOOD_CATCH
-                    ),
-                    50,
-                    AmountProvider.range(1, 3),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.GOLDEN_CARROT),
-                        GOOD_CATCH
-                    ),
-                    50,
-                    AmountProvider.range(3, 8),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.OBSIDIAN),
-                        GOOD_CATCH
-                    ),
-                    45,
-                    AmountProvider.range(2, 4),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.BLAZE_ROD),
-                        GOOD_CATCH
-                    ),
-                    45,
-                    AmountProvider.range(1, 3),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.SPECTRAL_ARROW),
-                        GOOD_CATCH
-                    ),
-                    40,
-                    AmountProvider.range(8, 16),
-                    LootCondition.biome(Biome.SOUL_SAND_VALLEY)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.SPECTRAL_ARROW),
-                        GOOD_CATCH
-                    ),
-                    40,
-                    AmountProvider.range(8, 16),
-                    LootCondition.biome(Biome.SOUL_SAND_VALLEY)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.GILDED_BLACKSTONE),
-                        GOOD_CATCH
-                    ),
-                    40,
-                    AmountProvider.range(1, 4),
-                    LootCondition.biome(Biome.BASALT_DELTAS)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of("CREME_BRULEE"),
-                        GOOD_CATCH
-                    ),
-                    40,
-                    AmountProvider.range(1, 2),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.randomDurability(Material.CROSSBOW, 0.10, 0.80),
-                        GOOD_CATCH
-                    ),
-                    35,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.randomDurability(Material.GOLDEN_HELMET, 0.20, 0.75),
-                        GOOD_CATCH
-                    ),
-                    35,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of("FLAMES"),
-                        GOOD_CATCH
-                    ),
-                    35,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.SUSPICIOUS_STEW, b ->
-                            b.setItemMeta(meta -> ((SuspiciousStewMeta) meta).addCustomEffect(
+                .setEntityRollChance(0.15)
+                .addVanillaEntity(EntityType.MAGMA_CUBE, 2.0, GREAT_CATCH)
+                .addVanillaEntity(EntityType.GHAST, 20.0, GREAT_CATCH, LootCondition.biome(Biome.SOUL_SAND_VALLEY))
+                .addVanillaEntity(EntityType.HOGLIN, 30.0, GREAT_CATCH, LootCondition.biome(Biome.CRIMSON_FOREST))
+                .addVanillaEntity(EntityType.ENDERMAN, 30.0, GREAT_CATCH, LootCondition.biome(Biome.WARPED_FOREST))
+                .addVanillaEntity(EntityType.SKELETON, 30.0, GREAT_CATCH, LootCondition.biome(Biome.SOUL_SAND_VALLEY))
+                .addItem(Material.ROTTEN_FLESH, 2, 6, 120.0, COMMON)
+                .addItem(Material.QUARTZ, 4, 12, 110.0, COMMON)
+                .addItem(Material.MUSHROOM_STEW, 1, 110.0, COMMON)
+                .addItem(Material.GLOWSTONE_DUST, 4, 12, 110.0, COMMON)
+                .addItem(Material.COAL, 3, 8, 100.0, COMMON)
+                .addItem(Material.GOLD_NUGGET, 5, 15, 100.0, COMMON)
+                .addItem(Material.IRON_NUGGET, 3, 9, 100.0, COMMON)
+                .addItem(Material.COOKED_CHICKEN, 2, 6, 100.0, COMMON)
+                .addItem(Material.COOKED_PORKCHOP, 2, 6, 100.0, COMMON)
+                .addItem(Material.BAKED_POTATO, 3, 8, 90.0, COMMON)
+                .addItem(Material.STRING, 1, 4, 80.0, COMMON)
+                .addItem(Material.LEATHER, 1, 3, 80.0, COMMON)
+                .addItem("SULFUR", 2, 4, 60.0, COMMON)
+                .addItem(new GemsResult(), 2, 5, 60.0, GOOD_CATCH)
+                .addItem(Material.EXPERIENCE_BOTTLE, 3, 8, 55.0, GOOD_CATCH)
+                .addItem(Material.GOLD_INGOT, 2, 5, 55.0, GOOD_CATCH)
+                .addItem("ENCHANTED_QUARTZ", 1, 3, 50.0, GOOD_CATCH)
+                .addItem("ENCHANTED_GLOWSTONE_DUST", 1, 3, 50.0, GOOD_CATCH)
+                .addItem(Material.GOLDEN_CARROT, 3, 8, 50.0, GOOD_CATCH)
+                .addItem(Material.OBSIDIAN, 2, 4, 45.0, GOOD_CATCH)
+                .addItem(Material.BLAZE_ROD, 1, 3, 45.0, GOOD_CATCH)
+                .addItem(Material.SPECTRAL_ARROW, 8, 16, 40.0, GOOD_CATCH, LootCondition.biome(Biome.SOUL_SAND_VALLEY))
+                .addItem(Material.GILDED_BLACKSTONE, 1, 4, 40.0, GOOD_CATCH, LootCondition.biome(Biome.BASALT_DELTAS))
+                .addItem("CREME_BRULEE", 1, 2, 40.0, GOOD_CATCH)
+                .addItem(ItemResult.randomDurability(Material.CROSSBOW, 0.10, 0.80), 1, 35.0, GOOD_CATCH)
+                .addItem(ItemResult.randomDurability(Material.GOLDEN_HELMET, 0.20, 0.75), 1, 35.0, GOOD_CATCH)
+                .addItem("FLAMES", 1, 35.0, GOOD_CATCH)
+                .addItem(ItemResult.of(Material.SUSPICIOUS_STEW, b ->
+                        b.setItemMeta(meta -> ((SuspiciousStewMeta) meta).addCustomEffect(
                                 new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 200, 0), false)
-                            )
-                        ),
-                        GOOD_CATCH
-                    ),
-                    35,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.WARPED_FUNGUS_ON_A_STICK),
-                        GOOD_CATCH
-                    ),
-                    30,
-                    AmountProvider.fixed(1),
-                    LootCondition.biome(Biome.WARPED_FOREST)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.SOUL_SAND),
-                        GOOD_CATCH
-                    ),
-                    30,
-                    AmountProvider.range(1, 2),
-                    LootCondition.biome(Biome.SOUL_SAND_VALLEY)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ENDER_PEARL),
-                        GOOD_CATCH
-                    ),
-                    30,
-                    AmountProvider.range(1, 2),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        new GemsResult(),
-                        GREAT_CATCH
-                    ),
-                    30,
-                    AmountProvider.range(6, 10),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.GOLDEN_APPLE),
-                        GREAT_CATCH
-                    ),
-                    25,
-                    AmountProvider.range(1, 2),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.CRYING_OBSIDIAN),
-                        GREAT_CATCH
-                    ),
-                    25,
-                    AmountProvider.range(1, 3),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.GHAST_TEAR),
-                        GREAT_CATCH
-                    ),
-                    25,
-                    AmountProvider.range(1, 3),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.POTION, b -> b.setItemMeta(meta ->
-                            ((PotionMeta) meta).setBasePotionType(PotionType.LONG_FIRE_RESISTANCE)
-                        )),
-                        GREAT_CATCH
-                    ),
-                    20,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.randomEnchantedBook(
-                            List.of(
+                        )
+                ), 1, 35.0, GOOD_CATCH)
+                .addItem(Material.WARPED_FUNGUS_ON_A_STICK, 1, 30.0, GOOD_CATCH, LootCondition.biome(Biome.WARPED_FOREST))
+                .addItem(Material.SOUL_SAND, 1, 2, 30.0, GOOD_CATCH, LootCondition.biome(Biome.SOUL_SAND_VALLEY))
+                .addItem(Material.ENDER_PEARL, 1, 2, 30.0, GOOD_CATCH)
+                .addItem(new GemsResult(), 6, 10, 30.0, GREAT_CATCH)
+                .addItem(Material.GOLDEN_APPLE, 1, 2, 25.0, GREAT_CATCH)
+                .addItem(Material.CRYING_OBSIDIAN, 1, 3, 25.0, GREAT_CATCH)
+                .addItem(Material.GHAST_TEAR, 1, 3, 25.0, GREAT_CATCH)
+                .addItem(ItemResult.of(Material.POTION, b -> b.setItemMeta(meta ->
+                        ((PotionMeta) meta).setBasePotionType(PotionType.LONG_FIRE_RESISTANCE)
+                )), 1, 20.0, GREAT_CATCH)
+                .addItem(ItemResult.randomEnchantedBook(
+                        List.of(
                                 Enchantment.SMITE,
                                 Enchantment.PROTECTION,
                                 Enchantment.FIRE_PROTECTION,
                                 Enchantment.SHARPNESS,
                                 Enchantment.FEATHER_FALLING
-                            ),
-                            3,
-                            5
                         ),
-                        GREAT_CATCH
-                    ),
-                    20,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.SKELETON_SKULL),
-                        GREAT_CATCH
-                    ),
-                    15,
-                    AmountProvider.fixed(1),
-                    LootCondition.biome(Biome.SOUL_SAND_VALLEY)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.DRIED_GHAST),
-                        GREAT_CATCH
-                    ),
-                    15,
-                    AmountProvider.fixed(1),
-                    LootCondition.biome(Biome.SOUL_SAND_VALLEY)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of("SUSPICIOUS_FUNGUS"),
-                        GREAT_CATCH
-                    ),
-                    15,
-                    AmountProvider.fixed(1),
-                    LootCondition.biome(Biome.SOUL_SAND_VALLEY)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.RESPAWN_ANCHOR),
-                        GREAT_CATCH
-                    ),
-                    15,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.PIGLIN_HEAD),
-                        GREAT_CATCH
-                    ),
-                    15,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.NETHERITE_SCRAP),
-                        GREAT_CATCH
-                    ),
-                    15,
-                    AmountProvider.range(1, 2),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ANCIENT_DEBRIS),
-                        GREAT_CATCH
-                    ),
-                    10,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        new GemsResult(),
-                        OUTSTANDING_CATCH
-                    ),
-                    10,
-                    AmountProvider.range(12, 16),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of("FLAMES"),
-                        OUTSTANDING_CATCH
-                    ),
-                    8,
-                    AmountProvider.range(8, 16),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.MUSIC_DISC_PIGSTEP),
-                        OUTSTANDING_CATCH
-                    ),
-                    5,
-                    AmountProvider.fixed(1),
-                    LootCondition.biome(Biome.CRIMSON_FOREST)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.MUSIC_DISC_TEARS),
-                        OUTSTANDING_CATCH
-                    ),
-                    5,
-                    AmountProvider.fixed(1),
-                    LootCondition.biome(Biome.SOUL_SAND_VALLEY)
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE),
-                        OUTSTANDING_CATCH
-                    ),
-                    3,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.WITHER_SKELETON_SKULL),
-                        OUTSTANDING_CATCH
-                    ),
-                    3,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.OMINOUS_BOTTLE, b -> b.setItemMeta(
-                            meta -> ((OminousBottleMeta) meta).setAmplifier(4)
-                        )),
-                        OUTSTANDING_CATCH
-                    ),
-                    3,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of("VENGEFUL_EYE"),
-                        OUTSTANDING_CATCH
-                    ),
-                    2,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.ENCHANTED_GOLDEN_APPLE),
-                        OUTSTANDING_CATCH
-                    ),
-                    1,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                ),
-                LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(
-                        ItemResult.of(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
-                        OUTSTANDING_CATCH
-                    ),
-                    1,
-                    AmountProvider.fixed(1),
-                    LootCondition.alwaysTrue()
-                )
-            )
-            .build();
+                        3,
+                        5
+                ), 1, 20.0, GREAT_CATCH)
+                .addItem(Material.SKELETON_SKULL, 1, 15.0, GREAT_CATCH, LootCondition.biome(Biome.SOUL_SAND_VALLEY))
+                .addItem(Material.DRIED_GHAST, 1, 15.0, GREAT_CATCH, LootCondition.biome(Biome.SOUL_SAND_VALLEY))
+                .addItem("SUSPICIOUS_FUNGUS", 1, 15.0, GREAT_CATCH, LootCondition.biome(Biome.SOUL_SAND_VALLEY))
+                .addItem(Material.RESPAWN_ANCHOR, 1, 15.0, GREAT_CATCH)
+                .addItem(Material.PIGLIN_HEAD, 1, 15.0, GREAT_CATCH)
+                .addItem(Material.NETHERITE_SCRAP, 1, 2, 15.0, GREAT_CATCH)
+                .addItem(Material.ANCIENT_DEBRIS, 1, 10.0, GREAT_CATCH)
+                .addItem(new GemsResult(), 12, 16, 10.0, OUTSTANDING_CATCH)
+                .addItem("FLAMES", 8, 16, 8.0, OUTSTANDING_CATCH)
+                .addItem(Material.MUSIC_DISC_PIGSTEP, 1, 5.0, OUTSTANDING_CATCH, LootCondition.biome(Biome.CRIMSON_FOREST))
+                .addItem(Material.MUSIC_DISC_TEARS, 1, 5.0, OUTSTANDING_CATCH, LootCondition.biome(Biome.SOUL_SAND_VALLEY))
+                .addItem(Material.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE, 1, 3.0, OUTSTANDING_CATCH)
+                .addItem(Material.WITHER_SKELETON_SKULL, 1, 3.0, OUTSTANDING_CATCH)
+                .addItem(ItemResult.of(Material.OMINOUS_BOTTLE, b -> b.setItemMeta(
+                        meta -> ((OminousBottleMeta) meta).setAmplifier(4)
+                )), 1, 3.0, OUTSTANDING_CATCH)
+                .addItem("VENGEFUL_EYE", 1, 2.0, OUTSTANDING_CATCH)
+                .addItem(Material.ENCHANTED_GOLDEN_APPLE, 1, 1.0, OUTSTANDING_CATCH)
+                .addItem(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1, 1.0, OUTSTANDING_CATCH)
+                .build();
     }
 }

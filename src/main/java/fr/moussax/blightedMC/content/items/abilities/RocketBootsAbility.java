@@ -24,7 +24,7 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
 
     @Override
     public String getName() {
-        return "Rocket Flight";
+        return "Propulsion Burst";
     }
 
     @Override
@@ -32,13 +32,13 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
         return new String[]{
                 "Double jump in the air to launch",
                 "yourself forward and take flight.",
-                "Consumes durability on use."
+                "§8Consumes durability on use."
         };
     }
 
     @Override
     public BonusCategory getCategory() {
-        return BonusCategory.ABILITY; // Overrides the default label
+        return BonusCategory.ABILITY;
     }
 
     @Override
@@ -102,14 +102,12 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
     public void onPlayerLand(PlayerMoveEvent event) {
         Player landedPlayer = event.getPlayer();
 
-        if (!isAbilityOwner(landedPlayer)) return;
         if (landedPlayer.getAllowFlight()) return;
-        if (!((Entity) landedPlayer).isOnGround()) return;
+        if (!isAbilityOwner(landedPlayer)) return;
 
-        if (event.getTo() == null) return;
-        if (event.getFrom().getBlockY() == event.getTo().getBlockY()) return; // no vertical change
-
-        landedPlayer.setAllowFlight(true);
+        if (((Entity) landedPlayer).isOnGround()) {
+            landedPlayer.setAllowFlight(true);
+        }
     }
 
     private void applyDurabilityDamageToBoots(Player player) {
@@ -138,7 +136,6 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
 
         int currentDamage = damageable.getDamage();
         int maxDurability = boots.getType().getMaxDurability();
-
         int durabilityDamage = currentDamage + appliedDamage;
 
         if (durabilityDamage >= maxDurability) {

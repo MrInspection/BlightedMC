@@ -1,19 +1,25 @@
 package fr.moussax.blightedMC.content.recipes;
 
 import fr.moussax.blightedMC.engine.items.crafting.BlightedRecipe;
-import fr.moussax.blightedMC.engine.items.crafting.registry.RecipeProvider;
+import fr.moussax.blightedMC.registry.RegistryModule;
+import fr.moussax.blightedMC.engine.items.crafting.registry.RecipeRegistryHandler;
 import org.bukkit.Material;
 
-public final class EquipmentRecipes implements RecipeProvider {
-    @Override
-    public void register() {
-        BlightedRecipe rocketBoots = shapedRecipe("ROCKET_BOOTS", 1)
-            .shape("aba", "cbc", "c c")
-            .bind('a', Material.FIREWORK_ROCKET, 1)
-            .bind('b', Material.SLIME_BALL, 1)
-            .bind('c', Material.RABBIT_HIDE, 1)
-            .build();
+import static fr.moussax.blightedMC.engine.items.crafting.registry.RecipeRegistry.shapedRecipe;
 
-        add(rocketBoots);
+public final class EquipmentRecipes implements RegistryModule<RecipeRegistryHandler> {
+    @Override
+    public void register(RecipeRegistryHandler registry) {
+        BlightedRecipe rocketBoots = shapedRecipe("ROCKET_BOOTS", 1)
+                .shape("aba", "cdc", "e e")
+                .bind('a', Material.PHANTOM_MEMBRANE, 1)
+                .bind('b', Material.WIND_CHARGE, 1)
+                .bind('c', Material.SLIME_BLOCK, 1)
+                .bind('d', Material.COPPER_BOOTS, 1)
+                .bind('e', Material.RABBIT_FOOT, 1)
+                .attributeSource(4)
+                .build();
+
+        registry.register(rocketBoots);
     }
 }

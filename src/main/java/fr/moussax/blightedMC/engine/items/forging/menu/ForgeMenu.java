@@ -9,8 +9,8 @@ import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
-import fr.moussax.blightedMC.shared.formatting.Formatter;
-import fr.moussax.blightedMC.shared.sound.SoundSequence;
+import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -304,7 +304,6 @@ public final class ForgeMenu extends Menu {
 
     private void handleFuelInsertion(BlightedPlayer blightedPlayer) {
         Player player = blightedPlayer.getPlayer();
-        if (player == null) return;
 
         int currentFuel = blightedPlayer.getForgeFuel();
         int availableSpace = MAXIMUM_FORGE_FUEL - currentFuel;

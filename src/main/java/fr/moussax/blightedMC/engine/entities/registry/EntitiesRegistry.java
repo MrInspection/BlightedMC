@@ -1,8 +1,8 @@
 package fr.moussax.blightedMC.engine.entities.registry;
 
+import fr.moussax.blightedMC.content.entities.factions.blightsworn.*;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.content.entities.frenzied.*;
 import fr.moussax.blightedMC.content.entities.bosses.TheAncientKnight;
 import fr.moussax.blightedMC.content.entities.Illusioner;
 import fr.moussax.blightedMC.content.entities.Watchling;
@@ -19,20 +19,21 @@ public final class EntitiesRegistry {
     private static final Map<String, BlightedEntity> ENTITIES = new HashMap<>();
 
     private static final List<BlightedEntity> DEFAULT_ENTITIES = List.of(
-        new TheAncientKnight(),
-        new FrenziedBogged(),
-        new FrenziedDrowned(),
-        new FrenziedHusk(),
-        new FrenziedParched(),
-        new FrenziedPiglin(),
-        new FrenziedSkeleton(),
-        new FrenziedStray(),
-        new FrenziedWitherSkeleton(),
-        new FrenziedZombie(),
-        new FrenziedZombifiedPiglin(),
-        new Endersent(),
-        new Watchling(),
-        new Illusioner()
+            new BlightswornBogged(),
+            new BlightswornDrowned(),
+            new BlightswornHusk(),
+            new BlightswornParched(),
+            new BlightswornPiglin(),
+            new BlightswornSkeleton(),
+            new BlightswornStray(),
+            new BlightswornWitherSkeleton(),
+            new BlightswornZombie(),
+            new BlightswornZombifiedPiglin(),
+
+            new TheAncientKnight(),
+            new Endersent(),
+            new Watchling(),
+            new Illusioner()
     );
 
     private static final List<Runnable> onRegisterCallbacks = new ArrayList<>();
@@ -79,8 +80,8 @@ public final class EntitiesRegistry {
 
     public static List<BlightedEntity> getAll() {
         return ENTITIES.values().stream()
-            .map(BlightedEntity::clone)
-            .toList();
+                .map(BlightedEntity::clone)
+                .toList();
     }
 
     public static void clear() {

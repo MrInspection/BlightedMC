@@ -20,7 +20,7 @@ public final class GemsResult implements LootResult {
      */
     @Override
     public void execute(LootContext context, int amount) {
-        ItemStack gemstone = new GemsItem(amount).createItemStack();
+        ItemStack gemstone = new GemsItem(amount).get();
         if (context.origin().getWorld() == null) return;
 
         Item droppedItem = context.origin().getWorld().dropItem(context.origin(), gemstone);

@@ -39,15 +39,15 @@ public final class CraftingTableMenu extends InteractiveMenu {
         }
 
         setItem(25, new ItemBuilder(Material.KNOWLEDGE_BOOK, "§6Crafting Recipes")
-            .addLore("§7A tainted book that holds", "§7secrets of §5blighted §7items.", "", "§eClick to view!")
-            .toItemStack(), (p, t) -> BlightedMC.menuManager().openMenu(
-            new RecipeBookMenu.RecipeListMenu(new CraftingTableMenu()), p)
+                .addLore("§7A tainted book that holds", "§7secrets of §5blighted §7items.", "", "§eClick to view!")
+                .toItemStack(), (p, t) -> BlightedMC.menuManager().openMenu(
+                new RecipeBookMenu.RecipeListMenu(new CraftingTableMenu()), p)
         );
 
         setCloseButton(49);
 
         ItemStack indicator = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
-            .setDisplayName("§r").setHideTooltip(true).toItemStack();
+                .setDisplayName("§r").setHideTooltip(true).toItemStack();
 
         for (int slot : INDICATOR_SLOTS_LEFT)
             setItem(slot, indicator, (p, t) -> {
@@ -241,7 +241,7 @@ public final class CraftingTableMenu extends InteractiveMenu {
 
     private void updateIndicators(boolean isValid) {
         ItemStack indicator = new ItemBuilder(isValid ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE)
-            .setDisplayName("§r").setHideTooltip(true).toItemStack();
+                .setDisplayName("§r").setHideTooltip(true).toItemStack();
 
         for (int slot : INDICATOR_SLOTS_LEFT) inventory.setItem(slot, indicator);
         for (int slot : INDICATOR_SLOTS_RIGHT) inventory.setItem(slot, indicator);
@@ -249,8 +249,8 @@ public final class CraftingTableMenu extends InteractiveMenu {
 
     private ItemStack RECIPE_REQUIRED() {
         return new ItemBuilder(Material.BARRIER, "§cRecipe Required")
-            .addLore("§7Add items for a valid recipe in", "§7the crafting grid to the left.")
-            .toItemStack();
+                .addLore("§7Add items for a valid recipe in", "§7the crafting grid to the left.")
+                .toItemStack();
     }
 
     private boolean canAddToCursor(ItemStack cursor, ItemStack result) {
@@ -273,9 +273,7 @@ public final class CraftingTableMenu extends InteractiveMenu {
     }
 
     @Override
-    public void close() {
-        Player p = getPlayer();
-        if (p != null) returnItems(p);
-        super.close();
+    public void onClose(Player player) {
+        returnItems(player);
     }
 }

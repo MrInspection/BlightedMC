@@ -9,6 +9,7 @@ import fr.moussax.blightedMC.content.items.materials.BlightedMaterials;
 import fr.moussax.blightedMC.content.items.materials.EndMaterials;
 import fr.moussax.blightedMC.content.items.materials.NetherMaterials;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
+import fr.moussax.blightedMC.registry.RegistryModule;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
@@ -18,25 +19,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public final class ItemRegistry {
     private static final Map<String, BlightedItem> REGISTERED_ITEMS = new HashMap<>();
 
-    private static final List<ItemProvider> MODULES = List.of(
-        new BlightedGemstone(),
-        new BlightedMaterials(),
-        new Bonemerang(),
-        new GlimmeringEye(),
-        new KnightsSword(),
-        new HomodeusArmor(),
-        new RocketBoots(),
-        new BlightedBlockItems(),
-        new Hyperion(),
-        new ThermalFuels(),
-        new BlightedTools(),
-        new NetherMaterials(),
-        new EndMaterials(),
-        new FishingArmors()
+    private static final List<RegistryModule<ItemRegistryHandler>> MODULES = List.of(
+            new BlightedMaterials(),
+            new Bonemerang(),
+            new GlimmeringEye(),
+            new KnightsSword(),
+            new HomodeusArmor(),
+            new RocketBoots(),
+            new BlightedBlockItems(),
+            new Hyperion(),
+            new ThermalFuels(),
+            new BlightedTools(),
+            new NetherMaterials(),
+            new EndMaterials(),
+            new FishingArmors(),
+            new BlightedItems()
     );
 
     private ItemRegistry() {
@@ -44,7 +44,7 @@ public final class ItemRegistry {
 
     public static void initialize() {
         clear();
-        MODULES.forEach(ItemProvider::register);
+        MODULES.forEach(module -> module.register(ItemRegistry::register));
         Log.success("ItemDirectory", "Registered " + REGISTERED_ITEMS.size() + " custom items.");
     }
 
@@ -53,11 +53,17 @@ public final class ItemRegistry {
         return BlightedItem.fromItemStack(itemStack);
     }
 
-    static void addItem(@NonNull BlightedItem blightedItem) {
+    public static void register(@NonNull BlightedItem blightedItem) {
         if (REGISTERED_ITEMS.containsKey(blightedItem.getItemId())) {
             throw new IllegalArgumentException("Duplicate item ID: " + blightedItem.getItemId());
         }
         REGISTERED_ITEMS.put(blightedItem.getItemId(), blightedItem);
+    }
+
+    public static void register(BlightedItem... items) {
+        for (BlightedItem item : items) {
+            register(item);
+        }
     }
 
     @NonNull

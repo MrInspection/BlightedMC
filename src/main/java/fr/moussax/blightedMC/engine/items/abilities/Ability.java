@@ -19,6 +19,7 @@ public record Ability(AbilityManager<? extends Event> manager, String name, Abil
     public List<String> getAbilityLore() {
         List<String> lore = new ArrayList<>();
 
+        lore.add("");
         lore.add("§5 Ability: " + name + "  " + type.getDisplayName());
 
         for (String line : manager.getDescription()) {
