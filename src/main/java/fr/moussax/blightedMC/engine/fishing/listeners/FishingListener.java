@@ -40,9 +40,15 @@ public final class FishingListener implements Listener {
             return;
         }
 
-        LavaFishingHook customHook = LavaFishingHook.get(hook);
-        if (customHook != null) {
-            handleLavaFishingReel(event, customHook, player);
+        LavaFishingHook lavaHook = LavaFishingHook.get(hook);
+        if (lavaHook != null) {
+            handleCustomFishingReel(event, player, lavaHook::reelIn, lavaHook::remove, ItemType.LAVA_FISHING_ROD);
+            return;
+        }
+
+        VoidFishingHook voidHook = VoidFishingHook.get(hook);
+        if (voidHook != null) {
+            handleCustomFishingReel(event, player, voidHook::reelIn, voidHook::remove, ItemType.VOID_FISHING_ROD);
             return;
         }
 
@@ -52,59 +58,66 @@ public final class FishingListener implements Listener {
     }
 
     private void handleFishingCast(Player player, FishHook hook, PlayerFishEvent event) {
-        ItemStack rodStack = findFishingRodItem(player, ItemType.LAVA_FISHING_ROD);
-        if (rodStack == null) return;
-
-        if (hook.getLocation().getBlock().getType() == Material.WATER) {
-            Formatter.warn(player, "Lava fishing rods cannot be used in water!");
-            event.setCancelled(true);
+        ItemStack lavaRod = findFishingRodItem(player, ItemType.LAVA_FISHING_ROD);
+        if (lavaRod != null) {
+            if (hook.getLocation().getBlock().getType() == Material.WATER) {
+                Formatter.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
+                event.setCancelled(true);
+            } else {
+                new LavaFishingHook(hook, BlightedPlayer.getBlightedPlayer(player), player, lavaRod, getSpeedMultiplier(player));
+            }
             return;
         }
 
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-        double speedMultiplier = 1.0;
-        if(blightedPlayer != null && blightedPlayer.hasFullSetBonus(EmberWeaveSetBonus.class)) {
-            speedMultiplier = 0.85;
-            player.playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 0.8f);
-        } else if (blightedPlayer != null && blightedPlayer.hasFullSetBonus(MagmaweaveSetBonus.class)) {
-            speedMultiplier = 0.70;
-            player.playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 0.8f);
+        ItemStack voidRod = findFishingRodItem(player, ItemType.VOID_FISHING_ROD);
+        if (voidRod != null) {
+            if (player.getWorld().getEnvironment() != World.Environment.THE_END) {
+                Formatter.warn(player, "This rod answers only to the void of the End.");
+                event.setCancelled(true);
+            } else {
+                new VoidFishingHook(hook, BlightedPlayer.getBlightedPlayer(player), player, voidRod, getSpeedMultiplier(player));
+            }
         }
-
-        new LavaFishingHook(hook, blightedPlayer, player, rodStack, speedMultiplier);
     }
 
-    private void handleLavaFishingReel(PlayerFishEvent event, LavaFishingHook customHook, Player player) {
+    private void handleCustomFishingReel(PlayerFishEvent event, Player player, CustomReelAction reelAction, Runnable removeAction, ItemType rodType) {
         PlayerFishEvent.State state = event.getState();
 
         if (state == PlayerFishEvent.State.REEL_IN ||
-            state == PlayerFishEvent.State.IN_GROUND ||
-            state == PlayerFishEvent.State.CAUGHT_FISH) {
+                state == PlayerFishEvent.State.IN_GROUND ||
+                state == PlayerFishEvent.State.CAUGHT_FISH) {
 
-            if (customHook.reelIn()) {
-                damageRod(player);
+            if (reelAction.reelIn()) {
+                damageRod(player, rodType);
             }
         } else {
-            customHook.remove();
+            removeAction.run();
         }
     }
 
     private void handleStandardFishing(PlayerFishEvent event, Player player, FishHook hook) {
         if (findFishingRodItem(player, ItemType.LAVA_FISHING_ROD) != null) {
             event.setCancelled(true);
-            Formatter.warn(player, "Lava fishing rods cannot be used in water!");
+            Formatter.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
+            return;
+        }
+
+        if (findFishingRodItem(player, ItemType.VOID_FISHING_ROD) != null) {
+            event.setCancelled(true);
+            return;
+        }
+
+        World.Environment env = player.getWorld().getEnvironment();
+        if (env == World.Environment.THE_END) {
             return;
         }
 
         Entity caught = event.getCaught();
         if (!(caught instanceof Item caughtItem)) return;
-
         if (ThreadLocalRandom.current().nextDouble() > CUSTOM_LOOT_CHANCE) return;
 
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-        World.Environment env = player.getWorld().getEnvironment();
         FishingLootTable lootTable = FishingLootRegistry.getTable(env, FishingMethod.WATER);
-
         Vector velocity = calculateVelocity(hook.getLocation(), player.getLocation());
 
         if (lootTable.roll(blightedPlayer, hook.getLocation(), velocity)) {
@@ -132,10 +145,10 @@ public final class FishingListener implements Listener {
         return stack != null && stack.getType() == Material.FISHING_ROD;
     }
 
-    private void damageRod(Player player) {
+    private void damageRod(Player player, ItemType type) {
         if (player.getGameMode() == GameMode.CREATIVE) return;
 
-        ItemStack rodStack = findFishingRodItem(player, ItemType.LAVA_FISHING_ROD);
+        ItemStack rodStack = findFishingRodItem(player, type);
         if (rodStack == null) return;
 
         int unbreaking = rodStack.getEnchantmentLevel(Enchantment.UNBREAKING);
@@ -162,6 +175,21 @@ public final class FishingListener implements Listener {
         }
     }
 
+    private double getSpeedMultiplier(Player player) {
+        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        if (blightedPlayer == null) return 1.0;
+
+        if (blightedPlayer.hasFullSetBonus(EmberWeaveSetBonus.class)) {
+            player.playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 0.8f);
+            return 0.85;
+        }
+        if (blightedPlayer.hasFullSetBonus(MagmaweaveSetBonus.class)) {
+            player.playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 0.8f);
+            return 0.70;
+        }
+        return 1.0;
+    }
+
     private Vector calculateVelocity(Location origin, Location target) {
         Vector vector = target.toVector().subtract(origin.toVector());
         double distance = vector.length();
@@ -169,5 +197,10 @@ public final class FishingListener implements Listener {
         vector.multiply(0.1);
         vector.setY(vector.getY() + Math.sqrt(distance) * 0.08);
         return vector;
+    }
+
+    @FunctionalInterface
+    private interface CustomReelAction {
+        boolean reelIn();
     }
 }
