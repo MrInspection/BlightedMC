@@ -129,6 +129,11 @@ public final class AbilityListener implements Listener {
         trigger(event.getPlayer(), event);
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockBreak(org.bukkit.event.block.BlockBreakEvent event) {
+        trigger(event.getPlayer(), event);
+    }
+
     private boolean isArmorMaterial(String name) {
         return name.endsWith("_HELMET") || name.endsWith("_CHESTPLATE")
                 || name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS") || name.equals("ELYTRA");
@@ -138,10 +143,17 @@ public final class AbilityListener implements Listener {
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
         if (blightedPlayer == null) return;
 
-        BlightedItem blightedItem;
+        BlightedItem blightedItem = null;
+
         if (event instanceof PlayerInteractEvent ie) {
-            if (ie.getItem() == null) return;
-            blightedItem = BlightedItem.fromItemStack(ie.getItem());
+            if (ie.getItem() != null) {
+                blightedItem = BlightedItem.fromItemStack(ie.getItem());
+            }
+        } else if (event instanceof org.bukkit.event.block.BlockBreakEvent) {
+            org.bukkit.inventory.ItemStack mainHand = player.getInventory().getItemInMainHand();
+            if (mainHand.getType() != org.bukkit.Material.AIR) {
+                blightedItem = BlightedItem.fromItemStack(mainHand);
+            }
         } else {
             blightedItem = blightedPlayer.getEquippedItemManager();
         }

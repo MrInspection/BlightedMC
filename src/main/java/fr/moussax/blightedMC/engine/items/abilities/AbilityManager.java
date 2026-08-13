@@ -39,6 +39,17 @@ public interface AbilityManager<T extends Event> {
      */
     void stop(BlightedPlayer player);
 
+    /**
+     * @param success the result of {@link #triggerAbility}
+     * @return whether the triggering event should be cancelled after this outcome.
+     *         Event-driven abilities (right-click, entity-hit) want this true.
+     *         Abilities that need vanilla's own resolution to proceed (e.g. block
+     *         breaking) override this to false.
+     */
+    default boolean cancelEvent(boolean success) {
+        return true;
+    }
+
     default String[] getDescription() {
         return new String[0];
     }

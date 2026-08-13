@@ -1,7 +1,5 @@
 package fr.moussax.blightedMC.engine.items.abilities;
 
-import java.time.Instant;
-
 /**
  * Tracks a cooldown for a specific ability.
  *
@@ -23,3 +21,4 @@ public record CooldownEntry(Class<? extends AbilityManager> abilityManager, Abil
         return Math.max(0, remainingMillis / 1000.0);
     }
 }
+
