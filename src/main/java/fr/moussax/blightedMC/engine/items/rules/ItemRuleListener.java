@@ -14,6 +14,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 import static fr.moussax.blightedMC.engine.items.BlightedItem.BLIGHTED_ID_KEY;
 
@@ -96,11 +100,11 @@ public final class ItemRuleListener implements Listener {
                 return;
             }
             if ("FISHERMANS_STEW".equals(manager.getItemId())) {
-                event.getPlayer().addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.WATER_BREATHING, 2400, 0));
+                event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 2400, 0));
             } else if ("BLIGHTED_SUSHI".equals(manager.getItemId())) {
-                event.getPlayer().addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.WATER_BREATHING, 1200, 0));
-                if (java.util.concurrent.ThreadLocalRandom.current().nextDouble() < 0.5) {
-                    event.getPlayer().addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.HUNGER, 300, 0));
+                event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 1200, 0));
+                if (ThreadLocalRandom.current().nextDouble() < 0.5) {
+                    event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 300, 0));
                 }
             }
         }
