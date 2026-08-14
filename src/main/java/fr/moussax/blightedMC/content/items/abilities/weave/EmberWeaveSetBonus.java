@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.content.items.abilities.weave;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedModifier;
 import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import org.bukkit.Particle;
@@ -13,7 +14,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public sealed class EmberWeaveSetBonus implements FullSetBonus permits MagmaweaveSetBonus {
+public sealed class EmberWeaveSetBonus implements FullSetBonus, FishingSpeedModifier permits MagmaweaveSetBonus {
     protected BlightedPlayer blightedPlayer;
     protected BukkitTask passiveTask;
     protected boolean isActive = false;
@@ -33,6 +34,16 @@ public sealed class EmberWeaveSetBonus implements FullSetBonus permits Magmaweav
                 "Grants immunity to §cfire §7and §clava§7.",
                 "Grants §b+15% §3Lava Fishing Speed§7."
         };
+    }
+
+    @Override
+    public double getFishingSpeedBonus() {
+        return 18.0;
+    }
+
+    @Override
+    public void onFishingCast(Player player) {
+        player.playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 0.8f);
     }
 
     @Override
