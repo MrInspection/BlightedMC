@@ -1,8 +1,9 @@
-package fr.moussax.blightedMC.engine.fishing.listeners;
+package fr.moussax.blightedMC.engine.fishing.hooks;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
 import fr.moussax.blightedMC.engine.fishing.FishingMethod;
+import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedCalculator;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.Formatter;
@@ -30,8 +31,8 @@ public final class LavaFishingHook {
     private static final Vector FLOAT_UP = new Vector(0, 0.04, 0);
     private static final Vector FLOAT_DOWN = new Vector(0, -0.01, 0);
 
-    private static final int BASE_WAIT_TIME = 160;     // 8 Seconds
-    private static final int WAIT_TIME_VARIANCE = 240; // +0 to 12 Seconds variance
+    private static final int BASE_MIN_WAIT_TICKS = 160; // 8 seconds
+    private static final int BASE_MAX_WAIT_TICKS = 400; // 20 seconds
     private static final int BASE_BITE_WINDOW_TICKS = 30;
 
     private static final int PARTICLE_COUNT = 16; // Player feedback
@@ -41,35 +42,26 @@ public final class LavaFishingHook {
     private final Player player;
     private final World.Environment environment;
     private final int luckOfSeaLevel;
-    private final int lureLevel;
-    private final double speedMultiplier;
+    private final double fishingSpeedStat;
 
     private BukkitRunnable task;
     private boolean isReadyToCatch = false;
 
-    public LavaFishingHook(FishHook hook, BlightedPlayer blightedPlayer, Player player, ItemStack rod, double speedMultiplier) {
+    public LavaFishingHook(FishHook hook, BlightedPlayer blightedPlayer, Player player, ItemStack rod, double fishingSpeedStat) {
         this.hook = hook;
         this.blightedPlayer = blightedPlayer;
         this.player = player;
         this.environment = hook.getWorld().getEnvironment();
-        this.speedMultiplier = speedMultiplier;
-
-        if (rod != null) {
-            this.luckOfSeaLevel = rod.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
-            this.lureLevel = rod.getEnchantmentLevel(Enchantment.LURE);
-        } else {
-            this.luckOfSeaLevel = 0;
-            this.lureLevel = 0;
-        }
+        this.fishingSpeedStat = fishingSpeedStat;
+        this.luckOfSeaLevel = rod != null ? rod.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA) : 0;
 
         ACTIVE_HOOKS.put(hook.getUniqueId(), this);
         startLavaTask(calculateWaitTime());
     }
 
     private int calculateWaitTime() {
-        int baseTime = Math.max(40, BASE_WAIT_TIME - (lureLevel * 40));
-        int totalWaitTime = baseTime + ThreadLocalRandom.current().nextInt(WAIT_TIME_VARIANCE);
-        return (int) (totalWaitTime * speedMultiplier);
+        int baseTicks = ThreadLocalRandom.current().nextInt(BASE_MIN_WAIT_TICKS, BASE_MAX_WAIT_TICKS + 1);
+        return FishingSpeedCalculator.applyToWaitTicks(baseTicks, fishingSpeedStat);
     }
 
     private int calculateBiteWindow() {
@@ -105,9 +97,9 @@ public final class LavaFishingHook {
         double angle = random.nextDouble() * 2 * Math.PI;
 
         Location particleLocation = hook.getLocation().clone().add(
-            Math.cos(angle) * 4.0,
-            0,
-            Math.sin(angle) * 4.0
+                Math.cos(angle) * 4.0,
+                0,
+                Math.sin(angle) * 4.0
         );
 
         task = new BukkitRunnable() {
@@ -163,7 +155,7 @@ public final class LavaFishingHook {
         particleLoc.add(direction);
 
         Objects.requireNonNull(particleLoc.getWorld()).spawnParticle(
-            Particle.SMOKE, particleLoc, PARTICLE_COUNT, 0.05, 0.05, 0.05, 0.01
+                Particle.SMOKE, particleLoc, PARTICLE_COUNT, 0.05, 0.05, 0.05, 0.01
         );
     }
 
@@ -196,7 +188,7 @@ public final class LavaFishingHook {
         Location spawnLocation = hookLocation.add(0, 0.5, 0);
 
         FishingLootTable lootTable = FishingLootRegistry.getTable(environment, FishingMethod.LAVA);
-        boolean success = lootTable.roll(blightedPlayer, spawnLocation, velocity);
+        boolean success = lootTable.roll(blightedPlayer, spawnLocation, velocity, luckOfSeaLevel);
 
         if (success) {
             ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(playerLocation, EntityType.EXPERIENCE_ORB);

@@ -1,8 +1,9 @@
-package fr.moussax.blightedMC.engine.fishing.listeners;
+package fr.moussax.blightedMC.engine.fishing.hooks;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
 import fr.moussax.blightedMC.engine.fishing.FishingMethod;
+import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedCalculator;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.Formatter;
@@ -26,9 +27,8 @@ public final class VoidFishingHook {
     private static final double MIN_DROP_DISTANCE = 20.0;
     private static final double MIN_Y_LEVEL = 0.0;
 
-    private static final int BASE_MIN_WAIT_TICKS = 300;
-    private static final int BASE_MAX_WAIT_TICKS = 900;
-    private static final int LURE_MAX_DEDUCTION = 100;
+    private static final int BASE_MIN_WAIT_TICKS = 220; // 11 seconds
+    private static final int BASE_MAX_WAIT_TICKS = 460; // 23 seconds
 
     private static final int BASE_BITE_WINDOW_TICKS = 40;
     private static final double PARTICLE_SPEED = 0.2;
@@ -37,34 +37,30 @@ public final class VoidFishingHook {
     private static final Vector FLOAT_UP = new Vector(0, 0.02, 0);
     private static final Vector FLOAT_DOWN = new Vector(0, -0.01, 0);
 
+    private static final double IDLE_RING_RADIUS = 1.2;
+    private static final int STARLIGHT_INTERVAL_TICKS = 40;
+
     private final FishHook hook;
     private final BlightedPlayer blightedPlayer;
     private final Player player;
     private final World.Environment environment;
     private final int luckOfSeaLevel;
-    private final int lureLevel;
-    private final double speedMultiplier;
+    private final double fishingSpeedStat;
 
     private BukkitRunnable task;
     private boolean isReadyToCatch = false;
     private boolean suspendedInVoid = false;
     private double targetY;
     private double particleAngleOffset = 0.0;
+    private int idleTickCounter = 0;
 
-    public VoidFishingHook(FishHook hook, BlightedPlayer blightedPlayer, Player player, ItemStack rod, double speedMultiplier) {
+    public VoidFishingHook(FishHook hook, BlightedPlayer blightedPlayer, Player player, ItemStack rod, double fishingSpeedStat) {
         this.hook = hook;
         this.blightedPlayer = blightedPlayer;
         this.player = player;
         this.environment = hook.getWorld().getEnvironment();
-        this.speedMultiplier = speedMultiplier;
-
-        if (rod != null) {
-            this.luckOfSeaLevel = rod.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
-            this.lureLevel = rod.getEnchantmentLevel(Enchantment.LURE);
-        } else {
-            this.luckOfSeaLevel = 0;
-            this.lureLevel = 0;
-        }
+        this.fishingSpeedStat = fishingSpeedStat;
+        this.luckOfSeaLevel = rod != null ? rod.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA) : 0;
 
         ACTIVE_HOOKS.put(hook.getUniqueId(), this);
         startVoidDropTask();
@@ -106,11 +102,8 @@ public final class VoidFishingHook {
     }
 
     private int calculateWaitTime() {
-        int maxTicks = BASE_MAX_WAIT_TICKS - (lureLevel * LURE_MAX_DEDUCTION);
-        maxTicks = Math.max(BASE_MIN_WAIT_TICKS, maxTicks);
-
-        int totalWaitTime = ThreadLocalRandom.current().nextInt(BASE_MIN_WAIT_TICKS, maxTicks + 1);
-        return (int) (totalWaitTime * speedMultiplier);
+        int baseTicks = ThreadLocalRandom.current().nextInt(BASE_MIN_WAIT_TICKS, BASE_MAX_WAIT_TICKS + 1);
+        return FishingSpeedCalculator.applyToWaitTicks(baseTicks, fishingSpeedStat);
     }
 
     private int calculateBiteWindow() {
@@ -144,22 +137,39 @@ public final class VoidFishingHook {
 
     private void spawnIdleParticles() {
         World world = hook.getWorld();
+        Location center = hook.getLocation();
 
-        particleAngleOffset += 0.15;
+        particleAngleOffset += 0.12;
         if (particleAngleOffset > Math.PI * 2) {
             particleAngleOffset -= Math.PI * 2;
         }
 
-        Location center = hook.getLocation();
-        double radius = 1.2;
+        double bob = Math.sin(particleAngleOffset * 1.7) * 0.15;
+        Location ringCenter = center.clone().add(0, bob, 0);
 
-        double x1 = Math.cos(particleAngleOffset) * radius;
-        double z1 = Math.sin(particleAngleOffset) * radius;
-        world.spawnParticle(Particle.PORTAL, center.clone().add(x1, 0, z1), 0, 0, 0, 0, 0);
+        for (int i = 0; i < 3; i++) {
+            double angle = particleAngleOffset + (Math.PI * 2 / 3) * i;
+            double x = Math.cos(angle) * IDLE_RING_RADIUS;
+            double z = Math.sin(angle) * IDLE_RING_RADIUS;
+            Particle particle = (i % 2 == 0) ? Particle.PORTAL : Particle.REVERSE_PORTAL;
+            world.spawnParticle(particle, ringCenter.clone().add(x, 0, z), 0, 0, 0, 0, 0);
+        }
 
-        double x2 = Math.cos(particleAngleOffset + Math.PI) * radius;
-        double z2 = Math.sin(particleAngleOffset + Math.PI) * radius;
-        world.spawnParticle(Particle.REVERSE_PORTAL, center.clone().add(x2, 0, z2), 0, 0, 0, 0, 0);
+        if (++idleTickCounter >= STARLIGHT_INTERVAL_TICKS) {
+            idleTickCounter = 0;
+            spawnStarlightTwinkle(world, center);
+        }
+    }
+
+    private void spawnStarlightTwinkle(World world, Location center) {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        double angle = random.nextDouble() * Math.PI * 2;
+        double radius = IDLE_RING_RADIUS * (0.5 + random.nextDouble() * 0.8);
+        double y = (random.nextDouble() - 0.5) * 0.8;
+
+        Location point = center.clone().add(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+        world.spawnParticle(Particle.END_ROD, point, 1, 0, 0, 0, 0);
+        world.playSound(point, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.3f, 1.6f);
     }
 
     private void startCatchAnimation() {
@@ -170,7 +180,8 @@ public final class VoidFishingHook {
 
         task = new BukkitRunnable() {
             private boolean reachedHook = false;
-            private int readyTicks = calculateBiteWindow();
+            private final int totalBiteTicks = calculateBiteWindow();
+            private int readyTicks = totalBiteTicks;
 
             @Override
             public void run() {
@@ -183,11 +194,13 @@ public final class VoidFishingHook {
                     if (particleLocation.distanceSquared(hook.getLocation()) < PARTICLE_DISTANCE_SQUARED) {
                         reachedHook = true;
                         player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_HURT, 1.0f, 0.5f);
-                        Objects.requireNonNull(hook.getWorld()).spawnParticle(Particle.WITCH, hook.getLocation(), 30, 0.3, 0.5, 0.3, 0.1);
+                        spawnImplosionFlash(hook.getLocation());
                         hook.setVelocity(new Vector(0, -0.2, 0));
                     }
                 } else {
                     isReadyToCatch = true;
+                    spawnAwaitingCatchParticles(readyTicks, totalBiteTicks);
+
                     if (--readyTicks <= 0) {
                         remove();
                     }
@@ -197,22 +210,55 @@ public final class VoidFishingHook {
         task.runTaskTimer(BlightedMC.getInstance(), 1L, 1L);
     }
 
+    private void moveParticleToHook(Location particleLoc) {
+        Vector direction = hook.getLocation().toVector().subtract(particleLoc.toVector());
+        direction.normalize().multiply(PARTICLE_SPEED);
+        particleLoc.add(direction);
+
+        World world = Objects.requireNonNull(particleLoc.getWorld());
+        world.spawnParticle(Particle.END_ROD, particleLoc, 2, 0.02, 0.02, 0.02, 0.0);
+        world.spawnParticle(Particle.SMOKE, particleLoc, 1, 0.04, 0.04, 0.04, 0.001);
+    }
+
+    private void spawnImplosionFlash(Location center) {
+        World world = Objects.requireNonNull(center.getWorld());
+
+        for (int i = 0; i < 10; i++) {
+            double angle = (Math.PI * 2 / 10) * i;
+            Location point = center.clone().add(Math.cos(angle) * 0.8, 0.1, Math.sin(angle) * 0.8);
+            Vector inward = center.toVector().subtract(point.toVector()).normalize().multiply(0.15);
+            world.spawnParticle(Particle.PORTAL, point, 0, inward.getX(), inward.getY() + 0.05, inward.getZ(), 1.0);
+        }
+
+        world.spawnParticle(Particle.WITCH, center, 20, 0.3, 0.4, 0.3, 0.08);
+    }
+
+    private void spawnAwaitingCatchParticles(int readyTicks, int totalBiteTicks) {
+        double urgency = 1.0 - (readyTicks / (double) totalBiteTicks);
+        int pulseInterval = Math.max(1, 6 - (int) (urgency * 5));
+
+        if (readyTicks % pulseInterval != 0) return;
+
+        World world = hook.getWorld();
+        Location center = hook.getLocation();
+        double pullRadius = 0.6 - (urgency * 0.4);
+
+        for (int i = 0; i < 3; i++) {
+            double angle = (Math.PI * 2 / 3) * i + (readyTicks * 0.3);
+            double x = Math.cos(angle) * pullRadius;
+            double z = Math.sin(angle) * pullRadius;
+            world.spawnParticle(Particle.REVERSE_PORTAL, center.clone().add(x, 0.1, z), 0, 0, -0.05, 0, 0.02);
+        }
+
+        world.spawnParticle(Particle.SOUL, center.clone().add(0, 0.1, 0), 1, 0.15, 0, 0.15, 0.01);
+    }
+
     private boolean isInvalid() {
         if (hook.isDead() || !player.isOnline()) {
             remove();
             return true;
         }
         return false;
-    }
-
-    private void moveParticleToHook(Location particleLoc) {
-        Vector direction = hook.getLocation().toVector().subtract(particleLoc.toVector());
-        direction.normalize().multiply(PARTICLE_SPEED);
-        particleLoc.add(direction);
-
-        Objects.requireNonNull(particleLoc.getWorld()).spawnParticle(
-                Particle.END_ROD, particleLoc, 3, 0.02, 0.02, 0.02, 0.0
-        );
     }
 
     public boolean reelIn() {
@@ -224,8 +270,9 @@ public final class VoidFishingHook {
         World world = hookLocation.getWorld();
         if (world == null) return false;
 
-        world.spawnParticle(Particle.REVERSE_PORTAL, hookLocation, 50, 0.5, 1.0, 0.5, 0.1);
+        spawnVoidCollapseBurst(world, hookLocation);
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.5f);
+        player.playSound(player.getLocation(), Sound.ITEM_TRIDENT_RETURN, 0.6f, 0.7f);
 
         Location playerLocation = player.getLocation();
         Vector velocity = playerLocation.toVector().subtract(hookLocation.toVector());
@@ -237,7 +284,7 @@ public final class VoidFishingHook {
         Location spawnLocation = hookLocation.add(0, 0.5, 0);
 
         FishingLootTable lootTable = FishingLootRegistry.getTable(environment, FishingMethod.VOID);
-        boolean success = lootTable.roll(blightedPlayer, spawnLocation, velocity);
+        boolean success = lootTable.roll(blightedPlayer, spawnLocation, velocity, luckOfSeaLevel);
 
         if (success) {
             ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(playerLocation, EntityType.EXPERIENCE_ORB);
@@ -245,6 +292,17 @@ public final class VoidFishingHook {
         }
 
         return success;
+    }
+
+    private void spawnVoidCollapseBurst(World world, Location center) {
+        for (int i = 0; i < 16; i++) {
+            double angle = (Math.PI * 2 / 16) * i;
+            Vector outward = new Vector(Math.cos(angle), 0.05, Math.sin(angle)).multiply(0.3);
+            world.spawnParticle(Particle.REVERSE_PORTAL, center, 0, outward.getX(), outward.getY(), outward.getZ(), 1.0);
+        }
+
+        world.spawnParticle(Particle.PORTAL, center, 30, 0.4, 0.6, 0.4, 0.1);
+        world.spawnParticle(Particle.END_ROD, center, 8, 0.1, 0.3, 0.1, 0.02);
     }
 
     public void remove() {
