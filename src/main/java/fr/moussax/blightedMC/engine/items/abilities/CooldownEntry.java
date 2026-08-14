@@ -21,4 +21,3 @@ public record CooldownEntry(Class<? extends AbilityManager> abilityManager, Abil
         return Math.max(0, remainingMillis / 1000.0);
     }
 }
-

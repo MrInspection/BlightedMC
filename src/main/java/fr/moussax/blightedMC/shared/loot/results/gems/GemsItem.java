@@ -78,7 +78,7 @@ public record GemsItem(int amount) implements Supplier<ItemStack> {
     public ItemStack get() {
         BlightedItem blightedItem = ItemRegistry.getItem("BLIGHTED_GEMSTONE");
 
-        blightedItem.setLore(7, "§8 Gems: §d" + this.amount + "✵");
+        blightedItem.setLore(6, "§8 Gems: §d" + this.amount + "✵");
         ItemStack itemStack = blightedItem.toItemStack();
 
         ItemMeta meta = itemStack.getItemMeta();
