@@ -91,6 +91,7 @@ public final class ItemRuleListener implements Listener {
         }
     }
 
+    // TODO : Make more simple and elegant way for custom items with consume effects
     @EventHandler(ignoreCancelled = true)
     public void onItemConsume(PlayerItemConsumeEvent event) {
         BlightedItem manager = getManager(event.getItem());

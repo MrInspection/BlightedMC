@@ -97,9 +97,9 @@ public final class BlightedShapedRecipe extends BlightedRecipe {
             if (ingredient == null) continue;
             String itemId;
             if (ingredient.isCustom()) {
-                itemId = ingredient.getManager().getItemId();
+                itemId = Objects.requireNonNull(ingredient.getManager()).getItemId();
             } else if (ingredient.isVanilla()) {
-                itemId = Utilities.resolveItemId(ingredient.getVanillaItem(), "vanilla:");
+                itemId = Utilities.resolveItemId(Objects.requireNonNull(ingredient.getVanillaItem()), "vanilla:");
             } else {
                 throw new IllegalArgumentException("Ingredient must be custom or vanilla");
             }
