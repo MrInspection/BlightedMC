@@ -186,7 +186,7 @@ public final class FishingListener implements Listener {
         if (rodStack == null) return;
 
         int unbreaking = rodStack.getEnchantmentLevel(Enchantment.UNBREAKING);
-        if (unbreaking > 0 && ThreadLocalRandom.current().nextInt(100) < (100 / (unbreaking + 1))) {
+        if (unbreaking > 0 && ThreadLocalRandom.current().nextInt(100) >= (100 / (unbreaking + 1))) {
             return;
         }
 
