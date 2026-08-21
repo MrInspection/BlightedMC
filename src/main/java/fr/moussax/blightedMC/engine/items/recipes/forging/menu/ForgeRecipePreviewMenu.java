@@ -1,22 +1,25 @@
 package fr.moussax.blightedMC.engine.items.recipes.forging.menu;
 
 import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
-import fr.moussax.blightedMC.engine.items.recipes.forging.ForgeRecipe;
 import fr.moussax.blightedMC.engine.items.recipes.RecipePreviewManager;
+import fr.moussax.blightedMC.engine.items.recipes.forging.ForgeRecipe;
+import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.utils.Formatter;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
+import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public final class ForgeRecipePreviewMenu extends Menu {
 
@@ -26,11 +29,11 @@ public final class ForgeRecipePreviewMenu extends Menu {
     private static final int FORGE_SLOT = 14;
     private static final int ITEM_INDICATOR = 23;
     private static final int RESULT_SLOT = 25;
-    private static final int ANVIL_SLOT = 32;
+    private static final int HYPERFORGE_SLOT = 32;
     private static final int FUEL_INFO_SLOT = 34;
     private static final int BACK_BUTTON_SLOT = 48;
     private static final int CLOSE_BUTTON_SLOT = 49;
-    private static final int FUEL_GUIDE_SLOT = 52;
+    private static final int FUEL_GUIDE_SLOT = 50;
 
     private final ForgeRecipe recipe;
     private final Menu previousMenu;
@@ -47,21 +50,22 @@ public final class ForgeRecipePreviewMenu extends Menu {
 
     @Override
     public void build(Player player) {
-        setupRecipeVisualization();
+        setupRecipeVisualization(player);
         setupNavigation();
     }
 
-    private void setupRecipeVisualization() {
-        setupStatusPanes();
+    private void setupRecipeVisualization(Player player) {
+        setupStatusPanes(player);
         setupIngredientGrid();
         setupResultDisplay();
-        setupAnvilDisplay();
         setupFuelDisplay();
         setupFuelGuide();
+        setupHyperforgeButton(player);
     }
 
-    private void setupStatusPanes() {
-        Material indicator = Material.ORANGE_STAINED_GLASS_PANE;
+    private void setupStatusPanes(Player player) {
+        boolean canHyperforge = checkCanHyperforge(player);
+        Material indicator = canHyperforge ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
 
         ItemStack requiredItemsPane = new ItemBuilder(indicator, "§6Items Required")
                 .addLore("§7The materials required to forge", "§7the item are displayed below.")
@@ -83,6 +87,20 @@ public final class ForgeRecipePreviewMenu extends Menu {
         });
     }
 
+    private boolean checkCanHyperforge(Player player) {
+        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        int currentFuel = blightedPlayer != null ? blightedPlayer.getForgeFuel() : 0;
+        int fuelCost = recipe.getFuelCost();
+        boolean hasSufficientFuel = currentFuel >= fuelCost;
+
+        Map<String, IngredientInfo> requirements = aggregateForgeIngredients(recipe);
+        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+
+        return hasSufficientFuel && requirements.entrySet().stream()
+                .allMatch(entry -> inventoryCounts.getOrDefault(
+                        entry.getKey(), 0) >= entry.getValue().amount);
+    }
+
     private void setupIngredientGrid() {
         ItemBuilder emptySlotBuilder = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE, "§cUnused Slot")
                 .addLore("§7This slot isn't used for", "§7the selected recipe.");
@@ -94,7 +112,6 @@ public final class ForgeRecipePreviewMenu extends Menu {
             ItemStack displayItem = createIngredientDisplay(ingredient);
 
             setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (p, _) -> {
-                // ponytail: kept
                 if (ingredient.isCustom() && ingredient.getManager() != null) {
                     RecipePreviewManager.openPreview(p, ingredient.getManager(), this);
                 }
@@ -117,27 +134,10 @@ public final class ForgeRecipePreviewMenu extends Menu {
         });
     }
 
-    private void setupAnvilDisplay() {
-        ItemBuilder builder = new ItemBuilder(Material.ANVIL, "§aForge Requirements");
-        builder.addLore("", " §7Items required: ");
-        for (CraftingObject ingredient : recipe.getIngredients()) {
-            builder.addLore(" §8‣ " + Utilities.extractIngredientName(ingredient) + " §8x" + ingredient.getAmount());
-        }
-        builder.addLore(
-                "",
-                " §8Consumes §6🪣 " + Formatter.formatDecimalWithCommas(recipe.getFuelCost()) + " mB §8of fuel to ",
-                " §8start the forging process.",
-                ""
-        );
-
-        setItem(ANVIL_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (_, _) -> {
-        });
-    }
-
     private void setupFuelDisplay() {
         ItemStack fuelInfo = new ItemBuilder(Material.CAMPFIRE, "§6Fuel Requirement")
                 .addLore(
-                        "§7Requires §6🪣 " + Formatter.formatDecimalWithCommas(recipe.getFuelCost()) + " mB §7of fuel",
+                        "§7Requires §6🪣 " + Formatter.formatDecimalWithCommas(recipe.getFuelCost()) + "mB §7of thermal fuel",
                         "§7to power the forging process."
                 )
                 .toItemStack();
@@ -169,6 +169,141 @@ public final class ForgeRecipePreviewMenu extends Menu {
 
         setItem(FUEL_GUIDE_SLOT, fuelGuide, MenuItemInteraction.ANY_CLICK, (_, _) -> {
         });
+    }
+
+    private void setupHyperforgeButton(Player player) {
+        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        int currentFuel = blightedPlayer != null ? blightedPlayer.getForgeFuel() : 0;
+        int fuelCost = recipe.getFuelCost();
+        boolean hasSufficientFuel = currentFuel >= fuelCost;
+
+        Map<String, IngredientInfo> requirements = aggregateForgeIngredients(recipe);
+        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+
+        boolean hasAllIngredients = true;
+        ItemBuilder builder = new ItemBuilder(Material.GOLDEN_PICKAXE, "§aHyperforge");
+        builder.addLore(
+                "§7Forge this item instantly from your",
+                "§7inventory materials & thermal fuel.",
+                "",
+                " §7Requirements:"
+        );
+
+        for (Map.Entry<String, IngredientInfo> entry : requirements.entrySet()) {
+            IngredientInfo info = entry.getValue();
+            int owned = inventoryCounts.getOrDefault(entry.getKey(), 0);
+            boolean hasEnough = owned >= info.amount;
+
+            if (!hasEnough) {
+                hasAllIngredients = false;
+            }
+
+            String status = hasEnough ? "§a✓" : "§cx";
+            String countColor = hasEnough ? "§a" : "§c";
+            String name = Utilities.extractIngredientName(info.ingredient);
+
+            builder.addLore(" " + status + " §7" + name + " §8x" + info.amount + " §7(" + countColor + owned + "§7/§a" + info.amount + "§7)");
+        }
+
+        String fuelStatus = hasSufficientFuel ? "§a✓" : "§cx";
+        String fuelCountColor = hasSufficientFuel ? "§a" : "§c";
+        builder.addLore(
+                " " + fuelStatus + " §7Thermal Fuel §8" + Formatter.formatDecimalWithCommas(fuelCost) + "mB §7(" + fuelCountColor + Formatter.formatDecimalWithCommas(currentFuel) + "§7/§a" + Formatter.formatDecimalWithCommas(fuelCost) + "mB§7)"
+        );
+
+        final boolean canHyperforge = hasAllIngredients && hasSufficientFuel;
+        builder.addItemFlag(ItemFlag.HIDE_ATTRIBUTES);
+        builder.addLore(
+                "",
+                canHyperforge ? "§eClick to Hyperforge!" : "§cYou don't meet the requirements!"
+        ).setEnchantmentGlint(canHyperforge);
+
+
+        setItem(HYPERFORGE_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, _) -> {
+            if (canHyperforge) {
+                executeHyperforge(p, blightedPlayer, requirements, fuelCost);
+            } else {
+                Formatter.warn(p, "You don't meet the requirements to hyperforge this item!");
+            }
+        });
+    }
+
+    private void executeHyperforge(Player player, BlightedPlayer blightedPlayer, Map<String, IngredientInfo> requirements, int fuelCost) {
+        if (blightedPlayer == null) return;
+
+        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+        boolean verifiedIngredients = requirements.entrySet().stream()
+                .allMatch(entry -> inventoryCounts.getOrDefault(entry.getKey(), 0) >= entry.getValue().amount);
+        boolean verifiedFuel = blightedPlayer.getForgeFuel() >= fuelCost;
+
+        if (!verifiedIngredients || !verifiedFuel) {
+            Formatter.warn(player, "You don't meet the requirements to hyperforge this item!");
+            refresh(player);
+            return;
+        }
+
+        for (IngredientInfo info : requirements.values()) {
+            CraftingObject consumeObject = info.ingredient.isCustom()
+                    ? new CraftingObject(Objects.requireNonNull(info.ingredient.getManager()), info.amount)
+                    : new CraftingObject(Objects.requireNonNull(info.ingredient.getVanillaItem()).getType(), info.amount);
+            Utilities.consumeItemsFromInventory(player, consumeObject);
+        }
+
+        blightedPlayer.removeForgeFuel(fuelCost);
+        blightedPlayer.saveData();
+
+        ItemStack result = recipe.getForgedItem().toItemStack().clone();
+        int amount = Math.max(1, recipe.getForgedAmount());
+        result.setAmount(amount);
+
+        HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(result);
+        for (ItemStack drop : leftover.values()) {
+            player.getWorld().dropItemNaturally(player.getLocation(), drop);
+        }
+
+        SoundSequence.FORGE_ITEM.play(player.getLocation());
+        Formatter.inform(player, "§aHyperforged " + recipe.getForgedItem().getDisplayName() + " §ax" + amount + "!");
+
+        refresh(player);
+    }
+
+    private Map<String, IngredientInfo> aggregateForgeIngredients(ForgeRecipe recipe) {
+        Map<String, IngredientInfo> recipeIngredients = new LinkedHashMap<>();
+        for (CraftingObject ingredient : recipe.getIngredients()) {
+            if (ingredient == null) continue;
+            String ingredientId = ingredient.getId();
+            if (ingredientId.isEmpty()) continue;
+            if (!recipeIngredients.containsKey(ingredientId)) {
+                recipeIngredients.put(ingredientId, new IngredientInfo(ingredient, ingredient.getAmount()));
+            } else {
+                IngredientInfo info = recipeIngredients.get(ingredientId);
+                info.amount += ingredient.getAmount();
+            }
+        }
+        return recipeIngredients;
+    }
+
+    private Map<String, Integer> countInventoryItems(Player player, Set<String> requiredIds) {
+        Map<String, Integer> counts = new HashMap<>();
+        for (ItemStack stack : player.getInventory().getContents()) {
+            if (stack == null || stack.getType() == Material.AIR) continue;
+            for (String reqId : requiredIds) {
+                if (Utilities.resolveItemId(stack, reqId).equals(reqId)) {
+                    counts.put(reqId, counts.getOrDefault(reqId, 0) + stack.getAmount());
+                }
+            }
+        }
+        return counts;
+    }
+
+    private static class IngredientInfo {
+        final CraftingObject ingredient;
+        int amount;
+
+        IngredientInfo(CraftingObject ingredient, int amount) {
+            this.ingredient = ingredient;
+            this.amount = amount;
+        }
     }
 
     private void setupNavigation() {
