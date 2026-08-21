@@ -12,6 +12,8 @@ import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
+
 import static fr.moussax.blightedMC.utils.Formatter.*;
 
 @CommandArguments({
@@ -57,7 +59,11 @@ public final class GiveItemCommand extends AdminCommand {
 
         ItemStack stack = blightedItem.toItemStack().clone();
         stack.setAmount(amount);
-        target.getInventory().addItem(stack);
+
+        Map<Integer, ItemStack> overflow = target.getInventory().addItem(stack);
+        for (ItemStack excess : overflow.values()) {
+            target.getWorld().dropItem(target.getLocation(), excess);
+        }
 
         inform(player, " §eGave §7x" + amount + " §f" + formatEnumName(blightedItem.getItemId()) + " §eto §d" + target.getName() + "§7.");
 

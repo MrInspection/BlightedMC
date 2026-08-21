@@ -159,6 +159,7 @@ public final class BlightedPlayer {
      * @param type         the ability type associated with the cooldown
      * @param seconds      the cooldown duration in seconds
      */
+    @SuppressWarnings("rawtypes")
     public void setCooldown(Class<? extends AbilityManager> managerClass, AbilityType type, int seconds) {
         long expire = System.currentTimeMillis() + (seconds * 1000L);
         cooldowns.removeIf(currentCooldown ->
@@ -176,6 +177,7 @@ public final class BlightedPlayer {
      * @return the remaining cooldown in seconds, or {@code 0} if no active
      * cooldown exists
      */
+    @SuppressWarnings("rawtypes")
     public double getRemainingCooldown(Class<? extends AbilityManager> managerClass, AbilityType type) {
         cooldowns.removeIf(CooldownEntry::isExpired);
 

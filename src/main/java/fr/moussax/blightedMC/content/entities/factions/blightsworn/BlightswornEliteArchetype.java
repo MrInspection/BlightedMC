@@ -51,7 +51,6 @@ public sealed abstract class BlightswornEliteArchetype extends BlightswornCreatu
 
     private void triggerBlightWard() {
         if (isNotAlive()) return;
-
         isWarded = true;
 
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ILLUSIONER_CAST_SPELL, 1.0f, 0.8f);

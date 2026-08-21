@@ -67,14 +67,14 @@ public final class TeleportPositionCommand extends AdminCommand {
             target.teleport(location);
 
             String displayWorld = getWorldDisplayName(world);
-            String coordinates = String.format("§d%.1f, %.1f, %.1f §7in §5%s§7.", x, y, z, displayWorld);
+            String coordinates = String.format("§d%.0f, %.0f, %.0f §ein §5%s§a.", x, y, z, displayWorld);
 
             if (target.equals(player)) {
-                inform(player, "§7Teleported to " + coordinates);
+                inform(player, "§eTeleported to " + coordinates);
                 player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 0.75f);
             } else {
-                inform(player, "§7Teleported §f" + target.getName() + " §7to " + coordinates);
-                inform(target, "§7Teleported to " + coordinates);
+                inform(player, " §eTeleported §f" + target.getName() + " §eto " + coordinates);
+                inform(target, " §eTeleported to " + coordinates);
                 target.playSound(target.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 0.75f);
             }
         } catch (NumberFormatException e) {

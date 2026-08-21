@@ -55,12 +55,12 @@ public final class BlightswornPiglin extends BlightswornEliteArchetype {
 
     @Override
     protected void onEnrage(LivingEntity entity) {
-        Location loc = entity.getLocation().add(0, 1, 0);
-        entity.getWorld().playSound(loc, Sound.ENTITY_PIGLIN_ANGRY, 1.5f, 0.5f);
-        entity.getWorld().playSound(loc, Sound.ITEM_ARMOR_EQUIP_GOLD, 1.0f, 0.5f);
+        Location location = entity.getLocation().add(0, 1, 0);
+        entity.getWorld().playSound(location, Sound.ENTITY_PIGLIN_ANGRY, 1.5f, 0.5f);
+        entity.getWorld().playSound(location, Sound.ITEM_ARMOR_EQUIP_GOLD, 1.0f, 0.5f);
 
-        entity.getWorld().spawnParticle(Particle.CRIT, loc, 40, 0.5, 1.0, 0.5, 0.1);
-        entity.getWorld().spawnParticle(Particle.DUST, loc, 30, 0.5, 1.0, 0.5, 0.0, BLIGHT_DUST);
+        entity.getWorld().spawnParticle(Particle.CRIT, location, 40, 0.5, 1.0, 0.5, 0.1);
+        entity.getWorld().spawnParticle(Particle.DUST, location, 30, 0.5, 1.0, 0.5, 0.0, BLIGHT_DUST);
     }
 
     private void executeHunterDash(boolean isPhaseTwo) {
@@ -92,7 +92,11 @@ public final class BlightswornPiglin extends BlightswornEliteArchetype {
     private void applyHuntingSnare() {
         getNearbyPlayers(4.0).forEach(player -> {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 1));
-            player.getWorld().spawnParticle(Particle.BLOCK, player.getLocation().add(0, 1, 0), 20, 0.3, 0.3, 0.3, 0.1, Material.COBWEB.createBlockData());
+            player.getWorld().spawnParticle(
+                    Particle.BLOCK,
+                    player.getLocation().add(0, 1, 0), 20, 0.3, 0.3, 0.3, 0.1,
+                    Material.COBWEB.createBlockData()
+            );
         });
     }
 

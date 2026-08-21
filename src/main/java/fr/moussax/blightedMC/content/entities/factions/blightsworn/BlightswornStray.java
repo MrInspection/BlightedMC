@@ -38,12 +38,10 @@ public final class BlightswornStray extends BlightswornArcherArchetype {
 
     @Override
     protected void applyArrowEffects(Arrow arrow, boolean isPhaseTwo) {
-
     }
 
     @Override
     protected void onEnrage(LivingEntity entity) {
-
     }
 
     @Override

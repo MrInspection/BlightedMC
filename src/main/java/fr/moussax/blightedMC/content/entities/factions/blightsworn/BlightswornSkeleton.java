@@ -43,7 +43,6 @@ public final class BlightswornSkeleton extends BlightswornArcherArchetype {
     protected void onEnrage(LivingEntity entity) {
         Location location = entity.getLocation().add(0, 1, 0);
         entity.getWorld().playSound(location, Sound.ENTITY_SKELETON_DEATH, 1.0f, 0.5f);
-
         entity.getWorld().spawnParticle(Particle.CRIT, location, 30, 0.5, 1.0, 0.5, 0.05);
         entity.getWorld().spawnParticle(Particle.DUST, location, 30, 0.5, 1.0, 0.5, 0.0, BLIGHT_DUST);
     }
