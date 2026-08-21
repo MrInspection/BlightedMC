@@ -222,7 +222,7 @@ public final class ForgeRecipePreviewMenu extends Menu {
 
         setItem(HYPERFORGE_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, _) -> {
             if (canHyperforge) {
-                executeHyperforge(p, blightedPlayer, requirements, fuelCost);
+                Utilities.delay(() -> executeHyperforge(p, blightedPlayer, requirements, fuelCost), 1L);
             } else {
                 Formatter.warn(p, "You don't meet the requirements to hyperforge this item!");
             }
@@ -257,13 +257,13 @@ public final class ForgeRecipePreviewMenu extends Menu {
         int amount = Math.max(1, recipe.getForgedAmount());
         result.setAmount(amount);
 
-        SoundSequence.FORGE_ITEM.play(player.getLocation());
-        refresh(player);
-
         HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(result);
         for (ItemStack drop : leftover.values()) {
             player.getWorld().dropItemNaturally(player.getLocation(), drop);
         }
+
+        SoundSequence.FORGE_ITEM.play(player.getLocation());
+        refresh(player);
     }
 
     private Map<String, IngredientInfo> aggregateForgeIngredients(ForgeRecipe recipe) {

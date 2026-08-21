@@ -57,18 +57,14 @@ public final class Utilities {
      * @return the resolved item identifier
      */
     public static String resolveItemId(@NonNull ItemStack item, @NonNull String resolutionId) {
-        if (resolutionId.startsWith("vanilla:")) {
-            return "vanilla:" + item.getType().name();
-        }
-
         var meta = item.getItemMeta();
-        if (meta == null) {
-            return "vanilla:" + item.getType().name();
+        if (meta != null) {
+            String customId = meta.getPersistentDataContainer().get(BLIGHTED_ID_KEY, PersistentDataType.STRING);
+            if (customId != null) {
+                return customId;
+            }
         }
-
-        NamespacedKey itemIdKey = BLIGHTED_ID_KEY;
-        String customId = meta.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
-        return customId != null ? customId : "vanilla:" + item.getType().name();
+        return "vanilla:" + item.getType().name();
     }
 
     /**

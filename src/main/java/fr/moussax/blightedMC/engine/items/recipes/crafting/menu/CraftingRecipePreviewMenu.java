@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC.engine.items.recipes.crafting.menu;
 
-
 import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.engine.items.recipes.RecipePreviewManager;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
@@ -67,7 +66,7 @@ public final class CraftingRecipePreviewMenu extends Menu {
                 .toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
         });
 
-        ItemStack resultItem = recipe.getResult().toItemStack().clone();
+        ItemStack resultItem = recipe.assemble(createVirtualCraftingGrid());
         int amount = recipe.getAmount() > 0 ? recipe.getAmount() : 1;
         resultItem.setAmount(amount);
         setItem(RESULT_SLOT, resultItem, MenuItemInteraction.ANY_CLICK, (p, t) -> {
@@ -154,9 +153,8 @@ public final class CraftingRecipePreviewMenu extends Menu {
 
         setItem(SUPERCRAFT_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
             if (canSupercraft) {
-                executeSupercraft(p, requirements);
+                Utilities.delay(() -> executeSupercraft(p, requirements), 1L);
             } else {
-                p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
                 Formatter.warn(p, "You don't meet the requirements to supercraft this item!");
             }
         });
@@ -168,7 +166,6 @@ public final class CraftingRecipePreviewMenu extends Menu {
                 .allMatch(entry -> inventoryCounts.getOrDefault(entry.getKey(), 0) >= entry.getValue().amount);
 
         if (!verified) {
-            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
             Formatter.warn(player, "You don't meet the requirements to supercraft this item!");
             refresh(player);
             return;
@@ -181,7 +178,9 @@ public final class CraftingRecipePreviewMenu extends Menu {
             Utilities.consumeItemsFromInventory(player, consumeObject);
         }
 
-        ItemStack result = recipe.getResult().toItemStack().clone();
+        List<ItemStack> virtualGrid = createVirtualCraftingGrid();
+        ItemStack result = recipe.assemble(virtualGrid);
+
         int amount = recipe.getAmount() > 0 ? recipe.getAmount() : 1;
         result.setAmount(amount);
 
@@ -192,6 +191,20 @@ public final class CraftingRecipePreviewMenu extends Menu {
 
         player.playSound(player.getLocation(), Sound.BLOCK_SMITHING_TABLE_USE, 1f, 1f);
         refresh(player);
+    }
+
+    private List<ItemStack> createVirtualCraftingGrid() {
+        List<ItemStack> grid = new ArrayList<>();
+        if (recipe instanceof BlightedShapedRecipe shapedRecipe) {
+            for (CraftingObject object : shapedRecipe.getRecipe()) {
+                grid.add(object != null ? getCraftingObjectItem(object) : null);
+            }
+        } else if (recipe instanceof BlightedShapelessRecipe shapelessRecipe) {
+            for (CraftingObject object : shapelessRecipe.getIngredients()) {
+                grid.add(object != null ? getCraftingObjectItem(object) : null);
+            }
+        }
+        return grid;
     }
 
     private Map<String, IngredientInfo> aggregateRecipeIngredients(BlightedRecipe recipe) {
@@ -262,7 +275,6 @@ public final class CraftingRecipePreviewMenu extends Menu {
             setBackButton(BACK_BUTTON_SLOT, previousMenu);
         }
         setCloseButton(CLOSE_BUTTON_SLOT);
-
         fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
     }
 }
