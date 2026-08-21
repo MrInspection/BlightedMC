@@ -83,7 +83,7 @@ public final class CraftingRecipePreviewMenu extends Menu {
             CraftingObject craftingObject = pattern.get(i);
 
             if (craftingObject == null) {
-                setItem(CRAFTING_GRID_SLOTS[i], new ItemStack(Material.AIR), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                setItem(CRAFTING_GRID_SLOTS[i], new ItemStack(Material.AIR), MenuItemInteraction.ANY_CLICK, (_, _) -> {
                 });
                 continue;
             }
@@ -190,9 +190,7 @@ public final class CraftingRecipePreviewMenu extends Menu {
             player.getWorld().dropItemNaturally(player.getLocation(), drop);
         }
 
-        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-        Formatter.inform(player, "§aSupercrafted " + recipe.getResult().getDisplayName() + " §ax" + amount + "!");
-
+        player.playSound(player.getLocation(), Sound.BLOCK_SMITHING_TABLE_USE, 1f, 1f);
         refresh(player);
     }
 
@@ -207,14 +205,14 @@ public final class CraftingRecipePreviewMenu extends Menu {
             rawList = List.of();
         }
 
-        for (CraftingObject ing : rawList) {
-            String id = ing.getId();
-            if (id.isEmpty()) continue;
-            if (!map.containsKey(id)) {
-                map.put(id, new IngredientInfo(ing, ing.getAmount()));
+        for (CraftingObject ingredient : rawList) {
+            String ingredientId = ingredient.getId();
+            if (ingredientId.isEmpty()) continue;
+            if (!map.containsKey(ingredientId)) {
+                map.put(ingredientId, new IngredientInfo(ingredient, ingredient.getAmount()));
             } else {
-                IngredientInfo info = map.get(id);
-                info.amount += ing.getAmount();
+                IngredientInfo info = map.get(ingredientId);
+                info.amount += ingredient.getAmount();
             }
         }
         return map;

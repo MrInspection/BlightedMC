@@ -190,9 +190,11 @@ public final class ForgeRecipePreviewMenu extends Menu {
         );
 
         for (Map.Entry<String, IngredientInfo> entry : requirements.entrySet()) {
+            String ingredientId = entry.getKey();
             IngredientInfo info = entry.getValue();
-            int owned = inventoryCounts.getOrDefault(entry.getKey(), 0);
-            boolean hasEnough = owned >= info.amount;
+            int requiredAmount = info.amount;
+            int owned = inventoryCounts.getOrDefault(ingredientId, 0);
+            boolean hasEnough = owned >= requiredAmount;
 
             if (!hasEnough) {
                 hasAllIngredients = false;
@@ -202,7 +204,8 @@ public final class ForgeRecipePreviewMenu extends Menu {
             String countColor = hasEnough ? "§a" : "§c";
             String name = Utilities.extractIngredientName(info.ingredient);
 
-            builder.addLore(" " + status + " §7" + name + " §8x" + info.amount + " §7(" + countColor + owned + "§7/§a" + info.amount + "§7)");
+            builder.addLore(String.format(" %s §7%s §8x%d §7(%s%d§7/§a%d§7)",
+                    status, name, requiredAmount, countColor, owned, requiredAmount));
         }
 
         String fuelStatus = hasSufficientFuel ? "§a✓" : "§cx";
@@ -262,8 +265,6 @@ public final class ForgeRecipePreviewMenu extends Menu {
         }
 
         SoundSequence.FORGE_ITEM.play(player.getLocation());
-        Formatter.inform(player, "§aHyperforged " + recipe.getForgedItem().getDisplayName() + " §ax" + amount + "!");
-
         refresh(player);
     }
 
@@ -311,7 +312,6 @@ public final class ForgeRecipePreviewMenu extends Menu {
             setBackButton(BACK_BUTTON_SLOT, previousMenu);
         }
         setCloseButton(CLOSE_BUTTON_SLOT);
-
         fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
     }
 }
