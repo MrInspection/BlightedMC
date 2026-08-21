@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.engine.entities.rituals.menu;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.engine.entities.rituals.AncientCreature;
 import fr.moussax.blightedMC.engine.entities.rituals.AncientRitual;
 import fr.moussax.blightedMC.engine.entities.rituals.RitualAnimations;
 import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
@@ -76,8 +77,7 @@ public final class RitualAltarMenu extends Menu {
             ItemStack barrier = new ItemBuilder(Material.BARRIER, "§cRitual Required")
                     .addLore("§7Select an ancient ritual to start", "§7the invocation process.")
                     .toItemStack();
-            setItem(25, barrier, (_, _) -> {
-            });
+            setItem(25, barrier, (_, _) -> {});
             return;
         }
 
@@ -90,8 +90,7 @@ public final class RitualAltarMenu extends Menu {
             result = builder.toItemStack();
         }
 
-        setItem(25, result, (_, _) -> {
-        });
+        setItem(25, result, (_, _) -> {});
     }
 
     private void checkRequirements(Player player) {
@@ -127,8 +126,7 @@ public final class RitualAltarMenu extends Menu {
     private void displayRequiredIngredients() {
         for (int i = 0; i < ritual.getOfferings().size() && i < GRID_SLOTS.length; i++) {
             CraftingObject ingredient = ritual.getOfferings().get(i);
-            setItem(GRID_SLOTS[i], createDisplayItem(ingredient), (_, _) -> {
-            });
+            setItem(GRID_SLOTS[i], createDisplayItem(ingredient), (_, _) -> {});
         }
     }
 
@@ -154,15 +152,14 @@ public final class RitualAltarMenu extends Menu {
         fillSlots(INVOKED_MOB_INDICATOR_SLOTS, invokedPane);
         fillSlots(ITEM_INDICATOR, fillerPane);
 
-        ItemStack shriekerIcon = new ItemBuilder(Material.SCULK_SHRIEKER, "§5Blighted Altar")
+        ItemStack shriekerIcon = new ItemBuilder(Material.SCULK_SHRIEKER, "§5The Altar")
                 .addLore(
                         "§7The Ritual Altar allows you to offer",
                         "§7rare sacrifices, gems, and experience",
-                        "§7to invoke ancient forgotten creatures."
+                        "§7to invoke ancient forgotten entities."
                 )
                 .toItemStack();
-        setItem(14, shriekerIcon, (_, _) -> {
-        });
+        setItem(14, shriekerIcon, (_, _) -> {});
     }
 
     private Material determineIndicatorMaterial() {
@@ -198,6 +195,13 @@ public final class RitualAltarMenu extends Menu {
                 builder.addLore(" §8‣ §3" + Formatter.formatDecimalWithCommas(ritual.getLevelCost()) + "◎ EXP Levels");
             }
 
+            if (ritual.getSummonedCreature() != null) {
+                builder.addLore(
+                        "",
+                        " §7Time limit: §c" + Formatter.formatTime(ritual.getSummonedCreature().getTimeAllowance())
+                );
+            }
+
             builder.addLore(
                     "",
                     " §c§lBEWARE!",
@@ -221,10 +225,10 @@ public final class RitualAltarMenu extends Menu {
     private void setupNavigationButtons() {
         ItemStack recipeBook = new ItemBuilder(Material.WRITABLE_BOOK, "§5Ancient Rituals")
                 .addLore(
-                        "", " §7Browse ancient rituals written eons",
-                        " §7ago by the §5Voidling Mages§7, devised",
-                        " §7to invoke forgotten creatures",
-                        " §7back into existence.",
+                        "§7Browse ancient rituals written eons",
+                        "§7ago by the §5Voidling Mages§7, devised",
+                        "§7to invoke forgotten creatures",
+                        "§7back into existence.",
                         "",
                         "§eClick to browse!"
                 ).toItemStack();
@@ -262,13 +266,16 @@ public final class RitualAltarMenu extends Menu {
         RitualAnimations.playRiteAnimation(BlightedMC.getInstance(), spawnLoc, () -> handleFinalImpact(spawnLoc));
     }
 
-    private void handleFinalImpact(Location loc) {
+    private void handleFinalImpact(Location location) {
         Player player = getPlayer();
         if (ritual.getSummonedCreature() == null || player == null) {
             return;
         }
 
-        Bukkit.broadcastMessage("§5 ☤ §dThe §c" + ritual.getSummonedCreature().getName() + " §dhas been summoned by §f" + player.getName() + "§d.");
-        ritual.getSummonedCreature().clone().spawn(loc);
+        Bukkit.broadcastMessage("§5 ☤ §dThe §4" + ritual.getSummonedCreature().getName() + " §dhas been summoned by §f" + player.getName() + "§d.");
+
+        AncientCreature creature = (AncientCreature) ritual.getSummonedCreature().clone();
+        creature.setSummoner(player);
+        creature.spawn(location);
     }
 }

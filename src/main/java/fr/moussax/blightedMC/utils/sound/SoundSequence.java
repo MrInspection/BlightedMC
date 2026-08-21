@@ -89,6 +89,18 @@ public record SoundSequence(List<BlightedSound> sounds) {
         new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_EJECT_ITEM, 1.0f, 1.0f, 60L)
     );
 
+    public static final SoundSequence ANCIENT_MOB_COLLAPSE = new SoundSequence(
+            new BlightedSound(Sound.BLOCK_BEACON_DEACTIVATE, 1.5f, 0.5f, 0L),
+            new BlightedSound(Sound.ENTITY_WARDEN_SONIC_BOOM, 1.5f, 0.6f, 0L),
+            new BlightedSound(Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 2.0f, 0.6f, 0L),
+            new BlightedSound(Sound.BLOCK_END_PORTAL_SPAWN, 1.2f, 0.5f, 15L),
+            new BlightedSound(Sound.BLOCK_GLASS_BREAK, 1.8f, 0.5f, 15L),
+            new BlightedSound(Sound.ENTITY_BREEZE_INHALE, 1.5f, 0.4f, 20L),
+            new BlightedSound(Sound.ENTITY_ENDERMAN_TELEPORT, 1.8f, 0.5f, 35L),
+            new BlightedSound(Sound.PARTICLE_SOUL_ESCAPE, 2.0f, 0.5f, 35L),
+            new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_SPAWN_MOB, 1.2f, 0.5f, 40L)
+    );
+
     public static final SoundSequence XP_PICKUP = new SoundSequence(
         new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.5f, 0L),
         new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.6f, 2L),

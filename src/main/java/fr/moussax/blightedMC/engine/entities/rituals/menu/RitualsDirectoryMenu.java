@@ -110,7 +110,12 @@ public final class RitualsDirectoryMenu extends PaginatedMenu {
             }
         }
 
-        builder.addLore("", " §7Offerings required: ");
+        if (ritual.getSummonedCreature() != null) {
+            String timeFormatted = Formatter.formatTime(ritual.getSummonedCreature().getTimeAllowance());
+            builder.addLore("", " §7Time limit: §c" + timeFormatted, "");
+        }
+
+        builder.addLore(" §7Offerings required: ");
         for (CraftingObject offering : ritual.getOfferings()) {
             builder.addLore(" §8‣ " + Utilities.extractIngredientName(offering) + " §8x" + offering.getAmount());
         }
