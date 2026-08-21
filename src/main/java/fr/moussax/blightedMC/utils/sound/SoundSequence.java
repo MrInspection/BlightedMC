@@ -116,16 +116,18 @@ public record SoundSequence(List<BlightedSound> sounds) {
     );
 
     public static final SoundSequence FORGE_ITEM = new SoundSequence(
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.50f, 0L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.55f, 2L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.60f, 4L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.65f, 6L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.70f, 8L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.80f, 10L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.90f, 12L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 1.00f, 14L),
-        new BlightedSound(Sound.BLOCK_HEAVY_CORE_PLACE, 1.0f, 0.8f, 16L),
-        new BlightedSound(Sound.BLOCK_FIRE_EXTINGUISH, 0.5f, 0.8f, 18L),
-        new BlightedSound(Sound.BLOCK_END_PORTAL_FRAME_FILL, 1.0f, 0.5f, 18L)
+            new BlightedSound(Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 0.50f, 0L),
+            new BlightedSound(Sound.BLOCK_SCULK_CATALYST_BLOOM, 0.9f, 0.50f, 2L),
+            new BlightedSound(Sound.BLOCK_VAULT_OPEN_SHUTTER, 1.0f, 0.50f, 4L),
+            new BlightedSound(Sound.ENTITY_WARDEN_HEARTBEAT, 1.2f, 0.50f, 6L),
+            new BlightedSound(Sound.ENTITY_WARDEN_ROAR, 0.6f, 0.50f, 6L),
+            new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_SPAWN_MOB, 1.2f, 0.50f, 8L),
+            new BlightedSound(Sound.BLOCK_HEAVY_CORE_PLACE, 1.2f, 0.50f, 10L),
+            new BlightedSound(Sound.PARTICLE_SOUL_ESCAPE, 0.9f, 0.50f, 10L),
+            new BlightedSound(Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 1.0f, 0.50f, 12L),
+            new BlightedSound(Sound.BLOCK_RESPAWN_ANCHOR_SET_SPAWN, 1.0f, 0.50f, 14L),
+            new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_OMINOUS_ACTIVATE, 1.3f, 0.50f, 16L),
+            new BlightedSound(Sound.BLOCK_VAULT_ACTIVATE, 1.1f, 0.50f, 18L),
+            new BlightedSound(Sound.BLOCK_ANVIL_LAND, 0.9f, 0.50f, 20L)
     );
 }

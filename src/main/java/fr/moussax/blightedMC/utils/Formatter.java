@@ -366,12 +366,12 @@ public final class Formatter {
      * @param bar     the value each segment represents
      * @return formatted progress bar string
      */
-    public static String createProgressBar(double percent, double max, double bar) {
+    public static String createProgressBar(double percent, double max, double bar, ChatColor color) {
         double filledBars = percent / bar;
         double emptyBars = max - filledBars;
 
         if (filledBars > max) filledBars = max;
 
-        return ChatColor.DARK_GREEN + repeat("-", (int) filledBars) + ChatColor.WHITE + repeat("-", (int) emptyBars);
+        return color + repeat("-", (int) filledBars) + ChatColor.WHITE + repeat("-", (int) emptyBars);
     }
 }

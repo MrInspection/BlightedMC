@@ -1,6 +1,5 @@
 package fr.moussax.blightedMC.engine.items.forging.menu;
 
-import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.engine.items.forging.ForgeFuel;
 import fr.moussax.blightedMC.engine.items.forging.ForgeRecipe;
@@ -11,6 +10,7 @@ import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
 import fr.moussax.blightedMC.utils.Formatter;
 import fr.moussax.blightedMC.utils.sound.SoundSequence;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -18,13 +18,15 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public final class ForgeMenu extends Menu {
+
     private static final int[] GRID_SLOTS = {19, 20, 21, 28, 29, 30, 37, 38, 39};
     private static final int[] REQUIRED_ITEM_INDICATOR_SLOTS = {10, 11, 12, 13};
     private static final int[] FORGED_ITEM_INDICATOR_SLOTS = {15, 16};
     private static final int ITEM_INDICATOR = 23;
-    private static final int MAXIMUM_FORGE_FUEL = 50000;
+    private static final int MAXIMUM_FORGE_FUEL = 250_000;
 
     private final ForgeRecipe recipe;
     private final Menu previousMenu;
@@ -32,15 +34,13 @@ public final class ForgeMenu extends Menu {
     private boolean isForging = false;
 
     public ForgeMenu(ForgeRecipe recipe, Menu previousMenu) {
-        super("Forge Item", 54);
+        super(recipe == null ? "Blighted Forge" : "Forge Item", 54);
         this.recipe = recipe;
         this.previousMenu = previousMenu;
     }
 
     public ForgeMenu(ForgeRecipe recipe) {
-        super("Forge Item", 54);
-        this.recipe = recipe;
-        previousMenu = null;
+        this(recipe, null);
     }
 
     @Override
@@ -75,8 +75,8 @@ public final class ForgeMenu extends Menu {
     private void setupResultDisplay() {
         if (recipe == null) {
             ItemStack noRecipe = new ItemBuilder(Material.BARRIER, "§cRecipe Required")
-                .addLore("§7Select a recipe from the", "§7recipe book to start forging.")
-                .toItemStack();
+                    .addLore("§7Select a recipe from the", "§7recipe book to start forging.")
+                    .toItemStack();
             setItem(25, noRecipe, (_, _) -> {
             });
             return;
@@ -92,8 +92,18 @@ public final class ForgeMenu extends Menu {
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
         Map<String, Integer> requiredCounts = aggregateRequirements();
 
+        Map<String, Integer> inventoryCounts = new HashMap<>();
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item == null || item.getType() == Material.AIR) continue;
+            for (String reqId : requiredCounts.keySet()) {
+                if (Utilities.resolveItemId(item, reqId).equals(reqId)) {
+                    inventoryCounts.put(reqId, inventoryCounts.getOrDefault(reqId, 0) + item.getAmount());
+                }
+            }
+        }
+
         boolean hasAllIngredients = requiredCounts.entrySet().stream()
-            .allMatch(entry -> hasEnoughIngredient(player, entry.getKey(), entry.getValue()));
+                .allMatch(entry -> inventoryCounts.getOrDefault(entry.getKey(), 0) >= entry.getValue());
 
         boolean hasSufficientFuel = blightedPlayer.getForgeFuel() >= recipe.getFuelCost();
 
@@ -109,19 +119,6 @@ public final class ForgeMenu extends Menu {
         return counts;
     }
 
-    private boolean hasEnoughIngredient(Player player, String itemId, int requiredAmount) {
-        int count = 0;
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item == null || item.getType() == Material.AIR) continue;
-
-            String currentId = Utilities.resolveItemId(item, itemId);
-            if (currentId.equals(itemId)) {
-                count += item.getAmount();
-            }
-        }
-        return count >= requiredAmount;
-    }
-
     private void displayRequiredIngredients() {
         for (int i = 0; i < recipe.getIngredients().size() && i < GRID_SLOTS.length; i++) {
             CraftingObject ingredient = recipe.getIngredients().get(i);
@@ -133,8 +130,8 @@ public final class ForgeMenu extends Menu {
 
     private ItemStack createDisplayItem(CraftingObject ingredient) {
         ItemStack displayItem = ingredient.isCustom()
-            ? ingredient.getManager().toItemStack().clone()
-            : ingredient.getVanillaItem().clone();
+                ? Objects.requireNonNull(ingredient.getManager()).toItemStack().clone()
+                : Objects.requireNonNull(ingredient.getVanillaItem()).clone();
         displayItem.setAmount(ingredient.getAmount());
         return displayItem;
     }
@@ -143,23 +140,18 @@ public final class ForgeMenu extends Menu {
         Material indicator = determineIndicatorMaterial();
 
         ItemStack sacrificedItemPane = new ItemBuilder(indicator, "§6Items to Process")
-            .addLore("§7The materials required to forge", "§7the item are displayed in this side.")
-            .toItemStack();
+                .addLore("§7The materials required to forge", "§7the item are displayed in this side.")
+                .toItemStack();
 
         ItemStack forgedItemPane = new ItemBuilder(indicator, "§6Item to Forge")
-            .addLore("§7The item you will create", "§7with the required materials.")
-            .toItemStack();
+                .addLore("§7The item you will create", "§7with the required materials.")
+                .toItemStack();
 
         fillSlots(REQUIRED_ITEM_INDICATOR_SLOTS, sacrificedItemPane);
         fillSlots(FORGED_ITEM_INDICATOR_SLOTS, forgedItemPane);
-
-        setItem(ITEM_INDICATOR, new ItemBuilder(indicator, "§r").hideTooltip().toItemStack(), (_, _) -> {
+        setItem(ITEM_INDICATOR, new ItemBuilder(indicator).hideTooltip().toItemStack(), (_, _) -> {
         });
-
-        ItemStack forgeIcon = new ItemBuilder(Material.BLAST_FURNACE, "§dBlighted Forge")
-            .addLore("§7Combine materials to forge ", "§7items beyond the reach of", "§7ordinary furnaces.")
-            .toItemStack();
-        setItem(14, forgeIcon, (_, _) -> {
+        setItem(14, new ItemBuilder(Material.BLAST_FURNACE).hideTooltip().toItemStack(), (_, _) -> {
         });
     }
 
@@ -180,18 +172,22 @@ public final class ForgeMenu extends Menu {
 
         if (recipe == null) {
             builder.setDisplayName("§aForge Item")
-                .addLore("§7Select a recipe from the", "§7Recipe Book to start forging.");
+                    .addLore("§7Select a recipe from the", "§7Recipe Book to start forging.");
         } else if (isForging) {
             builder.setDisplayName("§6Forging...");
         } else {
-            builder.setDisplayName("§aConfirm process").addLore("", " §7Cost: ");
+            builder.setDisplayName("§aConfirm process").addLore("", " §7Items required: ");
             for (CraftingObject ingredient : recipe.getIngredients()) {
                 builder.addLore(" §8‣ " + Utilities.extractIngredientName(ingredient) + " §8x" + ingredient.getAmount());
             }
 
-            builder.addLore("");
-            builder.addLore(canForge ? "§eClick to confirm!" : "§cYou don't have the required items!")
-                .setEnchantmentGlint(canForge);
+            builder.addLore(
+                    "",
+                    " §8Consumes §6🪣 " + Formatter.formatDecimalWithCommas(recipe.getFuelCost()) + "mB §8of fuel to ",
+                    " §8start the forging process.",
+                    "",
+                    canForge ? "§eClick to confirm!" : "§cYou don't meet the requirements!"
+            ).setEnchantmentGlint(canForge);
         }
 
         setItem(32, builder.toItemStack(), (p, _) -> {
@@ -207,89 +203,77 @@ public final class ForgeMenu extends Menu {
 
     private void setupNavigationButtons() {
         ItemStack recipeBook = new ItemBuilder(Material.KNOWLEDGE_BOOK, "§6Forge Recipes")
-            .addLore("§7View all §6Forge Recipes §7and ", "§7their requirements.", "", "§eClick to view!")
-            .toItemStack();
+                .addLore("§7View all §6Forge Recipes §7and ", "§7their requirements.", "", "§eClick to view!")
+                .toItemStack();
 
         setCloseButton(49);
-        setItem(50, recipeBook, (p, _) ->
-            BlightedMC.menuManager().openMenu(new ForgeRecipesMenu(this), p));
+        setItem(50, recipeBook, (p, _) -> openSubMenu(new ForgeRecipesMenu(this)));
     }
 
     private void setupFuelButtons(Player player) {
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
         int currentFuel = blightedPlayer.getForgeFuel();
-        int requiredFuel = recipe != null ? recipe.getFuelCost() : 0;
 
-        setItem(34, createFuelMeter(currentFuel, requiredFuel), (_, _) -> {
+        setItem(34, createFuelMeter(currentFuel), (_, _) -> {
         });
-        setItem(51, createFuelGuide(), (_, _) -> {
+        setItem(52, createFuelGuide(), (_, _) -> {
         });
-        setItem(53, createInsertFuelButton(player), (p, _) -> handleFuelInsertion(blightedPlayer));
+        setItem(53, createInsertFuelButton(player), (_, _) -> handleFuelInsertion(blightedPlayer));
     }
 
-    private ItemStack createFuelMeter(int currentFuel, int requiredFuel) {
+    private ItemStack createFuelMeter(int currentFuel) {
         String formattedCurrent = Formatter.formatDecimalWithCommas(currentFuel);
         String formattedMax = Formatter.formatDecimalWithCommas(MAXIMUM_FORGE_FUEL);
-        String formattedRequired = Formatter.formatDecimalWithCommas(requiredFuel);
 
         int barLength = 20;
         double valuePerSegment = MAXIMUM_FORGE_FUEL / (double) barLength;
 
-        ItemBuilder builder = new ItemBuilder(Material.CAMPFIRE, "§6Fuel Meter")
-            .addLore(
-                "§r " + Formatter.createProgressBar(currentFuel, barLength, valuePerSegment) + " §e" + formattedCurrent + "§6/§e" + formattedMax + " mB ", "",
-                " §7Fill your forge with §c🔥 thermal fuel §7like",
-                " §7§fLava Bucket§7, to power the forge and",
-                " §7craft advanced items."
-            );
-
-        if (recipe != null) {
-            builder.addLore(
-                "",
-                " §7The forge must have §6🪣 " + formattedRequired + " mB §7of",
-                " §7fuel stored to start forging items.",
-                ""
-            );
-        } else {
-            builder.addLore("");
-        }
-
-        return builder.toItemStack();
+        return new ItemBuilder(Material.CAMPFIRE, "§6Fuel Meter")
+                .addLore(
+                        "§r " + Formatter.createProgressBar(currentFuel, barLength, valuePerSegment, ChatColor.YELLOW) + " §e" + formattedCurrent + "§6/§e" + formattedMax + "mB ",
+                        "",
+                        " §7Fill your forge with §c🔥 thermal fuel §7like",
+                        " §7§fLava Bucket§7, to power the forge and",
+                        " §7craft advanced items.",
+                        ""
+                )
+                .toItemStack();
     }
 
     private ItemStack createFuelGuide() {
         return new ItemBuilder(Material.BLAZE_POWDER, "§6Thermal Fuel")
-            .addLore(
-                "§8Measured in millibuckets (mB)", "", " §7There are various types of §6Fuel",
-                " §7that you can use to power your Forge. ",
-                " §7Each offers various §6🪣 mB §7of fuel",
-                " §7based on their §c🔥 heat strength§7.",
-                " ",
-                "   §8‣ §fCoal §8- §610 mB",
-                "   §8‣ §fMagma Block §8- §640 mB",
-                "   §8‣ §fBlaze Rod §8- §6200 mB",
-                "   §8‣ §fLava Bucket §8- §61,000 mB",
-                "   §8‣ §eEnchanted Coal §8- §63,000 mB",
-                "   §8‣ §bEnchanted Lava Bucket §8- §610,000 mB ",
-                "   §8‣ §dMagma Bucket §8- §620,000 mB",
-                "   §8‣ §cPlasma Bucket §8- §650,000 mB",
-                ""
-            )
-            .addEnchantmentGlint()
-            .toItemStack();
+                .addLore(
+                        "§8Measured in millibuckets (mB)", "",
+                        " §7There are various types of §6Thermal Fuel ",
+                        " §7that you can use to power your Forge.",
+                        " §7Each offers various §6🪣 mB §7of fuel",
+                        " §7based on their §c🔥 heat strength§7.",
+                        " ",
+                        "   §8‣ §fCoal §8- §610mB",
+                        "   §8‣ §fMagma Block §8- §640mB",
+                        "   §8‣ §fBlaze Rod §8- §6200mB",
+                        "   §8‣ §fLava Bucket §8- §61,000mB",
+                        "   §8‣ §eEnchanted Coal §8- §63,000mB",
+                        "   §8‣ §bEnchanted Lava Bucket §8- §610,000mB ",
+                        "   §8‣ §dMagma Bucket §8- §620,000mB",
+                        "   §8‣ §cPlasma Bucket §8- §650,000mB",
+                        ""
+                )
+                .addEnchantmentGlint()
+                .toItemStack();
     }
 
     private ItemStack createInsertFuelButton(Player player) {
         int fuelInInventory = calculateInventoryFuel(player);
 
         return new ItemBuilder(Material.CAULDRON, "§aInsert Fuel from Inventory")
-            .addLore(
-                "§7Grab as much fuel that will fit into",
-                "§7the forge from your inventory.", "",
-                "§7In your inventory: §6🪣 " + Formatter.formatDecimalWithCommas(fuelInInventory) + " mB", "",
-                "§eClick to insert!"
-            )
-            .toItemStack();
+                .addLore(
+                        "§7Grab as much fuel that will fit into ",
+                        "§7the forge from your inventory.", "",
+                        "§7 In your inventory: §6🪣 " + Formatter.formatDecimalWithCommas(fuelInInventory) + "mB", "",
+                        "§eClick to insert!"
+                )
+                .toItemStack();
     }
 
     private int calculateInventoryFuel(Player player) {
@@ -309,7 +293,7 @@ public final class ForgeMenu extends Menu {
         int availableSpace = MAXIMUM_FORGE_FUEL - currentFuel;
 
         if (availableSpace <= 0) {
-            Formatter.warn(player, "§cYour forge is already full!");
+            Formatter.warn(player, "Your forge is already full!");
             return;
         }
 
@@ -382,69 +366,79 @@ public final class ForgeMenu extends Menu {
 
         refresh(player);
         SoundSequence.FORGE_ITEM.play(player.getLocation());
-        refresh(player);
 
-        Utilities.delay(() -> setStatusSlot(10, Material.YELLOW_STAINED_GLASS_PANE), 0L);
-        Utilities.delay(() -> setStatusSlot(11, Material.YELLOW_STAINED_GLASS_PANE), 2L);
-        Utilities.delay(() -> setStatusSlot(12, Material.YELLOW_STAINED_GLASS_PANE), 4L);
-        Utilities.delay(() -> setStatusSlot(13, Material.YELLOW_STAINED_GLASS_PANE), 6L);
-        Utilities.delay(() -> updateStatusPanes(Material.ORANGE_STAINED_GLASS_PANE, REQUIRED_ITEM_INDICATOR_SLOTS), 8L);
-        Utilities.delay(() -> setStatusSlot(15, Material.ORANGE_STAINED_GLASS_PANE), 10L);
-        Utilities.delay(() -> setStatusSlot(16, Material.ORANGE_STAINED_GLASS_PANE), 12L);
-        Utilities.delay(() -> setStatusSlot(ITEM_INDICATOR, Material.ORANGE_STAINED_GLASS_PANE), 14L);
+        int[] inputPath = {10, 11, 12, 13};
+        for (int i = 0; i < inputPath.length; i++) {
+            final int slot = inputPath[i];
+            Utilities.delay(() -> setStatusSlot(slot, Material.PURPLE_STAINED_GLASS_PANE), i * 2L);
+        }
 
         Utilities.delay(() -> {
-            updateStatusPanes(Material.RED_STAINED_GLASS_PANE, REQUIRED_ITEM_INDICATOR_SLOTS);
-            updateStatusPanes(Material.RED_STAINED_GLASS_PANE, FORGED_ITEM_INDICATOR_SLOTS);
-            setStatusSlot(ITEM_INDICATOR, Material.RED_STAINED_GLASS_PANE);
+            updateStatusPanes(Material.MAGENTA_STAINED_GLASS_PANE, REQUIRED_ITEM_INDICATOR_SLOTS);
+            setStatusSlot(ITEM_INDICATOR, Material.MAGENTA_STAINED_GLASS_PANE);
+        }, 8L);
+
+        Utilities.delay(() -> setStatusSlot(15, Material.CYAN_STAINED_GLASS_PANE), 12L);
+        Utilities.delay(() -> setStatusSlot(16, Material.CYAN_STAINED_GLASS_PANE), 14L);
+
+        Utilities.delay(() -> {
+            updateStatusPanes(Material.OBSIDIAN, REQUIRED_ITEM_INDICATOR_SLOTS);
+            updateStatusPanes(Material.OBSIDIAN, FORGED_ITEM_INDICATOR_SLOTS);
+            setStatusSlot(ITEM_INDICATOR, Material.OBSIDIAN);
         }, 16L);
 
         Utilities.delay(() -> {
-            updateStatusPanes(Material.LIME_STAINED_GLASS_PANE, REQUIRED_ITEM_INDICATOR_SLOTS);
-            updateStatusPanes(Material.LIME_STAINED_GLASS_PANE, FORGED_ITEM_INDICATOR_SLOTS);
-            setStatusSlot(ITEM_INDICATOR, Material.LIME_STAINED_GLASS_PANE);
+            updateStatusPanes(Material.PURPLE_STAINED_GLASS_PANE, REQUIRED_ITEM_INDICATOR_SLOTS);
+            updateStatusPanes(Material.PURPLE_STAINED_GLASS_PANE, FORGED_ITEM_INDICATOR_SLOTS);
+            setStatusSlot(ITEM_INDICATOR, Material.PURPLE_STAINED_GLASS_PANE);
         }, 18L);
 
         Utilities.delay(() -> {
+            Player viewingPlayer = getPlayer();
+            if (viewingPlayer == null || !viewingPlayer.isOnline()) {
+                this.isForging = false;
+                return;
+            }
+
             ItemStack result = recipe.getForgedItem().toItemStack().clone();
             result.setAmount(recipe.getForgedAmount());
 
-            Player p = getPlayer();
-            if (p != null && p.isOnline()) {
-                HashMap<Integer, ItemStack> leftover = p.getInventory().addItem(result);
-                if (!leftover.isEmpty()) {
-                    for (ItemStack item : leftover.values()) {
-                        p.getWorld().dropItem(p.getLocation(), item);
-                    }
-                }
+            HashMap<Integer, ItemStack> leftover = viewingPlayer.getInventory().addItem(result);
+            for (ItemStack item : leftover.values()) {
+                viewingPlayer.getWorld().dropItemNaturally(viewingPlayer.getLocation(), item);
+            }
 
-                this.isForging = false;
-                if (p.getOpenInventory().getTopInventory().getHolder() instanceof ForgeMenu) {
-                    refresh(p);
-                }
+            this.isForging = false;
+
+            if (viewingPlayer.getOpenInventory().getTopInventory().getHolder() instanceof ForgeMenu) {
+                refresh(viewingPlayer);
             }
         }, 22L);
     }
 
     private void updateStatusPanes(Material material, int[] slots) {
-        if (!(inventory.getHolder() instanceof ForgeMenu)) return;
+        Player player = getPlayer();
+        if (player == null || !(player.getOpenInventory().getTopInventory().getHolder() instanceof ForgeMenu)) {
+            return;
+        }
 
-        ItemStack pane = new ItemBuilder(material, "§6Forging...")
-            .hideTooltip()
-            .toItemStack();
-
+        ItemStack pane = new ItemBuilder(material).hideTooltip().toItemStack();
         for (int slot : slots) {
+            setItem(slot, pane, (_, _) -> {
+            });
             inventory.setItem(slot, pane);
         }
     }
 
     private void setStatusSlot(int slot, Material material) {
-        if (!(inventory.getHolder() instanceof ForgeMenu)) return;
+        Player player = getPlayer();
+        if (player == null || !(player.getOpenInventory().getTopInventory().getHolder() instanceof ForgeMenu)) {
+            return;
+        }
 
-        ItemStack pane = new ItemBuilder(material, "§6Forging...")
-            .hideTooltip()
-            .toItemStack();
-
+        ItemStack pane = new ItemBuilder(material).hideTooltip().toItemStack();
+        setItem(slot, pane, (_, _) -> {
+        });
         inventory.setItem(slot, pane);
     }
 
