@@ -2,6 +2,7 @@ package fr.moussax.blightedMC.content.items.abilities;
 
 import fr.moussax.blightedMC.engine.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
+import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -16,9 +17,9 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
     @Override
     public String[] getDescription() {
         return new String[]{
-            "Teleport through the void to the ",
-            "block you're looking at, up to §e" + MAX_DISTANCE,
-            "blocks away."
+                "Teleport through the void to the ",
+                "block you're looking at, up to §e" + MAX_DISTANCE,
+                "blocks away."
         };
     }
 
@@ -28,7 +29,7 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
         Location targetLocation = getTargetedEyeLocation(blightedPlayer);
 
         if (targetLocation == null) {
-            blightedPlayer.getPlayer().sendMessage("§cObstructed destination!");
+            Formatter.warn(blightedPlayer.getPlayer(), "Obstructed destination!");
             return false;
         }
 
@@ -82,48 +83,46 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
         var direction = eyeLocation.getDirection();
 
         RayTraceResult traceResult = player.getWorld().rayTraceBlocks(
-            eyeLocation, direction, MAX_DISTANCE, FluidCollisionMode.NEVER, true
+                eyeLocation, direction, MAX_DISTANCE, FluidCollisionMode.NEVER, true
         );
 
-        // Case 1: We hit a block
         if (traceResult != null && traceResult.getHitBlock() != null) {
             Block hitBlock = traceResult.getHitBlock();
+            BlockFace hitFace = traceResult.getHitBlockFace();
 
-            // Try landing on top
+            if (hitFace != null) {
+                Block adjacentBlock = hitBlock.getRelative(hitFace);
+                Location adjacentLocation = adjacentBlock.getLocation().add(0.5, 0.0, 0.5);
+
+                if (isSafe(adjacentLocation, false)) {
+                    return adjacentLocation;
+                }
+            }
+
             Location topOfBlock = hitBlock.getLocation().add(0.5, 1.0, 0.5);
-
-            // STRICT check for landing: We need solid ground below
-            if (isSafe(topOfBlock, true)) return topOfBlock;
+            if (isSafe(topOfBlock, false)) {
+                return topOfBlock;
+            }
 
             return null;
         }
 
-        // Case 2: We hit nothing (Air Dash)
-        Vector maxVec = direction.normalize().multiply(MAX_DISTANCE);
-        Location inAir = eyeLocation.add(maxVec);
+        Vector maxVec = direction.clone().normalize().multiply(MAX_DISTANCE);
+        Location inAir = eyeLocation.clone().add(maxVec);
 
-        // LENIENT check for air: We DON'T need solid ground below
         if (isSafe(inAir, false)) return inAir;
 
         return null;
     }
 
-    /**
-     * Checks if a location is safe to teleport to.
-     *
-     * @param location      The feet location
-     * @param requireGround Whether we strictly require a solid block below (true for landing, false for air dash)
-     */
     private boolean isSafe(Location location, boolean requireGround) {
         Block feet = location.getBlock();
         Block head = feet.getRelative(BlockFace.UP);
         Block below = feet.getRelative(BlockFace.DOWN);
 
-        // 1. Must not suffocate
         if (feet.getType().isSolid()) return false;
         if (head.getType().isSolid()) return false;
 
-        // 2. Ground check (Only if required)
         return !requireGround || below.getType().isSolid();
     }
 }
