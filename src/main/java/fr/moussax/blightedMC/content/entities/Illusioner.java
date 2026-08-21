@@ -2,21 +2,19 @@ package fr.moussax.blightedMC.content.entities;
 
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.components.ShieldComponent;
-import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
-import fr.moussax.blightedMC.engine.entities.spawnable.engine.SpawnMode;
+import fr.moussax.blightedMC.engine.entities.rituals.AncientCreature;
 import fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
-import org.bukkit.generator.structure.Structure;
 
 import java.util.List;
 
-public class Illusioner extends SpawnableEntity {
+public class Illusioner extends AncientCreature {
 
     public Illusioner() {
-        super("PILLAGER", "Pillager", 35, EntityType.PILLAGER, 0.5, SpawnMode.INDEPENDENT);
+        super("Ancient Dummy", 20, EntityType.ILLUSIONER, 30);
+        setDamage(12);
 
         this.lootTable = new EntityLootTableBuilder()
                 .addLoot(Material.SPECTRAL_ARROW, 4, 12, 0.6, EntityLootFeedbackDecorator.EntityLootRarity.COMMON)
@@ -34,13 +32,15 @@ public class Illusioner extends SpawnableEntity {
 
     @Override
     protected void onDefineBehavior() {
+        super.onDefineBehavior();
+
         if (getComponent("BLIGHTED_SHIELD") == null) {
             addComponent(new ShieldComponent(120));
         }
     }
 
     @Override
-    protected void defineSpawnConditions() {
-        addCondition(SpawnRules.insideStructure(Structure.MANSION).or(SpawnRules.insideStructure(Structure.TRIAL_CHAMBERS)));
+    public String getEntityId() {
+        return "ANCIENT_ILLUSIONER";
     }
 }
