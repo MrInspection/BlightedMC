@@ -1,10 +1,10 @@
 package fr.moussax.blightedMC.content.recipes;
 
-import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
-import fr.moussax.blightedMC.engine.items.forging.ForgeRecipe;
+import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
+import fr.moussax.blightedMC.engine.items.recipes.forging.ForgeRecipe;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.forging.registry.ForgeRegistryHandler;
+import fr.moussax.blightedMC.engine.items.recipes.forging.registry.ForgeRegistryHandler;
 import org.bukkit.Material;
 
 public class ForgeRecipes implements RegistryModule<ForgeRegistryHandler> {
