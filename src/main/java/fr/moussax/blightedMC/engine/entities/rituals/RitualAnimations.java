@@ -1,9 +1,9 @@
 package fr.moussax.blightedMC.engine.entities.rituals;
 
-import fr.moussax.blightedMC.BlightedMC;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.NonNull;
@@ -12,7 +12,11 @@ import java.util.Objects;
 
 public final class RitualAnimations {
 
-    public static void playRiteAnimation(BlightedMC instance, Location spawnLoc, @NonNull Runnable onAnimationComplete) {
+    public static void playRiteAnimation(
+            JavaPlugin instance,
+            Location spawnLocation,
+            @NonNull Runnable onAnimationComplete
+    ) {
         new BukkitRunnable() {
             int tick = 0;
 
@@ -25,15 +29,15 @@ public final class RitualAnimations {
                 }
 
                 if (tick < 20) {
-                    drawRitualFloor(spawnLoc, tick);
+                    drawRitualFloor(spawnLocation, tick);
                 }
 
                 if (tick >= 20 && tick < 45) {
-                    drawRisingSoulVortex(spawnLoc, tick);
+                    drawRisingSoulVortex(spawnLocation, tick);
                 }
 
                 if (tick >= 45) {
-                    drawManifestation(spawnLoc, tick);
+                    drawManifestation(spawnLocation, tick);
                 }
 
                 tick++;
@@ -41,7 +45,7 @@ public final class RitualAnimations {
         }.runTaskTimer(instance, 0L, 1L);
     }
 
-    private static void drawRitualFloor(Location loc, int tick) {
+    private static void drawRitualFloor(Location location, int tick) {
         double radius = 3.0;
         int particles = 4;
         double speed = 8.0;
@@ -51,20 +55,20 @@ public final class RitualAnimations {
             double x = radius * Math.cos(angle);
             double z = radius * Math.sin(angle);
 
-            Objects.requireNonNull(loc.getWorld()).spawnParticle(Particle.TRIAL_SPAWNER_DETECTION_OMINOUS, loc.clone().add(x, 0.1, z), 1, 0, 0, 0, 0);
+            Objects.requireNonNull(location.getWorld()).spawnParticle(Particle.TRIAL_SPAWNER_DETECTION_OMINOUS, location.clone().add(x, 0.1, z), 1, 0, 0, 0, 0);
 
-            loc.getWorld().spawnParticle(Particle.SOUL, loc.clone().add(x * 0.5, 0.1, z * 0.5), 0, 0, 0.1, 0, 0.05);
+            location.getWorld().spawnParticle(Particle.SOUL, location.clone().add(x * 0.5, 0.1, z * 0.5), 0, 0, 0.1, 0, 0.05);
         }
 
         if (tick % 5 == 0) {
-            loc.getWorld().spawnParticle(
-                Particle.BLOCK, loc.clone().add(0, 0.1, 0), 5, 0.5, 0, 0.5, 0.1,
-                Material.CRYING_OBSIDIAN.createBlockData()
+            location.getWorld().spawnParticle(
+                    Particle.BLOCK, location.clone().add(0, 0.1, 0), 5, 0.5, 0, 0.5, 0.1,
+                    Material.CRYING_OBSIDIAN.createBlockData()
             );
         }
     }
 
-    private static void drawRisingSoulVortex(Location loc, int tick) {
+    private static void drawRisingSoulVortex(Location location, int tick) {
         double radius = 1.8;
         double y = ((tick - 20) / 25.0) * 3.0;
 
@@ -73,19 +77,19 @@ public final class RitualAnimations {
             double x = radius * Math.cos(angle);
             double z = radius * Math.sin(angle);
 
-            Location particleLoc = loc.clone().add(x, y, z);
+            Location particleLocation = location.clone().add(x, y, z);
 
-            Objects.requireNonNull(loc.getWorld()).spawnParticle(Particle.SCULK_SOUL, particleLoc, 1, 0, 0, 0, 0.02);
-            loc.getWorld().spawnParticle(Particle.WITCH, particleLoc, 0, 0, 0, 0, 0);
+            Objects.requireNonNull(location.getWorld()).spawnParticle(Particle.SCULK_SOUL, particleLocation, 1, 0, 0, 0, 0.02);
+            location.getWorld().spawnParticle(Particle.WITCH, particleLocation, 0, 0, 0, 0, 0);
         }
 
         if (tick % 2 == 0) {
-            loc.getWorld().spawnParticle(Particle.REVERSE_PORTAL, loc.clone().add(0, y, 0), 1, 0.1, 0.5, 0.1, 0.01);
+            location.getWorld().spawnParticle(Particle.REVERSE_PORTAL, location.clone().add(0, y, 0), 1, 0.1, 0.5, 0.1, 0.01);
         }
     }
 
-    private static void drawManifestation(Location loc, int tick) {
-        Location center = loc.clone().add(0, 1.2, 0);
+    private static void drawManifestation(Location location, int tick) {
+        Location center = location.clone().add(0, 1.2, 0);
         Objects.requireNonNull(center.getWorld()).spawnParticle(Particle.WITCH, center, 5, 0.2, 0.5, 0.2, 0);
         center.getWorld().spawnParticle(Particle.REVERSE_PORTAL, center, 2, 0.1, 0.1, 0.1, 0.05);
 
