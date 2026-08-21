@@ -12,7 +12,6 @@ import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
 import fr.moussax.blightedMC.utils.sound.SoundSequence;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -221,7 +220,6 @@ public final class ForgeRecipePreviewMenu extends Menu {
                 canHyperforge ? "§eClick to Hyperforge!" : "§cYou don't meet the requirements!"
         ).setEnchantmentGlint(canHyperforge);
 
-
         setItem(HYPERFORGE_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, _) -> {
             if (canHyperforge) {
                 executeHyperforge(p, blightedPlayer, requirements, fuelCost);
@@ -259,13 +257,13 @@ public final class ForgeRecipePreviewMenu extends Menu {
         int amount = Math.max(1, recipe.getForgedAmount());
         result.setAmount(amount);
 
+        SoundSequence.FORGE_ITEM.play(player.getLocation());
+        refresh(player);
+
         HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(result);
         for (ItemStack drop : leftover.values()) {
             player.getWorld().dropItemNaturally(player.getLocation(), drop);
         }
-
-        SoundSequence.FORGE_ITEM.play(player.getLocation());
-        refresh(player);
     }
 
     private Map<String, IngredientInfo> aggregateForgeIngredients(ForgeRecipe recipe) {
