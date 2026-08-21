@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.engine.entities.rituals.menu;
 
 import fr.moussax.blightedMC.engine.entities.rituals.AncientRitual;
 import fr.moussax.blightedMC.engine.entities.rituals.registry.RitualRegistry;
-import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
+import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.PaginatedMenu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;

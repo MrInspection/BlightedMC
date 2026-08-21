@@ -4,8 +4,8 @@ import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.engine.entities.rituals.registry.RitualRegistry;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.engine.items.blocks.registry.BlockRegistry;
-import fr.moussax.blightedMC.engine.items.crafting.registry.RecipeRegistry;
-import fr.moussax.blightedMC.engine.items.forging.registry.ForgeRegistry;
+import fr.moussax.blightedMC.engine.items.recipes.crafting.registry.RecipeRegistry;
+import fr.moussax.blightedMC.engine.items.recipes.forging.registry.ForgeRegistry;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 
 /**

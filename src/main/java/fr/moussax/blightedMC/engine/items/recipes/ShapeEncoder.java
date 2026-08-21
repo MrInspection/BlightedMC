@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.engine.items.crafting;
+package fr.moussax.blightedMC.engine.items.recipes;
 
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import org.bukkit.Material;

@@ -1,7 +1,7 @@
-package fr.moussax.blightedMC.engine.items.forging;
+package fr.moussax.blightedMC.engine.items.recipes.forging;
 
 import fr.moussax.blightedMC.engine.items.BlightedItem;
-import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
+import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import lombok.Getter;
 import org.bukkit.Material;

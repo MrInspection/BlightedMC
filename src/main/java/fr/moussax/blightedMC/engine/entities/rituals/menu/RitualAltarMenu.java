@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.entities.rituals.AncientCreature;
 import fr.moussax.blightedMC.engine.entities.rituals.AncientRitual;
 import fr.moussax.blightedMC.engine.entities.rituals.RitualAnimations;
-import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
+import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
