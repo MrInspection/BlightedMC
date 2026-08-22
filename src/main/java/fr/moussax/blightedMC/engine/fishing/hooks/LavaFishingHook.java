@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.engine.fishing.hooks;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
 import fr.moussax.blightedMC.engine.fishing.FishingMethod;
+import fr.moussax.blightedMC.engine.fishing.FishingComboTracker;
 import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedCalculator;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
@@ -23,8 +24,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class LavaFishingHook {
     private static final Map<UUID, LavaFishingHook> ACTIVE_HOOKS = new HashMap<>();
 
-    private static final double FLOAT_TARGET_HIGH = 0.85;
-    private static final double FLOAT_TARGET_LOW = 0.6;
+    private static final double FLOAT_TARGET_HIGH = 0.95;
+    private static final double FLOAT_TARGET_LOW = 0.80;
     private static final double PARTICLE_SPEED = 0.15;
     private static final double PARTICLE_DISTANCE_SQUARED = 0.25 * 0.25;
 
@@ -54,6 +55,8 @@ public final class LavaFishingHook {
         this.environment = hook.getWorld().getEnvironment();
         this.fishingSpeedStat = fishingSpeedStat;
         this.luckOfSeaLevel = rod != null ? rod.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA) : 0;
+        this.hook.setVisualFire(false);
+        this.hook.setFireTicks(0);
 
         ACTIVE_HOOKS.put(hook.getUniqueId(), this);
         startLavaTask(calculateWaitTime());
@@ -123,6 +126,7 @@ public final class LavaFishingHook {
                     adjustHookFloat(FLOAT_TARGET_LOW);
 
                     if (--readyTicks <= 0) {
+                        FishingComboTracker.resetCombo(player, FishingMethod.LAVA);
                         remove();
                     }
                 }
@@ -169,7 +173,10 @@ public final class LavaFishingHook {
     public boolean reelIn() {
         remove();
 
-        if (!isReadyToCatch) return false;
+        if (!isReadyToCatch) {
+            FishingComboTracker.resetCombo(player, FishingMethod.LAVA);
+            return false;
+        }
 
         Location hookLocation = hook.getLocation();
         World world = hookLocation.getWorld();
@@ -187,12 +194,16 @@ public final class LavaFishingHook {
 
         Location spawnLocation = hookLocation.add(0, 0.5, 0);
 
+        int currentCombo = FishingComboTracker.getCombo(player, FishingMethod.LAVA);
         FishingLootTable lootTable = FishingLootRegistry.getTable(environment, FishingMethod.LAVA);
-        boolean success = lootTable.roll(blightedPlayer, spawnLocation, velocity, luckOfSeaLevel);
+        boolean success = lootTable.roll(blightedPlayer, spawnLocation, velocity, luckOfSeaLevel, currentCombo);
 
         if (success) {
+            FishingComboTracker.incrementCombo(player, FishingMethod.LAVA);
+            int newCombo = FishingComboTracker.getCombo(player, FishingMethod.LAVA);
             ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(playerLocation, EntityType.EXPERIENCE_ORB);
             orb.setExperience(ThreadLocalRandom.current().nextInt(3, 8));
+            FishingComboTracker.spawnBonusExperience(world, playerLocation, newCombo);
         }
 
         return success;
