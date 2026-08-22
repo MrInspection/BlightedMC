@@ -62,33 +62,50 @@ public final class FishingLootTable {
      * @return {@code true} if a loot entry was selected and executed
      */
     public boolean roll(BlightedPlayer player, Location location, Vector velocity) {
-        return roll(player, location, velocity, 0);
+        return roll(player, location, velocity, 0, 0);
     }
 
     /**
      * Rolls this fishing loot table using the specified Luck of the Sea level.
      *
-     * <p>Luck of the Sea increases the probability of selecting an entity
-     * from the entity pool. If no entity is selected, the item pool is used.</p>
+     * <p>Luck of the Sea increases the chance of selecting an entry from the
+     * entity pool. If no entity is selected, the item pool is used.</p>
      *
      * @param player         the player performing the fishing roll
-     * @param location       the location at which the catch occurs
-     * @param velocity       the velocity of the fishing hook
-     * @param luckOfSeaLevel the player's Luck of the Sea enchantment level
-     * @return {@code true} if a loot entry was selected and executed
+     * @param location       the location where the catch occurs
+     * @param velocity       the fishing hook's velocity
+     * @param luckOfSeaLevel the player's Luck of the Sea level
+     * @return {@code true} if a loot entry was executed
      */
     public boolean roll(BlightedPlayer player, Location location, Vector velocity, int luckOfSeaLevel) {
+        return roll(player, location, velocity, luckOfSeaLevel, 0);
+    }
+
+    /**
+     * Rolls this fishing loot table using Luck of the Sea and the current combo.
+     *
+     * <p>The combo increases the entity pool chance by up to 10%, while Luck of
+     * the Sea provides an additional chance bonus. The combined chance is capped
+     * at 100%. If no entity is selected, the item pool is used.</p>
+     *
+     * @param player         the player performing the fishing roll
+     * @param location       the location where the catch occurs
+     * @param velocity       the fishing hook's velocity
+     * @param luckOfSeaLevel the player's Luck of the Sea level
+     * @param combo          the player's current fishing combo
+     * @return {@code true} if a loot entry was executed
+     */
+    public boolean roll(BlightedPlayer player, Location location, Vector velocity, int luckOfSeaLevel, int combo) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         World world = Objects.requireNonNull(location.getWorld());
         Biome biome = world.getBiome(location);
         LootContext context = new LootContext(player, world, biome, location, random, velocity);
 
-        double adjustedEntityChance = Math.min(
-                1.0,
-                entityRollChance + (luckOfSeaLevel * LUCK_ENTITY_CHANCE_PER_LEVEL)
-        );
+        double seaCreatureChanceBonus = Math.min(0.10, combo * 0.005);
+        double luckBonus = luckOfSeaLevel * LUCK_ENTITY_CHANCE_PER_LEVEL;
+        double finalEntityChance = Math.min(1.0, entityRollChance + luckBonus + seaCreatureChanceBonus);
 
-        if (!entityTable.isEmpty() && random.nextDouble() <= adjustedEntityChance) {
+        if (!entityTable.isEmpty() && random.nextDouble() <= finalEntityChance) {
             entityTable.execute(context);
             return true;
         }
