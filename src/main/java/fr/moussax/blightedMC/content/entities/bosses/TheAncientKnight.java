@@ -77,7 +77,6 @@ public class TheAncientKnight extends BlightedEntity {
 
     @Override
     protected void onDefineBehavior() {
-        // Phase 1: Melee & Overhead Stabs (Dynamic multi-target when multiple players are near)
         registerPhase(1.0, () -> {
             currentPhase = 1;
             setMainHandEquipped(true);
@@ -85,7 +84,6 @@ public class TheAncientKnight extends BlightedEntity {
             addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(5.0));
         });
 
-        // Phase 2: Refined Stomp & Arced Sword Throw
         registerPhase(0.66, () -> {
             setMainHandEquipped(true);
             addPhaseAbility(120L, 220L, this::executeStomp);
@@ -93,7 +91,6 @@ public class TheAncientKnight extends BlightedEntity {
             addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(5.0));
         });
 
-        // Phase 3: 8-Blade Bladenado & Sword Throw Combo
         registerPhase(0.33, () -> {
             setMainHandEquipped(true);
             addPhaseAbility(100L, 220L, this::executeBladenado);
@@ -488,7 +485,6 @@ public class TheAncientKnight extends BlightedEntity {
 
                 Location currentCenter = entity.getLocation();
 
-                // Smart Pursuit: Slowly tracks closest player while active
                 Player chaseTarget = getNearestPlayer(16.0);
                 if (chaseTarget != null) {
                     Vector chaseVector = chaseTarget.getLocation().toVector().subtract(currentCenter.toVector()).setY(0);
@@ -585,7 +581,6 @@ public class TheAncientKnight extends BlightedEntity {
         entity.getEquipment().setBoots(bootsItem);
     }
 
-
     @Override
     public String getEntityId() {
         return "DIAMOND_GIANT";
@@ -634,6 +629,10 @@ public class TheAncientKnight extends BlightedEntity {
         private Location stabledLocation;
         private Giant swordEntity;
         private int tick = 0;
+        private boolean returning = false;
+        private int returnStep = 0;
+        private final int totalReturnSteps = 12;
+        private Location groundApex;
 
         StabPlayer(BlightedPlayer target, TheAncientKnight owner) {
             this.target = target;
@@ -654,7 +653,7 @@ public class TheAncientKnight extends BlightedEntity {
 
         @Override
         public void run() {
-            if (!owner.isAlive() || !target.getPlayer().isOnline()) {
+            if (!owner.isAlive() || swordEntity == null || swordEntity.isDead()) {
                 cancel();
                 return;
             }
@@ -662,26 +661,73 @@ public class TheAncientKnight extends BlightedEntity {
             if (tick == 0) {
                 stabledLocation = target.getPlayer().getLocation();
                 Objects.requireNonNull(stabledLocation.getWorld())
-                    .playSound(stabledLocation, Sound.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, 1.0f, 0.75f);
+                        .playSound(stabledLocation, Sound.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, 1.0f, 0.75f);
             }
 
-            if (tick < 90) {
-                trackSwordAbovePlayer();
-                stabledLocation = target.getPlayer().getLocation();
-            } else if (tick == 101) {
-                if (owner.getEntity() instanceof Mob mob) {
-                    mob.swingMainHand();
+            if (!returning) {
+                if (tick < 90) {
+                    if (target.getPlayer().isOnline()) {
+                        stabledLocation = target.getPlayer().getLocation().clone();
+                        trackSwordAbovePlayer();
+                    }
+                } else if (tick == 101) {
+                    if (owner.getEntity() instanceof Mob mob) {
+                        mob.swingMainHand();
+                    }
+                    plungeAndDamage();
+                    groundApex = stabledLocation.clone().add(0, 0.5, 0);
+                } else if (tick >= 115) {
+                    returning = true;
+                    if (owner.getEntity() != null) {
+                        owner.getEntity().getWorld().playSound(owner.getEntity().getLocation(), Sound.BLOCK_CHAIN_FALL, 1.5f, 1.4f);
+                    }
                 }
-                plungeAndDamage();
-            } else if (tick > 200) {
-                cancel();
+            } else {
+                executeReturnFlight();
             }
 
             tick++;
         }
 
+        private void executeReturnFlight() {
+            returnStep++;
+            double progress = (double) returnStep / totalReturnSteps;
+
+            LivingEntity bossEntity = owner.getEntity();
+            if (bossEntity == null || !bossEntity.isValid()) {
+                cancel();
+                return;
+            }
+
+            double currentYawRad = Math.toRadians(bossEntity.getLocation().getYaw());
+            Vector dynamicRight = new Vector(-Math.cos(currentYawRad), 0, -Math.sin(currentYawRad)).normalize();
+            Location returnHandLoc = bossEntity.getEyeLocation().clone().add(dynamicRight.multiply(2.2)).subtract(0, 1.5, 0);
+
+            double returnArcY = Math.sin(progress * Math.PI) * 1.8;
+            Location currentReturnLoc = groundApex.clone().add(returnHandLoc.toVector().subtract(groundApex.toVector()).multiply(progress)).add(0, returnArcY, 0);
+
+            float spinYaw = (float) ((returnStep * 60) % 360);
+            swordEntity.teleport(TheAncientKnight.calculateGiantAnchor(currentReturnLoc, spinYaw, true, 0.85));
+
+            World world = Objects.requireNonNull(currentReturnLoc.getWorld());
+            world.spawnParticle(Particle.DUST, currentReturnLoc, 2, 0.0, 0.0, 0.0, 0.0, RUNIC_CYAN);
+
+            for (Player player : owner.getNearbyPlayers(26)) {
+                if (player.getLocation().distanceSquared(currentReturnLoc) <= 5.0) {
+                    player.damage(12, bossEntity);
+                }
+            }
+
+            if (returnStep >= totalReturnSteps) {
+                if (bossEntity instanceof Mob mob) {
+                    mob.swingMainHand();
+                }
+                world.playSound(bossEntity.getLocation(), Sound.ITEM_ARMOR_EQUIP_NETHERITE, 1.5f, 1.0f);
+                cancel();
+            }
+        }
+
         private void trackSwordAbovePlayer() {
-            if (swordEntity == null || swordEntity.isDead()) return;
             Location above = target.getPlayer().getLocation().clone();
             above.setPitch(0);
             above.setYaw(0);
@@ -690,13 +736,11 @@ public class TheAncientKnight extends BlightedEntity {
         }
 
         private void plungeAndDamage() {
-            if (swordEntity != null && !swordEntity.isDead()) {
-                Location plungeLocation = target.getPlayer().getLocation().clone();
-                plungeLocation.setPitch(0);
-                plungeLocation.setYaw(0);
-                plungeLocation.subtract(2, 1, 4);
-                swordEntity.teleport(plungeLocation);
-            }
+            Location plungeLocation = stabledLocation.clone();
+            plungeLocation.setPitch(0);
+            plungeLocation.setYaw(0);
+            plungeLocation.subtract(2, 1, 4);
+            swordEntity.teleport(plungeLocation);
 
             World world = Objects.requireNonNull(stabledLocation.getWorld());
             world.spawnParticle(Particle.EXPLOSION_EMITTER, stabledLocation, 1);
