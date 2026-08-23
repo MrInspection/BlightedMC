@@ -1,12 +1,12 @@
 package fr.moussax.blightedMC.engine.entities.rituals.menu;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.engine.entities.rituals.AncientCreature;
 import fr.moussax.blightedMC.engine.entities.rituals.AncientRitual;
 import fr.moussax.blightedMC.engine.entities.rituals.RitualAnimations;
 import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
-import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -34,26 +34,28 @@ public final class RitualAltarMenu extends Menu {
     private boolean canInvoke = false;
 
     public RitualAltarMenu(AncientRitual ritual, Menu previousMenu) {
-        super("Rituals Altar", 54);
+        super(ritual == null ? "Rituals Altar" : "Invoke Creature", 54);
         this.ritual = ritual;
         this.previousMenu = previousMenu;
     }
 
     public RitualAltarMenu(AncientRitual ritual) {
-        super("Rituals Altar", 54);
-        this.ritual = ritual;
-        this.previousMenu = null;
+        this(ritual, null);
     }
 
     @Override
     public void build(Player player) {
-        if (ritual != null) checkRequirements(player);
+        if (ritual != null) {
+            checkRequirements(player);
+        }
 
         fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
-
-        // Setup grids and indicators
         setupGrid();
-        if (ritual != null) displayRequiredIngredients();
+
+        if (ritual != null) {
+            displayRequiredIngredients();
+        }
+
         setupStatusPanes();
         setupResultDisplay();
         setupActionButtons(player);
@@ -61,37 +63,55 @@ public final class RitualAltarMenu extends Menu {
 
     private void setupGrid() {
         ItemBuilder builder = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE, "§cLocked Slot");
-        if (ritual == null) builder.addLore("§7Select an ancient ritual to view", "§7view the required offerings.");
-        else builder.addLore("§7This slot isn't used for", "§7the selected ritual.");
+        if (ritual == null) {
+            builder.addLore("§7Select an ancient ritual to view", "§7the required offerings.");
+        } else {
+            builder.addLore("§7This slot isn't used for", "§7the selected ritual.");
+        }
 
         fillSlots(GRID_SLOTS, builder.toItemStack());
     }
 
     private void setupResultDisplay() {
-        ItemStack result;
         if (ritual == null) {
-            result = new ItemBuilder(Material.BARRIER, "§cRitual Required")
-                .addLore("§7Select an ancient ritual to start", "§7the invocation process.")
-                .toItemStack();
-        } else {
-            result = ritual.getSummoningItem().clone();
-            if (!result.hasItemMeta() || !Objects.requireNonNull(result.getItemMeta()).hasDisplayName()) {
-                ItemBuilder builder = new ItemBuilder(result);
-                if (ritual.getSummonedCreature() != null)
-                    builder.setDisplayName("§5" + ritual.getSummonedCreature().getName());
-                result = builder.toItemStack();
-            }
+            ItemStack barrier = new ItemBuilder(Material.BARRIER, "§cRitual Required")
+                    .addLore("§7Select an ancient ritual to start", "§7the invocation process.")
+                    .toItemStack();
+            setItem(25, barrier, (_, _) -> {});
+            return;
         }
-        setItem(25, result, MenuItemInteraction.ANY_CLICK, (p, t) -> {});
+
+        ItemStack result = ritual.getDisplayedItem().clone();
+        if (!result.hasItemMeta() || !Objects.requireNonNull(result.getItemMeta()).hasDisplayName()) {
+            ItemBuilder builder = new ItemBuilder(result);
+            if (ritual.getSummonedCreature() != null) {
+                builder.setDisplayName("§5" + ritual.getSummonedCreature().getName());
+            }
+            result = builder.toItemStack();
+        }
+
+        setItem(25, result, (_, _) -> {});
     }
 
     private void checkRequirements(Player player) {
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
         Map<String, Integer> requiredCounts = aggregateRequirements();
+
+        Map<String, Integer> inventoryCounts = new HashMap<>();
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item == null || item.getType() == Material.AIR) continue;
+            for (String reqId : requiredCounts.keySet()) {
+                if (Utilities.resolveItemId(item, reqId).equals(reqId)) {
+                    inventoryCounts.put(reqId, inventoryCounts.getOrDefault(reqId, 0) + item.getAmount());
+                }
+            }
+        }
+
         boolean hasItems = requiredCounts.entrySet().stream()
-            .allMatch(e -> hasEnoughIngredient(player, e.getKey(), e.getValue()));
-        boolean hasGems = blightedPlayer.getGemsManager().hasEnoughGems(ritual.getGemstoneCost());
-        boolean hasXp = player.getLevel() >= ritual.getExperienceLevelCost();
+                .allMatch(e -> inventoryCounts.getOrDefault(e.getKey(), 0) >= e.getValue());
+        boolean hasGems = blightedPlayer.getGemsManager().hasEnoughGems(ritual.getGemsCost());
+        boolean hasXp = player.getLevel() >= ritual.getLevelCost();
+
         this.canInvoke = hasItems && hasGems && hasXp;
     }
 
@@ -103,24 +123,17 @@ public final class RitualAltarMenu extends Menu {
         return counts;
     }
 
-    private boolean hasEnoughIngredient(Player player, String itemId, int requiredAmount) {
-        int count = 0;
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item == null || item.getType() == Material.AIR) continue;
-            if (Utilities.resolveItemId(item, itemId).equals(itemId)) count += item.getAmount();
-        }
-        return count >= requiredAmount;
-    }
-
     private void displayRequiredIngredients() {
         for (int i = 0; i < ritual.getOfferings().size() && i < GRID_SLOTS.length; i++) {
             CraftingObject ingredient = ritual.getOfferings().get(i);
-            setItem(GRID_SLOTS[i], createDisplayItem(ingredient), MenuItemInteraction.ANY_CLICK, (p, t) -> {});
+            setItem(GRID_SLOTS[i], createDisplayItem(ingredient), (_, _) -> {});
         }
     }
 
     private ItemStack createDisplayItem(CraftingObject ingredient) {
-        ItemStack item = ingredient.isCustom() ? ingredient.getManager().toItemStack().clone() : ingredient.getVanillaItem().clone();
+        ItemStack item = ingredient.isCustom()
+                ? Objects.requireNonNull(ingredient.getManager()).toItemStack().clone()
+                : Objects.requireNonNull(ingredient.getVanillaItem()).clone();
         item.setAmount(ingredient.getAmount());
         return item;
     }
@@ -128,18 +141,25 @@ public final class RitualAltarMenu extends Menu {
     private void setupStatusPanes() {
         Material indicator = determineIndicatorMaterial();
         ItemStack sacrificedPane = new ItemBuilder(indicator, "§5Offerings to Sacrifice")
-            .addLore("§7The items required to invoke", "§7the §4⚚ Ancient Creature §7are ", "§7displayed in this side.").toItemStack();
+                .addLore("§7The items required to invoke", "§7the §4⚚ Ancient Creature §7are", "§7displayed in this side.")
+                .toItemStack();
         ItemStack invokedPane = new ItemBuilder(indicator, "§5Creature to Invoke")
-            .addLore("§7The §4⚚ Ancient Creature §7you will", "§7invoke with your offerings.").toItemStack();
+                .addLore("§7The §4⚚ Ancient Creature §7you will", "§7invoke with your offerings.")
+                .toItemStack();
         ItemStack fillerPane = new ItemBuilder(indicator, "§r").hideTooltip().toItemStack();
 
         fillSlots(REQUIRED_ITEM_INDICATOR_SLOTS, sacrificedPane);
         fillSlots(INVOKED_MOB_INDICATOR_SLOTS, invokedPane);
         fillSlots(ITEM_INDICATOR, fillerPane);
 
-        ItemStack forgeIcon = new ItemBuilder(Material.SCULK_SHRIEKER, "§5Rituals Altar")
-            .addLore("§7Sacrifice offerings to the ", "§7Rituals Altar to invoke an", "§7ancient creature.").toItemStack();
-        setItem(14, forgeIcon, MenuItemInteraction.ANY_CLICK, (p, t) -> {});
+        ItemStack shriekerIcon = new ItemBuilder(Material.SCULK_SHRIEKER, "§5The Altar")
+                .addLore(
+                        "§7The Ritual Altar allows you to offer",
+                        "§7rare sacrifices, gems, and experience",
+                        "§7to invoke ancient forgotten entities."
+                )
+                .toItemStack();
+        setItem(14, shriekerIcon, (_, _) -> {});
     }
 
     private Material determineIndicatorMaterial() {
@@ -148,54 +168,81 @@ public final class RitualAltarMenu extends Menu {
     }
 
     private void setupActionButtons(Player player) {
-        setupInvokeButton(player);
+        setupInvokeButton();
         setupNavigationButtons();
     }
 
-    private void setupInvokeButton(Player player) {
+    private void setupInvokeButton() {
         ItemBuilder builder = new ItemBuilder(Material.END_PORTAL_FRAME);
         if (ritual == null) {
             builder.setDisplayName("§5Initiate Invocation")
-                .addLore("§7Select an ancient ritual to start", "§7the invocation process.");
+                    .addLore("§7Select an ancient ritual to start", "§7the invocation process.");
         } else {
-            builder.setDisplayName("§5Invoke " + ritual.getSummonedCreature().getName())
-                .addLore("", " §7Cost: ");
-            for (CraftingObject ingredient : ritual.getOfferings())
+            String creatureName = ritual.getSummonedCreature() != null
+                    ? ritual.getSummonedCreature().getName()
+                    : "Creature";
+            builder.setDisplayName("§5Invoke " + creatureName)
+                    .addLore("", " §7Offerings required:");
+
+            for (CraftingObject ingredient : ritual.getOfferings()) {
                 builder.addLore(" §8‣ " + Utilities.extractIngredientName(ingredient) + " §8x" + ingredient.getAmount());
+            }
 
-            if (ritual.getGemstoneCost() > 0)
-                builder.addLore(" §8‣ §d" + Formatter.formatDecimalWithCommas(ritual.getGemstoneCost()) + " Gems");
-            if (ritual.getExperienceLevelCost() > 0)
-                builder.addLore(" §8‣ §3" + Formatter.formatDecimalWithCommas(ritual.getExperienceLevelCost()) + " XP Levels");
+            if (ritual.getGemsCost() > 0) {
+                builder.addLore(" §8‣ §d" + Formatter.formatDecimalWithCommas(ritual.getGemsCost()) + "✵ Gems");
+            }
+            if (ritual.getLevelCost() > 0) {
+                builder.addLore(" §8‣ §3" + Formatter.formatDecimalWithCommas(ritual.getLevelCost()) + "◎ EXP Levels");
+            }
 
-            builder.addLore("", " §8§lBEWARE!", " §8Such ritual demand sacrifice,", " §8and the Ancients do not return", " §8unchanged.", "")
-                .addLore(canInvoke ? "§eClick to confirm!" : "§cYou don't have the required ingredients!")
-                .setEnchantmentGlint(canInvoke);
+            if (ritual.getSummonedCreature() != null) {
+                builder.addLore(
+                        "",
+                        " §7Time limit: §c" + Formatter.formatTime(ritual.getSummonedCreature().getTimeAllowance())
+                );
+            }
+
+            builder.addLore(
+                    "",
+                    " §c§lBEWARE!",
+                    " §cSuch rituals demand sacrifice,",
+                    " §cand the Ancients do not return",
+                    " §cunchanged.",
+                    "",
+                    canInvoke ? "§eClick to confirm!" : "§cYou don't meet the requirements!"
+            ).setEnchantmentGlint(canInvoke);
         }
 
-        setItem(32, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
-            if (ritual != null && canInvoke) invokeMob(p);
-            else p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
+        setItem(32, builder.toItemStack(), (p, _) -> {
+            if (ritual != null && canInvoke) {
+                invokeMob(p);
+            } else {
+                p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
+            }
         });
     }
 
     private void setupNavigationButtons() {
         ItemStack recipeBook = new ItemBuilder(Material.WRITABLE_BOOK, "§5Ancient Rituals")
-            .addLore("§8Voidling Grimoire", "",
-                " §7Browse ancient rituals written eons ", " §7ago by the §5Voidling Mages§7, devised ",
-                " §7to invoke forgotten creatures", " §7back into existence.", "",
-                " §8§lBEWARE!", " §8Such rituals demand sacrifice,", " §8and the Ancients do not return",
-                " §8unchanged.", "", "§eClick to browse!").toItemStack();
+                .addLore(
+                        "§7Browse ancient rituals written eons",
+                        "§7ago by the §5Voidling Mages§7, devised",
+                        "§7to invoke forgotten creatures",
+                        "§7back into existence.",
+                        "",
+                        "§eClick to browse!"
+                ).toItemStack();
 
-        setItem(49, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (p, t) -> close());
-        setItem(50, recipeBook, MenuItemInteraction.ANY_CLICK, (p, t) ->
-            BlightedMC.menuManager().openMenu(new RitualsDirectoryMenu(this), p));
+        setCloseButton(49);
+        setItem(50, recipeBook, (p, _) -> openSubMenu(new RitualsDirectoryMenu(this)));
     }
 
     private void consumeIngredients(Player player) {
-        ritual.getOfferings().forEach(ingredient -> Utilities.consumeItemsFromInventory(player, ingredient));
-        BlightedPlayer.getBlightedPlayer(player).removeGems(ritual.getGemstoneCost());
-        player.setLevel(player.getLevel() - ritual.getExperienceLevelCost());
+        for (CraftingObject ingredient : ritual.getOfferings()) {
+            Utilities.consumeItemsFromInventory(player, ingredient);
+        }
+        BlightedPlayer.getBlightedPlayer(player).removeGems(ritual.getGemsCost());
+        player.setLevel(player.getLevel() - ritual.getLevelCost());
     }
 
     private void invokeMob(Player player) {
@@ -212,18 +259,23 @@ public final class RitualAltarMenu extends Menu {
 
         Bukkit.broadcastMessage("§5 ☤ §f" + player.getName() + " §dhas started an §5Ancient Ritual§d!");
 
-        final Location spawnLoc = player.getLocation().add(player.getLocation().getDirection().setY(0).normalize().multiply(3));
+        Location spawnLoc = player.getLocation().add(player.getLocation().getDirection().setY(0).normalize().multiply(3));
         spawnLoc.setY(player.getLocation().getY());
 
         SoundSequence.ANCIENT_MOB_SPAWN.play(spawnLoc);
         RitualAnimations.playRiteAnimation(BlightedMC.getInstance(), spawnLoc, () -> handleFinalImpact(spawnLoc));
     }
 
-    private void handleFinalImpact(Location loc) {
-        if (ritual.getSummonedCreature() != null) {
-            Bukkit.broadcastMessage("§5 ☤ §dThe §c" + ritual.getSummonedCreature().getName() + " §dhas been summoned by §f" + Objects.requireNonNull(getPlayer()).getName() + "§d.");
-            ritual.getSummonedCreature().clone().spawn(loc);
+    private void handleFinalImpact(Location location) {
+        Player player = getPlayer();
+        if (ritual.getSummonedCreature() == null || player == null) {
+            return;
         }
+
+        Bukkit.broadcastMessage("§5 ☤ §dThe §4" + ritual.getSummonedCreature().getName() + " §dhas been summoned by §f" + player.getName() + "§d.");
+
+        AncientCreature creature = (AncientCreature) ritual.getSummonedCreature().clone();
+        creature.setSummoner(player);
+        creature.spawn(location);
     }
 }
-

@@ -31,6 +31,11 @@ public final class MagmaweaveSetBonus extends EmberWeaveSetBonus {
     }
 
     @Override
+    public double getFishingSpeedBonus() {
+        return 43.0;
+    }
+
+    @Override
     public void startAbilityEffect() {
         if (isActive || blightedPlayer == null) return;
 

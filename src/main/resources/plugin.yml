@@ -23,8 +23,6 @@ commands:
     description: Open or give yourself a custom item
   tppos:
     description: Teleport to a position
-  fly:
-    description: Toggle fly mode for yourself or another player
   forge:
     description: Forge command
   altar:
@@ -33,3 +31,19 @@ commands:
     description: Moderator command
   invsee:
     description: Moderator command
+  gms:
+    description: Switch to survival mode
+  gmc:
+    description: Switch to creative mode
+  gmspec:
+    description: Switch to spectator mode
+  gma:
+    description: Switch to adventure mode
+  nightvision:
+    description: Toggle night vision for yourself
+    aliases:
+      - nv
+  god:
+  butcher:
+  speed:
+  fly:

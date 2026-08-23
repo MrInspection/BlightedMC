@@ -56,7 +56,7 @@ public class OverworldLavaFishing implements RegistryModule<FishingRegistryHandl
             .addItem(Material.IRON_NUGGET, 5, 15, 100.0, COMMON)
             .addItem(Material.COAL, 3, 8, 100.0, COMMON)
             .addItem(Material.STONE, 5, 10, 100.0, COMMON)
-            .addItem(ItemResult.of(Material.STONE_BUTTON, b -> b.setDisplayName("§rPebble")), 2, 5, 100.0, COMMON)
+            .addItem(ItemResult.of(Material.STONE_BUTTON, builder -> builder.setItemName("Pebble")), 2, 5, 100.0, COMMON)
             .addItem(Material.TUFF, 5, 10, 60.0, GOOD_CATCH, LootCondition.atMostY(0))
             .addItem(new GemsResult(), 2, 5, 60.0, GOOD_CATCH)
             .addItem(Material.EXPERIENCE_BOTTLE, 3, 8, 55.0, GOOD_CATCH)

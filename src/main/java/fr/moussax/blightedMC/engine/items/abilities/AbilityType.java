@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.engine.items.abilities;
 import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -18,7 +19,8 @@ public enum AbilityType {
     FULL_SET_BONUS("§6§lFULL SET BONUS"),
     ENTITY_HIT("§d§lON HIT"),
     PRE_HIT("§d§lPRE HIT"),
-    AFTER_HIT("§d§lAFTER HIT");
+    AFTER_HIT("§d§lAFTER HIT"),
+    PASSIVE("");
 
     private final String displayName;
 
@@ -48,6 +50,11 @@ public enum AbilityType {
         if (event instanceof EntityDamageByEntityEvent) {
             return this == ENTITY_HIT;
         }
+
+        if(event instanceof BlockBreakEvent) {
+            return this == PASSIVE;
+        }
+
         return false;
     }
 }

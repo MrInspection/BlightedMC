@@ -51,22 +51,22 @@ public class NetherMaterials implements RegistryModule<ItemRegistryHandler> {
         BlightedItem flames = new BlightedItem("FLAMES", ItemType.MATERIAL, ItemRarity.RARE, Material.BLAZE_POWDER);
         flames.setDisplayName("Flames");
         flames.addLore("",
-            " §7Dredged from the deepest magma, ",
-            " §7these §6abyssal embers §7burn with",
-            " §7a cold heat that defies nature.",
-            "",
-            ItemRarity.RARE.getName()
+                " §7Dredged from the deepest magma, ",
+                " §7these §6abyssal embers §7burn with",
+                " §7a cold heat that defies nature.",
+                "",
+                ItemRarity.RARE.getName()
         );
         flames.addEnchantmentGlint();
 
         BlightedItem sulfur = new BlightedItem("SULFUR", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.GLOWSTONE_DUST);
         sulfur.setDisplayName("Sulfur");
         sulfur.addLore(
-            "", " §7A pungent precipitate scraped ",
-            " §7from Nether vents, used to",
-            " §7catalyze volatile reactions.",
-            "",
-            ItemRarity.UNCOMMON.getName()
+                "", " §7A pungent precipitate scraped ",
+                " §7from Nether vents, used to",
+                " §7catalyze volatile reactions.",
+                "",
+                ItemRarity.UNCOMMON.getName()
         );
 
         BlightedItem enchantedSulfur = new BlightedItem("ENCHANTED_SULFUR", ItemType.MATERIAL, ItemRarity.RARE, Material.GLOWSTONE_DUST);
@@ -89,17 +89,16 @@ public class NetherMaterials implements RegistryModule<ItemRegistryHandler> {
         BlightedItem cremeBrulee = new BlightedItem("CREME_BRULEE", ItemType.UNCATEGORIZED, ItemRarity.UNCOMMON, Material.PUMPKIN_PIE);
         cremeBrulee.setDisplayName("Crème brûlée");
         cremeBrulee.addLore(
-            "§8French Food",
-            "",
-            " §7Impervious to the flame that",
-            " §7scorched its §6caramelized§7,",
-            " §6crown§7, this custard remains",
-            " §7velvety and untouched within. ",
-            "",
-            " §8“Sous le feu, la promesse",
-            " §8d'un instant sucré.”",
-            "",
-            ItemRarity.UNCOMMON.getName() + " GOURMET"
+                "",
+                " §7Impervious to the flame that",
+                " §7scorched its §6caramelized§7,",
+                " §6crown§7, this custard remains",
+                " §7velvety and untouched within. ",
+                "",
+                " §8“Sous le feu, la promesse",
+                " §8d'un instant sucré.”",
+                "",
+                ItemRarity.UNCOMMON.getName()
         );
         cremeBrulee.editFood(food -> {
             food.setNutrition(10);
@@ -114,7 +113,7 @@ public class NetherMaterials implements RegistryModule<ItemRegistryHandler> {
         suspiciousFungus.addRule(ItemRule.PREVENT_PLACEMENT);
         suspiciousFungus.addEnchantmentGlint();
 
-                registry.register(enchantedGhastTear);
+        registry.register(enchantedGhastTear);
         registry.register(enchantedMagmaCream);
         registry.register(enchantedQuartz);
         registry.register(enchantedBlazePowder);

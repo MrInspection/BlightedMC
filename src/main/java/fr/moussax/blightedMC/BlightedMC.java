@@ -1,6 +1,8 @@
 package fr.moussax.blightedMC;
 
-import fr.moussax.blightedMC.engine.fishing.listeners.LavaFishingHook;
+import fr.moussax.blightedMC.engine.fishing.hooks.LavaFishingHook;
+import fr.moussax.blightedMC.engine.fishing.hooks.VoidFishingHook;
+import fr.moussax.blightedMC.registry.CommandsRegistry;
 import fr.moussax.blightedMC.registry.EventsRegistry;
 import fr.moussax.blightedMC.registry.RegistrySystem;
 import fr.moussax.blightedMC.server.BlightedServer;
@@ -10,7 +12,6 @@ import fr.moussax.blightedMC.server.database.PluginDatabase;
 import fr.moussax.blightedMC.engine.entities.spawnable.engine.BlightedSpawnEngine;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuSystem;
-import fr.moussax.blightedMC.utils.commands.CommandBuilder;
 import fr.moussax.blightedMC.utils.debug.Log;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -19,6 +20,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.*;
 import java.sql.SQLException;
 
+/**
+ * Main plugin entry point for BlightedMC.
+ *
+ * <p>Coordinates initialization and shutdown of the plugin's core systems,
+ * including server configuration, persistence, registries, commands, event
+ * listeners, entity spawning, and custom fishing hooks.</p>
+ */
 public final class BlightedMC extends JavaPlugin {
 
     @Getter
@@ -43,7 +51,7 @@ public final class BlightedMC extends JavaPlugin {
         settings = PluginSettings.load(this);
         initializeDatabase();
 
-        CommandBuilder.initializeCommands();
+        CommandsRegistry.register(this);
         RegistrySystem.initialize();
         eventsRegistry = new EventsRegistry();
         eventsRegistry.initializeListeners();
@@ -56,20 +64,36 @@ public final class BlightedMC extends JavaPlugin {
     @Override
     public void onDisable() {
         LavaFishingHook.cleanupAll();
+        VoidFishingHook.cleanupAll();
         database.closeConnection();
         eventsRegistry.shutdownMenus();
         eventsRegistry.cleanup();
         RegistrySystem.clear();
     }
 
+    /**
+     * Returns the menu manager associated with this plugin instance.
+     *
+     * @return active menu manager
+     */
     public MenuManager getMenuManager() {
         return eventsRegistry.getMenuManager();
     }
 
+    /**
+     * Returns the menu system associated with this plugin instance.
+     *
+     * @return active menu system
+     */
     public MenuSystem getMenuSystem() {
         return eventsRegistry.getMenuSystem();
     }
 
+    /**
+     * Returns the menu manager of the active plugin instance.
+     *
+     * @return active menu manager
+     */
     public static MenuManager menuManager() {
         return instance.getMenuManager();
     }

@@ -89,6 +89,18 @@ public record SoundSequence(List<BlightedSound> sounds) {
         new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_EJECT_ITEM, 1.0f, 1.0f, 60L)
     );
 
+    public static final SoundSequence ANCIENT_MOB_COLLAPSE = new SoundSequence(
+            new BlightedSound(Sound.BLOCK_BEACON_DEACTIVATE, 1.5f, 0.5f, 0L),
+            new BlightedSound(Sound.ENTITY_WARDEN_SONIC_BOOM, 1.5f, 0.6f, 0L),
+            new BlightedSound(Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 2.0f, 0.6f, 0L),
+            new BlightedSound(Sound.BLOCK_END_PORTAL_SPAWN, 1.2f, 0.5f, 15L),
+            new BlightedSound(Sound.BLOCK_GLASS_BREAK, 1.8f, 0.5f, 15L),
+            new BlightedSound(Sound.ENTITY_BREEZE_INHALE, 1.5f, 0.4f, 20L),
+            new BlightedSound(Sound.ENTITY_ENDERMAN_TELEPORT, 1.8f, 0.5f, 35L),
+            new BlightedSound(Sound.PARTICLE_SOUL_ESCAPE, 2.0f, 0.5f, 35L),
+            new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_SPAWN_MOB, 1.2f, 0.5f, 40L)
+    );
+
     public static final SoundSequence XP_PICKUP = new SoundSequence(
         new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.5f, 0L),
         new BlightedSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 0.6f, 2L),
@@ -116,16 +128,18 @@ public record SoundSequence(List<BlightedSound> sounds) {
     );
 
     public static final SoundSequence FORGE_ITEM = new SoundSequence(
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.50f, 0L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.55f, 2L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.60f, 4L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.65f, 6L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.70f, 8L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.80f, 10L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 0.90f, 12L),
-        new BlightedSound(Sound.ITEM_LODESTONE_COMPASS_LOCK, 1.0f, 1.00f, 14L),
-        new BlightedSound(Sound.BLOCK_HEAVY_CORE_PLACE, 1.0f, 0.8f, 16L),
-        new BlightedSound(Sound.BLOCK_FIRE_EXTINGUISH, 0.5f, 0.8f, 18L),
-        new BlightedSound(Sound.BLOCK_END_PORTAL_FRAME_FILL, 1.0f, 0.5f, 18L)
+            new BlightedSound(Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 0.50f, 0L),
+            new BlightedSound(Sound.BLOCK_SCULK_CATALYST_BLOOM, 0.9f, 0.50f, 2L),
+            new BlightedSound(Sound.BLOCK_VAULT_OPEN_SHUTTER, 1.0f, 0.50f, 4L),
+            new BlightedSound(Sound.ENTITY_WARDEN_HEARTBEAT, 1.2f, 0.50f, 6L),
+            new BlightedSound(Sound.ENTITY_WARDEN_ROAR, 0.6f, 0.50f, 6L),
+            new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_SPAWN_MOB, 1.2f, 0.50f, 8L),
+            new BlightedSound(Sound.BLOCK_HEAVY_CORE_PLACE, 1.2f, 0.50f, 10L),
+            new BlightedSound(Sound.PARTICLE_SOUL_ESCAPE, 0.9f, 0.50f, 10L),
+            new BlightedSound(Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 1.0f, 0.50f, 12L),
+            new BlightedSound(Sound.BLOCK_RESPAWN_ANCHOR_SET_SPAWN, 1.0f, 0.50f, 14L),
+            new BlightedSound(Sound.BLOCK_TRIAL_SPAWNER_OMINOUS_ACTIVATE, 1.3f, 0.50f, 16L),
+            new BlightedSound(Sound.BLOCK_VAULT_ACTIVATE, 1.1f, 0.50f, 18L),
+            new BlightedSound(Sound.BLOCK_ANVIL_LAND, 0.9f, 0.50f, 20L)
     );
 }

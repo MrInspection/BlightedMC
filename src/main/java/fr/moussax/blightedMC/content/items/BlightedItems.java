@@ -25,9 +25,8 @@ public class BlightedItems implements RegistryModule<ItemRegistryHandler> {
 
         BlightedItem blightedBanner = new BlightedItem(
                 "BLIGHTED_BANNER", ItemType.UNCATEGORIZED, ItemRarity.EPIC, Material.BLACK_BANNER);
-        blightedBanner.setDisplayName("Blighted Banner");
+        blightedBanner.setDisplayName("Crown of the Blight");
         blightedBanner.addLore(
-                "§8Ominous Artifact",
                 "",
                 "§7 An ancient standard woven from",
                 "§5 shadow-silk§7. Its fabric beats with ",
@@ -49,35 +48,35 @@ public class BlightedItems implements RegistryModule<ItemRegistryHandler> {
         blightedBanner.addRule(ItemRule.PREVENT_PLACEMENT);
         blightedBanner.editEquippable(equippable -> equippable.setSlot(EquipmentSlot.HEAD));
         blightedBanner.fireResistant();
+        blightedBanner.unstackable();
 
-        BlightedItem blightedCodex = new BlightedItem("BLIGHTED_CODEX", ItemType.UNCATEGORIZED, ItemRarity.EPIC, Material.ENCHANTED_BOOK);
+        BlightedItem blightedCodex = new BlightedItem("BLIGHTED_CODEX", ItemType.UNCATEGORIZED, ItemRarity.EPIC, Material.KNOWLEDGE_BOOK);
         blightedCodex.setDisplayName("Blighted Codex");
         blightedCodex.addLore(
-                "§8Ominous Artifact",
                 "",
                 "§7 A forbidden ledger bound in cracked",
                 "§7 leather. Its pages remain blank until",
                 "§7 they absorb the essence of the Blight.",
                 "",
-                " §8§lSEALED RIDDLE!",
-                "§8 Wear the woven shadow as your crown,",
-                "§8 claim a Blighted soul for these pages.",
-                "§8 Hold the violet crystal in your left hand, ",
-                "§8 stand before the altar of runes.",
-                "§8 Lay your hand upon the ancient seal,",
-                "§8 and the hidden path shall awaken.",
+                " &#D2A5FF§lSEALED RIDDLE!",
+                "&#D2A5FF Wear the woven shadow as your crown,",
+                "&#D2A5FF claim a Blighted soul for these pages.",
+                "&#D2A5FF Hold the violet crystal in your left hand, ",
+                "&#D2A5FF stand before the altar of runes.",
+                "&#D2A5FF Lay your hand upon the ancient seal,",
+                "&#D2A5FF and the hidden path shall awaken.",
                 "",
                 "§8 Souls trapped: §d0 ☠",
                 "",
                 ItemRarity.EPIC.getName()
         );
-        blightedCodex.setEnchantmentGlint(false);
+        blightedCodex.addEnchantmentGlint();
+        blightedCodex.fireResistant();
 
         BlightedItem blightedGemstone = new BlightedItem("BLIGHTED_GEMSTONE", ItemType.UNCATEGORIZED, ItemRarity.SPECIAL, Material.PLAYER_HEAD);
         blightedGemstone.setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM2MjM1MjFjODExMWFkMjllOWRjZjdhY2M1NjA4NWE5YWIwN2RhNzMyZDE1MTg5NzZhZWU2MWQwYjNlM2JkNiJ9fX0=");
         blightedGemstone.setDisplayName("Blighted Gemstone");
         blightedGemstone.addLore(
-                "§8Consumable Item",
                 "",
                 "§7 A gemstone §5corrupted§7 by shadow,",
                 "§7 stolen from the heart of a §5fallen",

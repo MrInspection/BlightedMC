@@ -14,6 +14,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 import static fr.moussax.blightedMC.engine.items.BlightedItem.BLIGHTED_ID_KEY;
 
@@ -87,11 +91,23 @@ public final class ItemRuleListener implements Listener {
         }
     }
 
+    // TODO : Make more simple and elegant way for custom items with consume effects
     @EventHandler(ignoreCancelled = true)
     public void onItemConsume(PlayerItemConsumeEvent event) {
         BlightedItem manager = getManager(event.getItem());
-        if (manager != null && manager.canUse(event, event.getItem())) {
-            event.setCancelled(true);
+        if (manager != null) {
+            if (manager.canUse(event, event.getItem())) {
+                event.setCancelled(true);
+                return;
+            }
+            if ("FISHERMANS_STEW".equals(manager.getItemId())) {
+                event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 2400, 0));
+            } else if ("BLIGHTED_SUSHI".equals(manager.getItemId())) {
+                event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 1200, 0));
+                if (ThreadLocalRandom.current().nextDouble() < 0.5) {
+                    event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 300, 0));
+                }
+            }
         }
     }
 

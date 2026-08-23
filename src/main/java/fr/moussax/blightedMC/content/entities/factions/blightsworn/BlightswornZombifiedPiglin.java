@@ -82,8 +82,11 @@ public final class BlightswornZombifiedPiglin extends BlightswornEliteArchetype 
     }
 
     private void executePhaseTwoIgnition() {
-        Location loc = entity.getLocation();
-        entity.getWorld().spawnParticle(Particle.LAVA, loc.add(0, 1, 0), 15, 0.5, 0.5, 0.5, 0.1);
+        Location location = entity.getLocation();
+        entity.getWorld().spawnParticle(
+                Particle.LAVA,
+                location.add(0, 1, 0), 15, 0.5, 0.5, 0.5, 0.1
+        );
 
         getNearbyPlayers(3.0).forEach(player -> {
             player.damage(this.damage * 0.5, entity);

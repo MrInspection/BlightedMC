@@ -11,6 +11,7 @@ public enum ItemType {
 
     SWORD(Category.MELEE_WEAPON),
     LONGSWORD(Category.MELEE_WEAPON),
+    SPEAR(Category.RANGE_WEAPON),
     WAND(Category.MELEE_WEAPON),
 
     BOW(Category.RANGE_WEAPON),
@@ -20,16 +21,17 @@ public enum ItemType {
     AXE(Category.TOOLS),
     HOE(Category.TOOLS),
     SHOVEL(Category.TOOLS),
+
     FISHING_ROD(Category.TOOLS),
     LAVA_FISHING_ROD(Category.TOOLS),
+    VOID_FISHING_ROD(Category.TOOLS),
 
     MATERIAL(Category.MATERIAL),
     GEMSTONE(Category.MATERIAL),
     UPGRADE_MODULE(Category.MATERIAL),
     BLOCK(Category.BLOCKS),
 
-    UNCATEGORIZED(Category.MISCELLANEOUS),
-    ENCHANTED_BOOK(Category.MISCELLANEOUS);
+    UNCATEGORIZED(Category.MISCELLANEOUS);
 
     private final Category category;
 

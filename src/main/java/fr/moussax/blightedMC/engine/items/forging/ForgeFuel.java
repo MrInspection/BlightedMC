@@ -8,6 +8,12 @@ import org.jspecify.annotations.NonNull;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Utility class for resolving the fuel value of items used by the forge.
+ *
+ * <p>Fuel values are defined per item and multiplied by the item's stack
+ * amount when calculating the total fuel provided by a stack.</p>
+ */
 public final class ForgeFuel {
     private static final Map<String, Integer> FORGE_FUELS = new HashMap<>();
 
@@ -25,6 +31,15 @@ public final class ForgeFuel {
     private ForgeFuel() {
     }
 
+    /**
+     * Returns the total amount of forge fuel provided by an item stack.
+     *
+     * <p>The returned value is the fuel value of a single item multiplied by
+     * the stack amount. Air and unregistered items provide no fuel.</p>
+     *
+     * @param item the item stack to evaluate
+     * @return the total forge fuel provided by the item stack
+     */
     public static int getFuelAmount(@NonNull ItemStack item) {
         if (item.getType() == Material.AIR) return 0;
 
@@ -32,6 +47,15 @@ public final class ForgeFuel {
         return FORGE_FUELS.getOrDefault(id, 0) * item.getAmount();
     }
 
+    /**
+     * Returns the forge fuel value provided by a single item.
+     *
+     * <p>Unlike {@link #getFuelAmount(ItemStack)}, this method does not
+     * account for the item's stack amount.</p>
+     *
+     * @param item the item stack to evaluate
+     * @return the forge fuel value per item, or {@code 0} if the item is not fuel
+     */
     public static int getFuelPerItem(@NonNull ItemStack item) {
         if (item.getType() == Material.AIR) return 0;
 
@@ -39,6 +63,12 @@ public final class ForgeFuel {
         return FORGE_FUELS.getOrDefault(id, 0);
     }
 
+    /**
+     * Determines whether an item can be used as forge fuel.
+     *
+     * @param item the item stack to evaluate
+     * @return {@code true} if the item provides forge fuel; {@code false} otherwise
+     */
     public static boolean isFuel(ItemStack item) {
         return getFuelPerItem(item) > 0;
     }

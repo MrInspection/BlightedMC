@@ -47,11 +47,11 @@ public final class AbilityExecutor {
         try {
             boolean success = manager.triggerAbility(event);
             if (!success) {
-                cancel(event);
+                if (manager.cancelEvent(false)) cancel(event);
                 return;
             }
 
-            cancel(event);
+            if (manager.cancelEvent(true)) cancel(event);
 
             if (manaCost > 0) {
                 player.getMana().consumeMana(manaCost);

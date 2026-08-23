@@ -20,13 +20,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository/org/spigotmc
-          key: spigot-26.1.2
+          key: spigot-26.2
           restore-keys: spigot-
 
       - name: Build and install Spigot via BuildTools
         uses: SpraxDev/Action-SpigotMC@v5
         with:
-          versions: 26.1.2
+          versions: 26.2
           remapped: true
           generateSrc: false
           generateDoc: false

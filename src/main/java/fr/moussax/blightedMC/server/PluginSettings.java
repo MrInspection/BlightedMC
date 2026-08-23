@@ -11,15 +11,13 @@ public final class PluginSettings {
     private double defaultManaRegenerationRate;
     @Getter
     private double customLootChance;
-    private boolean bannersOnJoin;
 
     public static PluginSettings load(BlightedMC plugin) {
         PluginSettings settings = new PluginSettings();
         try {
             plugin.reloadConfig();
             FileConfiguration config = plugin.getConfig();
-            
-            settings.bannersOnJoin = config.getBoolean("banners_on_join", true);
+
             settings.customLootChance = config.getDouble("custom_loot_chance", 0.50);
             settings.defaultManaRegenerationRate = config.getDouble("default_mana_regeneration_rate", 2.0);
             
@@ -28,9 +26,5 @@ public final class PluginSettings {
             Log.error("Config", "Failed to load configuration: " + e.getMessage());
         }
         return settings;
-    }
-
-    public boolean hasBannersOnJoin() {
-        return bannersOnJoin;
     }
 }

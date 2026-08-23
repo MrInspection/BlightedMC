@@ -1,7 +1,5 @@
 package fr.moussax.blightedMC.engine.items.abilities;
 
-import java.time.Instant;
-
 /**
  * Tracks a cooldown for a specific ability.
  *

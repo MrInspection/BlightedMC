@@ -1,14 +1,15 @@
-package fr.moussax.blightedMC.engine.fishing.listeners;
+package fr.moussax.blightedMC.engine.fishing;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
-import fr.moussax.blightedMC.engine.fishing.FishingMethod;
+import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedCalculator;
+import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedModifier;
+import fr.moussax.blightedMC.engine.fishing.hooks.LavaFishingHook;
+import fr.moussax.blightedMC.engine.fishing.hooks.VoidFishingHook;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemType;
+import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.content.items.abilities.weave.EmberWeaveSetBonus;
-import fr.moussax.blightedMC.content.items.abilities.weave.MagmaweaveSetBonus;
 import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
@@ -40,9 +41,15 @@ public final class FishingListener implements Listener {
             return;
         }
 
-        LavaFishingHook customHook = LavaFishingHook.get(hook);
-        if (customHook != null) {
-            handleLavaFishingReel(event, customHook, player);
+        LavaFishingHook lavaHook = LavaFishingHook.get(hook);
+        if (lavaHook != null) {
+            handleCustomFishingReel(event, player, lavaHook::reelIn, lavaHook::remove, ItemType.LAVA_FISHING_ROD);
+            return;
+        }
+
+        VoidFishingHook voidHook = VoidFishingHook.get(hook);
+        if (voidHook != null) {
+            handleCustomFishingReel(event, player, voidHook::reelIn, voidHook::remove, ItemType.VOID_FISHING_ROD);
             return;
         }
 
@@ -52,62 +59,92 @@ public final class FishingListener implements Listener {
     }
 
     private void handleFishingCast(Player player, FishHook hook, PlayerFishEvent event) {
-        ItemStack rodStack = findFishingRodItem(player, ItemType.LAVA_FISHING_ROD);
-        if (rodStack == null) return;
-
-        if (hook.getLocation().getBlock().getType() == Material.WATER) {
-            Formatter.warn(player, "Lava fishing rods cannot be used in water!");
-            event.setCancelled(true);
+        ItemStack lavaRod = findFishingRodItem(player, ItemType.LAVA_FISHING_ROD);
+        if (lavaRod != null) {
+            if (hook.getLocation().getBlock().getType() == Material.WATER) {
+                Formatter.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
+                event.setCancelled(true);
+            } else {
+                BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+                new LavaFishingHook(hook, blightedPlayer, player, lavaRod, resolveFishingSpeed(blightedPlayer, lavaRod));
+            }
             return;
         }
 
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-        double speedMultiplier = 1.0;
-        if(blightedPlayer != null && blightedPlayer.hasFullSetBonus(EmberWeaveSetBonus.class)) {
-            speedMultiplier = 0.85;
-            player.playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 0.8f);
-        } else if (blightedPlayer != null && blightedPlayer.hasFullSetBonus(MagmaweaveSetBonus.class)) {
-            speedMultiplier = 0.70;
-            player.playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 0.8f);
+        ItemStack voidRod = findFishingRodItem(player, ItemType.VOID_FISHING_ROD);
+        if (voidRod != null) {
+            if (player.getWorld().getEnvironment() != World.Environment.THE_END) {
+                Formatter.warn(player, "This rod answers only to the void of the End.");
+                event.setCancelled(true);
+            } else {
+                BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+                new VoidFishingHook(hook, blightedPlayer, player, voidRod, resolveFishingSpeed(blightedPlayer, voidRod));
+            }
         }
-
-        new LavaFishingHook(hook, blightedPlayer, player, rodStack, speedMultiplier);
     }
 
-    private void handleLavaFishingReel(PlayerFishEvent event, LavaFishingHook customHook, Player player) {
+    /**
+     * Sums the Fishing Speed stat for this cast and fires each contributing bonus's cast feedback (sound/etc).
+     */
+    private double resolveFishingSpeed(BlightedPlayer blightedPlayer, ItemStack rod) {
+        if (blightedPlayer != null) {
+            for (FullSetBonus bonus : blightedPlayer.getActiveFullSetBonuses()) {
+                if (bonus instanceof FishingSpeedModifier modifier) {
+                    modifier.onFishingCast(blightedPlayer.getPlayer());
+                }
+            }
+        }
+        return FishingSpeedCalculator.calculate(blightedPlayer, rod);
+    }
+
+    private void handleCustomFishingReel(
+            PlayerFishEvent event,
+            Player player,
+            CustomReelAction reelAction,
+            Runnable removeAction,
+            ItemType rodType
+    ) {
         PlayerFishEvent.State state = event.getState();
 
         if (state == PlayerFishEvent.State.REEL_IN ||
-            state == PlayerFishEvent.State.IN_GROUND ||
-            state == PlayerFishEvent.State.CAUGHT_FISH) {
+                state == PlayerFishEvent.State.IN_GROUND ||
+                state == PlayerFishEvent.State.CAUGHT_FISH) {
 
-            if (customHook.reelIn()) {
-                damageRod(player);
+            if (reelAction.reelIn()) {
+                damageRod(player, rodType);
             }
         } else {
-            customHook.remove();
+            removeAction.run();
         }
     }
 
     private void handleStandardFishing(PlayerFishEvent event, Player player, FishHook hook) {
         if (findFishingRodItem(player, ItemType.LAVA_FISHING_ROD) != null) {
             event.setCancelled(true);
-            Formatter.warn(player, "Lava fishing rods cannot be used in water!");
+            Formatter.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
+            return;
+        }
+
+        if (findFishingRodItem(player, ItemType.VOID_FISHING_ROD) != null) {
+            event.setCancelled(true);
+            return;
+        }
+
+        World.Environment env = player.getWorld().getEnvironment();
+        if (env == World.Environment.THE_END) {
             return;
         }
 
         Entity caught = event.getCaught();
         if (!(caught instanceof Item caughtItem)) return;
-
         if (ThreadLocalRandom.current().nextDouble() > CUSTOM_LOOT_CHANCE) return;
 
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-        World.Environment env = player.getWorld().getEnvironment();
         FishingLootTable lootTable = FishingLootRegistry.getTable(env, FishingMethod.WATER);
-
         Vector velocity = calculateVelocity(hook.getLocation(), player.getLocation());
+        int luckLevel = resolveVanillaLuckLevel(player);
 
-        if (lootTable.roll(blightedPlayer, hook.getLocation(), velocity)) {
+        if (lootTable.roll(blightedPlayer, hook.getLocation(), velocity, luckLevel)) {
             caughtItem.remove();
         }
     }
@@ -128,14 +165,24 @@ public final class FishingListener implements Listener {
         return null;
     }
 
+    private int resolveVanillaLuckLevel(Player player) {
+        ItemStack main = player.getInventory().getItemInMainHand();
+        if (isRodMaterial(main)) return main.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
+
+        ItemStack off = player.getInventory().getItemInOffHand();
+        if (isRodMaterial(off)) return off.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
+
+        return 0;
+    }
+
     private boolean isRodMaterial(ItemStack stack) {
         return stack != null && stack.getType() == Material.FISHING_ROD;
     }
 
-    private void damageRod(Player player) {
+    private void damageRod(Player player, ItemType type) {
         if (player.getGameMode() == GameMode.CREATIVE) return;
 
-        ItemStack rodStack = findFishingRodItem(player, ItemType.LAVA_FISHING_ROD);
+        ItemStack rodStack = findFishingRodItem(player, type);
         if (rodStack == null) return;
 
         int unbreaking = rodStack.getEnchantmentLevel(Enchantment.UNBREAKING);
@@ -169,5 +216,10 @@ public final class FishingListener implements Listener {
         vector.multiply(0.1);
         vector.setY(vector.getY() + Math.sqrt(distance) * 0.08);
         return vector;
+    }
+
+    @FunctionalInterface
+    private interface CustomReelAction {
+        boolean reelIn();
     }
 }

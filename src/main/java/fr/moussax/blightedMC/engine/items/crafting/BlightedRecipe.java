@@ -104,9 +104,9 @@ public sealed abstract class BlightedRecipe permits BlightedShapedRecipe, Blight
 
             String expectedItemId;
             if (expectedSlot.isCustom()) {
-                expectedItemId = expectedSlot.getManager().getItemId();
+                expectedItemId = Objects.requireNonNull(expectedSlot.getManager()).getItemId();
             } else if (expectedSlot.isVanilla()) {
-                expectedItemId = "vanilla:" + expectedSlot.getVanillaItem().getType().name();
+                expectedItemId = "vanilla:" + Objects.requireNonNull(expectedSlot.getVanillaItem()).getType().name();
             } else {
                 return false;
             }

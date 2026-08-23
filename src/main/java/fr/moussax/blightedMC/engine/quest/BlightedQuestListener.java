@@ -28,6 +28,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class BlightedQuestListener implements Listener {
     private final BlightedMC plugin = BlightedMC.getInstance();
@@ -173,7 +174,7 @@ public final class BlightedQuestListener implements Listener {
         if (item == null || !item.hasItemMeta()) return false;
 
         NamespacedKey absorbedSoulKey = new NamespacedKey(plugin, "cipher_absorbed_soul");
-        PersistentDataContainer persistentDataContainer = item.getItemMeta().getPersistentDataContainer();
+        PersistentDataContainer persistentDataContainer = Objects.requireNonNull(item.getItemMeta()).getPersistentDataContainer();
 
         if (persistentDataContainer.has(absorbedSoulKey, PersistentDataType.BOOLEAN)) {
             return Boolean.TRUE.equals(persistentDataContainer.get(absorbedSoulKey, PersistentDataType.BOOLEAN));
