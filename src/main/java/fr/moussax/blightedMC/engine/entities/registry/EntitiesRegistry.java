@@ -1,9 +1,9 @@
 package fr.moussax.blightedMC.engine.entities.registry;
 
+import fr.moussax.blightedMC.content.entities.bosses.CorruptedChampion;
 import fr.moussax.blightedMC.content.entities.factions.blightsworn.*;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.content.entities.bosses.TheAncientKnight;
 import fr.moussax.blightedMC.content.entities.Illusioner;
 import fr.moussax.blightedMC.content.entities.Watchling;
 import fr.moussax.blightedMC.content.entities.powerful.Endersent;
@@ -30,7 +30,7 @@ public final class EntitiesRegistry {
             new BlightswornZombie(),
             new BlightswornZombifiedPiglin(),
 
-            new TheAncientKnight(),
+            new CorruptedChampion(),
             new Endersent(),
             new Watchling(),
             new Illusioner()
