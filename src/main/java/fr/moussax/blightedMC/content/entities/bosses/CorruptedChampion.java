@@ -25,8 +25,17 @@ import org.bukkit.util.Vector;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@EntityImmunities({DamageType.PROJECTILE, DamageType.FALL})
+@EntityImmunities({DamageType.PROJECTILE, DamageType.FALL, DamageType.MACE})
 public class CorruptedChampion extends BlightedEntity {
+
+    private static final int MELEE_DAMAGE = 28;
+    private static final double STAB_DAMAGE = 16.0;
+    private static final double STAB_RETURN_DAMAGE = 12.0;
+    private static final double EARTHQUAKE_DAMAGE = 22.0;
+    private static final double SWORD_THROW_FLIGHT_DAMAGE = 20.0;
+    private static final double SWORD_THROW_RETURN_DAMAGE = 12.0;
+    private static final double BLADENADO_DAMAGE = 14.0;
+    private static final double PHASE_TRANSITION_BLAST_DAMAGE = 0.0;
 
     private static final ItemStack RED_BOOTS = createRocketBoots();
     private static final Particle.DustOptions VOID_PURPLE = new Particle.DustOptions(Color.fromRGB(150, 40, 240), 1.2f);
@@ -37,7 +46,7 @@ public class CorruptedChampion extends BlightedEntity {
     private int currentPhase = 1;
 
     public CorruptedChampion() {
-        super("Corrupted Champion", 350, 30, EntityType.ZOMBIE);
+        super("Corrupted Champion", 300, MELEE_DAMAGE, EntityType.ZOMBIE);
         addAttribute(Attribute.SCALE, 4.0);
         addAttribute(Attribute.SPAWN_REINFORCEMENTS, 0.0);
         setBoss(true);
@@ -103,14 +112,14 @@ public class CorruptedChampion extends BlightedEntity {
             setMainHandEquipped(true);
             addPhaseAbility(120L, 220L, this::executeStomp);
             addPhaseAbility(160L, 260L, this::executeSwordThrow);
-            addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(7.0));
+            addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(5));
         });
 
         registerPhase(0.33, () -> {
             setMainHandEquipped(true);
             addPhaseAbility(140L, 200L, this::executeSwordThrow);
             addPhaseAbility(240L, 340L, this::executeBladenado);
-            addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(7.0));
+            addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(5));
         });
     }
 
@@ -172,7 +181,7 @@ public class CorruptedChampion extends BlightedEntity {
                     world.spawnParticle(Particle.FLASH, blastLocation.clone().add(0, 1.5, 0), 2, Color.WHITE);
                     world.spawnParticle(Particle.SOUL, blastLocation.clone().add(0, 1.5, 0), 80, 2.0, 1.5, 2.0, 0.15);
 
-                    damageAndKnockbackNearbyPlayers(blastLocation, 14.0, 0.0, 1.8, 0.5);
+                    damageAndKnockbackNearbyPlayers(blastLocation, 14.0, PHASE_TRANSITION_BLAST_DAMAGE, 1.8, 0.5);
 
                     for (Player player : getNearbyPlayers(blastLocation, 14.0)) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 0, false, false, true));
@@ -321,7 +330,7 @@ public class CorruptedChampion extends BlightedEntity {
                     if (nearby instanceof Player player && player.getGameMode() == GameMode.SURVIVAL) {
                         double distance = player.getLocation().distance(center);
                         if (Math.abs(distance - currentRadius) <= 1.8) {
-                            player.damage(22, entity);
+                            player.damage(EARTHQUAKE_DAMAGE, entity);
                             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 255, false, false, true));
                             player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 80, 255, false, false, true));
                             player.setVelocity(new Vector(0, 0.6, 0));
@@ -430,7 +439,7 @@ public class CorruptedChampion extends BlightedEntity {
 
                     for (Player player : getNearbyPlayers(26)) {
                         if (player.getLocation().distanceSquared(currentLocation) <= 6.0) {
-                            player.damage(20, entity);
+                            player.damage(SWORD_THROW_FLIGHT_DAMAGE, entity);
                             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.2f, 0.8f);
                         }
                     }
@@ -475,7 +484,7 @@ public class CorruptedChampion extends BlightedEntity {
 
                 for (Player player : getNearbyPlayers(26)) {
                     if (player.getLocation().distanceSquared(currentReturnLocation) <= 5.0) {
-                        player.damage(12, entity);
+                        player.damage(SWORD_THROW_RETURN_DAMAGE, entity);
                     }
                 }
 
@@ -587,7 +596,7 @@ public class CorruptedChampion extends BlightedEntity {
                     }
                     world.playSound(currentCenter, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.4f, 0.6f);
                     for (Player player : getNearbyPlayers(6.5)) {
-                        player.damage(12, entity);
+                        player.damage(BLADENADO_DAMAGE, entity);
                         Vector knockback = player.getLocation().toVector().subtract(currentCenter.toVector())
                                 .normalize()
                                 .multiply(0.6)
@@ -790,7 +799,7 @@ public class CorruptedChampion extends BlightedEntity {
 
             for (Player player : owner.getNearbyPlayers(26)) {
                 if (player.getLocation().distanceSquared(currentReturnLocation) <= 5.0) {
-                    player.damage(12, bossEntity);
+                    player.damage(STAB_RETURN_DAMAGE, bossEntity);
                 }
             }
 
@@ -840,7 +849,7 @@ public class CorruptedChampion extends BlightedEntity {
             world.spawnParticle(Particle.DUST, stabledLocation.clone().add(0, 0.5, 0), 8, 0.3, 0.3, 0.3, 0.0, VOID_PURPLE);
             world.playSound(stabledLocation, Sound.BLOCK_ANVIL_LAND, 1.0f, 0.5f);
             world.playSound(stabledLocation, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.8f);
-            owner.damageNearbyPlayers(stabledLocation, 6.0, 16.0);
+            owner.damageNearbyPlayers(stabledLocation, 6.0, STAB_DAMAGE);
         }
 
         @Override
