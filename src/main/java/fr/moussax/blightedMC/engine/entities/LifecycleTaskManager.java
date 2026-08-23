@@ -71,7 +71,7 @@ public final class LifecycleTaskManager {
      */
     public void cancelAll() {
         if (tasks == null) return;
-        for (ScheduledTask task : tasks) {
+        for (ScheduledTask task : new ArrayList<>(tasks)) {
             task.cancel();
         }
         tasks.clear();

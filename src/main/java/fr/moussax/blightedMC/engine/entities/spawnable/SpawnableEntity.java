@@ -63,9 +63,8 @@ public abstract class SpawnableEntity extends BlightedEntity {
         if (affixChance > 0.0 && Math.random() <= affixChance) {
             EntityComponent affix = AffixRegistry.getRandomAffix();
             if (affix != null) {
-                addComponent(affix.clone());
                 spawned.getPersistentDataContainer().set(AFFIXES_KEY, PersistentDataType.STRING, affix.getId());
-                startEliteAura();
+                applyAffix(affix);
             }
         }
 
@@ -80,10 +79,14 @@ public abstract class SpawnableEntity extends BlightedEntity {
         if (affixId != null && getComponent(affixId) == null) {
             EntityComponent affix = AffixRegistry.getAffixById(affixId);
             if (affix != null) {
-                addComponent(affix.clone());
-                startEliteAura();
+                applyAffix(affix);
             }
         }
+    }
+
+    private void applyAffix(EntityComponent affix) {
+        addComponent(affix.clone());
+        startEliteAura();
     }
 
     private void startEliteAura() {
@@ -97,8 +100,9 @@ public abstract class SpawnableEntity extends BlightedEntity {
             double angle = time * 0.2;
             double x = Math.cos(angle) * 0.6;
             double z = Math.sin(angle) * 0.6;
+            Location orbitLoc = center.clone().add(x, 0, z);
 
-            world.spawnParticle(Particle.SCULK_SOUL, center, 2, 0.3, 0.4, 0.3, 0.05);
+            world.spawnParticle(Particle.SCULK_SOUL, orbitLoc, 1, 0.05, 0.05, 0.05, 0.02);
 
             if (time % 10 == 0) {
                 world.spawnParticle(Particle.ENCHANT, center, 5, 0.5, 0.5, 0.5, 0.01);
@@ -117,14 +121,9 @@ public abstract class SpawnableEntity extends BlightedEntity {
     }
 
     @Override
-    public String getEntityId() {
-        return entityId;
-    }
-
-    @Override
     public SpawnableEntity clone() {
         SpawnableEntity cloned = (SpawnableEntity) super.clone();
-        cloned.spawnProfile = this.spawnProfile.copy();
+        cloned.spawnProfile = this.spawnProfile != null ? this.spawnProfile.copy() : new SpawnProfile();
         return cloned;
     }
 }

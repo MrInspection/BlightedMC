@@ -67,6 +67,10 @@ public final class BlightedEntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent event) {
+        if (event instanceof EntityDamageByEntityEvent damageByEntity) {
+            handleDamageDealt(damageByEntity);
+        }
+
         if (!(event.getEntity() instanceof LivingEntity entity)) return;
         if (!entity.getScoreboardTags().contains(FAST_PASS_TAG)) return;
 
@@ -87,6 +91,18 @@ public final class BlightedEntitiesListener implements Listener {
             }
         } finally {
             processingDamageIds.remove(entityId);
+        }
+    }
+
+    private void handleDamageDealt(EntityDamageByEntityEvent event) {
+        Entity rawDamager = event.getDamager();
+        Entity source = (rawDamager instanceof Projectile projectile && projectile.getShooter() instanceof Entity shooter)
+                ? shooter
+                : rawDamager;
+
+        BlightedEntity damager = getBlightedEntity(source);
+        if (damager != null) {
+            damager.onDamageDealt(event);
         }
     }
 
@@ -118,11 +134,12 @@ public final class BlightedEntitiesListener implements Listener {
     ) {
         forwardDamageToBodyAttachments(blighted, event);
 
-        if (event instanceof EntityDamageByEntityEvent damageByEntity) {
-            if (handleImmunity(blighted, entity, damageByEntity)) return;
-        }
+        if (handleImmunity(blighted, entity, event)) return;
 
         blighted.onDamageTaken(event);
+        for (var component : blighted.getComponents()) {
+            component.onDamageTaken(blighted, event);
+        }
         double remainingHealth = entity.getHealth() - event.getFinalDamage();
 
         if (remainingHealth > 0) {
@@ -166,14 +183,14 @@ public final class BlightedEntitiesListener implements Listener {
     private boolean handleImmunity(
             BlightedEntity blighted,
             LivingEntity entity,
-            EntityDamageByEntityEvent event
+            EntityDamageEvent event
     ) {
         EntityImmunity triggered = blighted.getTriggeredImmunity(entity, event);
         if (triggered == null) return false;
 
         event.setCancelled(true);
 
-        Player player = getPlayerDamager(event.getDamager());
+        Player player = getPlayerDamager(getRealDamager(event));
         if (player != null) {
             player.sendMessage(triggered.getImmunityMessage());
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 100, 0.6f);

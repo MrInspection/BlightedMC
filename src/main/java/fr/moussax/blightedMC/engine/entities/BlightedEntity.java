@@ -20,6 +20,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.*;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -235,6 +236,14 @@ public abstract class BlightedEntity implements Cloneable {
      * @param event damage event
      */
     public void onDamageTaken(EntityDamageEvent event) {
+    }
+
+    /**
+     * Called when this entity deals damage to a target entity.
+     *
+     * @param event damage by entity event
+     */
+    public void onDamageDealt(EntityDamageByEntityEvent event) {
     }
 
     /**
@@ -532,14 +541,12 @@ public abstract class BlightedEntity implements Cloneable {
      * @param center       damage center
      * @param radius       damage radius
      * @param damageAmount damage dealt
-     * @return players affected
      */
-    public List<Player> damageNearbyPlayers(Location center, double radius, double damageAmount) {
+    public void damageNearbyPlayers(Location center, double radius, double damageAmount) {
         List<Player> hitPlayers = getNearbyPlayers(center, radius);
         for (Player player : hitPlayers) {
             player.damage(damageAmount, entity);
         }
-        return hitPlayers;
     }
 
     /**
@@ -547,10 +554,9 @@ public abstract class BlightedEntity implements Cloneable {
      *
      * @param radius       damage radius
      * @param damageAmount damage dealt
-     * @return players affected
      */
-    public List<Player> damageNearbyPlayers(double radius, double damageAmount) {
-        return damageNearbyPlayers(entity != null ? entity.getLocation() : null, radius, damageAmount);
+    public void damageNearbyPlayers(double radius, double damageAmount) {
+        damageNearbyPlayers(entity != null ? entity.getLocation() : null, radius, damageAmount);
     }
 
     /**
@@ -876,12 +882,12 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     private void rehydrateAttributes() {
-        setAttributeBaseOnly(Attribute.MAX_HEALTH, maxHealth);
-        setAttributeBaseOnly(Attribute.ATTACK_DAMAGE, damage);
+        setAttribute(Attribute.MAX_HEALTH, maxHealth);
+        setAttribute(Attribute.ATTACK_DAMAGE, damage);
         if (defense > 0) {
-            setAttributeBaseOnly(Attribute.ARMOR, defense);
+            setAttribute(Attribute.ARMOR, defense);
         }
-        attributes.forEach(this::setAttributeBaseOnly);
+        attributes.forEach(this::setAttribute);
 
         AttributeInstance maxHealthAttribute = entity.getAttribute(Attribute.MAX_HEALTH);
         if (maxHealthAttribute != null) {
@@ -904,14 +910,6 @@ public abstract class BlightedEntity implements Cloneable {
         }
         for (AttributeModifier modifier : new ArrayList<>(instance.getModifiers())) {
             instance.removeModifier(modifier);
-        }
-        instance.setBaseValue(value);
-    }
-
-    private void setAttributeBaseOnly(Attribute attribute, double value) {
-        AttributeInstance instance = entity.getAttribute(attribute);
-        if (instance == null) {
-            return;
         }
         instance.setBaseValue(value);
     }
