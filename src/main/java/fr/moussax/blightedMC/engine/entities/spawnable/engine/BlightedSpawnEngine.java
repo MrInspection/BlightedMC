@@ -98,11 +98,19 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
         int x = (chunk.getX() << 4) + random.nextInt(16);
         int z = (chunk.getZ() << 4) + random.nextInt(16);
 
-        // Scan from world max height down to min height
-        for (int y = world.getMaxHeight() - 1; y >= world.getMinHeight() + 1; y--) {
-            Location location = new Location(world, x + 0.5, y, z + 0.5);
+        int startY;
+        int endY;
 
-            Block block = location.getBlock();
+        if (world.getEnvironment() == World.Environment.NORMAL) {
+            startY = world.getHighestBlockYAt(x, z) + 1;
+            endY = Math.max(world.getMinHeight() + 1, startY - 64);
+        } else {
+            startY = Math.min(120, world.getMaxHeight() - 1);
+            endY = world.getMinHeight() + 1;
+        }
+
+        for (int y = startY; y >= endY; y--) {
+            Block block = world.getBlockAt(x, y, z);
             if (!block.getType().isAir()) continue;
 
             Block below = block.getRelative(0, -1, 0);
@@ -110,6 +118,8 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
 
             Block above = block.getRelative(0, 1, 0);
             if (!above.getType().isAir()) continue;
+
+            Location location = new Location(world, x + 0.5, y, z + 0.5);
 
             List<SpawnableEntity> eligible = null;
             for (SpawnableEntity entity : cachedIndependentEntities) {

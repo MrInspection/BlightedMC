@@ -64,7 +64,7 @@ public sealed abstract class BlightswornBruteArchetype extends BlightswornCreatu
     protected abstract void applySurgeHitEffects(Player player);
 
     private void handleBlightAccumulation() {
-        if (isNotAlive() || isSurging || isRecovering) return;
+        if (!isAlive() || isSurging || isRecovering) return;
 
         Player target = getNearestPlayer(ACCUMULATION_RADIUS);
         if (target != null && hasLineOfSight(target)) {
@@ -103,7 +103,7 @@ public sealed abstract class BlightswornBruteArchetype extends BlightswornCreatu
     }
 
     private void executeSurgeLunge(Player target, double originalSpeed) {
-        if (isNotAlive()) return;
+        if (!isAlive()) return;
 
         Vector direction;
         if (target != null && !target.isDead() && target.getWorld().equals(entity.getWorld())) {
@@ -120,7 +120,7 @@ public sealed abstract class BlightswornBruteArchetype extends BlightswornCreatu
     }
 
     private void executeSurgeStrikeAndRecover(double originalSpeed) {
-        if (isNotAlive()) return;
+        if (!isAlive()) return;
 
         isSurging = false;
         isRecovering = true;
@@ -138,7 +138,7 @@ public sealed abstract class BlightswornBruteArchetype extends BlightswornCreatu
         }
 
         addCoreDelayedAction(30L, () -> {
-            if (isNotAlive()) return;
+            if (!isAlive()) return;
             isRecovering = false;
             Objects.requireNonNull(entity.getAttribute(Attribute.MOVEMENT_SPEED))
                     .setBaseValue(originalSpeed);

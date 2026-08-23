@@ -32,6 +32,12 @@ public enum DamageType implements EntityImmunity {
             return event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE;
         }
     },
+    FALL {
+        @Override
+        public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
+            return event.getCause() == EntityDamageEvent.DamageCause.FALL;
+        }
+    },
     MACE {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {

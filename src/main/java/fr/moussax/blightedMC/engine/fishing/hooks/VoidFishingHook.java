@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.engine.fishing.hooks;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
 import fr.moussax.blightedMC.engine.fishing.FishingMethod;
+import fr.moussax.blightedMC.engine.fishing.FishingComboTracker;
 import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedCalculator;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
@@ -202,6 +203,7 @@ public final class VoidFishingHook {
                     spawnAwaitingCatchParticles(readyTicks, totalBiteTicks);
 
                     if (--readyTicks <= 0) {
+                        FishingComboTracker.resetCombo(player, FishingMethod.VOID);
                         remove();
                     }
                 }
@@ -264,7 +266,10 @@ public final class VoidFishingHook {
     public boolean reelIn() {
         remove();
 
-        if (!isReadyToCatch || !suspendedInVoid) return false;
+        if (!isReadyToCatch || !suspendedInVoid) {
+            FishingComboTracker.resetCombo(player, FishingMethod.VOID);
+            return false;
+        }
 
         Location hookLocation = hook.getLocation();
         World world = hookLocation.getWorld();
@@ -283,12 +288,17 @@ public final class VoidFishingHook {
 
         Location spawnLocation = hookLocation.add(0, 0.5, 0);
 
+        int currentCombo = FishingComboTracker.getCombo(player, FishingMethod.VOID);
         FishingLootTable lootTable = FishingLootRegistry.getTable(environment, FishingMethod.VOID);
-        boolean success = lootTable.roll(blightedPlayer, spawnLocation, velocity, luckOfSeaLevel);
+        boolean success = lootTable.roll(blightedPlayer, spawnLocation, velocity, luckOfSeaLevel, currentCombo);
 
         if (success) {
+            FishingComboTracker.incrementCombo(player, FishingMethod.VOID);
+            int newCombo = FishingComboTracker.getCombo(player, FishingMethod.VOID);
+
             ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(playerLocation, EntityType.EXPERIENCE_ORB);
             orb.setExperience(ThreadLocalRandom.current().nextInt(5, 12));
+            FishingComboTracker.spawnBonusExperience(world, playerLocation, newCombo);
         }
 
         return success;

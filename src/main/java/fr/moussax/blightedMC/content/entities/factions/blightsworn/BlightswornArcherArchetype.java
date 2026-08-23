@@ -50,7 +50,7 @@ public sealed abstract class BlightswornArcherArchetype extends BlightswornCreat
     protected abstract void applyArrowEffects(Arrow arrow, boolean isPhaseTwo);
 
     private void executeAimedShot(boolean isPhaseTwo) {
-        if (isNotAlive() || isAiming) return;
+        if (!isAlive() || isAiming) return;
 
         Player target = getNearestPlayer(AIMED_SHOT_RANGE);
         if (target == null || !hasLineOfSight(target)) return;
@@ -69,7 +69,7 @@ public sealed abstract class BlightswornArcherArchetype extends BlightswornCreat
         );
 
         addCoreDelayedAction(20L, () -> {
-            if (isNotAlive()) return;
+            if (!isAlive()) return;
 
             isAiming = false;
             Objects.requireNonNull(entity.getAttribute(Attribute.MOVEMENT_SPEED))
@@ -86,7 +86,7 @@ public sealed abstract class BlightswornArcherArchetype extends BlightswornCreat
     }
 
     private void fireArrowAt(Player target, boolean isPhaseTwo) {
-        if (isNotAlive()) return;
+        if (!isAlive()) return;
 
         Arrow arrow = entity.launchProjectile(Arrow.class);
         Vector trajectory = target.getEyeLocation().toVector()
@@ -104,7 +104,7 @@ public sealed abstract class BlightswornArcherArchetype extends BlightswornCreat
     }
 
     private void performScatterEvasion() {
-        if (isNotAlive() || isAiming || entity.getTicksLived() < nextScatterTick) return;
+        if (!isAlive() || isAiming || entity.getTicksLived() < nextScatterTick) return;
 
         Player threat = getNearestPlayer(SCATTER_TRIGGER_RADIUS);
         if (threat == null || !hasLineOfSight(threat)) return;

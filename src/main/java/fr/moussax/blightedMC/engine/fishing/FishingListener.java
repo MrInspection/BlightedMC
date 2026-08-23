@@ -1,17 +1,21 @@
 package fr.moussax.blightedMC.engine.fishing;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedCalculator;
-import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedModifier;
 import fr.moussax.blightedMC.engine.fishing.hooks.LavaFishingHook;
 import fr.moussax.blightedMC.engine.fishing.hooks.VoidFishingHook;
+import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedCalculator;
+import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedModifier;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.Formatter;
-import org.bukkit.*;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FishHook;
@@ -20,7 +24,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -53,9 +59,26 @@ public final class FishingListener implements Listener {
             return;
         }
 
+        if (event.getState() == PlayerFishEvent.State.FAILED_ATTEMPT
+                || event.getState() == PlayerFishEvent.State.IN_GROUND
+                || event.getState() == PlayerFishEvent.State.REEL_IN) {
+            FishingComboTracker.resetCombo(player, FishingMethod.WATER);
+            return;
+        }
+
         if (event.getState() == PlayerFishEvent.State.CAUGHT_FISH) {
             handleStandardFishing(event, player, hook);
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        FishingComboTracker.clear(event.getEntity());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        FishingComboTracker.clear(event.getPlayer());
     }
 
     private void handleFishingCast(Player player, FishHook hook, PlayerFishEvent event) {
@@ -66,7 +89,13 @@ public final class FishingListener implements Listener {
                 event.setCancelled(true);
             } else {
                 BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-                new LavaFishingHook(hook, blightedPlayer, player, lavaRod, resolveFishingSpeed(blightedPlayer, lavaRod));
+                new LavaFishingHook(
+                        hook,
+                        blightedPlayer,
+                        player,
+                        lavaRod,
+                        resolveFishingSpeed(blightedPlayer, lavaRod)
+                );
             }
             return;
         }
@@ -78,13 +107,24 @@ public final class FishingListener implements Listener {
                 event.setCancelled(true);
             } else {
                 BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-                new VoidFishingHook(hook, blightedPlayer, player, voidRod, resolveFishingSpeed(blightedPlayer, voidRod));
+                new VoidFishingHook(
+                        hook,
+                        blightedPlayer,
+                        player,
+                        voidRod,
+                        resolveFishingSpeed(blightedPlayer, voidRod)
+                );
             }
         }
     }
 
     /**
-     * Sums the Fishing Speed stat for this cast and fires each contributing bonus's cast feedback (sound/etc).
+     * Calculates the Fishing Speed for a cast and triggers feedback from
+     * any active set bonus that contributes to the stat.
+     *
+     * @param blightedPlayer the player's BlightedMC state
+     * @param rod            the fishing rod being used
+     * @return the resolved Fishing Speed
      */
     private double resolveFishingSpeed(BlightedPlayer blightedPlayer, ItemStack rod) {
         if (blightedPlayer != null) {
@@ -94,6 +134,7 @@ public final class FishingListener implements Listener {
                 }
             }
         }
+
         return FishingSpeedCalculator.calculate(blightedPlayer, rod);
     }
 
@@ -106,9 +147,9 @@ public final class FishingListener implements Listener {
     ) {
         PlayerFishEvent.State state = event.getState();
 
-        if (state == PlayerFishEvent.State.REEL_IN ||
-                state == PlayerFishEvent.State.IN_GROUND ||
-                state == PlayerFishEvent.State.CAUGHT_FISH) {
+        if (state == PlayerFishEvent.State.REEL_IN
+                || state == PlayerFishEvent.State.IN_GROUND
+                || state == PlayerFishEvent.State.CAUGHT_FISH) {
 
             if (reelAction.reelIn()) {
                 damageRod(player, rodType);
@@ -130,53 +171,66 @@ public final class FishingListener implements Listener {
             return;
         }
 
-        World.Environment env = player.getWorld().getEnvironment();
-        if (env == World.Environment.THE_END) {
-            return;
-        }
+        World.Environment environment = player.getWorld().getEnvironment();
+        if (environment == World.Environment.THE_END) return;
 
         Entity caught = event.getCaught();
         if (!(caught instanceof Item caughtItem)) return;
-        if (ThreadLocalRandom.current().nextDouble() > CUSTOM_LOOT_CHANCE) return;
 
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
-        FishingLootTable lootTable = FishingLootRegistry.getTable(env, FishingMethod.WATER);
-        Vector velocity = calculateVelocity(hook.getLocation(), player.getLocation());
-        int luckLevel = resolveVanillaLuckLevel(player);
+        int currentCombo = FishingComboTracker.getCombo(player, FishingMethod.WATER);
 
-        if (lootTable.roll(blightedPlayer, hook.getLocation(), velocity, luckLevel)) {
-            caughtItem.remove();
+        if (ThreadLocalRandom.current().nextDouble() <= CUSTOM_LOOT_CHANCE) {
+            BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+            FishingLootTable lootTable = FishingLootRegistry.getTable(environment, FishingMethod.WATER);
+
+            Vector velocity = calculateVelocity(hook.getLocation(), player.getLocation());
+            int luckLevel = resolveVanillaLuckLevel(player);
+
+            if (lootTable.roll(blightedPlayer, hook.getLocation(), velocity, luckLevel, currentCombo)) {
+                caughtItem.remove();
+            }
         }
+
+        FishingComboTracker.incrementCombo(player, FishingMethod.WATER);
+        int newCombo = FishingComboTracker.getCombo(player, FishingMethod.WATER);
+        FishingComboTracker.spawnBonusExperience(player.getWorld(), player.getLocation(), newCombo);
     }
 
     private ItemStack findFishingRodItem(Player player, ItemType requiredType) {
-        ItemStack main = player.getInventory().getItemInMainHand();
-        if (isRodMaterial(main)) {
-            BlightedItem bMain = BlightedItem.fromItemStack(main);
-            if (bMain != null && bMain.getItemType() == requiredType) return main;
+        ItemStack mainHandItem = player.getInventory().getItemInMainHand();
+        if (isRodMaterial(mainHandItem)) {
+            BlightedItem mainHandBlightedItem = BlightedItem.fromItemStack(mainHandItem);
+            if (mainHandBlightedItem != null && mainHandBlightedItem.getItemType() == requiredType) {
+                return mainHandItem;
+            }
         }
 
-        ItemStack off = player.getInventory().getItemInOffHand();
-        if (isRodMaterial(off)) {
-            BlightedItem bOff = BlightedItem.fromItemStack(off);
-            if (bOff != null && bOff.getItemType() == requiredType) return off;
+        ItemStack offhandItem = player.getInventory().getItemInOffHand();
+        if (isRodMaterial(offhandItem)) {
+            BlightedItem offhandBlightedItem = BlightedItem.fromItemStack(offhandItem);
+            if (offhandBlightedItem != null && offhandBlightedItem.getItemType() == requiredType) {
+                return offhandItem;
+            }
         }
 
         return null;
     }
 
     private int resolveVanillaLuckLevel(Player player) {
-        ItemStack main = player.getInventory().getItemInMainHand();
-        if (isRodMaterial(main)) return main.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
+        ItemStack mainHandItem = player.getInventory().getItemInMainHand();
+        if (isRodMaterial(mainHandItem)) {
+            return mainHandItem.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
+        }
 
-        ItemStack off = player.getInventory().getItemInOffHand();
-        if (isRodMaterial(off)) return off.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
-
+        ItemStack offhandItem = player.getInventory().getItemInOffHand();
+        if (isRodMaterial(offhandItem)) {
+            return offhandItem.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
+        }
         return 0;
     }
 
-    private boolean isRodMaterial(ItemStack stack) {
-        return stack != null && stack.getType() == Material.FISHING_ROD;
+    private boolean isRodMaterial(ItemStack itemStack) {
+        return itemStack != null && itemStack.getType() == Material.FISHING_ROD;
     }
 
     private void damageRod(Player player, ItemType type) {
@@ -185,37 +239,37 @@ public final class FishingListener implements Listener {
         ItemStack rodStack = findFishingRodItem(player, type);
         if (rodStack == null) return;
 
-        int unbreaking = rodStack.getEnchantmentLevel(Enchantment.UNBREAKING);
-        if (unbreaking > 0 && ThreadLocalRandom.current().nextInt(100) >= (100 / (unbreaking + 1))) {
+        int unbreakingLevel = rodStack.getEnchantmentLevel(Enchantment.UNBREAKING);
+        if (unbreakingLevel > 0 && ThreadLocalRandom.current().nextInt(100) >= (100 / (unbreakingLevel + 1))) {
             return;
         }
 
         if (!rodStack.hasItemMeta()) return;
-        ItemMeta meta = rodStack.getItemMeta();
-
-        if (meta instanceof Damageable damageable) {
-            int max = rodStack.getType().getMaxDurability();
-            if (max <= 0) return;
+        ItemMeta itemMeta = rodStack.getItemMeta();
+        if (itemMeta instanceof Damageable damageable) {
+            int maxDurability = rodStack.getType().getMaxDurability();
+            if (maxDurability <= 0) return;
 
             int newDamage = damageable.getDamage() + 1;
 
-            if (newDamage >= max) {
+            if (newDamage >= maxDurability) {
                 rodStack.setAmount(0);
                 player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
             } else {
                 damageable.setDamage(newDamage);
-                rodStack.setItemMeta(meta);
+                rodStack.setItemMeta(itemMeta);
             }
         }
     }
 
     private Vector calculateVelocity(Location origin, Location target) {
-        Vector vector = target.toVector().subtract(origin.toVector());
-        double distance = vector.length();
+        Vector velocity = target.toVector().subtract(origin.toVector());
+        double distance = velocity.length();
 
-        vector.multiply(0.1);
-        vector.setY(vector.getY() + Math.sqrt(distance) * 0.08);
-        return vector;
+        velocity.multiply(0.1);
+        velocity.setY(velocity.getY() + Math.sqrt(distance) * 0.08);
+
+        return velocity;
     }
 
     @FunctionalInterface

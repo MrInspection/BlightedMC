@@ -79,7 +79,7 @@ public final class BlightswornDrowned extends BlightswornCreature {
     }
 
     private void executeTidalRepel() {
-        if (isNotAlive() || !entity.isInWater() || entity.getTicksLived() < nextRepelTick) return;
+        if (!isAlive() || !entity.isInWater() || entity.getTicksLived() < nextRepelTick) return;
 
         Player threat = getNearestPlayer(REPEL_RADIUS);
         if (threat == null || threat.isDead() || threat.getWorld() != entity.getWorld() || !hasLineOfSight(threat)) return;
@@ -101,7 +101,7 @@ public final class BlightswornDrowned extends BlightswornCreature {
     }
 
     private void executeAbyssalGeyser(boolean isPhaseTwo) {
-        if (isNotAlive() || !entity.isInWater()) return;
+        if (!isAlive() || !entity.isInWater()) return;
 
         Player target = getNearestPlayer(GEYSER_RANGE);
         if (target == null || target.isDead() || target.getWorld() != entity.getWorld() || !hasLineOfSight(target)) return;
@@ -123,7 +123,7 @@ public final class BlightswornDrowned extends BlightswornCreature {
     }
 
     private void eruptGeyser(Location center, boolean isPhaseTwo) {
-        if (isNotAlive()) return;
+        if (!isAlive()) return;
 
         Objects.requireNonNull(center.getWorld()).playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.5f);
         center.getWorld().playSound(center, Sound.ITEM_TRIDENT_THUNDER, 1.0f, 1.2f);

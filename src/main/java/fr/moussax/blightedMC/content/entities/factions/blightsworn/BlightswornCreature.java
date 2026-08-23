@@ -98,13 +98,13 @@ public sealed abstract class BlightswornCreature extends SpawnableEntity
     }
 
     private void evaluateResonance() {
-        if (isNotAlive()) return;
+        if (!isAlive()) return;
 
         boolean hasNearbyAlly = false;
 
         for (Entity nearby : entity.getNearbyEntities(12, 12, 12)) {
             var blighted = BlightedEntitiesListener.getBlightedEntity(nearby);
-            if (!(blighted instanceof BlightswornCreature ally) || ally.isNotAlive()) continue;
+            if (!(blighted instanceof BlightswornCreature ally) || !ally.isAlive()) continue;
 
             hasNearbyAlly = true;
             drawResonanceLine(nearby.getLocation().add(0, 1, 0));
@@ -131,7 +131,7 @@ public sealed abstract class BlightswornCreature extends SpawnableEntity
     }
 
     public void setResonating(boolean resonating) {
-        if (this.isResonating == resonating || isNotAlive()) return;
+        if (this.isResonating == resonating || !isAlive()) return;
         this.isResonating = resonating;
 
         var speedAttr = entity.getAttribute(Attribute.MOVEMENT_SPEED);

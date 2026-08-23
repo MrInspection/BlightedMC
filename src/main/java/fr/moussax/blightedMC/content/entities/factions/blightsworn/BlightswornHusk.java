@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -24,6 +25,13 @@ public final class BlightswornHusk extends BlightswornBruteArchetype {
                 .addGemsLoot(5, 0.04, VERY_RARE)
                 .build()
         );
+    }
+
+    @Override
+    public void onDamageDealt(EntityDamageByEntityEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 60, 0));
+        }
     }
 
     @Override

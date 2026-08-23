@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.content.entities.powerful;
 import fr.moussax.blightedMC.content.entities.Watchling;
 import fr.moussax.blightedMC.content.utils.ai.EndermanAI;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
+import fr.moussax.blightedMC.engine.entities.attachment.AttachmentRole;
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
@@ -30,7 +31,6 @@ public class Endersent extends SpawnableEntity {
     private int projectileHits = 0;
     private boolean enraged = false;
     private boolean isEscaping = false;
-    private List<LivingEntity> watchlings = new ArrayList<>();
     private long lastTeleportSmash = 0;
     private int escapeTicks = 0;
 
@@ -90,16 +90,10 @@ public class Endersent extends SpawnableEntity {
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
 
         addCoreDelayedAction(9L, () -> {
-            if (isNotAlive()) return;
+            if (!isAlive()) return;
             entity.getWorld().spawnParticle(Particle.EXPLOSION, entity.getLocation(), 1);
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.8f);
-
-            for (Entity nearby : entity.getNearbyEntities(3, 2, 3)) {
-                if (!(nearby instanceof LivingEntity living) || living == entity) continue;
-                if (nearby instanceof Player p && p.getGameMode() == GameMode.SPECTATOR) continue;
-                if (BlightedEntitiesListener.getBlightedEntity(living) instanceof Watchling) continue;
-                living.damage(14, entity);
-            }
+            damageNearbyPlayers(3.0, 14.0);
         });
     }
 
@@ -107,9 +101,8 @@ public class Endersent extends SpawnableEntity {
         if (!isEscaping) return;
 
         escapeTicks += 20;
-        watchlings.removeIf(e -> e.isDead() || !e.isValid());
 
-        if (watchlings.isEmpty() || escapeTicks >= 300) {
+        if (attachments.isEmpty() || escapeTicks >= 300) {
             endDeadlyEscape();
         }
     }
@@ -139,11 +132,7 @@ public class Endersent extends SpawnableEntity {
         Objects.requireNonNull(loc.getWorld()).spawnParticle(Particle.EXPLOSION_EMITTER, loc, 1);
         loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
 
-        for (Entity nearby : entity.getNearbyEntities(4, 3, 4)) {
-            if (!(nearby instanceof LivingEntity living) || living == entity) continue;
-            if (BlightedEntitiesListener.getBlightedEntity(living) instanceof Watchling) continue;
-            living.damage(18, entity);
-        }
+        damageNearbyPlayers(4.0, 18.0);
 
         entity.setInvisible(true);
         entity.setInvulnerable(true);
@@ -157,7 +146,7 @@ public class Endersent extends SpawnableEntity {
             LivingEntity wEntity = prototype.spawn(
                     loc.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
             );
-            watchlings.add(wEntity);
+            addAttachment(wEntity, AttachmentRole.DEPENDENT);
         }
     }
 
@@ -165,13 +154,7 @@ public class Endersent extends SpawnableEntity {
         if (!isEscaping) return;
         isEscaping = false;
 
-        for (LivingEntity watchling : watchlings) {
-            if (!watchling.isDead()) {
-                watchling.setHealth(0);
-                watchling.remove();
-            }
-        }
-        watchlings.clear();
+        killAllAttachments();
 
         Player target = getNearestPlayer(60);
         Location targetLoc = (target != null) ? target.getLocation() : entity.getLocation().subtract(0, 50, 0);
@@ -199,23 +182,11 @@ public class Endersent extends SpawnableEntity {
     @Override
     public Endersent clone() {
         Endersent clone = (Endersent) super.clone();
-        clone.watchlings = new ArrayList<>();
         clone.projectileHits = 0;
         clone.enraged = false;
         clone.isEscaping = false;
         clone.lastTeleportSmash = 0;
         clone.escapeTicks = 0;
         return clone;
-    }
-
-    @Override
-    public void cleanup() {
-        super.cleanup();
-        for (LivingEntity watchling : watchlings) {
-            if (watchling != null && !watchling.isDead()) {
-                watchling.remove();
-            }
-        }
-        watchlings.clear();
     }
 }

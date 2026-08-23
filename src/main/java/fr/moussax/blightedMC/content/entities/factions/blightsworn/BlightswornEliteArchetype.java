@@ -50,7 +50,7 @@ public sealed abstract class BlightswornEliteArchetype extends BlightswornCreatu
     }
 
     private void triggerBlightWard() {
-        if (isNotAlive()) return;
+        if (!isAlive()) return;
         isWarded = true;
 
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ILLUSIONER_CAST_SPELL, 1.0f, 0.8f);
@@ -71,7 +71,7 @@ public sealed abstract class BlightswornEliteArchetype extends BlightswornCreatu
         Objects.requireNonNull(entity.getAttribute(Attribute.MOVEMENT_SPEED)).setBaseValue(wardSpeed);
 
         addCoreDelayedAction(WARD_DURATION_TICKS, () -> {
-            if (isNotAlive()) return;
+            if (!isAlive()) return;
             isWarded = false;
             Objects.requireNonNull(entity.getAttribute(Attribute.MOVEMENT_SPEED))
                     .setBaseValue(wardSpeed / WARD_SPEED_MULTIPLIER);
