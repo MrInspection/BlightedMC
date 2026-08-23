@@ -136,6 +136,8 @@ public final class BlightedEntitiesListener implements Listener {
 
         if (handleImmunity(blighted, entity, event)) return;
 
+        handleResistance(blighted, entity, event);
+
         blighted.onDamageTaken(event);
         for (var component : blighted.getComponents()) {
             component.onDamageTaken(blighted, event);
@@ -196,6 +198,14 @@ public final class BlightedEntitiesListener implements Listener {
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 100, 0.6f);
         }
         return true;
+    }
+
+    private void handleResistance(BlightedEntity blighted, LivingEntity entity, EntityDamageEvent event) {
+        double resistancePercent = blighted.getResistancePercent(entity, event);
+        if (resistancePercent <= 0.0) return;
+
+        double multiplier = Math.max(0.0, 1.0 - (resistancePercent / 100.0));
+        event.setDamage(event.getDamage() * multiplier);
     }
 
     @EventHandler

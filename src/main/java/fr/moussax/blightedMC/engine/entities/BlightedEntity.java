@@ -4,6 +4,7 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.entities.attachment.AttachmentRole;
 import fr.moussax.blightedMC.engine.entities.attachment.EntityAttachment;
 import fr.moussax.blightedMC.engine.entities.components.EntityComponent;
+import fr.moussax.blightedMC.engine.entities.immunity.DamageType;
 import fr.moussax.blightedMC.engine.entities.immunity.EntityImmunity;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
@@ -12,6 +13,9 @@ import fr.moussax.blightedMC.shared.loot.LootTable;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.*;
+
+import java.util.*;
+
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -95,6 +99,7 @@ public abstract class BlightedEntity implements Cloneable {
     protected Map<Attribute, Double> attributes = new HashMap<>();
 
     private final List<EntityImmunity> immunities = new ArrayList<>();
+    private final Map<DamageType, Double> resistances = new EnumMap<>(DamageType.class);
     private boolean runtimeInitialized = false;
     private boolean componentsInitialized = false;
 
@@ -151,6 +156,7 @@ public abstract class BlightedEntity implements Cloneable {
         }
 
         initImmunityRules();
+        initResistanceRules();
         entity = (LivingEntity) Objects.requireNonNull(location.getWorld()).spawnEntity(location, entityType);
         entity.addScoreboardTag(FAST_PASS_TAG);
         entity.getPersistentDataContainer().set(ENTITY_ID_KEY, PersistentDataType.STRING, getEntityId());
@@ -182,6 +188,7 @@ public abstract class BlightedEntity implements Cloneable {
         }
 
         initImmunityRules();
+        initResistanceRules();
         rehydrateAttributes();
         onConfigureAI(existing);
 
@@ -831,6 +838,27 @@ public abstract class BlightedEntity implements Cloneable {
         return null;
     }
 
+    /**
+     * Returns the highest resistance percentage matching a damage event.
+     *
+     * @param target entity receiving the event
+     * @param event  damage event
+     * @return resistance percentage (0.0 if no resistance applies)
+     */
+    public double getResistancePercent(LivingEntity target, EntityDamageEvent event) {
+        if (resistances.isEmpty()) {
+            return 0.0;
+        }
+        double highestResistance = 0.0;
+        for (Map.Entry<DamageType, Double> entry : resistances.entrySet()) {
+            DamageType type = entry.getKey();
+            if (type.isImmune(target, event)) {
+                highestResistance = Math.max(highestResistance, entry.getValue());
+            }
+        }
+        return highestResistance;
+    }
+
     private void initComponents() {
         if (componentsInitialized) {
             return;
@@ -954,6 +982,29 @@ public abstract class BlightedEntity implements Cloneable {
      */
     public void addImmunity(EntityImmunity immunity) {
         this.immunities.add(immunity);
+    }
+
+    private void initResistanceRules() {
+        EntityResistances container = getClass().getAnnotation(EntityResistances.class);
+        if (container != null) {
+            for (EntityResistance rule : container.value()) {
+                this.resistances.put(rule.type(), rule.percent());
+            }
+        }
+        EntityResistance single = getClass().getAnnotation(EntityResistance.class);
+        if (single != null) {
+            this.resistances.put(single.type(), single.percent());
+        }
+    }
+
+    /**
+     * Adds a damage resistance percentage rule to this entity.
+     *
+     * @param type    damage type
+     * @param percent percentage resisted (0 - 100)
+     */
+    public void addResistance(DamageType type, double percent) {
+        this.resistances.put(type, percent);
     }
 
     private void scheduleAbility(LifecycleTaskManager manager, long delayTicks, long periodTicks, Runnable action) {
