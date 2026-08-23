@@ -442,9 +442,10 @@ public abstract class BlightedEntity implements Cloneable {
      */
     public List<Player> getNearbyPlayers(Location center, double radius) {
         if (!isAlive() || center == null || center.getWorld() == null) return Collections.emptyList();
-        return center.getWorld().getNearbyEntities(center, radius, radius, radius).stream()
-                .filter(nearbyEntity -> nearbyEntity instanceof Player player && player.getGameMode() == GameMode.SURVIVAL)
-                .map(nearbyEntity -> (Player) nearbyEntity)
+        return center.getWorld().getNearbyEntities(center, radius, radius, radius,
+                        entity -> entity instanceof Player player && player.getGameMode() == GameMode.SURVIVAL
+                ).stream()
+                .map(entity -> (Player) entity)
                 .toList();
     }
 

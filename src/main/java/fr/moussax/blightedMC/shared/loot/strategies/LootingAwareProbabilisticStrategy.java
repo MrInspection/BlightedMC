@@ -9,7 +9,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * A probabilistic {@link LootSelectionStrategy} that considers the player's looting level.
@@ -75,11 +74,7 @@ public final class LootingAwareProbabilisticStrategy implements LootSelectionStr
         }
 
         ItemStack weapon = context.blightedPlayer().getPlayer().getInventory().getItemInMainHand();
-        if (weapon.hasItemMeta() && Objects.requireNonNull(weapon.getItemMeta()).hasEnchant(Enchantment.LOOTING)) {
-            return weapon.getItemMeta().getEnchantLevel(Enchantment.LOOTING);
-        }
-
-        return 0;
+        return weapon.getEnchantmentLevel(Enchantment.LOOTING);
     }
 
     /**
