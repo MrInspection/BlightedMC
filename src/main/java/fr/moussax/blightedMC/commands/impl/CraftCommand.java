@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.commands.impl;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.commands.PlayerCommand;
-import fr.moussax.blightedMC.engine.items.crafting.menu.CraftingTableMenu;
+import fr.moussax.blightedMC.engine.items.recipes.crafting.menu.CraftingTableMenu;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 

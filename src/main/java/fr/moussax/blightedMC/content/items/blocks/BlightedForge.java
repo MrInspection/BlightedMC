@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.content.items.blocks;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.blocks.BlightedBlock;
-import fr.moussax.blightedMC.engine.items.forging.menu.ForgeMenu;
+import fr.moussax.blightedMC.engine.items.recipes.forging.menu.ForgeMenu;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

@@ -1,8 +1,13 @@
 package fr.moussax.blightedMC.commands.impl;
 
 import fr.moussax.blightedMC.commands.AdminCommand;
+import fr.moussax.blightedMC.utils.ItemBuilder;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public final class TestCommand extends AdminCommand {
     @Override
@@ -15,6 +20,17 @@ public final class TestCommand extends AdminCommand {
         player.sendMessage(" §7Your gems balance has been §creset§e.");
         player.sendMessage(" §7Your gems balance was set to §d67 §7gems.");
         player.sendMessage("");
+
+
+        ItemStack itemStack = new ItemStack(Material.DIAMOND_SWORD);
+        ItemMeta meta = itemStack.getItemMeta();
+        meta.addEnchant(Enchantment.SHARPNESS, 100, true);
+        itemStack.setItemMeta(meta);
+
+        player.getInventory().addItem(itemStack);
+
+
+
         return true;
     }
 }

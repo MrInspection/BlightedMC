@@ -1,6 +1,6 @@
-package fr.moussax.blightedMC.engine.items.forging.registry;
+package fr.moussax.blightedMC.engine.items.recipes.forging.registry;
 
-import fr.moussax.blightedMC.engine.items.forging.ForgeRecipe;
+import fr.moussax.blightedMC.engine.items.recipes.forging.ForgeRecipe;
 import java.util.function.Consumer;
 
 /**

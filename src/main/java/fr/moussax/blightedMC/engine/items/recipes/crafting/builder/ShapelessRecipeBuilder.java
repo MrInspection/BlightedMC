@@ -1,8 +1,8 @@
-package fr.moussax.blightedMC.engine.items.crafting.builder;
+package fr.moussax.blightedMC.engine.items.recipes.crafting.builder;
 
 import fr.moussax.blightedMC.engine.items.BlightedItem;
-import fr.moussax.blightedMC.engine.items.crafting.BlightedShapelessRecipe;
-import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
+import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedShapelessRecipe;
+import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import org.bukkit.Material;
 

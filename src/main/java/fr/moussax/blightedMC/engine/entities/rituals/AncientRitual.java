@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.engine.entities.rituals;
 
 import fr.moussax.blightedMC.engine.items.BlightedItem;
-import fr.moussax.blightedMC.engine.items.crafting.CraftingObject;
+import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import lombok.Getter;

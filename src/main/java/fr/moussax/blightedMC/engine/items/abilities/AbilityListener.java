@@ -9,6 +9,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDispenseArmorEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -125,6 +126,19 @@ public final class AbilityListener implements Listener {
 
         // Prevent double triggering from off-hand interactions
         if (event.getHand() != EquipmentSlot.HAND) return;
+
+        if (event.getItem() != null) {
+            BlightedItem blightedItem = BlightedItem.fromItemStack(event.getItem());
+            if (blightedItem != null && blightedItem.isRecipePreviewEnabled()) {
+                Action action = event.getAction();
+                if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
+                    if (blightedItem.openRecipePreview(event.getPlayer(), null)) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+            }
+        }
 
         trigger(event.getPlayer(), event);
     }

@@ -4,19 +4,23 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityExecutor;
 import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
+import fr.moussax.blightedMC.engine.items.recipes.RecipePreviewManager;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
+import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +54,13 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     @Getter
     private final List<Ability> abilities = new ArrayList<>();
     private final List<ItemRule> rules = new ArrayList<>();
+    /**
+     * -- GETTER --
+     *
+     * @return true if recipe preview is enabled for this item
+     */
+    @Getter
+    private boolean recipePreviewEnabled = false;
 
     /**
      * Creates a Blighted item from a material.
@@ -132,6 +143,46 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
         rules.add(rule);
     }
 
+    /**
+     * Enables recipe preview support for this item.
+     *
+     * <p>When enabled, the item can be used to open its associated recipe
+     * preview through the recipe preview system.</p>
+     */
+    public void enableRecipePreview() {
+        this.recipePreviewEnabled = true;
+    }
+
+    /**
+     * Opens this item's recipe preview for a player.
+     *
+     * <p>If a parent menu is provided, the preview can use it for
+     * back-navigation.</p>
+     *
+     * @param player     the player viewing the recipe preview
+     * @param parentMenu the parent menu to return to, or {@code null}
+     *                   if no parent menu exists
+     * @return {@code true} if the recipe preview was opened successfully;
+     * {@code false} otherwise
+     */
+    public boolean openRecipePreview(@NonNull Player player, @Nullable Menu parentMenu) {
+        return RecipePreviewManager.openPreview(player, this, parentMenu);
+    }
+
+    /**
+     * Opens this item's recipe preview for a player without a parent menu.
+     *
+     * @param player the player viewing the recipe preview
+     * @return {@code true} if the recipe preview was opened successfully;
+     * {@code false} otherwise
+     */
+    public boolean openRecipePreview(@NonNull Player player) {
+        return openRecipePreview(player, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BlightedItem setDisplayName(@NonNull String displayName) {
         super.setDisplayName(itemRarity.getColorPrefix() + displayName);
@@ -164,7 +215,7 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
      * Triggers all abilities matching the provided event.
      *
      * @param blightedPlayer the player owning the item
-     * @param event the event that may trigger abilities
+     * @param event          the event that may trigger abilities
      */
     public void triggerAbilities(BlightedPlayer blightedPlayer, Event event) {
         for (Ability ability : abilities) {

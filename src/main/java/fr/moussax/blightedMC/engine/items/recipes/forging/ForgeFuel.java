@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.engine.items.forging;
+package fr.moussax.blightedMC.engine.items.recipes.forging;
 
 import fr.moussax.blightedMC.utils.Utilities;
 import org.bukkit.Material;

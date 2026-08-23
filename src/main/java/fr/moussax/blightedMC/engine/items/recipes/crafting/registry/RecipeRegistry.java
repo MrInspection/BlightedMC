@@ -1,12 +1,12 @@
-package fr.moussax.blightedMC.engine.items.crafting.registry;
+package fr.moussax.blightedMC.engine.items.recipes.crafting.registry;
 
 import fr.moussax.blightedMC.content.recipes.EndRecipes;
 import fr.moussax.blightedMC.content.recipes.EquipmentRecipes;
 import fr.moussax.blightedMC.content.recipes.MaterialRecipes;
 import fr.moussax.blightedMC.content.recipes.NetherMaterialRecipes;
-import fr.moussax.blightedMC.engine.items.crafting.BlightedRecipe;
-import fr.moussax.blightedMC.engine.items.crafting.builder.ShapedRecipeBuilder;
-import fr.moussax.blightedMC.engine.items.crafting.builder.ShapelessRecipeBuilder;
+import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
+import fr.moussax.blightedMC.engine.items.recipes.crafting.builder.ShapedRecipeBuilder;
+import fr.moussax.blightedMC.engine.items.recipes.crafting.builder.ShapelessRecipeBuilder;
 import fr.moussax.blightedMC.registry.RegistryModule;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.NonNull;

@@ -1,11 +1,11 @@
 package fr.moussax.blightedMC.content.recipes;
 
-import fr.moussax.blightedMC.engine.items.crafting.BlightedRecipe;
+import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.crafting.registry.RecipeRegistryHandler;
-import fr.moussax.blightedMC.engine.items.crafting.registry.RecipeRegistry;
-import static fr.moussax.blightedMC.engine.items.crafting.registry.RecipeRegistry.shapedRecipe;
-import static fr.moussax.blightedMC.engine.items.crafting.registry.RecipeRegistry.shapelessRecipe;
+import fr.moussax.blightedMC.engine.items.recipes.crafting.registry.RecipeRegistryHandler;
+
+import static fr.moussax.blightedMC.engine.items.recipes.crafting.registry.RecipeRegistry.shapedRecipe;
+
 import org.bukkit.Material;
 
 public class NetherMaterialRecipes implements RegistryModule<RecipeRegistryHandler> {

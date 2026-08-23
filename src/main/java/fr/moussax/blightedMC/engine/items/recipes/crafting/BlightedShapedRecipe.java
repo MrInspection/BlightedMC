@@ -1,6 +1,7 @@
-package fr.moussax.blightedMC.engine.items.crafting;
+package fr.moussax.blightedMC.engine.items.recipes.crafting;
 
 import fr.moussax.blightedMC.engine.items.BlightedItem;
+import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.utils.Utilities;
 import org.bukkit.inventory.ItemStack;
 

@@ -1,6 +1,6 @@
-package fr.moussax.blightedMC.engine.items.crafting.registry;
+package fr.moussax.blightedMC.engine.items.recipes.crafting.registry;
 
-import fr.moussax.blightedMC.engine.items.crafting.BlightedRecipe;
+import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
 import java.util.function.Consumer;
 
 /**

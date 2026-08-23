@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.content.items.blocks;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.blocks.BlightedBlock;
-import fr.moussax.blightedMC.engine.items.crafting.menu.CraftingTableMenu;
+import fr.moussax.blightedMC.engine.items.recipes.crafting.menu.CraftingTableMenu;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.Material;

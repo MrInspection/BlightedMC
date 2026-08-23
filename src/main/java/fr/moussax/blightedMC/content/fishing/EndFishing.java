@@ -14,7 +14,7 @@ public class EndFishing implements RegistryModule<FishingRegistryHandler> {
 
     @Override
     public void register(FishingRegistryHandler registry) {
-        registry.register(World.Environment.THE_END, FishingMethod.WATER, provide());
+        registry.register(World.Environment.THE_END, FishingMethod.VOID, provide());
     }
 
     public FishingLootTable provide() {

@@ -29,7 +29,7 @@ public class Hyperion implements RegistryModule<ItemRegistryHandler> {
         );
         hyperion.setUnbreakable(true);
         hyperion.addItemFlag(ItemFlag.HIDE_UNBREAKABLE);
-        hyperion.addAbility(new Ability(new WitherImpactAbility(), "Whither Impact", AbilityType.RIGHT_CLICK));
+        hyperion.addAbility(new Ability(new WitherImpactAbility(), "Whither Impact", AbilityType.RIGHT_CLICK), false);
 
         registry.register(hyperion);
     }
