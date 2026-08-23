@@ -7,7 +7,6 @@ import fr.moussax.blightedMC.engine.entities.components.EntityComponent;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnCondition;
 import fr.moussax.blightedMC.engine.entities.spawnable.engine.SpawnMode;
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -89,7 +88,7 @@ public abstract class SpawnableEntity extends BlightedEntity {
 
     private void startEliteAura() {
         addCoreAbility(5L, 3L, () -> {
-            if (isNotAlive()) return;
+            if (!isAlive()) return;
 
             long time = entity.getTicksLived();
             Location center = entity.getLocation().add(0, entity.getHeight() / 2.0, 0);

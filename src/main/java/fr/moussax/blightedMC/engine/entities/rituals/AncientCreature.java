@@ -209,7 +209,7 @@ public abstract class AncientCreature extends BlightedEntity {
     }
 
     private void handleTimeTick() {
-        if (isNotAlive() || isCollapsing) return;
+        if (!isAlive() || isCollapsing) return;
 
         remainingSeconds--;
         updateHologramText();
@@ -226,7 +226,7 @@ public abstract class AncientCreature extends BlightedEntity {
     }
 
     private void handleTimeExpiration() {
-        if (isCollapsing || isNotAlive()) return;
+        if (isCollapsing || !isAlive()) return;
         this.isCollapsing = true;
 
         Location location = entity.getLocation().clone();
