@@ -4,7 +4,6 @@ import fr.moussax.blightedMC.content.utils.ai.EndermanAI;
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.condition.SpawnRules;
-import fr.moussax.blightedMC.utils.Utilities;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -83,7 +82,7 @@ public class Watchling extends SpawnableEntity {
         entity.swingMainHand();
         entity.swingOffHand();
 
-        Utilities.delay(() -> {
+        addCoreDelayedAction(10L, () -> {
             if (!isAlive() || target.getLocation().distance(entity.getLocation()) > 3) return;
 
             target.damage(getDamage() * 2, entity);
@@ -92,7 +91,7 @@ public class Watchling extends SpawnableEntity {
             if (random.nextBoolean()) {
                 executeEscapeTeleport();
             }
-        }, 10);
+        });
     }
 
     private void executeEscapeTeleport() {
@@ -103,9 +102,9 @@ public class Watchling extends SpawnableEntity {
         );
         entity.teleport(escapeLoc);
         entity.setInvisible(true);
-        Utilities.delay(() -> {
+        addCoreDelayedAction(40L, () -> {
             if (isAlive()) entity.setInvisible(false);
-        }, 40);
+        });
     }
 
     @Override
