@@ -56,7 +56,7 @@ public final class BlightswornZombifiedPiglin extends BlightswornEliteArchetype 
     }
 
     private void executeInfernalCharge(boolean isPhaseTwo) {
-        if (isNotAlive()) return;
+        if (!isAlive()) return;
 
         Player target = getNearestPlayer(CHARGE_RANGE);
         if (target == null || target.isDead() || target.getWorld() != entity.getWorld() || !hasLineOfSight(target)) return;
@@ -65,7 +65,7 @@ public final class BlightswornZombifiedPiglin extends BlightswornEliteArchetype 
         entity.getWorld().spawnParticle(Particle.FLAME, entity.getLocation().add(0, 1, 0), 20, 0.5, 1.0, 0.5, 0.05);
 
         addCoreDelayedAction(15L, () -> {
-            if (isNotAlive()) return;
+            if (!isAlive()) return;
 
             Vector chargeDirection = target.getLocation().toVector().subtract(entity.getLocation().toVector());
             if (chargeDirection.lengthSquared() > 0) {

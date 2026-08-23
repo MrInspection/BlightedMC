@@ -64,7 +64,7 @@ public final class BlightswornPiglin extends BlightswornEliteArchetype {
     }
 
     private void executeHunterDash(boolean isPhaseTwo) {
-        if (isNotAlive()) return;
+        if (!isAlive()) return;
 
         Player target = getNearestPlayer(DASH_RANGE);
         if (target == null || target.isDead() || target.getWorld() != entity.getWorld() || !hasLineOfSight(target)) return;
@@ -73,7 +73,7 @@ public final class BlightswornPiglin extends BlightswornEliteArchetype {
         entity.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, entity.getLocation().add(0, 1, 0), 15, 0.5, 0.5, 0.5, 0.02);
 
         addCoreDelayedAction(12L, () -> {
-            if (isNotAlive()) return;
+            if (!isAlive()) return;
 
             Vector dashDirection = target.getLocation().toVector().subtract(entity.getLocation().toVector());
             if (dashDirection.lengthSquared() > 0) {

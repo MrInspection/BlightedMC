@@ -90,7 +90,7 @@ public class Endersent extends SpawnableEntity {
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
 
         addCoreDelayedAction(9L, () -> {
-            if (isNotAlive()) return;
+            if (!isAlive()) return;
             entity.getWorld().spawnParticle(Particle.EXPLOSION, entity.getLocation(), 1);
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.8f);
 

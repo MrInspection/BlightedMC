@@ -84,7 +84,7 @@ public class Watchling extends SpawnableEntity {
         entity.swingOffHand();
 
         Utilities.delay(() -> {
-            if (isNotAlive() || target.getLocation().distance(entity.getLocation()) > 3) return;
+            if (!isAlive() || target.getLocation().distance(entity.getLocation()) > 3) return;
 
             target.damage(getDamage() * 2, entity);
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 0.5f, 1.2f);
@@ -104,7 +104,7 @@ public class Watchling extends SpawnableEntity {
         entity.teleport(escapeLoc);
         entity.setInvisible(true);
         Utilities.delay(() -> {
-            if (!isNotAlive()) entity.setInvisible(false);
+            if (isAlive()) entity.setInvisible(false);
         }, 40);
     }
 

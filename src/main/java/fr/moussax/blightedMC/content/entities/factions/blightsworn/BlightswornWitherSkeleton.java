@@ -59,7 +59,7 @@ public final class BlightswornWitherSkeleton extends BlightswornEliteArchetype {
     }
 
     private void executePhantomLunge(boolean isPhaseTwo) {
-        if (isNotAlive()) return;
+        if (!isAlive()) return;
 
         Player target = getNearestPlayer(LUNGE_RANGE);
         if (target == null || target.isDead() || target.getWorld() != entity.getWorld() || !hasLineOfSight(target)) return;
@@ -68,7 +68,7 @@ public final class BlightswornWitherSkeleton extends BlightswornEliteArchetype {
         entity.getWorld().spawnParticle(Particle.PORTAL, entity.getLocation().add(0, 1, 0), 20, 0.5, 1.0, 0.5, 0.1);
 
         addCoreDelayedAction(10L, () -> {
-            if (isNotAlive()) return;
+            if (!isAlive()) return;
 
             Vector lungeDirection = target.getLocation().toVector().subtract(entity.getLocation().toVector());
             if (lungeDirection.lengthSquared() > 0) {
