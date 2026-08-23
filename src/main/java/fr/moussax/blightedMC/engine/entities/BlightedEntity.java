@@ -396,7 +396,6 @@ public abstract class BlightedEntity implements Cloneable {
             return;
         }
         entity.attack(target);
-        entity.swingMainHand();
     }
 
     /**
