@@ -6,6 +6,7 @@ import fr.moussax.blightedMC.engine.entities.EntityImmunities;
 import fr.moussax.blightedMC.engine.entities.EntityResistance;
 import fr.moussax.blightedMC.engine.entities.EntityResistances;
 import fr.moussax.blightedMC.engine.entities.immunity.DamageType;
+import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
@@ -14,6 +15,7 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
@@ -60,7 +62,7 @@ public class CorruptedChampion extends BlightedEntity {
         armor = new ItemStack[]{
                 new ItemStack(Material.GOLDEN_BOOTS),
                 new ItemStack(Material.IRON_LEGGINGS),
-                new ItemBuilder(Material.GOLDEN_CHESTPLATE).setArmorTrim(TrimMaterial.GOLD, TrimPattern.RIB).toItemStack(),
+                new ItemBuilder(Material.GOLDEN_CHESTPLATE).setArmorTrim(TrimMaterial.GOLD, TrimPattern.SNOUT).toItemStack(),
                 new ItemBuilder(Material.PLAYER_HEAD)
                         .setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWFiNTRjMWNlOTQyYzIzMjFkNmRiYjgzMjQ1ZWJmM2ZmZDY5NmJmOWQxZjAyNDY3MzY0NzFmNjdmNzJiYTI1MCJ9fX0=")
                         .toItemStack()
@@ -167,29 +169,60 @@ public class CorruptedChampion extends BlightedEntity {
 
                 ticks++;
 
-                if (ticks <= 45) {
-                    Location hoverLocation = center.clone().add(0, Math.sin(ticks * 0.1) * 1.5 + 1.5, 0);
-                    hoverLocation.setYaw((hoverLocation.getYaw() + ticks * 4) % 360);
+                if (ticks <= 40) {
+                    double riseProgress = ticks / 40.0;
+                    double yOffset = Math.sin(riseProgress * (Math.PI / 2.0)) * 2.5;
+                    Location hoverLocation = center.clone().add(0, yOffset, 0);
+                    hoverLocation.setYaw((hoverLocation.getYaw() + 8) % 360);
                     entity.teleport(hoverLocation);
-                    double radius = Math.max(0.5, 5.0 - (ticks * 0.1));
 
-                    for (int i = 0; i < 8; i++) {
-                        double angle = (ticks * 0.15) + (i * (2 * Math.PI / 8));
+                    double helixRadius = 2.2 * (1.0 - riseProgress * 0.4);
+                    double angleOffset = ticks * 0.25;
 
-                        Location particleLocation = hoverLocation.clone().add(radius * Math.cos(angle), 1.2, radius * Math.sin(angle));
-                        world.spawnParticle(Particle.DUST, particleLocation, 1, 0.0, 0.0, 0.0, 0.0, VOID_PURPLE);
-                        world.spawnParticle(Particle.ENCHANT, particleLocation, 1, 0.0, 0.0, 0.0, 0.5);
+                    for (int i = 0; i < 4; i++) {
+                        double angle = angleOffset + (i * (Math.PI / 2.0));
+                        double x = helixRadius * Math.cos(angle);
+                        double z = helixRadius * Math.sin(angle);
+
+                        Location goldPosition = hoverLocation.clone().add(x, -0.8 + (riseProgress * 1.5), z);
+                        world.spawnParticle(Particle.DUST, goldPosition, 2, 0.05, 0.05, 0.05, 0.0, CHAMPION_GOLD);
+                        Location voidPosition = hoverLocation.clone().add(-x, 2.2 - (riseProgress * 1.5), -z);
+                        world.spawnParticle(Particle.DUST, voidPosition, 2, 0.05, 0.05, 0.05, 0.0, VOID_PURPLE);
                     }
 
-                    if (ticks % 10 == 0) {
-                        world.playSound(hoverLocation, Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.5f, 0.6f + (ticks * 0.02f));
+                    world.spawnParticle(Particle.ENCHANT, hoverLocation.clone().add(0, 1.2, 0), 3, 0.3, 0.5, 0.3, 0.8);
+
+                    if (ticks % 8 == 0) {
+                        world.playSound(hoverLocation, Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.2f, 0.5f + (ticks * 0.025f));
+                        world.playSound(hoverLocation, Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 1.0f, 0.6f + (ticks * 0.02f));
+                    }
+                } else if (ticks <= 45) {
+                    Location bossLocation = entity.getLocation().add(0, 1.2, 0);
+                    for (int i = 0; i < 12; i++) {
+                        double angle = Math.random() * 2 * Math.PI;
+                        double dist = 1.5 + Math.random() * 1.5;
+                        Location spawnPosition = bossLocation.clone().add(dist * Math.cos(angle), (Math.random() - 0.5) * 2, dist * Math.sin(angle));
+                        Vector inward = bossLocation.toVector().subtract(spawnPosition.toVector()).normalize().multiply(0.35);
+
+                        world.spawnParticle(Particle.PORTAL, spawnPosition, 0, inward.getX(), inward.getY(), inward.getZ(), 1.0);
                     }
                 } else if (ticks == 46) {
                     Location blastLocation = entity.getLocation();
-                    world.playSound(blastLocation, Sound.ENTITY_WITHER_SPAWN, 1.8f, 0.9f);
-                    world.playSound(blastLocation, Sound.ITEM_TRIDENT_THUNDER, 2.0f, 0.8f);
-                    world.spawnParticle(Particle.FLASH, blastLocation.clone().add(0, 1.5, 0), 2, Color.WHITE);
-                    world.spawnParticle(Particle.SOUL, blastLocation.clone().add(0, 1.5, 0), 80, 2.0, 1.5, 2.0, 0.15);
+
+                    world.playSound(blastLocation, Sound.ENTITY_WITHER_SPAWN, 1.8f, 0.85f);
+                    world.playSound(blastLocation, Sound.ITEM_TRIDENT_THUNDER, 2.0f, 0.7f);
+                    world.playSound(blastLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.6f, 0.6f);
+
+                    world.spawnParticle(Particle.FLASH, blastLocation.clone().add(0, 1.5, 0), 3, Color.WHITE);
+                    world.spawnParticle(Particle.FLAME, blastLocation.clone().add(0, 1.5, 0), 100, 2.5, 1.8, 2.5, 0.2);
+                    world.spawnParticle(Particle.DUST, blastLocation.clone().add(0, 1.5, 0), 60, 2.0, 1.0, 2.0, 0.0, CHAMPION_GOLD);
+                    world.spawnParticle(Particle.DUST, blastLocation.clone().add(0, 1.5, 0), 60, 2.0, 1.0, 2.0, 0.0, VOID_PURPLE);
+
+                    for (int i = 0; i < 32; i++) {
+                        double angle = (2 * Math.PI / 32) * i;
+                        Location ring = blastLocation.clone().add(4.5 * Math.cos(angle), 0.2, 4.5 * Math.sin(angle));
+                        world.spawnParticle(Particle.SWEEP_ATTACK, ring, 1);
+                    }
 
                     damageAndKnockbackNearbyPlayers(blastLocation, 14.0, PHASE_TRANSITION_BLAST_DAMAGE, 1.8, 0.5);
 
@@ -197,6 +230,10 @@ public class CorruptedChampion extends BlightedEntity {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 0, false, false, true));
                     }
                 } else if (ticks >= 60) {
+                    Location groundLocation = center.clone();
+                    groundLocation.setPitch(0);
+                    entity.teleport(groundLocation);
+
                     cancel();
                     if (entity instanceof Mob mob) {
                         mob.setAI(true);
@@ -273,7 +310,7 @@ public class CorruptedChampion extends BlightedEntity {
                     entity.teleport(currentLocation);
 
                     world.spawnParticle(Particle.DUST, currentLocation.clone().add(0, 0.5, 0), 4, 0.3, 0.1, 0.3, 0.0, VOID_PURPLE);
-                    world.spawnParticle(Particle.SOUL_FIRE_FLAME, currentLocation.clone().add(0, 0.2, 0), 2, 0.2, 0.1, 0.2, 0.02);
+                    world.spawnParticle(Particle.FLAME, currentLocation.clone().add(0, 0.2, 0), 2, 0.2, 0.1, 0.2, 0.02);
 
                     if (ticks == 14) {
                         world.playSound(currentLocation, Sound.ENTITY_GHAST_SHOOT, 1.5f, 0.5f);
@@ -347,7 +384,7 @@ public class CorruptedChampion extends BlightedEntity {
                         if (Math.abs(distance - currentRadius) <= 1.4) {
                             player.damage(EARTHQUAKE_DAMAGE, entity);
                             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 255, false, false, true));
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 80, 255, false, false, true));
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 80, 4, false, false, true));
                             player.setVelocity(new Vector(0, 0.6, 0));
                         }
                     }
@@ -514,8 +551,12 @@ public class CorruptedChampion extends BlightedEntity {
 
             private void cleanup() {
                 cancel();
-                if (thrownSword != null && !thrownSword.isDead()) {
-                    thrownSword.remove();
+                if (thrownSword != null) {
+                    attachments.removeIf(a -> a.entity() != null && a.entity().equals(thrownSword));
+                    BlightedEntitiesListener.unregisterAttachment(thrownSword);
+                    if (!thrownSword.isDead()) {
+                        thrownSword.remove();
+                    }
                 }
                 setMainHandEquipped(true);
                 setPerformingAbility(false);
@@ -572,72 +613,91 @@ public class CorruptedChampion extends BlightedEntity {
                     return;
                 }
 
-                Location currentCenter = entity.getLocation();
-                Player chaseTarget = getNearestPlayer(16.0);
+                try {
+                    Location currentCenter = entity.getLocation().clone();
+                    Player chaseTarget = getNearestPlayer(16.0);
 
-                if (chaseTarget != null) {
-                    Vector chaseVector = chaseTarget.getLocation().toVector().subtract(currentCenter.toVector()).setY(0);
-                    if (chaseVector.lengthSquared() > 0.5) {
-                        double currentSpeed = 0.13 + ((double) ticks / 140.0) * 0.10;
-                        currentCenter.add(chaseVector.normalize().multiply(currentSpeed));
-                    }
-                }
-
-                currentCenter.setYaw((currentCenter.getYaw() + 25) % 360);
-                entity.teleport(currentCenter);
-                spinAngle += 0.22;
-
-                for (int i = 0; i < bladeCount; i++) {
-                    double angle = spinAngle + (i * (2 * Math.PI / bladeCount));
-                    double xOffset = radius * Math.cos(angle);
-                    double zOffset = radius * Math.sin(angle);
-                    double yWave = Math.sin(ticks * 0.25 + (i * (2 * Math.PI / bladeCount))) * 0.4;
-
-                    Location visualBladeTarget = currentCenter.clone().add(xOffset, 2.2 + yWave, zOffset);
-                    float tangentYaw = (float) Math.toDegrees(angle);
-                    visualBladeTarget.setYaw(tangentYaw);
-                    visualBladeTarget.setPitch(0);
-
-                    Location giantAnchor = calculateGiantAnchor(visualBladeTarget, tangentYaw, true, 0.85);
-                    tornadoSwords.get(i).teleport(giantAnchor);
-                    world.spawnParticle(Particle.SWEEP_ATTACK, visualBladeTarget, 1);
-                    world.spawnParticle(Particle.DUST, visualBladeTarget.clone().add(0, 0.2, 0), 2, 0.15, 0.15, 0.15, 0.0, CHAMPION_GOLD);
-                }
-
-                world.spawnParticle(Particle.CLOUD, currentCenter.clone().add(0, 2.0, 0), 4, 1.5, 0.4, 1.5, 0.03);
-
-                if (ticks % 2 == 0) {
-                    for (Player player : getNearbyPlayers(12.0)) {
-                        double distance = player.getLocation().distance(currentCenter);
-                        if (distance > 6.0 && distance <= 12.0) {
-                            Vector pull = currentCenter.toVector().subtract(player.getLocation().toVector()).setY(0).normalize().multiply(0.08);
-                            player.setVelocity(player.getVelocity().add(pull));
+                    if (chaseTarget != null) {
+                        Vector chaseVector = chaseTarget.getLocation().toVector().subtract(currentCenter.toVector()).setY(0);
+                        if (chaseVector.lengthSquared() > 0.5) {
+                            double currentSpeed = 0.13 + ((double) ticks / 140.0) * 0.10;
+                            currentCenter.add(chaseVector.normalize().multiply(currentSpeed));
                         }
                     }
-                }
 
-                if (ticks % 8 == 0) {
-                    if (entity instanceof Mob mob) {
-                        mob.swingMainHand();
-                    }
-                    world.playSound(currentCenter, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.4f, 0.6f);
-                    for (Player player : getNearbyPlayers(6.5)) {
-                        player.damage(BLADENADO_DAMAGE, entity);
-                        player.setNoDamageTicks(0);
-                        Vector knockback = player.getLocation().toVector().subtract(currentCenter.toVector())
-                                .normalize()
-                                .multiply(0.6)
-                                .setY(0.2);
+                    currentCenter.setYaw((currentCenter.getYaw() + 25) % 360);
+                    entity.teleport(currentCenter);
+                    spinAngle = (spinAngle + 0.22) % (2 * Math.PI);
 
-                        player.setVelocity(knockback);
+                    for (int i = 0; i < bladeCount; i++) {
+                        Giant sword = tornadoSwords.get(i);
+                        if (sword == null || !sword.isValid() || sword.isDead()) {
+                            continue;
+                        }
+
+                        double angle = spinAngle + (i * (2 * Math.PI / bladeCount));
+                        double xOffset = radius * Math.cos(angle);
+                        double zOffset = radius * Math.sin(angle);
+                        double yWave = Math.sin(ticks * 0.25 + (i * (2 * Math.PI / bladeCount))) * 0.4;
+
+                        Location visualBladeTarget = currentCenter.clone().add(xOffset, 2.2 + yWave, zOffset);
+                        float tangentYaw = (float) Math.toDegrees(angle);
+                        visualBladeTarget.setYaw(tangentYaw);
+                        visualBladeTarget.setPitch(0);
+
+                        Location giantAnchor = calculateGiantAnchor(visualBladeTarget, tangentYaw, true, 0.85);
+                        sword.teleport(giantAnchor);
+                        sword.setRotation(tangentYaw, 0f);
+                        world.spawnParticle(Particle.SWEEP_ATTACK, visualBladeTarget, 1);
+                        world.spawnParticle(Particle.DUST, visualBladeTarget.clone().add(0, 0.2, 0), 2, 0.15, 0.15, 0.15, 0.0, CHAMPION_GOLD);
                     }
+
+                    world.spawnParticle(Particle.LARGE_SMOKE, currentCenter.clone().add(0, 2.0, 0), 4, 1.5, 0.4, 1.5, 0.03);
+
+                    if (ticks % 2 == 0) {
+                        for (Player player : getNearbyPlayers(12.0)) {
+                            double distance = player.getLocation().distance(currentCenter);
+                            if (distance > 6.0 && distance <= 12.0) {
+                                Vector pull = currentCenter.toVector().subtract(player.getLocation().toVector()).setY(0).normalize().multiply(0.08);
+                                player.setVelocity(player.getVelocity().add(pull));
+                            }
+                        }
+                    }
+
+                    if (ticks % 8 == 0) {
+                        if (entity instanceof Mob mob) {
+                            mob.swingMainHand();
+                        }
+                        world.playSound(currentCenter, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.4f, 0.6f);
+                        for (Player player : getNearbyPlayers(6.5)) {
+                            player.damage(BLADENADO_DAMAGE, entity);
+                            player.setNoDamageTicks(0);
+                            Vector knockback = player.getLocation().toVector().subtract(currentCenter.toVector())
+                                    .normalize()
+                                    .multiply(0.6)
+                                    .setY(0.2);
+
+                            player.setVelocity(knockback);
+                        }
+                    }
+                    ticks++;
+                } catch (Throwable t) {
+                    BlightedMC.getInstance().getLogger().severe("[CorruptedChampion] Bladenado error: " + t.getMessage());
+                    cleanup();
                 }
-                ticks++;
             }
 
             private void cleanup() {
                 cancel();
-                tornadoSwords.forEach(Giant::remove);
+                for (Giant sword : tornadoSwords) {
+                    if (sword != null) {
+                        attachments.removeIf(a -> a.entity() != null && a.entity().equals(sword));
+                        BlightedEntitiesListener.unregisterAttachment(sword);
+                        if (!sword.isDead()) {
+                            sword.remove();
+                        }
+                    }
+                }
                 setMainHandEquipped(true);
 
                 if (entity instanceof Mob mob) {
@@ -645,7 +705,7 @@ public class CorruptedChampion extends BlightedEntity {
                 }
                 setPerformingAbility(false);
             }
-        }.runTaskTimer(BlightedMC.getInstance(), 1L, 1L);
+        }.runTaskTimer(BlightedMC.getInstance(), 0L, 1L);
     }
 
     @Override
@@ -659,11 +719,13 @@ public class CorruptedChampion extends BlightedEntity {
         Location targetLocation = spawnLocation.clone();
         targetLocation.setPitch(0);
         targetLocation.setYaw(spawnLocation.getYaw());
-        return Objects.requireNonNull(spawnLocation.getWorld()).spawn(targetLocation, Giant.class, giant -> {
-                    configureSwordGiant(giant, scale);
-                    giant.setCustomName("Dinnerbone");
+        Giant giant = Objects.requireNonNull(spawnLocation.getWorld()).spawn(targetLocation, Giant.class, g -> {
+                    configureSwordGiant(g, scale);
+                    g.setCustomName("Dinnerbone");
                 }
         );
+        addAttachment(giant);
+        return giant;
     }
 
     private void configureSwordGiant(Giant giant, double scale) {
@@ -674,6 +736,8 @@ public class CorruptedChampion extends BlightedEntity {
         giant.setSilent(true);
         giant.setGravity(false);
         giant.setCollidable(false);
+        giant.setPersistent(false);
+        giant.setRemoveWhenFarAway(false);
 
         AttributeInstance scaleAttribute = giant.getAttribute(Attribute.SCALE);
         if (scaleAttribute != null) {
