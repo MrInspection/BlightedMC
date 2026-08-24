@@ -14,16 +14,16 @@ public enum DamageType implements EntityImmunity {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
             return event.getCause() == EntityDamageEvent.DamageCause.FIRE ||
-                   event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK ||
-                   event.getCause() == EntityDamageEvent.DamageCause.LAVA ||
-                   event.getCause() == EntityDamageEvent.DamageCause.CAMPFIRE;
+                    event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK ||
+                    event.getCause() == EntityDamageEvent.DamageCause.LAVA ||
+                    event.getCause() == EntityDamageEvent.DamageCause.CAMPFIRE;
         }
     },
     MELEE {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
             return event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK ||
-                   event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK;
+                    event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK;
         }
     },
     PROJECTILE {
@@ -48,7 +48,18 @@ public enum DamageType implements EntityImmunity {
 
         @Override
         public String getImmunityMessage() {
-            return "§4 ■ §cThe Blight prevents your mace from dealing damage.";
+            return "§c A mystical force prevented your mace from dealing damage.";
+        }
+    },
+    MAGIC {
+        @Override
+        public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
+            EntityDamageEvent.DamageCause cause = event.getCause();
+            return cause == EntityDamageEvent.DamageCause.MAGIC ||
+                    cause == EntityDamageEvent.DamageCause.POISON ||
+                    cause == EntityDamageEvent.DamageCause.WITHER ||
+                    cause == EntityDamageEvent.DamageCause.DRAGON_BREATH ||
+                    cause == EntityDamageEvent.DamageCause.SONIC_BOOM;
         }
     }
 }

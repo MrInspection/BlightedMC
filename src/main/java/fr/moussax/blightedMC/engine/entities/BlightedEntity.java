@@ -33,7 +33,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.NonNull;
 
-import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -592,6 +591,19 @@ public abstract class BlightedEntity implements Cloneable {
                 knockbackVector = new Vector(0, verticalKnockback, 0);
             }
             player.setVelocity(knockbackVector);
+        }
+    }
+
+    /**
+     * Disables a target player's shield if they are currently blocking.
+     *
+     * @param target        target player
+     * @param cooldownTicks duration in ticks to put the shield on cooldown
+     */
+    public void disableShieldIfBlocking(Player target, int cooldownTicks) {
+        if (target != null && target.isBlocking()) {
+            target.setCooldown(Material.SHIELD, cooldownTicks);
+            target.getWorld().playSound(target.getLocation(), Sound.ITEM_SHIELD_BREAK, 1.0f, 0.8f);
         }
     }
 

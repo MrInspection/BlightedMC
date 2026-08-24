@@ -60,24 +60,76 @@ public abstract class AncientCreature extends BlightedEntity {
     /**
      * Creates an ancient creature using the default time allowance.
      *
-     * @param name creature display name
-     * @param maxHealth creature maximum health
+     * @param name       creature display name
+     * @param maxHealth  creature maximum health
      * @param entityType Bukkit entity type
      */
     public AncientCreature(@NonNull String name, int maxHealth, EntityType entityType) {
-        this(name, maxHealth, entityType, DEFAULT_TIME_ALLOWANCE_SECONDS);
+        this(name, maxHealth, 1, 0, entityType, DEFAULT_TIME_ALLOWANCE_SECONDS);
     }
 
     /**
-     * Creates an ancient creature with the specified time allowance.
+     * Creates an ancient creature using the default time allowance.
      *
-     * @param name creature display name
-     * @param maxHealth creature maximum health
+     * @param name       creature display name
+     * @param maxHealth  creature maximum health
+     * @param damage     base attack damage
      * @param entityType Bukkit entity type
+     */
+    public AncientCreature(@NonNull String name, int maxHealth, int damage, EntityType entityType) {
+        this(name, maxHealth, damage, 0, entityType, DEFAULT_TIME_ALLOWANCE_SECONDS);
+    }
+
+    /**
+     * Creates an ancient creature using the default time allowance.
+     *
+     * @param name       creature display name
+     * @param maxHealth  creature maximum health
+     * @param damage     base attack damage
+     * @param defense    base armor value
+     * @param entityType Bukkit entity type
+     */
+    public AncientCreature(@NonNull String name, int maxHealth, int damage, int defense, EntityType entityType) {
+        this(name, maxHealth, damage, defense, entityType, DEFAULT_TIME_ALLOWANCE_SECONDS);
+    }
+
+    /**
+     * Creates an ancient creature using the specified time allowance.
+     *
+     * @param name                 creature display name
+     * @param maxHealth            creature maximum health
+     * @param entityType           Bukkit entity type
      * @param timeAllowanceSeconds time allowed to defeat the creature, in seconds
      */
     public AncientCreature(@NonNull String name, int maxHealth, EntityType entityType, int timeAllowanceSeconds) {
-        super(name, maxHealth, entityType);
+        this(name, maxHealth, 1, 0, entityType, timeAllowanceSeconds);
+    }
+
+    /**
+     * Creates an ancient creature using the specified damage and time allowance.
+     *
+     * @param name                 creature display name
+     * @param maxHealth            creature maximum health
+     * @param damage               base attack damage
+     * @param entityType           Bukkit entity type
+     * @param timeAllowanceSeconds time allowed to defeat the creature, in seconds
+     */
+    public AncientCreature(@NonNull String name, int maxHealth, int damage, EntityType entityType, int timeAllowanceSeconds) {
+        this(name, maxHealth, damage, 0, entityType, timeAllowanceSeconds);
+    }
+
+    /**
+     * Creates an ancient creature using the specified combat stats and time allowance.
+     *
+     * @param name                 creature display name
+     * @param maxHealth            creature maximum health
+     * @param damage               base attack damage
+     * @param defense              base armor value
+     * @param entityType           Bukkit entity type
+     * @param timeAllowanceSeconds time allowed to defeat the creature, in seconds
+     */
+    public AncientCreature(@NonNull String name, int maxHealth, int damage, int defense, EntityType entityType, int timeAllowanceSeconds) {
+        super(name, maxHealth, damage, defense, entityType);
         this.timeAllowance = timeAllowanceSeconds;
         this.remainingSeconds = timeAllowanceSeconds;
         setBoss(true);
