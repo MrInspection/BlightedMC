@@ -563,10 +563,35 @@ public class CorruptedChampion extends BlightedEntity {
         }.runTaskTimer(BlightedMC.getInstance(), 1L, 1L);
     }
 
+    private void cleanupBladenado(List<Giant> tornadoSwords) {
+        for (Giant sword : tornadoSwords) {
+            if (sword != null) {
+                attachments.removeIf(a -> a.entity() != null && a.entity().equals(sword));
+                BlightedEntitiesListener.unregisterAttachment(sword);
+                if (!sword.isDead()) {
+                    sword.remove();
+                }
+            }
+        }
+
+        setMainHandEquipped(true);
+
+        if (entity instanceof Mob mob) {
+            mob.setAI(true);
+        }
+
+        endAbility();
+    }
+
     private void executeBladenado() {
-        if (currentPhase != 3 || isPerformingAbility()) {
+        if (currentPhase != 3) {
             return;
         }
+
+        if (!tryStartAbility()) {
+            return;
+        }
+
 
         setPerformingAbility(true);
 
@@ -682,7 +707,7 @@ public class CorruptedChampion extends BlightedEntity {
                     ticks++;
                 } catch (Throwable t) {
                     BlightedMC.getInstance().getLogger().severe("[CorruptedChampion] Bladenado error: " + t.getMessage());
-                    cleanup();
+                    cleanupBladenado(tornadoSwords);
                 }
             }
 
@@ -751,6 +776,18 @@ public class CorruptedChampion extends BlightedEntity {
             return;
         }
         entity.getEquipment().setBoots(bootsItem);
+    }
+
+    private boolean tryStartAbility() {
+        if (isPerformingAbility()) {
+            return false;
+        }
+        setPerformingAbility(true);
+        return true;
+    }
+
+    private void endAbility() {
+        setPerformingAbility(false);
     }
 
     @Override
