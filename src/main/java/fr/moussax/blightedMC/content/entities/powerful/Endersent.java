@@ -62,6 +62,7 @@ public class Endersent extends SpawnableEntity {
     }
 
     private void tickCombat() {
+        if (!isAlive()) return;
         tickSmash();
         tickEscape();
     }
@@ -146,12 +147,12 @@ public class Endersent extends SpawnableEntity {
             LivingEntity wEntity = prototype.spawn(
                     loc.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
             );
-            addAttachment(wEntity, AttachmentRole.DEPENDENT);
+            addAttachment(wEntity, AttachmentRole.SUBORDINATE);
         }
     }
 
     private void endDeadlyEscape() {
-        if (!isEscaping) return;
+        if (!isEscaping || !isAlive()) return;
         isEscaping = false;
 
         killAllAttachments();
