@@ -30,7 +30,10 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
 import java.util.function.Consumer;
@@ -770,18 +773,23 @@ public abstract class BlightedEntity implements Cloneable {
         if (attachmentEntity == null) {
             return;
         }
-        Vector vec = offset != null ? offset : new Vector(0, 0, 0);
-        attachments.add(new EntityAttachment(attachmentEntity, role, vec, syncYaw, syncPitch));
+        Vector vector = offset != null ? offset : new Vector(0, 0, 0);
+        attachments.add(new EntityAttachment(attachmentEntity, role, vector, syncYaw, syncPitch));
         BlightedEntitiesListener.registerAttachment(attachmentEntity, this);
 
         if (entity != null) {
             attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING, entity.getUniqueId().toString());
             attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING, role.name());
-            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_X_KEY, PersistentDataType.DOUBLE, vec.getX());
-            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_Y_KEY, PersistentDataType.DOUBLE, vec.getY());
-            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_Z_KEY, PersistentDataType.DOUBLE, vec.getZ());
+            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_X_KEY, PersistentDataType.DOUBLE, vector.getX());
+            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_Y_KEY, PersistentDataType.DOUBLE, vector.getY());
+            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_Z_KEY, PersistentDataType.DOUBLE, vector.getZ());
             attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_SYNC_YAW_KEY, PersistentDataType.BYTE, (byte) (syncYaw ? 1 : 0));
             attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_SYNC_PITCH_KEY, PersistentDataType.BYTE, (byte) (syncPitch ? 1 : 0));
+        }
+
+        if (attachmentEntity instanceof Display display) {
+            display.setTeleportDuration(1);
+            display.setInterpolationDuration(1);
         }
 
         if (attachmentEntity instanceof LivingEntity living) {
@@ -801,8 +809,8 @@ public abstract class BlightedEntity implements Cloneable {
             return;
         }
 
-        Location baseLoc = entity.getLocation();
-        double radians = Math.toRadians(baseLoc.getYaw());
+        Location baseLocation = entity.getLocation();
+        double radians = Math.toRadians(baseLocation.getYaw());
         double cos = Math.cos(radians);
         double sin = Math.sin(radians);
 
@@ -816,22 +824,29 @@ public abstract class BlightedEntity implements Cloneable {
                 continue;
             }
 
-            // ponytail: kept
-            Vector offset = attachment.localOffset();
-            double xPrime = baseLoc.getX() + (offset.getX() * cos - offset.getZ() * sin);
-            double zPrime = baseLoc.getZ() + (offset.getX() * sin + offset.getZ() * cos);
-            double yPrime = baseLoc.getY() + offset.getY();
+            if (entity != null && entity.getPassengers().contains(attachedEntity)) {
+                continue;
+            }
 
-            Location targetLoc = new Location(
-                    baseLoc.getWorld(),
+            Vector offset = attachment.localOffset();
+            double xPrime = baseLocation.getX() + (offset.getX() * cos - offset.getZ() * sin);
+            double zPrime = baseLocation.getZ() + (offset.getX() * sin + offset.getZ() * cos);
+            double yPrime = baseLocation.getY() + offset.getY();
+
+            // When syncYaw/syncPitch are false, preserve current yaw/pitch
+            float targetYaw = attachment.syncYaw() ? baseLocation.getYaw() : 0.0f;
+            float targetPitch = attachment.syncPitch() ? baseLocation.getPitch() : 0.0f;
+
+            Location targetLocation = new Location(
+                    baseLocation.getWorld(),
                     xPrime,
                     yPrime,
                     zPrime,
-                    attachment.syncYaw() ? baseLoc.getYaw() : attachedEntity.getLocation().getYaw(),
-                    attachment.syncPitch() ? baseLoc.getPitch() : attachedEntity.getLocation().getPitch()
+                    attachment.syncYaw() ? baseLocation.getYaw() : attachedEntity.getLocation().getYaw(),
+                    attachment.syncPitch() ? baseLocation.getPitch() : attachedEntity.getLocation().getPitch()
             );
 
-            attachedEntity.teleport(targetLoc);
+            attachedEntity.teleport(targetLocation);
         }
     }
 
@@ -851,11 +866,7 @@ public abstract class BlightedEntity implements Cloneable {
             }
 
             BlightedEntitiesListener.unregisterAttachment(attachmentEntity);
-            if (attachmentEntity instanceof LivingEntity living && !living.isDead()) {
-                living.setHealth(0);
-            } else {
-                attachmentEntity.remove();
-            }
+            attachmentEntity.remove();
         }
         attachments.clear();
     }

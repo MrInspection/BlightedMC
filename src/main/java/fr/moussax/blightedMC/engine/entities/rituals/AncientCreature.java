@@ -20,6 +20,7 @@ import org.bukkit.entity.TextDisplay;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Transformation;
+import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
@@ -202,9 +203,6 @@ public abstract class AncientCreature extends BlightedEntity {
 
             if (pdc.has(HOLOGRAM_KEY, PersistentDataType.BYTE)) {
                 this.hologram = display;
-                if (!existing.getPassengers().contains(display)) {
-                    existing.addPassenger(display);
-                }
                 break;
             }
         }
@@ -230,9 +228,9 @@ public abstract class AncientCreature extends BlightedEntity {
         display.setShadowed(true);
         display.setPersistent(false);
 
-        float verticalOffset = 0.30f;
+        float verticalSeatOffset = (float) (entity.getHeight() + 0.35f);
         Transformation transformation = new Transformation(
-                new Vector3f(0f, verticalOffset, 0f),
+                new Vector3f(0f, verticalSeatOffset, 0f),
                 new AxisAngle4f(),
                 new Vector3f(1f, 1f, 1f),
                 new AxisAngle4f()
@@ -244,7 +242,7 @@ public abstract class AncientCreature extends BlightedEntity {
         this.hologram = display;
         this.hologram.setText(buildHologramContent());
 
-        addAttachment(this.hologram, AttachmentRole.DEPENDENT);
+        addAttachment(this.hologram, AttachmentRole.VISUAL);
         entity.addPassenger(this.hologram);
     }
 

@@ -126,41 +126,16 @@ public final class BlightedEntitiesListener implements Listener {
             return;
         }
 
-        Entity realDamager = getRealDamager(event);
-        if (owner.shouldBlockSameTickDamage(realDamager)) {
-            event.setCancelled(true);
-            return;
-        }
-
         event.setCancelled(true);
+        Entity realDamager = getRealDamager(event);
 
-        if (handleImmunity(owner, ownerEntity, event)) {
-            return;
-        }
-
-        handleResistance(owner, ownerEntity, event);
         flashHurtAndCancelKnockback(owner, attachmentEntity);
 
         if (attachmentEntity instanceof LivingEntity livingAttachment) {
             syncEquipment(livingAttachment, ownerEntity);
         }
 
-        owner.onDamageTaken(event);
-        for (var component : owner.getComponents()) {
-            component.onDamageTaken(owner, event);
-        }
-
-        double finalDamage = event.getFinalDamage();
-        double remainingHealth = ownerEntity.getHealth() - finalDamage;
-
-        if (remainingHealth > 0) {
-            ownerEntity.setHealth(remainingHealth);
-            owner.updateBossBar();
-            owner.evaluatePhases(remainingHealth);
-        } else {
-            ownerEntity.setHealth(0);
-            owner.killAllAttachments();
-        }
+        ownerEntity.damage(event.getFinalDamage(), realDamager);
     }
 
     private void handleBlightedEntityDamage(BlightedEntity blighted, LivingEntity entity, EntityDamageEvent event) {
@@ -272,8 +247,10 @@ public final class BlightedEntitiesListener implements Listener {
         if (!dead.getScoreboardTags().contains(FAST_PASS_TAG)) return;
         UUID uuid = dead.getUniqueId();
 
-        BlightedEntity owner = ATTACHMENT_OWNERS.remove(uuid);
-        if (owner != null) {
+        boolean isAttachment = ATTACHMENT_OWNERS.remove(uuid) != null
+                || dead.getPersistentDataContainer().has(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
+
+        if (isAttachment) {
             event.getDrops().clear();
             event.setDroppedExp(0);
             return;
