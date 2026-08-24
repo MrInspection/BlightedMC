@@ -3,6 +3,8 @@ package fr.moussax.blightedMC.content.entities.bosses;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.EntityImmunities;
+import fr.moussax.blightedMC.engine.entities.EntityResistance;
+import fr.moussax.blightedMC.engine.entities.EntityResistances;
 import fr.moussax.blightedMC.engine.entities.immunity.DamageType;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -25,7 +27,11 @@ import org.bukkit.util.Vector;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@EntityImmunities({DamageType.PROJECTILE, DamageType.FALL, DamageType.MACE})
+@EntityImmunities({DamageType.FALL, DamageType.MACE})
+@EntityResistances({
+        @EntityResistance(type = DamageType.PROJECTILE, percent = 50.0),
+        @EntityResistance(type = DamageType.MAGIC, percent = 75.0),
+})
 public class CorruptedChampion extends BlightedEntity {
 
     private static final int MELEE_DAMAGE = 28;
@@ -35,27 +41,29 @@ public class CorruptedChampion extends BlightedEntity {
     private static final double SWORD_THROW_FLIGHT_DAMAGE = 20.0;
     private static final double SWORD_THROW_RETURN_DAMAGE = 12.0;
     private static final double BLADENADO_DAMAGE = 14.0;
-    private static final double PHASE_TRANSITION_BLAST_DAMAGE = 0.0;
+    private static final double PHASE_TRANSITION_BLAST_DAMAGE = 8.0;
 
     private static final ItemStack RED_BOOTS = createRocketBoots();
     private static final Particle.DustOptions VOID_PURPLE = new Particle.DustOptions(Color.fromRGB(150, 40, 240), 1.2f);
-    private static final Particle.DustOptions RUNIC_CYAN = new Particle.DustOptions(Color.fromRGB(50, 220, 240), 1.0f);
+    private static final Particle.DustOptions CHAMPION_GOLD = new Particle.DustOptions(Color.fromRGB(255, 200, 30), 1.5f);
 
     private final List<StabPlayer> activeStabs = new CopyOnWriteArrayList<>();
-
     private int currentPhase = 1;
 
     public CorruptedChampion() {
         super("Corrupted Champion", 300, MELEE_DAMAGE, EntityType.ZOMBIE);
         addAttribute(Attribute.SCALE, 4.0);
         addAttribute(Attribute.SPAWN_REINFORCEMENTS, 0.0);
+        addAttribute(Attribute.KNOCKBACK_RESISTANCE, 0.40);
         setBoss(true);
 
         armor = new ItemStack[]{
                 new ItemStack(Material.GOLDEN_BOOTS),
                 new ItemStack(Material.IRON_LEGGINGS),
-                new ItemStack(Material.GOLDEN_CHESTPLATE),
-                new ItemBuilder(Material.PLAYER_HEAD).setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWFiNTRjMWNlOTQyYzIzMjFkNmRiYjgzMjQ1ZWJmM2ZmZDY5NmJmOWQxZjAyNDY3MzY0NzFmNjdmNzJiYTI1MCJ9fX0=").toItemStack()
+                new ItemBuilder(Material.GOLDEN_CHESTPLATE).setArmorTrim(TrimMaterial.GOLD, TrimPattern.RIB).toItemStack(),
+                new ItemBuilder(Material.PLAYER_HEAD)
+                        .setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWFiNTRjMWNlOTQyYzIzMjFkNmRiYjgzMjQ1ZWJmM2ZmZDY5NmJmOWQxZjAyNDY3MzY0NzFmNjdmNzJiYTI1MCJ9fX0=")
+                        .toItemStack()
         };
 
         itemInMainHand = new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack();
@@ -69,12 +77,12 @@ public class CorruptedChampion extends BlightedEntity {
                 .toItemStack();
     }
 
-    public static Location calculateGiantAnchor(Location visualLoc, float yaw, boolean inverted, double scale) {
+    public static Location calculateGiantAnchor(Location visualLocation, float yaw, boolean inverted, double scale) {
         double rad = Math.toRadians(yaw);
         Vector forward = new Vector(-Math.sin(rad), 0, Math.cos(rad));
         Vector right = new Vector(-Math.cos(rad), 0, -Math.sin(rad));
 
-        Location anchor = visualLoc.clone();
+        Location anchor = visualLocation.clone();
         anchor.setYaw(yaw);
         anchor.setPitch(0);
 
@@ -105,21 +113,21 @@ public class CorruptedChampion extends BlightedEntity {
             currentPhase = 1;
             setMainHandEquipped(true);
             addPhaseAbility(80L, 180L, this::stabTargetPlayers);
-            addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(5));
+            addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(6));
         });
 
         registerPhase(0.66, () -> {
             setMainHandEquipped(true);
             addPhaseAbility(120L, 220L, this::executeStomp);
             addPhaseAbility(160L, 260L, this::executeSwordThrow);
-            addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(5));
+            addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(6));
         });
 
         registerPhase(0.33, () -> {
             setMainHandEquipped(true);
             addPhaseAbility(140L, 200L, this::executeSwordThrow);
             addPhaseAbility(240L, 340L, this::executeBladenado);
-            addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(5));
+            addPhaseAbility(20L, 30L, () -> meleeAttackNearestPlayer(6));
         });
     }
 
@@ -128,6 +136,8 @@ public class CorruptedChampion extends BlightedEntity {
         if (healthThreshold == 1.0) {
             return 0L;
         }
+
+        setBootsEquipped(armor != null && armor.length > 0 ? armor[0] : new ItemStack(Material.GOLDEN_BOOTS));
 
         if (healthThreshold == 0.66) {
             currentPhase = 2;
@@ -195,6 +205,11 @@ public class CorruptedChampion extends BlightedEntity {
             }
         }.runTaskTimer(BlightedMC.getInstance(), 1L, 1L);
         return 60L;
+    }
+
+    private void applyHeavyAttack(Player target, double damage, int shieldCooldownTicks) {
+        disableShieldIfBlocking(target, shieldCooldownTicks);
+        target.damage(damage, entity);
     }
 
     private void stabTargetPlayers() {
@@ -280,7 +295,7 @@ public class CorruptedChampion extends BlightedEntity {
 
             private void cleanup() {
                 cancel();
-                setBootsEquipped(armor != null && armor.length > 0 ? armor[0] : new ItemStack(Material.NETHERITE_BOOTS));
+                setBootsEquipped(armor != null && armor.length > 0 ? armor[0] : new ItemStack(Material.GOLDEN_BOOTS));
                 if (entity instanceof Mob mob) {
                     mob.setAI(true);
                 }
@@ -319,7 +334,7 @@ public class CorruptedChampion extends BlightedEntity {
                     Location blockSurface = highestBlock.getLocation().add(0.5, 1.0, 0.5);
 
                     world.spawnParticle(Particle.BLOCK, blockSurface, 3, 0.2, 0.3, 0.2, highestBlock.getBlockData());
-                    world.spawnParticle(Particle.DUST, blockSurface.clone().add(0, 0.2, 0), 1, 0.0, 0.0, 0.0, 0.0, RUNIC_CYAN);
+                    world.spawnParticle(Particle.DUST, blockSurface.clone().add(0, 0.2, 0), 1, 0.0, 0.0, 0.0, 0.0, CHAMPION_GOLD);
                 }
 
                 for (Entity nearby : world.getNearbyEntities(center, currentRadius + 1.2, 3.5, currentRadius + 1.2)) {
@@ -329,7 +344,7 @@ public class CorruptedChampion extends BlightedEntity {
 
                     if (nearby instanceof Player player && player.getGameMode() == GameMode.SURVIVAL) {
                         double distance = player.getLocation().distance(center);
-                        if (Math.abs(distance - currentRadius) <= 1.8) {
+                        if (Math.abs(distance - currentRadius) <= 1.4) {
                             player.damage(EARTHQUAKE_DAMAGE, entity);
                             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 255, false, false, true));
                             player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 80, 255, false, false, true));
@@ -337,9 +352,9 @@ public class CorruptedChampion extends BlightedEntity {
                         }
                     }
                 }
-                currentRadius += 1.8;
+                currentRadius += 1.2;
             }
-        }.runTaskTimer(BlightedMC.getInstance(), 1L, 2L);
+        }.runTaskTimer(BlightedMC.getInstance(), 1L, 3L);
     }
 
     private void executeSwordThrow() {
@@ -439,7 +454,7 @@ public class CorruptedChampion extends BlightedEntity {
 
                     for (Player player : getNearbyPlayers(26)) {
                         if (player.getLocation().distanceSquared(currentLocation) <= 6.0) {
-                            player.damage(SWORD_THROW_FLIGHT_DAMAGE, entity);
+                            applyHeavyAttack(player, SWORD_THROW_FLIGHT_DAMAGE, 60);
                             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.2f, 0.8f);
                         }
                     }
@@ -480,7 +495,7 @@ public class CorruptedChampion extends BlightedEntity {
 
                 float spinYaw = (float) ((returnStep * 60) % 360);
                 thrownSword.teleport(calculateGiantAnchor(currentReturnLocation, spinYaw, true, 0.85));
-                world.spawnParticle(Particle.DUST, currentReturnLocation, 2, 0.0, 0.0, 0.0, 0.0, RUNIC_CYAN);
+                world.spawnParticle(Particle.DUST, currentReturnLocation, 5, 0.15, 0.15, 0.15, 0.0, CHAMPION_GOLD);
 
                 for (Player player : getNearbyPlayers(26)) {
                     if (player.getLocation().distanceSquared(currentReturnLocation) <= 5.0) {
@@ -563,7 +578,8 @@ public class CorruptedChampion extends BlightedEntity {
                 if (chaseTarget != null) {
                     Vector chaseVector = chaseTarget.getLocation().toVector().subtract(currentCenter.toVector()).setY(0);
                     if (chaseVector.lengthSquared() > 0.5) {
-                        currentCenter.add(chaseVector.normalize().multiply(0.12));
+                        double currentSpeed = 0.13 + ((double) ticks / 140.0) * 0.10;
+                        currentCenter.add(chaseVector.normalize().multiply(currentSpeed));
                     }
                 }
 
@@ -585,18 +601,29 @@ public class CorruptedChampion extends BlightedEntity {
                     Location giantAnchor = calculateGiantAnchor(visualBladeTarget, tangentYaw, true, 0.85);
                     tornadoSwords.get(i).teleport(giantAnchor);
                     world.spawnParticle(Particle.SWEEP_ATTACK, visualBladeTarget, 1);
-                    world.spawnParticle(Particle.DUST, visualBladeTarget.clone().add(0, 0.2, 0), 1, 0.0, 0.0, 0.0, 0.0, VOID_PURPLE);
+                    world.spawnParticle(Particle.DUST, visualBladeTarget.clone().add(0, 0.2, 0), 2, 0.15, 0.15, 0.15, 0.0, CHAMPION_GOLD);
                 }
 
                 world.spawnParticle(Particle.CLOUD, currentCenter.clone().add(0, 2.0, 0), 4, 1.5, 0.4, 1.5, 0.03);
 
-                if (ticks % 3 == 0) {
+                if (ticks % 2 == 0) {
+                    for (Player player : getNearbyPlayers(12.0)) {
+                        double distance = player.getLocation().distance(currentCenter);
+                        if (distance > 6.0 && distance <= 12.0) {
+                            Vector pull = currentCenter.toVector().subtract(player.getLocation().toVector()).setY(0).normalize().multiply(0.08);
+                            player.setVelocity(player.getVelocity().add(pull));
+                        }
+                    }
+                }
+
+                if (ticks % 8 == 0) {
                     if (entity instanceof Mob mob) {
                         mob.swingMainHand();
                     }
                     world.playSound(currentCenter, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.4f, 0.6f);
                     for (Player player : getNearbyPlayers(6.5)) {
                         player.damage(BLADENADO_DAMAGE, entity);
+                        player.setNoDamageTicks(0);
                         Vector knockback = player.getLocation().toVector().subtract(currentCenter.toVector())
                                 .normalize()
                                 .multiply(0.6)
@@ -684,8 +711,9 @@ public class CorruptedChampion extends BlightedEntity {
     @Override
     public LivingEntity spawn(Location location) {
         super.spawn(location);
-        if (entity instanceof Ageable ageable) {
-            ageable.setAdult();
+        if (entity instanceof Zombie zombie) {
+            zombie.setAdult();
+            zombie.setConversionTime(-1);
         }
         return entity;
     }
@@ -795,7 +823,7 @@ public class CorruptedChampion extends BlightedEntity {
             float spinYaw = (float) ((returnStep * 60) % 360);
             swordEntity.teleport(CorruptedChampion.calculateGiantAnchor(currentReturnLocation, spinYaw, true, 0.85));
             World world = Objects.requireNonNull(currentReturnLocation.getWorld());
-            world.spawnParticle(Particle.DUST, currentReturnLocation, 2, 0.0, 0.0, 0.0, 0.0, RUNIC_CYAN);
+            world.spawnParticle(Particle.DUST, currentReturnLocation, 5, 0.15, 0.15, 0.15, 0.0, CHAMPION_GOLD);
 
             for (Player player : owner.getNearbyPlayers(26)) {
                 if (player.getLocation().distanceSquared(currentReturnLocation) <= 5.0) {
@@ -849,7 +877,10 @@ public class CorruptedChampion extends BlightedEntity {
             world.spawnParticle(Particle.DUST, stabledLocation.clone().add(0, 0.5, 0), 8, 0.3, 0.3, 0.3, 0.0, VOID_PURPLE);
             world.playSound(stabledLocation, Sound.BLOCK_ANVIL_LAND, 1.0f, 0.5f);
             world.playSound(stabledLocation, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.8f);
-            owner.damageNearbyPlayers(stabledLocation, 6.0, STAB_DAMAGE);
+
+            for (Player player : owner.getNearbyPlayers(stabledLocation, 6.0)) {
+                owner.applyHeavyAttack(player, STAB_DAMAGE, 70);
+            }
         }
 
         @Override
