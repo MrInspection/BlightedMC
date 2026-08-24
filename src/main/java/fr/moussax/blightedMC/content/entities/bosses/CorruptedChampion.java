@@ -15,7 +15,6 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
@@ -31,7 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @EntityImmunities({DamageType.FALL, DamageType.MACE})
 @EntityResistances({
-        @EntityResistance(type = DamageType.PROJECTILE, percent = 50.0),
+        @EntityResistance(type = DamageType.PROJECTILE, percent = 75.0),
         @EntityResistance(type = DamageType.MAGIC, percent = 75.0),
 })
 public class CorruptedChampion extends BlightedEntity {
@@ -53,7 +52,7 @@ public class CorruptedChampion extends BlightedEntity {
     private int currentPhase = 1;
 
     public CorruptedChampion() {
-        super("Corrupted Champion", 300, MELEE_DAMAGE, EntityType.ZOMBIE);
+        super("Corrupted Champion", 350, MELEE_DAMAGE, EntityType.ZOMBIE);
         addAttribute(Attribute.SCALE, 4.0);
         addAttribute(Attribute.SPAWN_REINFORCEMENTS, 0.0);
         addAttribute(Attribute.KNOCKBACK_RESISTANCE, 0.40);
@@ -586,7 +585,8 @@ public class CorruptedChampion extends BlightedEntity {
             double angle = i * (2 * Math.PI / bladeCount);
             double xOffset = radius * Math.cos(angle);
             double zOffset = radius * Math.sin(angle);
-            Location visualBladeTarget = startCenter.clone().add(xOffset, 2.2, zOffset);
+            double yWave = Math.sin(angle) * 0.4;
+            Location visualBladeTarget = startCenter.clone().add(xOffset, 2.2 + yWave, zOffset);
 
             float tangentYaw = (float) Math.toDegrees(angle);
             Location giantAnchor = calculateGiantAnchor(visualBladeTarget, tangentYaw, true, 0.85);
@@ -647,7 +647,6 @@ public class CorruptedChampion extends BlightedEntity {
 
                         Location giantAnchor = calculateGiantAnchor(visualBladeTarget, tangentYaw, true, 0.85);
                         sword.teleport(giantAnchor);
-                        sword.setRotation(tangentYaw, 0f);
                         world.spawnParticle(Particle.SWEEP_ATTACK, visualBladeTarget, 1);
                         world.spawnParticle(Particle.DUST, visualBladeTarget.clone().add(0, 0.2, 0), 2, 0.15, 0.15, 0.15, 0.0, CHAMPION_GOLD);
                     }
