@@ -228,7 +228,7 @@ public abstract class AncientCreature extends BlightedEntity {
         display.setShadowed(true);
         display.setPersistent(false);
 
-        float verticalSeatOffset = (float) (entity.getHeight() + 0.35f);
+        float verticalSeatOffset = (float) (entity.getHeight() * 0.10f + 0.10f);
         Transformation transformation = new Transformation(
                 new Vector3f(0f, verticalSeatOffset, 0f),
                 new AxisAngle4f(),
