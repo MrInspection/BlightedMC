@@ -764,10 +764,18 @@ public abstract class BlightedEntity implements Cloneable {
      * Updates the boss bar progress to match the entity's health.
      */
     public void updateBossBar() {
-        if (bossBar == null || entity == null || entity.isDead()) {
+        if (bossBar == null) {
             return;
         }
-        double progress = entity.getHealth() / Math.max(1, maxHealth);
+        if (!isAlive()) {
+            removeBossBar();
+            return;
+        }
+        AttributeInstance maxHealthAttribute = entity.getAttribute(Attribute.MAX_HEALTH);
+        double maxHealth = (maxHealthAttribute != null && maxHealthAttribute.getValue() > 0)
+                ? maxHealthAttribute.getValue()
+                : Math.max(1, this.maxHealth);
+        double progress = entity.getHealth() / maxHealth;
         bossBar.setProgress(Math.clamp(progress, 0.0, 1.0));
     }
 
@@ -1077,6 +1085,12 @@ public abstract class BlightedEntity implements Cloneable {
         if (bossBar == null) {
             return;
         }
+        if (!isAlive()) {
+            removeBossBar();
+            return;
+        }
+
+        updateBossBar();
 
         World world = entity.getWorld();
         Location entityLocation = entity.getLocation();
