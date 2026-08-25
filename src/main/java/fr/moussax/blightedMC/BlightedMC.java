@@ -46,7 +46,7 @@ public final class BlightedMC extends JavaPlugin {
         BlightedServer.getInstance().configureServer();
 
         String config = PluginFiles.CONFIG.getFileName();
-        saveResourcesAs(config, config);
+        saveResource(config, false);
 
         settings = PluginSettings.load(this);
         initializeDatabase();
@@ -106,29 +106,6 @@ public final class BlightedMC extends JavaPlugin {
             Log.debug(e.getMessage());
             Log.error("Database", "Unable to connect to the database.");
             Bukkit.getPluginManager().disablePlugin(this);
-        }
-    }
-
-    private void saveResourcesAs(String resourcePath, String destinationPath) {
-        if (resourcePath.isEmpty()) throw new IllegalArgumentException("Resource path cannot be null or empty.");
-
-        try (InputStream in = getResource(resourcePath)) {
-            if (in == null) throw new IllegalArgumentException("Resource cannot be found at path: " + resourcePath);
-
-            if (!getDataFolder().exists() && !getDataFolder().mkdirs()) {
-                Log.error("Config", "Unable to create data folder.");
-                throw new IllegalStateException("Failed to create plugin data folder.");
-            }
-
-            File outputFile = new File(getDataFolder(), destinationPath);
-
-            try (OutputStream out = new FileOutputStream(outputFile)) {
-                in.transferTo(out);
-            }
-
-            Log.success("Config", "Successfully created the " + resourcePath + " file.");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }
