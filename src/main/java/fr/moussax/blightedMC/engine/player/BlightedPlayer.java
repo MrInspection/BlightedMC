@@ -5,15 +5,14 @@ import fr.moussax.blightedMC.engine.items.abilities.*;
 import fr.moussax.blightedMC.server.database.PlayerDataHandler;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemType;
-import fr.moussax.blightedMC.shared.ui.actionbar.ActionBarManager;
 import fr.moussax.blightedMC.engine.player.managers.GemsManager;
+import fr.moussax.blightedMC.shared.ui.actionbar.ActionbarService;
 import fr.moussax.blightedMC.engine.player.managers.ManaManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
@@ -43,8 +42,6 @@ public final class BlightedPlayer {
     @Getter
     private final GemsManager gemsManager;
     private final PlayerDataHandler dataHandler;
-    @Getter
-    private final ActionBarManager actionBarManager;
     private final ManaManager manaManager;
 
     private final List<FullSetBonus> activeFullSetBonuses = new ArrayList<>();
@@ -52,7 +49,6 @@ public final class BlightedPlayer {
     private final EnumMap<ItemType, BlightedItem> armorPieces = new EnumMap<>(ItemType.class);
 
     private ItemStack[] lastKnownArmor = new ItemStack[4];
-    private final BukkitTask actionBarTask;
     @Getter
     @Setter
     private int forgeFuel;
@@ -61,7 +57,7 @@ public final class BlightedPlayer {
      * Creates and registers a BlightedMC player context for the given player.
      *
      * <p>Persistent player data is loaded during construction, and the
-     * player's action bar update task and armor state are initialized.</p>
+     * player's armor state is initialized.</p>
      *
      * @param player the Bukkit player represented by this context
      */
@@ -74,15 +70,7 @@ public final class BlightedPlayer {
         this.manaManager.setCurrentMana(dataHandler.getMana());
         this.forgeFuel = dataHandler.getForgeFuel();
 
-        this.actionBarManager = new ActionBarManager(this);
-
         players.put(playerId, this);
-
-        this.actionBarTask = Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(),
-                actionBarManager::tick,
-                0L,
-                20L
-        );
 
         ArmorManager.updatePlayerArmor(this);
     }
@@ -117,9 +105,6 @@ public final class BlightedPlayer {
      * Releases temporary resources and state held by this player context.
      */
     private void cleanup() {
-        if (actionBarTask != null) {
-            actionBarTask.cancel();
-        }
         clearActiveBonuses();
         clearArmorPieces();
     }
@@ -319,7 +304,7 @@ public final class BlightedPlayer {
     public void addGems(int value) {
         if (value == 0) return;
         gemsManager.addGems(value);
-        actionBarManager.tick();
+        ActionbarService.ifPresent(service -> service.renderPlayer(player));
     }
 
     /**
@@ -332,7 +317,7 @@ public final class BlightedPlayer {
     public void removeGems(int value) {
         if (value == 0) return;
         gemsManager.removeGems(value);
-        actionBarManager.tick();
+        ActionbarService.ifPresent(service -> service.renderPlayer(player));
     }
 
     /**

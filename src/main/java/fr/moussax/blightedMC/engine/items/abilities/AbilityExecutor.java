@@ -1,10 +1,14 @@
 package fr.moussax.blightedMC.engine.items.abilities;
 
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
+import fr.moussax.blightedMC.engine.player.hud.PlayerHudManager;
+import fr.moussax.blightedMC.shared.ui.actionbar.ActionbarService;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.Sound;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
+
+import java.time.Duration;
 
 import static fr.moussax.blightedMC.utils.Formatter.warn;
 
@@ -34,7 +38,7 @@ public final class AbilityExecutor {
                     100f,
                     0.5f
             );
-            player.getActionBarManager().setInsufficientMana(true);
+            ActionbarService.ifPresent(service -> service.sendSlotAlert(player.getPlayer(), PlayerHudManager.SECTION_MANA, "§cNOT ENOUGH MANA", Duration.ofSeconds(2)));
             cancel(event);
             return;
         }
@@ -50,7 +54,7 @@ public final class AbilityExecutor {
 
             if (manaCost > 0) {
                 player.getMana().consumeMana(manaCost);
-                player.getActionBarManager().tick();
+                ActionbarService.ifPresent(service -> service.renderPlayer(player.getPlayer()));
             }
 
             manager.start(player);

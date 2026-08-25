@@ -10,6 +10,7 @@ import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
 import fr.moussax.blightedMC.server.database.PluginDatabase;
 import fr.moussax.blightedMC.engine.entities.spawnable.engine.BlightedSpawnEngine;
+import fr.moussax.blightedMC.shared.ui.actionbar.ActionbarService;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.utils.debug.Log;
@@ -34,6 +35,7 @@ public final class BlightedMC extends JavaPlugin {
     private PluginSettings settings;
     @Getter
     private PluginDatabase database;
+    @Getter
     private EventsRegistry eventsRegistry;
 
     @Override
@@ -89,12 +91,30 @@ public final class BlightedMC extends JavaPlugin {
     }
 
     /**
+     * Returns the action bar service associated with this plugin instance.
+     *
+     * @return active action bar service, or {@code null} if not initialized
+     */
+    public ActionbarService getActionBarService() {
+        return eventsRegistry != null ? eventsRegistry.getActionBarService() : null;
+    }
+
+    /**
      * Returns the menu manager of the active plugin instance.
      *
      * @return active menu manager
      */
     public static MenuManager menuManager() {
         return instance.getMenuManager();
+    }
+
+    /**
+     * Returns the action bar service of the active plugin instance.
+     *
+     * @return active action bar service, or {@code null} if not initialized
+     */
+    public static ActionbarService actionBarService() {
+        return instance.getActionBarService();
     }
 
     private void initializeDatabase() {
