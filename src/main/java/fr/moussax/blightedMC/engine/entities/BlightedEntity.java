@@ -30,10 +30,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
-import org.joml.AxisAngle4f;
-import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
 import java.util.function.Consumer;
@@ -892,8 +889,12 @@ public abstract class BlightedEntity implements Cloneable {
      * @return {@code true} if damage was already processed this tick by the same attacker
      */
     public boolean shouldBlockSameTickDamage(Entity damager) {
-        long currentTick = entity != null && entity.getWorld() != null ? entity.getWorld().getGameTime() : System.currentTimeMillis();
-        UUID damagerUuid = damager != null ? damager.getUniqueId() : null;
+        if (damager == null) {
+            return false;
+        }
+
+        long currentTick = entity != null ? entity.getWorld().getGameTime() : System.currentTimeMillis();
+        UUID damagerUuid = damager.getUniqueId();
 
         if (currentTick == lastDamageTick && Objects.equals(damagerUuid, lastDamagerUuid)) {
             return true;
