@@ -2,12 +2,11 @@ package fr.moussax.blightedMC.utils;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
@@ -41,12 +40,7 @@ public final class Utilities {
      * @param ticks    number of server ticks to wait before execution
      */
     public static void delay(Runnable runnable, long ticks) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                runnable.run();
-            }
-        }.runTaskLater(BlightedMC.getInstance(), ticks);
+        Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), runnable, ticks);
     }
 
     /**

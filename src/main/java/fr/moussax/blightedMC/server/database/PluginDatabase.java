@@ -15,7 +15,7 @@ public final class PluginDatabase {
         initializeSchema();
     }
 
-    public void closeConnection() {
+    public synchronized void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
@@ -29,26 +29,26 @@ public final class PluginDatabase {
     private void initializeSchema() throws SQLException {
         try (Statement statement = connection.createStatement()) {
             statement.execute("""
-                CREATE TABLE IF NOT EXISTS players (
-                    uuid TEXT PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    gems INTEGER NOT NULL DEFAULT 0,
-                    mana REAL NOT NULL DEFAULT 0,
-                    forge_fuel INTEGER NOT NULL DEFAULT 0
-                )
-                """
+                    CREATE TABLE IF NOT EXISTS players (
+                        uuid TEXT PRIMARY KEY,
+                        name TEXT NOT NULL,
+                        gems INTEGER NOT NULL DEFAULT 0,
+                        mana REAL NOT NULL DEFAULT 0,
+                        forge_fuel INTEGER NOT NULL DEFAULT 0
+                    )
+                    """
             );
 
             statement.execute("""
-                CREATE TABLE IF NOT EXISTS blighted_blocks (
-                    world_uid TEXT NOT NULL,
-                    x INTEGER NOT NULL,
-                    y INTEGER NOT NULL,
-                    z INTEGER NOT NULL,
-                    block_id TEXT NOT NULL,
-                    PRIMARY KEY (world_uid, x, y, z)
-                )
-                """
+                    CREATE TABLE IF NOT EXISTS blighted_blocks (
+                        world_uid TEXT NOT NULL,
+                        x INTEGER NOT NULL,
+                        y INTEGER NOT NULL,
+                        z INTEGER NOT NULL,
+                        block_id TEXT NOT NULL,
+                        PRIMARY KEY (world_uid, x, y, z)
+                    )
+                    """
             );
 
             try {
@@ -58,7 +58,7 @@ public final class PluginDatabase {
         }
     }
 
-    public void addBlock(UUID worldId, int x, int y, int z, String blockId) {
+    public synchronized void addBlock(UUID worldId, int x, int y, int z, String blockId) {
         String query = "INSERT OR REPLACE INTO blighted_blocks(world_uid, x, y, z, block_id) VALUES(?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, worldId.toString());
@@ -72,7 +72,7 @@ public final class PluginDatabase {
         }
     }
 
-    public void removeBlock(UUID worldId, int x, int y, int z) {
+    public synchronized void removeBlock(UUID worldId, int x, int y, int z) {
         String query = "DELETE FROM blighted_blocks WHERE world_uid = ? AND x = ? AND y = ? AND z = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -86,7 +86,7 @@ public final class PluginDatabase {
         }
     }
 
-    public String getBlockId(UUID worldId, int x, int y, int z) {
+    public synchronized String getBlockId(UUID worldId, int x, int y, int z) {
         String query = "SELECT block_id FROM blighted_blocks WHERE world_uid = ? AND x = ? AND y = ? AND z = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {

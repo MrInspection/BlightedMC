@@ -6,7 +6,6 @@ import fr.moussax.blightedMC.engine.entities.EntityImmunities;
 import fr.moussax.blightedMC.engine.entities.EntityResistance;
 import fr.moussax.blightedMC.engine.entities.EntityResistances;
 import fr.moussax.blightedMC.engine.entities.immunity.DamageType;
-import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
@@ -551,8 +550,6 @@ public class CorruptedChampion extends BlightedEntity {
             private void cleanup() {
                 cancel();
                 if (thrownSword != null) {
-                    attachments.removeIf(a -> a.entity() != null && a.entity().equals(thrownSword));
-                    BlightedEntitiesListener.unregisterAttachment(thrownSword);
                     if (!thrownSword.isDead()) {
                         thrownSword.remove();
                     }
@@ -563,10 +560,33 @@ public class CorruptedChampion extends BlightedEntity {
         }.runTaskTimer(BlightedMC.getInstance(), 1L, 1L);
     }
 
+    private void cleanupBladenado(List<Giant> tornadoSwords) {
+        for (Giant sword : tornadoSwords) {
+            if (sword != null) {
+                if (!sword.isDead()) {
+                    sword.remove();
+                }
+            }
+        }
+
+        setMainHandEquipped(true);
+
+        if (entity instanceof Mob mob) {
+            mob.setAI(true);
+        }
+
+        endAbility();
+    }
+
     private void executeBladenado() {
-        if (currentPhase != 3 || isPerformingAbility()) {
+        if (currentPhase != 3) {
             return;
         }
+
+        if (!tryStartAbility()) {
+            return;
+        }
+
 
         setPerformingAbility(true);
 
@@ -688,21 +708,7 @@ public class CorruptedChampion extends BlightedEntity {
 
             private void cleanup() {
                 cancel();
-                for (Giant sword : tornadoSwords) {
-                    if (sword != null) {
-                        attachments.removeIf(a -> a.entity() != null && a.entity().equals(sword));
-                        BlightedEntitiesListener.unregisterAttachment(sword);
-                        if (!sword.isDead()) {
-                            sword.remove();
-                        }
-                    }
-                }
-                setMainHandEquipped(true);
-
-                if (entity instanceof Mob mob) {
-                    mob.setAI(true);
-                }
-                setPerformingAbility(false);
+                cleanupBladenado(tornadoSwords);
             }
         }.runTaskTimer(BlightedMC.getInstance(), 0L, 1L);
     }
@@ -723,7 +729,6 @@ public class CorruptedChampion extends BlightedEntity {
                     g.setCustomName("Dinnerbone");
                 }
         );
-        addAttachment(giant);
         return giant;
     }
 
@@ -751,6 +756,18 @@ public class CorruptedChampion extends BlightedEntity {
             return;
         }
         entity.getEquipment().setBoots(bootsItem);
+    }
+
+    private boolean tryStartAbility() {
+        if (isPerformingAbility()) {
+            return false;
+        }
+        setPerformingAbility(true);
+        return true;
+    }
+
+    private void endAbility() {
+        setPerformingAbility(false);
     }
 
     @Override

@@ -25,7 +25,7 @@ public class Bonemerang implements RegistryModule<ItemRegistryHandler> {
                 "",
                 ItemRarity.EPIC.getName() + " BOW"
         );
-        bonemerang.addAbility(new Ability(new BonemerangAbility(), "Swing", AbilityType.RIGHT_CLICK));
+        bonemerang.addAbility(new Ability(new BonemerangAbility(), "Swing", AbilityType.RIGHT_CLICK), false);
         bonemerang.addEnchantmentGlint();
         bonemerang.unstackable();
 

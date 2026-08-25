@@ -16,12 +16,7 @@ public final class AbilityExecutor {
 
         double remaining = player.getRemainingCooldown(manager.getClass(), ability.type());
         if (remaining > 0) {
-            warn(
-                    player.getPlayer(),
-                    "§cYour §f" + ability.name()
-                            + " §cability is on cooldown for §d"
-                            + (int) Math.ceil(remaining) + "s§c!"
-            );
+            warn(player.getPlayer(), "§c⌚ Your §f" + ability.name() + " §cability is on cooldown for §d" + (int) Math.ceil(remaining) + "s§c!");
             cancel(event);
             return;
         }

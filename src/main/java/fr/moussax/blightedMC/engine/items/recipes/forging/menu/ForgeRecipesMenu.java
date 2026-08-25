@@ -108,7 +108,7 @@ public final class ForgeRecipesMenu extends PaginatedMenu {
 
         builder.addLore(
                 "",
-                " §8Consumes §6🪣 " + Formatter.formatDecimalWithCommas(recipe.getFuelCost()) + " mB §8of ",
+                " §8Consumes §6🪣 " + Formatter.formatDecimalWithCommas(recipe.getFuelCost()) + "mB §8of ",
                 " §8thermal fuel to forge.",
                 "",
                 "§eClick to select!"

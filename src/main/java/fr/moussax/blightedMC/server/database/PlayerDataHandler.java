@@ -35,24 +35,26 @@ public final class PlayerDataHandler {
 
     public void save() {
         String query = """
-            INSERT INTO players (uuid, name, gems, mana, forge_fuel)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT(uuid) DO UPDATE SET
-              name = excluded.name,
-              gems = excluded.gems,
-              mana = excluded.mana,
-              forge_fuel = excluded.forge_fuel
-            """;
+                INSERT INTO players (uuid, name, gems, mana, forge_fuel)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(uuid) DO UPDATE SET
+                  name = excluded.name,
+                  gems = excluded.gems,
+                  mana = excluded.mana,
+                  forge_fuel = excluded.forge_fuel
+                """;
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, playerId.toString());
-            statement.setString(2, playerName);
-            statement.setInt(3, gems);
-            statement.setDouble(4, mana);
-            statement.setInt(5, forgeFuel);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to save player data to database.", e);
+        synchronized (connection) {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, playerId.toString());
+                statement.setString(2, playerName);
+                statement.setInt(3, gems);
+                statement.setDouble(4, mana);
+                statement.setInt(5, forgeFuel);
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to save player data to database.", e);
+            }
         }
     }
 

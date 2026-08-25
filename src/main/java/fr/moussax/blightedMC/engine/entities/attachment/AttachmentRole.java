@@ -1,17 +1,18 @@
 package fr.moussax.blightedMC.engine.entities.attachment;
 
 /**
- * Defines the lifecycle relationship between an {@link EntityAttachment} and its owner.
+ * Defines the functional role of an attached entity in a composite {@link fr.moussax.blightedMC.engine.entities.BlightedEntity}.
  *
  * <ul>
- *   <li>{@link #BODY} — the attachment is a structural part of the owner. If the attachment
- *       dies, the owner dies. Damage to the owner is forwarded to this attachment so health
- *       stays in sync. Direct hits on the attachment are redirected to the owner.</li>
- *   <li>{@link #DEPENDENT} — the attachment is a subordinate of the owner. It dies when the
- *       owner dies, but its death does not kill the owner. It does not mirror owner health.</li>
+ *   <li>{@link #VISUAL} — A non-interactive render element (Display entity: Item, Block, or Text)
+ *       locked to a local 3D offset relative to the base entity's origin and facing yaw.</li>
+ *   <li>{@link #HITBOX} — An {@link org.bukkit.entity.Interaction} entity that intercepts melee/projectile attacks,
+ *       redirects damage to the base entity, and forwards damage events.</li>
+ *   <li>{@link #SUBORDINATE} — A companion or non-rigid attached entity that cleans up on owner death.</li>
  * </ul>
  */
 public enum AttachmentRole {
-    BODY,
-    DEPENDENT
+    VISUAL,
+    HITBOX,
+    SUBORDINATE
 }

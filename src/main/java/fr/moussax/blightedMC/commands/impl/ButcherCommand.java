@@ -1,6 +1,8 @@
 package fr.moussax.blightedMC.commands.impl;
 
 import fr.moussax.blightedMC.commands.AdminCommand;
+import fr.moussax.blightedMC.engine.entities.BlightedEntity;
+import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.entity.LivingEntity;
@@ -46,7 +48,7 @@ public final class ButcherCommand extends AdminCommand {
         for (LivingEntity entity : player.getWorld().getLivingEntities()) {
             if (entity instanceof Player) continue;
 
-            entity.remove();
+            removeEntity(entity);
             removed++;
         }
 
@@ -65,10 +67,20 @@ public final class ButcherCommand extends AdminCommand {
                 continue;
             }
 
-            entity.remove();
+            removeEntity(entity);
             removed++;
         }
 
         return removed;
+    }
+
+    private void removeEntity(LivingEntity entity) {
+        BlightedEntity blighted = BlightedEntitiesListener.getBlightedEntity(entity);
+        if (blighted != null) {
+            blighted.cleanup();
+        }
+        if (!entity.isDead()) {
+            entity.remove();
+        }
     }
 }

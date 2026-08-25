@@ -33,6 +33,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.NonNull;
 
+import java.util.function.Consumer;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -50,6 +51,11 @@ public abstract class BlightedEntity implements Cloneable {
     public static final NamespacedKey ENTITY_ID_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_entity_id");
     public static final NamespacedKey ATTACHMENT_OWNER_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_attachment_owner");
     public static final NamespacedKey ATTACHMENT_ROLE_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_attachment_role");
+    public static final NamespacedKey ATTACHMENT_OFFSET_X_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_attachment_offset_x");
+    public static final NamespacedKey ATTACHMENT_OFFSET_Y_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_attachment_offset_y");
+    public static final NamespacedKey ATTACHMENT_OFFSET_Z_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_attachment_offset_z");
+    public static final NamespacedKey ATTACHMENT_SYNC_YAW_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_attachment_sync_yaw");
+    public static final NamespacedKey ATTACHMENT_SYNC_PITCH_KEY = new NamespacedKey(BlightedMC.getInstance(), "blighted_attachment_sync_pitch");
     public static final String FAST_PASS_TAG = "blighted_opt";
 
     private static final double BOSS_BAR_RANGE = 60.0;
@@ -59,6 +65,9 @@ public abstract class BlightedEntity implements Cloneable {
     private LifecycleTaskManager phaseTasks = new LifecycleTaskManager();
     private Map<String, EntityComponent> components = new HashMap<>();
     public Set<EntityAttachment> attachments = new CopyOnWriteArraySet<>();
+
+    private long lastDamageTick = -1L;
+    private UUID lastDamagerUuid = null;
 
     @Getter
     protected String entityId;
@@ -649,12 +658,82 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     /**
-     * Attaches an entity using {@link AttachmentRole#DEPENDENT}.
+     * Attaches a non-interactive {@link ItemDisplay} entity with local 3D translation offset.
+     *
+     * @param offset       local offset relative to base entity origin and facing yaw
+     * @param configurator optional configuration consumer
+     * @return the created ItemDisplay attachment
+     */
+    public ItemDisplay attachItemDisplay(Vector offset, Consumer<ItemDisplay> configurator) {
+        if (!isAlive()) {
+            return null;
+        }
+        Vector localOffset = offset != null ? offset : new Vector(0, 0, 0);
+        Location spawnLoc = entity.getLocation().clone().add(localOffset);
+        ItemDisplay display = entity.getWorld().spawn(spawnLoc, ItemDisplay.class, d -> {
+            if (configurator != null) {
+                configurator.accept(d);
+            }
+        });
+        addAttachment(display, AttachmentRole.VISUAL, localOffset, true, false);
+        return display;
+    }
+
+    /**
+     * Attaches a non-interactive {@link BlockDisplay} entity with local 3D translation offset.
+     *
+     * @param offset       local offset relative to base entity origin and facing yaw
+     * @param configurator optional configuration consumer
+     * @return the created BlockDisplay attachment
+     */
+    public BlockDisplay attachBlockDisplay(Vector offset, Consumer<BlockDisplay> configurator) {
+        if (!isAlive()) {
+            return null;
+        }
+        Vector localOffset = offset != null ? offset : new Vector(0, 0, 0);
+        Location spawnLoc = entity.getLocation().clone().add(localOffset);
+        BlockDisplay display = entity.getWorld().spawn(spawnLoc, BlockDisplay.class, d -> {
+            if (configurator != null) {
+                configurator.accept(d);
+            }
+        });
+        addAttachment(display, AttachmentRole.VISUAL, localOffset, true, false);
+        return display;
+    }
+
+    /**
+     * Attaches a multi-part hittable {@link Interaction} hitbox entity.
+     *
+     * @param offset       local offset relative to base entity origin and facing yaw
+     * @param width        hitbox width
+     * @param height       hitbox height
+     * @param configurator optional configuration consumer
+     * @return the created Interaction attachment
+     */
+    public Interaction attachHitbox(Vector offset, float width, float height, Consumer<Interaction> configurator) {
+        if (!isAlive()) {
+            return null;
+        }
+        Vector localOffset = offset != null ? offset : new Vector(0, 0, 0);
+        Location spawnLoc = entity.getLocation().clone().add(localOffset);
+        Interaction interaction = entity.getWorld().spawn(spawnLoc, Interaction.class, i -> {
+            i.setInteractionWidth(width);
+            i.setInteractionHeight(height);
+            if (configurator != null) {
+                configurator.accept(i);
+            }
+        });
+        addAttachment(interaction, AttachmentRole.HITBOX, localOffset, true, false);
+        return interaction;
+    }
+
+    /**
+     * Attaches an entity using {@link AttachmentRole#SUBORDINATE}.
      *
      * @param attachmentEntity entity to attach
      */
     public void addAttachment(Entity attachmentEntity) {
-        addAttachment(attachmentEntity, AttachmentRole.DEPENDENT);
+        addAttachment(attachmentEntity, AttachmentRole.SUBORDINATE, new Vector(0, 0, 0), true, false);
     }
 
     /**
@@ -664,15 +743,50 @@ public abstract class BlightedEntity implements Cloneable {
      * @param role             attachment role
      */
     public void addAttachment(Entity attachmentEntity, AttachmentRole role) {
+        addAttachment(attachmentEntity, role, new Vector(0, 0, 0), true, false);
+    }
+
+    /**
+     * Attaches an entity with the given role and local offset.
+     *
+     * @param attachmentEntity entity to attach
+     * @param role             attachment role
+     * @param offset           local 3D offset
+     */
+    public void addAttachment(Entity attachmentEntity, AttachmentRole role, Vector offset) {
+        addAttachment(attachmentEntity, role, offset, true, false);
+    }
+
+    /**
+     * Attaches an entity with full offset and rotation synchronization configuration.
+     *
+     * @param attachmentEntity entity to attach
+     * @param role             attachment role
+     * @param offset           local 3D offset
+     * @param syncYaw          whether horizontal rotation follows base yaw
+     * @param syncPitch        whether vertical rotation follows base pitch
+     */
+    public void addAttachment(Entity attachmentEntity, AttachmentRole role, Vector offset, boolean syncYaw, boolean syncPitch) {
         if (attachmentEntity == null) {
             return;
         }
-        attachments.add(new EntityAttachment(attachmentEntity, role));
+        Vector vector = offset != null ? offset : new Vector(0, 0, 0);
+        attachments.add(new EntityAttachment(attachmentEntity, role, vector, syncYaw, syncPitch));
         BlightedEntitiesListener.registerAttachment(attachmentEntity, this);
 
         if (entity != null) {
             attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING, entity.getUniqueId().toString());
             attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING, role.name());
+            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_X_KEY, PersistentDataType.DOUBLE, vector.getX());
+            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_Y_KEY, PersistentDataType.DOUBLE, vector.getY());
+            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_Z_KEY, PersistentDataType.DOUBLE, vector.getZ());
+            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_SYNC_YAW_KEY, PersistentDataType.BYTE, (byte) (syncYaw ? 1 : 0));
+            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_SYNC_PITCH_KEY, PersistentDataType.BYTE, (byte) (syncPitch ? 1 : 0));
+        }
+
+        if (attachmentEntity instanceof Display display) {
+            display.setTeleportDuration(1);
+            display.setInterpolationDuration(1);
         }
 
         if (attachmentEntity instanceof LivingEntity living) {
@@ -680,7 +794,56 @@ public abstract class BlightedEntity implements Cloneable {
             if (equipment != null) {
                 zeroEquipmentDropChances(equipment);
             }
-            living.addScoreboardTag(FAST_PASS_TAG);
+        }
+        attachmentEntity.addScoreboardTag(FAST_PASS_TAG);
+    }
+
+    /**
+     * Synchronizes all registered attachments to their relative world position based on base location and facing yaw.
+     */
+    public void syncAttachments() {
+        if (!isAlive() || attachments.isEmpty()) {
+            return;
+        }
+
+        Location baseLocation = entity.getLocation();
+        double radians = Math.toRadians(baseLocation.getYaw());
+        double cos = Math.cos(radians);
+        double sin = Math.sin(radians);
+
+        for (EntityAttachment attachment : attachments) {
+            Entity attachedEntity = attachment.entity();
+            if (attachedEntity == null || !attachedEntity.isValid() || attachedEntity.isDead()) {
+                attachments.remove(attachment);
+                if (attachedEntity != null) {
+                    BlightedEntitiesListener.unregisterAttachment(attachedEntity);
+                }
+                continue;
+            }
+
+            if (entity != null && entity.getPassengers().contains(attachedEntity)) {
+                continue;
+            }
+
+            Vector offset = attachment.localOffset();
+            double xPrime = baseLocation.getX() + (offset.getX() * cos - offset.getZ() * sin);
+            double zPrime = baseLocation.getZ() + (offset.getX() * sin + offset.getZ() * cos);
+            double yPrime = baseLocation.getY() + offset.getY();
+
+            // When syncYaw/syncPitch are false, preserve current yaw/pitch
+            float targetYaw = attachment.syncYaw() ? baseLocation.getYaw() : 0.0f;
+            float targetPitch = attachment.syncPitch() ? baseLocation.getPitch() : 0.0f;
+
+            Location targetLocation = new Location(
+                    baseLocation.getWorld(),
+                    xPrime,
+                    yPrime,
+                    zPrime,
+                    attachment.syncYaw() ? baseLocation.getYaw() : attachedEntity.getLocation().getYaw(),
+                    attachment.syncPitch() ? baseLocation.getPitch() : attachedEntity.getLocation().getPitch()
+            );
+
+            attachedEntity.teleport(targetLocation);
         }
     }
 
@@ -700,11 +863,7 @@ public abstract class BlightedEntity implements Cloneable {
             }
 
             BlightedEntitiesListener.unregisterAttachment(attachmentEntity);
-            if (attachmentEntity instanceof LivingEntity living && !living.isDead()) {
-                living.setHealth(0);
-            } else {
-                attachmentEntity.remove();
-            }
+            attachmentEntity.remove();
         }
         attachments.clear();
     }
@@ -716,12 +875,33 @@ public abstract class BlightedEntity implements Cloneable {
      */
     public boolean hasLivingBodyAttachment() {
         for (EntityAttachment attachment : attachments) {
-            if (attachment.role() == AttachmentRole.BODY
-                    && attachment.entity() instanceof LivingEntity living
-                    && !living.isDead()) {
+            if (attachment.entity() instanceof LivingEntity living && !living.isDead()) {
                 return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * Prevents multi-hit exploits (e.g. Sweeping Edge or AoE hitting multiple hitboxes in the same tick).
+     *
+     * @param damager attacker entity or projectile shooter
+     * @return {@code true} if damage was already processed this tick by the same attacker
+     */
+    public boolean shouldBlockSameTickDamage(Entity damager) {
+        if (damager == null) {
+            return false;
+        }
+
+        long currentTick = entity != null ? entity.getWorld().getGameTime() : System.currentTimeMillis();
+        UUID damagerUuid = damager.getUniqueId();
+
+        if (currentTick == lastDamageTick && Objects.equals(damagerUuid, lastDamagerUuid)) {
+            return true;
+        }
+
+        lastDamageTick = currentTick;
+        lastDamagerUuid = damagerUuid;
         return false;
     }
 
@@ -902,6 +1082,7 @@ public abstract class BlightedEntity implements Cloneable {
         onDefineBehavior();
         if (bossBar != null) startBossBarTask();
 
+        addCoreAbility(1L, 1L, this::syncAttachments);
         addCoreAbility(5L, 5L, () -> {
             for (EntityComponent component : components.values()) {
                 component.onTick(this);

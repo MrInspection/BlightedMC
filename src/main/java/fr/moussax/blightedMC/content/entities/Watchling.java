@@ -48,7 +48,7 @@ public class Watchling extends SpawnableEntity {
     }
 
     private void handleCombatLogic() {
-        if (!(((Mob) entity).getTarget() instanceof Player target)) return;
+        if (!isAlive() || !(entity instanceof Mob mob) || !(mob.getTarget() instanceof Player target)) return;
 
         double distance = entity.getLocation().distance(target.getLocation());
 

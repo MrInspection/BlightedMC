@@ -18,7 +18,7 @@ public class ThermalFuels implements RegistryModule<ItemRegistryHandler> {
                 "§8Thermal Fuel", "",
                 " §7Ultra-dense carbon radiating ",
                 " §7with intense heat that adds ",
-                " §6\uD83E\uDEA3 3,000 mB §7to a refuelable ",
+                " §6\uD83E\uDEA3 3,000mB §7to a refuelable ",
                 " §7machine.", ""
         );
         enchantedCoal.addLore(ItemRarity.UNCOMMON.getName());
@@ -30,7 +30,7 @@ public class ThermalFuels implements RegistryModule<ItemRegistryHandler> {
                 "§8Thermal Fuel", "",
                 " §7Enriched lava capable of ",
                 " §7prolonged burning that adds ",
-                " §6\uD83E\uDEA3 10,000 mB §7to a refuelable ",
+                " §6\uD83E\uDEA3 10,000mB §7to a refuelable ",
                 " §7machine.", ""
         );
         enchantedLavaBucket.addLore(ItemRarity.RARE.getName());
@@ -43,7 +43,7 @@ public class ThermalFuels implements RegistryModule<ItemRegistryHandler> {
                 "§8Thermal Fuel", "",
                 " §7A superheated amalgam of ",
                 " §7compressed magma that adds ",
-                " §6\uD83E\uDEA3 20,000 mB §7to a refuelable",
+                " §6\uD83E\uDEA3 20,000mB §7to a refuelable",
                 " §7machine.", ""
         );
         magmaBucket.addLore(ItemRarity.EPIC.getName());
@@ -56,7 +56,7 @@ public class ThermalFuels implements RegistryModule<ItemRegistryHandler> {
                 "§8Thermal Fuel", "",
                 " §7Stable ionized matter containing ",
                 " §7stellar-grade heat that adds",
-                " §6\uD83E\uDEA3 50,000 mB §7to a refuelable",
+                " §6\uD83E\uDEA3 50,000mB §7to a refuelable",
                 " §7machine.", ""
         );
         plasmaBucket.addLore(ItemRarity.LEGENDARY.getName());

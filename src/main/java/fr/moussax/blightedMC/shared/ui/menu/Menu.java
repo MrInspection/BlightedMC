@@ -92,8 +92,8 @@ public abstract class Menu implements InventoryHolder {
             inventory.setItem(entry.getKey(), entry.getValue().item);
         }
 
-        player.openInventory(inventory);
         menuSystem.registerMenu(player, this);
+        player.openInventory(inventory);
     }
 
     /**
