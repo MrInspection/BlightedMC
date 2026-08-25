@@ -114,7 +114,7 @@ public final class BlightedMC extends JavaPlugin {
      * @return active action bar service, or {@code null} if not initialized
      */
     public static ActionbarService actionBarService() {
-        return instance != null ? instance.getActionBarService() : null;
+        return instance.getActionBarService();
     }
 
     private void initializeDatabase() {
