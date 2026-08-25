@@ -44,6 +44,29 @@ public final class BlightedEntitiesListener implements Listener {
     private static final Map<UUID, BlightedEntity> ATTACHMENT_OWNERS = new ConcurrentHashMap<>();
     private final Set<UUID> processingDamageIds = ConcurrentHashMap.newKeySet();
 
+    private static final long ORPHAN_SWEEP_PERIOD_TICKS = 100L; // 5s
+
+    public BlightedEntitiesListener() {
+        Bukkit.getScheduler().runTaskTimer(
+                BlightedMC.getInstance(), BlightedEntitiesListener::sweepOrphanedEntities,
+                ORPHAN_SWEEP_PERIOD_TICKS, ORPHAN_SWEEP_PERIOD_TICKS
+        );
+    }
+
+    private static void sweepOrphanedEntities() {
+        for (BlightedEntity blighted : List.copyOf(BLIGHTED_ENTITIES.values())) {
+            LivingEntity entity = blighted.getEntity();
+            if (entity == null || entity.isDead() || !entity.isValid()) {
+                if (entity != null) {
+                    BLIGHTED_ENTITIES.remove(entity.getUniqueId(), blighted);
+                } else {
+                    BLIGHTED_ENTITIES.values().remove(blighted);
+                }
+                blighted.cleanup();
+            }
+        }
+    }
+
     public static void registerEntity(LivingEntity entity, BlightedEntity blighted) {
         if (entity == null || blighted == null) return;
         BLIGHTED_ENTITIES.put(entity.getUniqueId(), blighted);
@@ -364,11 +387,11 @@ public final class BlightedEntitiesListener implements Listener {
                 PersistentDataContainer pdc = entity.getPersistentDataContainer();
                 if (!pdc.has(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING)) continue;
 
-                String ownerUuidStr = pdc.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
-                if (ownerUuidStr == null) continue;
+                String ownerUuidString = pdc.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
+                if (ownerUuidString == null) continue;
 
                 try {
-                    UUID ownerUuid = UUID.fromString(ownerUuidStr);
+                    UUID ownerUuid = UUID.fromString(ownerUuidString);
                     BlightedEntity owner = BLIGHTED_ENTITIES.get(ownerUuid);
                     if (owner == null || owner.getEntity() == null || !owner.getEntity().isValid()) {
                         entity.remove();
