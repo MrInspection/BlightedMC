@@ -1,0 +1,23 @@
+{
+  "skill_name": "generate-docs",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Improve the Javadocs in this Java API class like a senior developer. Keep them concise and precise, matching an existing style that uses short summaries, useful second paragraphs, and direct @param/@return wording. Do not change the implementation.",
+      "expected_output": "Revised Java source with concise, accurate Javadocs and no implementation changes.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Add Javadocs to this functional Java interface and its factory methods. Explain the observable contract, use links where they add value, avoid filler, and preserve the implementation exactly.",
+      "expected_output": "Complete API-quality Javadocs for the interface and methods without code changes.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Clean up the Javadocs for this enum. Document the enum's purpose and constructor/accessor API, but leave the enum constants undocumented because I am explicitly handling those separately.",
+      "expected_output": "Concise Javadocs for the enum type and non-constant API, with no Javadocs added to enum values and no code changes.",
+      "files": []
+    }
+  ]
+}
