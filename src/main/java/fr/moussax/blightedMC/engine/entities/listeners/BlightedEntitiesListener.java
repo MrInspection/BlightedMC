@@ -110,8 +110,18 @@ public final class BlightedEntitiesListener implements Listener {
         try {
             BlightedEntity owner = ATTACHMENT_OWNERS.get(entityId);
             if (owner != null) {
-                handleAttachmentDamage(owner, target, event);
-                return;
+                LivingEntity ownerEntity = owner.getEntity();
+                if (ownerEntity == null || ownerEntity.isDead()) {
+                    target.remove();
+                    ATTACHMENT_OWNERS.remove(entityId);
+                    return;
+                }
+
+                AttachmentRole role = getAttachmentRole(owner, target);
+                if (role == AttachmentRole.HITBOX) {
+                    handleAttachmentDamage(owner, target, event);
+                    return;
+                }
             }
 
             if (target instanceof LivingEntity living) {
@@ -123,6 +133,30 @@ public final class BlightedEntitiesListener implements Listener {
         } finally {
             processingDamageIds.remove(entityId);
         }
+    }
+
+    private AttachmentRole getAttachmentRole(BlightedEntity owner, Entity attachmentEntity) {
+        if (owner != null && owner.attachments != null) {
+            for (EntityAttachment attachment : owner.attachments) {
+                if (attachment.entity() != null && attachment.entity().equals(attachmentEntity)) {
+                    return attachment.role();
+                }
+            }
+        }
+
+        if (attachmentEntity != null) {
+            PersistentDataContainer pdc = attachmentEntity.getPersistentDataContainer();
+            if (pdc.has(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING)) {
+                String roleStr = pdc.get(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING);
+                if (roleStr != null) {
+                    try {
+                        return AttachmentRole.valueOf(roleStr);
+                    } catch (IllegalArgumentException ignored) {
+                    }
+                }
+            }
+        }
+        return AttachmentRole.SUBORDINATE;
     }
 
     private void handleDamageDealt(EntityDamageByEntityEvent event) {
