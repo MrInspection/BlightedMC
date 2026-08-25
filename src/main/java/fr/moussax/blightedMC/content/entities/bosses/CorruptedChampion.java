@@ -702,25 +702,13 @@ public class CorruptedChampion extends BlightedEntity {
                     ticks++;
                 } catch (Throwable t) {
                     BlightedMC.getInstance().getLogger().severe("[CorruptedChampion] Bladenado error: " + t.getMessage());
-                    cleanupBladenado(tornadoSwords);
+                    cleanup();
                 }
             }
 
             private void cleanup() {
                 cancel();
-                for (Giant sword : tornadoSwords) {
-                    if (sword != null) {
-                        if (!sword.isDead()) {
-                            sword.remove();
-                        }
-                    }
-                }
-                setMainHandEquipped(true);
-
-                if (entity instanceof Mob mob) {
-                    mob.setAI(true);
-                }
-                setPerformingAbility(false);
+                cleanupBladenado(tornadoSwords);
             }
         }.runTaskTimer(BlightedMC.getInstance(), 0L, 1L);
     }
