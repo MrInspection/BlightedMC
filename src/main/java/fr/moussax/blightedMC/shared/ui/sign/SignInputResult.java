@@ -24,7 +24,7 @@ public record SignInputResult(@NonNull Player player, String @NonNull [] lines) 
      * Returns the submitted line at the specified index.
      *
      * @param index line index
-     * @return line content, or an empty string if the index is invalid
+     * @return line content, or an empty string if the index is invalid or the submitted line is null
      */
     public String getLine(int index) {
         if (index < 0 || index >= lines.length) return "";
