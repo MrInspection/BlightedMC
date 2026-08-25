@@ -6,24 +6,25 @@ import org.bukkit.event.inventory.ClickType;
 /**
  * Represents an action executed when a menu item is clicked.
  *
- * <p>This is a functional interface and can be implemented with a lambda expression.</p>
+ * <p>Supports filtering actions by click type through the provided factory
+ * methods.</p>
  */
 @FunctionalInterface
 public interface MenuAction {
 
     /**
-     * Executes the menu action for the given player and click type.
+     * Executes this action for the specified player and click type.
      *
-     * @param player    the player who clicked
-     * @param clickType the type of click
+     * @param player player who clicked
+     * @param clickType click type that triggered the action
      */
     void execute(Player player, ClickType clickType);
 
     /**
-     * Creates a new {@code MenuAction} that executes only for left-clicks.
+     * Creates an action that executes only for left clicks.
      *
-     * @param action the action to execute on left-click
-     * @return a new {@code MenuAction} that triggers on left-click
+     * @param action action to execute
+     * @return action restricted to left clicks
      */
     static MenuAction left(MenuAction action) {
         return (player, clickType) -> {
@@ -32,14 +33,26 @@ public interface MenuAction {
     }
 
     /**
-     * Creates a new {@code MenuAction} that executes only for right-clicks.
+     * Creates an action that executes only for right clicks.
      *
-     * @param action the action to execute on right-click
-     * @return a new {@code MenuAction} that triggers on right-click
+     * @param action action to execute
+     * @return action restricted to right clicks
      */
     static MenuAction right(MenuAction action) {
         return (player, clickType) -> {
             if (clickType == ClickType.RIGHT) action.execute(player, clickType);
+        };
+    }
+
+    /**
+     * Creates an action that executes only for middle clicks.
+     *
+     * @param action action to execute
+     * @return action restricted to middle clicks
+     */
+    static MenuAction middle(MenuAction action) {
+        return (player, clickType) -> {
+            if (clickType == ClickType.MIDDLE) action.execute(player, clickType);
         };
     }
 }

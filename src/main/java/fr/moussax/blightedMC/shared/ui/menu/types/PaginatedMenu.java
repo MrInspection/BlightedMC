@@ -1,5 +1,6 @@
-package fr.moussax.blightedMC.shared.ui.menu;
+package fr.moussax.blightedMC.shared.ui.menu.types;
 
+import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import org.bukkit.entity.Player;
@@ -8,41 +9,68 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 
 /**
- * Base class for menus supporting automatic pagination.
+ * Base class for menus with automatic pagination.
  *
- * <p>Pagination state is kept per-menu instance and refreshed in-place
- * to remain compatible with the MenuSystem lifecycle.</p>
+ * <p>Items are displayed across pages, with navigation controls rendered in
+ * the bottom row. The current page is preserved when the menu is refreshed.</p>
+ *
+ * <p>Subclasses provide the total item count, item contents, and optional
+ * click handling through {@link #onItemClick(Player, int, ClickType)}.</p>
  */
 public abstract class PaginatedMenu extends Menu {
 
     protected int currentPage = 0;
     protected int totalItems = 0;
 
+    /**
+     * Creates a paginated menu.
+     *
+     * @param title menu title
+     * @param size  inventory size (multiple of 9)
+     */
     protected PaginatedMenu(String title, int size) {
         super(title, size);
     }
 
     /**
-     * @return total number of items to paginate
+     * Returns the total number of items available for pagination.
+     *
+     * @param player player viewing the menu
+     * @return total number of items
      */
     protected abstract int getTotalItems(@NonNull Player player);
 
     /**
-     * @param index global item index
-     * @return item for the given index
+     * Returns the item displayed at the specified global index.
+     *
+     * @param player player viewing the menu
+     * @param index  global item index
+     * @return item to display
      */
     protected abstract ItemStack getItem(@NonNull Player player, int index);
 
     /**
-     * @return number of items per page
+     * Returns the maximum number of items displayed on each page.
+     *
+     * <p>The bottom row is reserved for pagination controls.</p>
+     *
+     * @return number of items displayed per page
      */
     protected int getItemsPerPage() {
         return size - 9;
     }
 
+    /**
+     * Builds the current page and its navigation controls.
+     *
+     * <p>The current page is clamped to the last available page when the
+     * total item count changes between refreshes.</p>
+     *
+     * @param player player viewing the menu
+     */
     @Override
-    public void build(@NonNull Player player) {
-        totalItems = Math.max(0, getTotalItems(player));
+    public void build(@NonNull Player viewer) {
+        totalItems = Math.max(0, getTotalItems(viewer));
 
         int itemsPerPage = getItemsPerPage();
         int maxPage = Math.max(0, (totalItems - 1) / itemsPerPage);
@@ -56,33 +84,32 @@ public abstract class PaginatedMenu extends Menu {
             final int index = i;
             setItem(
                     slot++,
-                    getItem(player, index),
+                    getItem(viewer, index),
                     MenuItemInteraction.ANY_CLICK,
-                    (p, click) -> onItemClick(p, index, click)
+                    (player, click) -> onItemClick(player, index, click)
             );
         }
 
         // Previous page
         if (currentPage > 0) {
-            setBackButton(
-                    size - 9,
-                    (p, t) -> {
+            setBackButton(size - 9,
+                    (player, type) -> {
                         currentPage--;
-                        refresh(p);
+                        refresh(player);
                     }
             );
         }
 
         // Next page
         if (endIndex < totalItems) {
-            setItem(size - 1, MenuElementPreset.NEXT_BUTTON, (p, t) -> {
+            setItem(size - 1, MenuElementPreset.NEXT_BUTTON,
+                    (player, type) -> {
                         currentPage++;
-                        refresh(p);
+                        refresh(player);
                     }
             );
         }
 
-        // Close button
         setCloseButton(size - 5);
     }
 
