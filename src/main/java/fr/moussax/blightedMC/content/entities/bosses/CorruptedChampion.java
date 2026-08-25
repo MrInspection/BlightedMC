@@ -6,7 +6,6 @@ import fr.moussax.blightedMC.engine.entities.EntityImmunities;
 import fr.moussax.blightedMC.engine.entities.EntityResistance;
 import fr.moussax.blightedMC.engine.entities.EntityResistances;
 import fr.moussax.blightedMC.engine.entities.immunity.DamageType;
-import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import org.bukkit.*;
@@ -551,8 +550,6 @@ public class CorruptedChampion extends BlightedEntity {
             private void cleanup() {
                 cancel();
                 if (thrownSword != null) {
-                    attachments.removeIf(a -> a.entity() != null && a.entity().equals(thrownSword));
-                    BlightedEntitiesListener.unregisterAttachment(thrownSword);
                     if (!thrownSword.isDead()) {
                         thrownSword.remove();
                     }
@@ -566,8 +563,6 @@ public class CorruptedChampion extends BlightedEntity {
     private void cleanupBladenado(List<Giant> tornadoSwords) {
         for (Giant sword : tornadoSwords) {
             if (sword != null) {
-                attachments.removeIf(a -> a.entity() != null && a.entity().equals(sword));
-                BlightedEntitiesListener.unregisterAttachment(sword);
                 if (!sword.isDead()) {
                     sword.remove();
                 }
@@ -715,8 +710,6 @@ public class CorruptedChampion extends BlightedEntity {
                 cancel();
                 for (Giant sword : tornadoSwords) {
                     if (sword != null) {
-                        attachments.removeIf(a -> a.entity() != null && a.entity().equals(sword));
-                        BlightedEntitiesListener.unregisterAttachment(sword);
                         if (!sword.isDead()) {
                             sword.remove();
                         }
@@ -748,7 +741,6 @@ public class CorruptedChampion extends BlightedEntity {
                     g.setCustomName("Dinnerbone");
                 }
         );
-        addAttachment(giant);
         return giant;
     }
 
