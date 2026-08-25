@@ -304,10 +304,7 @@ public final class BlightedPlayer {
     public void addGems(int value) {
         if (value == 0) return;
         gemsManager.addGems(value);
-        ActionbarService service = BlightedMC.actionBarService();
-        if (service != null) {
-            service.renderPlayer(player);
-        }
+        ActionbarService.ifPresent(service -> service.renderPlayer(player));
     }
 
     /**
@@ -320,10 +317,7 @@ public final class BlightedPlayer {
     public void removeGems(int value) {
         if (value == 0) return;
         gemsManager.removeGems(value);
-        ActionbarService service = BlightedMC.actionBarService();
-        if (service != null) {
-            service.renderPlayer(player);
-        }
+        ActionbarService.ifPresent(service -> service.renderPlayer(player));
     }
 
     /**

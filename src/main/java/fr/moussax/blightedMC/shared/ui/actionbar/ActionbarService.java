@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.shared.ui.actionbar;
 
+import fr.moussax.blightedMC.BlightedMC;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -15,6 +16,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * Manages player action bar lifecycle, section registrations, timed alerts, and periodic rendering.
@@ -80,6 +82,18 @@ public final class ActionbarService implements Listener {
     public void unregisterSection(@NonNull String sectionId) {
         globalSections.remove(sectionId);
         composers.values().forEach(composer -> composer.unregisterSection(sectionId));
+    }
+
+    /**
+     * Executes an action with the active action bar service if present.
+     *
+     * @param action consumer accepting the active service instance
+     */
+    public static void ifPresent(@NonNull Consumer<ActionbarService> action) {
+        ActionbarService service = BlightedMC.actionBarService();
+        if (service != null) {
+            action.accept(service);
+        }
     }
 
     /**
