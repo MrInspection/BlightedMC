@@ -2,9 +2,17 @@ name: Maven Build
 
 on: [pull_request]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -16,23 +24,40 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Get cache week bucket
+        id: date
+        run: echo "week=$(date +%Y-W%V)" >> "$GITHUB_OUTPUT"
+
       - name: Cache Spigot BuildTools artifacts
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository/org/spigotmc
-          key: spigot-26.2
-          restore-keys: spigot-
+          key: spigot-26.2-${{ steps.date.outputs.week }}
+          restore-keys: spigot-26.2-
 
       - name: Build and install Spigot via BuildTools
-        uses: SpraxDev/Action-SpigotMC@v5
+        uses: SpraxDev/Action-SpigotMC@<pin-to-full-commit-sha>
         with:
           versions: 26.2
           remapped: true
           generateSrc: false
           generateDoc: false
 
+      - name: Verify plugin.yml api-version matches target
+        run: |
+          grep -q "api-version: '26.2'" src/main/resources/plugin.yml || {
+            echo "::error::plugin.yml api-version doesn't match Spigot target 26.2"; exit 1; }
+
       - name: Build and Run Tests
         run: mvn -B package --file pom.xml
+
+      - name: Upload test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: '**/target/surefire-reports/*.txt'
+          retention-days: 5
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
