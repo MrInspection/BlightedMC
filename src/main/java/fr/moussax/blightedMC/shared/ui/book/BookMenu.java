@@ -12,6 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Builds and opens interactive written books for players.
+ *
+ * <p>Pages are composed from {@link Formatter.InteractiveMessage} instances
+ * and may contain interactive chat components.</p>
+ */
 public final class BookMenu {
 
     private final List<BaseComponent[]> pages = new ArrayList<>();
@@ -20,19 +26,19 @@ public final class BookMenu {
     }
 
     /**
-     * Creates a new empty book menu builder.
+     * Creates an empty book menu.
      *
-     * @return a new book menu instance
+     * @return new book menu
      */
     public static BookMenu builder() {
         return new BookMenu();
     }
 
     /**
-     * Appends a complete page constructed from an interactive message.
+     * Appends a page from an interactive message.
      *
-     * @param message the configured interactive message
-     * @return this builder
+     * @param message message used to build the page
+     * @return this book menu
      */
     public BookMenu addPage(Formatter.@NonNull InteractiveMessage message) {
         this.pages.add(message.build());
@@ -40,13 +46,13 @@ public final class BookMenu {
     }
 
     /**
-     * Appends a page configured through a functional message builder.
+     * Appends a page configured through a callback.
      *
-     * <p>The configurator receives an empty interactive message instance that can
-     * be populated before the page is compiled.</p>
+     * <p>The callback receives an empty interactive message that can be
+     * configured before the page is built.</p>
      *
-     * @param pageConfigurator the page configuration callback
-     * @return this builder
+     * @param pageConfigurator callback used to configure the page
+     * @return this book menu
      */
     public BookMenu addPage(@NonNull Consumer<Formatter.InteractiveMessage> pageConfigurator) {
         Formatter.InteractiveMessage message = Formatter.text("");
@@ -56,11 +62,11 @@ public final class BookMenu {
     }
 
     /**
-     * Compiles the configured pages and opens the generated book for a player.
+     * Opens the configured book for a player.
      *
-     * <p>The generated book uses the server default title and author metadata.</p>
+     * <p>The generated book uses the default BlightedMC title and author.</p>
      *
-     * @param player the player receiving the book
+     * @param player player receiving the book
      */
     public void open(@NonNull Player player) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
