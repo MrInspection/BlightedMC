@@ -36,7 +36,7 @@ Check quality:
 
 When complete, return:
 
-```
+```markdown
 ## Done
  
 **Task:** {what was implemented}

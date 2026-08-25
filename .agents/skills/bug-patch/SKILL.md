@@ -35,7 +35,7 @@ Apply the minimal fix for every confirmed issue, directly to the files. Keep to 
 ### 6. Report every patched issue, CodeRabbit-style
 For each issue, regardless of how many were found, write one block using this structure:
 
-```
+````markdown
 ## 🐛 Issue: <short, specific description>
 
 **File(s):** <path(s)>
@@ -51,7 +51,7 @@ understands exactly why the symptom happens>
 ```diff
 <the actual diff applied>
 ```
-```
+````
 
 Keep the report terse and factual — no padding, no restating the diff in prose. If more than one issue was found (per step 4), present them as separate blocks in order of how directly they relate to what the user asked about (the one they reported first, siblings after).
 
