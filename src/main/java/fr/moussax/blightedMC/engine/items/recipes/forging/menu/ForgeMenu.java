@@ -49,7 +49,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
 
     @Override
     public void onTick(Player player) {
-        if (isForging) return;
+        if (recipe == null || isForging) return;
 
         boolean initialCanForge = this.canForge;
         checkRequirements(player);

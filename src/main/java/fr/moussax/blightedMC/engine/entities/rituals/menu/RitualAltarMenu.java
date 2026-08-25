@@ -49,6 +49,8 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
 
     @Override
     public void onTick(Player player) {
+        if (ritual == null) return;
+
         boolean initialCanInvoke = this.canInvoke;
         checkRequirements(player);
 
