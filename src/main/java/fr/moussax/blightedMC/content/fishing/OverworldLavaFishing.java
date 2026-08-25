@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.content.fishing.overworld;
+package fr.moussax.blightedMC.content.fishing;
 
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
 import fr.moussax.blightedMC.registry.RegistryModule;
