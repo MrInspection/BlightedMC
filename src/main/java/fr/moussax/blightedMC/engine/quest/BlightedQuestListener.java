@@ -78,7 +78,6 @@ public final class BlightedQuestListener implements Listener {
 
         NamespacedKey absorbedSoulKey = new NamespacedKey(plugin, "cipher_absorbed_soul");
         persistentDataContainer.set(absorbedSoulKey, PersistentDataType.BOOLEAN, true);
-        persistentDataContainer.set(absorbedSoulKey, PersistentDataType.BYTE, (byte) 1);
 
         List<String> lore = meta.getLore();
         if (lore != null) {
@@ -182,14 +181,6 @@ public final class BlightedQuestListener implements Listener {
         if (persistentDataContainer.has(absorbedSoulKey, PersistentDataType.BYTE)) {
             Byte byteValue = persistentDataContainer.get(absorbedSoulKey, PersistentDataType.BYTE);
             return byteValue != null && byteValue == 1;
-        }
-        if (persistentDataContainer.has(absorbedSoulKey, PersistentDataType.INTEGER)) {
-            Integer integerValue = persistentDataContainer.get(absorbedSoulKey, PersistentDataType.INTEGER);
-            return integerValue != null && integerValue == 1;
-        }
-        if (persistentDataContainer.has(absorbedSoulKey, PersistentDataType.STRING)) {
-            String stringValue = persistentDataContainer.get(absorbedSoulKey, PersistentDataType.STRING);
-            return stringValue != null && stringValue.equalsIgnoreCase("true");
         }
         return false;
     }
