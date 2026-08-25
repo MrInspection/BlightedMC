@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.engine.items.recipes.crafting.menu;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
-import fr.moussax.blightedMC.shared.ui.menu.PaginatedMenu;
+import fr.moussax.blightedMC.shared.ui.menu.types.PaginatedMenu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
@@ -44,10 +44,10 @@ public final class RecipeBookMenu {
             super("Blighted Recipe Book", 54);
             this.previousMenu = previousMenu;
             this.cachedRecipes = new ArrayList<>(BlightedRecipe.REGISTERED_RECIPES);
-            this.cachedRecipes.sort((r1, r2) -> {
-                String name1 = r1.getResult().getDisplayName();
-                String name2 = r2.getResult().getDisplayName();
-                return (name1 != null ? name1 : "").compareTo(name2 != null ? name2 : "");
+            this.cachedRecipes.sort((firstRecipe, secondRecipe) -> {
+                String firstName = firstRecipe.getResult().getDisplayName();
+                String secondName = secondRecipe.getResult().getDisplayName();
+                return (firstName != null ? firstName : "").compareTo(secondName != null ? secondName : "");
             });
         }
 
@@ -98,28 +98,27 @@ public final class RecipeBookMenu {
             for (int i = start; i < end && recipeIndex < RECIPE_SLOTS.length; i++) {
                 final int itemIndex = i;
                 setItem(RECIPE_SLOTS[recipeIndex], getItem(player, itemIndex), MenuItemInteraction.ANY_CLICK,
-                    (p, t) -> onItemClick(p, itemIndex, t));
+                    (clickingPlayer, clickType) -> onItemClick(clickingPlayer, itemIndex, clickType));
                 recipeIndex++;
             }
         }
 
         private void setupNavigationButtons(Player player, int end) {
             if (currentPage > 0) {
-                setBackButton(BACK_BUTTON_SLOT, (p, t) -> {
+                setBackButton(BACK_BUTTON_SLOT, (clickingPlayer, clickType) -> {
                     currentPage--;
-                    manager.openMenu(this, p);
+                    refresh(clickingPlayer);
                 });
+            } else if (previousMenu != null) {
+                setBackButton(BACK_BUTTON_SLOT, previousMenu);
             } else {
                 setBackButton(BACK_BUTTON_SLOT, new CraftingTableMenu());
             }
 
             if (end < totalItems) {
-                setItem(NEXT_BUTTON_SLOT, MenuElementPreset.NEXT_BUTTON, (p, t) -> {
+                setItem(NEXT_BUTTON_SLOT, MenuElementPreset.NEXT_BUTTON, (clickingPlayer, clickType) -> {
                     currentPage++;
-                    manager.openMenu(this, p);
-                });
-            } else {
-                setItem(NEXT_BUTTON_SLOT, MenuElementPreset.EMPTY_SLOT_FILLER.getItem(), (p, t) -> {
+                    refresh(clickingPlayer);
                 });
             }
 

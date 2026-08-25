@@ -5,7 +5,7 @@ import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedShapedRecipe;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedShapelessRecipe;
 import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
-import fr.moussax.blightedMC.shared.ui.menu.InteractiveMenu;
+import fr.moussax.blightedMC.shared.ui.menu.types.InteractiveMenu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.utils.ItemBuilder;

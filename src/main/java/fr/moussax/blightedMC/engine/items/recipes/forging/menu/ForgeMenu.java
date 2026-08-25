@@ -16,11 +16,13 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class ForgeMenu extends Menu {
+public final class ForgeMenu extends Menu implements TickableMenu {
 
     private static final int[] GRID_SLOTS = {19, 20, 21, 28, 29, 30, 37, 38, 39};
     private static final int[] REQUIRED_ITEM_INDICATOR_SLOTS = {10, 11, 12, 13};
@@ -32,11 +34,31 @@ public final class ForgeMenu extends Menu {
     private final Menu previousMenu;
     private boolean canForge = false;
     private boolean isForging = false;
+    private int lastInventoryFuel = -1;
 
     public ForgeMenu(ForgeRecipe recipe, Menu previousMenu) {
         super(recipe == null ? "Blighted Forge" : "Forge Item", 54);
         this.recipe = recipe;
         this.previousMenu = previousMenu;
+    }
+
+    @Override
+    public long tickPeriodTicks() {
+        return 10L;
+    }
+
+    @Override
+    public void onTick(Player player) {
+        if (isForging) return;
+
+        boolean initialCanForge = this.canForge;
+        checkRequirements(player);
+        int currentFuelInInventory = calculateInventoryFuel(player);
+
+        if (initialCanForge != this.canForge || lastInventoryFuel != currentFuelInInventory) {
+            this.lastInventoryFuel = currentFuelInInventory;
+            refresh(player);
+        }
     }
 
     public ForgeMenu(ForgeRecipe recipe) {

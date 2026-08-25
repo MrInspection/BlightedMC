@@ -17,13 +17,14 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class RitualAltarMenu extends Menu {
+public final class RitualAltarMenu extends Menu implements TickableMenu {
     private static final int[] GRID_SLOTS = {19, 20, 21, 28, 29, 30};
     private static final int[] REQUIRED_ITEM_INDICATOR_SLOTS = {10, 11, 12, 13};
     private static final int[] INVOKED_MOB_INDICATOR_SLOTS = {15, 16};
@@ -32,11 +33,34 @@ public final class RitualAltarMenu extends Menu {
     private final AncientRitual ritual;
     private final Menu previousMenu;
     private boolean canInvoke = false;
+    private int lastPlayerLevel = -1;
+    private double lastPlayerGems = -1;
 
     public RitualAltarMenu(AncientRitual ritual, Menu previousMenu) {
         super(ritual == null ? "Rituals Altar" : "Invoke Creature", 54);
         this.ritual = ritual;
         this.previousMenu = previousMenu;
+    }
+
+    @Override
+    public long tickPeriodTicks() {
+        return 10L;
+    }
+
+    @Override
+    public void onTick(Player player) {
+        boolean initialCanInvoke = this.canInvoke;
+        checkRequirements(player);
+
+        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        int currentLevel = player.getLevel();
+        double currentGems = blightedPlayer != null ? blightedPlayer.getGemsManager().getGems() : 0;
+
+        if (initialCanInvoke != this.canInvoke || lastPlayerLevel != currentLevel || lastPlayerGems != currentGems) {
+            this.lastPlayerLevel = currentLevel;
+            this.lastPlayerGems = currentGems;
+            refresh(player);
+        }
     }
 
     public RitualAltarMenu(AncientRitual ritual) {

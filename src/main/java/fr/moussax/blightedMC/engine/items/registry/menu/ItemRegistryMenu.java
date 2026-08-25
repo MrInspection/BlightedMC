@@ -6,7 +6,7 @@ import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.utils.Formatter;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
-import fr.moussax.blightedMC.shared.ui.menu.PaginatedMenu;
+import fr.moussax.blightedMC.shared.ui.menu.types.PaginatedMenu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
@@ -141,10 +141,10 @@ public final class ItemRegistryMenu {
             super(title, 54);
             this.previousMenu = previousMenu;
             this.blightedItems = ItemRegistry.getAllItems().stream().filter(filter).collect(Collectors.toList());
-            this.blightedItems.sort((i1, i2) -> {
-                String name1 = i1.getDisplayName();
-                String name2 = i2.getDisplayName();
-                return (name1 != null ? name1 : "").compareTo(name2 != null ? name2 : "");
+            this.blightedItems.sort((firstItem, secondItem) -> {
+                String firstName = firstItem.getDisplayName();
+                String secondName = secondItem.getDisplayName();
+                return (firstName != null ? firstName : "").compareTo(secondName != null ? secondName : "");
             });
         }
 
@@ -180,46 +180,41 @@ public final class ItemRegistryMenu {
 
         @Override
         public void build(@NonNull Player player) {
-            clearMenu();
+            int totalCount = getTotalItems(player);
             int start = currentPage * getItemsPerPage();
-            int end = Math.min(start + getItemsPerPage(), getTotalItems(player));
+            int end = Math.min(start + getItemsPerPage(), totalCount);
 
             if (blightedItems.isEmpty()) {
                 setItem(22, buildMenuItem(new ItemStack(Material.RED_STAINED_GLASS_PANE),
                     "§cNo Items Found",
-                    List.of("§7No items match the criteria")), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                    List.of("§7No items match the criteria")), MenuItemInteraction.ANY_CLICK, (clickingPlayer, clickType) -> {
                 });
             } else {
-                for (int slotIdx = 0, i = start; i < end && slotIdx < ITEM_SLOTS.length; i++, slotIdx++) {
-                    final int idx = i;
-                    setItem(ITEM_SLOTS[slotIdx], getItem(player, idx), MenuItemInteraction.ANY_CLICK,
-                        (p, t) -> onItemClick(p, idx, t));
+                for (int slotIndex = 0, i = start; i < end && slotIndex < ITEM_SLOTS.length; i++, slotIndex++) {
+                    final int itemIndex = i;
+                    setItem(ITEM_SLOTS[slotIndex], getItem(player, itemIndex), MenuItemInteraction.ANY_CLICK,
+                        (clickingPlayer, clickType) -> onItemClick(clickingPlayer, itemIndex, clickType));
                 }
             }
-            setNavigation();
+            setNavigation(player, totalCount);
         }
 
-        private void clearMenu() {
-            for (int i = 0; i < size; i++)
-                setItem(i, new ItemStack(Material.AIR), MenuItemInteraction.ANY_CLICK, (p, t) -> {
-                });
-        }
-
-        private void setNavigation() {
+        private void setNavigation(Player player, int totalItemsCount) {
             if (currentPage > 0) {
-                setBackButton(48, (p, t) -> {
+                setBackButton(48, (clickingPlayer, clickType) -> {
                     currentPage--;
-                    manager.openMenu(this, p);
+                    refresh(clickingPlayer);
                 });
-            } else {
+            } else if (previousMenu != null) {
                 setBackButton(48, previousMenu);
             }
 
-            if ((currentPage + 1) * getItemsPerPage() < getTotalItems(null))
-                setItem(50, MenuElementPreset.NEXT_BUTTON, (p, t) -> {
+            if ((currentPage + 1) * getItemsPerPage() < totalItemsCount) {
+                setItem(50, MenuElementPreset.NEXT_BUTTON, (clickingPlayer, clickType) -> {
                     currentPage++;
-                    manager.openMenu(this, p);
+                    refresh(clickingPlayer);
                 });
+            }
 
             setCloseButton(49);
         }

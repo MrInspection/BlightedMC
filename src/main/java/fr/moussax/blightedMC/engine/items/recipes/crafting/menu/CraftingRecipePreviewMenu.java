@@ -17,11 +17,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
+import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
-public final class CraftingRecipePreviewMenu extends Menu {
+public final class CraftingRecipePreviewMenu extends Menu implements TickableMenu {
 
     private static final int[] CRAFTING_GRID_SLOTS = {
             10, 11, 12,
@@ -37,11 +38,29 @@ public final class CraftingRecipePreviewMenu extends Menu {
 
     private final BlightedRecipe recipe;
     private final Menu previousMenu;
+    private int lastIngredientHash = -1;
 
     public CraftingRecipePreviewMenu(@NonNull BlightedRecipe recipe, @Nullable Menu previousMenu) {
         super(recipe.getResult().getDisplayName().replaceAll("§[0-9A-FK-ORa-fk-or]", "") + " Recipe", 54);
         this.recipe = recipe;
         this.previousMenu = previousMenu;
+    }
+
+    @Override
+    public long tickPeriodTicks() {
+        return 10L;
+    }
+
+    @Override
+    public void onTick(Player player) {
+        Map<String, IngredientInfo> requirements = aggregateRecipeIngredients(recipe);
+        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+        int currentHash = inventoryCounts.hashCode();
+
+        if (lastIngredientHash != currentHash) {
+            this.lastIngredientHash = currentHash;
+            refresh(player);
+        }
     }
 
     public CraftingRecipePreviewMenu(@NonNull BlightedRecipe recipe) {
