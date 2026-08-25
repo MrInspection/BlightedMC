@@ -89,7 +89,7 @@ public final class MenuSystem {
 
     /**
      * Returns to the previous menu in the player's navigation history.
-
+     *
      * <p>Closes the inventory when no previous menu remains.</p>
      *
      * @param player player navigating back
@@ -114,8 +114,8 @@ public final class MenuSystem {
         } else {
             Menu previousMenu = stack.peek();
             if (previousMenu != null) {
-                previousMenu.refresh(player);
-                activeMenus.put(playerId, previousMenu);
+                previousMenu.setMenuSystem(this);
+                previousMenu.open(player);
             }
         }
     }

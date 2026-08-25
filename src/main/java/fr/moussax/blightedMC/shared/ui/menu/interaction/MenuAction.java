@@ -15,7 +15,7 @@ public interface MenuAction {
     /**
      * Executes this action for the specified player and click type.
      *
-     * @param player player who clicked
+     * @param player    player who clicked
      * @param clickType click type that triggered the action
      */
     void execute(Player player, ClickType clickType);

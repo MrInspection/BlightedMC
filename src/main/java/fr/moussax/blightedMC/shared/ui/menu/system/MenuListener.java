@@ -1,11 +1,12 @@
 package fr.moussax.blightedMC.shared.ui.menu.system;
 
-import fr.moussax.blightedMC.shared.ui.menu.types.InteractiveMenu;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.shared.ui.menu.types.InteractiveMenu;
 import fr.moussax.blightedMC.utils.Utilities;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -24,6 +25,11 @@ public final class MenuListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (!(event.getView().getTopInventory().getHolder() instanceof Menu menu)) return;
+
+        if (event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
+            event.setCancelled(true);
+            return;
+        }
 
         boolean isTopInventory = event.getClickedInventory() == event.getView().getTopInventory();
         int slotIndex = event.getRawSlot();

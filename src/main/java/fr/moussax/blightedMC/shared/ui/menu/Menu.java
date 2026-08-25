@@ -257,10 +257,10 @@ public abstract class Menu implements InventoryHolder {
      */
     public void setBackButton(int slot, @NonNull Menu previousMenu) {
         setBackButton(slot, (player, _) -> {
-            close();
             if (menuSystem != null) {
-                previousMenu.setMenuSystem(menuSystem);
-                previousMenu.open(player);
+                menuSystem.goBack(player);
+            } else {
+                close();
             }
         });
     }

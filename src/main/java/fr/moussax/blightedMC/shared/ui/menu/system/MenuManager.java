@@ -23,7 +23,7 @@ public final class MenuManager {
     /**
      * Opens a menu for the specified player.
      *
-     * @param menu menu to open
+     * @param menu   menu to open
      * @param player player viewing the menu
      */
     public void openMenu(@NonNull Menu menu, @NonNull Player player) {
