@@ -17,6 +17,8 @@ import fr.moussax.blightedMC.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.shared.ui.sign.SignInputListener;
 import fr.moussax.blightedMC.content.items.abilities.WitherImpactAbility;
 import fr.moussax.blightedMC.engine.quest.BlightedQuestListener;
+import fr.moussax.blightedMC.engine.player.hud.PlayerHudManager;
+import fr.moussax.blightedMC.shared.ui.actionbar.ActionbarService;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -35,6 +37,9 @@ public final class EventsRegistry {
     private MenuSystem menuSystem;
     @Getter
     private MenuManager menuManager;
+    @Getter
+    private ActionbarService actionBarService;
+    private PlayerHudManager playerHudManager;
     private SpawnableEntitiesListener spawnableEntitiesListener;
     private SignInputListener signInputListener;
 
@@ -50,6 +55,9 @@ public final class EventsRegistry {
         PluginManager pm = Bukkit.getPluginManager();
         menuSystem = new MenuSystem(instance);
         menuManager = new MenuManager(menuSystem);
+        actionBarService = new ActionbarService(instance);
+        actionBarService.start(20L);
+        playerHudManager = new PlayerHudManager(actionBarService);
         spawnableEntitiesListener = new SpawnableEntitiesListener();
         EntitiesRegistry.addOnRegisterCallback(spawnableEntitiesListener::invalidateCache);
         signInputListener = new SignInputListener();
@@ -88,6 +96,9 @@ public final class EventsRegistry {
     public void cleanup() {
         if (signInputListener != null) {
             signInputListener.cleanup();
+        }
+        if (actionBarService != null) {
+            actionBarService.stop();
         }
     }
 
