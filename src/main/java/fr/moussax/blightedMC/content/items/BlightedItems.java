@@ -50,7 +50,7 @@ public class BlightedItems implements RegistryModule<ItemRegistryHandler> {
         blightedBanner.fireResistant();
         blightedBanner.unstackable();
 
-        BlightedItem blightedCodex = new BlightedItem("BLIGHTED_CODEX", ItemType.UNCATEGORIZED, ItemRarity.EPIC, Material.KNOWLEDGE_BOOK);
+        BlightedItem blightedCodex = new BlightedItem("BLIGHTED_CODEX", ItemType.UNCATEGORIZED, ItemRarity.EPIC, Material.ENCHANTED_BOOK);
         blightedCodex.setDisplayName("Blighted Codex");
         blightedCodex.addLore(
                 "",
@@ -70,7 +70,6 @@ public class BlightedItems implements RegistryModule<ItemRegistryHandler> {
                 "",
                 ItemRarity.EPIC.getName()
         );
-        blightedCodex.addEnchantmentGlint();
         blightedCodex.fireResistant();
 
         BlightedItem blightedGemstone = new BlightedItem("BLIGHTED_GEMSTONE", ItemType.UNCATEGORIZED, ItemRarity.SPECIAL, Material.PLAYER_HEAD);

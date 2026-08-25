@@ -12,16 +12,38 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Manages active sign input sessions and their completion callbacks.
+ *
+ * <p>Tracks the temporary sign location used by each player and restores its
+ * actual block state when input is submitted.</p>
+ */
 public final class SignInputManager {
     private static final Map<UUID, Session> sessions = new ConcurrentHashMap<>();
 
     private record Session(SignInputMenu menu, BlockPos position) {
     }
 
-    static void register(UUID id, SignInputMenu menu, BlockPos position) {
-        sessions.put(id, new Session(menu, position));
+    /**
+     * Registers an active sign input session for a player.
+     *
+     * @param PlayerId player unique identifier
+     * @param menu sign input menu handling the session
+     * @param position temporary sign position
+     */
+    static void register(UUID PlayerId, SignInputMenu menu, BlockPos position) {
+        sessions.put(PlayerId, new Session(menu, position));
     }
 
+    /**
+     * Handles sign input submitted by a player.
+     *
+     * <p>The temporary sign is restored before the completion callback is
+     * invoked.</p>
+     *
+     * @param player player who submitted the input
+     * @param lines submitted sign lines
+     */
     public static void handleSignUpdate(Player player, String[] lines) {
         Session session = sessions.remove(player.getUniqueId());
         if (session == null) return;
@@ -39,11 +61,22 @@ public final class SignInputManager {
         );
     }
 
-    public static boolean hasActiveSession(UUID id) {
-        return sessions.containsKey(id);
+    /**
+     * Checks whether a player has an active sign input session.
+     *
+     * @param PlayerId player unique identifier
+     * @return {@code true} if an active session exists
+     */
+    public static boolean hasActiveSession(UUID PlayerId) {
+        return sessions.containsKey(PlayerId);
     }
 
-    public static void removeSession(UUID id) {
-        sessions.remove(id);
+    /**
+     * Removes the active sign input session for a player.
+     *
+     * @param PlayerId player unique identifier
+     */
+    public static void removeSession(UUID PlayerId) {
+        sessions.remove(PlayerId);
     }
 }

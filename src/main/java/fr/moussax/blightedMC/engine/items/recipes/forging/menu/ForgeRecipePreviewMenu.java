@@ -18,9 +18,11 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
+
 import java.util.*;
 
-public final class ForgeRecipePreviewMenu extends Menu {
+public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
 
     private static final int[] GRID_SLOTS = {19, 20, 21, 28, 29, 30, 37, 38, 39};
     private static final int[] REQUIRED_ITEM_INDICATOR_SLOTS = {10, 11, 12, 13};
@@ -36,11 +38,32 @@ public final class ForgeRecipePreviewMenu extends Menu {
 
     private final ForgeRecipe recipe;
     private final Menu previousMenu;
+    private int lastStateHash = -1;
 
     public ForgeRecipePreviewMenu(@NonNull ForgeRecipe recipe, @Nullable Menu previousMenu) {
         super(recipe.getForgedItem().getDisplayName().replaceAll("§[0-9A-FK-ORa-fk-or]", "") + " Recipe", 54);
         this.recipe = recipe;
         this.previousMenu = previousMenu;
+    }
+
+    @Override
+    public long tickPeriodTicks() {
+        return 10L;
+    }
+
+    @Override
+    public void onTick(Player player) {
+        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        int currentFuel = blightedPlayer != null ? blightedPlayer.getForgeFuel() : 0;
+
+        Map<String, IngredientInfo> requirements = aggregateForgeIngredients(recipe);
+        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+
+        int currentHash = Objects.hash(currentFuel, inventoryCounts);
+        if (lastStateHash != currentHash) {
+            this.lastStateHash = currentHash;
+            refresh(player);
+        }
     }
 
     public ForgeRecipePreviewMenu(@NonNull ForgeRecipe recipe) {

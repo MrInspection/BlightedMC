@@ -5,6 +5,9 @@ import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Provides predefined visual elements for common menu interactions.
+ */
 @Getter
 public enum MenuElementPreset {
     CLOSE_BUTTON(new ItemBuilder(Material.BARRIER, "§cClose").toItemStack()),
@@ -14,6 +17,11 @@ public enum MenuElementPreset {
 
     private final ItemStack item;
 
+    /**
+     * Creates a menu element preset.
+     *
+     * @param item item displayed by this preset
+     */
     MenuElementPreset(ItemStack item) {
         this.item = item;
     }

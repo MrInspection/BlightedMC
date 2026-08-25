@@ -27,9 +27,8 @@ import org.bukkit.util.Vector;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@EntityImmunities({DamageType.FALL, DamageType.MACE})
+@EntityImmunities({DamageType.FALL, DamageType.MACE, DamageType.PROJECTILE})
 @EntityResistances({
-        @EntityResistance(type = DamageType.PROJECTILE, percent = 75.0),
         @EntityResistance(type = DamageType.MAGIC, percent = 75.0),
 })
 public class CorruptedChampion extends BlightedEntity {
