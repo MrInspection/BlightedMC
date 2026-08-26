@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.engine.fishing;
 
 import fr.moussax.blightedMC.BlightedMC;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -98,7 +98,7 @@ public final class FishingComboTracker {
 
                 int highestCombo = methodMap.values().stream().mapToInt(Integer::intValue).max().orElse(0);
                 if (highestCombo >= 5 && player.isOnline()) {
-                    Formatter.warn(player, String.format(Locale.ROOT, "§c\uD83C\uDFA3 Your combo has expired! You reached a %d Catch Combo!", highestCombo));
+                    Messenger.warn(player, String.format(Locale.ROOT, "§c🎣 Your combo has expired! You reached a %d Catch Combo!", highestCombo));
                 }
             }
         }.runTaskLater(BlightedMC.getInstance(), EXPIRATION_DELAY_TICKS);

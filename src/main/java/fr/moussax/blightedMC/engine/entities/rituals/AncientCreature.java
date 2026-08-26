@@ -1,10 +1,11 @@
 package fr.moussax.blightedMC.engine.entities.rituals;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.content.sound.BlightedSounds;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.attachment.AttachmentRole;
-import fr.moussax.blightedMC.utils.Formatter;
-import fr.moussax.blightedMC.utils.sound.SoundSequence;
+import fr.moussax.blightedMC.shared.text.Formatter;
+import fr.moussax.blightedMC.shared.sound.SoundSequence;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -20,7 +21,6 @@ import org.bukkit.entity.TextDisplay;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Transformation;
-import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
@@ -282,7 +282,7 @@ public abstract class AncientCreature extends BlightedEntity {
         Location location = entity.getLocation().clone();
 
         Bukkit.broadcastMessage("§5 ☤ §f" + summonerName + " §dfailed to defeat the §4" + name + "§d on time! The Ancient Creature returned to the forbidden realm.");
-        SoundSequence.ANCIENT_MOB_COLLAPSE.play(location);
+        BlightedSounds.ANCIENT_MOB_COLLAPSE.play(location);
 
         entity.setAI(false);
         entity.setInvulnerable(true);
@@ -298,6 +298,6 @@ public abstract class AncientCreature extends BlightedEntity {
     @Override
     public void onDeath(Location location) {
         super.onDeath(location);
-        SoundSequence.ANCIENT_MOB_DEFEAT.play(location);
+        BlightedSounds.ANCIENT_MOB_DEFEAT.play(location);
     }
 }

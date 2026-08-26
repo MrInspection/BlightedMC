@@ -4,7 +4,9 @@ import fr.moussax.blightedMC.commands.AdminCommand;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-import static fr.moussax.blightedMC.utils.Formatter.*;
+import static fr.moussax.blightedMC.shared.text.InteractiveMessage.text;
+import static fr.moussax.blightedMC.shared.text.Messenger.inform;
+import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
 public final class SpeedCommand extends AdminCommand {
     @Override

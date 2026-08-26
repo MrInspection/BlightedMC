@@ -8,7 +8,7 @@ import org.bukkit.command.Command;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import static fr.moussax.blightedMC.utils.Formatter.warn;
+import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
 public final class ButcherCommand extends AdminCommand {
 

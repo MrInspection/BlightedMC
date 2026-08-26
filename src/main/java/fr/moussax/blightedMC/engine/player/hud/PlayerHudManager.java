@@ -3,7 +3,7 @@ package fr.moussax.blightedMC.engine.player.hud;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.shared.ui.actionbar.ActionbarSection;
 import fr.moussax.blightedMC.shared.ui.actionbar.ActionbarService;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.shared.text.Formatter;
 import org.jspecify.annotations.NonNull;
 
 public final class PlayerHudManager {

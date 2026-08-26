@@ -9,8 +9,8 @@ import fr.moussax.blightedMC.engine.entities.rituals.AncientCreature;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-import static fr.moussax.blightedMC.utils.Formatter.inform;
-import static fr.moussax.blightedMC.utils.Formatter.warn;
+import static fr.moussax.blightedMC.shared.text.Messenger.inform;
+import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
 @CommandArgument(position = 0, suggestions = {"$entities"})
 public final class SpawnCustomMobCommand extends AdminCommand {

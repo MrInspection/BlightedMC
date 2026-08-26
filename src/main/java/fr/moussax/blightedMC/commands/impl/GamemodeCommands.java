@@ -5,7 +5,7 @@ import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-import static fr.moussax.blightedMC.utils.Formatter.inform;
+import static fr.moussax.blightedMC.shared.text.Messenger.inform;
 
 public final class GamemodeCommands extends AdminCommand {
 

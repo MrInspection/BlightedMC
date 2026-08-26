@@ -7,7 +7,8 @@ import fr.moussax.blightedMC.engine.fishing.FishingComboTracker;
 import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedCalculator;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.shared.text.Formatter;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -75,7 +76,7 @@ public final class VoidFishingHook {
                 Location hookLoc = hook.getLocation();
 
                 if (hookLoc.getY() <= MIN_Y_LEVEL) {
-                    Formatter.warn(player, "The void consumes your hook. Life cannot endure beneath Y0.");
+                    Messenger.warn(player, "The void consumes your hook. Life cannot endure beneath Y0.");
                     remove();
                     hook.remove();
                     return;
@@ -85,7 +86,7 @@ public final class VoidFishingHook {
                 if (dropDistance >= MIN_DROP_DISTANCE) {
                     double distanceSquared = (hookLoc.getX() * hookLoc.getX()) + (hookLoc.getZ() * hookLoc.getZ());
                     if (distanceSquared <= CENTRAL_ISLAND_RADIUS_SQUARED) {
-                        Formatter.warn(player, "The void beneath the central island is barren. Cast farther out.");
+                        Messenger.warn(player, "The void beneath the central island is barren. Cast farther out.");
                         remove();
                         hook.remove();
                         return;

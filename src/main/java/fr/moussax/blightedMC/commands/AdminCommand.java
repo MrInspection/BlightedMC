@@ -1,9 +1,9 @@
 package fr.moussax.blightedMC.commands;
 
+import fr.moussax.blightedMC.shared.text.Messenger;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
-
-import static fr.moussax.blightedMC.utils.Formatter.hasRequiredPermission;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Base class for administrative commands.
@@ -15,6 +15,20 @@ import static fr.moussax.blightedMC.utils.Formatter.hasRequiredPermission;
  * sufficient permissions.
  */
 public abstract class AdminCommand extends PlayerCommand {
+
+    /**
+     * Verifies administrative permission for a player.
+     *
+     * @param player the player to check
+     * @return {@code true} if the player is an operator
+     */
+    protected boolean hasRequiredPermission(@NonNull Player player) {
+        if (!player.isOp()) {
+            Messenger.warn(player, "You must be an administrator to use this command.");
+            return false;
+        }
+        return true;
+    }
 
     /**
      * {@inheritDoc}

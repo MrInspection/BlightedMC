@@ -7,7 +7,8 @@ import fr.moussax.blightedMC.engine.fishing.FishingComboTracker;
 import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedCalculator;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.shared.text.Formatter;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -147,7 +148,7 @@ public final class LavaFishingHook {
         if (hook.isInWater()) {
             hook.remove();
             remove();
-            Formatter.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
+            Messenger.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
             return true;
         }
         return false;

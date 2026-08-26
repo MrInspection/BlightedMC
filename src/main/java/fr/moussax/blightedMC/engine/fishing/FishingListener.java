@@ -10,7 +10,7 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -85,7 +85,7 @@ public final class FishingListener implements Listener {
         ItemStack lavaRod = findFishingRodItem(player, ItemType.LAVA_FISHING_ROD);
         if (lavaRod != null) {
             if (hook.getLocation().getBlock().getType() == Material.WATER) {
-                Formatter.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
+                Messenger.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
                 event.setCancelled(true);
             } else {
                 BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
@@ -103,7 +103,7 @@ public final class FishingListener implements Listener {
         ItemStack voidRod = findFishingRodItem(player, ItemType.VOID_FISHING_ROD);
         if (voidRod != null) {
             if (player.getWorld().getEnvironment() != World.Environment.THE_END) {
-                Formatter.warn(player, "This rod answers only to the void of the End.");
+                Messenger.warn(player, "This rod answers only to the void of the End.");
                 event.setCancelled(true);
             } else {
                 BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
@@ -162,7 +162,7 @@ public final class FishingListener implements Listener {
     private void handleStandardFishing(PlayerFishEvent event, Player player, FishHook hook) {
         if (findFishingRodItem(player, ItemType.LAVA_FISHING_ROD) != null) {
             event.setCancelled(true);
-            Formatter.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
+            Messenger.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
             return;
         }
 

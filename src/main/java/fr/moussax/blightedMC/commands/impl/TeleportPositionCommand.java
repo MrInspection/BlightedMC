@@ -11,7 +11,8 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-import static fr.moussax.blightedMC.utils.Formatter.*;
+import static fr.moussax.blightedMC.shared.text.Messenger.inform;
+import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
 @CommandArguments({
     @CommandArgument(position = 0, suggestions = {"$players"}),

@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.blocks.BlightedBlock;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.menu.CraftingTableMenu;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -21,7 +21,7 @@ public class BlightedWorkbench extends BlightedBlock {
     @Override
     public void onPlace(BlockPlaceEvent event) {
         event.getPlayer().playSound(event.getBlockPlaced().getLocation(), Sound.BLOCK_TRIAL_SPAWNER_OMINOUS_ACTIVATE, 100.0F, 0.85F);
-        Formatter.inform(event.getPlayer(), "You have placed a §dBlighted Workbench§7!");
+        Messenger.inform(event.getPlayer(), "You have placed a §dBlighted Workbench§7!");
     }
 
     @Override

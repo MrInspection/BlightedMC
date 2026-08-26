@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.engine.items.recipes.forging.menu;
 
+import fr.moussax.blightedMC.content.sound.BlightedSounds;
 import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.engine.items.recipes.RecipePreviewManager;
 import fr.moussax.blightedMC.engine.items.recipes.forging.ForgeRecipe;
@@ -7,10 +8,12 @@ import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.shared.scheduling.PluginContext;
+import fr.moussax.blightedMC.shared.text.Formatter;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
-import fr.moussax.blightedMC.utils.sound.SoundSequence;
+import fr.moussax.blightedMC.shared.sound.SoundSequence;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -245,9 +248,9 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
 
         setItem(HYPERFORGE_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, _) -> {
             if (canHyperforge) {
-                Utilities.delay(() -> executeHyperforge(p, blightedPlayer, requirements, fuelCost), 1L);
+                PluginContext.delay(() -> executeHyperforge(p, blightedPlayer, requirements, fuelCost), 1L);
             } else {
-                Formatter.warn(p, "You don't meet the requirements to hyperforge this item!");
+                Messenger.warn(p, "You don't meet the requirements to hyperforge this item!");
             }
         });
     }
@@ -261,7 +264,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
         boolean verifiedFuel = blightedPlayer.getForgeFuel() >= fuelCost;
 
         if (!verifiedIngredients || !verifiedFuel) {
-            Formatter.warn(player, "You don't meet the requirements to hyperforge this item!");
+            Messenger.warn(player, "You don't meet the requirements to hyperforge this item!");
             refresh(player);
             return;
         }
@@ -285,7 +288,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
             player.getWorld().dropItemNaturally(player.getLocation(), drop);
         }
 
-        SoundSequence.FORGE_ITEM.play(player.getLocation());
+        BlightedSounds.FORGE_ITEM.play(player.getLocation());
         refresh(player);
     }
 

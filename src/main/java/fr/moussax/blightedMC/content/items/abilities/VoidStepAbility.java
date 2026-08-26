@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.content.items.abilities;
 
 import fr.moussax.blightedMC.engine.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -29,7 +29,7 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
         Location targetLocation = getTargetedEyeLocation(blightedPlayer);
 
         if (targetLocation == null) {
-            Formatter.warn(blightedPlayer.getPlayer(), "Obstructed destination!");
+            Messenger.warn(blightedPlayer.getPlayer(), "Obstructed destination!");
             return false;
         }
 

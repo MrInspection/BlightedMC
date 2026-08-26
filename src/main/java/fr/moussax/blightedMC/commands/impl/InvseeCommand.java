@@ -6,7 +6,7 @@ import fr.moussax.blightedMC.engine.player.menus.InvSeeMenu;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-import static fr.moussax.blightedMC.utils.Formatter.warn;
+import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
 public final class InvseeCommand extends AdminCommand {
 

@@ -3,14 +3,14 @@ package fr.moussax.blightedMC.commands.impl;
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.commands.AdminCommand;
 import fr.moussax.blightedMC.commands.utils.CommandFormatter;
-import fr.moussax.blightedMC.utils.Formatter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 
-import static fr.moussax.blightedMC.utils.Formatter.*;
+import static fr.moussax.blightedMC.shared.text.InteractiveMessage.text;
+import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
 public final class LoopCommand extends AdminCommand {
     private static final int MIN_AMOUNT = 2;
@@ -63,7 +63,7 @@ public final class LoopCommand extends AdminCommand {
             Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), () -> Bukkit.dispatchCommand(player, commandToExecute), ticksDelay);
         }
 
-        Formatter.text("\n§e Looping §7x" + amount + " §eyour ")
+        text("\n§e Looping §7x" + amount + " §eyour ")
                 .hoverAndSuggest("§fCOMMAND", "§eClick to fill §dcommand §ein chat", "/" + commandToExecute)
                 .append(" §ewith §d" + delay + " tick§e delay...\n")
                 .send(player);

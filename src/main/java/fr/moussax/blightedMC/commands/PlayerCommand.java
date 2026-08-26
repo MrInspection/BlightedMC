@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
 
-import static fr.moussax.blightedMC.utils.Formatter.warn;
+import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
 /**
  * Base class for commands that require a {@link Player} as the command sender.

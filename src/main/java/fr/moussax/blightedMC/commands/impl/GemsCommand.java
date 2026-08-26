@@ -8,8 +8,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-import static fr.moussax.blightedMC.utils.Formatter.inform;
-import static fr.moussax.blightedMC.utils.Formatter.warn;
+import static fr.moussax.blightedMC.shared.text.Messenger.inform;
+import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
 @CommandArgument(position = 0, suggestions = {"add", "remove", "set", "reset", "resetall", "giveall", "help"})
 @CommandArgument(position = 1, after = {"add", "remove", "set", "reset"}, suggestions = {"$players"})

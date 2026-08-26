@@ -1,12 +1,12 @@
 package fr.moussax.blightedMC.shared.loot.results.gems;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.content.sound.BlightedSounds;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.utils.Formatter;
-import fr.moussax.blightedMC.utils.sound.SoundSequence;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -38,13 +38,13 @@ public record GemsItem(int amount) implements Supplier<ItemStack> {
             GemsItem gemsItem = new GemsItem(event.getItem());
 
             if (gemsItem.amount <= 0) {
-                Formatter.warn(event.getPlayer(), "This gemstone doesn't have any gems to redeem.");
+                Messenger.warn(event.getPlayer(), "This gemstone doesn't have any gems to redeem.");
                 return false;
             }
 
             gemsItem.addGems(blightedPlayer);
             event.getPlayer().sendMessage("§8 ■ §7You received §d" + gemsItem.amount + "✵ Gems §7from a §5Blighted Gemstone.");
-            SoundSequence.BLIGHTED_GEMSTONE_CONSUME.play(event.getPlayer().getLocation());
+            BlightedSounds.BLIGHTED_GEMSTONE_CONSUME.play(event.getPlayer().getLocation());
             event.getPlayer().getInventory().remove(event.getItem());
             event.setCancelled(true);
             return true;

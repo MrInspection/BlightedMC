@@ -5,10 +5,11 @@ import fr.moussax.blightedMC.engine.items.recipes.RecipePreviewManager;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedShapedRecipe;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedShapelessRecipe;
+import fr.moussax.blightedMC.shared.scheduling.PluginContext;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
-import fr.moussax.blightedMC.utils.Formatter;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
 import org.bukkit.Material;
@@ -172,9 +173,9 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
 
         setItem(SUPERCRAFT_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
             if (canSupercraft) {
-                Utilities.delay(() -> executeSupercraft(p, requirements), 1L);
+                PluginContext.delay(() -> executeSupercraft(p, requirements), 1L);
             } else {
-                Formatter.warn(p, "You don't meet the requirements to supercraft this item!");
+                Messenger.warn(p, "You don't meet the requirements to supercraft this item!");
             }
         });
     }
@@ -185,7 +186,7 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
                 .allMatch(entry -> inventoryCounts.getOrDefault(entry.getKey(), 0) >= entry.getValue().amount);
 
         if (!verified) {
-            Formatter.warn(player, "You don't meet the requirements to supercraft this item!");
+            Messenger.warn(player, "You don't meet the requirements to supercraft this item!");
             refresh(player);
             return;
         }

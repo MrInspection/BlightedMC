@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.commands.AdminCommand;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-import static fr.moussax.blightedMC.utils.Formatter.text;
+import static fr.moussax.blightedMC.shared.text.InteractiveMessage.text;
 
 public final class GodCommand extends AdminCommand {
     @Override

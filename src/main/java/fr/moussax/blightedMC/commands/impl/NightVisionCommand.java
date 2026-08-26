@@ -6,7 +6,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import static fr.moussax.blightedMC.utils.Formatter.*;
+import static fr.moussax.blightedMC.shared.text.InteractiveMessage.text;
+import static fr.moussax.blightedMC.shared.text.Messenger.inform;
 
 public final class NightVisionCommand extends AdminCommand {
 

@@ -1,15 +1,18 @@
 package fr.moussax.blightedMC.engine.items.recipes.forging.menu;
 
+import fr.moussax.blightedMC.content.sound.BlightedSounds;
 import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.engine.items.recipes.forging.ForgeFuel;
 import fr.moussax.blightedMC.engine.items.recipes.forging.ForgeRecipe;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
+import fr.moussax.blightedMC.shared.scheduling.PluginContext;
+import fr.moussax.blightedMC.shared.text.Formatter;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
-import fr.moussax.blightedMC.utils.Formatter;
-import fr.moussax.blightedMC.utils.sound.SoundSequence;
+import fr.moussax.blightedMC.shared.sound.SoundSequence;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -315,7 +318,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
         int availableSpace = MAXIMUM_FORGE_FUEL - currentFuel;
 
         if (availableSpace <= 0) {
-            Formatter.warn(player, "Your forge is already full!");
+            Messenger.warn(player, "Your forge is already full!");
             return;
         }
 
@@ -327,7 +330,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
             player.playSound(player.getLocation(), Sound.ITEM_BUCKET_FILL_LAVA, 1f, 0f);
             refresh(player);
         } else {
-            Formatter.warn(player, "No suitable fuel found in your inventory!");
+            Messenger.warn(player, "No suitable fuel found in your inventory!");
         }
     }
 
@@ -372,7 +375,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
 
         checkRequirements(player);
         if (!canForge) {
-            Formatter.warn(player, "Not enough resources!");
+            Messenger.warn(player, "Not enough resources!");
             refresh(player);
             return;
         }
@@ -387,35 +390,35 @@ public final class ForgeMenu extends Menu implements TickableMenu {
         blightedPlayer.saveData();
 
         refresh(player);
-        SoundSequence.FORGE_ITEM.play(player.getLocation());
+        BlightedSounds.FORGE_ITEM.play(player.getLocation());
 
         int[] inputPath = {10, 11, 12, 13};
         for (int i = 0; i < inputPath.length; i++) {
             final int slot = inputPath[i];
-            Utilities.delay(() -> setStatusSlot(slot, Material.PURPLE_STAINED_GLASS_PANE), i * 2L);
+            PluginContext.delay(() -> setStatusSlot(slot, Material.PURPLE_STAINED_GLASS_PANE), i * 2L);
         }
 
-        Utilities.delay(() -> {
+        PluginContext.delay(() -> {
             updateStatusPanes(Material.MAGENTA_STAINED_GLASS_PANE, REQUIRED_ITEM_INDICATOR_SLOTS);
             setStatusSlot(ITEM_INDICATOR, Material.MAGENTA_STAINED_GLASS_PANE);
         }, 8L);
 
-        Utilities.delay(() -> setStatusSlot(15, Material.CYAN_STAINED_GLASS_PANE), 12L);
-        Utilities.delay(() -> setStatusSlot(16, Material.CYAN_STAINED_GLASS_PANE), 14L);
+        PluginContext.delay(() -> setStatusSlot(15, Material.CYAN_STAINED_GLASS_PANE), 12L);
+        PluginContext.delay(() -> setStatusSlot(16, Material.CYAN_STAINED_GLASS_PANE), 14L);
 
-        Utilities.delay(() -> {
+        PluginContext.delay(() -> {
             updateStatusPanes(Material.OBSIDIAN, REQUIRED_ITEM_INDICATOR_SLOTS);
             updateStatusPanes(Material.OBSIDIAN, FORGED_ITEM_INDICATOR_SLOTS);
             setStatusSlot(ITEM_INDICATOR, Material.OBSIDIAN);
         }, 16L);
 
-        Utilities.delay(() -> {
+        PluginContext.delay(() -> {
             updateStatusPanes(Material.PURPLE_STAINED_GLASS_PANE, REQUIRED_ITEM_INDICATOR_SLOTS);
             updateStatusPanes(Material.PURPLE_STAINED_GLASS_PANE, FORGED_ITEM_INDICATOR_SLOTS);
             setStatusSlot(ITEM_INDICATOR, Material.PURPLE_STAINED_GLASS_PANE);
         }, 18L);
 
-        Utilities.delay(() -> {
+        PluginContext.delay(() -> {
             Player viewingPlayer = getPlayer();
             if (viewingPlayer == null || !viewingPlayer.isOnline()) {
                 this.isForging = false;

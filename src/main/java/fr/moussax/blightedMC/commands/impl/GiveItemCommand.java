@@ -14,7 +14,9 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 
-import static fr.moussax.blightedMC.utils.Formatter.*;
+import static fr.moussax.blightedMC.shared.text.Formatter.formatEnumName;
+import static fr.moussax.blightedMC.shared.text.Messenger.inform;
+import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
 @CommandArguments({
         @CommandArgument(position = 0, suggestions = {"$players"}),

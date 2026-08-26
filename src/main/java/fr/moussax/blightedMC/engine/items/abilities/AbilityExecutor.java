@@ -10,7 +10,7 @@ import org.bukkit.event.Event;
 
 import java.time.Duration;
 
-import static fr.moussax.blightedMC.utils.Formatter.warn;
+import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
 public final class AbilityExecutor {
     private AbilityExecutor() {}

@@ -4,7 +4,8 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityManager;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.shared.text.Formatter;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -117,7 +118,7 @@ public class WitherImpactAbility implements AbilityManager<PlayerInteractEvent>,
     private void notifyPlayerOfAbilityDamage(Player player, int entitiesDamaged) {
         if (entitiesDamaged > 0) {
             double totalDamage = (double) entitiesDamaged * (15000.0D + Math.random() * 135000.0D);
-            Formatter.inform(player, "Your implosion hit §d" + entitiesDamaged + " §7enem" + (entitiesDamaged > 1 ? "ies" : "y") + " for §d" + Formatter.formatDecimalWithCommas(totalDamage) + " §7damage.");
+            Messenger.inform(player, "Your implosion hit §d" + entitiesDamaged + " §7enem" + (entitiesDamaged > 1 ? "ies" : "y") + " for §d" + Formatter.formatDecimalWithCommas(totalDamage) + " §7damage.");
         }
     }
 

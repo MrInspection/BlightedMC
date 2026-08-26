@@ -5,7 +5,8 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.content.entities.factions.blightsworn.BlightswornCreature;
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.shared.text.Formatter;
+import fr.moussax.blightedMC.shared.text.Messenger;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -132,7 +133,7 @@ public final class BlightedQuestListener implements Listener {
             event.setCancelled(true);
 
             if (!hasClearWorkspace(clickedBlock)) {
-                Formatter.warn(player,"The ritual requires a clear space of 5 blocks on all sides and 5 blocks above the table.");
+                Messenger.warn(player,"The ritual requires a clear space of 5 blocks on all sides and 5 blocks above the table.");
                 return;
             }
 

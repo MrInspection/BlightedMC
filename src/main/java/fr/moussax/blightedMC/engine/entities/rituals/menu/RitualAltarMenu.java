@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.engine.entities.rituals.menu;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.content.sound.BlightedSounds;
 import fr.moussax.blightedMC.engine.entities.rituals.AncientCreature;
 import fr.moussax.blightedMC.engine.entities.rituals.AncientRitual;
 import fr.moussax.blightedMC.engine.entities.rituals.RitualAnimations;
@@ -10,8 +11,9 @@ import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
-import fr.moussax.blightedMC.utils.Formatter;
-import fr.moussax.blightedMC.utils.sound.SoundSequence;
+import fr.moussax.blightedMC.shared.text.Formatter;
+import fr.moussax.blightedMC.shared.text.Messenger;
+import fr.moussax.blightedMC.shared.sound.SoundSequence;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -274,7 +276,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
     private void invokeMob(Player player) {
         checkRequirements(player);
         if (!canInvoke) {
-            Formatter.warn(player, "You don't have the required ingredients!");
+            Messenger.warn(player, "You don't have the required ingredients!");
             refresh(player);
             return;
         }
@@ -288,7 +290,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
         Location spawnLoc = player.getLocation().add(player.getLocation().getDirection().setY(0).normalize().multiply(3));
         spawnLoc.setY(player.getLocation().getY());
 
-        SoundSequence.ANCIENT_MOB_SPAWN.play(spawnLoc);
+        BlightedSounds.ANCIENT_MOB_SPAWN.play(spawnLoc);
         RitualAnimations.playRiteAnimation(BlightedMC.getInstance(), spawnLoc, () -> handleFinalImpact(spawnLoc));
     }
 
