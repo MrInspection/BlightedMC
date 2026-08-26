@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.utils;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.shared.scheduling.PluginContext;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -580,7 +580,7 @@ public class ItemBuilder {
             AttributeModifier.Operation operation,
             EquipmentSlotGroup slotGroup
     ) {
-        NamespacedKey key = new NamespacedKey(BlightedMC.getInstance(), UUID.randomUUID().toString());
+        NamespacedKey key = new NamespacedKey(PluginContext.get(), UUID.randomUUID().toString());
         AttributeModifier modifier = new AttributeModifier(key, amount, operation, slotGroup);
         return addAttributeModifier(attribute, modifier);
     }
@@ -783,7 +783,7 @@ public class ItemBuilder {
                 EntitySnapshot snapshot = Bukkit.getEntityFactory().createEntitySnapshot(nbtString);
                 eggMeta.setSpawnedEntity(snapshot);
             } catch (IllegalArgumentException e) {
-                BlightedMC.getInstance().getLogger().warning("Failed to create EntitySnapshot for type: " + type.name());
+                PluginContext.get().getLogger().warning("Failed to create EntitySnapshot for type: " + type.name());
             }
         }
         return this;
