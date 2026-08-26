@@ -33,7 +33,7 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
 
     private static final int WORKBENCH_SLOT = 23;
     private static final int RESULT_SLOT = 25;
-    private static final int SUPERCRAFT_SLOT = 32;
+    private static final int QUICKCRAFT_SLOT = 32;
     private static final int BACK_BUTTON_SLOT = 48;
     private static final int CLOSE_BUTTON_SLOT = 49;
 
@@ -42,7 +42,7 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
     private int lastIngredientHash = -1;
 
     public CraftingRecipePreviewMenu(@NonNull BlightedRecipe recipe, @Nullable Menu previousMenu) {
-        super(recipe.getResult().getDisplayName().replaceAll("§[0-9A-FK-ORa-fk-or]", "") + " Recipe", 54);
+        super(recipe.getResult().getDisplayName().replaceAll("§[0-9A-FK-ORa-fk-or]", ""), 54);
         this.recipe = recipe;
         this.previousMenu = previousMenu;
     }
@@ -81,8 +81,8 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
             setupShapelessRecipeGrid(shapelessRecipe);
         }
 
-        setItem(WORKBENCH_SLOT, new ItemBuilder(Material.ENCHANTING_TABLE, "§dBlighted Workbench")
-                .addLore("§7Craft this recipe by using a", "§7blighted workbench.")
+        setItem(WORKBENCH_SLOT, new ItemBuilder(Material.CRAFTING_TABLE, "§fBlighted Workbench")
+                .addLore("§7Craft this recipe by using a blighted", "§7workbench or Quickcraft. ")
                 .toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
         });
 
@@ -141,7 +141,7 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
         Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
 
         boolean hasAllIngredients = true;
-        ItemBuilder builder = new ItemBuilder(Material.GOLDEN_PICKAXE, "§aSupercraft");
+        ItemBuilder builder = new ItemBuilder(Material.GOLDEN_PICKAXE, "§fQuickcraft");
         builder.addLore(
                 "§7Craft this item instantly from ",
                 "§7your inventory materials.",
@@ -158,7 +158,7 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
                 hasAllIngredients = false;
             }
 
-            String status = hasEnough ? "§a✓" : "§cx";
+            String status = hasEnough ? "§a✔" : "§c❌";
             String countColor = hasEnough ? "§a" : "§c";
             String name = Utilities.extractIngredientName(info.ingredient);
 
@@ -167,15 +167,15 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
 
         final boolean canSupercraft = hasAllIngredients;
 
-        builder.addLore("", canSupercraft ? "§eClick to Supercraft!" : "§cYou don't meet the requirements!")
+        builder.addLore("", canSupercraft ? "§eClick to Quickcraft!" : "§cMissing ingredients!")
                 .setEnchantmentGlint(canSupercraft);
         builder.addItemFlag(ItemFlag.HIDE_ATTRIBUTES);
 
-        setItem(SUPERCRAFT_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+        setItem(QUICKCRAFT_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
             if (canSupercraft) {
                 PluginContext.delay(() -> executeSupercraft(p, requirements), 1L);
             } else {
-                Messenger.warn(p, "You don't meet the requirements to supercraft this item!");
+                Messenger.warn(p, "You're missing some ingredients to Quickcraft this item!");
             }
         });
     }
@@ -186,7 +186,7 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
                 .allMatch(entry -> inventoryCounts.getOrDefault(entry.getKey(), 0) >= entry.getValue().amount);
 
         if (!verified) {
-            Messenger.warn(player, "You don't meet the requirements to supercraft this item!");
+            Messenger.warn(player, "You're missing some ingredients to Quickcraft this item!");
             refresh(player);
             return;
         }

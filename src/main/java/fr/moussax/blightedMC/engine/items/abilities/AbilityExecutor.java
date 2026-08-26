@@ -38,7 +38,9 @@ public final class AbilityExecutor {
                     100f,
                     0.5f
             );
-            ActionbarService.ifPresent(service -> service.sendSlotAlert(player.getPlayer(), PlayerHudManager.SECTION_MANA, "§cNOT ENOUGH MANA", Duration.ofSeconds(2)));
+            ActionbarService.ifPresent(service -> service.sendSlotAlert(
+                    player.getPlayer(), PlayerHudManager.SECTION_MANA, "§c§lNOT ENOUGH MANA", Duration.ofSeconds(2))
+            );
             cancel(event);
             return;
         }

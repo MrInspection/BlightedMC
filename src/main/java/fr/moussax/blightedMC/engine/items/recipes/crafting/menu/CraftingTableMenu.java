@@ -26,12 +26,13 @@ public final class CraftingTableMenu extends InteractiveMenu {
     private static final int[] INDICATOR_SLOTS_RIGHT = {50, 51, 52, 53};
 
     public CraftingTableMenu() {
-        super("Craft Items", 54);
+        super("Crafting Table", 54);
         addInteractableSlots(INPUT_SLOTS);
     }
 
     @Override
     public void build(Player player) {
+        setTitle("Craft Item");
         fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
 
         for (int slot : INPUT_SLOTS) {

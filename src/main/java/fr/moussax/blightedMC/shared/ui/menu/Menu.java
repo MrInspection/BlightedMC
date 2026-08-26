@@ -8,6 +8,7 @@ import fr.moussax.blightedMC.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.shared.ui.menu.types.InteractiveMenu;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -35,7 +36,9 @@ import java.util.function.Consumer;
  */
 public abstract class Menu implements InventoryHolder {
 
-    protected final String title;
+    @Setter
+    @Getter
+    protected String title;
     protected final int size;
 
     @Getter
@@ -94,7 +97,7 @@ public abstract class Menu implements InventoryHolder {
         slots.clear();
         build(player);
 
-        inventory.clear();
+        this.inventory = Bukkit.createInventory(this, size, this.title);
         for (Map.Entry<Integer, MenuSlot> entry : slots.entrySet()) {
             inventory.setItem(entry.getKey(), entry.getValue().item);
         }
@@ -700,6 +703,10 @@ public abstract class Menu implements InventoryHolder {
 
         slots.clear();
         build(player);
+
+        if (player.getOpenInventory().getTopInventory().getHolder() == this) {
+            player.getOpenInventory().setTitle(this.title);
+        }
 
         for (int slot = 0; slot < size; slot++) {
             MenuSlot menuSlot = slots.get(slot);
