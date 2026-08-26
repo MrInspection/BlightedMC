@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.engine.items.recipes.crafting.menu;
 
+import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.engine.items.recipes.RecipePreviewManager;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
@@ -8,7 +9,7 @@ import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedShapelessReci
 import fr.moussax.blightedMC.shared.scheduling.PluginContext;
 import fr.moussax.blightedMC.shared.text.Messenger;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
-import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
+import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
@@ -18,7 +19,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
-import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -34,17 +34,21 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
     private static final int WORKBENCH_SLOT = 23;
     private static final int RESULT_SLOT = 25;
     private static final int QUICKCRAFT_SLOT = 32;
-    private static final int BACK_BUTTON_SLOT = 48;
-    private static final int CLOSE_BUTTON_SLOT = 49;
 
     private final BlightedRecipe recipe;
+    private final BlightedItem targetItem;
     private final Menu previousMenu;
     private int lastIngredientHash = -1;
 
-    public CraftingRecipePreviewMenu(@NonNull BlightedRecipe recipe, @Nullable Menu previousMenu) {
+    public CraftingRecipePreviewMenu(@NonNull BlightedRecipe recipe, @Nullable BlightedItem targetItem, @Nullable Menu previousMenu) {
         super(recipe.getResult().getDisplayName().replaceAll("§[0-9A-FK-ORa-fk-or]", ""), 54);
         this.recipe = recipe;
+        this.targetItem = targetItem;
         this.previousMenu = previousMenu;
+    }
+
+    public CraftingRecipePreviewMenu(@NonNull BlightedRecipe recipe, @Nullable Menu previousMenu) {
+        this(recipe, recipe.getResult(), previousMenu);
     }
 
     @Override
@@ -55,21 +59,22 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
     @Override
     public void onTick(Player player) {
         Map<String, IngredientInfo> requirements = aggregateRecipeIngredients(recipe);
-        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+        Map<String, Integer> inventoryCounts = RecipePreviewManager.countInventoryItems(player, requirements.keySet());
         int currentHash = inventoryCounts.hashCode();
 
-        if (lastIngredientHash != currentHash) {
-            this.lastIngredientHash = currentHash;
-            refresh(player);
-        }
+        if (lastIngredientHash == currentHash) return;
+
+        this.lastIngredientHash = currentHash;
+        refresh(player);
     }
 
     public CraftingRecipePreviewMenu(@NonNull BlightedRecipe recipe) {
-        this(recipe, null);
+        this(recipe, recipe.getResult(), null);
     }
 
     @Override
     public void build(Player player) {
+        setTitle(recipe.getResult().getDisplayName().replaceAll("§[0-9A-FK-ORa-fk-or]", ""));
         setupRecipeVisualization(player);
         setupNavigation();
     }
@@ -92,7 +97,7 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
         setItem(RESULT_SLOT, resultItem, MenuItemInteraction.ANY_CLICK, (p, t) -> {
         });
 
-        setupSupercraftButton(player);
+        setupQuickcraftButton(player);
     }
 
     private void setupShapedRecipeGrid(BlightedShapedRecipe shapedRecipe) {
@@ -108,10 +113,9 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
             }
 
             ItemStack ingredientItem = createIngredientDisplay(craftingObject);
-            setItem(CRAFTING_GRID_SLOTS[i], ingredientItem, MenuItemInteraction.ANY_CLICK, (p, t) -> {
-                if (craftingObject.isCustom() && craftingObject.getManager() != null) {
-                    RecipePreviewManager.openPreview(p, craftingObject.getManager(), this);
-                }
+            setItem(CRAFTING_GRID_SLOTS[i], ingredientItem, MenuItemInteraction.ANY_CLICK, (p, _) -> {
+                if (!craftingObject.isCustom() || craftingObject.getManager() == null) return;
+                RecipePreviewManager.openPreview(p, craftingObject.getManager(), this);
             });
         }
     }
@@ -124,10 +128,9 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
                 CraftingObject ingredient = ingredients.get(i);
                 ItemStack ingredientItem = createIngredientDisplay(ingredient);
 
-                setItem(CRAFTING_GRID_SLOTS[i], ingredientItem, MenuItemInteraction.ANY_CLICK, (p, t) -> {
-                    if (ingredient.isCustom() && ingredient.getManager() != null) {
-                        RecipePreviewManager.openPreview(p, ingredient.getManager(), this);
-                    }
+                setItem(CRAFTING_GRID_SLOTS[i], ingredientItem, MenuItemInteraction.ANY_CLICK, (p, _) -> {
+                    if (!ingredient.isCustom() || ingredient.getManager() == null) return;
+                    RecipePreviewManager.openPreview(p, ingredient.getManager(), this);
                 });
             } else {
                 setItem(CRAFTING_GRID_SLOTS[i], new ItemStack(Material.AIR), MenuItemInteraction.ANY_CLICK, (p, t) -> {
@@ -136,14 +139,14 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
         }
     }
 
-    private void setupSupercraftButton(Player player) {
+    private void setupQuickcraftButton(Player player) {
         Map<String, IngredientInfo> requirements = aggregateRecipeIngredients(recipe);
-        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+        Map<String, Integer> inventoryCounts = RecipePreviewManager.countInventoryItems(player, requirements.keySet());
 
         boolean hasAllIngredients = true;
         ItemBuilder builder = new ItemBuilder(Material.GOLDEN_PICKAXE, "§fQuickcraft");
         builder.addLore(
-                "§7Craft this item instantly from ",
+                "§7Craft this item instantly from",
                 "§7your inventory materials.",
                 "",
                 " §7Ingredients required:"
@@ -165,23 +168,23 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
             builder.addLore(" " + status + " §7" + name + " §8x" + info.amount + " §7(" + countColor + owned + "§7/§a" + info.amount + "§7)");
         }
 
-        final boolean canSupercraft = hasAllIngredients;
+        final boolean canQuickcraft = hasAllIngredients;
 
-        builder.addLore("", canSupercraft ? "§eClick to Quickcraft!" : "§cMissing ingredients!")
-                .setEnchantmentGlint(canSupercraft);
+        builder.addLore("", canQuickcraft ? "§eClick to Quickcraft!" : "§cMissing ingredients!")
+                .setEnchantmentGlint(canQuickcraft);
         builder.addItemFlag(ItemFlag.HIDE_ATTRIBUTES);
 
-        setItem(QUICKCRAFT_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
-            if (canSupercraft) {
-                PluginContext.delay(() -> executeSupercraft(p, requirements), 1L);
-            } else {
+        setItem(QUICKCRAFT_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, _) -> {
+            if (!canQuickcraft) {
                 Messenger.warn(p, "You're missing some ingredients to Quickcraft this item!");
+                return;
             }
+            PluginContext.delay(() -> executeQuickcraft(p, requirements), 1L);
         });
     }
 
-    private void executeSupercraft(Player player, Map<String, IngredientInfo> requirements) {
-        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+    private void executeQuickcraft(Player player, Map<String, IngredientInfo> requirements) {
+        Map<String, Integer> inventoryCounts = RecipePreviewManager.countInventoryItems(player, requirements.keySet());
         boolean verified = requirements.entrySet().stream()
                 .allMatch(entry -> inventoryCounts.getOrDefault(entry.getKey(), 0) >= entry.getValue().amount);
 
@@ -214,17 +217,17 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
     }
 
     private List<ItemStack> createVirtualCraftingGrid() {
-        List<ItemStack> grid = new ArrayList<>();
         if (recipe instanceof BlightedShapedRecipe shapedRecipe) {
-            for (CraftingObject object : shapedRecipe.getRecipe()) {
-                grid.add(object != null ? getCraftingObjectItem(object) : null);
-            }
-        } else if (recipe instanceof BlightedShapelessRecipe shapelessRecipe) {
-            for (CraftingObject object : shapelessRecipe.getIngredients()) {
-                grid.add(object != null ? getCraftingObjectItem(object) : null);
-            }
+            return shapedRecipe.getRecipe().stream()
+                    .map(object -> object != null ? getCraftingObjectItem(object) : null)
+                    .toList();
         }
-        return grid;
+        if (recipe instanceof BlightedShapelessRecipe shapelessRecipe) {
+            return shapelessRecipe.getIngredients().stream()
+                    .map(object -> object != null ? getCraftingObjectItem(object) : null)
+                    .toList();
+        }
+        return List.of();
     }
 
     private Map<String, IngredientInfo> aggregateRecipeIngredients(BlightedRecipe recipe) {
@@ -249,19 +252,6 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
             }
         }
         return map;
-    }
-
-    private Map<String, Integer> countInventoryItems(Player player, Set<String> requiredIds) {
-        Map<String, Integer> counts = new HashMap<>();
-        for (ItemStack stack : player.getInventory().getContents()) {
-            if (stack == null || stack.getType() == Material.AIR) continue;
-            for (String reqId : requiredIds) {
-                if (Utilities.resolveItemId(stack, reqId).equals(reqId)) {
-                    counts.put(reqId, counts.getOrDefault(reqId, 0) + stack.getAmount());
-                }
-            }
-        }
-        return counts;
     }
 
     private static class IngredientInfo {
@@ -291,10 +281,6 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
     }
 
     private void setupNavigation() {
-        if (previousMenu != null) {
-            setBackButton(BACK_BUTTON_SLOT, previousMenu);
-        }
-        setCloseButton(CLOSE_BUTTON_SLOT);
-        fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
+        RecipePreviewManager.setupNavigation(this, recipe, targetItem, previousMenu);
     }
 }
