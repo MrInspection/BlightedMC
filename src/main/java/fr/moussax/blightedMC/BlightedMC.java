@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC;
 
+import fr.moussax.blightedMC.engine.entities.spawnable.engine.BlightedSpawnEngine;
 import fr.moussax.blightedMC.engine.fishing.hooks.LavaFishingHook;
 import fr.moussax.blightedMC.engine.fishing.hooks.VoidFishingHook;
 import fr.moussax.blightedMC.registry.CommandsRegistry;
@@ -9,7 +10,7 @@ import fr.moussax.blightedMC.server.BlightedServer;
 import fr.moussax.blightedMC.server.PluginFiles;
 import fr.moussax.blightedMC.server.PluginSettings;
 import fr.moussax.blightedMC.server.database.PluginDatabase;
-import fr.moussax.blightedMC.engine.entities.spawnable.engine.BlightedSpawnEngine;
+import fr.moussax.blightedMC.shared.scheduling.PluginContext;
 import fr.moussax.blightedMC.shared.ui.actionbar.ActionbarService;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuSystem;
@@ -41,6 +42,7 @@ public final class BlightedMC extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        PluginContext.bind(this);
 
         Log.info("Plugin", "Initializing BlightedMC plugin...");
         BlightedServer.initialize(this);

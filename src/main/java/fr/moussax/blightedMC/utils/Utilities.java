@@ -1,8 +1,7 @@
 package fr.moussax.blightedMC.utils;
 
-import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
-import org.bukkit.Bukkit;
+import fr.moussax.blightedMC.shared.text.Formatter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,32 +14,10 @@ import static fr.moussax.blightedMC.engine.items.BlightedItem.BLIGHTED_ID_KEY;
 
 /**
  * Utility class providing general-purpose helper methods for the BlightedMC plugin.
- *
- * <p>Includes methods for delayed task execution using the Bukkit scheduler.</p>
  */
 public final class Utilities {
 
     private Utilities() {
-    }
-
-    /**
-     * Schedules a task to run after a specified number of server ticks.
-     *
-     * @param runnable the task to execute
-     * @param ticks    number of server ticks to wait before execution
-     */
-    public static void delay(Runnable runnable, int ticks) {
-        delay(runnable, (long) ticks);
-    }
-
-    /**
-     * Schedules a task to run after a specified number of server ticks.
-     *
-     * @param runnable the task to execute
-     * @param ticks    number of server ticks to wait before execution
-     */
-    public static void delay(Runnable runnable, long ticks) {
-        Bukkit.getScheduler().runTaskLater(BlightedMC.getInstance(), runnable, ticks);
     }
 
     /**

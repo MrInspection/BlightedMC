@@ -2,7 +2,7 @@ package fr.moussax.blightedMC.shared.ui.menu.system;
 
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.shared.ui.menu.types.InteractiveMenu;
-import fr.moussax.blightedMC.utils.Utilities;
+import fr.moussax.blightedMC.shared.scheduling.PluginContext;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -43,12 +43,12 @@ public final class MenuListener implements Listener {
                 boolean interactable = menu.isInteractable(slotIndex);
                 event.setCancelled(!interactable);
                 if (interactable) {
-                    Utilities.delay(() -> menu.onUpdate(player), 1L);
+                    PluginContext.delay(() -> menu.onUpdate(player), 1L);
                 }
                 return;
             }
             event.setCancelled(false);
-            Utilities.delay(() -> menu.onUpdate(player), 1L);
+            PluginContext.delay(() -> menu.onUpdate(player), 1L);
             return;
         }
 
@@ -75,7 +75,7 @@ public final class MenuListener implements Listener {
                 }
             }
             event.setCancelled(false);
-            Utilities.delay(() -> menu.onUpdate((Player) event.getWhoClicked()), 1L);
+            PluginContext.delay(() -> menu.onUpdate((Player) event.getWhoClicked()), 1L);
             return;
         }
         event.setCancelled(true);
@@ -88,7 +88,7 @@ public final class MenuListener implements Listener {
 
         menu.onClose(player);
 
-        Utilities.delay(() -> {
+        PluginContext.delay(() -> {
             if (!player.isOnline()) {
                 menuSystem.cleanup(player);
                 return;

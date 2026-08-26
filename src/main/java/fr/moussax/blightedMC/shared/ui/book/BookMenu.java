@@ -1,6 +1,6 @@
 package fr.moussax.blightedMC.shared.ui.book;
 
-import fr.moussax.blightedMC.utils.Formatter;
+import fr.moussax.blightedMC.shared.text.InteractiveMessage;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 /**
  * Builds and opens interactive written books for players.
  *
- * <p>Pages are composed from {@link Formatter.InteractiveMessage} instances
+ * <p>Pages are composed from {@link InteractiveMessage} instances
  * and may contain interactive chat components.</p>
  */
 public final class BookMenu {
@@ -40,7 +40,7 @@ public final class BookMenu {
      * @param message message used to build the page
      * @return this book menu
      */
-    public BookMenu addPage(Formatter.@NonNull InteractiveMessage message) {
+    public BookMenu addPage(@NonNull InteractiveMessage message) {
         this.pages.add(message.build());
         return this;
     }
@@ -54,8 +54,8 @@ public final class BookMenu {
      * @param pageConfigurator callback used to configure the page
      * @return this book menu
      */
-    public BookMenu addPage(@NonNull Consumer<Formatter.InteractiveMessage> pageConfigurator) {
-        Formatter.InteractiveMessage message = Formatter.text("");
+    public BookMenu addPage(@NonNull Consumer<InteractiveMessage> pageConfigurator) {
+        InteractiveMessage message = InteractiveMessage.text("");
         pageConfigurator.accept(message);
         this.pages.add(message.build());
         return this;
