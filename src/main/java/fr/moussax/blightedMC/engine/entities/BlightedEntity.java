@@ -821,6 +821,10 @@ public abstract class BlightedEntity implements Cloneable {
                 continue;
             }
 
+            if (attachment.role() == AttachmentRole.SUBORDINATE) {
+                continue;
+            }
+
             if (entity != null && entity.getPassengers().contains(attachedEntity)) {
                 continue;
             }
@@ -869,6 +873,30 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     /**
+     * Removes and destroys attached entities matching the specified role.
+     *
+     * @param role attachment role to remove
+     */
+    public void killAttachments(AttachmentRole role) {
+        if (attachments.isEmpty() || role == null) {
+            return;
+        }
+
+        for (EntityAttachment attachment : attachments) {
+            if (attachment.role() != role) {
+                continue;
+            }
+
+            Entity attachmentEntity = attachment.entity();
+            if (attachmentEntity != null) {
+                BlightedEntitiesListener.unregisterAttachment(attachmentEntity);
+                attachmentEntity.remove();
+            }
+            attachments.remove(attachment);
+        }
+    }
+
+    /**
      * Checks whether a living body attachment is currently present.
      *
      * @return {@code true} if a living body attachment exists
@@ -876,6 +904,23 @@ public abstract class BlightedEntity implements Cloneable {
     public boolean hasLivingBodyAttachment() {
         for (EntityAttachment attachment : attachments) {
             if (attachment.entity() instanceof LivingEntity living && !living.isDead()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether an active subordinate companion attachment is currently present.
+     *
+     * @return {@code true} if a non-dead subordinate attachment exists
+     */
+    public boolean hasSubordinateAttachments() {
+        for (EntityAttachment attachment : attachments) {
+            if (attachment.role() == AttachmentRole.SUBORDINATE
+                    && attachment.entity() != null
+                    && attachment.entity().isValid()
+                    && !attachment.entity().isDead()) {
                 return true;
             }
         }

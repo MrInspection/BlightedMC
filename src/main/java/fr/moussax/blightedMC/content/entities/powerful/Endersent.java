@@ -103,7 +103,7 @@ public class Endersent extends SpawnableEntity {
 
         escapeTicks += 20;
 
-        if (attachments.isEmpty() || escapeTicks >= 300) {
+        if (!hasSubordinateAttachments() || escapeTicks >= 300) {
             endDeadlyEscape();
         }
     }
@@ -155,7 +155,7 @@ public class Endersent extends SpawnableEntity {
         if (!isEscaping || !isAlive()) return;
         isEscaping = false;
 
-        killAllAttachments();
+        killAttachments(AttachmentRole.SUBORDINATE);
 
         Player target = getNearestPlayer(60);
         Location targetLoc = (target != null) ? target.getLocation() : entity.getLocation().subtract(0, 50, 0);

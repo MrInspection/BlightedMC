@@ -239,6 +239,9 @@ public final class BlightedEntitiesListener implements Listener {
         }
 
         for (EntityAttachment attachment : owner.attachments) {
+            if (attachment.role() == AttachmentRole.SUBORDINATE) {
+                continue;
+            }
             Entity sibling = attachment.entity();
             if (sibling instanceof LivingEntity livingSibling && !sibling.equals(hitEntity)) {
                 livingSibling.playHurtAnimation(0.0f);
