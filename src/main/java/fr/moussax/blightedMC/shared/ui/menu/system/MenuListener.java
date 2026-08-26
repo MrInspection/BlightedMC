@@ -42,6 +42,10 @@ public final class MenuListener implements Listener {
             if (isTopInventory) {
                 boolean interactable = menu.isInteractable(slotIndex);
                 event.setCancelled(!interactable);
+                Menu.MenuSlot slot = menu.getSlots().get(event.getSlot());
+                if (slot != null) {
+                    slot.handle(player, event.getClick());
+                }
                 if (interactable) {
                     PluginContext.delay(() -> menu.onUpdate(player), 1L);
                 }
