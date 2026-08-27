@@ -7,17 +7,20 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
- * A probabilistic {@link LootSelectionStrategy} that considers the player's looting level.
- * Each entry's probability is adjusted based on the looting enchantment of the main-hand weapon.
- * The number of selected entries is capped by {@code maxDrops}.
+ * A probabilistic {@link LootSelectionStrategy} that adjusts drop chances using the player's looting level.
  */
 public final class LootingAwareProbabilisticStrategy implements LootSelectionStrategy {
     private final int maxDrops;
 
+    /**
+     * Constructs a looting-aware probabilistic selection strategy.
+     *
+     * @param maxDrops maximum number of entries to select
+     * @throws IllegalArgumentException if {@code maxDrops <= 0}
+     */
     public LootingAwareProbabilisticStrategy(int maxDrops) {
         if (maxDrops <= 0) {
             throw new IllegalArgumentException("maxDrops must be positive, got: " + maxDrops);
@@ -26,12 +29,11 @@ public final class LootingAwareProbabilisticStrategy implements LootSelectionStr
     }
 
     /**
-     * Selects loot entries probabilistically, adjusting each entry's chance based on looting level.
-     * Guaranteed/non-probabilistic items are always included prior to filtering.
+     * Selects loot entries probabilistically, adjusting probabilities by weapon looting level.
      *
-     * @param validEntries the list of valid entries after condition checks
-     * @param context      the loot context, used for randomness and player looting level
-     * @return a list of selected loot entries
+     * @param validEntries list of eligible entries
+     * @param context      loot context containing player and RNG state
+     * @return selected loot entries capped at maximum drops
      */
     @Override
     public List<LootEntry> select(List<LootEntry> validEntries, LootContext context) {
@@ -39,37 +41,26 @@ public final class LootingAwareProbabilisticStrategy implements LootSelectionStr
         List<LootEntry> selected = new ArrayList<>();
 
         for (LootEntry entry : validEntries) {
-            if (!entry.isProbabilistic()) {
+            if (!(entry instanceof LootEntry.Probabilistic probabilisticEntry)) {
                 selected.add(entry);
                 continue;
             }
-            double adjustedProbability = adjustForLooting(entry.probability(), lootingLevel);
+            double adjustedProbability = adjustForLooting(probabilisticEntry.probability(), lootingLevel);
             if (context.random().nextDouble() <= adjustedProbability) {
                 selected.add(entry);
             }
         }
 
-        if (selected.size() > maxDrops) {
-            Collections.shuffle(selected, context.random());
-            selected.sort((e1, e2) -> {
-                double p1 = e1.isProbabilistic() ? e1.probability() : 1.0;
-                double p2 = e2.isProbabilistic() ? e2.probability() : 1.0;
-                return Double.compare(p2, p1);
-            });
-            return selected.subList(0, maxDrops);
-        }
-
-        return selected;
+        // ponytail: kept — looting-aware strategy sorts by base probability post-shuffle when capping drops
+        return SelectionCapper.capToMaxDrops(selected, maxDrops, context.random(), (firstEntry, secondEntry) -> {
+            double firstProbability = firstEntry instanceof LootEntry.Probabilistic probabilisticFirst ? probabilisticFirst.probability() : 1.0;
+            double secondProbability = secondEntry instanceof LootEntry.Probabilistic probabilisticSecond ? probabilisticSecond.probability() : 1.0;
+            return Double.compare(secondProbability, firstProbability);
+        });
     }
 
-    /**
-     * Extracts the looting level from the player's main-hand weapon.
-     *
-     * @param context the loot context
-     * @return looting level (0 if blightedPlayer or weapon is null)
-     */
     private int extractLootingLevel(LootContext context) {
-        if (context.blightedPlayer() == null) {
+        if (context.blightedPlayer() == null || context.blightedPlayer().getPlayer() == null) {
             return 0;
         }
 
@@ -77,13 +68,6 @@ public final class LootingAwareProbabilisticStrategy implements LootSelectionStr
         return weapon.getEnchantmentLevel(Enchantment.LOOTING);
     }
 
-    /**
-     * Adjusts the base probability by the looting level.
-     *
-     * @param baseProbability the base probability of the entry
-     * @param lootingLevel    the player's looting level
-     * @return adjusted probability, capped at 1.0
-     */
     private double adjustForLooting(double baseProbability, int lootingLevel) {
         return Math.min(1.0, baseProbability * (1.0 + lootingLevel * 0.1));
     }

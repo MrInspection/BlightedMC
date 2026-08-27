@@ -5,47 +5,42 @@ import fr.moussax.blightedMC.shared.loot.LootEntry;
 import fr.moussax.blightedMC.shared.loot.LootSelectionStrategy;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
- * A {@link LootSelectionStrategy} that selects loot entries based on their individual probabilities.
- * At most {@code maxDrops} entries can be selected.
+ * A {@link LootSelectionStrategy} that selects loot entries based on individual drop probabilities.
  */
 public final class ProbabilisticSelectionStrategy implements LootSelectionStrategy {
     private final int maxDrops;
 
     /**
-     * Constructs a probabilistic selection strategy.
+     * Constructs a probabilistic selection strategy with a drop count cap.
      *
-     * @param maxDrops the maximum number of entries to select
+     * @param maxDrops maximum number of entries to select
      */
     public ProbabilisticSelectionStrategy(int maxDrops) {
         this.maxDrops = maxDrops;
     }
 
     /**
-     * Selects entries from the valid list based on their probability.
+     * Selects probabilistic entries based on context RNG, capped at maximum drops.
      *
-     * @param validEntries the list of valid loot entries
-     * @param context the loot context, providing randomness
-     * @return a list of selected entries, up to {@code maxDrops} in size
+     * @param validEntries list of eligible loot entries
+     * @param context      loot context providing randomness
+     * @return selected loot entries capped at maximum drops
      */
     @Override
     public List<LootEntry> select(List<LootEntry> validEntries, LootContext context) {
         List<LootEntry> selected = new ArrayList<>();
 
         for (LootEntry entry : validEntries) {
-            if (context.random().nextDouble() <= entry.probability()) {
-                selected.add(entry);
+            if (entry instanceof LootEntry.Probabilistic probabilisticEntry) {
+                if (context.random().nextDouble() <= probabilisticEntry.probability()) {
+                    selected.add(entry);
+                }
             }
         }
 
-        if (selected.size() > maxDrops) {
-            Collections.shuffle(selected, context.random());
-            return selected.subList(0, maxDrops);
-        }
-
-        return selected;
+        return SelectionCapper.capToMaxDrops(selected, maxDrops, context.random());
     }
 }

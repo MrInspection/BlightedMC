@@ -2,118 +2,132 @@ package fr.moussax.blightedMC.shared.loot;
 
 import fr.moussax.blightedMC.shared.loot.providers.AmountProvider;
 
-/**
- * Represents a single loot entry with a result, condition, amount, and selection method.
- *
- * <p>An entry can be either probabilistic (dropped based on a chance) or
- * weighted (selected based on relative weight). The entry is only valid if
- * its {@link LootCondition} passes for the given {@link LootContext}.</p>
- */
-public final class LootEntry {
-    private final LootResult result;
-    private final LootCondition condition;
-    private final AmountProvider amountProvider;
-    private final Double probability;
-    private final Double weight;
+import java.util.Objects;
 
-    private LootEntry(
-        LootResult result,
-        LootCondition condition,
-        AmountProvider amountProvider,
-        Double probability,
-        Double weight
-    ) {
-        this.result = result;
-        this.condition = condition;
-        this.amountProvider = amountProvider;
-        this.probability = probability;
-        this.weight = weight;
+/**
+ * Entry in a {@link LootTable} defining a result, eligibility condition, amount provider, and selection mechanics.
+ *
+ * <p>Entries are sealed as either {@link Probabilistic} (evaluated by drop chance)
+ * or {@link Weighted} (evaluated by relative selection weight).</p>
+ */
+public sealed interface LootEntry permits LootEntry.Probabilistic, LootEntry.Weighted {
+
+    /**
+     * Returns the loot result to execute when selected.
+     *
+     * @return loot result
+     */
+    LootResult result();
+
+    /**
+     * Returns the condition required for entry eligibility.
+     *
+     * @return eligibility condition
+     */
+    LootCondition condition();
+
+    /**
+     * Returns the provider for rolling drop quantities.
+     *
+     * @return amount provider
+     */
+    AmountProvider amountProvider();
+
+    /**
+     * Checks if this entry is eligible for selection under the given context.
+     *
+     * @param context loot context
+     * @return {@code true} if condition passes
+     */
+    default boolean isValid(LootContext context) {
+        return condition().test(context);
+    }
+
+    /**
+     * Rolls the drop quantity for this entry.
+     *
+     * @param context loot context
+     * @return rolled drop quantity
+     */
+    default int rollAmount(LootContext context) {
+        return amountProvider().roll(context.random());
+    }
+
+    /**
+     * A probabilistic loot entry evaluated by individual drop chance.
+     *
+     * @param result         loot result to execute
+     * @param condition      condition for eligibility
+     * @param amountProvider provider for drop quantity
+     * @param probability    chance of selection (0.0 to 1.0)
+     */
+    record Probabilistic(
+            LootResult result,
+            LootCondition condition,
+            AmountProvider amountProvider,
+            double probability
+    ) implements LootEntry {
+        public Probabilistic {
+            Objects.requireNonNull(result, "result cannot be null");
+            Objects.requireNonNull(condition, "condition cannot be null");
+            Objects.requireNonNull(amountProvider, "amountProvider cannot be null");
+        }
+    }
+
+    /**
+     * A weighted loot entry evaluated relative to other weighted entries.
+     *
+     * @param result         loot result to execute
+     * @param condition      condition for eligibility
+     * @param amountProvider provider for drop quantity
+     * @param weight         relative selection weight
+     */
+    record Weighted(
+            LootResult result,
+            LootCondition condition,
+            AmountProvider amountProvider,
+            double weight
+    ) implements LootEntry {
+        public Weighted {
+            Objects.requireNonNull(result, "result cannot be null");
+            Objects.requireNonNull(condition, "condition cannot be null");
+            Objects.requireNonNull(amountProvider, "amountProvider cannot be null");
+        }
     }
 
     /**
      * Creates a probabilistic loot entry.
      *
-     * @param result the loot result to execute
-     * @param probability chance of this loot being selected (0.0-1.0)
-     * @param amount the amount provider for this loot
-     * @param condition condition that must pass for this entry to be valid
-     * @return a new probabilistic loot entry
+     * @param result      loot result to execute
+     * @param probability selection chance (0.0 to 1.0)
+     * @param amount      provider for drop quantity
+     * @param condition   condition for eligibility
+     * @return new probabilistic entry
      */
-    public static LootEntry probabilistic(
-        LootResult result,
-        double probability,
-        AmountProvider amount,
-        LootCondition condition
+    static LootEntry.Probabilistic probabilistic(
+            LootResult result,
+            double probability,
+            AmountProvider amount,
+            LootCondition condition
     ) {
-        return new LootEntry(result, condition, amount, probability, null);
+        return new Probabilistic(result, condition, amount, probability);
     }
 
     /**
      * Creates a weighted loot entry.
      *
-     * @param result the loot result to execute
-     * @param weight relative weight for selection
-     * @param amount the amount provider for this loot
-     * @param condition condition that must pass for this entry to be valid
-     * @return a new weighted loot entry
+     * @param result    loot result to execute
+     * @param weight    relative selection weight
+     * @param amount    provider for drop quantity
+     * @param condition condition for eligibility
+     * @return new weighted entry
      */
-    public static LootEntry weighted(
-        LootResult result,
-        double weight,
-        AmountProvider amount,
-        LootCondition condition
+    static LootEntry.Weighted weighted(
+            LootResult result,
+            double weight,
+            AmountProvider amount,
+            LootCondition condition
     ) {
-        return new LootEntry(result, condition, amount, null, weight);
-    }
-
-    /**
-     * Checks if this entry is valid under the given context.
-     *
-     * @param context the loot context
-     * @return {@code true} if the condition passes
-     */
-    public boolean isValid(LootContext context) {
-        return condition.test(context);
-    }
-
-    /**
-     * Rolls the amount for this entry based on the context's RNG.
-     *
-     * @param context the loot context
-     * @return the rolled amount
-     */
-    public int rollAmount(LootContext context) {
-        return amountProvider.roll(context.random());
-    }
-
-    /** @return the loot result */
-    public LootResult result() {
-        return result;
-    }
-
-    /** @return the probability if this entry is probabilistic */
-    public double probability() {
-        if (probability == null) {
-            throw new IllegalStateException("Entry is not probabilistic");
-        }
-        return probability;
-    }
-
-    /** @return the weight if this entry is weighted */
-    public double weight() {
-        if (weight == null) {
-            throw new IllegalStateException("Entry is not weighted");
-        }
-        return weight;
-    }
-
-    /** @return true if this entry is probabilistic */
-    public boolean isProbabilistic() {
-        return probability != null;
-    }
-
-    /** @return true if this entry is weighted */
-    public boolean isWeighted() {
-        return weight != null;
+        return new Weighted(result, condition, amount, weight);
     }
 }

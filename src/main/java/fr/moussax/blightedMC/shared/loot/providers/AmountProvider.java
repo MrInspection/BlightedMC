@@ -3,44 +3,41 @@ package fr.moussax.blightedMC.shared.loot.providers;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Provides the amount of loot to generate for a loot entry.
- *
- * <p>Implementations can provide a fixed value, a range, or a dynamic calculation
- * based on the given {@link ThreadLocalRandom}.</p>
+ * Provider determining the quantity of loot items to generate.
  */
 @FunctionalInterface
 public interface AmountProvider {
 
     /**
-     * Rolls an amount using the given random generator.
+     * Rolls a drop quantity using the specified random generator.
      *
-     * @param random the RNG to use
-     * @return the rolled amount
+     * @param random random generator
+     * @return rolled drop quantity
      */
     int roll(ThreadLocalRandom random);
 
     /**
-     * Returns a provider that always returns a fixed value.
+     * Returns a provider that always yields a fixed quantity.
      *
-     * @param value fixed amount
-     * @return amount provider
+     * @param value fixed quantity
+     * @return fixed amount provider
      */
     static AmountProvider fixed(int value) {
         return random -> value;
     }
 
     /**
-     * Returns a provider that generates a random amount in the inclusive range [min, max].
+     * Returns a provider that generates a random quantity in an inclusive range.
      *
-     * @param min minimum value
-     * @param max maximum value
-     * @return amount provider
-     * @throws IllegalArgumentException if min < 0 or max < min
+     * @param minimum minimum quantity
+     * @param maximum maximum quantity
+     * @return range amount provider
+     * @throws IllegalArgumentException if {@code minimum < 0} or {@code maximum < minimum}
      */
-    static AmountProvider range(int min, int max) {
-        if (min < 0 || max < min) {
-            throw new IllegalArgumentException("Invalid amount range");
+    static AmountProvider range(int minimum, int maximum) {
+        if (minimum < 0 || maximum < minimum) {
+            throw new IllegalArgumentException("Invalid amount range: minimum=" + minimum + ", maximum=" + maximum);
         }
-        return random -> min + random.nextInt(max - min + 1);
+        return random -> minimum + random.nextInt(maximum - minimum + 1);
     }
 }

@@ -12,23 +12,42 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Objects;
 import java.util.function.Supplier;
 
+/**
+ * Representation of a consumable Blighted Gemstone item carrying a gem quantity.
+ *
+ * @param amount quantity of gems carried by this gemstone item
+ */
 public record GemsItem(int amount) implements Supplier<ItemStack> {
 
+    /**
+     * Constructs a GemsItem by reading the gem quantity from an existing item stack's persistent data.
+     *
+     * @param itemStack item stack containing gemstone persistent data
+     */
     public GemsItem(ItemStack itemStack) {
-        ItemMeta meta = itemStack.getItemMeta();
-        assert meta != null;
+        ItemMeta meta = Objects.requireNonNull(itemStack.getItemMeta(), "itemMeta cannot be null");
 
         Integer value = meta.getPersistentDataContainer().get(
-            new NamespacedKey(BlightedMC.getInstance(), "gems"), PersistentDataType.INTEGER);
+                new NamespacedKey(BlightedMC.getInstance(), "gems"), PersistentDataType.INTEGER);
         this(value != null ? value : 1);
     }
 
+    /**
+     * Adds this gemstone's gem quantity to a player's balance.
+     *
+     * @param player player receiving the gems
+     */
     public void addGems(BlightedPlayer player) {
         player.addGems(amount);
     }
 
+    /**
+     * Ability handler for consuming Blighted Gemstone items on player interaction.
+     */
     public static class BlightedGemstoneAbility implements AbilityManager<PlayerInteractEvent> {
 
         @Override
@@ -74,6 +93,11 @@ public record GemsItem(int amount) implements Supplier<ItemStack> {
         }
     }
 
+    /**
+     * Constructs the {@link ItemStack} for this gemstone with lore and persistent data applied.
+     *
+     * @return constructed gemstone item stack
+     */
     @Override
     public ItemStack get() {
         BlightedItem blightedItem = ItemRegistry.getItem("BLIGHTED_GEMSTONE");
@@ -81,8 +105,7 @@ public record GemsItem(int amount) implements Supplier<ItemStack> {
         blightedItem.setLore(6, "§8 Gems: §d" + this.amount + "✵");
         ItemStack itemStack = blightedItem.toItemStack();
 
-        ItemMeta meta = itemStack.getItemMeta();
-        assert meta != null;
+        ItemMeta meta = Objects.requireNonNull(itemStack.getItemMeta(), "itemMeta cannot be null");
         meta.getPersistentDataContainer().set(new NamespacedKey(BlightedMC.getInstance(), "gems"), PersistentDataType.INTEGER, amount);
         itemStack.setItemMeta(meta);
 

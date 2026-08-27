@@ -11,8 +11,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * A {@link LootResult} that spawns an entity at the loot origin.
- * Supports both vanilla {@link EntityType} and custom {@link BlightedEntity}.
+ * A {@link LootResult} that spawns a vanilla or custom entity at the loot origin.
  */
 public final class EntityResult implements LootResult {
     private final EntityType entityType;
@@ -26,51 +25,51 @@ public final class EntityResult implements LootResult {
     }
 
     /**
-     * Creates an EntityResult for a vanilla Minecraft entity.
+     * Creates an entity result for a vanilla entity type.
      *
-     * @param entityType the type of vanilla entity to spawn
-     * @return a new EntityResult
+     * @param entityType entity type to spawn
+     * @return new entity result
      */
     public static EntityResult vanilla(EntityType entityType) {
         return new EntityResult(Objects.requireNonNull(entityType), null, null);
     }
 
     /**
-     * Creates an EntityResult for a vanilla entity with a modifier to adjust the mob.
+     * Creates an entity result for a vanilla entity type with a modifier function.
      *
-     * @param entityType     the type of vanilla entity to spawn
-     * @param entityModifier a function to modify the spawned entity
-     * @return a new EntityResult
+     * @param entityType     entity type to spawn
+     * @param entityModifier modifier applied to the spawned entity
+     * @return new entity result
      */
     public static EntityResult vanilla(EntityType entityType, Consumer<LivingEntity> entityModifier) {
         return new EntityResult(Objects.requireNonNull(entityType), null, entityModifier);
     }
 
     /**
-     * Creates an EntityResult for a custom Blighted entity.
+     * Creates an entity result for a custom Blighted entity.
      *
-     * @param blightedEntity the Blighted entity to spawn
-     * @return a new EntityResult
+     * @param blightedEntity Blighted entity to spawn
+     * @return new entity result
      */
     public static EntityResult blighted(BlightedEntity blightedEntity) {
         return new EntityResult(null, Objects.requireNonNull(blightedEntity), null);
     }
 
     /**
-     * Spawns the entity at the loot origin with the configured velocity.
+     * Spawns the entity at the loot origin and applies initial velocity and modifiers.
      *
-     * @param context the loot context
-     * @param amount  ignored for entity spawns
+     * @param context loot context
+     * @param amount  quantity parameter (unused for single entity spawn)
      */
     @Override
     public void execute(LootContext context, int amount) {
         LivingEntity spawned = null;
 
         if (entityType != null) {
-            var entity = Objects.requireNonNull(context.origin().getWorld())
-                .spawnEntity(context.origin(), entityType);
+            Object rawEntity = Objects.requireNonNull(context.origin().getWorld())
+                    .spawnEntity(context.origin(), entityType);
 
-            if (entity instanceof LivingEntity living) {
+            if (rawEntity instanceof LivingEntity living) {
                 spawned = living;
             } else {
                 return;
@@ -90,10 +89,10 @@ public final class EntityResult implements LootResult {
     }
 
     /**
-     * Returns a display name for the spawned entity.
+     * Returns the formatted display name of the spawned entity type or generic description.
      *
-     * @param amount ignored for entity spawns
-     * @return the entity name
+     * @param amount drop quantity
+     * @return formatted display name
      */
     @Override
     public String displayName(int amount) {

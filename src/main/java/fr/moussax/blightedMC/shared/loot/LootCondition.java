@@ -4,62 +4,60 @@ import org.bukkit.World;
 import org.bukkit.block.Biome;
 
 /**
- * Represents a condition that determines whether a loot entry is eligible.
- *
- * <p>Conditions are evaluated against a {@link LootContext} and can be
- * combined to restrict loot by biome, world environment, or other criteria.</p>
+ * Condition determining whether a loot entry is eligible for selection.
  */
 @FunctionalInterface
 public interface LootCondition {
 
     /**
-     * Tests whether the given context satisfies this condition.
+     * Evaluates whether the loot condition passes for the given context.
      *
-     * @param ctx the loot context
-     * @return {@code true} if the condition passes, {@code false} otherwise
+     * @param context loot context
+     * @return {@code true} if the condition passes
      */
-    boolean test(LootContext ctx);
+    boolean test(LootContext context);
 
     /**
-     * Always returns {@code true}.
+     * Returns a condition that always evaluates to {@code true}.
+     *
+     * @return unconditional condition
      */
     static LootCondition alwaysTrue() {
-        return ctx -> true;
+        return context -> true;
     }
 
     /**
-     * Returns a condition that passes only in the specified biome.
+     * Returns a condition matching a specific biome.
      *
-     * @param biome the allowed biome
-     * @return a new condition
+     * @param biome required biome
+     * @return biome condition
      */
     static LootCondition biome(Biome biome) {
         return context -> context.biome() == biome;
     }
 
     /**
-     * Returns a condition that passes only in the specified world environment.
+     * Returns a condition matching a specific world environment.
      *
-     * @param environment the allowed environment
-     * @return a new condition
+     * @param environment required world environment
+     * @return environment condition
      */
     static LootCondition environment(World.Environment environment) {
         return context -> context.world().getEnvironment() == environment;
     }
 
     /**
-     * Returns a condition that passes only if the player's Y-coordinate
-     * is less than or equal to the specified maximum value.
+     * Returns a condition matching players at or below a maximum Y-coordinate.
      *
-     * @param maxY the maximum allowed Y-coordinate (inclusive)
-     * @return a new condition
+     * @param maximumY maximum allowed Y-coordinate (inclusive)
+     * @return Y-coordinate condition
      */
-    static LootCondition atMostY(int maxY) {
+    static LootCondition atMostY(int maximumY) {
         return context -> {
             if (context.blightedPlayer() == null || context.blightedPlayer().getPlayer() == null) {
                 return false;
             }
-            return context.blightedPlayer().getPlayer().getLocation().getY() <= maxY;
+            return context.blightedPlayer().getPlayer().getLocation().getY() <= maximumY;
         };
     }
 }
