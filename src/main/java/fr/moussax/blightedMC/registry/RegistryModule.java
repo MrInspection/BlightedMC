@@ -7,5 +7,11 @@ package fr.moussax.blightedMC.registry;
  */
 @FunctionalInterface
 public interface RegistryModule<T> {
+
+    /**
+     * Registers content with the provided registry consumer or handler.
+     *
+     * @param registry consumer or handler receiving the registered content
+     */
     void register(T registry);
 }

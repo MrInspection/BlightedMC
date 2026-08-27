@@ -16,6 +16,12 @@ import java.util.List;
  * @param type    the ability's behavior type
  */
 public record Ability(AbilityManager<? extends Event> manager, String name, AbilityType type) {
+
+    /**
+     * Formats and constructs lore lines displaying the ability name, type, description, and resource costs.
+     *
+     * @return formatted list of item lore lines
+     */
     public List<String> getAbilityLore() {
         List<String> lore = new ArrayList<>();
 

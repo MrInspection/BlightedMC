@@ -12,11 +12,13 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  * Defines behavioral restrictions for custom items in BlightedMC.
- * <p>
- * Implementations override these methods to define permissions.
- * Defaults are set to prevent placement but allow interaction.
+ *
+ * <p>Implementations override these methods to define permissions.
+ * Defaults are set to prevent placement but allow interaction.</p>
  */
 public interface ItemRule {
+
+    /** Rule preventing bucket fill and empty operations. */
     ItemRule PREVENT_BUCKET_INTERACTIONS = new ItemRule() {
         @Override
         public boolean canUse(Event event, ItemStack itemStack) {
@@ -24,6 +26,7 @@ public interface ItemRule {
         }
     };
 
+    /** Rule preventing item consumption (eating or drinking). */
     ItemRule PREVENT_CONSUME = new ItemRule() {
         @Override
         public boolean canUse(Event event, ItemStack itemStack) {
@@ -31,6 +34,7 @@ public interface ItemRule {
         }
     };
 
+    /** Rule preventing items from being dropped by players. */
     ItemRule PREVENT_DROP = new ItemRule() {
         @Override
         public boolean canUse(Event event, ItemStack itemStack) {
@@ -38,6 +42,7 @@ public interface ItemRule {
         }
     };
 
+    /** Rule preventing all environmental interactions with the item. */
     ItemRule PREVENT_INTERACTION = new ItemRule() {
         @Override
         public boolean canInteract(PlayerInteractEvent event, ItemStack itemStack) {
@@ -45,6 +50,7 @@ public interface ItemRule {
         }
     };
 
+    /** Rule preventing block placement and block right-click interactions. */
     ItemRule PREVENT_PLACEMENT = new ItemRule() {
         @Override
         public boolean canPlace(BlockPlaceEvent event, ItemStack itemStack) {
@@ -57,6 +63,7 @@ public interface ItemRule {
         }
     };
 
+    /** Rule preventing projectile launching (bows, tridents, snowballs). */
     ItemRule PREVENT_PROJECTILE_LAUNCH = new ItemRule() {
         @Override
         public boolean canUse(Event event, ItemStack itemStack) {

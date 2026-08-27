@@ -10,6 +10,8 @@ import org.bukkit.event.entity.EntityDamageEvent;
  * Standard implementation of entity immunities mapping to specific damage types.
  */
 public enum DamageType implements EntityImmunity {
+
+    /** Immunity to fire, lava, fire tick, and campfire damage. */
     FIRE {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
@@ -19,6 +21,8 @@ public enum DamageType implements EntityImmunity {
                     event.getCause() == EntityDamageEvent.DamageCause.CAMPFIRE;
         }
     },
+
+    /** Immunity to direct melee and sweep attacks. */
     MELEE {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
@@ -26,18 +30,24 @@ public enum DamageType implements EntityImmunity {
                     event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK;
         }
     },
+
+    /** Immunity to ranged projectile damage. */
     PROJECTILE {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
             return event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE;
         }
     },
+
+    /** Immunity to fall damage. */
     FALL {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
             return event.getCause() == EntityDamageEvent.DamageCause.FALL;
         }
     },
+
+    /** Immunity to heavy mace weapon attacks. */
     MACE {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
@@ -51,6 +61,8 @@ public enum DamageType implements EntityImmunity {
             return "§c A mystical force prevented your mace from dealing damage.";
         }
     },
+
+    /** Immunity to magic, poison, wither, dragon breath, and sonic boom damage. */
     MAGIC {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {

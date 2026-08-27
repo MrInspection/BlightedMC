@@ -5,9 +5,9 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 /**
  * Represents a rule that determines if an entity is immune to a specific type of damage.
- * <p>
- * Implementations of this interface define conditions under which a {@link LivingEntity}
- * should ignore a given {@link EntityDamageEvent}.
+ *
+ * <p>Implementations of this interface define conditions under which a {@link LivingEntity}
+ * should ignore a given {@link EntityDamageEvent}.</p>
  */
 @FunctionalInterface
 public interface EntityImmunity {
@@ -21,6 +21,11 @@ public interface EntityImmunity {
      */
     boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event);
 
+    /**
+     * Gets the formatted immunity warning message sent to players when damage is prevented.
+     *
+     * @return immunity notification message
+     */
     default String getImmunityMessage() {
         return "§4 ■ §cThis creature is immune to this type of damage!";
     }
