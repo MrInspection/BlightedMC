@@ -14,6 +14,7 @@ import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -40,7 +41,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
     private int lastStateHash = -1;
 
     public ForgeRecipePreviewMenu(@NonNull ForgeRecipe recipe, @Nullable BlightedItem targetItem, @Nullable Menu previousMenu) {
-        super(recipe.getForgedItem().getDisplayName().replaceAll("§[0-9A-FK-ORa-fk-or]", ""), 54);
+        super(ChatColor.stripColor(recipe.getForgedItem().getDisplayName()), 54);
         this.recipe = recipe;
         this.targetItem = targetItem;
         this.previousMenu = previousMenu;
@@ -76,7 +77,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
 
     @Override
     public void build(Player player) {
-        setTitle(recipe.getForgedItem().getDisplayName().replaceAll("§[0-9A-FK-ORa-fk-or]", ""));
+        setTitle(ChatColor.stripColor(recipe.getForgedItem().getDisplayName()));
         setupRecipeVisualization(player);
         setupNavigation();
     }
@@ -137,9 +138,9 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
             CraftingObject ingredient = ingredients.get(i);
             ItemStack displayItem = createIngredientDisplay(ingredient);
 
-            setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (p, _) -> {
+            setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
                 if (!ingredient.isCustom() || ingredient.getManager() == null) return;
-                RecipePreviewManager.openPreview(p, ingredient.getManager(), this);
+                RecipePreviewManager.openPreview(clickingPlayer, ingredient.getManager(), this);
             });
         }
     }
@@ -220,12 +221,12 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
                 canHyperforge ? "§eClick to Hyperforge!" : "§cMissing ingredients or insufficient fuel!"
         ).setEnchantmentGlint(canHyperforge);
 
-        setItem(HYPERFORGE_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, _) -> {
+        setItem(HYPERFORGE_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
             if (!canHyperforge) {
-                Messenger.warn(p, "You're missing some ingredients or insufficient fuel to Hyperforge this item!");
+                Messenger.warn(clickingPlayer, "You're missing some ingredients or insufficient fuel to Hyperforge this item!");
                 return;
             }
-            PluginContext.delay(() -> executeHyperforge(p, blightedPlayer, requirements, fuelCost), 1L);
+            PluginContext.delay(() -> executeHyperforge(clickingPlayer, blightedPlayer, requirements, fuelCost), 1L);
         });
     }
 

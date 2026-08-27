@@ -74,9 +74,9 @@ public final class ShapelessRecipeBuilder {
             int amount,
             boolean isAttributeSource
     ) {
-        CraftingObject obj = new CraftingObject(material, amount);
-        ingredients.add(obj);
-        if (isAttributeSource) this.attributeSource = obj;
+        CraftingObject craftingObject = new CraftingObject(material, amount);
+        ingredients.add(craftingObject);
+        if (isAttributeSource) this.attributeSource = craftingObject;
         return this;
     }
 
@@ -106,9 +106,9 @@ public final class ShapelessRecipeBuilder {
             int amount,
             boolean isAttributeSource
     ) {
-        CraftingObject obj = new CraftingObject(item, amount);
-        ingredients.add(obj);
-        if (isAttributeSource) this.attributeSource = obj;
+        CraftingObject craftingObject = new CraftingObject(item, amount);
+        ingredients.add(craftingObject);
+        if (isAttributeSource) this.attributeSource = craftingObject;
         return this;
     }
 

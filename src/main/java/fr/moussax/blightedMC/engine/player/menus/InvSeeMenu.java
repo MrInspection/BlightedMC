@@ -52,8 +52,8 @@ public final class InvSeeMenu extends Menu {
                 .setDisplayName("§dView Ender Chest")
                 .addLore("§7Click to view ender chest.")
                 .toItemStack(),
-            (p, _) -> BlightedMC.menuManager().openMenu(
-                new EnderSeeMenu(target, this), p
+            (clickingPlayer, _) -> BlightedMC.menuManager().openMenu(
+                new EnderSeeMenu(target, this), clickingPlayer
             )
         );
 

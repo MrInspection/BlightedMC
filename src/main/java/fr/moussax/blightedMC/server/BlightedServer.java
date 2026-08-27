@@ -1,9 +1,9 @@
 package fr.moussax.blightedMC.server;
 
-import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.*;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -13,13 +13,13 @@ import java.util.List;
 
 public final class BlightedServer {
     private static BlightedServer instance;
-    private final BlightedMC plugin;
+    private final JavaPlugin plugin;
 
-    private BlightedServer(BlightedMC plugin) {
+    private BlightedServer(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 
-    public static void initialize(BlightedMC plugin) {
+    public static void initialize(JavaPlugin plugin) {
         if (instance != null) return;
         instance = new BlightedServer(plugin);
     }

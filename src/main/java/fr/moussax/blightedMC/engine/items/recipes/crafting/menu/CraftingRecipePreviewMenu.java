@@ -13,6 +13,7 @@ import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -41,7 +42,7 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
     private int lastIngredientHash = -1;
 
     public CraftingRecipePreviewMenu(@NonNull BlightedRecipe recipe, @Nullable BlightedItem targetItem, @Nullable Menu previousMenu) {
-        super(recipe.getResult().getDisplayName().replaceAll("§[0-9A-FK-ORa-fk-or]", ""), 54);
+        super(ChatColor.stripColor(recipe.getResult().getDisplayName()), 54);
         this.recipe = recipe;
         this.targetItem = targetItem;
         this.previousMenu = previousMenu;
@@ -74,7 +75,7 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
 
     @Override
     public void build(Player player) {
-        setTitle(recipe.getResult().getDisplayName().replaceAll("§[0-9A-FK-ORa-fk-or]", ""));
+        setTitle(ChatColor.stripColor(recipe.getResult().getDisplayName()));
         setupRecipeVisualization(player);
         setupNavigation();
     }
@@ -88,13 +89,13 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
 
         setItem(WORKBENCH_SLOT, new ItemBuilder(Material.CRAFTING_TABLE, "§fBlighted Workbench")
                 .addLore("§7Craft this recipe by using a blighted", "§7workbench or Quickcraft. ")
-                .toItemStack(), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                .toItemStack(), MenuItemInteraction.ANY_CLICK, (_, _) -> {
         });
 
         ItemStack resultItem = recipe.assemble(createVirtualCraftingGrid());
         int amount = recipe.getAmount() > 0 ? recipe.getAmount() : 1;
         resultItem.setAmount(amount);
-        setItem(RESULT_SLOT, resultItem, MenuItemInteraction.ANY_CLICK, (p, t) -> {
+        setItem(RESULT_SLOT, resultItem, MenuItemInteraction.ANY_CLICK, (_, _) -> {
         });
 
         setupQuickcraftButton(player);
@@ -113,9 +114,9 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
             }
 
             ItemStack ingredientItem = createIngredientDisplay(craftingObject);
-            setItem(CRAFTING_GRID_SLOTS[i], ingredientItem, MenuItemInteraction.ANY_CLICK, (p, _) -> {
+            setItem(CRAFTING_GRID_SLOTS[i], ingredientItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
                 if (!craftingObject.isCustom() || craftingObject.getManager() == null) return;
-                RecipePreviewManager.openPreview(p, craftingObject.getManager(), this);
+                RecipePreviewManager.openPreview(clickingPlayer, craftingObject.getManager(), this);
             });
         }
     }
@@ -128,12 +129,12 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
                 CraftingObject ingredient = ingredients.get(i);
                 ItemStack ingredientItem = createIngredientDisplay(ingredient);
 
-                setItem(CRAFTING_GRID_SLOTS[i], ingredientItem, MenuItemInteraction.ANY_CLICK, (p, _) -> {
+                setItem(CRAFTING_GRID_SLOTS[i], ingredientItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
                     if (!ingredient.isCustom() || ingredient.getManager() == null) return;
-                    RecipePreviewManager.openPreview(p, ingredient.getManager(), this);
+                    RecipePreviewManager.openPreview(clickingPlayer, ingredient.getManager(), this);
                 });
             } else {
-                setItem(CRAFTING_GRID_SLOTS[i], new ItemStack(Material.AIR), MenuItemInteraction.ANY_CLICK, (p, t) -> {
+                setItem(CRAFTING_GRID_SLOTS[i], new ItemStack(Material.AIR), MenuItemInteraction.ANY_CLICK, (_, _) -> {
                 });
             }
         }
@@ -174,12 +175,12 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
                 .setEnchantmentGlint(canQuickcraft);
         builder.addItemFlag(ItemFlag.HIDE_ATTRIBUTES);
 
-        setItem(QUICKCRAFT_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, _) -> {
+        setItem(QUICKCRAFT_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
             if (!canQuickcraft) {
-                Messenger.warn(p, "You're missing some ingredients to Quickcraft this item!");
+                Messenger.warn(clickingPlayer, "You're missing some ingredients to Quickcraft this item!");
                 return;
             }
-            PluginContext.delay(() -> executeQuickcraft(p, requirements), 1L);
+            PluginContext.delay(() -> executeQuickcraft(clickingPlayer, requirements), 1L);
         });
     }
 

@@ -120,10 +120,10 @@ public final class RecipePreviewManager {
 
         BlightedItem previewItem = targetItem;
         if (previewItem == null) {
-            if (recipe instanceof BlightedRecipe br) {
-                previewItem = br.getResult();
-            } else if (recipe instanceof ForgeRecipe fr) {
-                previewItem = fr.getForgedItem();
+            if (recipe instanceof BlightedRecipe blightedRecipe) {
+                previewItem = blightedRecipe.getResult();
+            } else if (recipe instanceof ForgeRecipe forgeRecipe) {
+                previewItem = forgeRecipe.getForgedItem();
             }
         }
 
@@ -164,9 +164,9 @@ public final class RecipePreviewManager {
         Map<String, Integer> counts = new HashMap<>();
         for (ItemStack stack : player.getInventory().getContents()) {
             if (stack == null || stack.getType() == Material.AIR) continue;
-            for (String reqId : requiredIds) {
-                if (Utilities.resolveItemId(stack, reqId).equals(reqId)) {
-                    counts.put(reqId, counts.getOrDefault(reqId, 0) + stack.getAmount());
+            for (String requiredIdentifier : requiredIds) {
+                if (Utilities.resolveItemId(stack, requiredIdentifier).equals(requiredIdentifier)) {
+                    counts.put(requiredIdentifier, counts.getOrDefault(requiredIdentifier, 0) + stack.getAmount());
                 }
             }
         }

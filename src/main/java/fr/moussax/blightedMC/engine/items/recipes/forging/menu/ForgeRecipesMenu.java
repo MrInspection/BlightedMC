@@ -10,6 +10,7 @@ import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.shared.ui.menu.types.PaginatedMenu;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -128,7 +129,7 @@ public final class ForgeRecipesMenu extends PaginatedMenu {
         for (int i = start; i < end && recipeIndex < RECIPE_SLOTS.length; i++) {
             final int itemIndex = i;
             setItem(RECIPE_SLOTS[recipeIndex], getItem(player, itemIndex),
-                    (p, click) -> onItemClick(p, itemIndex, click));
+                    (clickingPlayer, click) -> onItemClick(clickingPlayer, itemIndex, click));
             recipeIndex++;
         }
     }
@@ -138,18 +139,18 @@ public final class ForgeRecipesMenu extends PaginatedMenu {
             ItemStack prevItem = new ItemBuilder(Material.ARROW, "§aPrevious Page")
                     .addLore("§7Page " + (pageNum - 1) + "/" + totalPages)
                     .toItemStack();
-            setItem(BACK_BUTTON_SLOT, prevItem, MenuItemInteraction.ANY_CLICK, (p, _) -> {
+            setItem(BACK_BUTTON_SLOT, prevItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
                 currentPage--;
-                refresh(p);
+                refresh(clickingPlayer);
             });
         } else {
             String targetName = previousMenu != null
-                    ? previousMenu.getTitle().replaceAll("§[0-9A-FK-ORa-fk-or]", "")
+                    ? ChatColor.stripColor(previousMenu.getTitle())
                     : "Blighted Forge";
             ItemStack backItem = new ItemBuilder(Material.ARROW, "§aGo Back")
                     .addLore("§7To " + targetName)
                     .toItemStack();
-            setItem(BACK_BUTTON_SLOT, backItem, MenuItemInteraction.ANY_CLICK, (p, _) ->
+            setItem(BACK_BUTTON_SLOT, backItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) ->
                     openSubMenu(Objects.requireNonNullElseGet(previousMenu, () -> new ForgeMenu(null)))
             );
         }
@@ -158,9 +159,9 @@ public final class ForgeRecipesMenu extends PaginatedMenu {
             ItemStack nextItem = new ItemBuilder(Material.ARROW, "§aNext Page")
                     .addLore("§7Page " + (pageNum + 1) + "/" + totalPages)
                     .toItemStack();
-            setItem(NEXT_BUTTON_SLOT, nextItem, MenuItemInteraction.ANY_CLICK, (p, _) -> {
+            setItem(NEXT_BUTTON_SLOT, nextItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
                 currentPage++;
-                refresh(p);
+                refresh(clickingPlayer);
             });
         } else {
             setItem(NEXT_BUTTON_SLOT, MenuElementPreset.EMPTY_SLOT_FILLER);

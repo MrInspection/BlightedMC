@@ -253,11 +253,11 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
             ).setEnchantmentGlint(canInvoke);
         }
 
-        setItem(32, builder.toItemStack(), (p, _) -> {
+        setItem(32, builder.toItemStack(), (clickingPlayer, _) -> {
             if (ritual != null && canInvoke) {
-                invokeMob(p);
+                invokeMob(clickingPlayer);
             } else {
-                p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
+                clickingPlayer.playSound(clickingPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
             }
         });
     }
@@ -274,7 +274,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
                 ).toItemStack();
 
         setCloseButton(49);
-        setItem(50, recipeBook, (p, _) -> openSubMenu(new AncientRitualsMenu(this)));
+        setItem(50, recipeBook, (clickingPlayer, _) -> openSubMenu(new AncientRitualsMenu(this)));
     }
 
     private void consumeIngredients(Player player) {

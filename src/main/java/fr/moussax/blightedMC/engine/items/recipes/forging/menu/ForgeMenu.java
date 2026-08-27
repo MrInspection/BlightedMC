@@ -221,13 +221,13 @@ public final class ForgeMenu extends Menu implements TickableMenu {
             ).setEnchantmentGlint(canForge);
         }
 
-        setItem(32, builder.toItemStack(), (p, _) -> {
+        setItem(32, builder.toItemStack(), (clickingPlayer, _) -> {
             if (isForging) return;
 
             if (recipe != null && canForge) {
-                forgeItem(p);
+                forgeItem(clickingPlayer);
             } else {
-                p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
+                clickingPlayer.playSound(clickingPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
             }
         });
     }
@@ -238,7 +238,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
                 .toItemStack();
 
         setCloseButton(49);
-        setItem(50, recipeBook, (p, _) -> openSubMenu(new ForgeRecipesMenu(this)));
+        setItem(50, recipeBook, (clickingPlayer, _) -> openSubMenu(new ForgeRecipesMenu(this)));
     }
 
     private void setupFuelButtons(Player player) {
