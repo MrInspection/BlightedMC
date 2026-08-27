@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.engine.entities.affixes;
+package fr.moussax.blightedMC.engine.entities.components.impl;
 
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.components.EntityComponent;
@@ -9,27 +9,22 @@ import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class BurningAffix implements EntityComponent {
+/**
+ * Burning component generating a surrounding volcanic flame aura that sets nearby players on fire.
+ */
+public final class BurningComponent implements EntityComponent {
 
     private static final double BURN_RADIUS = 3.0;
     private static final double BASE_DAMAGE = 2.0;
-    private Map<UUID, Long> playerHeatMap = new HashMap<>();
     private int tickCounter = 0;
 
     @Override
-    public String getId() { return "AFFIX_BURNING"; }
-
-    @Override
-    public void onInit(LivingEntity entity) {}
-
-    @Override
-    public void onDestroy(LivingEntity entity) {}
+    public String getId() {
+        return "AFFIX_BURNING";
+    }
 
     @Override
     public void onTick(BlightedEntity owner) {
@@ -55,11 +50,11 @@ public final class BurningAffix implements EntityComponent {
             Objects.requireNonNull(center.getWorld()).spawnParticle(Particle.DUST, center.clone().add(x, 0.1, z), 1, 0, 0, 0, 0, dust);
         }
 
-        double rx = ThreadLocalRandom.current().nextDouble(-BURN_RADIUS, BURN_RADIUS);
-        double rz = ThreadLocalRandom.current().nextDouble(-BURN_RADIUS, BURN_RADIUS);
+        double randomX = ThreadLocalRandom.current().nextDouble(-BURN_RADIUS, BURN_RADIUS);
+        double randomZ = ThreadLocalRandom.current().nextDouble(-BURN_RADIUS, BURN_RADIUS);
 
-        center.getWorld().spawnParticle(Particle.LAVA, center.clone().add(rx, 0.2, rz), 1, 0.1, 0.1, 0.1, 0.05);
-        center.getWorld().spawnParticle(Particle.FLAME, center.clone().add(rx, 0.3, rz), 3, 0.2, 0.2, 0.2, 0.02);
+        center.getWorld().spawnParticle(Particle.LAVA, center.clone().add(randomX, 0.2, randomZ), 1, 0.1, 0.1, 0.1, 0.05);
+        center.getWorld().spawnParticle(Particle.FLAME, center.clone().add(randomX, 0.3, randomZ), 3, 0.2, 0.2, 0.2, 0.02);
     }
 
     private void applyAuraDamage(LivingEntity entity) {
@@ -69,18 +64,6 @@ public final class BurningAffix implements EntityComponent {
             player.damage(BASE_DAMAGE, entity);
             entity.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 1, 0), 10, 0.2, 0.5, 0.2, 0.05);
             entity.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 0.6f);
-        }
-    }
-
-    @Override
-    public EntityComponent clone() {
-        try {
-            BurningAffix clone = (BurningAffix) super.clone();
-            clone.playerHeatMap = new HashMap<>(this.playerHeatMap);
-            clone.tickCounter = 0;
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError(e);
         }
     }
 }

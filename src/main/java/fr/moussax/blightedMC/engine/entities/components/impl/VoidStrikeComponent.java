@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.engine.entities.affixes;
+package fr.moussax.blightedMC.engine.entities.components.impl;
 
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.components.EntityComponent;
@@ -16,20 +16,24 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-public final class VoidStrikeAffix implements EntityComponent {
+/**
+ * Void strike component marking hit players with scaling damage multipliers over time.
+ */
+public final class VoidStrikeComponent implements EntityComponent {
 
     private Map<UUID, Long> markedPlayers = new HashMap<>();
     private static final long MARK_DURATION_MS = 5000L;
     private static final double MAX_MULTIPLIER = 3.0;
 
     @Override
-    public String getId() { return "AFFIX_VOID_STRIKE"; }
+    public String getId() {
+        return "AFFIX_VOID_STRIKE";
+    }
 
     @Override
-    public void onInit(LivingEntity entity) {}
-
-    @Override
-    public void onDestroy(LivingEntity entity) { markedPlayers.clear(); }
+    public void onDestroy(LivingEntity entity) {
+        markedPlayers.clear();
+    }
 
     @Override
     public void onTick(BlightedEntity owner) {
@@ -62,10 +66,10 @@ public final class VoidStrikeAffix implements EntityComponent {
             player.getWorld().spawnParticle(Particle.WHITE_ASH, player.getLocation().add(0, 1.2, 0), 2, 0.1, 0.2, 0.1, 0.01);
 
             if (System.currentTimeMillis() % 200 < 50) {
-                Vector dir = player.getLocation().add(0, 1, 0).toVector().subtract(mobLoc.toVector()).normalize().multiply(0.5);
+                Vector direction = player.getLocation().add(0, 1, 0).toVector().subtract(mobLoc.toVector()).normalize().multiply(0.5);
                 Location current = mobLoc.clone();
                 for (int i = 0; i < 10; i++) {
-                    current.add(dir);
+                    current.add(direction);
                     entity.getWorld().spawnParticle(Particle.DUST, current, 1, 0, 0, 0, 0, new Particle.DustOptions(Color.fromRGB(140, 0, 210), 0.6f));
                 }
             }
@@ -100,16 +104,5 @@ public final class VoidStrikeAffix implements EntityComponent {
         }
 
         markedPlayers.put(playerId, now);
-    }
-
-    @Override
-    public EntityComponent clone() {
-        try {
-            VoidStrikeAffix clone = (VoidStrikeAffix) super.clone();
-            clone.markedPlayers = new HashMap<>(this.markedPlayers);
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError("Affix cloning failed", e);
-        }
     }
 }

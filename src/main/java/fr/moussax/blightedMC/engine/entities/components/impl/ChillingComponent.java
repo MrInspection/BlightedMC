@@ -1,4 +1,4 @@
-package fr.moussax.blightedMC.engine.entities.affixes;
+package fr.moussax.blightedMC.engine.entities.components.impl;
 
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.components.EntityComponent;
@@ -13,19 +13,18 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.Objects;
 
-public final class ChillingAffix implements EntityComponent {
+/**
+ * Chilling component generating a rotating frost vortex that slows nearby players.
+ */
+public final class ChillingComponent implements EntityComponent {
 
     private static final double RADIUS = 6.0;
     private int tickCounter = 0;
 
     @Override
-    public String getId() { return "AFFIX_CHILLING"; }
-
-    @Override
-    public void onInit(LivingEntity entity) {}
-
-    @Override
-    public void onDestroy(LivingEntity entity) {}
+    public String getId() {
+        return "AFFIX_CHILLING";
+    }
 
     @Override
     public void onTick(BlightedEntity owner) {
@@ -49,19 +48,19 @@ public final class ChillingAffix implements EntityComponent {
             Particle.DustOptions iceDust = new Particle.DustOptions(Color.fromRGB(150, 230, 255), 1.0f);
             Objects.requireNonNull(center.getWorld()).spawnParticle(Particle.DUST, center.clone().add(x, 0.1, z), 1, 0, 0, 0, 0, iceDust);
 
-            double hx = Math.cos(angle + 0.1) * (RADIUS - 0.2);
-            double hz = Math.sin(angle + 0.1) * (RADIUS - 0.2);
+            double hazeX = Math.cos(angle + 0.1) * (RADIUS - 0.2);
+            double hazeZ = Math.sin(angle + 0.1) * (RADIUS - 0.2);
             Particle.DustOptions hazeDust = new Particle.DustOptions(Color.fromRGB(200, 255, 255), 0.6f);
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(hx, 0.15, hz), 1, 0, 0, 0, 0, hazeDust);
+            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(hazeX, 0.15, hazeZ), 1, 0, 0, 0, 0, hazeDust);
         }
 
         double innerAngle = -rotation * 2.0;
         for (int i = 0; i < 4; i++) {
             double offset = i * (Math.PI / 2);
-            double sX = Math.cos(innerAngle + offset) * (RADIUS * 0.4);
-            double sZ = Math.sin(innerAngle + offset) * (RADIUS * 0.4);
+            double spiralX = Math.cos(innerAngle + offset) * (RADIUS * 0.4);
+            double spiralZ = Math.sin(innerAngle + offset) * (RADIUS * 0.4);
 
-            center.getWorld().spawnParticle(Particle.WHITE_ASH, center.clone().add(sX, 0.2, sZ), 2, 0.1, 0.6, 0.1, 0.02);
+            center.getWorld().spawnParticle(Particle.WHITE_ASH, center.clone().add(spiralX, 0.2, spiralZ), 2, 0.1, 0.6, 0.1, 0.02);
         }
     }
 
@@ -76,17 +75,6 @@ public final class ChillingAffix implements EntityComponent {
 
         if (slowed && tickCounter == 0) {
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_POWDER_SNOW_STEP, 0.3f, 0.8f);
-        }
-    }
-
-    @Override
-    public EntityComponent clone() {
-        try {
-            ChillingAffix clone = (ChillingAffix) super.clone();
-            clone.tickCounter = 0;
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError(e);
         }
     }
 }
