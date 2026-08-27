@@ -40,7 +40,7 @@ public final class RecipePreviewManager {
             }
         }
 
-        for (ForgeRecipe forgeRecipe : ForgeRegistry.RECIPES) {
+        for (ForgeRecipe forgeRecipe : ForgeRegistry.getAll()) {
             if (forgeRecipe != null && forgeRecipe.getForgedItem() != null && forgeRecipe.getForgedItem().equals(targetItem)) {
                 recipes.add(forgeRecipe);
             }
@@ -52,7 +52,7 @@ public final class RecipePreviewManager {
             }
         }
 
-        for (ForgeRecipe forgeRecipe : ForgeRegistry.RECIPES) {
+        for (ForgeRecipe forgeRecipe : ForgeRegistry.getAll()) {
             if (forgeRecipe != null && isIngredientInForgeRecipe(targetItem, forgeRecipe) && !recipes.contains(forgeRecipe)) {
                 recipes.add(forgeRecipe);
             }

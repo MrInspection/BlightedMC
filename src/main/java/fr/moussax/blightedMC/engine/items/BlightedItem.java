@@ -7,6 +7,7 @@ import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.engine.items.recipes.RecipePreviewManager;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
+import fr.moussax.blightedMC.engine.items.rules.ItemRuleEngine;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
 import fr.moussax.blightedMC.utils.ItemBuilder;
@@ -30,15 +31,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Represents a custom BlightedMC item with persistent identity, rarity, abilities,
- * and gameplay rules.
+ * Custom item definition with persistent identity, rarity, abilities, and restriction rules.
  *
- * <p>This class extends {@link ItemBuilder} to provide fluent item construction
- * while adding custom item system behavior such as ability execution, set bonuses,
- * placement restrictions, interaction rules, and persistent item identification.</p>
- *
- * <p>Built items are identified through {@link #BLIGHTED_ID_KEY} and store their
- * rarity through {@link #BLIGHTED_RARITY_KEY} when {@link #toItemStack()} is called.</p>
+ * <p>Extends {@link ItemBuilder} to provide fluent item construction while integrating with the
+ * BlightedMC item system (ability execution, set bonuses, restriction rules, and recipe previews).
+ * Built stacks are marked with persistent metadata keys {@link #BLIGHTED_ID_KEY} and
+ * {@link #BLIGHTED_RARITY_KEY}.</p>
  */
 public final class BlightedItem extends ItemBuilder implements ItemRule, Supplier<ItemStack> {
 
@@ -55,22 +53,18 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     private FullSetBonus fullSetBonus;
     @Getter
     private final List<Ability> abilities = new ArrayList<>();
-    private final List<ItemRule> rules = new ArrayList<>();
-    /**
-     * -- GETTER --
-     *
-     * @return true if recipe preview is enabled for this item
-     */
+    @Getter
+    private final ItemRuleEngine ruleEngine = new ItemRuleEngine();
     @Getter
     private boolean recipePreviewEnabled = false;
 
     /**
-     * Creates a Blighted item from a material.
+     * Constructs a custom item definition from a base material.
      *
-     * @param itemId   the unique item identifier
-     * @param type     the item category
-     * @param rarity   the item rarity
-     * @param material the base material
+     * @param itemId   unique item identifier
+     * @param type     item category
+     * @param rarity   item rarity
+     * @param material base material
      */
     public BlightedItem(@NonNull String itemId, @NonNull ItemType type, @NonNull ItemRarity rarity, @NonNull Material material) {
         super(material);
@@ -80,14 +74,12 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     }
 
     /**
-     * Creates a Blighted item from an existing item stack.
+     * Constructs a custom item definition from an existing item stack.
      *
-     * <p>The provided item is copied through {@link ItemBuilder}.</p>
-     *
-     * @param itemId    the unique item identifier
-     * @param type      the item category
-     * @param rarity    the item rarity
-     * @param itemStack the base item stack
+     * @param itemId    unique item identifier
+     * @param type      item category
+     * @param rarity    item rarity
+     * @param itemStack base item stack
      */
     public BlightedItem(@NonNull String itemId, @NonNull ItemType type, @NonNull ItemRarity rarity, @NonNull ItemStack itemStack) {
         super(itemStack);
@@ -97,19 +89,19 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     }
 
     /**
-     * Adds an ability to this item and injects its lore representation.
+     * Adds an ability to this item and appends its formatted description to the lore.
      *
-     * @param ability the ability to add
+     * @param ability ability to add
      */
     public void addAbility(Ability ability) {
         addAbility(ability, true);
     }
 
     /**
-     * Adds an ability to this item.
+     * Adds an ability to this item with optional lore injection.
      *
-     * @param ability    the ability to add
-     * @param injectLore whether the ability description should be added to the item lore
+     * @param ability    ability to add
+     * @param injectLore {@code true} to append formatted ability description to lore
      */
     public void addAbility(Ability ability, boolean injectLore) {
         if (ability == null) return;
@@ -122,7 +114,7 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     }
 
     /**
-     * Adds multiple abilities to this item and injects their lore representations.
+     * Adds multiple abilities to this item and appends their descriptions to the lore.
      *
      * @param abilities abilities to add
      */
@@ -133,21 +125,19 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     }
 
     /**
-     * Sets the full set bonus of this item.
+     * Sets the full-set bonus for this item and appends its description to the lore.
      *
-     * <p>The bonus description is automatically added to the item lore by default.</p>
-     *
-     * @param fullSetBonus the set bonus, or {@code null} to remove it
+     * @param fullSetBonus set bonus to assign, or {@code null} to remove
      */
     public void setFullSetBonus(FullSetBonus fullSetBonus) {
         setFullSetBonus(fullSetBonus, true);
     }
 
     /**
-     * Sets the full set bonus of this item with optional lore injection.
+     * Sets the full-set bonus for this item with optional lore injection.
      *
-     * @param fullSetBonus the set bonus, or {@code null} to remove it
-     * @param injectLore   whether the bonus description should be added to the item lore
+     * @param fullSetBonus set bonus to assign, or {@code null} to remove
+     * @param injectLore   {@code true} to append set bonus description to lore
      */
     public void setFullSetBonus(FullSetBonus fullSetBonus, boolean injectLore) {
         this.fullSetBonus = fullSetBonus;
@@ -160,53 +150,47 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     }
 
     /**
-     * Adds a gameplay rule to this item.
+     * Registers a gameplay restriction rule for this item.
      *
-     * @param rule the rule to add
+     * @param rule restriction rule to add
      */
     public void addRule(ItemRule rule) {
-        rules.add(rule);
+        ruleEngine.addRule(rule);
     }
 
     /**
      * Enables recipe preview support for this item.
-     *
-     * <p>When enabled, the item can be used to open its associated recipe
-     * preview through the recipe preview system.</p>
      */
     public void enableRecipePreview() {
         this.recipePreviewEnabled = true;
     }
 
     /**
-     * Opens this item's recipe preview for a player.
+     * Opens the recipe preview interface for a player.
      *
-     * <p>If a parent menu is provided, the preview can use it for
-     * back-navigation.</p>
-     *
-     * @param player     the player viewing the recipe preview
-     * @param parentMenu the parent menu to return to, or {@code null}
-     *                   if no parent menu exists
-     * @return {@code true} if the recipe preview was opened successfully;
-     * {@code false} otherwise
+     * @param player     player viewing the preview
+     * @param parentMenu parent menu to return to, or {@code null} for no parent
+     * @return {@code true} if the preview opened successfully, {@code false} otherwise
      */
     public boolean openRecipePreview(@NonNull Player player, @Nullable Menu parentMenu) {
         return RecipePreviewManager.openPreview(player, this, parentMenu);
     }
 
     /**
-     * Opens this item's recipe preview for a player without a parent menu.
+     * Opens the recipe preview interface for a player without a parent menu.
      *
-     * @param player the player viewing the recipe preview
-     * @return {@code true} if the recipe preview was opened successfully;
-     * {@code false} otherwise
+     * @param player player viewing the preview
+     * @return {@code true} if the preview opened successfully, {@code false} otherwise
      */
     public boolean openRecipePreview(@NonNull Player player) {
         return openRecipePreview(player, null);
     }
 
     /**
-     * {@inheritDoc}
+     * Sets the item display name, prefixing it with the rarity color code.
+     *
+     * @param displayName new display name
+     * @return this item builder instance
      */
     @Override
     public BlightedItem setDisplayName(@NonNull String displayName) {
@@ -215,14 +199,12 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     }
 
     /**
-     * Resolves a Blighted item from an item stack.
+     * Resolves the registered custom item definition corresponding to an item stack.
      *
-     * <p>The item stack must contain a valid {@link #BLIGHTED_ID_KEY} value.
-     * Returns {@code null} when the stack is not a registered Blighted item.</p>
-     *
-     * @param itemStack the item stack to resolve
-     * @return the registered Blighted item, or {@code null} if none exists
+     * @param itemStack item stack to inspect
+     * @return registered custom item definition, or {@code null} if stack is non-custom or unregistered
      */
+    @Nullable
     public static BlightedItem fromItemStack(@NonNull ItemStack itemStack) {
         if (itemStack.getType().isAir()) return null;
 
@@ -237,10 +219,10 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     }
 
     /**
-     * Triggers all abilities matching the provided event.
+     * Triggers active abilities on this item that match a triggering event.
      *
-     * @param blightedPlayer the player owning the item
-     * @param event          the event that may trigger abilities
+     * @param blightedPlayer player context executing the ability
+     * @param event          triggering event
      */
     public void triggerAbilities(BlightedPlayer blightedPlayer, Event event) {
         for (Ability ability : abilities) {
@@ -254,10 +236,10 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     private ItemConsumeHandler consumeHandler;
 
     /**
-     * Registers an explicit consume handler callback invoked with the consuming player and item stack.
+     * Registers an item consume handler receiving both the player and item stack.
      *
-     * @param consumeHandler explicit item consume handler callback
-     * @return this item manager for chaining
+     * @param consumeHandler consume handler callback
+     * @return this item instance for method chaining
      */
     public BlightedItem onConsume(ItemConsumeHandler consumeHandler) {
         this.consumeHandler = consumeHandler;
@@ -265,20 +247,18 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     }
 
     /**
-     * Registers a simple consume handler callback invoked directly with the consuming player.
+     * Registers a simple consume handler receiving the consuming player.
      *
-     * @param consumeHandler consumer callback receiving the player
-     * @return this item manager for chaining
+     * @param consumeHandler consume callback receiving the player
      */
-    public BlightedItem onConsume(Consumer<Player> consumeHandler) {
+    public void onConsume(Consumer<Player> consumeHandler) {
         this.consumeHandler = (player, _) -> consumeHandler.accept(player);
-        return this;
     }
 
     /**
-     * Checks whether this custom item is classified as equippable gear (weapon, armor, or tool).
+     * Evaluates whether this item is classified as equippable gear (weapon, armor, or tool).
      *
-     * @return {@code true} if equipment, {@code false} otherwise
+     * @return {@code true} if equippable equipment, {@code false} otherwise
      */
     public boolean isEquipment() {
         if (itemType == null || itemType.getCategory() == null) return false;
@@ -289,54 +269,45 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     }
 
     /**
-     * Evaluates whether any registered rule restricts block placement for this item.
+     * Evaluates whether block placement should be restricted for an item stack.
      *
      * @param event     block place event
      * @param itemStack item stack being placed
-     * @return {@code true} if placement should be restricted, {@code false} otherwise
+     * @return {@code true} if placement is restricted, {@code false} otherwise
      */
     @Override
     public boolean shouldRestrictPlace(BlockPlaceEvent event, ItemStack itemStack) {
-        for (ItemRule rule : rules) {
-            if (rule.shouldRestrictPlace(event, itemStack)) return true;
-        }
-        return false;
+        return ruleEngine.shouldRestrictPlace(event, itemStack);
     }
 
     /**
-     * Evaluates whether any registered rule restricts player interaction for this item.
+     * Evaluates whether player interaction should be restricted for an item stack.
      *
      * @param event     player interact event
      * @param itemStack item stack being interacted with
-     * @return {@code true} if interaction should be restricted, {@code false} otherwise
+     * @return {@code true} if interaction is restricted, {@code false} otherwise
      */
     @Override
     public boolean shouldRestrictInteract(PlayerInteractEvent event, ItemStack itemStack) {
-        for (ItemRule rule : rules) {
-            if (rule.shouldRestrictInteract(event, itemStack)) return true;
-        }
-        return false;
+        return ruleEngine.shouldRestrictInteract(event, itemStack);
     }
 
     /**
-     * Evaluates whether any registered rule restricts generic event usage for this item.
+     * Evaluates whether generic usage should be restricted for an event and item stack.
      *
      * @param event     triggering event
      * @param itemStack item stack being used
-     * @return {@code true} if usage should be restricted, {@code false} otherwise
+     * @return {@code true} if usage is restricted, {@code false} otherwise
      */
     @Override
     public boolean shouldRestrictUse(Event event, ItemStack itemStack) {
-        for (ItemRule rule : rules) {
-            if (rule.shouldRestrictUse(event, itemStack)) return true;
-        }
-        return false;
+        return ruleEngine.shouldRestrictUse(event, itemStack);
     }
 
     /**
      * Builds the item stack and applies BlightedMC persistent metadata.
      *
-     * @return the configured item stack
+     * @return configured item stack
      */
     @Override
     public ItemStack toItemStack() {
@@ -346,11 +317,9 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     }
 
     /**
-     * Creates an item stack instance.
+     * Creates an item stack instance by delegating to {@link #toItemStack()}.
      *
-     * <p>This method delegates to {@link #toItemStack()}.</p>
-     *
-     * @return a newly built item stack
+     * @return newly built item stack
      */
     @Override
     public ItemStack get() {

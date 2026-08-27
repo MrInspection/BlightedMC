@@ -11,9 +11,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Encapsulates rule registration and evaluation logic for custom items.
+ * Evaluates behavioral restriction rules for custom items.
  *
- * // ponytail: simplified — encapsulates rule collection and evaluation into a deep module.
+ * <p>An {@code ItemRuleEngine} maintains a collection of {@link ItemRule} instances and evaluates
+ * whether actions such as block placement, player interaction, or generic event usage should be restricted.</p>
  */
 public final class ItemRuleEngine {
 
@@ -28,18 +29,18 @@ public final class ItemRuleEngine {
     /**
      * Registers an item restriction rule.
      *
-     * @param rule rule to register
+     * @param rule restriction rule to add
      */
     public void addRule(@NonNull ItemRule rule) {
         this.rules.add(rule);
     }
 
     /**
-     * Evaluates whether block placement should be restricted.
+     * Evaluates whether block placement should be restricted for an item stack.
      *
      * @param event     block place event
      * @param itemStack item stack being placed
-     * @return {@code true} if placement is restricted (cancel event), {@code false} otherwise
+     * @return {@code true} if placement is restricted, {@code false} otherwise
      */
     public boolean shouldRestrictPlace(BlockPlaceEvent event, ItemStack itemStack) {
         for (ItemRule rule : rules) {
@@ -49,11 +50,11 @@ public final class ItemRuleEngine {
     }
 
     /**
-     * Evaluates whether player interaction should be restricted.
+     * Evaluates whether player interaction should be restricted for an item stack.
      *
      * @param event     player interact event
      * @param itemStack item stack being interacted with
-     * @return {@code true} if interaction is restricted (cancel event), {@code false} otherwise
+     * @return {@code true} if interaction is restricted, {@code false} otherwise
      */
     public boolean shouldRestrictInteract(PlayerInteractEvent event, ItemStack itemStack) {
         for (ItemRule rule : rules) {
@@ -63,11 +64,11 @@ public final class ItemRuleEngine {
     }
 
     /**
-     * Evaluates whether generic usage should be restricted for an event.
+     * Evaluates whether generic usage should be restricted for an event and item stack.
      *
      * @param event     triggering event
      * @param itemStack item stack being used
-     * @return {@code true} if usage is restricted (cancel event), {@code false} otherwise
+     * @return {@code true} if usage is restricted, {@code false} otherwise
      */
     public boolean shouldRestrictUse(Event event, ItemStack itemStack) {
         for (ItemRule rule : rules) {
@@ -77,9 +78,9 @@ public final class ItemRuleEngine {
     }
 
     /**
-     * Returns an unmodifiable list of registered rules.
+     * Returns an unmodifiable list of all registered restriction rules.
      *
-     * @return registered rules
+     * @return unmodifiable view of registered rules
      */
     public List<ItemRule> getRules() {
         return Collections.unmodifiableList(rules);
