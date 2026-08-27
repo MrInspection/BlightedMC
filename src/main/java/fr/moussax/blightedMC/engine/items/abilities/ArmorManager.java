@@ -65,7 +65,7 @@ public final class ArmorManager {
 
                 newBonus.setPlayer(player);
                 player.addActiveBonus(newBonus);
-            } catch (Exception e) {
+            } catch (Exception exception) {
                 Log.error("ArmorManager", "Failed to activate bonus " + bonusClass.getSimpleName());
             }
         });

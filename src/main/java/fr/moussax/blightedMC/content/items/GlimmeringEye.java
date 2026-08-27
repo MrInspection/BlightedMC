@@ -5,7 +5,6 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
-import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
 import fr.moussax.blightedMC.registry.RegistryModule;
 import java.util.function.Consumer;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
@@ -18,7 +17,7 @@ public class GlimmeringEye implements RegistryModule<Consumer<BlightedItem>> {
         BlightedItem glimmeringEye = new BlightedItem("GLIMMERING_EYE", ItemType.UNCATEGORIZED, ItemRarity.RARE, Material.ENDER_EYE);
         glimmeringEye.setDisplayName("Glimmering Eye");
 
-        Ability voidStep = new Ability(new VoidStepAbility(), "Voidstep", AbilityType.RIGHT_CLICK);
+        Ability voidStep = Ability.rightClick("Voidstep", new VoidStepAbility());
         glimmeringEye.addEnchantmentGlint();
         glimmeringEye.addAbility(voidStep);
         glimmeringEye.addLore("", ItemRarity.RARE.getName());

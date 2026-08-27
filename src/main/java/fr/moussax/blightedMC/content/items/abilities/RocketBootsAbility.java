@@ -1,8 +1,7 @@
 package fr.moussax.blightedMC.content.items.abilities;
 
+import fr.moussax.blightedMC.engine.items.abilities.AbstractFullSetBonus;
 import fr.moussax.blightedMC.engine.items.abilities.ArmorManager;
-import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -19,8 +18,17 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class RocketBootsAbility implements FullSetBonus, Listener {
-    private BlightedPlayer player;
+/**
+ * Piece bonus granting double jump propulsion to players wearing Rocket Boots.
+ */
+public class RocketBootsAbility extends AbstractFullSetBonus implements Listener {
+
+    /**
+     * Constructs a Rocket Boots piece bonus requiring 1 piece.
+     */
+    public RocketBootsAbility() {
+        super(1);
+    }
 
     @Override
     public String getName() {
@@ -43,58 +51,38 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
 
     @Override
     public void startAbilityEffect() {
-        if (player == null) return;
-        Player p = player.getPlayer();
-        p.setAllowFlight(true);
+        if (getAbilityOwner() == null) return;
+        Player player = getAbilityOwner().getPlayer();
+        player.setAllowFlight(true);
     }
 
     @Override
     public void stopAbilityEffect() {
-        if (player == null) return;
-        Player p = player.getPlayer();
+        if (getAbilityOwner() == null) return;
+        Player player = getAbilityOwner().getPlayer();
 
-        if (p.getGameMode() != GameMode.CREATIVE && p.getGameMode() != GameMode.SPECTATOR) {
-            p.setAllowFlight(false);
-            p.setFlying(false);
+        if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
+            player.setAllowFlight(false);
+            player.setFlying(false);
         }
-    }
-
-    @Override
-    public int getPieces() {
-        return 1;
-    }
-
-    @Override
-    public int getMaxPieces() {
-        return 1;
-    }
-
-    @Override
-    public void setPlayer(BlightedPlayer player) {
-        this.player = player;
-    }
-
-    @Override
-    public BlightedPlayer getAbilityOwner() {
-        return this.player;
     }
 
     @EventHandler
     public void onPlayerToggleFlight(PlayerToggleFlightEvent event) {
-        Player p = event.getPlayer();
+        Player player = event.getPlayer();
 
-        if (!isAbilityOwner(p)) return;
-        if (p.getGameMode() == GameMode.CREATIVE || p.getGameMode() == GameMode.SPECTATOR) return;
+        if (!isAbilityOwner(player)) return;
+        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) return;
 
-        if (!p.isFlying()) {
+        if (!player.isFlying()) {
             event.setCancelled(true);
-            p.setAllowFlight(false);
-            p.setVelocity(p.getLocation().getDirection().setY(0.5).multiply(1.25));
+            player.setAllowFlight(false);
+            player.setVelocity(player.getLocation().getDirection().setY(0.5).multiply(1.25));
 
-            applyDurabilityDamageToBoots(p);
+            applyDurabilityDamageToBoots(player);
 
-            p.getWorld().spawnParticle(Particle.CLOUD, p.getLocation(), 12, 0.2, 0.05, 0.2, 0.001);
-            p.getWorld().playSound(p.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 60f, 0f);
+            player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation(), 12, 0.2, 0.05, 0.2, 0.001);
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 60f, 0f);
         }
     }
 
@@ -141,7 +129,7 @@ public class RocketBootsAbility implements FullSetBonus, Listener {
         if (durabilityDamage >= maxDurability) {
             player.getInventory().setBoots(null);
             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
-            ArmorManager.updatePlayerArmor(this.player);
+            ArmorManager.updatePlayerArmor(getAbilityOwner());
         } else {
             damageable.setDamage(durabilityDamage);
             boots.setItemMeta(meta);

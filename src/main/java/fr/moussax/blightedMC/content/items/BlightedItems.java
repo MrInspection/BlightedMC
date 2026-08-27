@@ -93,8 +93,8 @@ public class BlightedItems implements RegistryModule<Consumer<BlightedItem>> {
         blightedGemstone.unstackable();
         blightedGemstone.addRule(ItemRule.PREVENT_PLACEMENT);
         blightedGemstone.addAbility(
-                new Ability(new GemsItem.BlightedGemstoneAbility(), "Consume Gems", AbilityType.RIGHT_CLICK)
-                , false
+                Ability.rightClick("Consume Gems", new GemsItem.BlightedGemstoneAbility()),
+                false
         );
 
         registry.accept(blightedBanner);

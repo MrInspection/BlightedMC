@@ -5,7 +5,6 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
-import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
 import fr.moussax.blightedMC.registry.RegistryModule;
 import java.util.function.Consumer;
 import org.bukkit.Material;
@@ -25,7 +24,7 @@ public class Bonemerang implements RegistryModule<Consumer<BlightedItem>> {
                 "",
                 ItemRarity.EPIC.getName() + " BOW"
         );
-        bonemerang.addAbility(new Ability(new BonemerangAbility(), "Swing", AbilityType.RIGHT_CLICK), false);
+        bonemerang.addAbility(Ability.rightClick("Swing", new BonemerangAbility()), false);
         bonemerang.addEnchantmentGlint();
         bonemerang.unstackable();
 

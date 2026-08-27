@@ -5,7 +5,6 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
-import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
 import fr.moussax.blightedMC.registry.RegistryModule;
 import java.util.function.Consumer;
 import org.bukkit.Material;
@@ -30,7 +29,7 @@ public class KnightsSword implements RegistryModule<Consumer<BlightedItem>> {
                 ItemRarity.LEGENDARY.getName() + " LONGSWORD"
         );
 
-        knightSword.addAbility(new Ability(new KnightsSlamAbility(), "Knight's Slam", AbilityType.RIGHT_CLICK));
+        knightSword.addAbility(Ability.rightClick("Knight's Slam", new KnightsSlamAbility()), false);
         knightSword.addAttributeModifier(Attribute.ATTACK_DAMAGE, 10, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
         knightSword.addAttributeModifier(Attribute.ATTACK_SPEED, 1.2, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
 

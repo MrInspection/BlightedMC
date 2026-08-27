@@ -5,7 +5,6 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
-import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
 import fr.moussax.blightedMC.registry.RegistryModule;
 import org.bukkit.Material;
 
@@ -34,10 +33,9 @@ public class BlightedTools implements RegistryModule<Consumer<BlightedItem>> {
         voidRod.addLore("");
         voidRod.addLore(ItemRarity.RARE.getName() + " ROD");
 
-
         BlightedItem demoPickaxe = new BlightedItem("DEMO_PICKAXE", ItemType.PICKAXE, ItemRarity.SPECIAL, Material.DIAMOND_PICKAXE);
         demoPickaxe.setDisplayName("Demo Pickaxe");
-        demoPickaxe.addAbility(new Ability(new VeinmineAbility(), "Veinmine", AbilityType.PASSIVE));
+        demoPickaxe.addAbility(Ability.passive("Veinmine", new VeinmineAbility()));
         demoPickaxe.addLore("§8Demonstration tool");
 
         registry.accept(demoPickaxe);

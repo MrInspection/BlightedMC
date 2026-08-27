@@ -12,9 +12,22 @@ import java.time.Duration;
 
 import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
+/**
+ * Validates player resources, checks active cooldowns, and executes custom item abilities.
+ */
 public final class AbilityExecutor {
-    private AbilityExecutor() {}
 
+    private AbilityExecutor() {
+    }
+
+    /**
+     * Evaluates cooldowns, verifies mana sufficiency, and executes the specified ability.
+     *
+     * @param <T>     event type
+     * @param ability ability to execute
+     * @param player  player context triggering the ability
+     * @param event   triggering Bukkit event
+     */
     public static <T extends Event> void execute(Ability ability, BlightedPlayer player, T event) {
         AbilityManager<T> manager = castManager(ability.manager());
 
@@ -64,8 +77,8 @@ public final class AbilityExecutor {
             if (manager.getCooldownSeconds() > 0) {
                 player.setCooldown(manager.getClass(), ability.type(), manager.getCooldownSeconds());
             }
-        } catch (Exception e) {
-            Log.error("AbilityExecutor", "Ability execution failed: " + e.getClass().getSimpleName());
+        } catch (Exception exception) {
+            Log.error("AbilityExecutor", "Ability execution failed: " + exception.getClass().getSimpleName());
             cancel(event);
         }
     }

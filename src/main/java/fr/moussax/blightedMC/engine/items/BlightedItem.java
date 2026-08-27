@@ -120,18 +120,41 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     }
 
     /**
+     * Adds multiple abilities to this item and injects their lore representations.
+     *
+     * @param abilities abilities to add
+     */
+    public void addAbilities(Ability... abilities) {
+        for (Ability ability : abilities) {
+            addAbility(ability, true);
+        }
+    }
+
+    /**
      * Sets the full set bonus of this item.
      *
-     * <p>The bonus description is automatically added to the item lore.</p>
+     * <p>The bonus description is automatically added to the item lore by default.</p>
      *
      * @param fullSetBonus the set bonus, or {@code null} to remove it
      */
     public void setFullSetBonus(FullSetBonus fullSetBonus) {
+        setFullSetBonus(fullSetBonus, true);
+    }
+
+    /**
+     * Sets the full set bonus of this item with optional lore injection.
+     *
+     * @param fullSetBonus the set bonus, or {@code null} to remove it
+     * @param injectLore   whether the bonus description should be added to the item lore
+     */
+    public void setFullSetBonus(FullSetBonus fullSetBonus, boolean injectLore) {
         this.fullSetBonus = fullSetBonus;
         if (fullSetBonus == null) return;
 
-        List<String> formattedLore = fullSetBonus.getBonusLore();
-        this.addLore(formattedLore.toArray(new String[0]));
+        if (injectLore) {
+            List<String> formattedLore = fullSetBonus.getBonusLore();
+            this.addLore(formattedLore.toArray(new String[0]));
+        }
     }
 
     /**

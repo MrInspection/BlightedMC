@@ -118,8 +118,8 @@ public interface FullSetBonus {
             FullSetBonus clone = this.getClass().getDeclaredConstructor().newInstance();
             clone.setPlayer(player);
             return clone;
-        } catch (Exception e) {
-            throw new IllegalStateException("Cannot instantiate FullSetBonus", e);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Cannot instantiate FullSetBonus", exception);
         }
     }
 

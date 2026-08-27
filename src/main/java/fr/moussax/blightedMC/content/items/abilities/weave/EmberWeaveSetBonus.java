@@ -2,8 +2,7 @@ package fr.moussax.blightedMC.content.items.abilities.weave;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.fishing.modifiers.FishingSpeedModifier;
-import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.engine.player.BlightedPlayer;
+import fr.moussax.blightedMC.engine.items.abilities.AbstractFullSetBonus;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -14,10 +13,19 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public sealed class EmberWeaveSetBonus implements FullSetBonus, FishingSpeedModifier permits MagmaweaveSetBonus {
-    protected BlightedPlayer blightedPlayer;
+/**
+ * Full set bonus granting fire resistance and lava fishing speed boost for Emberweave armor.
+ */
+public sealed class EmberWeaveSetBonus extends AbstractFullSetBonus implements FishingSpeedModifier permits MagmaweaveSetBonus {
     protected BukkitTask passiveTask;
     protected boolean isActive = false;
+
+    /**
+     * Constructs an Emberweave set bonus requiring 4 armor pieces.
+     */
+    public EmberWeaveSetBonus() {
+        super(4);
+    }
 
     @Override
     public String getName() {
@@ -48,9 +56,9 @@ public sealed class EmberWeaveSetBonus implements FullSetBonus, FishingSpeedModi
 
     @Override
     public void startAbilityEffect() {
-        if (isActive || blightedPlayer == null) return;
+        if (isActive || getAbilityOwner() == null) return;
 
-        Player player = blightedPlayer.getPlayer();
+        Player player = getAbilityOwner().getPlayer();
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_FIRECHARGE_USE, 1.0f, 0.5f);
 
         this.isActive = true;
@@ -106,28 +114,8 @@ public sealed class EmberWeaveSetBonus implements FullSetBonus, FishingSpeedModi
             passiveTask = null;
         }
 
-        if (blightedPlayer == null) return;
-        Player player = blightedPlayer.getPlayer();
+        if (getAbilityOwner() == null) return;
+        Player player = getAbilityOwner().getPlayer();
         player.removePotionEffect(PotionEffectType.FIRE_RESISTANCE);
-    }
-
-    @Override
-    public int getPieces() {
-        return 4;
-    }
-
-    @Override
-    public int getMaxPieces() {
-        return 4;
-    }
-
-    @Override
-    public void setPlayer(BlightedPlayer player) {
-        this.blightedPlayer = player;
-    }
-
-    @Override
-    public BlightedPlayer getAbilityOwner() {
-        return this.blightedPlayer;
     }
 }
