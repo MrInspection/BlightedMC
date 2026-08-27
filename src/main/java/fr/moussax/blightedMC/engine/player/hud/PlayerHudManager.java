@@ -32,15 +32,14 @@ public final class PlayerHudManager {
         actionBarService.registerSection(ActionbarSection.of(SECTION_GEMS, 0, player -> {
             BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
             if (blightedPlayer == null) return null;
-            return "§d" + Formatter.formatDecimalWithCommas(blightedPlayer.getGemsManager().getGems()) + "✵ Gems";
+            return "§d" + Formatter.formatDecimalWithCommas(blightedPlayer.getGems()) + "✵ Gems";
         }));
 
         actionBarService.registerSection(ActionbarSection.of(SECTION_MANA, 10, player -> {
             BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
             if (blightedPlayer == null) return null;
-            var mana = blightedPlayer.getMana();
-            return "§b" + Formatter.formatDouble(mana.getCurrentMana(), 0) + "/"
-                    + Formatter.formatDouble(mana.getMaxMana(), 0) + "✎ Mana";
+            return "§b" + Formatter.formatDouble(blightedPlayer.getCurrentMana(), 0) + "/"
+                    + Formatter.formatDouble(blightedPlayer.getMaxMana(), 0) + "✎ Mana";
         }));
     }
 }

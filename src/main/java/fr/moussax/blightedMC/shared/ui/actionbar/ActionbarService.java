@@ -174,8 +174,7 @@ public final class ActionbarService implements Listener {
             try {
                 renderPlayer(player);
             } catch (Exception exception) {
-                Log.warn("ActionbarService", "Failed to render for "
-                        + player.getName() + ": " + exception.getMessage());
+                Log.warn("ActionbarService", "Failed to render for " + player.getName() + ": " + exception.getMessage());
             }
         }
     }

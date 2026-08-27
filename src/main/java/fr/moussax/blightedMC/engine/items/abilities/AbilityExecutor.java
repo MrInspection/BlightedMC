@@ -44,7 +44,7 @@ public final class AbilityExecutor {
         }
 
         int manaCost = manager.getManaCost();
-        if (player.getMana().getCurrentMana() < manaCost) {
+        if (!player.hasMana(manaCost)) {
             player.getPlayer().playSound(
                     player.getPlayer().getLocation(),
                     Sound.ENTITY_ENDERMAN_TELEPORT,
@@ -68,7 +68,7 @@ public final class AbilityExecutor {
             if (manager.cancelEvent(true)) cancel(event);
 
             if (manaCost > 0) {
-                player.getMana().consumeMana(manaCost);
+                player.consumeMana(manaCost);
                 ActionbarService.ifPresent(service -> service.renderPlayer(player.getPlayer()));
             }
 

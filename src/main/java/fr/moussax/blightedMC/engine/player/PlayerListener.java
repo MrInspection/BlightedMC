@@ -54,13 +54,7 @@ public final class PlayerListener implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
-        // Clear NMS AI targets to prevent stalling on offline players
-        for (BlightedEntity blighted : BlightedEntitiesListener.getActiveEntities()) {
-            LivingEntity entity = blighted.getEntity();
-            if (entity instanceof Mob mob && player.equals(mob.getTarget())) {
-                mob.setTarget(null);
-            }
-        }
+        clearTargetedMobs(player);
 
         BlightedPlayer blighted = BlightedPlayer.getBlightedPlayer(player);
         if (blighted != null) {
@@ -74,13 +68,7 @@ public final class PlayerListener implements Listener {
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player deadPlayer = event.getEntity();
 
-        // Clear NMS AI targets to prevent pathfinding to the distant respawn location
-        for (BlightedEntity blighted : BlightedEntitiesListener.getActiveEntities()) {
-            LivingEntity entity = blighted.getEntity();
-            if (entity instanceof Mob mob && deadPlayer.equals(mob.getTarget())) {
-                mob.setTarget(null);
-            }
-        }
+        clearTargetedMobs(deadPlayer);
 
         String deathMessage = event.getDeathMessage();
         if (deathMessage == null) return;
@@ -107,12 +95,21 @@ public final class PlayerListener implements Listener {
             return;
         }
 
-        String strippedMsg = ChatColor.stripColor(deathMessage);
+        String strippedMessage = ChatColor.stripColor(deathMessage);
         String strippedKiller = ChatColor.stripColor(customNameWithHealth != null ? customNameWithHealth : killer.getName());
 
-        if (strippedMsg.contains(strippedKiller)) {
-            String action = strippedMsg.replace(victimName, "").replace(strippedKiller, "").trim();
+        if (strippedMessage.contains(strippedKiller)) {
+            String action = strippedMessage.replace(victimName, "").replace(strippedKiller, "").trim();
             event.setDeathMessage(String.format("§r%s %s %s", victimName, action, blightedCreature));
+        }
+    }
+
+    private void clearTargetedMobs(Player targetPlayer) {
+        for (BlightedEntity blighted : BlightedEntitiesListener.getActiveEntities()) {
+            LivingEntity entity = blighted.getEntity();
+            if (entity instanceof Mob mob && targetPlayer.equals(mob.getTarget())) {
+                mob.setTarget(null);
+            }
         }
     }
 }
