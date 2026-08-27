@@ -27,6 +27,6 @@ public interface EntityImmunity {
      * @return immunity notification message
      */
     default String getImmunityMessage() {
-        return "§4 ■ §cThis creature is immune to this type of damage!";
+        return "§c This creature is immune to this type of damage!";
     }
 }

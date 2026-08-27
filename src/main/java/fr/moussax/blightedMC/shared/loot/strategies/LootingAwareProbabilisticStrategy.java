@@ -51,7 +51,6 @@ public final class LootingAwareProbabilisticStrategy implements LootSelectionStr
             }
         }
 
-        // ponytail: kept — looting-aware strategy sorts by base probability post-shuffle when capping drops
         return SelectionCapper.capToMaxDrops(selected, maxDrops, context.random(), (firstEntry, secondEntry) -> {
             double firstProbability = firstEntry instanceof LootEntry.Probabilistic probabilisticFirst ? probabilisticFirst.probability() : 1.0;
             double secondProbability = secondEntry instanceof LootEntry.Probabilistic probabilisticSecond ? probabilisticSecond.probability() : 1.0;

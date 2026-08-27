@@ -57,7 +57,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
 
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
         int currentLevel = player.getLevel();
-        double currentGems = blightedPlayer != null ? blightedPlayer.getGemsManager().getGems() : 0;
+        double currentGems = blightedPlayer != null ? blightedPlayer.getGems() : 0;
 
         if (initialCanInvoke != this.canInvoke || lastPlayerLevel != currentLevel || lastPlayerGems != currentGems) {
             this.lastPlayerLevel = currentLevel;
@@ -147,7 +147,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
 
         boolean hasItems = requiredCounts.entrySet().stream()
                 .allMatch(e -> inventoryCounts.getOrDefault(e.getKey(), 0) >= e.getValue());
-        boolean hasGems = blightedPlayer.getGemsManager().hasEnoughGems(ritual.getGemsCost());
+        boolean hasGems = blightedPlayer.hasGems(ritual.getGemsCost());
         boolean hasXp = player.getLevel() >= ritual.getLevelCost();
 
         this.canInvoke = hasItems && hasGems && hasXp;

@@ -2,10 +2,10 @@ package fr.moussax.blightedMC.content.entities.bosses;
 
 import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
-import fr.moussax.blightedMC.engine.entities.EntityImmunities;
-import fr.moussax.blightedMC.engine.entities.EntityResistance;
-import fr.moussax.blightedMC.engine.entities.EntityResistances;
-import fr.moussax.blightedMC.engine.entities.immunity.DamageType;
+import fr.moussax.blightedMC.engine.entities.defense.DamageType;
+import fr.moussax.blightedMC.engine.entities.defense.EntityImmunities;
+import fr.moussax.blightedMC.engine.entities.defense.EntityResistance;
+import fr.moussax.blightedMC.engine.entities.defense.EntityResistances;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.debug.Log;

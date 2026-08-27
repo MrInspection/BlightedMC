@@ -4,7 +4,7 @@ import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.attachment.AttachmentRole;
 import fr.moussax.blightedMC.engine.entities.attachment.EntityAttachment;
-import fr.moussax.blightedMC.engine.entities.immunity.EntityImmunity;
+import fr.moussax.blightedMC.engine.entities.defense.EntityImmunity;
 import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import org.bukkit.Bukkit;

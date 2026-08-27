@@ -44,7 +44,7 @@ public final class AncientRitualsMenu extends Menu {
     public AncientRitualsMenu(Menu previousMenu) {
         super("Ancient Rituals", 54);
         this.previousMenu = previousMenu;
-        this.cachedRituals = new ArrayList<>(RitualRegistry.REGISTRY);
+        this.cachedRituals = new ArrayList<>(RitualRegistry.getAll());
         this.cachedRituals.sort(Comparator.comparing(
                 ritual -> ritual.getSummonedCreature() != null
                         ? ritual.getSummonedCreature().getName()

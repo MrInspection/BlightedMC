@@ -13,8 +13,6 @@ import java.util.Map;
 
 /**
  * Encapsulates damage immunities and type resistance rules for an entity.
- *
- * // ponytail: simplified — encapsulates reflection annotation parsing and defense calculations into a deep value object.
  */
 public final class EntityDefenses {
 
@@ -25,6 +23,18 @@ public final class EntityDefenses {
      * Constructs an empty defense profile.
      */
     public EntityDefenses() {
+    }
+
+    /**
+     * Creates a defensive copy of this defense profile.
+     *
+     * @return a new EntityDefenses instance with identical rules
+     */
+    public EntityDefenses copy() {
+        EntityDefenses copy = new EntityDefenses();
+        copy.immunities.addAll(this.immunities);
+        copy.resistances.putAll(this.resistances);
+        return copy;
     }
 
     /**
