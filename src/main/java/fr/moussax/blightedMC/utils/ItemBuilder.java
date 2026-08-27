@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.utils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.moussax.blightedMC.shared.scheduling.PluginContext;
+import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -782,8 +783,8 @@ public class ItemBuilder {
                 String nbtString = "{id:\"" + type.getKeyOrThrow() + "\"}";
                 EntitySnapshot snapshot = Bukkit.getEntityFactory().createEntitySnapshot(nbtString);
                 eggMeta.setSpawnedEntity(snapshot);
-            } catch (IllegalArgumentException e) {
-                PluginContext.get().getLogger().warning("Failed to create EntitySnapshot for type: " + type.name());
+            } catch (IllegalArgumentException _) {
+                Log.warn("ItemBuilder", "Failed to create EntitySnapshot for type: " + type.name());
             }
         }
         return this;

@@ -65,7 +65,7 @@ public final class AbilityExecutor {
                 player.setCooldown(manager.getClass(), ability.type(), manager.getCooldownSeconds());
             }
         } catch (Exception e) {
-            Log.error("§cAbility execution failed: " + e.getClass().getSimpleName());
+            Log.error("AbilityExecutor", "Ability execution failed: " + e.getClass().getSimpleName());
             cancel(event);
         }
     }

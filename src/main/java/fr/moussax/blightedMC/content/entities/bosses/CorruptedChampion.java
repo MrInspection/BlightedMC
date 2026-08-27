@@ -8,6 +8,7 @@ import fr.moussax.blightedMC.engine.entities.EntityResistances;
 import fr.moussax.blightedMC.engine.entities.immunity.DamageType;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.utils.ItemBuilder;
+import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -700,7 +701,7 @@ public class CorruptedChampion extends BlightedEntity {
                     }
                     ticks++;
                 } catch (Throwable t) {
-                    BlightedMC.getInstance().getLogger().severe("[CorruptedChampion] Bladenado error: " + t.getMessage());
+                    Log.error("CorruptedChampion", "Bladenado error: " + t.getMessage());
                     cleanup();
                 }
             }

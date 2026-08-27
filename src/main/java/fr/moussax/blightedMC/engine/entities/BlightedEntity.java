@@ -10,6 +10,7 @@ import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.shared.loot.LootContext;
 import fr.moussax.blightedMC.shared.loot.LootTable;
+import fr.moussax.blightedMC.utils.debug.Log;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.*;
@@ -1264,7 +1265,7 @@ public abstract class BlightedEntity implements Cloneable {
                 try {
                     action.run();
                 } catch (Exception exception) {
-                    BlightedMC.getInstance().getLogger().warning("[BlightedEntity] Ability threw an exception on entity '" + name + "': " + exception.getMessage());
+                    Log.warn("BlightedEntity", "Ability threw an exception on entity '" + name + "': " + exception.getMessage());
                 }
             }
         }, delayTicks, periodTicks);
@@ -1281,7 +1282,7 @@ public abstract class BlightedEntity implements Cloneable {
                 try {
                     action.run();
                 } catch (Exception exception) {
-                    BlightedMC.getInstance().getLogger().warning("[BlightedEntity] Delayed action threw an exception on entity '" + name + "': " + exception.getMessage());
+                    Log.warn("BlightedEntity", "Delayed action threw an exception on entity '" + name + "': " + exception.getMessage());
                 }
             }
         }, delayTicks);
