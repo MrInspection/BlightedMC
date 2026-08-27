@@ -7,16 +7,16 @@ import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlotGroup;
 
-public class KnightsSword implements RegistryModule<ItemRegistryHandler> {
+public class KnightsSword implements RegistryModule<Consumer<BlightedItem>> {
 
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
         BlightedItem knightSword = new BlightedItem("ANCIENT_KNIGHT_SWORD", ItemType.LONGSWORD, ItemRarity.LEGENDARY, Material.NETHERITE_SWORD);
         knightSword.setDisplayName("Knight's Sword");
         knightSword.addLore(
@@ -34,6 +34,6 @@ public class KnightsSword implements RegistryModule<ItemRegistryHandler> {
         knightSword.addAttributeModifier(Attribute.ATTACK_DAMAGE, 10, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
         knightSword.addAttributeModifier(Attribute.ATTACK_SPEED, 1.2, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
 
-        registry.register(knightSword);
+        registry.accept(knightSword);
     }
 }

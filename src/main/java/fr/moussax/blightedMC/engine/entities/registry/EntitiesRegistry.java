@@ -1,12 +1,8 @@
 package fr.moussax.blightedMC.engine.entities.registry;
 
-import fr.moussax.blightedMC.content.entities.bosses.CorruptedChampion;
-import fr.moussax.blightedMC.content.entities.factions.blightsworn.*;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.content.entities.Illusioner;
-import fr.moussax.blightedMC.content.entities.Watchling;
-import fr.moussax.blightedMC.content.entities.powerful.Endersent;
+import fr.moussax.blightedMC.registry.RegistryModule;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.Nullable;
 
@@ -14,27 +10,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public final class EntitiesRegistry {
     private static final Map<String, BlightedEntity> ENTITIES = new HashMap<>();
-
-    private static final List<BlightedEntity> DEFAULT_ENTITIES = List.of(
-            new BlightswornBogged(),
-            new BlightswornDrowned(),
-            new BlightswornHusk(),
-            new BlightswornParched(),
-            new BlightswornPiglin(),
-            new BlightswornSkeleton(),
-            new BlightswornStray(),
-            new BlightswornWitherSkeleton(),
-            new BlightswornZombie(),
-            new BlightswornZombifiedPiglin(),
-
-            new CorruptedChampion(),
-            new Endersent(),
-            new Watchling(),
-            new Illusioner()
-    );
 
     private static final List<Runnable> onRegisterCallbacks = new ArrayList<>();
 
@@ -45,9 +24,9 @@ public final class EntitiesRegistry {
         onRegisterCallbacks.add(callback);
     }
 
-    public static void initialize() {
+    public static void initialize(List<RegistryModule<Consumer<BlightedEntity>>> modules) {
         clear();
-        DEFAULT_ENTITIES.forEach(EntitiesRegistry::register);
+        modules.forEach(module -> module.register(EntitiesRegistry::register));
         Log.success("EntitiesRegistry", "Registered " + ENTITIES.size() + " entities (spawnable: " + SpawnableEntitiesRegistry.count() + ").");
     }
 

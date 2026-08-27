@@ -1,14 +1,5 @@
 package fr.moussax.blightedMC.engine.items.registry;
 
-import fr.moussax.blightedMC.content.items.*;
-import fr.moussax.blightedMC.content.items.armors.FishingArmors;
-import fr.moussax.blightedMC.content.items.armors.HomodeusArmor;
-import fr.moussax.blightedMC.content.items.armors.RocketBoots;
-import fr.moussax.blightedMC.content.items.blocks.BlightedBlockItems;
-import fr.moussax.blightedMC.content.items.materials.BlightedMaterials;
-import fr.moussax.blightedMC.content.items.materials.EndMaterials;
-import fr.moussax.blightedMC.content.items.materials.NetherMaterials;
-import fr.moussax.blightedMC.content.items.materials.FishingMaterials;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.registry.RegistryModule;
 import fr.moussax.blightedMC.utils.debug.Log;
@@ -19,6 +10,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Central registry for all {@link BlightedItem} definitions available to the
@@ -31,36 +23,20 @@ import java.util.Map;
 public final class ItemRegistry {
     private static final Map<String, BlightedItem> REGISTERED_ITEMS = new HashMap<>();
 
-    private static final List<RegistryModule<ItemRegistryHandler>> MODULES = List.of(
-            new BlightedMaterials(),
-            new Bonemerang(),
-            new GlimmeringEye(),
-            new KnightsSword(),
-            new HomodeusArmor(),
-            new RocketBoots(),
-            new BlightedBlockItems(),
-            new Hyperion(),
-            new ThermalFuels(),
-            new BlightedTools(),
-            new NetherMaterials(),
-            new EndMaterials(),
-            new FishingArmors(),
-            new BlightedItems(),
-            new FishingMaterials()
-    );
-
     private ItemRegistry() {
     }
 
     /**
-     * Initializes the item registry.
+     * Initializes the item registry using the provided list of modules.
      *
      * <p>Previously registered items are cleared before all configured item
      * modules are loaded.</p>
+     *
+     * @param modules the list of registry modules to load
      */
-    public static void initialize() {
+    public static void initialize(List<RegistryModule<Consumer<BlightedItem>>> modules) {
         clear();
-        MODULES.forEach(module -> module.register(ItemRegistry::register));
+        modules.forEach(module -> module.register(ItemRegistry::register));
         Log.success("ItemDirectory", "Registered " + REGISTERED_ITEMS.size() + " custom items.");
     }
 

@@ -4,14 +4,14 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import org.bukkit.Material;
 
-public class FishingMaterials implements RegistryModule<ItemRegistryHandler> {
+public class FishingMaterials implements RegistryModule<Consumer<BlightedItem>> {
 
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
 
         BlightedItem blightedAlgae = new BlightedItem("BLIGHTED_ALGAE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.KELP);
         blightedAlgae.setDisplayName("Blighted Algae");
@@ -177,16 +177,16 @@ public class FishingMaterials implements RegistryModule<ItemRegistryHandler> {
         );
         drownedResearchCodex.setEnchantmentGlint(false);
 
-        registry.register(blightedAlgae);
-        registry.register(smokedSalmonPlate);
-        registry.register(saltedCod);
-        registry.register(fishermansBait);
-        registry.register(fishermansStew);
-        registry.register(barnacleCluster);
-        registry.register(coralFragment);
-        registry.register(messageInABottle);
-        registry.register(drownedResearchCodex);
-        registry.register(blightedSushi);
-        registry.register(abyssalPearl);
+        registry.accept(blightedAlgae);
+        registry.accept(smokedSalmonPlate);
+        registry.accept(saltedCod);
+        registry.accept(fishermansBait);
+        registry.accept(fishermansStew);
+        registry.accept(barnacleCluster);
+        registry.accept(coralFragment);
+        registry.accept(messageInABottle);
+        registry.accept(drownedResearchCodex);
+        registry.accept(blightedSushi);
+        registry.accept(abyssalPearl);
     }
 }

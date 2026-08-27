@@ -7,12 +7,14 @@ import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
 import org.bukkit.Material;
 
-public class BlightedTools implements RegistryModule<ItemRegistryHandler> {
+import java.util.function.Consumer;
+
+public class BlightedTools implements RegistryModule<Consumer<BlightedItem>> {
+
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
         BlightedItem magmaRod = new BlightedItem("MAGMA_ROD", ItemType.LAVA_FISHING_ROD, ItemRarity.UNCOMMON, Material.FISHING_ROD);
         magmaRod.setDisplayName("Magma Rod");
 
@@ -38,8 +40,8 @@ public class BlightedTools implements RegistryModule<ItemRegistryHandler> {
         demoPickaxe.addAbility(new Ability(new VeinmineAbility(), "Veinmine", AbilityType.PASSIVE));
         demoPickaxe.addLore("§8Demonstration tool");
 
-        registry.register(demoPickaxe);
-        registry.register(magmaRod);
-        registry.register(voidRod);
+        registry.accept(demoPickaxe);
+        registry.accept(magmaRod);
+        registry.accept(voidRod);
     }
 }

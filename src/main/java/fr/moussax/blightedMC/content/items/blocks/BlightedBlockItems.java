@@ -4,13 +4,13 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import org.bukkit.Material;
 
-public class BlightedBlockItems implements RegistryModule<ItemRegistryHandler> {
+public class BlightedBlockItems implements RegistryModule<Consumer<BlightedItem>> {
 
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
 
         BlightedItem blightedWorkbench = new BlightedItem("BLIGHTED_WORKBENCH", ItemType.BLOCK, ItemRarity.UNCOMMON, Material.ENCHANTING_TABLE);
         blightedWorkbench.setDisplayName("Blighted Workbench");
@@ -40,7 +40,7 @@ public class BlightedBlockItems implements RegistryModule<ItemRegistryHandler> {
         );
         blightedForge.addEnchantmentGlint();
 
-        registry.register(blightedWorkbench);
-        registry.register(blightedForge);
+        registry.accept(blightedWorkbench);
+        registry.accept(blightedForge);
     }
 }

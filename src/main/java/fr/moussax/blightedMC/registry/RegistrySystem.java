@@ -1,5 +1,6 @@
 package fr.moussax.blightedMC.registry;
 
+import fr.moussax.blightedMC.content.ContentRegistrar;
 import fr.moussax.blightedMC.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedMC.engine.entities.rituals.registry.RitualRegistry;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingLootRegistry;
@@ -17,6 +18,9 @@ import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
  */
 public final class RegistrySystem {
 
+    private RegistrySystem() {
+    }
+
     /**
      * Initializes all BlightedMC registries in dependency order.
      *
@@ -24,13 +28,13 @@ public final class RegistrySystem {
      * before dependent systems are loaded.</p>
      */
     public static void initialize() {
-        ItemRegistry.initialize();
-        BlockRegistry.initialize();
-        RecipeRegistry.initialize();
-        ForgeRegistry.initialize();
-        EntitiesRegistry.initialize();
-        RitualRegistry.initialize();
-        FishingLootRegistry.initialize();
+        ItemRegistry.initialize(ContentRegistrar.ITEM_MODULES);
+        BlockRegistry.initialize(ContentRegistrar.BLOCK_MODULES);
+        RecipeRegistry.initialize(ContentRegistrar.RECIPE_MODULES);
+        ForgeRegistry.initialize(ContentRegistrar.FORGE_MODULES);
+        EntitiesRegistry.initialize(ContentRegistrar.ENTITY_MODULES);
+        RitualRegistry.initialize(ContentRegistrar.RITUAL_MODULES);
+        FishingLootRegistry.initialize(ContentRegistrar.FISHING_MODULES);
     }
 
     /**

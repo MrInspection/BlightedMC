@@ -7,14 +7,14 @@ import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import org.bukkit.Material;
 
-public class GlimmeringEye implements RegistryModule<ItemRegistryHandler> {
+public class GlimmeringEye implements RegistryModule<Consumer<BlightedItem>> {
 
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
         BlightedItem glimmeringEye = new BlightedItem("GLIMMERING_EYE", ItemType.UNCATEGORIZED, ItemRarity.RARE, Material.ENDER_EYE);
         glimmeringEye.setDisplayName("Glimmering Eye");
 
@@ -24,6 +24,6 @@ public class GlimmeringEye implements RegistryModule<ItemRegistryHandler> {
         glimmeringEye.addLore("", ItemRarity.RARE.getName());
         glimmeringEye.addRule(ItemRule.PREVENT_PROJECTILE_LAUNCH);
 
-        registry.register(glimmeringEye);
+        registry.accept(glimmeringEye);
     }
 }

@@ -7,7 +7,7 @@ import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -18,11 +18,11 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 
-public final class FishingArmors implements RegistryModule<ItemRegistryHandler> {
+public final class FishingArmors implements RegistryModule<Consumer<BlightedItem>> {
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
 
         FullSetBonus emberWeaveSetBonus = new EmberWeaveSetBonus();
 
@@ -168,17 +168,17 @@ public final class FishingArmors implements RegistryModule<ItemRegistryHandler> 
         anglerBoots.setMaxDurability(143);
         anglerBoots.addLore("", ItemRarity.UNCOMMON.getName() + " BOOTS");
 
-        registry.register(emberWeaveHelmet);
-        registry.register(emberWeaveChestplate);
-        registry.register(emberWeaveLeggins);
-        registry.register(emberWeaveBoots);
-        registry.register(ashfangHelmet);
-        registry.register(ashfangChestplate);
-        registry.register(ashfangLeggins);
-        registry.register(ashfangBoots);
-        registry.register(anglerHelmet);
-        registry.register(anglerChestplate);
-        registry.register(anglerLeggings);
-        registry.register(anglerBoots);
+        registry.accept(emberWeaveHelmet);
+        registry.accept(emberWeaveChestplate);
+        registry.accept(emberWeaveLeggins);
+        registry.accept(emberWeaveBoots);
+        registry.accept(ashfangHelmet);
+        registry.accept(ashfangChestplate);
+        registry.accept(ashfangLeggins);
+        registry.accept(ashfangBoots);
+        registry.accept(anglerHelmet);
+        registry.accept(anglerChestplate);
+        registry.accept(anglerLeggings);
+        registry.accept(anglerBoots);
     }
 }

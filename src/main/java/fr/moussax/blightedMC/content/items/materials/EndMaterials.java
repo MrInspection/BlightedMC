@@ -4,13 +4,13 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import org.bukkit.Material;
 
-public class EndMaterials implements RegistryModule<ItemRegistryHandler> {
+public class EndMaterials implements RegistryModule<Consumer<BlightedItem>> {
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
         BlightedItem enchantedEnderPearl = new BlightedItem("ENCHANTED_ENDER_PEARL", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.ENDER_PEARL);
         enchantedEnderPearl.setDisplayName("Enchanted Ender Pearl");
         enchantedEnderPearl.addLore(ItemRarity.UNCOMMON.getName());
@@ -39,9 +39,9 @@ public class EndMaterials implements RegistryModule<ItemRegistryHandler> {
         );
         voidResidue.addEnchantmentGlint();
 
-        registry.register(enchantedEnderPearl);
-        registry.register(enchantedEndstone);
-        registry.register(enchantedChorusFruit);
-        registry.register(voidResidue);
+        registry.accept(enchantedEnderPearl);
+        registry.accept(enchantedEndstone);
+        registry.accept(enchantedChorusFruit);
+        registry.accept(voidResidue);
     }
 }

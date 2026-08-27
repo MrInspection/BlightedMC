@@ -6,14 +6,14 @@ import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 
-public class HomodeusArmor implements RegistryModule<ItemRegistryHandler> {
+public class HomodeusArmor implements RegistryModule<Consumer<BlightedItem>> {
 
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
         FullSetBonus homodeusFlightBonus = new HomodeusFlightAbility();
 
         BlightedItem homodeusHelmet = new BlightedItem("HOMODEUS_HELMET", ItemType.HELMET, ItemRarity.LEGENDARY, Material.LEATHER_HELMET);
@@ -32,10 +32,10 @@ public class HomodeusArmor implements RegistryModule<ItemRegistryHandler> {
         homodeusBoots.setDisplayName("Homodeus Boots");
         setupHomodeusPiece(homodeusBoots, homodeusFlightBonus);
 
-        registry.register(homodeusHelmet);
-        registry.register(homodeusChestplate);
-        registry.register(homodeusLeggings);
-        registry.register(homodeusBoots);
+        registry.accept(homodeusHelmet);
+        registry.accept(homodeusChestplate);
+        registry.accept(homodeusLeggings);
+        registry.accept(homodeusBoots);
     }
 
     private void setupHomodeusPiece(BlightedItem piece, FullSetBonus bonus) {

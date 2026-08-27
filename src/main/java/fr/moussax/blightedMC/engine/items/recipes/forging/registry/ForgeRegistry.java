@@ -1,21 +1,20 @@
 package fr.moussax.blightedMC.engine.items.recipes.forging.registry;
 
-import fr.moussax.blightedMC.content.recipes.ForgeRecipes;
 import fr.moussax.blightedMC.engine.items.recipes.forging.ForgeRecipe;
 import fr.moussax.blightedMC.registry.RegistryModule;
 import fr.moussax.blightedMC.utils.debug.Log;
-import org.jspecify.annotations.NonNull;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Registry for {@link ForgeRecipe} definitions available to the forge system.
  *
  * <p>Recipes are provided by registered {@link RegistryModule} implementations
- * and loaded when {@link #initialize()} is called.</p>
+ * and loaded when {@link #initialize(List)} is called.</p>
  */
 public final class ForgeRegistry {
 
@@ -24,45 +23,42 @@ public final class ForgeRegistry {
      */
     public static final Set<ForgeRecipe> RECIPES = new HashSet<>();
 
-    private static final List<RegistryModule<ForgeRegistryHandler>> PROVIDERS = List.of(
-            new ForgeRecipes()
-    );
-
     private ForgeRegistry() {
     }
 
     /**
-     * Initializes the forge recipe registry.
+     * Initializes the forge registry using the provided list of modules.
      *
-     * <p>Previously registered recipes are cleared before all configured
-     * recipe providers are loaded.</p>
+     * <p>Clears existing registrations before invoking configured forge modules.</p>
+     *
+     * @param modules the list of forge modules to load
      */
-    public static void initialize() {
+    public static void initialize(List<RegistryModule<Consumer<ForgeRecipe>>> modules) {
         clear();
-        PROVIDERS.forEach(module -> module.register(ForgeRegistry::register));
+        modules.forEach(module -> module.register(ForgeRegistry::register));
         Log.success("ForgeRegistry", "Registered " + RECIPES.size() + " forge recipes.");
     }
 
     /**
      * Registers a forge recipe.
      *
-     * @param recipe the recipe to register
+     * @param recipe the recipe to add to the registry
      */
-    public static void register(@NonNull ForgeRecipe recipe) {
+    public static void register(ForgeRecipe recipe) {
         RECIPES.add(recipe);
     }
 
     /**
-     * Returns all currently registered forge recipes.
+     * Retrieves an unmodifiable set of all registered forge recipes.
      *
-     * @return an unmodifiable view of the registered recipes
+     * @return an unmodifiable set of registered forge recipes
      */
     public static Set<ForgeRecipe> getAll() {
         return Collections.unmodifiableSet(RECIPES);
     }
 
     /**
-     * Removes all recipes currently registered in the forge registry.
+     * Clears all registered forge recipes.
      */
     public static void clear() {
         RECIPES.clear();
