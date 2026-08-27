@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.registry;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.content.items.abilities.WitherImpactAbility;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.entities.listeners.EntityComponentListener;
 import fr.moussax.blightedMC.engine.entities.listeners.SpawnableEntitiesListener;
@@ -9,16 +10,16 @@ import fr.moussax.blightedMC.engine.fishing.FishingListener;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityListener;
 import fr.moussax.blightedMC.engine.items.blocks.BlightedBlockListener;
 import fr.moussax.blightedMC.engine.items.listeners.UnsafeAnvilListener;
+import fr.moussax.blightedMC.engine.items.listeners.VanillaRecipeProtectionListener;
 import fr.moussax.blightedMC.engine.items.rules.ItemRuleListener;
 import fr.moussax.blightedMC.engine.player.PlayerListener;
+import fr.moussax.blightedMC.engine.player.hud.PlayerHudManager;
+import fr.moussax.blightedMC.engine.quest.BlightedQuestListener;
+import fr.moussax.blightedMC.shared.ui.actionbar.ActionbarService;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuListener;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.shared.ui.sign.SignInputListener;
-import fr.moussax.blightedMC.content.items.abilities.WitherImpactAbility;
-import fr.moussax.blightedMC.engine.quest.BlightedQuestListener;
-import fr.moussax.blightedMC.engine.player.hud.PlayerHudManager;
-import fr.moussax.blightedMC.shared.ui.actionbar.ActionbarService;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -73,6 +74,7 @@ public final class EventsRegistry {
         pluginManager.registerEvents(new AbilityListener(), instance);
         pluginManager.registerEvents(new FishingListener(), instance);
         pluginManager.registerEvents(new UnsafeAnvilListener(), instance);
+        pluginManager.registerEvents(new VanillaRecipeProtectionListener(), instance);
         pluginManager.registerEvents(new WitherImpactAbility(), instance);
         pluginManager.registerEvents(new BlightedQuestListener(), instance);
     }

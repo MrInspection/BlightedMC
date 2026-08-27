@@ -18,13 +18,15 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -224,10 +226,10 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     public static BlightedItem fromItemStack(@NonNull ItemStack itemStack) {
         if (itemStack.getType().isAir()) return null;
 
-        var meta = itemStack.getItemMeta();
-        if (meta == null) return null;
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (itemMeta == null) return null;
 
-        var container = meta.getPersistentDataContainer();
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
         String itemId = container.get(BLIGHTED_ID_KEY, PersistentDataType.STRING);
         if (itemId == null) return null;
 
@@ -248,35 +250,85 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
         }
     }
 
+    @Getter
+    private ItemConsumeHandler consumeHandler;
+
     /**
-     * {@inheritDoc}
+     * Registers an explicit consume handler callback invoked with the consuming player and item stack.
+     *
+     * @param consumeHandler explicit item consume handler callback
+     * @return this item manager for chaining
+     */
+    public BlightedItem onConsume(ItemConsumeHandler consumeHandler) {
+        this.consumeHandler = consumeHandler;
+        return this;
+    }
+
+    /**
+     * Registers a simple consume handler callback invoked directly with the consuming player.
+     *
+     * @param consumeHandler consumer callback receiving the player
+     * @return this item manager for chaining
+     */
+    public BlightedItem onConsume(Consumer<Player> consumeHandler) {
+        this.consumeHandler = (player, _) -> consumeHandler.accept(player);
+        return this;
+    }
+
+    /**
+     * Checks whether this custom item is classified as equippable gear (weapon, armor, or tool).
+     *
+     * @return {@code true} if equipment, {@code false} otherwise
+     */
+    public boolean isEquipment() {
+        if (itemType == null || itemType.getCategory() == null) return false;
+        return switch (itemType.getCategory()) {
+            case ARMOR, MELEE_WEAPON, RANGE_WEAPON, TOOLS -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * Evaluates whether any registered rule restricts block placement for this item.
+     *
+     * @param event     block place event
+     * @param itemStack item stack being placed
+     * @return {@code true} if placement should be restricted, {@code false} otherwise
      */
     @Override
-    public boolean canPlace(BlockPlaceEvent event, ItemStack itemStack) {
+    public boolean shouldRestrictPlace(BlockPlaceEvent event, ItemStack itemStack) {
         for (ItemRule rule : rules) {
-            if (rule.canPlace(event, itemStack)) return true;
+            if (rule.shouldRestrictPlace(event, itemStack)) return true;
         }
         return false;
     }
 
     /**
-     * {@inheritDoc}
+     * Evaluates whether any registered rule restricts player interaction for this item.
+     *
+     * @param event     player interact event
+     * @param itemStack item stack being interacted with
+     * @return {@code true} if interaction should be restricted, {@code false} otherwise
      */
     @Override
-    public boolean canInteract(PlayerInteractEvent event, ItemStack itemStack) {
+    public boolean shouldRestrictInteract(PlayerInteractEvent event, ItemStack itemStack) {
         for (ItemRule rule : rules) {
-            if (!rule.canInteract(event, itemStack)) return false;
+            if (rule.shouldRestrictInteract(event, itemStack)) return true;
         }
-        return true;
+        return false;
     }
 
     /**
-     * {@inheritDoc}
+     * Evaluates whether any registered rule restricts generic event usage for this item.
+     *
+     * @param event     triggering event
+     * @param itemStack item stack being used
+     * @return {@code true} if usage should be restricted, {@code false} otherwise
      */
     @Override
-    public boolean canUse(Event event, ItemStack itemStack) {
+    public boolean shouldRestrictUse(Event event, ItemStack itemStack) {
         for (ItemRule rule : rules) {
-            if (rule.canUse(event, itemStack)) return true;
+            if (rule.shouldRestrictUse(event, itemStack)) return true;
         }
         return false;
     }
