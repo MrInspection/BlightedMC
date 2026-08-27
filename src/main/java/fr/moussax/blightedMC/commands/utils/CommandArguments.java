@@ -12,5 +12,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface CommandArguments {
 
+    /**
+     * Declared command argument rules.
+     */
     CommandArgument[] value();
 }
