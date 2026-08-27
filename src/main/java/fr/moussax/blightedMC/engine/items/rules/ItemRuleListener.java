@@ -3,6 +3,7 @@ package fr.moussax.blightedMC.engine.items.rules;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -13,31 +14,31 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 import static fr.moussax.blightedMC.engine.items.BlightedItem.BLIGHTED_ID_KEY;
 
+/**
+ * Event listener enforcing item rules and processing custom item consumption callbacks.
+ */
 public final class ItemRuleListener implements Listener {
 
-    private BlightedItem getManager(ItemStack stack) {
-        if (stack == null || !stack.hasItemMeta()) return null;
-        var meta = stack.getItemMeta();
-        if (meta == null) return null;
-        String id = meta.getPersistentDataContainer().get(BLIGHTED_ID_KEY, PersistentDataType.STRING);
+    private BlightedItem getManager(ItemStack itemStack) {
+        if (itemStack == null || !itemStack.hasItemMeta()) return null;
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (itemMeta == null) return null;
+        String id = itemMeta.getPersistentDataContainer().get(BLIGHTED_ID_KEY, PersistentDataType.STRING);
         if (id == null) return null;
         return ItemRegistry.getItem(id);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
-        ItemStack stack = event.getItem();
-        BlightedItem manager = getManager(stack);
+        ItemStack itemStack = event.getItem();
+        BlightedItem manager = getManager(itemStack);
 
-        if (manager != null && manager.canUse(event, stack)) {
+        if (manager != null && manager.shouldRestrictInteract(event, itemStack)) {
             event.setCancelled(true);
         }
     }
@@ -46,30 +47,28 @@ public final class ItemRuleListener implements Listener {
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
         if (!(event.getEntity().getShooter() instanceof Player player)) return;
 
-        boolean cancelled = false;
+        boolean mainHandRestricted = checkAndRestrictHandItem(player, player.getInventory().getItemInMainHand(), event);
+        boolean offHandRestricted = checkAndRestrictHandItem(player, player.getInventory().getItemInOffHand(), event);
 
-        ItemStack mainHand = player.getInventory().getItemInMainHand();
-        BlightedItem mainManager = getManager(mainHand);
-        if (mainManager != null && mainManager.canUse(event, mainHand)) {
-            cancelled = true;
-            player.setCooldown(mainHand.getType(), 0);
+        if (mainHandRestricted || offHandRestricted) {
+            event.setCancelled(true);
         }
+    }
 
-        ItemStack offHand = player.getInventory().getItemInOffHand();
-        BlightedItem offManager = getManager(offHand);
-        if (offManager != null && offManager.canUse(event, offHand)) {
-            cancelled = true;
-            player.setCooldown(offHand.getType(), 0);
+    private boolean checkAndRestrictHandItem(Player player, ItemStack itemStack, Event event) {
+        BlightedItem manager = getManager(itemStack);
+        if (manager != null && manager.shouldRestrictUse(event, itemStack)) {
+            player.setCooldown(itemStack.getType(), 0);
+            return true;
         }
-
-        if (cancelled) event.setCancelled(true);
+        return false;
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onBucketEmpty(PlayerBucketEmptyEvent event) {
         ItemStack handItem = event.getPlayer().getInventory().getItem(event.getHand());
         BlightedItem manager = getManager(handItem);
-        if (manager != null && manager.canUse(event, handItem)) {
+        if (manager != null && manager.shouldRestrictUse(event, handItem)) {
             event.setCancelled(true);
         }
     }
@@ -77,7 +76,7 @@ public final class ItemRuleListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
         BlightedItem manager = getManager(event.getItemInHand());
-        if (manager != null && manager.canPlace(event, event.getItemInHand())) {
+        if (manager != null && manager.shouldRestrictPlace(event, event.getItemInHand())) {
             event.setCancelled(true);
             event.getPlayer().updateInventory();
         }
@@ -86,35 +85,30 @@ public final class ItemRuleListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onItemDrop(PlayerDropItemEvent event) {
         BlightedItem manager = getManager(event.getItemDrop().getItemStack());
-        if (manager != null && manager.canUse(event, event.getItemDrop().getItemStack())) {
+        if (manager != null && manager.shouldRestrictUse(event, event.getItemDrop().getItemStack())) {
             event.setCancelled(true);
         }
     }
 
-    // TODO : Make more simple and elegant way for custom items with consume effects
     @EventHandler(ignoreCancelled = true)
     public void onItemConsume(PlayerItemConsumeEvent event) {
         BlightedItem manager = getManager(event.getItem());
-        if (manager != null) {
-            if (manager.canUse(event, event.getItem())) {
-                event.setCancelled(true);
-                return;
-            }
-            if ("FISHERMANS_STEW".equals(manager.getItemId())) {
-                event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 2400, 0));
-            } else if ("BLIGHTED_SUSHI".equals(manager.getItemId())) {
-                event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 1200, 0));
-                if (ThreadLocalRandom.current().nextDouble() < 0.5) {
-                    event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 300, 0));
-                }
-            }
+        if (manager == null) return;
+
+        if (manager.shouldRestrictUse(event, event.getItem())) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (manager.getConsumeHandler() != null) {
+            manager.getConsumeHandler().onConsume(event.getPlayer(), event.getItem());
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         BlightedItem manager = getManager(event.getCurrentItem());
-        if (manager != null && manager.canUse(event, event.getCurrentItem())) {
+        if (manager != null && manager.shouldRestrictUse(event, event.getCurrentItem())) {
             event.setCancelled(true);
         }
     }

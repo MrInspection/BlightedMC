@@ -3,10 +3,14 @@ package fr.moussax.blightedMC.content.items.materials;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
-import fr.moussax.blightedMC.registry.RegistryModule;
-import java.util.function.Consumer;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
+import fr.moussax.blightedMC.registry.RegistryModule;
 import org.bukkit.Material;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
 public class FishingMaterials implements RegistryModule<Consumer<BlightedItem>> {
 
@@ -89,6 +93,7 @@ public class FishingMaterials implements RegistryModule<Consumer<BlightedItem>> 
             food.setSaturation(14.4f);
             food.setCanAlwaysEat(true);
         });
+        fishermansStew.onConsume(player -> player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 2400, 0)));
 
         BlightedItem barnacleCluster = new BlightedItem("BARNACLE_CLUSTER", ItemType.MATERIAL, ItemRarity.RARE, Material.NAUTILUS_SHELL);
         barnacleCluster.setDisplayName("Barnacle Cluster");
@@ -147,6 +152,12 @@ public class FishingMaterials implements RegistryModule<Consumer<BlightedItem>> 
             food.setNutrition(6);
             food.setSaturation(4.8f);
             food.setCanAlwaysEat(true);
+        });
+        blightedSushi.onConsume(player -> {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 1200, 0));
+            if (ThreadLocalRandom.current().nextDouble() < 0.5) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 300, 0));
+            }
         });
         blightedSushi.addEnchantmentGlint();
 
