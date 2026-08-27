@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity.*;
 
 public final class BlightswornSkeleton extends BlightswornArcherArchetype {
 
@@ -26,7 +26,7 @@ public final class BlightswornSkeleton extends BlightswornArcherArchetype {
         setLootTable(new EntityLootTableBuilder()
                 .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
                 .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
-                .addLootWithDurabilityRange(Material.BOW, 0.1, 0.8, 0.15, RARE)
+                .addDamagedLoot(Material.BOW, 0.1, 0.8, 0.15, RARE)
                 .addGemsLoot(5, 0.04, VERY_RARE)
                 .build()
         );

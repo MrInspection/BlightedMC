@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity.*;
 
 public final class BlightswornStray extends BlightswornArcherArchetype {
     public BlightswornStray() {

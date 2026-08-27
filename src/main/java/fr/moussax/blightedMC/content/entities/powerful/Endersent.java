@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity.*;
 
 public class Endersent extends SpawnableEntity {
 

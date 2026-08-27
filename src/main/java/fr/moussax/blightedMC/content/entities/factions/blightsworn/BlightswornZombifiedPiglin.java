@@ -14,7 +14,7 @@ import org.bukkit.generator.structure.Structure;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity.*;
 
 public final class BlightswornZombifiedPiglin extends BlightswornEliteArchetype {
 

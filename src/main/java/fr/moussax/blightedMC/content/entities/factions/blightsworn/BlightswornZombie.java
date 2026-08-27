@@ -7,7 +7,7 @@ import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity.*;
 
 public final class BlightswornZombie extends BlightswornBruteArchetype {
 

@@ -22,7 +22,7 @@ import org.bukkit.util.Vector;
 
 import java.util.Objects;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity.*;
 
 public final class BlightswornDrowned extends BlightswornCreature {
     private static final int MAX_HEALTH = 28;
@@ -40,7 +40,7 @@ public final class BlightswornDrowned extends BlightswornCreature {
                 .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, COMMON)
                 .addLoot(Material.COPPER_INGOT, 1, 3, 0.4, UNCOMMON)
                 .addLoot(Material.NAUTILUS_SHELL, 1, 0.08, RARE)
-                .addLootWithDurabilityRange(Material.TRIDENT, 0.05, 0.80, 0.02, VERY_RARE)
+                .addDamagedLoot(Material.TRIDENT, 0.05, 0.80, 0.02, VERY_RARE)
                 .addGemsLoot(5, 0.04, VERY_RARE)
                 .build()
         );

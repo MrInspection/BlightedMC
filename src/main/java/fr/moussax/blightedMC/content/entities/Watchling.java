@@ -17,8 +17,7 @@ import org.bukkit.generator.structure.Structure;
 
 import java.util.Random;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.COMMON;
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.VERY_RARE;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity.*;
 
 public class Watchling extends SpawnableEntity {
 
