@@ -50,12 +50,12 @@ public final class BlightswornWitherSkeleton extends BlightswornEliteArchetype {
 
     @Override
     protected void onEnrage(LivingEntity entity) {
-        Location loc = entity.getLocation().add(0, 1, 0);
-        entity.getWorld().playSound(loc, Sound.ENTITY_WITHER_SKELETON_DEATH, 1.0f, 0.5f);
-        entity.getWorld().playSound(loc, Sound.ENTITY_WITHER_SPAWN, 0.5f, 1.5f);
+        Location location = entity.getLocation().add(0, 1, 0);
+        entity.getWorld().playSound(location, Sound.ENTITY_WITHER_SKELETON_DEATH, 1.0f, 0.5f);
+        entity.getWorld().playSound(location, Sound.ENTITY_WITHER_SPAWN, 0.5f, 1.5f);
 
-        entity.getWorld().spawnParticle(Particle.LARGE_SMOKE, loc, 50, 0.5, 1.0, 0.5, 0.05);
-        entity.getWorld().spawnParticle(Particle.DUST, loc, 30, 0.5, 1.0, 0.5, 0.0, BLIGHT_DUST);
+        entity.getWorld().spawnParticle(Particle.LARGE_SMOKE, location, 50, 0.5, 1.0, 0.5, 0.05);
+        entity.getWorld().spawnParticle(Particle.DUST, location, 30, 0.5, 1.0, 0.5, 0.0, BLIGHT_DUST);
     }
 
     private void executePhantomLunge(boolean isPhaseTwo) {

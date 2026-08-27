@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.engine.entities;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.engine.entities.components.AffixRegistry;
 import fr.moussax.blightedMC.engine.entities.attachment.AttachmentRole;
 import fr.moussax.blightedMC.engine.entities.attachment.EntityAttachment;
 import fr.moussax.blightedMC.engine.entities.components.EntityComponent;
@@ -317,17 +318,14 @@ public abstract class BlightedEntity implements Cloneable {
      *
      * @param currentHealth current health value
      */
+    // ponytail: kept — entity lifecycle phase evaluation.
     public final void evaluatePhases(double currentHealth) {
         if (phaseThresholds.isEmpty()) return;
         double healthPercentage = currentHealth / maxHealth;
 
-        Iterator<Map.Entry<Double, Runnable>> iterator = phaseThresholds.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Double, Runnable> entry = iterator.next();
-
-            if (healthPercentage > entry.getKey()) {
-                break;
-            }
+        while (!phaseThresholds.isEmpty() && healthPercentage <= phaseThresholds.firstKey()) {
+            Map.Entry<Double, Runnable> entry = phaseThresholds.pollFirstEntry();
+            if (entry == null) break;
 
             phaseTasks.cancelAll();
             phaseTasks = new LifecycleTaskManager();
@@ -343,7 +341,6 @@ public abstract class BlightedEntity implements Cloneable {
             } else {
                 phaseTasks.scheduleAll();
             }
-            iterator.remove();
         }
     }
 
@@ -1372,7 +1369,8 @@ public abstract class BlightedEntity implements Cloneable {
             clone.components = new HashMap<>();
 
             for (Map.Entry<String, EntityComponent> entry : this.components.entrySet()) {
-                clone.components.put(entry.getKey(), entry.getValue().clone());
+                EntityComponent fresh = AffixRegistry.getAffixById(entry.getKey());
+                clone.components.put(entry.getKey(), fresh != null ? fresh : entry.getValue());
             }
 
             return clone;

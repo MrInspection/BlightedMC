@@ -145,13 +145,13 @@ public final class BlightedEntitiesListener implements Listener {
         }
 
         if (attachmentEntity != null) {
-            PersistentDataContainer pdc = attachmentEntity.getPersistentDataContainer();
-            if (pdc.has(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING)) {
-                String roleStr = pdc.get(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING);
-                if (roleStr != null) {
+            PersistentDataContainer persistentDataContainer = attachmentEntity.getPersistentDataContainer();
+            if (persistentDataContainer.has(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING)) {
+                String roleString = persistentDataContainer.get(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING);
+                if (roleString != null) {
                     try {
-                        return AttachmentRole.valueOf(roleStr);
-                    } catch (IllegalArgumentException ignored) {
+                        return AttachmentRole.valueOf(roleString);
+                    } catch (IllegalArgumentException _) {
                     }
                 }
             }
@@ -351,8 +351,8 @@ public final class BlightedEntitiesListener implements Listener {
             if (!(entity instanceof LivingEntity living)) continue;
             if (!living.getScoreboardTags().contains(FAST_PASS_TAG)) continue;
 
-            PersistentDataContainer pdc = living.getPersistentDataContainer();
-            if (!pdc.has(ENTITY_ID_KEY, PersistentDataType.STRING)) continue;
+            PersistentDataContainer persistentDataContainer = living.getPersistentDataContainer();
+            if (!persistentDataContainer.has(ENTITY_ID_KEY, PersistentDataType.STRING)) continue;
 
             BlightedEntity existing = BLIGHTED_ENTITIES.get(living.getUniqueId());
             if (existing != null) {
@@ -362,7 +362,7 @@ public final class BlightedEntitiesListener implements Listener {
                 continue;
             }
 
-            String entityId = pdc.get(ENTITY_ID_KEY, PersistentDataType.STRING);
+            String entityId = persistentDataContainer.get(ENTITY_ID_KEY, PersistentDataType.STRING);
             BlightedEntity prototype = EntitiesRegistry.get(entityId);
             if (prototype == null) continue;
 
@@ -373,17 +373,17 @@ public final class BlightedEntitiesListener implements Listener {
         for (Entity entity : entities) {
             if (!entity.getScoreboardTags().contains(FAST_PASS_TAG)) continue;
 
-            PersistentDataContainer pdc = entity.getPersistentDataContainer();
-            if (!pdc.has(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING)) continue;
+            PersistentDataContainer persistentDataContainer = entity.getPersistentDataContainer();
+            if (!persistentDataContainer.has(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING)) continue;
 
-            String ownerUuidStr = pdc.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
-            String roleStr = pdc.get(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING);
-            if (ownerUuidStr == null || roleStr == null) continue;
+            String ownerUuidString = persistentDataContainer.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
+            String roleString = persistentDataContainer.get(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING);
+            if (ownerUuidString == null || roleString == null) continue;
 
             UUID ownerUuid;
             try {
-                ownerUuid = UUID.fromString(ownerUuidStr);
-            } catch (IllegalArgumentException ignored) {
+                ownerUuid = UUID.fromString(ownerUuidString);
+            } catch (IllegalArgumentException _) {
                 continue;
             }
 
@@ -392,22 +392,22 @@ public final class BlightedEntitiesListener implements Listener {
 
             AttachmentRole role;
             try {
-                role = AttachmentRole.valueOf(roleStr);
-            } catch (IllegalArgumentException ignored) {
+                role = AttachmentRole.valueOf(roleString);
+            } catch (IllegalArgumentException _) {
                 role = AttachmentRole.SUBORDINATE;
             }
 
-            Double offsetX = pdc.get(ATTACHMENT_OFFSET_X_KEY, PersistentDataType.DOUBLE);
-            Double offsetY = pdc.get(ATTACHMENT_OFFSET_Y_KEY, PersistentDataType.DOUBLE);
-            Double offsetZ = pdc.get(ATTACHMENT_OFFSET_Z_KEY, PersistentDataType.DOUBLE);
+            Double offsetX = persistentDataContainer.get(ATTACHMENT_OFFSET_X_KEY, PersistentDataType.DOUBLE);
+            Double offsetY = persistentDataContainer.get(ATTACHMENT_OFFSET_Y_KEY, PersistentDataType.DOUBLE);
+            Double offsetZ = persistentDataContainer.get(ATTACHMENT_OFFSET_Z_KEY, PersistentDataType.DOUBLE);
             Vector offset = new Vector(
                     offsetX != null ? offsetX : 0.0,
                     offsetY != null ? offsetY : 0.0,
                     offsetZ != null ? offsetZ : 0.0
             );
 
-            Byte yawByte = pdc.get(ATTACHMENT_SYNC_YAW_KEY, PersistentDataType.BYTE);
-            Byte pitchByte = pdc.get(ATTACHMENT_SYNC_PITCH_KEY, PersistentDataType.BYTE);
+            Byte yawByte = persistentDataContainer.get(ATTACHMENT_SYNC_YAW_KEY, PersistentDataType.BYTE);
+            Byte pitchByte = persistentDataContainer.get(ATTACHMENT_SYNC_PITCH_KEY, PersistentDataType.BYTE);
             boolean syncYaw = yawByte == null || yawByte == 1;
             boolean syncPitch = pitchByte != null && pitchByte == 1;
 
@@ -421,10 +421,10 @@ public final class BlightedEntitiesListener implements Listener {
             if (!chunk.isLoaded()) return;
             for (Entity entity : chunk.getEntities()) {
                 if (!entity.getScoreboardTags().contains(FAST_PASS_TAG)) continue;
-                PersistentDataContainer pdc = entity.getPersistentDataContainer();
-                if (!pdc.has(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING)) continue;
+                PersistentDataContainer persistentDataContainer = entity.getPersistentDataContainer();
+                if (!persistentDataContainer.has(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING)) continue;
 
-                String ownerUuidString = pdc.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
+                String ownerUuidString = persistentDataContainer.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
                 if (ownerUuidString == null) continue;
 
                 try {
@@ -434,7 +434,7 @@ public final class BlightedEntitiesListener implements Listener {
                         entity.remove();
                         ATTACHMENT_OWNERS.remove(entity.getUniqueId());
                     }
-                } catch (IllegalArgumentException ignored) {
+                } catch (IllegalArgumentException _) {
                     entity.remove();
                 }
             }

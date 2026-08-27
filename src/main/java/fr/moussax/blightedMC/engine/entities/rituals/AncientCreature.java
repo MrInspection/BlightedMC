@@ -197,11 +197,11 @@ public abstract class AncientCreature extends BlightedEntity {
         for (Entity nearby : existing.getNearbyEntities(HOLOGRAM_RESCAN_RADIUS, HOLOGRAM_RESCAN_RADIUS, HOLOGRAM_RESCAN_RADIUS)) {
             if (!(nearby instanceof TextDisplay display)) continue;
 
-            PersistentDataContainer pdc = display.getPersistentDataContainer();
-            String attachedOwner = pdc.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
+            PersistentDataContainer persistentDataContainer = display.getPersistentDataContainer();
+            String attachedOwner = persistentDataContainer.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
             if (!ownerUuid.equals(attachedOwner)) continue;
 
-            if (pdc.has(HOLOGRAM_KEY, PersistentDataType.BYTE)) {
+            if (persistentDataContainer.has(HOLOGRAM_KEY, PersistentDataType.BYTE)) {
                 this.hologram = display;
                 break;
             }

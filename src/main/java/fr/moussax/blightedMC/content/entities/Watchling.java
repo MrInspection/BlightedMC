@@ -63,14 +63,14 @@ public class Watchling extends SpawnableEntity {
     private void teleportToTarget(Player target) {
         lastTeleportTime = System.currentTimeMillis();
 
-        Location loc = target.getLocation().add(
+        Location location = target.getLocation().add(
             (random.nextDouble() - 0.5) * 2,
             0,
             (random.nextDouble() - 0.5) * 2
         );
 
-        entity.teleport(loc);
-        entity.getWorld().playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.5f);
+        entity.teleport(location);
+        entity.getWorld().playSound(location, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.5f);
 
         if (random.nextDouble() < 0.3) {
             performHeavyAttack(target);

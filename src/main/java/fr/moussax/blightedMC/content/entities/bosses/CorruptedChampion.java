@@ -700,8 +700,8 @@ public class CorruptedChampion extends BlightedEntity {
                         }
                     }
                     ticks++;
-                } catch (Throwable t) {
-                    Log.error("CorruptedChampion", "Bladenado error: " + t.getMessage());
+                } catch (Throwable throwable) {
+                    Log.error("CorruptedChampion", "Bladenado error: " + throwable.getMessage());
                     cleanup();
                 }
             }

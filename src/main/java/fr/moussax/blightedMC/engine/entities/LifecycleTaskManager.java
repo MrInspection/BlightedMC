@@ -113,6 +113,7 @@ public final class LifecycleTaskManager {
                 current = factory.get();
                 current.runTaskTimer(BlightedMC.getInstance(), delayTicks, periodTicks);
             } else {
+                // ponytail: kept — BukkitRunnable wrapper requires self-cancellation on completion.
                 current = new BukkitRunnable() {
                     private final BukkitRunnable inner = factory.get();
 

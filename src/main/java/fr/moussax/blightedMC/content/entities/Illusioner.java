@@ -1,7 +1,7 @@
 package fr.moussax.blightedMC.content.entities;
 
 import fr.moussax.blightedMC.engine.entities.EntityLootTableBuilder;
-import fr.moussax.blightedMC.engine.entities.components.ShieldComponent;
+import fr.moussax.blightedMC.engine.entities.components.impl.ShieldComponent;
 import fr.moussax.blightedMC.engine.entities.rituals.AncientCreature;
 import fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity;
 import org.bukkit.Material;

@@ -44,7 +44,7 @@ public final class SpawnCustomMobCommand extends AdminCommand {
             entity.spawn(player.getLocation());
             inform(player, " §eSummoned §d" + entity.getName() + "§e.");
             return true;
-        } catch (Exception e) {
+        } catch (Exception exception) {
             warn(player, "Unable to spawn the entity §4" + entity.getName() + "§c.");
             return false;
         }

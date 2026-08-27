@@ -45,8 +45,8 @@ public final class EntitiesRegistry {
         onRegisterCallbacks.forEach(callback -> {
             try {
                 callback.run();
-            } catch (Throwable t) {
-                Log.error("EntitiesRegistry", "Failed to execute onRegister callback: " + t.getMessage());
+            } catch (Throwable throwable) {
+                Log.error("EntitiesRegistry", "Failed to execute onRegister callback: " + throwable.getMessage());
             }
         });
     }
