@@ -6,22 +6,34 @@ import lombok.Getter;
 import java.sql.*;
 import java.util.UUID;
 
+/**
+ * Manages the SQLite database connection, schema migrations, and custom block persistence.
+ */
 @Getter
 public final class PluginDatabase {
     private final Connection connection;
 
+    /**
+     * Creates a database manager at the specified file path and initializes the schema.
+     *
+     * @param path absolute file path to the SQLite database file
+     * @throws SQLException if a database access error occurs during connection or initialization
+     */
     public PluginDatabase(String path) throws SQLException {
         this.connection = DriverManager.getConnection("jdbc:sqlite:" + path);
         initializeSchema();
     }
 
+    /**
+     * Closes the active database connection if currently open.
+     */
     public synchronized void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
             }
-        } catch (SQLException e) {
-            Log.error("PluginDatabase", e.getMessage());
+        } catch (SQLException exception) {
+            Log.error("PluginDatabase", exception.getMessage());
             throw new RuntimeException("Unable to close the database connection");
         }
     }
@@ -53,11 +65,20 @@ public final class PluginDatabase {
 
             try {
                 statement.execute("ALTER TABLE players ADD COLUMN forge_fuel INTEGER NOT NULL DEFAULT 0");
-            } catch (SQLException ignored) {
+            } catch (SQLException _) {
             }
         }
     }
 
+    /**
+     * Persists or replaces a custom block entry at the specified coordinates.
+     *
+     * @param worldId unique identifier of the world containing the block
+     * @param x       block X coordinate
+     * @param y       block Y coordinate
+     * @param z       block Z coordinate
+     * @param blockId custom block identifier
+     */
     public synchronized void addBlock(UUID worldId, int x, int y, int z, String blockId) {
         String query = "INSERT OR REPLACE INTO blighted_blocks(world_uid, x, y, z, block_id) VALUES(?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -67,11 +88,19 @@ public final class PluginDatabase {
             statement.setInt(4, z);
             statement.setString(5, blockId);
             statement.executeUpdate();
-        } catch (SQLException e) {
-            Log.error("PluginDatabase", e.getMessage());
+        } catch (SQLException exception) {
+            Log.error("PluginDatabase", exception.getMessage());
         }
     }
 
+    /**
+     * Removes a custom block entry at the specified coordinates.
+     *
+     * @param worldId unique identifier of the world containing the block
+     * @param x       block X coordinate
+     * @param y       block Y coordinate
+     * @param z       block Z coordinate
+     */
     public synchronized void removeBlock(UUID worldId, int x, int y, int z) {
         String query = "DELETE FROM blighted_blocks WHERE world_uid = ? AND x = ? AND y = ? AND z = ?";
 
@@ -81,11 +110,20 @@ public final class PluginDatabase {
             statement.setInt(3, y);
             statement.setInt(4, z);
             statement.executeUpdate();
-        } catch (SQLException e) {
-            Log.error("PluginDatabase", e.getMessage());
+        } catch (SQLException exception) {
+            Log.error("PluginDatabase", exception.getMessage());
         }
     }
 
+    /**
+     * Retrieves the custom block identifier at the specified coordinates.
+     *
+     * @param worldId unique identifier of the world containing the block
+     * @param x       block X coordinate
+     * @param y       block Y coordinate
+     * @param z       block Z coordinate
+     * @return custom block identifier, or {@code null} if no block is registered at the coordinates
+     */
     public synchronized String getBlockId(UUID worldId, int x, int y, int z) {
         String query = "SELECT block_id FROM blighted_blocks WHERE world_uid = ? AND x = ? AND y = ? AND z = ?";
 
@@ -94,13 +132,13 @@ public final class PluginDatabase {
             statement.setInt(2, x);
             statement.setInt(3, y);
             statement.setInt(4, z);
-            try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("block_id");
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("block_id");
                 }
             }
-        } catch (SQLException e) {
-            Log.error("PluginDatabase", e.getMessage());
+        } catch (SQLException exception) {
+            Log.error("PluginDatabase", exception.getMessage());
         }
         return null;
     }

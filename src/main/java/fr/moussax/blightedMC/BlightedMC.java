@@ -45,8 +45,7 @@ public final class BlightedMC extends JavaPlugin {
         PluginContext.bind(this);
 
         Log.info("Plugin", "Initializing BlightedMC plugin...");
-        BlightedServer.initialize(this);
-        BlightedServer.getInstance().configureServer();
+        BlightedServer.configureServer();
 
         String config = PluginFiles.CONFIG.getFileName();
         saveResource(config, false);
@@ -60,7 +59,7 @@ public final class BlightedMC extends JavaPlugin {
         eventsRegistry.initializeListeners();
         eventsRegistry.buildSpawnCache();
 
-        BlightedServer.getInstance().rehydrateEntitiesOnLoadedChunks();
+        BlightedServer.rehydrateEntitiesOnLoadedChunks(this);
         new BlightedSpawnEngine().runTaskTimer(this, 100L, 1L);
     }
 

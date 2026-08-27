@@ -61,14 +61,14 @@ public final class BlightedPlayer {
         this.player = player;
         this.playerId = player.getUniqueId();
         this.dataHandler = new PlayerDataHandler(playerId, player.getName());
-        this.gems = dataHandler.getGems();
+        this.gems = dataHandler.getSavedGems();
 
         this.maxMana = DEFAULT_MAX_MANA;
         this.manaRegenerationRate = BlightedMC.getInstance() != null && BlightedMC.getInstance().getSettings() != null
                 ? BlightedMC.getInstance().getSettings().getDefaultManaRegenerationRate()
                 : DEFAULT_MANA_REGEN_RATE;
-        setCurrentMana(dataHandler.getMana());
-        this.forgeFuel = dataHandler.getForgeFuel();
+        setCurrentMana(dataHandler.getSavedMana());
+        this.forgeFuel = dataHandler.getSavedForgeFuel();
 
         players.put(playerId, this);
 
@@ -424,10 +424,13 @@ public final class BlightedPlayer {
      * Asynchronously persists resources and forge fuel to database storage.
      */
     public void saveData() {
-        dataHandler.setGems(gems);
-        dataHandler.setMana(currentMana);
-        dataHandler.setForgeFuel(forgeFuel);
-        Bukkit.getScheduler().runTaskAsynchronously(BlightedMC.getInstance(), dataHandler::save);
+        int gemsToSave = this.gems;
+        double manaToSave = this.currentMana;
+        int forgeFuelToSave = this.forgeFuel;
+        Bukkit.getScheduler().runTaskAsynchronously(
+                BlightedMC.getInstance(),
+                () -> dataHandler.save(gemsToSave, manaToSave, forgeFuelToSave)
+        );
     }
 
     /**

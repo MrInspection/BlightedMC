@@ -5,13 +5,32 @@ import fr.moussax.blightedMC.utils.debug.Log;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 
+/**
+ * Loads and holds runtime configuration settings from {@code config.yml}.
+ */
 public final class PluginSettings {
 
+    /**
+     * Default passive mana regeneration rate per tick.
+     */
     @Getter
     private double defaultManaRegenerationRate;
+
+    /**
+     * Base probability for custom loot drops.
+     */
     @Getter
     private double customLootChance;
 
+    private PluginSettings() {
+    }
+
+    /**
+     * Loads plugin configuration settings from the specified plugin instance.
+     *
+     * @param plugin plugin instance providing configuration access
+     * @return loaded settings instance with defensive defaults
+     */
     public static PluginSettings load(BlightedMC plugin) {
         PluginSettings settings = new PluginSettings();
         try {
