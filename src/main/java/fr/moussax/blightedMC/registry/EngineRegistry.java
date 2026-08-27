@@ -16,8 +16,6 @@ import java.util.function.Function;
 /**
  * Generic engine registry providing map storage, module loading, and duplicate key checking.
  *
- * // ponytail: simplified — unified 7 static content registries into a single generic EngineRegistry<T> to eliminate duplicate map boilerplate.
- *
  * @param <T> the type of registry element stored
  */
 public final class EngineRegistry<T> {

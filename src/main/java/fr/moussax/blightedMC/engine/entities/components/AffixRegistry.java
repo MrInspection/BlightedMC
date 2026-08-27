@@ -83,4 +83,15 @@ public final class AffixRegistry {
         Supplier<EntityComponent> supplier = REGISTRY.get(id);
         return supplier != null ? supplier.get() : null;
     }
+
+    /**
+     * Instantiates fresh instances of all registered components.
+     *
+     * @return unmodifiable list of fresh component instances for all registered affixes
+     */
+    public static List<EntityComponent> getAll() {
+        return REGISTRY.values().stream()
+                .map(Supplier::get)
+                .toList();
+    }
 }

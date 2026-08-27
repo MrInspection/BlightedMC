@@ -1,35 +1,35 @@
 package fr.moussax.blightedMC.engine.entities.rituals.registry;
 
 import fr.moussax.blightedMC.engine.entities.rituals.AncientRitual;
+import fr.moussax.blightedMC.registry.EngineRegistry;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.NonNull;
 
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 
+/**
+ * Central registry for all {@link AncientRitual} definitions.
+ */
 public final class RitualRegistry {
 
-    public static final Set<AncientRitual> REGISTRY = new HashSet<>();
+    private static final EngineRegistry<AncientRitual> REGISTRY =
+            new EngineRegistry<>("RitualRegistry", ritual -> ritual.getSummonedCreature() != null ? ritual.getSummonedCreature().getEntityId() : String.valueOf(ritual.hashCode()));
 
     private RitualRegistry() {
     }
 
     public static void initialize(List<RegistryModule<Consumer<AncientRitual>>> modules) {
-        clear();
-        modules.forEach(module -> module.register(RitualRegistry::register));
-        Log.success("RitualRegistry", "Registered " + REGISTRY.size() + " ancient rituals.");
+        REGISTRY.initialize(modules);
     }
 
     public static void register(@NonNull AncientRitual ritual) {
-        REGISTRY.add(ritual);
+        REGISTRY.register(ritual);
     }
 
-    public static Set<AncientRitual> getAll() {
-        return Collections.unmodifiableSet(REGISTRY);
+    public static Collection<AncientRitual> getAll() {
+        return REGISTRY.getAll();
     }
 
     public static void clear() {
