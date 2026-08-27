@@ -44,7 +44,7 @@ Necessary complexity (safety, security, correctness) is kept even if longer. Mar
 - The following abbreviations are explicitly banned. Write the full word instead:
 
   | Banned | Use instead |
-    |---|---|
+      |---|---|
   | `br` | `branch` / `break` / `bracket` — spell out the actual meaning |
   | `btn` | `button` |
   | `msg` | `message` |
@@ -94,20 +94,20 @@ Applies to any `List`, `Deque`, `LinkedHashSet`, or `SortedSet`; all implement `
 Avoid:
 ```java
 if (obj instanceof Player) {
-    Player player = (Player) obj;
-    greet(player);
+Player player = (Player) obj;
+greet(player);
 }
 ```
 Prefer:
 ```java
 if (obj instanceof Player player) {
-    greet(player);
+greet(player);
 }
 ```
 Record patterns destructure directly, including nested components:
 ```java
 if (event instanceof DamageEvent(var attacker, var target, var amount)) {
-    log(attacker, target, amount);
+log(attacker, target, amount);
 }
 ```
 
@@ -116,20 +116,20 @@ if (event instanceof DamageEvent(var attacker, var target, var amount)) {
 Avoid:
 ```java
 switch (type) {
-    case LEFT_CLICK:
+        case LEFT_CLICK:
         return handleLeft();
     case RIGHT_CLICK:
         return handleRight();
-    default:
+default:
         return handleAny();
 }
 ```
 Prefer:
 ```java
 return switch (type) {
-    case LEFT_CLICK -> handleLeft();
+        case LEFT_CLICK -> handleLeft();
     case RIGHT_CLICK -> handleRight();
-    default -> handleAny();
+default -> handleAny();
 };
 ```
 
@@ -138,9 +138,9 @@ return switch (type) {
 Avoid:
 ```java
 items.sort(new Comparator<ItemStack>() {
-    public int compare(ItemStack a, ItemStack b) {
-        return a.getAmount() - b.getAmount();
-    }
+  public int compare(ItemStack a, ItemStack b) {
+    return a.getAmount() - b.getAmount();
+  }
 });
 ```
 Prefer:
@@ -152,11 +152,11 @@ Exception: keep the anonymous class when it needs self-reference or more than on
 // ponytail: kept — BukkitRunnable must call cancel() on itself;
 // a lambda has no `this` to call it on.
 new BukkitRunnable() {
-    @Override
-    public void run() {
-        if (done) { cancel(); return; }
-        tick();
-    }
+  @Override
+  public void run() {
+    if (done) { cancel(); return; }
+    tick();
+  }
 }.runTaskTimer(plugin, 0L, 1L);
 ```
 
@@ -173,17 +173,17 @@ map.forEach((_, value) -> counter.increment());
 Avoid:
 ```java
 try {
-    risky();
+risky();
 } catch (IOException e) {
-    return fallback();
+        return fallback();
 }
 ```
 Prefer:
 ```java
 try {
-    risky();
+risky();
 } catch (IOException _) {
-    return fallback();
+        return fallback();
 }
 ```
 
@@ -224,10 +224,10 @@ String json = """
 Avoid:
 ```java
 class CooldownEntry {
-    private final Class<?> manager;
-    private final AbilityType type;
-    private final long expiresAt;
-    // plus constructor, getters, equals, hashCode, toString
+  private final Class<?> manager;
+  private final AbilityType type;
+  private final long expiresAt;
+  // plus constructor, getters, equals, hashCode, toString
 }
 ```
 Prefer:
@@ -278,6 +278,28 @@ These solved a problem — obfuscated internals — that no longer exists for th
 
 Do not parse the Minecraft version out of an NMS package name (a pre-existing anti-pattern even before 26.1, since Paper had already stopped relocating the CraftBukkit package by 1.20.5). Use `Bukkit.getBukkitVersion()` or `Bukkit.getServer().getVersion()`, or reuse a version-detection utility already in the codebase if one exists, per the Coding ladder above.
 
+## Version control
+
+Agents may draft a commit message. Agents must never create a commit, stage
+files for the purpose of committing, or push, without the user's explicit,
+turn-by-turn approval. This is a hard gate, not a courtesy, and it does not
+weaken based on how small or routine the change looks.
+
+- **Drafting is not committing.** A request such as "commit this" or "write
+  a commit message for these changes" authorizes inspecting the diff and
+  producing a message to review. It does not authorize running `git commit`.
+- **No proactive commits.** Finishing a task, reaching a good stopping
+  point, or the user moving on to a new request is never, by itself,
+  grounds to draft or run a commit. Only an explicit ask starts this flow.
+- **Executing requires a second, specific approval** of the exact message
+  shown — for example "yes, commit it" or "use that." Agreement with the
+  underlying change, or silence, is not approval to run the command. If
+  there is any ambiguity about whether the user approved the *message shown*
+  versus just the idea of committing, ask before running anything.
+- This applies uniformly across tools (Claude Code, Cursor, Copilot,
+  Windsurf, Cline, or any other agent reading this file) and across commit
+  message conventions the repository may adopt.
+
 ## Required before submitting code
 
 - [ ] The touched code was read before anything was proposed.
@@ -288,6 +310,7 @@ Do not parse the Minecraft version out of an NMS package name (a pre-existing an
 - [ ] Every new Bukkit or Spigot API call was verified against the Spigot API, not assumed from Paper documentation or examples.
 - [ ] No deprecated API was used without a `// ponytail: kept` justification.
 - [ ] No mapping, remapping, or reobfuscation workflow was added or suggested.
+- [ ] No commit was created, staged for committing, or pushed without the user's explicit, message-specific approval in this turn.
 
 ---
 
