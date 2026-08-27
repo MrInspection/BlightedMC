@@ -12,6 +12,7 @@ import fr.moussax.blightedMC.engine.items.blocks.BlightedBlockListener;
 import fr.moussax.blightedMC.engine.items.listeners.UnsafeAnvilListener;
 import fr.moussax.blightedMC.engine.items.listeners.VanillaRecipeProtectionListener;
 import fr.moussax.blightedMC.engine.items.rules.ItemRuleListener;
+import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.engine.player.PlayerListener;
 import fr.moussax.blightedMC.engine.player.hud.PlayerHudManager;
 import fr.moussax.blightedMC.engine.quest.BlightedQuestListener;
@@ -59,6 +60,13 @@ public final class EventsRegistry {
         actionBarService = new ActionbarService(instance);
         actionBarService.start(20L);
         playerHudManager = new PlayerHudManager(actionBarService);
+
+        Bukkit.getScheduler().runTaskTimer(instance, () -> {
+            for (BlightedPlayer player : BlightedPlayer.getPlayers()) {
+                player.tick();
+            }
+        }, 20L, 20L);
+
         spawnableEntitiesListener = new SpawnableEntitiesListener();
         EntitiesRegistry.addOnRegisterCallback(spawnableEntitiesListener::invalidateCache);
         signInputListener = new SignInputListener();

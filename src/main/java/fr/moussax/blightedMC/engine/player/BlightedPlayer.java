@@ -66,13 +66,24 @@ public final class BlightedPlayer {
         this.playerId = player.getUniqueId();
         this.dataHandler = new PlayerDataHandler(playerId, player.getName());
         this.gemsManager = new GemsManager(dataHandler.getGems());
-        this.manaManager = new ManaManager(DEFAULT_MAX_MANA, DEFAULT_MANA_REGEN_RATE);
+        
+        double regenRate = BlightedMC.getInstance() != null && BlightedMC.getInstance().getSettings() != null
+                ? BlightedMC.getInstance().getSettings().getDefaultManaRegenerationRate()
+                : DEFAULT_MANA_REGEN_RATE;
+        this.manaManager = new ManaManager(DEFAULT_MAX_MANA, regenRate);
         this.manaManager.setCurrentMana(dataHandler.getMana());
         this.forgeFuel = dataHandler.getForgeFuel();
 
         players.put(playerId, this);
 
         ArmorManager.updatePlayerArmor(this);
+    }
+
+    /**
+     * Ticks periodic player lifecycle tasks, including passive mana regeneration.
+     */
+    public void tick() {
+        manaManager.regenerateMana();
     }
 
     /**
@@ -83,6 +94,15 @@ public final class BlightedPlayer {
      */
     public static BlightedPlayer getBlightedPlayer(Player player) {
         return players.get(player.getUniqueId());
+    }
+
+    /**
+     * Returns an unmodifiable view of all active registered player contexts.
+     *
+     * @return active player contexts
+     */
+    public static Collection<BlightedPlayer> getPlayers() {
+        return Collections.unmodifiableCollection(players.values());
     }
 
     /**
