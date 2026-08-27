@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity.*;
 
 public class Endersent extends SpawnableEntity {
 
@@ -103,7 +103,7 @@ public class Endersent extends SpawnableEntity {
 
         escapeTicks += 20;
 
-        if (attachments.isEmpty() || escapeTicks >= 300) {
+        if (!hasSubordinateAttachments() || escapeTicks >= 300) {
             endDeadlyEscape();
         }
     }
@@ -128,24 +128,24 @@ public class Endersent extends SpawnableEntity {
         isEscaping = true;
         escapeTicks = 0;
 
-        Location loc = entity.getLocation();
+        Location location = entity.getLocation();
 
-        Objects.requireNonNull(loc.getWorld()).spawnParticle(Particle.EXPLOSION_EMITTER, loc, 1);
-        loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
+        Objects.requireNonNull(location.getWorld()).spawnParticle(Particle.EXPLOSION_EMITTER, location, 1);
+        location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
 
         damageNearbyPlayers(4.0, 18.0);
 
         entity.setInvisible(true);
         entity.setInvulnerable(true);
         entity.setAI(false);
-        entity.teleport(loc.clone().add(0, 50, 0));
+        entity.teleport(location.clone().add(0, 50, 0));
 
         int count = 3 + new Random().nextInt(4);
         for (int i = 0; i < count; i++) {
             BlightedEntity prototype = EntitiesRegistry.get("WATCHLING");
             if (prototype == null) continue;
             LivingEntity wEntity = prototype.spawn(
-                    loc.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
+                    location.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
             );
             addAttachment(wEntity, AttachmentRole.SUBORDINATE);
         }
@@ -155,7 +155,7 @@ public class Endersent extends SpawnableEntity {
         if (!isEscaping || !isAlive()) return;
         isEscaping = false;
 
-        killAllAttachments();
+        killAttachments(AttachmentRole.SUBORDINATE);
 
         Player target = getNearestPlayer(60);
         Location targetLoc = (target != null) ? target.getLocation() : entity.getLocation().subtract(0, 50, 0);

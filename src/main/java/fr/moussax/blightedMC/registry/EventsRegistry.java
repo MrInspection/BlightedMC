@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.registry;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.content.items.abilities.WitherImpactAbility;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.entities.listeners.EntityComponentListener;
 import fr.moussax.blightedMC.engine.entities.listeners.SpawnableEntitiesListener;
@@ -9,16 +10,17 @@ import fr.moussax.blightedMC.engine.fishing.FishingListener;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityListener;
 import fr.moussax.blightedMC.engine.items.blocks.BlightedBlockListener;
 import fr.moussax.blightedMC.engine.items.listeners.UnsafeAnvilListener;
+import fr.moussax.blightedMC.engine.items.listeners.VanillaRecipeProtectionListener;
 import fr.moussax.blightedMC.engine.items.rules.ItemRuleListener;
+import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.engine.player.PlayerListener;
+import fr.moussax.blightedMC.engine.player.hud.PlayerHudManager;
+import fr.moussax.blightedMC.engine.quest.BlightedQuestListener;
+import fr.moussax.blightedMC.shared.ui.actionbar.ActionbarService;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuListener;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuManager;
 import fr.moussax.blightedMC.shared.ui.menu.system.MenuSystem;
 import fr.moussax.blightedMC.shared.ui.sign.SignInputListener;
-import fr.moussax.blightedMC.content.items.abilities.WitherImpactAbility;
-import fr.moussax.blightedMC.engine.quest.BlightedQuestListener;
-import fr.moussax.blightedMC.engine.player.hud.PlayerHudManager;
-import fr.moussax.blightedMC.shared.ui.actionbar.ActionbarService;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -52,29 +54,37 @@ public final class EventsRegistry {
      * the entity registry changes.</p>
      */
     public void initializeListeners() {
-        PluginManager pm = Bukkit.getPluginManager();
+        PluginManager pluginManager = Bukkit.getPluginManager();
         menuSystem = new MenuSystem(instance);
         menuManager = new MenuManager(menuSystem);
         actionBarService = new ActionbarService(instance);
         actionBarService.start(20L);
         playerHudManager = new PlayerHudManager(actionBarService);
+
+        Bukkit.getScheduler().runTaskTimer(instance, () -> {
+            for (BlightedPlayer player : BlightedPlayer.getPlayers()) {
+                player.tick();
+            }
+        }, 20L, 20L);
+
         spawnableEntitiesListener = new SpawnableEntitiesListener();
         EntitiesRegistry.addOnRegisterCallback(spawnableEntitiesListener::invalidateCache);
         signInputListener = new SignInputListener();
 
-        pm.registerEvents(new MenuListener(menuSystem), instance);
-        pm.registerEvents(signInputListener, instance);
-        pm.registerEvents(new BlightedEntitiesListener(), instance);
-        pm.registerEvents(new EntityComponentListener(), instance);
-        pm.registerEvents(spawnableEntitiesListener, instance);
-        pm.registerEvents(new BlightedBlockListener(), instance);
-        pm.registerEvents(new PlayerListener(), instance);
-        pm.registerEvents(new ItemRuleListener(), instance);
-        pm.registerEvents(new AbilityListener(), instance);
-        pm.registerEvents(new FishingListener(), instance);
-        pm.registerEvents(new UnsafeAnvilListener(), instance);
-        pm.registerEvents(new WitherImpactAbility(), instance);
-        pm.registerEvents(new BlightedQuestListener(), instance);
+        pluginManager.registerEvents(new MenuListener(menuSystem), instance);
+        pluginManager.registerEvents(signInputListener, instance);
+        pluginManager.registerEvents(new BlightedEntitiesListener(), instance);
+        pluginManager.registerEvents(new EntityComponentListener(), instance);
+        pluginManager.registerEvents(spawnableEntitiesListener, instance);
+        pluginManager.registerEvents(new BlightedBlockListener(), instance);
+        pluginManager.registerEvents(new PlayerListener(), instance);
+        pluginManager.registerEvents(new ItemRuleListener(), instance);
+        pluginManager.registerEvents(new AbilityListener(), instance);
+        pluginManager.registerEvents(new FishingListener(), instance);
+        pluginManager.registerEvents(new UnsafeAnvilListener(), instance);
+        pluginManager.registerEvents(new VanillaRecipeProtectionListener(), instance);
+        pluginManager.registerEvents(new WitherImpactAbility(), instance);
+        pluginManager.registerEvents(new BlightedQuestListener(), instance);
     }
 
     /**

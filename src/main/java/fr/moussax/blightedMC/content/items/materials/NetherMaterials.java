@@ -4,14 +4,14 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import org.bukkit.Material;
 
-public class NetherMaterials implements RegistryModule<ItemRegistryHandler> {
+public class NetherMaterials implements RegistryModule<Consumer<BlightedItem>> {
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
 
         BlightedItem enchantedGhastTear = new BlightedItem("ENCHANTED_GHAST_TEAR", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.GHAST_TEAR);
         enchantedGhastTear.setDisplayName("Enchanted Ghast Tear");
@@ -113,19 +113,19 @@ public class NetherMaterials implements RegistryModule<ItemRegistryHandler> {
         suspiciousFungus.addRule(ItemRule.PREVENT_PLACEMENT);
         suspiciousFungus.addEnchantmentGlint();
 
-        registry.register(enchantedGhastTear);
-        registry.register(enchantedMagmaCream);
-        registry.register(enchantedQuartz);
-        registry.register(enchantedBlazePowder);
-        registry.register(enchantedBlazeRod);
-        registry.register(enchantedGlowstoneDust);
-        registry.register(enchantedNetherWart);
-        registry.register(flames);
-        registry.register(sulfur);
-        registry.register(enchantedSulfur);
-        registry.register(enchantedNetherrack);
-        registry.register(vengefulEye);
-        registry.register(cremeBrulee);
-        registry.register(suspiciousFungus);
+        registry.accept(enchantedGhastTear);
+        registry.accept(enchantedMagmaCream);
+        registry.accept(enchantedQuartz);
+        registry.accept(enchantedBlazePowder);
+        registry.accept(enchantedBlazeRod);
+        registry.accept(enchantedGlowstoneDust);
+        registry.accept(enchantedNetherWart);
+        registry.accept(flames);
+        registry.accept(sulfur);
+        registry.accept(enchantedSulfur);
+        registry.accept(enchantedNetherrack);
+        registry.accept(vengefulEye);
+        registry.accept(cremeBrulee);
+        registry.accept(suspiciousFungus);
     }
 }

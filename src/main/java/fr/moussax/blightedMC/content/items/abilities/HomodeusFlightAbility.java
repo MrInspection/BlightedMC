@@ -1,13 +1,15 @@
 package fr.moussax.blightedMC.content.items.abilities;
 
-import fr.moussax.blightedMC.engine.items.abilities.FullSetBonus;
-import fr.moussax.blightedMC.engine.player.BlightedPlayer;
+import fr.moussax.blightedMC.engine.items.abilities.AbstractFullSetBonus;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-public class HomodeusFlightAbility implements FullSetBonus {
-    private BlightedPlayer player;
+/**
+ * Full set bonus granting flight to players wearing full Homodeus armor.
+ */
+public class HomodeusFlightAbility extends AbstractFullSetBonus {
+
     private boolean isActive = false;
 
     @Override
@@ -25,15 +27,10 @@ public class HomodeusFlightAbility implements FullSetBonus {
     }
 
     @Override
-    public BonusCategory getCategory() {
-        return BonusCategory.FULL_SET;
-    }
-
-    @Override
     public void startAbilityEffect() {
         if (isActive) return;
 
-        Player bukkitPlayer = player.getPlayer();
+        Player bukkitPlayer = getAbilityOwner().getPlayer();
 
         if (bukkitPlayer.getGameMode() == GameMode.SURVIVAL) {
             bukkitPlayer.setAllowFlight(true);
@@ -49,31 +46,11 @@ public class HomodeusFlightAbility implements FullSetBonus {
     public void stopAbilityEffect() {
         if (!isActive) return;
 
-        Player bukkitPlayer = player.getPlayer();
+        Player bukkitPlayer = getAbilityOwner().getPlayer();
 
         bukkitPlayer.setAllowFlight(false);
         bukkitPlayer.setFlying(false);
         bukkitPlayer.sendMessage("§8 ■ §7Ascension mode terminated.");
         isActive = false;
-    }
-
-    @Override
-    public int getPieces() {
-        return 4;
-    }
-
-    @Override
-    public int getMaxPieces() {
-        return 4;
-    }
-
-    @Override
-    public void setPlayer(BlightedPlayer player) {
-        this.player = player;
-    }
-
-    @Override
-    public BlightedPlayer getAbilityOwner() {
-        return this.player;
     }
 }

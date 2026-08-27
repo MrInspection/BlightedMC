@@ -10,17 +10,13 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * Utility for formatting and sending command help messages.
+ * Formats and sends styled command usage and help menus to players.
  *
- * <p>Supports visual formatting for command syntax:
+ * <p>Supports visual formatting for syntax tokens:
  * <ul>
- *     <li>{@code <argument>} target or reference arguments</li>
- *     <li>{@code [argument]} value or input arguments</li>
- *     <li>Command literals</li>
+ *     <li>{@code <argument>} required target or reference arguments</li>
+ *     <li>{@code [argument]} optional value or input arguments</li>
  * </ul>
- *
- * <p>The argument notation is only used for display formatting and
- * does not define command validation rules.
  */
 public final class CommandFormatter {
 
@@ -43,7 +39,7 @@ public final class CommandFormatter {
     }
 
     /**
-     * Represents a command displayed in a help menu.
+     * Command syntax and description entry for help menus.
      *
      * @param syntax      command syntax without the leading slash
      * @param description short command description
@@ -58,25 +54,14 @@ public final class CommandFormatter {
                 throw new IllegalArgumentException("Command syntax cannot be blank.");
             }
         }
-
-        /**
-         * Creates command information for help display.
-         *
-         * @param syntax      command syntax without the leading slash
-         * @param description short command description
-         * @return command information
-         */
-        public static CommandInfo of(String syntax, String description) {
-            return new CommandInfo(syntax, description);
-        }
     }
 
     /**
-     * Sends a formatted command list to a player.
+     * Sends a formatted command list section to a player.
      *
      * @param player      command recipient
-     * @param title       help section title
-     * @param description help section description
+     * @param title       section header title
+     * @param description section header description
      * @param commands    commands to display
      */
     public static void sendCommands(Player player, String title, String description, CommandInfo... commands) {
@@ -84,10 +69,21 @@ public final class CommandFormatter {
     }
 
     /**
-     * Sends formatted usage information for a command.
+     * Sends formatted usage information for a command syntax string and description.
+     *
+     * @param player      command recipient
+     * @param syntax      command syntax without the leading slash
+     * @param description short command description
+     */
+    public static void sendUsage(Player player, String syntax, String description) {
+        sendUsage(player, new CommandInfo(syntax, description));
+    }
+
+    /**
+     * Sends formatted usage information for a command entry.
      *
      * @param player  command recipient
-     * @param command command information
+     * @param command command entry to display
      */
     public static void sendUsage(Player player, @NonNull CommandInfo command) {
         buildUsage(command).forEach(player::sendMessage);

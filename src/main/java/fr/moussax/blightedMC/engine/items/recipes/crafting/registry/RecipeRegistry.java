@@ -1,9 +1,5 @@
 package fr.moussax.blightedMC.engine.items.recipes.crafting.registry;
 
-import fr.moussax.blightedMC.content.recipes.EndRecipes;
-import fr.moussax.blightedMC.content.recipes.EquipmentRecipes;
-import fr.moussax.blightedMC.content.recipes.MaterialRecipes;
-import fr.moussax.blightedMC.content.recipes.NetherMaterialRecipes;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.builder.ShapedRecipeBuilder;
 import fr.moussax.blightedMC.engine.items.recipes.crafting.builder.ShapelessRecipeBuilder;
@@ -12,36 +8,32 @@ import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Central registry for custom {@link BlightedRecipe} definitions.
  *
  * <p>Recipes are provided by registered {@link RegistryModule} implementations
- * and added to the global recipe collection when {@link #initialize()} is
+ * and added to the global recipe collection when {@link #initialize(List)} is
  * called. The registry also provides factory methods for creating shaped and
  * shapeless recipe builders.</p>
  */
 public final class RecipeRegistry {
 
-    private static final List<RegistryModule<RecipeRegistryHandler>> PROVIDERS = List.of(
-        new MaterialRecipes(),
-        new NetherMaterialRecipes(),
-        new EndRecipes(),
-        new EquipmentRecipes()
-    );
-
     private RecipeRegistry() {
     }
 
     /**
-     * Initializes the recipe registry.
+     * Initializes the recipe registry using the provided list of modules.
      *
      * <p>Previously registered recipes are cleared before all configured
      * recipe providers are loaded.</p>
+     *
+     * @param modules the list of recipe modules to load
      */
-    public static void initialize() {
+    public static void initialize(List<RegistryModule<Consumer<BlightedRecipe>>> modules) {
         clear();
-        PROVIDERS.forEach(module -> module.register(RecipeRegistry::register));
+        modules.forEach(module -> module.register(RecipeRegistry::register));
         Log.success("RecipesRegistry", "Registered " + BlightedRecipe.REGISTERED_RECIPES.size() + " custom recipes.");
     }
 

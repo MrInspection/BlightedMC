@@ -1,26 +1,23 @@
 package fr.moussax.blightedMC.shared.loot;
 
 /**
- * Represents a single loot outcome that can be executed.
- *
- * <p>Implementations define how to apply the loot (e.g., give an item,
- * spawn an entity, or grant currency) and provide a display name for it.</p>
+ * Outcome executable upon selection from a {@link LootTable}.
  */
 public interface LootResult {
 
     /**
-     * Executes the loot according to the given context and amount.
+     * Executes the loot action in the world for the specified quantity.
      *
-     * @param context the context of the loot roll
-     * @param amount the quantity or magnitude of the loot
+     * @param context loot context
+     * @param amount  drop quantity
      */
     void execute(LootContext context, int amount);
 
     /**
-     * Returns a display name for this loot, optionally including the amount.
+     * Returns a formatted display name for this loot result.
      *
-     * @param amount the quantity or magnitude of the loot
-     * @return formatted loot name
+     * @param amount drop quantity
+     * @return formatted display name
      */
     String displayName(int amount);
 }

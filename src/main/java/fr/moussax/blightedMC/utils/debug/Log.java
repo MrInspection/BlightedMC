@@ -1,86 +1,126 @@
 package fr.moussax.blightedMC.utils.debug;
 
-import lombok.Setter;
+import org.bukkit.Bukkit;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Utility class for formatted console logging with colored output.
- * Provides methods for logging messages at different levels:
- * INFO, WARN, ERROR, and DEBUG, with optional custom prefixes.
+ * Utility class for standardized console logging through Spigot's native logger.
+ *
+ * <p>Delegates log output directly to {@link Bukkit#getLogger()} using standard
+ * {@link Level} severity thresholds, with support for optional subsystem tag
+ * prefixes.</p>
  */
 public final class Log {
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
-
-    private static final String RESET = "\u001B[0m";
-    private static final String LOG_INFO_COLOR = "\u001B[36m";
-    private static final String LOG_WARNING_COLOR = "\u001B[33m";
-    private static final String LOG_SUCCESS_COLOR = "\u001B[32m";
-    private static final String LOG_ERROR_COLOR = "\u001B[31m";
-    private static final String LOG_DEBUG_COLOR = "\u001B[1;35m";
-
-    @Setter
-    private static boolean includeTimestamp = false;
 
     private Log() {
     }
 
-    private static void print(String level, String message, String color) {
-        if (includeTimestamp) {
-            String timestamp = LocalDateTime.now().format(FORMATTER);
-            System.out.println(color + "[" + timestamp + "] [" + level + "]: " + message + RESET);
-        } else {
-            System.out.println(color + "[" + level + "]: " + message + RESET);
-        }
+    private static Logger getLogger() {
+        return Bukkit.getLogger();
     }
 
-    private static void print(String prefix, String level, String message, String color) {
-        if (includeTimestamp) {
-            String timestamp = LocalDateTime.now().format(FORMATTER);
-            System.out.println(color + "[" + timestamp + "] [" + prefix + "/" + level + "]: " + message + RESET);
-        } else {
-            System.out.println(color + "[" + prefix + "/" + level + "]: " + message + RESET);
-        }
+    private static void log(Level level, String message) {
+        getLogger().log(level, message);
     }
 
+    private static void log(Level level, String prefix, String message) {
+        getLogger().log(level, "[" + prefix + "] " + message);
+    }
+
+    /**
+     * Logs an informational message.
+     *
+     * @param message content to log
+     */
     public static void info(String message) {
-        print("INFO", message, LOG_INFO_COLOR);
+        log(Level.INFO, message);
     }
 
+    /**
+     * Logs a warning message.
+     *
+     * @param message content to log
+     */
     public static void warn(String message) {
-        print("WARN", message, LOG_WARNING_COLOR);
+        log(Level.WARNING, message);
     }
 
+    /**
+     * Logs an error message at severe level.
+     *
+     * @param message content to log
+     */
     public static void error(String message) {
-        print("ERROR", message, LOG_ERROR_COLOR);
+        log(Level.SEVERE, message);
     }
 
+    /**
+     * Logs a success message at informational level.
+     *
+     * @param message content to log
+     */
     public static void success(String message) {
-        print("SUCCESS", message, LOG_SUCCESS_COLOR);
+        log(Level.INFO, message);
     }
 
+    /**
+     * Logs a debug message at fine level.
+     *
+     * @param message content to log
+     */
     public static void debug(String message) {
-        print("DEBUG", message, LOG_DEBUG_COLOR);
+        log(Level.FINE, message);
     }
 
+    /**
+     * Logs an informational message with a subsystem prefix tag.
+     *
+     * @param prefix subsystem tag prefix
+     * @param message content to log
+     */
     public static void info(String prefix, String message) {
-        print(prefix, "INFO", message, LOG_INFO_COLOR);
+        log(Level.INFO, prefix, message);
     }
 
+    /**
+     * Logs a warning message with a subsystem prefix tag.
+     *
+     * @param prefix subsystem tag prefix
+     * @param message content to log
+     */
     public static void warn(String prefix, String message) {
-        print(prefix, "WARN", message, LOG_WARNING_COLOR);
+        log(Level.WARNING, prefix, message);
     }
 
+    /**
+     * Logs a success message at informational level with a subsystem prefix tag.
+     *
+     * @param prefix subsystem tag prefix
+     * @param message content to log
+     */
     public static void success(String prefix, String message) {
-        print(prefix, "SUCCESS", message, LOG_SUCCESS_COLOR);
+        log(Level.INFO, prefix, message);
     }
 
+    /**
+     * Logs an error message at severe level with a subsystem prefix tag.
+     *
+     * @param prefix subsystem tag prefix
+     * @param message content to log
+     */
     public static void error(String prefix, String message) {
-        print(prefix, "ERROR", message, LOG_ERROR_COLOR);
+        log(Level.SEVERE, prefix, message);
     }
 
+    /**
+     * Logs a debug message at fine level with a subsystem prefix tag.
+     *
+     * @param prefix subsystem tag prefix
+     * @param message content to log
+     */
     public static void debug(String prefix, String message) {
-        print(prefix, "DEBUG", message, LOG_DEBUG_COLOR);
+        log(Level.FINE, prefix, message);
     }
 }

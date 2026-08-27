@@ -21,7 +21,7 @@ public final class InvSeeMenu extends Menu {
 
     private static final ItemStack NO_HELMET = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).setDisplayName("§7Empty Helmet Slot").toItemStack();
     private static final ItemStack NO_CHESTPLATE = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).setDisplayName("§7Empty Chestplate Slot").toItemStack();
-    private static final ItemStack NO_LEGGINGS = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).setDisplayName("§7Empty Leggings Leggings").toItemStack();
+    private static final ItemStack NO_LEGGINGS = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).setDisplayName("§7Empty Leggings Slot").toItemStack();
     private static final ItemStack NO_BOOTS = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).setDisplayName("§7Empty Boots Slot").toItemStack();
     private static final ItemStack NO_OFFHAND = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).setDisplayName("§7Empty Offhand Slot").toItemStack();
 
@@ -52,8 +52,8 @@ public final class InvSeeMenu extends Menu {
                 .setDisplayName("§dView Ender Chest")
                 .addLore("§7Click to view ender chest.")
                 .toItemStack(),
-            (p, _) -> BlightedMC.menuManager().openMenu(
-                new EnderSeeMenu(target, this), p
+            (clickingPlayer, _) -> BlightedMC.menuManager().openMenu(
+                new EnderSeeMenu(target, this), clickingPlayer
             )
         );
 

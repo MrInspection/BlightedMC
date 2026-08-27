@@ -2,16 +2,16 @@ package fr.moussax.blightedMC.content.recipes;
 
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.recipes.crafting.registry.RecipeRegistryHandler;
+import java.util.function.Consumer;
 
 import static fr.moussax.blightedMC.engine.items.recipes.crafting.registry.RecipeRegistry.shapedRecipe;
 
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import org.bukkit.Material;
 
-public class EndRecipes implements RegistryModule<RecipeRegistryHandler> {
+public class EndRecipes implements RegistryModule<Consumer<BlightedRecipe>> {
     @Override
-    public void register(RecipeRegistryHandler registry) {
+    public void register(Consumer<BlightedRecipe> registry) {
 
         BlightedRecipe enchantedEnderPearlRecipe = shapedRecipe("ENCHANTED_ENDER_PEARL", 2)
                 .shape(" i ", "iii", " i ")
@@ -34,9 +34,9 @@ public class EndRecipes implements RegistryModule<RecipeRegistryHandler> {
                 .bind('j', Material.OPEN_EYEBLOSSOM, 1)
                 .build();
 
-        registry.register(enchantedEnderPearlRecipe);
-        registry.register(enchantedEndstoneRecipe);
-        registry.register(enchantedChorusFruitRecipe);
-        registry.register(glimmeringEyeRecipe);
+        registry.accept(enchantedEnderPearlRecipe);
+        registry.accept(enchantedEndstoneRecipe);
+        registry.accept(enchantedChorusFruitRecipe);
+        registry.accept(glimmeringEyeRecipe);
     }
 }

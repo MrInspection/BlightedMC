@@ -2,16 +2,16 @@ package fr.moussax.blightedMC.content.recipes;
 
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.recipes.crafting.registry.RecipeRegistryHandler;
+import java.util.function.Consumer;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import org.bukkit.Material;
 
 import static fr.moussax.blightedMC.engine.items.recipes.crafting.registry.RecipeRegistry.shapedRecipe;
 
-public final class MaterialRecipes implements RegistryModule<RecipeRegistryHandler> {
+public final class MaterialRecipes implements RegistryModule<Consumer<BlightedRecipe>> {
 
     @Override
-    public void register(RecipeRegistryHandler registry) {
+    public void register(Consumer<BlightedRecipe> registry) {
 
         BlightedRecipe enchantedCoalRecipe = shapedRecipe("ENCHANTED_COAL", 1)
                 .shape(" i ", "iii", " i ")
@@ -178,35 +178,35 @@ public final class MaterialRecipes implements RegistryModule<RecipeRegistryHandl
                 .bind('c', Material.GHAST_TEAR, 1)
                 .build();
 
-        registry.register(enchantedCoalRecipe);
-        registry.register(enchantedCopperIngotRecipe);
-        registry.register(enchantedIronIngotRecipe);
-        registry.register(enchantedIronBlockRecipe);
-        registry.register(enchantedGoldIngotRecipe);
-        registry.register(enchantedLapisLazuliRecipe);
-        registry.register(enchantedRedstoneRecipe);
-        registry.register(enchantedAmethystShardRecipe);
-        registry.register(enchantedEmeraldRecipe);
-        registry.register(enchantedRottenFleshRecipe);
-        registry.register(enchantedBoneRecipe);
-        registry.register(enchantedStringRecipe);
-        registry.register(enchantedGunpowderRecipe);
-        registry.register(enchantedSpiderEyeRecipe);
-        registry.register(enchantedSlimeBallRecipe);
-        registry.register(enchantedPhantomMembraneRecipe);
-        registry.register(enchantedResinClumpRecipe);
-        registry.register(enchantedCobblestoneRecipe);
-        registry.register(enchantedObsidianRecipe);
-        registry.register(enchantedClayBallRecipe);
-        registry.register(enchantedCodRecipe);
-        registry.register(enchantedSalmonRecipe);
-        registry.register(enchantedTropicalFishRecipe);
-        registry.register(enchantedPufferfishRecipe);
-        registry.register(enchantedSeaPickleRecipe);
-        registry.register(enchantedLavaBucketRecipe);
-        registry.register(magmaBucketRecipe);
-        registry.register(blightedCraftingTable);
-        registry.register(blightedForgeRecipe);
-        registry.register(magmaRodRecipe);
+        registry.accept(enchantedCoalRecipe);
+        registry.accept(enchantedCopperIngotRecipe);
+        registry.accept(enchantedIronIngotRecipe);
+        registry.accept(enchantedIronBlockRecipe);
+        registry.accept(enchantedGoldIngotRecipe);
+        registry.accept(enchantedLapisLazuliRecipe);
+        registry.accept(enchantedRedstoneRecipe);
+        registry.accept(enchantedAmethystShardRecipe);
+        registry.accept(enchantedEmeraldRecipe);
+        registry.accept(enchantedRottenFleshRecipe);
+        registry.accept(enchantedBoneRecipe);
+        registry.accept(enchantedStringRecipe);
+        registry.accept(enchantedGunpowderRecipe);
+        registry.accept(enchantedSpiderEyeRecipe);
+        registry.accept(enchantedSlimeBallRecipe);
+        registry.accept(enchantedPhantomMembraneRecipe);
+        registry.accept(enchantedResinClumpRecipe);
+        registry.accept(enchantedCobblestoneRecipe);
+        registry.accept(enchantedObsidianRecipe);
+        registry.accept(enchantedClayBallRecipe);
+        registry.accept(enchantedCodRecipe);
+        registry.accept(enchantedSalmonRecipe);
+        registry.accept(enchantedTropicalFishRecipe);
+        registry.accept(enchantedPufferfishRecipe);
+        registry.accept(enchantedSeaPickleRecipe);
+        registry.accept(enchantedLavaBucketRecipe);
+        registry.accept(magmaBucketRecipe);
+        registry.accept(blightedCraftingTable);
+        registry.accept(blightedForgeRecipe);
+        registry.accept(magmaRodRecipe);
     }
 }

@@ -5,7 +5,7 @@ import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
 import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import fr.moussax.blightedMC.registry.RegistryModule;
 import fr.moussax.blightedMC.shared.loot.results.gems.GemsItem;
@@ -18,10 +18,10 @@ import org.bukkit.inventory.ItemFlag;
 
 import java.util.List;
 
-public class BlightedItems implements RegistryModule<ItemRegistryHandler> {
+public class BlightedItems implements RegistryModule<Consumer<BlightedItem>> {
 
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
 
         BlightedItem blightedBanner = new BlightedItem(
                 "BLIGHTED_BANNER", ItemType.UNCATEGORIZED, ItemRarity.EPIC, Material.BLACK_BANNER);
@@ -93,12 +93,12 @@ public class BlightedItems implements RegistryModule<ItemRegistryHandler> {
         blightedGemstone.unstackable();
         blightedGemstone.addRule(ItemRule.PREVENT_PLACEMENT);
         blightedGemstone.addAbility(
-                new Ability(new GemsItem.BlightedGemstoneAbility(), "Consume Gems", AbilityType.RIGHT_CLICK)
-                , false
+                Ability.rightClick("Consume Gems", new GemsItem.BlightedGemstoneAbility()),
+                false
         );
 
-        registry.register(blightedBanner);
-        registry.register(blightedCodex);
-        registry.register(blightedGemstone);
+        registry.accept(blightedBanner);
+        registry.accept(blightedCodex);
+        registry.accept(blightedGemstone);
     }
 }

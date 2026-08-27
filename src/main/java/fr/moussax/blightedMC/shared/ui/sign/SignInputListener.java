@@ -28,8 +28,8 @@ public final class SignInputListener implements Listener {
         try {
             NETWORK_CONNECTION_FIELD = ServerCommonPacketListenerImpl.class.getDeclaredField("connection");
             NETWORK_CONNECTION_FIELD.setAccessible(true);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to locate NMS connection field via reflection", e);
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to locate NMS connection field via reflection", exception);
         }
     }
 
@@ -44,7 +44,7 @@ public final class SignInputListener implements Listener {
         uninject(player);
         try {
             SignInputManager.removeSession(player.getUniqueId());
-        } catch (NoClassDefFoundError ignored) {
+        } catch (NoClassDefFoundError _) {
         }
     }
 
@@ -55,18 +55,18 @@ public final class SignInputListener implements Listener {
 
             pipeline.addBefore("packet_handler", HANDLER_NAME, new ChannelDuplexHandler() {
                 @Override
-                public void channelRead(ChannelHandlerContext ctx, Object packet) throws Exception {
+                public void channelRead(ChannelHandlerContext context, Object packet) throws Exception {
                     if (packet instanceof ServerboundSignUpdatePacket signPacket) {
                         if (SignInputManager.hasActiveSession(player.getUniqueId())) {
                             SignInputManager.handleSignUpdate(player, signPacket.getLines());
                             return;
                         }
                     }
-                    super.channelRead(ctx, packet);
+                    super.channelRead(context, packet);
                 }
             });
-        } catch (Exception e) {
-            Log.error("SignInputListener", "Failed to inject: " + e.getMessage());
+        } catch (Exception exception) {
+            Log.error("SignInputListener", "Failed to inject: " + exception.getMessage());
         }
     }
 
@@ -76,9 +76,9 @@ public final class SignInputListener implements Listener {
             if (pipeline != null && pipeline.get(HANDLER_NAME) != null) {
                 pipeline.remove(HANDLER_NAME);
             }
-        } catch (NoSuchElementException | IllegalArgumentException ignored) {
-        } catch (Exception e) {
-            Log.error("SignInputListener", "Failed to uninject: " + e.getMessage());
+        } catch (NoSuchElementException | IllegalArgumentException _) {
+        } catch (Exception exception) {
+            Log.error("SignInputListener", "Failed to uninject: " + exception.getMessage());
         }
     }
 
@@ -87,7 +87,7 @@ public final class SignInputListener implements Listener {
             ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
             Connection connection = (Connection) NETWORK_CONNECTION_FIELD.get(nmsPlayer.connection);
             return connection.channel.pipeline();
-        } catch (Exception e) {
+        } catch (Exception _) {
             return null;
         }
     }

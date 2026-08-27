@@ -40,7 +40,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
     private int lastInventoryFuel = -1;
 
     public ForgeMenu(ForgeRecipe recipe, Menu previousMenu) {
-        super(recipe == null ? "Blighted Forge" : "Forge Item", 54);
+        super("Blighted Forge", 54);
         this.recipe = recipe;
         this.previousMenu = previousMenu;
     }
@@ -70,6 +70,12 @@ public final class ForgeMenu extends Menu implements TickableMenu {
 
     @Override
     public void build(Player player) {
+        if (recipe != null) {
+            setTitle("Forge Item");
+        } else {
+            setTitle("Blighted Forge");
+        }
+
         if (recipe != null && !isForging) {
             checkRequirements(player);
         }
@@ -211,17 +217,17 @@ public final class ForgeMenu extends Menu implements TickableMenu {
                     " §8Consumes §6🪣 " + Formatter.formatDecimalWithCommas(recipe.getFuelCost()) + "mB §8of fuel to ",
                     " §8start the forging process.",
                     "",
-                    canForge ? "§eClick to confirm!" : "§cYou don't meet the requirements!"
+                    canForge ? "§eClick to confirm!" : "§cMissing ingredients or insufficient fuel!"
             ).setEnchantmentGlint(canForge);
         }
 
-        setItem(32, builder.toItemStack(), (p, _) -> {
+        setItem(32, builder.toItemStack(), (clickingPlayer, _) -> {
             if (isForging) return;
 
             if (recipe != null && canForge) {
-                forgeItem(p);
+                forgeItem(clickingPlayer);
             } else {
-                p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
+                clickingPlayer.playSound(clickingPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
             }
         });
     }
@@ -232,7 +238,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
                 .toItemStack();
 
         setCloseButton(49);
-        setItem(50, recipeBook, (p, _) -> openSubMenu(new ForgeRecipesMenu(this)));
+        setItem(50, recipeBook, (clickingPlayer, _) -> openSubMenu(new ForgeRecipesMenu(this)));
     }
 
     private void setupFuelButtons(Player player) {
@@ -262,7 +268,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
                         " §7craft advanced items.",
                         ""
                 )
-                .toItemStack();
+                .addEnchantmentGlint().toItemStack();
     }
 
     private ItemStack createFuelGuide() {
@@ -291,7 +297,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
     private ItemStack createInsertFuelButton(Player player) {
         int fuelInInventory = calculateInventoryFuel(player);
 
-        return new ItemBuilder(Material.CAULDRON, "§aInsert Fuel from Inventory")
+        return new ItemBuilder(Material.CAULDRON, "§fInsert Fuel from Inventory")
                 .addLore(
                         "§7Grab as much fuel that will fit into ",
                         "§7the forge from your inventory.", "",

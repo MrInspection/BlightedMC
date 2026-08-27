@@ -1,15 +1,18 @@
 package fr.moussax.blightedMC.engine.entities;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.engine.entities.components.AffixRegistry;
 import fr.moussax.blightedMC.engine.entities.attachment.AttachmentRole;
 import fr.moussax.blightedMC.engine.entities.attachment.EntityAttachment;
 import fr.moussax.blightedMC.engine.entities.components.EntityComponent;
-import fr.moussax.blightedMC.engine.entities.immunity.DamageType;
-import fr.moussax.blightedMC.engine.entities.immunity.EntityImmunity;
+import fr.moussax.blightedMC.engine.entities.defense.DamageType;
+import fr.moussax.blightedMC.engine.entities.defense.EntityDefenses;
+import fr.moussax.blightedMC.engine.entities.defense.EntityImmunity;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
 import fr.moussax.blightedMC.shared.loot.LootContext;
 import fr.moussax.blightedMC.shared.loot.LootTable;
+import fr.moussax.blightedMC.utils.debug.Log;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.*;
@@ -106,8 +109,8 @@ public abstract class BlightedEntity implements Cloneable {
     protected BarStyle bossBarStyle = BarStyle.SOLID;
     protected Map<Attribute, Double> attributes = new HashMap<>();
 
-    private final List<EntityImmunity> immunities = new ArrayList<>();
-    private final Map<DamageType, Double> resistances = new EnumMap<>(DamageType.class);
+    @Getter
+    private EntityDefenses defenses = EntityDefenses.fromClass(getClass());
     private boolean runtimeInitialized = false;
     private boolean componentsInitialized = false;
 
@@ -163,8 +166,6 @@ public abstract class BlightedEntity implements Cloneable {
             throw new IllegalStateException("EntityType cannot be null");
         }
 
-        initImmunityRules();
-        initResistanceRules();
         entity = (LivingEntity) Objects.requireNonNull(location.getWorld()).spawnEntity(location, entityType);
         entity.addScoreboardTag(FAST_PASS_TAG);
         entity.getPersistentDataContainer().set(ENTITY_ID_KEY, PersistentDataType.STRING, getEntityId());
@@ -195,8 +196,6 @@ public abstract class BlightedEntity implements Cloneable {
             entity.addScoreboardTag(FAST_PASS_TAG);
         }
 
-        initImmunityRules();
-        initResistanceRules();
         rehydrateAttributes();
         onConfigureAI(existing);
 
@@ -320,13 +319,9 @@ public abstract class BlightedEntity implements Cloneable {
         if (phaseThresholds.isEmpty()) return;
         double healthPercentage = currentHealth / maxHealth;
 
-        Iterator<Map.Entry<Double, Runnable>> iterator = phaseThresholds.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Double, Runnable> entry = iterator.next();
-
-            if (healthPercentage > entry.getKey()) {
-                break;
-            }
+        while (!phaseThresholds.isEmpty() && healthPercentage <= phaseThresholds.firstKey()) {
+            Map.Entry<Double, Runnable> entry = phaseThresholds.pollFirstEntry();
+            if (entry == null) break;
 
             phaseTasks.cancelAll();
             phaseTasks = new LifecycleTaskManager();
@@ -342,7 +337,6 @@ public abstract class BlightedEntity implements Cloneable {
             } else {
                 phaseTasks.scheduleAll();
             }
-            iterator.remove();
         }
     }
 
@@ -821,6 +815,10 @@ public abstract class BlightedEntity implements Cloneable {
                 continue;
             }
 
+            if (attachment.role() == AttachmentRole.SUBORDINATE) {
+                continue;
+            }
+
             if (entity != null && entity.getPassengers().contains(attachedEntity)) {
                 continue;
             }
@@ -869,6 +867,30 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     /**
+     * Removes and destroys attached entities matching the specified role.
+     *
+     * @param role attachment role to remove
+     */
+    public void killAttachments(AttachmentRole role) {
+        if (attachments.isEmpty() || role == null) {
+            return;
+        }
+
+        for (EntityAttachment attachment : attachments) {
+            if (attachment.role() != role) {
+                continue;
+            }
+
+            Entity attachmentEntity = attachment.entity();
+            if (attachmentEntity != null) {
+                BlightedEntitiesListener.unregisterAttachment(attachmentEntity);
+                attachmentEntity.remove();
+            }
+            attachments.remove(attachment);
+        }
+    }
+
+    /**
      * Checks whether a living body attachment is currently present.
      *
      * @return {@code true} if a living body attachment exists
@@ -876,6 +898,23 @@ public abstract class BlightedEntity implements Cloneable {
     public boolean hasLivingBodyAttachment() {
         for (EntityAttachment attachment : attachments) {
             if (attachment.entity() instanceof LivingEntity living && !living.isDead()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether an active subordinate companion attachment is currently present.
+     *
+     * @return {@code true} if a non-dead subordinate attachment exists
+     */
+    public boolean hasSubordinateAttachments() {
+        for (EntityAttachment attachment : attachments) {
+            if (attachment.role() == AttachmentRole.SUBORDINATE
+                    && attachment.entity() != null
+                    && attachment.entity().isValid()
+                    && !attachment.entity().isDead()) {
                 return true;
             }
         }
@@ -1027,15 +1066,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return matching immunity, or {@code null} if none applies
      */
     public EntityImmunity getTriggeredImmunity(LivingEntity target, EntityDamageEvent event) {
-        if (immunities.isEmpty()) {
-            return null;
-        }
-        for (EntityImmunity rule : immunities) {
-            if (rule.isImmune(target, event)) {
-                return rule;
-            }
-        }
-        return null;
+        return defenses.getTriggeredImmunity(target, event);
     }
 
     /**
@@ -1046,17 +1077,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return resistance percentage (0.0 if no resistance applies)
      */
     public double getResistancePercent(LivingEntity target, EntityDamageEvent event) {
-        if (resistances.isEmpty()) {
-            return 0.0;
-        }
-        double highestResistance = 0.0;
-        for (Map.Entry<DamageType, Double> entry : resistances.entrySet()) {
-            DamageType type = entry.getKey();
-            if (type.isImmune(target, event)) {
-                highestResistance = Math.max(highestResistance, entry.getValue());
-            }
-        }
-        return highestResistance;
+        return defenses.getResistancePercent(target, event);
     }
 
     private void initComponents() {
@@ -1168,34 +1189,13 @@ public abstract class BlightedEntity implements Cloneable {
         equipment.setItemInOffHandDropChance(0f);
     }
 
-    private void initImmunityRules() {
-        EntityImmunities annotation = getClass().getAnnotation(EntityImmunities.class);
-        if (annotation == null) {
-            return;
-        }
-        Collections.addAll(this.immunities, annotation.value());
-    }
-
     /**
      * Adds an immunity rule to this entity.
      *
      * @param immunity immunity rule
      */
     public void addImmunity(EntityImmunity immunity) {
-        this.immunities.add(immunity);
-    }
-
-    private void initResistanceRules() {
-        EntityResistances container = getClass().getAnnotation(EntityResistances.class);
-        if (container != null) {
-            for (EntityResistance rule : container.value()) {
-                this.resistances.put(rule.type(), rule.percent());
-            }
-        }
-        EntityResistance single = getClass().getAnnotation(EntityResistance.class);
-        if (single != null) {
-            this.resistances.put(single.type(), single.percent());
-        }
+        defenses.addImmunity(immunity);
     }
 
     /**
@@ -1205,7 +1205,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param percent percentage resisted (0 - 100)
      */
     public void addResistance(DamageType type, double percent) {
-        this.resistances.put(type, percent);
+        defenses.addResistance(type, percent);
     }
 
     private void scheduleAbility(LifecycleTaskManager manager, long delayTicks, long periodTicks, Runnable action) {
@@ -1219,7 +1219,7 @@ public abstract class BlightedEntity implements Cloneable {
                 try {
                     action.run();
                 } catch (Exception exception) {
-                    BlightedMC.getInstance().getLogger().warning("[BlightedEntity] Ability threw an exception on entity '" + name + "': " + exception.getMessage());
+                    Log.warn("BlightedEntity", "Ability threw an exception on entity '" + name + "': " + exception.getMessage());
                 }
             }
         }, delayTicks, periodTicks);
@@ -1236,7 +1236,7 @@ public abstract class BlightedEntity implements Cloneable {
                 try {
                     action.run();
                 } catch (Exception exception) {
-                    BlightedMC.getInstance().getLogger().warning("[BlightedEntity] Delayed action threw an exception on entity '" + name + "': " + exception.getMessage());
+                    Log.warn("BlightedEntity", "Delayed action threw an exception on entity '" + name + "': " + exception.getMessage());
                 }
             }
         }, delayTicks);
@@ -1317,6 +1317,7 @@ public abstract class BlightedEntity implements Cloneable {
             clone.componentsInitialized = false;
             clone.attributes = new HashMap<>(this.attributes);
             clone.attachments = new CopyOnWriteArraySet<>();
+            clone.defenses = this.defenses.copy();
             clone.coreTasks = new LifecycleTaskManager();
             clone.phaseTasks = new LifecycleTaskManager();
             clone.armor = cloneArmor();
@@ -1326,7 +1327,8 @@ public abstract class BlightedEntity implements Cloneable {
             clone.components = new HashMap<>();
 
             for (Map.Entry<String, EntityComponent> entry : this.components.entrySet()) {
-                clone.components.put(entry.getKey(), entry.getValue().clone());
+                EntityComponent fresh = AffixRegistry.getAffixById(entry.getKey());
+                clone.components.put(entry.getKey(), fresh != null ? fresh : entry.getValue());
             }
 
             return clone;

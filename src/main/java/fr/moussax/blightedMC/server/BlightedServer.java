@@ -1,9 +1,9 @@
 package fr.moussax.blightedMC.server;
 
-import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.bukkit.*;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -11,20 +11,18 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Provides static server configuration and startup chunk rehydration routines.
+ */
 public final class BlightedServer {
-    private static BlightedServer instance;
-    private final BlightedMC plugin;
 
-    private BlightedServer(BlightedMC plugin) {
-        this.plugin = plugin;
+    private BlightedServer() {
     }
 
-    public static void initialize(BlightedMC plugin) {
-        if (instance != null) return;
-        instance = new BlightedServer(plugin);
-    }
-
-    public void configureServer() {
+    /**
+     * Applies default server gamerules and difficulty settings.
+     */
+    public static void configureServer() {
         for (World world : Bukkit.getWorlds()) {
             world.setDifficulty(Difficulty.HARD);
             world.setGameRule(GameRule.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0);
@@ -32,10 +30,11 @@ public final class BlightedServer {
     }
 
     /**
-     * Rehydrate any loaded entities in already-loaded chunks (e.g., after /reload) by
-     * manually firing the chunk scan once on enabling. This complements the runtime
+     * Rehydrates loaded entities across all loaded chunks asynchronously in batches.
+     *
+     * @param plugin plugin instance handling task scheduling
      */
-    public void rehydrateEntitiesOnLoadedChunks() {
+    public static void rehydrateEntitiesOnLoadedChunks(JavaPlugin plugin) {
         List<Chunk> chunks = new ArrayList<>();
         for (World world : plugin.getServer().getWorlds()) {
             Collections.addAll(chunks, world.getLoadedChunks());
@@ -73,10 +72,5 @@ public final class BlightedServer {
                 }
             }
         }.runTaskTimer(plugin, 1L, 1L);
-    }
-
-    public static BlightedServer getInstance() {
-        if (instance == null) throw new IllegalStateException("BlightedServer has not been initialized yet.");
-        return instance;
     }
 }

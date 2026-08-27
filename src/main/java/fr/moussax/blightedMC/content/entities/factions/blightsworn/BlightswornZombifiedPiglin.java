@@ -14,7 +14,7 @@ import org.bukkit.generator.structure.Structure;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity.*;
 
 public final class BlightswornZombifiedPiglin extends BlightswornEliteArchetype {
 
@@ -47,12 +47,12 @@ public final class BlightswornZombifiedPiglin extends BlightswornEliteArchetype 
 
     @Override
     protected void onEnrage(LivingEntity entity) {
-        Location loc = entity.getLocation().add(0, 1, 0);
-        entity.getWorld().playSound(loc, Sound.ENTITY_ZOMBIFIED_PIGLIN_ANGRY, 1.5f, 0.5f);
-        entity.getWorld().playSound(loc, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 0.8f);
+        Location location = entity.getLocation().add(0, 1, 0);
+        entity.getWorld().playSound(location, Sound.ENTITY_ZOMBIFIED_PIGLIN_ANGRY, 1.5f, 0.5f);
+        entity.getWorld().playSound(location, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 0.8f);
 
-        entity.getWorld().spawnParticle(Particle.LAVA, loc, 30, 0.5, 1.0, 0.5, 0.1);
-        entity.getWorld().spawnParticle(Particle.DUST, loc, 30, 0.5, 1.0, 0.5, 0.0, BLIGHT_DUST);
+        entity.getWorld().spawnParticle(Particle.LAVA, location, 30, 0.5, 1.0, 0.5, 0.1);
+        entity.getWorld().spawnParticle(Particle.DUST, location, 30, 0.5, 1.0, 0.5, 0.0, BLIGHT_DUST);
     }
 
     private void executeInfernalCharge(boolean isPhaseTwo) {

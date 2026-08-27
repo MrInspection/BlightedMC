@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Listens for Bukkit interaction events, armor changes, and player states to trigger abilities and schedule armor updates.
+ */
 public final class AbilityListener implements Listener {
     private final Set<UUID> dirtyArmorPlayers = new HashSet<>();
     private boolean updateTaskScheduled = false;
@@ -111,10 +114,10 @@ public final class AbilityListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onSneakToggle(PlayerToggleSneakEvent e) {
-        BlightedPlayer bp = BlightedPlayer.getBlightedPlayer(e.getPlayer());
-        if (bp != null) {
-            ArmorManager.handleSneakUpdate(bp, e.isSneaking());
+    public void onSneakToggle(PlayerToggleSneakEvent event) {
+        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(event.getPlayer());
+        if (blightedPlayer != null) {
+            ArmorManager.handleSneakUpdate(blightedPlayer, event.isSneaking());
         }
     }
 
@@ -159,9 +162,9 @@ public final class AbilityListener implements Listener {
 
         BlightedItem blightedItem = null;
 
-        if (event instanceof PlayerInteractEvent ie) {
-            if (ie.getItem() != null) {
-                blightedItem = BlightedItem.fromItemStack(ie.getItem());
+        if (event instanceof PlayerInteractEvent interactEvent) {
+            if (interactEvent.getItem() != null) {
+                blightedItem = BlightedItem.fromItemStack(interactEvent.getItem());
             }
         } else if (event instanceof org.bukkit.event.block.BlockBreakEvent) {
             org.bukkit.inventory.ItemStack mainHand = player.getInventory().getItemInMainHand();

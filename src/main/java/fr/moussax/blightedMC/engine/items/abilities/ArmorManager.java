@@ -10,11 +10,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Manages player armor evaluation, set bonus activation, and sneak state updates.
+ */
 public final class ArmorManager {
 
     private ArmorManager() {
     }
 
+    /**
+     * Inspects a player's equipped armor contents and updates active set bonuses.
+     *
+     * @param player player context to evaluate
+     */
     public static void updatePlayerArmor(BlightedPlayer player) {
         ItemStack[] armorContents = player.getPlayer().getInventory().getArmorContents();
         player.clearArmorPieces();
@@ -57,12 +65,18 @@ public final class ArmorManager {
 
                 newBonus.setPlayer(player);
                 player.addActiveBonus(newBonus);
-            } catch (Exception e) {
+            } catch (Exception exception) {
                 Log.error("ArmorManager", "Failed to activate bonus " + bonusClass.getSimpleName());
             }
         });
     }
 
+    /**
+     * Toggles sneak-dependent set bonuses when a player changes sneak state.
+     *
+     * @param player player context
+     * @param isSneaking {@code true} if player started sneaking, {@code false} if stopped
+     */
     public static void handleSneakUpdate(BlightedPlayer player, boolean isSneaking) {
         for (FullSetBonus bonus : player.getActiveFullSetBonuses()) {
             if (bonus.getType() != FullSetBonus.SetType.SNEAK) continue;

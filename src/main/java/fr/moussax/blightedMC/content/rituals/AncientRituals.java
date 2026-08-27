@@ -3,13 +3,13 @@ package fr.moussax.blightedMC.content.rituals;
 import fr.moussax.blightedMC.content.entities.Illusioner;
 import fr.moussax.blightedMC.engine.entities.rituals.AncientRitual;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.entities.rituals.registry.RitualRegistryHandler;
+import java.util.function.Consumer;
 import org.bukkit.Material;
 
-public class AncientRituals implements RegistryModule<RitualRegistryHandler> {
+public class AncientRituals implements RegistryModule<Consumer<AncientRitual>> {
 
     @Override
-    public void register(RitualRegistryHandler registry) {
+    public void register(Consumer<AncientRitual> registry) {
 
         AncientRitual dummy = AncientRitual.Builder.of(new Illusioner())
                 .displayedItem(Material.ENDER_PEARL, builder -> builder.setDisplayName("hello"))
@@ -19,6 +19,6 @@ public class AncientRituals implements RegistryModule<RitualRegistryHandler> {
                 .levelCost(3)
                 .build();
 
-        registry.register(dummy);
+        registry.accept(dummy);
     }
 }

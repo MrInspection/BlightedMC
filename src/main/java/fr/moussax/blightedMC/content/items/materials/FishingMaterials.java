@@ -3,15 +3,19 @@ package fr.moussax.blightedMC.content.items.materials;
 import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
-import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
+import fr.moussax.blightedMC.registry.RegistryModule;
 import org.bukkit.Material;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
-public class FishingMaterials implements RegistryModule<ItemRegistryHandler> {
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
+
+public class FishingMaterials implements RegistryModule<Consumer<BlightedItem>> {
 
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
 
         BlightedItem blightedAlgae = new BlightedItem("BLIGHTED_ALGAE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.KELP);
         blightedAlgae.setDisplayName("Blighted Algae");
@@ -89,6 +93,7 @@ public class FishingMaterials implements RegistryModule<ItemRegistryHandler> {
             food.setSaturation(14.4f);
             food.setCanAlwaysEat(true);
         });
+        fishermansStew.onConsume(player -> player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 2400, 0)));
 
         BlightedItem barnacleCluster = new BlightedItem("BARNACLE_CLUSTER", ItemType.MATERIAL, ItemRarity.RARE, Material.NAUTILUS_SHELL);
         barnacleCluster.setDisplayName("Barnacle Cluster");
@@ -148,6 +153,12 @@ public class FishingMaterials implements RegistryModule<ItemRegistryHandler> {
             food.setSaturation(4.8f);
             food.setCanAlwaysEat(true);
         });
+        blightedSushi.onConsume(player -> {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 1200, 0));
+            if (ThreadLocalRandom.current().nextDouble() < 0.5) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 300, 0));
+            }
+        });
         blightedSushi.addEnchantmentGlint();
 
         BlightedItem abyssalPearl = new BlightedItem("ABYSSAL_PEARL", ItemType.MATERIAL, ItemRarity.EPIC, Material.ENDER_PEARL);
@@ -177,16 +188,16 @@ public class FishingMaterials implements RegistryModule<ItemRegistryHandler> {
         );
         drownedResearchCodex.setEnchantmentGlint(false);
 
-        registry.register(blightedAlgae);
-        registry.register(smokedSalmonPlate);
-        registry.register(saltedCod);
-        registry.register(fishermansBait);
-        registry.register(fishermansStew);
-        registry.register(barnacleCluster);
-        registry.register(coralFragment);
-        registry.register(messageInABottle);
-        registry.register(drownedResearchCodex);
-        registry.register(blightedSushi);
-        registry.register(abyssalPearl);
+        registry.accept(blightedAlgae);
+        registry.accept(smokedSalmonPlate);
+        registry.accept(saltedCod);
+        registry.accept(fishermansBait);
+        registry.accept(fishermansStew);
+        registry.accept(barnacleCluster);
+        registry.accept(coralFragment);
+        registry.accept(messageInABottle);
+        registry.accept(drownedResearchCodex);
+        registry.accept(blightedSushi);
+        registry.accept(abyssalPearl);
     }
 }

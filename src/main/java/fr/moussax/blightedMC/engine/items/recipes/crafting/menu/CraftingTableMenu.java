@@ -26,12 +26,13 @@ public final class CraftingTableMenu extends InteractiveMenu {
     private static final int[] INDICATOR_SLOTS_RIGHT = {50, 51, 52, 53};
 
     public CraftingTableMenu() {
-        super("Craft Items", 54);
+        super("Crafting Table", 54);
         addInteractableSlots(INPUT_SLOTS);
     }
 
     @Override
     public void build(Player player) {
+        setTitle("Craft Item");
         fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
 
         for (int slot : INPUT_SLOTS) {
@@ -40,8 +41,8 @@ public final class CraftingTableMenu extends InteractiveMenu {
 
         setItem(25, new ItemBuilder(Material.KNOWLEDGE_BOOK, "§6Crafting Recipes")
                 .addLore("§7A tainted book that holds", "§7secrets of §5blighted §7items.", "", "§eClick to view!")
-                .toItemStack(), (p, t) -> BlightedMC.menuManager().openMenu(
-                new RecipeBookMenu.RecipeListMenu(new CraftingTableMenu()), p)
+                .toItemStack(), (clickingPlayer, _) -> BlightedMC.menuManager().openMenu(
+                new RecipeBookMenu(new CraftingTableMenu()), clickingPlayer)
         );
 
         setCloseButton(49);
@@ -123,13 +124,13 @@ public final class CraftingTableMenu extends InteractiveMenu {
         List<CraftingObject> pattern = recipe.getRecipe();
         for (int i = 0; i < INPUT_SLOTS.length; i++) {
             if (i >= pattern.size()) break;
-            CraftingObject req = pattern.get(i);
-            if (req == null) continue;
+            CraftingObject requiredIngredient = pattern.get(i);
+            if (requiredIngredient == null) continue;
 
             ItemStack stack = inventory.getItem(INPUT_SLOTS[i]);
             if (stack == null) continue;
 
-            int newAmount = stack.getAmount() - (req.getAmount() * times);
+            int newAmount = stack.getAmount() - (requiredIngredient.getAmount() * times);
             if (newAmount <= 0) {
                 inventory.setItem(INPUT_SLOTS[i], null);
             } else {
@@ -147,9 +148,9 @@ public final class CraftingTableMenu extends InteractiveMenu {
             if (stack == null) continue;
 
             String matchedId = null;
-            for (String reqId : required.keySet()) {
-                if (Utilities.resolveItemId(stack, reqId).equals(reqId)) {
-                    matchedId = reqId;
+            for (String requiredIdentifier : required.keySet()) {
+                if (Utilities.resolveItemId(stack, requiredIdentifier).equals(requiredIdentifier)) {
+                    matchedId = requiredIdentifier;
                     break;
                 }
             }
@@ -177,12 +178,12 @@ public final class CraftingTableMenu extends InteractiveMenu {
             List<CraftingObject> pattern = shaped.getRecipe();
             for (int i = 0; i < INPUT_SLOTS.length; i++) {
                 if (i >= pattern.size()) continue;
-                CraftingObject req = pattern.get(i);
-                if (req == null) continue;
+                CraftingObject requiredIngredient = pattern.get(i);
+                if (requiredIngredient == null) continue;
 
                 ItemStack stack = inventory.getItem(INPUT_SLOTS[i]);
                 if (stack == null) return 0;
-                max = Math.min(max, stack.getAmount() / req.getAmount());
+                max = Math.min(max, stack.getAmount() / requiredIngredient.getAmount());
             }
             return max == Integer.MAX_VALUE ? 0 : max;
         }

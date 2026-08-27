@@ -2,14 +2,14 @@ package fr.moussax.blightedMC.content.recipes;
 
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.recipes.crafting.registry.RecipeRegistryHandler;
+import java.util.function.Consumer;
 import org.bukkit.Material;
 
 import static fr.moussax.blightedMC.engine.items.recipes.crafting.registry.RecipeRegistry.shapedRecipe;
 
-public final class EquipmentRecipes implements RegistryModule<RecipeRegistryHandler> {
+public final class EquipmentRecipes implements RegistryModule<Consumer<BlightedRecipe>> {
     @Override
-    public void register(RecipeRegistryHandler registry) {
+    public void register(Consumer<BlightedRecipe> registry) {
         BlightedRecipe rocketBoots = shapedRecipe("ROCKET_BOOTS", 1)
                 .shape("aba", "cdc", "e e")
                 .bind('a', Material.PHANTOM_MEMBRANE, 1)
@@ -20,6 +20,6 @@ public final class EquipmentRecipes implements RegistryModule<RecipeRegistryHand
                 .attributeSource(4)
                 .build();
 
-        registry.register(rocketBoots);
+        registry.accept(rocketBoots);
     }
 }

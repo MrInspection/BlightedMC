@@ -1,27 +1,26 @@
 package fr.moussax.blightedMC.engine.items.recipes.forging.menu;
 
 import fr.moussax.blightedMC.content.sound.BlightedSounds;
+import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.engine.items.recipes.RecipePreviewManager;
 import fr.moussax.blightedMC.engine.items.recipes.forging.ForgeRecipe;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.shared.ui.menu.Menu;
-import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
-import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.shared.scheduling.PluginContext;
 import fr.moussax.blightedMC.shared.text.Formatter;
 import fr.moussax.blightedMC.shared.text.Messenger;
+import fr.moussax.blightedMC.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
+import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
-import fr.moussax.blightedMC.shared.sound.SoundSequence;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-
-import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
 
 import java.util.*;
 
@@ -35,18 +34,21 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
     private static final int RESULT_SLOT = 25;
     private static final int HYPERFORGE_SLOT = 32;
     private static final int FUEL_INFO_SLOT = 34;
-    private static final int BACK_BUTTON_SLOT = 48;
-    private static final int CLOSE_BUTTON_SLOT = 49;
-    private static final int FUEL_GUIDE_SLOT = 50;
 
     private final ForgeRecipe recipe;
+    private final BlightedItem targetItem;
     private final Menu previousMenu;
     private int lastStateHash = -1;
 
-    public ForgeRecipePreviewMenu(@NonNull ForgeRecipe recipe, @Nullable Menu previousMenu) {
-        super(recipe.getForgedItem().getDisplayName().replaceAll("§[0-9A-FK-ORa-fk-or]", "") + " Recipe", 54);
+    public ForgeRecipePreviewMenu(@NonNull ForgeRecipe recipe, @Nullable BlightedItem targetItem, @Nullable Menu previousMenu) {
+        super(ChatColor.stripColor(recipe.getForgedItem().getDisplayName()), 54);
         this.recipe = recipe;
+        this.targetItem = targetItem;
         this.previousMenu = previousMenu;
+    }
+
+    public ForgeRecipePreviewMenu(@NonNull ForgeRecipe recipe, @Nullable Menu previousMenu) {
+        this(recipe, recipe.getForgedItem(), previousMenu);
     }
 
     @Override
@@ -60,21 +62,22 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
         int currentFuel = blightedPlayer != null ? blightedPlayer.getForgeFuel() : 0;
 
         Map<String, IngredientInfo> requirements = aggregateForgeIngredients(recipe);
-        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+        Map<String, Integer> inventoryCounts = RecipePreviewManager.countInventoryItems(player, requirements.keySet());
 
         int currentHash = Objects.hash(currentFuel, inventoryCounts);
-        if (lastStateHash != currentHash) {
-            this.lastStateHash = currentHash;
-            refresh(player);
-        }
+        if (lastStateHash == currentHash) return;
+
+        this.lastStateHash = currentHash;
+        refresh(player);
     }
 
     public ForgeRecipePreviewMenu(@NonNull ForgeRecipe recipe) {
-        this(recipe, null);
+        this(recipe, recipe.getForgedItem(), null);
     }
 
     @Override
     public void build(Player player) {
+        setTitle(ChatColor.stripColor(recipe.getForgedItem().getDisplayName()));
         setupRecipeVisualization(player);
         setupNavigation();
     }
@@ -84,7 +87,6 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
         setupIngredientGrid();
         setupResultDisplay();
         setupFuelDisplay();
-        setupFuelGuide();
         setupHyperforgeButton(player);
     }
 
@@ -92,8 +94,8 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
         boolean canHyperforge = checkCanHyperforge(player);
         Material indicator = canHyperforge ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
 
-        ItemStack requiredItemsPane = new ItemBuilder(indicator, "§6Items Required")
-                .addLore("§7The materials required to forge", "§7the item are displayed below.")
+        ItemStack requiredItemsPane = new ItemBuilder(indicator, "§6Items to Process")
+                .addLore("§7The materials required to forge", "§7the item are displayed in this side.")
                 .toItemStack();
 
         ItemStack forgedItemPane = new ItemBuilder(indicator, "§6Item to Forge")
@@ -106,8 +108,8 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
         setItem(ITEM_INDICATOR, new ItemBuilder(indicator).hideTooltip().toItemStack(), (_, _) -> {
         });
 
-        setItem(FORGE_SLOT, new ItemBuilder(Material.BLAST_FURNACE, "§6Blighted Forge")
-                .addLore("§7Forge this recipe using a", "§7blighted forge.")
+        setItem(FORGE_SLOT, new ItemBuilder(Material.BLAST_FURNACE, "§fBlighted Forge")
+                .addLore("§7Forge this recipe using a blighted", "§7forge or Hyperforge.")
                 .toItemStack(), (_, _) -> {
         });
     }
@@ -119,7 +121,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
         boolean hasSufficientFuel = currentFuel >= fuelCost;
 
         Map<String, IngredientInfo> requirements = aggregateForgeIngredients(recipe);
-        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+        Map<String, Integer> inventoryCounts = RecipePreviewManager.countInventoryItems(player, requirements.keySet());
 
         return hasSufficientFuel && requirements.entrySet().stream()
                 .allMatch(entry -> inventoryCounts.getOrDefault(
@@ -136,10 +138,9 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
             CraftingObject ingredient = ingredients.get(i);
             ItemStack displayItem = createIngredientDisplay(ingredient);
 
-            setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (p, _) -> {
-                if (ingredient.isCustom() && ingredient.getManager() != null) {
-                    RecipePreviewManager.openPreview(p, ingredient.getManager(), this);
-                }
+            setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
+                if (!ingredient.isCustom() || ingredient.getManager() == null) return;
+                RecipePreviewManager.openPreview(clickingPlayer, ingredient.getManager(), this);
             });
         }
     }
@@ -170,32 +171,6 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
         });
     }
 
-    private void setupFuelGuide() {
-        ItemStack fuelGuide = new ItemBuilder(Material.BLAZE_POWDER, "§6Thermal Fuel")
-                .addLore(
-                        "§8Measured in millibuckets (mB)", "",
-                        " §7There are various types of §6Thermal Fuel ",
-                        " §7that you can use to power your Forge.",
-                        " §7Each offers various §6🪣 mB §7of fuel",
-                        " §7based on their §c🔥 heat strength§7.",
-                        " ",
-                        "   §8‣ §fCoal §8- §610mB",
-                        "   §8‣ §fMagma Block §8- §640mB",
-                        "   §8‣ §fBlaze Rod §8- §6200mB",
-                        "   §8‣ §fLava Bucket §8- §61,000mB",
-                        "   §8‣ §eEnchanted Coal §8- §63,000mB",
-                        "   §8‣ §bEnchanted Lava Bucket §8- §610,000mB ",
-                        "   §8‣ §dMagma Bucket §8- §620,000mB",
-                        "   §8‣ §cPlasma Bucket §8- §650,000mB",
-                        ""
-                )
-                .addEnchantmentGlint()
-                .toItemStack();
-
-        setItem(FUEL_GUIDE_SLOT, fuelGuide, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-        });
-    }
-
     private void setupHyperforgeButton(Player player) {
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
         int currentFuel = blightedPlayer != null ? blightedPlayer.getForgeFuel() : 0;
@@ -203,10 +178,10 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
         boolean hasSufficientFuel = currentFuel >= fuelCost;
 
         Map<String, IngredientInfo> requirements = aggregateForgeIngredients(recipe);
-        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+        Map<String, Integer> inventoryCounts = RecipePreviewManager.countInventoryItems(player, requirements.keySet());
 
         boolean hasAllIngredients = true;
-        ItemBuilder builder = new ItemBuilder(Material.GOLDEN_PICKAXE, "§aHyperforge");
+        ItemBuilder builder = new ItemBuilder(Material.ANVIL, "§fHyperforge");
         builder.addLore(
                 "§7Forge this item instantly from your",
                 "§7inventory materials & thermal fuel.",
@@ -225,7 +200,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
                 hasAllIngredients = false;
             }
 
-            String status = hasEnough ? "§a✓" : "§cx";
+            String status = hasEnough ? "§a✔" : "§c❌";
             String countColor = hasEnough ? "§a" : "§c";
             String name = Utilities.extractIngredientName(info.ingredient);
 
@@ -233,7 +208,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
                     status, name, requiredAmount, countColor, owned, requiredAmount));
         }
 
-        String fuelStatus = hasSufficientFuel ? "§a✓" : "§cx";
+        String fuelStatus = hasSufficientFuel ? "§a✔" : "§c❌";
         String fuelCountColor = hasSufficientFuel ? "§a" : "§c";
         builder.addLore(
                 " " + fuelStatus + " §7Thermal Fuel §8" + Formatter.formatDecimalWithCommas(fuelCost) + "mB §7(" + fuelCountColor + Formatter.formatDecimalWithCommas(currentFuel) + "§7/§a" + Formatter.formatDecimalWithCommas(fuelCost) + "mB§7)"
@@ -243,28 +218,28 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
         builder.addItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         builder.addLore(
                 "",
-                canHyperforge ? "§eClick to Hyperforge!" : "§cYou don't meet the requirements!"
+                canHyperforge ? "§eClick to Hyperforge!" : "§cMissing ingredients or insufficient fuel!"
         ).setEnchantmentGlint(canHyperforge);
 
-        setItem(HYPERFORGE_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (p, _) -> {
-            if (canHyperforge) {
-                PluginContext.delay(() -> executeHyperforge(p, blightedPlayer, requirements, fuelCost), 1L);
-            } else {
-                Messenger.warn(p, "You don't meet the requirements to hyperforge this item!");
+        setItem(HYPERFORGE_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
+            if (!canHyperforge) {
+                Messenger.warn(clickingPlayer, "You're missing some ingredients or insufficient fuel to Hyperforge this item!");
+                return;
             }
+            PluginContext.delay(() -> executeHyperforge(clickingPlayer, blightedPlayer, requirements, fuelCost), 1L);
         });
     }
 
     private void executeHyperforge(Player player, BlightedPlayer blightedPlayer, Map<String, IngredientInfo> requirements, int fuelCost) {
         if (blightedPlayer == null) return;
 
-        Map<String, Integer> inventoryCounts = countInventoryItems(player, requirements.keySet());
+        Map<String, Integer> inventoryCounts = RecipePreviewManager.countInventoryItems(player, requirements.keySet());
         boolean verifiedIngredients = requirements.entrySet().stream()
                 .allMatch(entry -> inventoryCounts.getOrDefault(entry.getKey(), 0) >= entry.getValue().amount);
         boolean verifiedFuel = blightedPlayer.getForgeFuel() >= fuelCost;
 
         if (!verifiedIngredients || !verifiedFuel) {
-            Messenger.warn(player, "You don't meet the requirements to hyperforge this item!");
+            Messenger.warn(player, "You're missing some ingredients or insufficient fuel to Hyperforge this item!");
             refresh(player);
             return;
         }
@@ -308,19 +283,6 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
         return recipeIngredients;
     }
 
-    private Map<String, Integer> countInventoryItems(Player player, Set<String> requiredIds) {
-        Map<String, Integer> counts = new HashMap<>();
-        for (ItemStack stack : player.getInventory().getContents()) {
-            if (stack == null || stack.getType() == Material.AIR) continue;
-            for (String reqId : requiredIds) {
-                if (Utilities.resolveItemId(stack, reqId).equals(reqId)) {
-                    counts.put(reqId, counts.getOrDefault(reqId, 0) + stack.getAmount());
-                }
-            }
-        }
-        return counts;
-    }
-
     private static class IngredientInfo {
         final CraftingObject ingredient;
         int amount;
@@ -332,10 +294,6 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
     }
 
     private void setupNavigation() {
-        if (previousMenu != null) {
-            setBackButton(BACK_BUTTON_SLOT, previousMenu);
-        }
-        setCloseButton(CLOSE_BUTTON_SLOT);
-        fillEmptyWith(MenuElementPreset.EMPTY_SLOT_FILLER);
+        RecipePreviewManager.setupNavigation(this, recipe, targetItem, previousMenu);
     }
 }

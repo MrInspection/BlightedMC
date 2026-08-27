@@ -4,12 +4,12 @@ import fr.moussax.blightedMC.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedMC.engine.items.recipes.forging.ForgeRecipe;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.recipes.forging.registry.ForgeRegistryHandler;
+import java.util.function.Consumer;
 import org.bukkit.Material;
 
-public class ForgeRecipes implements RegistryModule<ForgeRegistryHandler> {
+public class ForgeRecipes implements RegistryModule<Consumer<ForgeRecipe>> {
     @Override
-    public void register(ForgeRegistryHandler registry) {
+    public void register(Consumer<ForgeRecipe> registry) {
         var plasmaBucket = ForgeRecipe.Builder.of("PLASMA_BUCKET", 1)
                 .fuelCost(10000)
                 .ingredients(
@@ -19,6 +19,6 @@ public class ForgeRecipes implements RegistryModule<ForgeRegistryHandler> {
                 )
                 .build();
 
-        registry.register(plasmaBucket);
+        registry.accept(plasmaBucket);
     }
 }

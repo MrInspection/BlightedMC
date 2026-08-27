@@ -5,7 +5,6 @@ import fr.moussax.blightedMC.registry.RegistryModule;
 import fr.moussax.blightedMC.engine.fishing.registry.FishingRegistryHandler;
 import fr.moussax.blightedMC.engine.fishing.FishingMethod;
 import fr.moussax.blightedMC.shared.loot.LootCondition;
-import fr.moussax.blightedMC.shared.loot.decorators.FishingLootSoundDecorator;
 import fr.moussax.blightedMC.shared.loot.results.ItemResult;
 import fr.moussax.blightedMC.shared.loot.results.gems.GemsResult;
 import org.bukkit.Material;
@@ -16,7 +15,7 @@ import org.bukkit.entity.EntityType;
 
 import java.util.List;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.FishingCatchQuality.*;
 
 public class OverworldFishing implements RegistryModule<FishingRegistryHandler> {
 
@@ -26,32 +25,32 @@ public class OverworldFishing implements RegistryModule<FishingRegistryHandler> 
     }
 
     public FishingLootTable provide() {
-        LootCondition inFrozenWater = ctx ->
-                ctx.biome() == Biome.FROZEN_OCEAN ||
-                        ctx.biome() == Biome.DEEP_FROZEN_OCEAN ||
-                        ctx.biome() == Biome.FROZEN_RIVER;
+        LootCondition inFrozenWater = context ->
+                context.biome() == Biome.FROZEN_OCEAN ||
+                        context.biome() == Biome.DEEP_FROZEN_OCEAN ||
+                        context.biome() == Biome.FROZEN_RIVER;
 
-        LootCondition inSwamp = ctx ->
-                ctx.biome() == Biome.SWAMP ||
-                        ctx.biome() == Biome.MANGROVE_SWAMP;
+        LootCondition inSwamp = context ->
+                context.biome() == Biome.SWAMP ||
+                        context.biome() == Biome.MANGROVE_SWAMP;
 
-        LootCondition inJungle = ctx ->
-                ctx.biome() == Biome.JUNGLE ||
-                        ctx.biome() == Biome.SPARSE_JUNGLE ||
-                        ctx.biome() == Biome.BAMBOO_JUNGLE;
+        LootCondition inJungle = context ->
+                context.biome() == Biome.JUNGLE ||
+                        context.biome() == Biome.SPARSE_JUNGLE ||
+                        context.biome() == Biome.BAMBOO_JUNGLE;
 
-        LootCondition inDeepOcean = ctx ->
-                ctx.biome() == Biome.DEEP_OCEAN ||
-                        ctx.biome() == Biome.DEEP_LUKEWARM_OCEAN ||
-                        ctx.biome() == Biome.DEEP_COLD_OCEAN ||
-                        ctx.biome() == Biome.DEEP_FROZEN_OCEAN;
+        LootCondition inDeepOcean = context ->
+                context.biome() == Biome.DEEP_OCEAN ||
+                        context.biome() == Biome.DEEP_LUKEWARM_OCEAN ||
+                        context.biome() == Biome.DEEP_COLD_OCEAN ||
+                        context.biome() == Biome.DEEP_FROZEN_OCEAN;
 
         return FishingLootTable.builder()
                 .setEntityRollChance(0.15)
                 // TODO : Finish the fishing mods
                 .addVanillaEntity(EntityType.SQUID, 8.0, COMMON, "§b§lSPLASH! §7You caught a §9Squid§7!")
                 .addVanillaEntity(EntityType.SALMON, 5.0, GOOD_CATCH, "§e§lNICE! §7You caught a §6Salmon§7!")
-                .addVanillaEntityWithSound(EntityType.TROPICAL_FISH, 4.0, FishingLootSoundDecorator.FishingCatchQuality.GOOD_CATCH, "§d§lCOLORFUL! §7You caught a §bTropical Fish§7!", LootCondition.biome(Biome.WARM_OCEAN))
+                .addVanillaEntityWithSound(EntityType.TROPICAL_FISH, 4.0, GOOD_CATCH, "§d§lCOLORFUL! §7You caught a §bTropical Fish§7!", LootCondition.biome(Biome.WARM_OCEAN))
                 .addVanillaEntity(EntityType.PUFFERFISH, 2.0, GREAT_CATCH, "§e§lCAREFUL! §7You caught a §ePufferfish§7!")
                 .addVanillaEntity(EntityType.DOLPHIN, 0.5, OUTSTANDING_CATCH, "§b§lAMAZING! §7You caught a §9Dolphin§7!")
 

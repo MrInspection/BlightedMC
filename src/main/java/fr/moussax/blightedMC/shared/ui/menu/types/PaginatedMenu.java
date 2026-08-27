@@ -50,6 +50,44 @@ public abstract class PaginatedMenu extends Menu {
     protected abstract ItemStack getItem(@NonNull Player player, int index);
 
     /**
+     * Returns the 0-based index of the current page.
+     *
+     * @return current page index (0-based)
+     */
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    /**
+     * Returns the 1-based number of the current page.
+     *
+     * @return current page number (1-based)
+     */
+    public int getCurrentPageNumber() {
+        return currentPage + 1;
+    }
+
+    /**
+     * Returns the total item count evaluated during the last build.
+     *
+     * @return total item count
+     */
+    public int getTotalItems() {
+        return totalItems;
+    }
+
+    /**
+     * Returns the total number of pages based on total items and items per page.
+     *
+     * @return total number of pages
+     */
+    public int getTotalPages() {
+        int itemsPerPage = getItemsPerPage();
+        if (itemsPerPage <= 0) return 1;
+        return Math.max(1, (totalItems + itemsPerPage - 1) / itemsPerPage);
+    }
+
+    /**
      * Returns the maximum number of items displayed on each page.
      *
      * <p>The bottom row is reserved for pagination controls.</p>

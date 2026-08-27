@@ -40,30 +40,10 @@ public final class CommandRegistrar {
         Class<?> executorType = executor.getClass();
 
         if (executorType.getAnnotationsByType(CommandArgument.class).length > 0) {
-            command.setTabCompleter(new TabSuggestionBuilder(executorType, suggestionRegistry)
-            );
+            command.setTabCompleter(new TabSuggestionBuilder(executorType, suggestionRegistry));
+        } else if (executor instanceof TabCompleter completer) {
+            command.setTabCompleter(completer);
         }
-    }
-
-    /**
-     * Registers an executor with an explicit tab completer.
-     *
-     * @param commandName command name declared in {@code plugin.yml}
-     * @param executor    executor handling the command
-     * @param completer   completer providing argument suggestions
-     * @throws IllegalArgumentException when the command is not declared
-     */
-    public void register(
-            String commandName,
-            CommandExecutor executor,
-            TabCompleter completer
-    ) {
-        Objects.requireNonNull(executor, "executor");
-        Objects.requireNonNull(completer, "completer");
-
-        PluginCommand command = requireCommand(commandName);
-        command.setExecutor(executor);
-        command.setTabCompleter(completer);
     }
 
     private PluginCommand requireCommand(String commandName) {

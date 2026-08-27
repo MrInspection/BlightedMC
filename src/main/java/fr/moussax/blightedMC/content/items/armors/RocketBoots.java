@@ -5,16 +5,16 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 
-public class RocketBoots implements RegistryModule<ItemRegistryHandler> {
+public class RocketBoots implements RegistryModule<Consumer<BlightedItem>> {
 
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
         BlightedItem rocketBoots = new BlightedItem("ROCKET_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS);
         rocketBoots.setDisplayName("Rocket Boots");
 
@@ -25,6 +25,6 @@ public class RocketBoots implements RegistryModule<ItemRegistryHandler> {
         rocketBoots.addLore("", ItemRarity.UNCOMMON.getName() + " BOOTS");
         rocketBoots.setMaxDurability(140);
 
-        registry.register(rocketBoots);
+        registry.accept(rocketBoots);
     }
 }

@@ -6,17 +6,15 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * A {@link LootResult} that grants Blighted Gems to the player
- * or drops them at a location if no player is present.
+ * A {@link LootResult} that drops Blighted Gems at the loot origin.
  */
 public final class GemsResult implements LootResult {
 
     /**
-     * Grants the specified number of gems to the player or drops them
-     * at the loot origin if the player is null.
+     * Drops the specified quantity of gemstones at the loot origin.
      *
-     * @param context the loot context
-     * @param amount  the number of gems to grant
+     * @param context loot context
+     * @param amount  number of gems to drop
      */
     @Override
     public void execute(LootContext context, int amount) {
@@ -31,10 +29,10 @@ public final class GemsResult implements LootResult {
     }
 
     /**
-     * Returns the display name for this loot.
+     * Returns the display name for the gem drop.
      *
-     * @param amount the number of gems
-     * @return the display name string
+     * @param amount number of gems
+     * @return formatted display name
      */
     @Override
     public String displayName(int amount) {

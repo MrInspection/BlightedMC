@@ -1,9 +1,5 @@
 package fr.moussax.blightedMC.engine.fishing.registry;
 
-import fr.moussax.blightedMC.content.fishing.EndFishing;
-import fr.moussax.blightedMC.content.fishing.NetherFishing;
-import fr.moussax.blightedMC.content.fishing.OverworldFishing;
-import fr.moussax.blightedMC.content.fishing.OverworldLavaFishing;
 import fr.moussax.blightedMC.engine.fishing.FishingLootTable;
 import fr.moussax.blightedMC.engine.fishing.FishingMethod;
 import fr.moussax.blightedMC.registry.RegistryModule;
@@ -27,23 +23,18 @@ public final class FishingLootRegistry {
     private static final Map<World.Environment, Map<FishingMethod, FishingLootTable>> REGISTRY = new EnumMap<>(World.Environment.class);
     private static final FishingLootTable EMPTY_TABLE = FishingLootTable.builder().build();
 
-    private static final List<RegistryModule<FishingRegistryHandler>> PROVIDERS = List.of(
-            new NetherFishing(),
-            new OverworldLavaFishing(),
-            new OverworldFishing(),
-            new EndFishing()
-    );
-
     private FishingLootRegistry() {
     }
 
     /**
      * Initializes the registry by clearing existing registrations and loading
-     * loot tables from all configured fishing providers.
+     * loot tables from all provided fishing modules.
+     *
+     * @param modules the list of fishing modules to load
      */
-    public static void initialize() {
+    public static void initialize(List<RegistryModule<FishingRegistryHandler>> modules) {
         clear();
-        PROVIDERS.forEach(module -> module.register(FishingLootRegistry::register));
+        modules.forEach(module -> module.register(FishingLootRegistry::register));
         Log.success("FishingLootRegistry", "Registered " + countRegistrations() + " fishing loot tables.");
     }
 
@@ -58,38 +49,47 @@ public final class FishingLootRegistry {
      * @param table the loot table to register
      */
     public static void register(World.Environment environment, FishingMethod method, FishingLootTable table) {
-        REGISTRY.computeIfAbsent(environment, k -> new EnumMap<>(FishingMethod.class)).put(method, table);
+        REGISTRY.computeIfAbsent(environment, _ -> new EnumMap<>(FishingMethod.class)).put(method, table);
     }
 
     /**
-     * Returns the fishing loot table registered for the specified environment
-     * and fishing method.
+     * Retrieves the fishing loot table registered for the specified environment
+     * and method.
      *
-     * <p>Returns an empty loot table when no registration exists for the
-     * specified combination.</p>
+     * <p>If no loot table has been registered for the given combination, an
+     * empty table is returned.</p>
      *
-     * @param environment the world environment to query
-     * @param method the fishing method to query
-     * @return the registered loot table, or an empty loot table if none exists
+     * @param environment the environment to look up
+     * @param method the fishing method to look up
+     * @return the matching loot table, or an empty table if missing
      */
     public static FishingLootTable getTable(World.Environment environment, FishingMethod method) {
-        Map<FishingMethod, FishingLootTable> envMap = REGISTRY.get(environment);
-        if (envMap == null) return EMPTY_TABLE;
+        Map<FishingMethod, FishingLootTable> environmentTables = REGISTRY.get(environment);
+        if (environmentTables == null) {
+            return EMPTY_TABLE;
+        }
 
-        FishingLootTable table = envMap.get(method);
-        return table != null ? table : EMPTY_TABLE;
+        return environmentTables.getOrDefault(method, EMPTY_TABLE);
     }
 
     /**
-     * Removes all registered fishing loot tables.
+     * Counts the total number of registered fishing loot tables across all
+     * environments and methods.
+     *
+     * @return the total number of registered loot tables
+     */
+    public static int countRegistrations() {
+        int total = 0;
+        for (Map<FishingMethod, FishingLootTable> methodMap : REGISTRY.values()) {
+            total += methodMap.size();
+        }
+        return total;
+    }
+
+    /**
+     * Clears all registered fishing loot tables.
      */
     public static void clear() {
         REGISTRY.clear();
-    }
-
-    private static int countRegistrations() {
-        return REGISTRY.values().stream()
-                .mapToInt(Map::size)
-                .sum();
     }
 }

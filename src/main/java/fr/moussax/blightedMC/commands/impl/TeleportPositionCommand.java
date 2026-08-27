@@ -2,7 +2,6 @@ package fr.moussax.blightedMC.commands.impl;
 
 import fr.moussax.blightedMC.commands.AdminCommand;
 import fr.moussax.blightedMC.commands.utils.CommandArgument;
-import fr.moussax.blightedMC.commands.utils.CommandArguments;
 import fr.moussax.blightedMC.commands.utils.CommandFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -14,11 +13,9 @@ import org.bukkit.entity.Player;
 import static fr.moussax.blightedMC.shared.text.Messenger.inform;
 import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
-@CommandArguments({
-    @CommandArgument(position = 0, suggestions = {"$players"}),
-    @CommandArgument(position = 3, suggestions = {"OVERWORLD", "NETHER", "THE_END"}),
-    @CommandArgument(position = 4, suggestions = {"OVERWORLD", "NETHER", "THE_END"})
-})
+@CommandArgument(position = 0, suggestions = {"$players"})
+@CommandArgument(position = 3, suggestions = {"OVERWORLD", "NETHER", "THE_END"})
+@CommandArgument(position = 4, suggestions = {"OVERWORLD", "NETHER", "THE_END"})
 public final class TeleportPositionCommand extends AdminCommand {
 
     @Override
@@ -27,10 +24,8 @@ public final class TeleportPositionCommand extends AdminCommand {
         if (args.length < 3) {
             CommandFormatter.sendUsage(
                     player,
-                    CommandFormatter.CommandInfo.of(
-                            "tppos [player] <x> <y> <z> [world]",
-                            "Teleport to coordinates. World is optional."
-                    )
+                    "tppos [player] <x> <y> <z> [world]",
+                    "Teleport to coordinates. World is optional."
             );
             return true;
         }
@@ -78,7 +73,7 @@ public final class TeleportPositionCommand extends AdminCommand {
                 inform(target, " §eTeleported to " + coordinates);
                 target.playSound(target.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 0.75f);
             }
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             warn(player, "Invalid coordinates. Please provide valid numbers.");
             return false;
         }

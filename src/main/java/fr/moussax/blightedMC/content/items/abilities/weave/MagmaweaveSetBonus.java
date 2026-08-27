@@ -9,7 +9,11 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+/**
+ * Enhanced set bonus granting fire resistance, resistance in lava, and lava fishing speed boost for Magmaweave armor.
+ */
 public final class MagmaweaveSetBonus extends EmberWeaveSetBonus {
+
     private int taskCounter = 0;
 
     @Override
@@ -37,9 +41,9 @@ public final class MagmaweaveSetBonus extends EmberWeaveSetBonus {
 
     @Override
     public void startAbilityEffect() {
-        if (isActive || blightedPlayer == null) return;
+        if (isActive || getAbilityOwner() == null) return;
 
-        Player player = blightedPlayer.getPlayer();
+        Player player = getAbilityOwner().getPlayer();
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_AMBIENT, 2.0f, 0.5f);
 
         this.isActive = true;

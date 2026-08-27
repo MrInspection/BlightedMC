@@ -71,14 +71,14 @@ public final class ItemRegistryMenu {
             for (int i = 0; i < categories.size() && i < CATEGORY_SLOTS.length; i++) {
                 ItemType.Category category = categories.get(i);
                 ItemStack item = buildMenuItem(getCategoryIcon(category), "§b" + formatCategoryName(category), getCategoryLore(category));
-                setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (p, t) -> manager.openMenu(
+                setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> manager.openMenu(
                     new BlightedItemsPaginatedMenu(this,
-                        itemObj -> itemObj.getItemType() != null && itemObj.getItemType().getCategory() == category,
-                        "§r" + Formatter.formatEnumName(category.name()) + " Items"), p));
+                        registeredItem -> registeredItem.getItemType() != null && registeredItem.getItemType().getCategory() == category,
+                        "§r" + Formatter.formatEnumName(category.name()) + " Items"), clickingPlayer));
             }
 
             setItem(SEARCH_SLOT, buildMenuItem(new ItemStack(Material.PALE_OAK_SIGN), "§eSearch Items", List.of("§7Click to search for items!")),
-                MenuItemInteraction.ANY_CLICK, (p, t) -> openSearchSign(p, this));
+                MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> openSearchSign(clickingPlayer, this));
             setCloseButton(40);
         }
 
@@ -187,7 +187,7 @@ public final class ItemRegistryMenu {
             if (blightedItems.isEmpty()) {
                 setItem(22, buildMenuItem(new ItemStack(Material.RED_STAINED_GLASS_PANE),
                     "§cNo Items Found",
-                    List.of("§7No items match the criteria")), MenuItemInteraction.ANY_CLICK, (clickingPlayer, clickType) -> {
+                    List.of("§7No items match the criteria")), MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
                 });
             } else {
                 for (int slotIndex = 0, i = start; i < end && slotIndex < ITEM_SLOTS.length; i++, slotIndex++) {
@@ -201,7 +201,7 @@ public final class ItemRegistryMenu {
 
         private void setNavigation(Player player, int totalItemsCount) {
             if (currentPage > 0) {
-                setBackButton(48, (clickingPlayer, clickType) -> {
+                setBackButton(48, (clickingPlayer, _) -> {
                     currentPage--;
                     refresh(clickingPlayer);
                 });
@@ -210,7 +210,7 @@ public final class ItemRegistryMenu {
             }
 
             if ((currentPage + 1) * getItemsPerPage() < totalItemsCount) {
-                setItem(50, MenuElementPreset.NEXT_BUTTON, (clickingPlayer, clickType) -> {
+                setItem(50, MenuElementPreset.NEXT_BUTTON, (clickingPlayer, _) -> {
                     currentPage++;
                     refresh(clickingPlayer);
                 });

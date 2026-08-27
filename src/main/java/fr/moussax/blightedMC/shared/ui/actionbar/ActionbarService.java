@@ -1,6 +1,7 @@
 package fr.moussax.blightedMC.shared.ui.actionbar;
 
 import fr.moussax.blightedMC.BlightedMC;
+import fr.moussax.blightedMC.utils.debug.Log;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -173,8 +174,7 @@ public final class ActionbarService implements Listener {
             try {
                 renderPlayer(player);
             } catch (Exception exception) {
-                plugin.getLogger().warning("[ActionbarService] Failed to render for "
-                        + player.getName() + ": " + exception.getMessage());
+                Log.warn("ActionbarService", "Failed to render for " + player.getName() + ": " + exception.getMessage());
             }
         }
     }

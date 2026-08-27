@@ -16,7 +16,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity.*;
 
 public final class BlightswornPiglin extends BlightswornEliteArchetype {
 
@@ -28,7 +28,7 @@ public final class BlightswornPiglin extends BlightswornEliteArchetype {
         setLootTable(new EntityLootTableBuilder()
                 .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0, COMMON)
                 .addLoot(Material.GOLD_INGOT, 1, 3, 0.4, UNCOMMON)
-                .addLootWithDurabilityRange(Material.CROSSBOW, 0.10, 0.80, 0.1, RARE)
+                .addDamagedLoot(Material.CROSSBOW, 0.10, 0.80, 0.1, RARE)
                 .addGemsLoot(5, 0.04, VERY_RARE)
                 .build()
         );

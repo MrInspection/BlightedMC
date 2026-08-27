@@ -1,23 +1,26 @@
 package fr.moussax.blightedMC.engine.entities.spawnable.engine;
 
 /**
- * Defines how a spawnable entity interacts with vanilla spawning.
+ * Defines how a custom spawnable entity integrates with Minecraft spawning mechanisms.
  */
 public enum SpawnMode {
+
     /**
-     * Hijacks vanilla spawn attempts of the matching entity type.
-     * Requires vanilla to attempt spawning that entity type naturally.
+     * Intercepts vanilla entity spawning attempts of the matching entity type.
+     *
+     * <p>Requires vanilla Minecraft to attempt spawning the underlying entity type naturally.</p>
      */
     REPLACEMENT,
 
     /**
-     * Spawns independently using chunk-based scanning.
-     * Not dependent on vanilla spawn attempts.
+     * Spawns independently using chunk-based environmental scanning.
+     *
+     * <p>Operates independently of vanilla spawn attempt frequencies.</p>
      */
     INDEPENDENT,
 
     /**
-     * Uses both replacement and independent spawning mechanisms.
+     * Uses both vanilla replacement interception and independent chunk-based scanning.
      */
     HYBRID
 }

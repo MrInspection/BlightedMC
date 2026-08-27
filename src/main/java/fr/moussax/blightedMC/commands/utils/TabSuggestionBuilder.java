@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Produces positional tab completions from {@link CommandArgument}
+ * Produces positional tab completions for commands from {@link CommandArgument}
  * declarations.
  */
 public final class TabSuggestionBuilder implements TabCompleter {
@@ -23,6 +23,12 @@ public final class TabSuggestionBuilder implements TabCompleter {
     private final TabSuggestionRegistry suggestionRegistry;
     private final List<RuleEntry> rules;
 
+    /**
+     * Creates a tab suggestion builder for a command class using the specified suggestion registry.
+     *
+     * @param commandType        command executor class declaring {@link CommandArgument} annotations
+     * @param suggestionRegistry registry used to resolve dynamic suggestion keys
+     */
     public TabSuggestionBuilder(Class<?> commandType, TabSuggestionRegistry suggestionRegistry) {
         Objects.requireNonNull(commandType, "commandType");
         this.suggestionRegistry = Objects.requireNonNull(suggestionRegistry, "suggestionRegistry");
@@ -96,7 +102,6 @@ public final class TabSuggestionBuilder implements TabCompleter {
                     matches
             );
 
-            matches.sort(String.CASE_INSENSITIVE_ORDER);
             return matches;
         }
 
@@ -104,6 +109,18 @@ public final class TabSuggestionBuilder implements TabCompleter {
     }
 
     private List<String> resolveCandidates(List<String> suggestions) {
+        boolean hasDynamicKey = false;
+        for (String suggestion : suggestions) {
+            if (suggestion.startsWith("$")) {
+                hasDynamicKey = true;
+                break;
+            }
+        }
+
+        if (!hasDynamicKey) {
+            return suggestions;
+        }
+
         Set<String> candidates = new HashSet<>();
 
         for (String suggestion : suggestions) {
@@ -111,10 +128,9 @@ public final class TabSuggestionBuilder implements TabCompleter {
 
             if (provided == null) {
                 candidates.add(suggestion);
-                continue;
+            } else {
+                candidates.addAll(provided);
             }
-
-            candidates.addAll(provided);
         }
 
         return List.copyOf(candidates);

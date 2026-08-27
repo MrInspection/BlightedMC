@@ -2,21 +2,17 @@ package fr.moussax.blightedMC.engine.fishing;
 
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.player.BlightedPlayer;
-import fr.moussax.blightedMC.shared.loot.LootCondition;
-import fr.moussax.blightedMC.shared.loot.LootContext;
-import fr.moussax.blightedMC.shared.loot.LootEntry;
-import fr.moussax.blightedMC.shared.loot.LootResult;
-import fr.moussax.blightedMC.shared.loot.LootTable;
-import fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator;
-import fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality;
-import fr.moussax.blightedMC.shared.loot.decorators.FishingLootSoundDecorator;
-import fr.moussax.blightedMC.shared.loot.decorators.MessageDecorator;
+import fr.moussax.blightedMC.shared.loot.*;
+import fr.moussax.blightedMC.shared.loot.decorators.FeedbackSpecification;
+import fr.moussax.blightedMC.shared.loot.decorators.FishingCatchQuality;
+import fr.moussax.blightedMC.shared.loot.decorators.GenericFeedbackDecorator;
 import fr.moussax.blightedMC.shared.loot.providers.AmountProvider;
 import fr.moussax.blightedMC.shared.loot.results.EntityResult;
 import fr.moussax.blightedMC.shared.loot.results.ItemResult;
 import fr.moussax.blightedMC.shared.loot.strategies.WeightedSelectionStrategy;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
@@ -26,18 +22,13 @@ import org.bukkit.util.Vector;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
- * Defines the loot available from a fishing method.
+ * Loot table for fishing rolls containing separate entity and item drop pools.
  *
- * <p>A fishing loot table contains separate pools for entities and items. On each
- * successful roll, the entity pool is evaluated first according to its configured
- * roll chance. If no entity is selected, or the entity pool is empty, the item
- * pool is evaluated instead.</p>
- *
- * <p>Loot entries use weighted selection and may be restricted by
- * {@link LootCondition conditions}. Entity roll chance is additionally affected
- * by the player's Luck of the Sea enchantment.</p>
+ * <p>The entity pool is evaluated first based on the base roll chance, player Luck of the Sea level,
+ * and fishing combo. If no entity is selected, the item pool is evaluated using weighted selection.</p>
  */
 public final class FishingLootTable {
 
@@ -54,11 +45,11 @@ public final class FishingLootTable {
     }
 
     /**
-     * Rolls this fishing loot table without a Luck of the Sea bonus.
+     * Rolls this fishing loot table without Luck of the Sea or combo bonuses.
      *
-     * @param player   the player performing the fishing roll
-     * @param location the location at which the catch occurs
-     * @param velocity the velocity of the fishing hook
+     * @param player   player performing the roll
+     * @param location location where catch occurs
+     * @param velocity velocity of fishing hook
      * @return {@code true} if a loot entry was selected and executed
      */
     public boolean roll(BlightedPlayer player, Location location, Vector velocity) {
@@ -66,34 +57,27 @@ public final class FishingLootTable {
     }
 
     /**
-     * Rolls this fishing loot table using the specified Luck of the Sea level.
+     * Rolls this fishing loot table using a Luck of the Sea level bonus.
      *
-     * <p>Luck of the Sea increases the chance of selecting an entry from the
-     * entity pool. If no entity is selected, the item pool is used.</p>
-     *
-     * @param player         the player performing the fishing roll
-     * @param location       the location where the catch occurs
-     * @param velocity       the fishing hook's velocity
-     * @param luckOfSeaLevel the player's Luck of the Sea level
-     * @return {@code true} if a loot entry was executed
+     * @param player         player performing the roll
+     * @param location       location where catch occurs
+     * @param velocity       velocity of fishing hook
+     * @param luckOfSeaLevel player Luck of the Sea level
+     * @return {@code true} if a loot entry was selected and executed
      */
     public boolean roll(BlightedPlayer player, Location location, Vector velocity, int luckOfSeaLevel) {
         return roll(player, location, velocity, luckOfSeaLevel, 0);
     }
 
     /**
-     * Rolls this fishing loot table using Luck of the Sea and the current combo.
+     * Rolls this fishing loot table using Luck of the Sea and fishing combo bonuses.
      *
-     * <p>The combo increases the entity pool chance by up to 10%, while Luck of
-     * the Sea provides an additional chance bonus. The combined chance is capped
-     * at 100%. If no entity is selected, the item pool is used.</p>
-     *
-     * @param player         the player performing the fishing roll
-     * @param location       the location where the catch occurs
-     * @param velocity       the fishing hook's velocity
-     * @param luckOfSeaLevel the player's Luck of the Sea level
-     * @param combo          the player's current fishing combo
-     * @return {@code true} if a loot entry was executed
+     * @param player         player performing the roll
+     * @param location       location where catch occurs
+     * @param velocity       velocity of fishing hook
+     * @param luckOfSeaLevel player Luck of the Sea level
+     * @param combo          current fishing combo count
+     * @return {@code true} if a loot entry was selected and executed
      */
     public boolean roll(BlightedPlayer player, Location location, Vector velocity, int luckOfSeaLevel, int combo) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -119,9 +103,9 @@ public final class FishingLootTable {
     }
 
     /**
-     * Creates a builder for configuring a fishing loot table.
+     * Creates a new builder for configuring a fishing loot table.
      *
-     * @return a new fishing loot table builder
+     * @return fishing loot table builder
      */
     public static Builder builder() {
         return new Builder();
@@ -129,23 +113,33 @@ public final class FishingLootTable {
 
     /**
      * Fluent builder for constructing {@link FishingLootTable} instances.
-     *
-     * <p>The builder provides both generic loot-entry methods and convenience
-     * methods for common fishing results such as items, vanilla entities, and
-     * Blighted entities.</p>
      */
     public static final class Builder {
+        private static final Function<FishingCatchQuality, FeedbackSpecification> FISHING_FEEDBACK_MAPPER = quality -> switch (quality) {
+            case GOOD_CATCH ->
+                    FeedbackSpecification.full(" §5§lGOOD CATCH! §f| §7You found §f", Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 2.0f);
+            case GREAT_CATCH ->
+                    FeedbackSpecification.full(" §6§lGREAT CATCH! §f| §7You found §f", Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5f);
+            case OUTSTANDING_CATCH ->
+                    FeedbackSpecification.full(" §d§lOUTSTANDING CATCH! §f| §7You found §f", Sound.ENTITY_PLAYER_LEVELUP, 1.5f);
+            default -> null;
+        };
+
+        private static final Function<FishingCatchQuality, FeedbackSpecification> FISHING_SOUND_MAPPER = quality -> switch (quality) {
+            case GOOD_CATCH -> FeedbackSpecification.soundOnly(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 2.0f);
+            case GREAT_CATCH -> FeedbackSpecification.soundOnly(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5f);
+            case OUTSTANDING_CATCH -> FeedbackSpecification.soundOnly(Sound.ENTITY_PLAYER_LEVELUP, 1.5f);
+            default -> null;
+        };
+
         private final LootTable.Builder entityTableBuilder = LootTable.builder();
         private final LootTable.Builder itemTableBuilder = LootTable.builder();
         private double entityRollChance = 0.15;
 
         /**
-         * Sets the base probability of selecting an entity instead of an item.
+         * Sets the base probability of selecting from the entity pool instead of items.
          *
-         * <p>The value is clamped to the inclusive range {@code [0.0, 1.0]}.
-         * Luck of the Sea is applied separately when the table is rolled.</p>
-         *
-         * @param chance the entity selection probability
+         * @param chance entity selection probability (clamped between 0.0 and 1.0)
          * @return this builder
          */
         public Builder setEntityRollChance(double chance) {
@@ -154,9 +148,9 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds an entity loot entry to the table.
+         * Adds an entry to the entity loot pool.
          *
-         * @param entry the entity loot entry
+         * @param entry entity loot entry
          * @return this builder
          */
         public Builder addEntity(LootEntry entry) {
@@ -165,9 +159,9 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds multiple entity loot entries to the table.
+         * Adds multiple entries to the entity loot pool.
          *
-         * @param entries the entity loot entries
+         * @param entries entity loot entries
          * @return this builder
          */
         public Builder addEntities(LootEntry... entries) {
@@ -176,9 +170,9 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds an item loot entry to the table.
+         * Adds an entry to the item loot pool.
          *
-         * @param entry the item loot entry
+         * @param entry item loot entry
          * @return this builder
          */
         public Builder addItem(LootEntry entry) {
@@ -187,9 +181,9 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds multiple item loot entries to the table.
+         * Adds multiple entries to the item loot pool.
          *
-         * @param entries the item loot entries
+         * @param entries item loot entries
          * @return this builder
          */
         public Builder addItems(LootEntry... entries) {
@@ -198,60 +192,59 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a weighted item result with a variable amount and catch quality.
+         * Adds a weighted item result with a variable quantity range and catch feedback quality.
          *
-         * @param result    the loot result to produce
-         * @param minAmount the minimum amount
-         * @param maxAmount the maximum amount
-         * @param weight    the selection weight
-         * @param quality   the feedback quality associated with the catch
+         * @param result        loot result
+         * @param minimumAmount minimum drop quantity
+         * @param maximumAmount maximum drop quantity
+         * @param weight        selection weight
+         * @param quality       catch quality tier for feedback
          * @return this builder
          */
         public Builder addItem(
                 LootResult result,
-                int minAmount,
-                int maxAmount,
+                int minimumAmount,
+                int maximumAmount,
                 double weight,
                 FishingCatchQuality quality
         ) {
-            return addItem(result, minAmount, maxAmount, weight, quality, LootCondition.alwaysTrue());
+            return addItem(result, minimumAmount, maximumAmount, weight, quality, LootCondition.alwaysTrue());
         }
 
         /**
-         * Adds a weighted item result with a variable amount, catch quality,
-         * and selection condition.
+         * Adds a weighted item result with a variable quantity range, catch feedback quality, and selection condition.
          *
-         * @param result    the loot result to produce
-         * @param minAmount the minimum amount
-         * @param maxAmount the maximum amount
-         * @param weight    the selection weight
-         * @param quality   the feedback quality associated with the catch
-         * @param condition the condition required for the entry to be selected
+         * @param result        loot result
+         * @param minimumAmount minimum drop quantity
+         * @param maximumAmount maximum drop quantity
+         * @param weight        selection weight
+         * @param quality       catch quality tier for feedback
+         * @param condition     condition required for eligibility
          * @return this builder
          */
         public Builder addItem(
                 LootResult result,
-                int minAmount,
-                int maxAmount,
+                int minimumAmount,
+                int maximumAmount,
                 double weight,
                 FishingCatchQuality quality,
                 LootCondition condition
         ) {
             return addItem(LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(result, quality),
+                    new GenericFeedbackDecorator<>(result, quality, FISHING_FEEDBACK_MAPPER),
                     weight,
-                    AmountProvider.range(minAmount, maxAmount),
+                    AmountProvider.range(minimumAmount, maximumAmount),
                     condition
             ));
         }
 
         /**
-         * Adds a weighted item result with a fixed amount and catch quality.
+         * Adds a weighted item result with a fixed quantity and catch feedback quality.
          *
-         * @param result  the loot result to produce
-         * @param amount  the amount to produce
-         * @param weight  the selection weight
-         * @param quality the feedback quality associated with the catch
+         * @param result  loot result
+         * @param amount  drop quantity
+         * @param weight  selection weight
+         * @param quality catch quality tier for feedback
          * @return this builder
          */
         public Builder addItem(
@@ -264,14 +257,13 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a weighted item result with a fixed amount, catch quality,
-         * and selection condition.
+         * Adds a weighted item result with a fixed quantity, catch feedback quality, and selection condition.
          *
-         * @param result    the loot result to produce
-         * @param amount    the amount to produce
-         * @param weight    the selection weight
-         * @param quality   the feedback quality associated with the catch
-         * @param condition the condition required for the entry to be selected
+         * @param result    loot result
+         * @param amount    drop quantity
+         * @param weight    selection weight
+         * @param quality   catch quality tier for feedback
+         * @param condition condition required for eligibility
          * @return this builder
          */
         public Builder addItem(
@@ -285,11 +277,11 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a vanilla Minecraft entity as a fishing catch.
+         * Adds a vanilla Minecraft entity catch.
          *
-         * @param type    the entity type to spawn
-         * @param weight  the selection weight
-         * @param quality the feedback quality associated with the catch
+         * @param type    entity type to spawn
+         * @param weight  selection weight
+         * @param quality catch quality tier for feedback
          * @return this builder
          */
         public Builder addVanillaEntity(EntityType type, double weight, FishingCatchQuality quality) {
@@ -297,12 +289,12 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a vanilla Minecraft entity with a selection condition.
+         * Adds a vanilla Minecraft entity catch with a selection condition.
          *
-         * @param type      the entity type to spawn
-         * @param weight    the selection weight
-         * @param quality   the feedback quality associated with the catch
-         * @param condition the condition required for the entry to be selected
+         * @param type      entity type to spawn
+         * @param weight    selection weight
+         * @param quality   catch quality tier for feedback
+         * @param condition condition required for eligibility
          * @return this builder
          */
         public Builder addVanillaEntity(
@@ -312,7 +304,7 @@ public final class FishingLootTable {
                 LootCondition condition
         ) {
             return addEntity(LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(EntityResult.vanilla(type), quality),
+                    new GenericFeedbackDecorator<>(EntityResult.vanilla(type), quality, FISHING_FEEDBACK_MAPPER),
                     weight,
                     AmountProvider.fixed(1),
                     condition
@@ -320,12 +312,12 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a vanilla Minecraft entity with a custom entity modifier.
+         * Adds a vanilla Minecraft entity catch with an entity modifier.
          *
-         * @param type     the entity type to spawn
-         * @param weight   the selection weight
-         * @param quality  the feedback quality associated with the catch
-         * @param modifier the modifier applied to the spawned entity
+         * @param type     entity type to spawn
+         * @param weight   selection weight
+         * @param quality  catch quality tier for feedback
+         * @param modifier function to modify the spawned entity
          * @return this builder
          */
         public Builder addVanillaEntity(
@@ -338,14 +330,13 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a vanilla Minecraft entity with a custom entity modifier
-         * and selection condition.
+         * Adds a vanilla Minecraft entity catch with an entity modifier and selection condition.
          *
-         * @param type      the entity type to spawn
-         * @param weight    the selection weight
-         * @param quality   the feedback quality associated with the catch
-         * @param modifier  the modifier applied to the spawned entity
-         * @param condition the condition required for the entry to be selected
+         * @param type      entity type to spawn
+         * @param weight    selection weight
+         * @param quality   catch quality tier for feedback
+         * @param modifier  function to modify the spawned entity
+         * @param condition condition required for eligibility
          * @return this builder
          */
         public Builder addVanillaEntity(
@@ -356,7 +347,7 @@ public final class FishingLootTable {
                 LootCondition condition
         ) {
             return addEntity(LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(EntityResult.vanilla(type, modifier), quality),
+                    new GenericFeedbackDecorator<>(EntityResult.vanilla(type, modifier), quality, FISHING_FEEDBACK_MAPPER),
                     weight,
                     AmountProvider.fixed(1),
                     condition
@@ -364,12 +355,12 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a vanilla Minecraft entity with a custom catch message.
+         * Adds a vanilla Minecraft entity catch with a custom catch message.
          *
-         * @param type         the entity type to spawn
-         * @param weight       the selection weight
-         * @param quality      the feedback quality associated with the catch
-         * @param catchMessage the message displayed when the entity is caught
+         * @param type         entity type to spawn
+         * @param weight       selection weight
+         * @param quality      catch quality tier for feedback
+         * @param catchMessage custom message sent on catch
          * @return this builder
          */
         public Builder addVanillaEntity(
@@ -382,14 +373,13 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a vanilla Minecraft entity with a custom catch message
-         * and selection condition.
+         * Adds a vanilla Minecraft entity catch with a custom catch message and selection condition.
          *
-         * @param type         the entity type to spawn
-         * @param weight       the selection weight
-         * @param quality      the feedback quality associated with the catch
-         * @param catchMessage the message displayed when the entity is caught
-         * @param condition    the condition required for the entry to be selected
+         * @param type         entity type to spawn
+         * @param weight       selection weight
+         * @param quality      catch quality tier for feedback
+         * @param catchMessage custom message sent on catch
+         * @param condition    condition required for eligibility
          * @return this builder
          */
         public Builder addVanillaEntity(
@@ -400,9 +390,18 @@ public final class FishingLootTable {
                 LootCondition condition
         ) {
             return addEntity(LootEntry.weighted(
-                    new MessageDecorator(
-                            new FishingLootFeedbackDecorator(EntityResult.vanilla(type), quality),
-                            catchMessage
+                    new GenericFeedbackDecorator<>(
+                            EntityResult.vanilla(type),
+                            quality,
+                            catchQuality -> {
+                                FeedbackSpecification baseSpecification = FISHING_FEEDBACK_MAPPER.apply(catchQuality);
+                                return new FeedbackSpecification(
+                                        catchMessage,
+                                        baseSpecification != null ? baseSpecification.messagePrefix() : null,
+                                        baseSpecification != null ? baseSpecification.sound() : null,
+                                        baseSpecification != null ? baseSpecification.pitch() : 1.0f
+                                );
+                            }
                     ),
                     weight,
                     AmountProvider.fixed(1),
@@ -411,19 +410,18 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a vanilla Minecraft entity with catch-specific sound feedback
-         * and a custom catch message.
+         * Adds a vanilla Minecraft entity catch with sound-only feedback and a custom catch message.
          *
-         * @param type         the entity type to spawn
-         * @param weight       the selection weight
-         * @param soundQuality the sound feedback quality
-         * @param catchMessage the message displayed when the entity is caught
+         * @param type         entity type to spawn
+         * @param weight       selection weight
+         * @param soundQuality catch quality tier for sound feedback
+         * @param catchMessage custom message sent on catch
          * @return this builder
          */
         public Builder addVanillaEntityWithSound(
                 EntityType type,
                 double weight,
-                FishingLootSoundDecorator.FishingCatchQuality soundQuality,
+                FishingCatchQuality soundQuality,
                 String catchMessage
         ) {
             return addVanillaEntityWithSound(
@@ -436,27 +434,35 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a vanilla Minecraft entity with catch-specific sound feedback,
-         * a custom catch message, and selection condition.
+         * Adds a vanilla Minecraft entity catch with sound-only feedback, a custom catch message, and selection condition.
          *
-         * @param type         the entity type to spawn
-         * @param weight       the selection weight
-         * @param soundQuality the sound feedback quality
-         * @param catchMessage the message displayed when the entity is caught
-         * @param condition    the condition required for the entry to be selected
+         * @param type         entity type to spawn
+         * @param weight       selection weight
+         * @param soundQuality catch quality tier for sound feedback
+         * @param catchMessage custom message sent on catch
+         * @param condition    condition required for eligibility
          * @return this builder
          */
         public Builder addVanillaEntityWithSound(
                 EntityType type,
                 double weight,
-                FishingLootSoundDecorator.FishingCatchQuality soundQuality,
+                FishingCatchQuality soundQuality,
                 String catchMessage,
                 LootCondition condition
         ) {
             return addEntity(LootEntry.weighted(
-                    new MessageDecorator(
-                            new FishingLootSoundDecorator(EntityResult.vanilla(type), soundQuality),
-                            catchMessage
+                    new GenericFeedbackDecorator<>(
+                            EntityResult.vanilla(type),
+                            soundQuality,
+                            catchQuality -> {
+                                FeedbackSpecification baseSpecification = FISHING_SOUND_MAPPER.apply(catchQuality);
+                                return new FeedbackSpecification(
+                                        catchMessage,
+                                        null,
+                                        baseSpecification != null ? baseSpecification.sound() : null,
+                                        baseSpecification != null ? baseSpecification.pitch() : 1.0f
+                                );
+                            }
                     ),
                     weight,
                     AmountProvider.fixed(1),
@@ -465,11 +471,11 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a Blighted entity as a fishing catch.
+         * Adds a custom Blighted entity catch.
          *
-         * @param blightedEntity the Blighted entity to spawn
-         * @param weight         the selection weight
-         * @param quality        the feedback quality associated with the catch
+         * @param blightedEntity Blighted entity to spawn
+         * @param weight         selection weight
+         * @param quality        catch quality tier for feedback
          * @return this builder
          */
         public Builder addBlightedEntity(
@@ -481,12 +487,12 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a Blighted entity with a selection condition.
+         * Adds a custom Blighted entity catch with a selection condition.
          *
-         * @param blightedEntity the Blighted entity to spawn
-         * @param weight         the selection weight
-         * @param quality        the feedback quality associated with the catch
-         * @param condition      the condition required for the entry to be selected
+         * @param blightedEntity Blighted entity to spawn
+         * @param weight         selection weight
+         * @param quality        catch quality tier for feedback
+         * @param condition      condition required for eligibility
          * @return this builder
          */
         public Builder addBlightedEntity(
@@ -496,7 +502,7 @@ public final class FishingLootTable {
                 LootCondition condition
         ) {
             return addEntity(LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(EntityResult.blighted(blightedEntity), quality),
+                    new GenericFeedbackDecorator<>(EntityResult.blighted(blightedEntity), quality, FISHING_FEEDBACK_MAPPER),
                     weight,
                     AmountProvider.fixed(1),
                     condition
@@ -504,108 +510,106 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a weighted vanilla material item with a variable amount.
+         * Adds a vanilla material item catch with a variable quantity range.
          *
-         * @param material  the material to produce
-         * @param minAmount the minimum amount
-         * @param maxAmount the maximum amount
-         * @param weight    the selection weight
-         * @param quality   the feedback quality associated with the catch
+         * @param material      material to drop
+         * @param minimumAmount minimum drop quantity
+         * @param maximumAmount maximum drop quantity
+         * @param weight        selection weight
+         * @param quality       catch quality tier for feedback
          * @return this builder
          */
         public Builder addItem(
                 Material material,
-                int minAmount,
-                int maxAmount,
+                int minimumAmount,
+                int maximumAmount,
                 double weight,
                 FishingCatchQuality quality
         ) {
-            return addItem(material, minAmount, maxAmount, weight, quality, LootCondition.alwaysTrue());
+            return addItem(material, minimumAmount, maximumAmount, weight, quality, LootCondition.alwaysTrue());
         }
 
         /**
-         * Adds a weighted vanilla material item with a variable amount
-         * and selection condition.
+         * Adds a vanilla material item catch with a variable quantity range and selection condition.
          *
-         * @param material  the material to produce
-         * @param minAmount the minimum amount
-         * @param maxAmount the maximum amount
-         * @param weight    the selection weight
-         * @param quality   the feedback quality associated with the catch
-         * @param condition the condition required for the entry to be selected
+         * @param material      material to drop
+         * @param minimumAmount minimum drop quantity
+         * @param maximumAmount maximum drop quantity
+         * @param weight        selection weight
+         * @param quality       catch quality tier for feedback
+         * @param condition     condition required for eligibility
          * @return this builder
          */
         public Builder addItem(
                 Material material,
-                int minAmount,
-                int maxAmount,
+                int minimumAmount,
+                int maximumAmount,
                 double weight,
                 FishingCatchQuality quality,
                 LootCondition condition
         ) {
             return addItem(LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(ItemResult.of(material), quality),
+                    new GenericFeedbackDecorator<>(ItemResult.of(material), quality, FISHING_FEEDBACK_MAPPER),
                     weight,
-                    AmountProvider.range(minAmount, maxAmount),
+                    AmountProvider.range(minimumAmount, maximumAmount),
                     condition
             ));
         }
 
         /**
-         * Adds a weighted registered item with a variable amount.
+         * Adds a registered item catch with a variable quantity range.
          *
-         * @param itemId    the registered item identifier
-         * @param minAmount the minimum amount
-         * @param maxAmount the maximum amount
-         * @param weight    the selection weight
-         * @param quality   the feedback quality associated with the catch
+         * @param itemId        registry ID of item
+         * @param minimumAmount minimum drop quantity
+         * @param maximumAmount maximum drop quantity
+         * @param weight        selection weight
+         * @param quality       catch quality tier for feedback
          * @return this builder
          */
         public Builder addItem(
                 String itemId,
-                int minAmount,
-                int maxAmount,
+                int minimumAmount,
+                int maximumAmount,
                 double weight,
                 FishingCatchQuality quality
         ) {
-            return addItem(itemId, minAmount, maxAmount, weight, quality, LootCondition.alwaysTrue());
+            return addItem(itemId, minimumAmount, maximumAmount, weight, quality, LootCondition.alwaysTrue());
         }
 
         /**
-         * Adds a weighted registered item with a variable amount
-         * and selection condition.
+         * Adds a registered item catch with a variable quantity range and selection condition.
          *
-         * @param itemId    the registered item identifier
-         * @param minAmount the minimum amount
-         * @param maxAmount the maximum amount
-         * @param weight    the selection weight
-         * @param quality   the feedback quality associated with the catch
-         * @param condition the condition required for the entry to be selected
+         * @param itemId        registry ID of item
+         * @param minimumAmount minimum drop quantity
+         * @param maximumAmount maximum drop quantity
+         * @param weight        selection weight
+         * @param quality       catch quality tier for feedback
+         * @param condition     condition required for eligibility
          * @return this builder
          */
         public Builder addItem(
                 String itemId,
-                int minAmount,
-                int maxAmount,
+                int minimumAmount,
+                int maximumAmount,
                 double weight,
                 FishingCatchQuality quality,
                 LootCondition condition
         ) {
             return addItem(LootEntry.weighted(
-                    new FishingLootFeedbackDecorator(ItemResult.of(itemId), quality),
+                    new GenericFeedbackDecorator<>(ItemResult.of(itemId), quality, FISHING_FEEDBACK_MAPPER),
                     weight,
-                    AmountProvider.range(minAmount, maxAmount),
+                    AmountProvider.range(minimumAmount, maximumAmount),
                     condition
             ));
         }
 
         /**
-         * Adds a weighted vanilla material item with a fixed amount.
+         * Adds a vanilla material item catch with a fixed quantity.
          *
-         * @param material the material to produce
-         * @param amount   the amount to produce
-         * @param weight   the selection weight
-         * @param quality  the feedback quality associated with the catch
+         * @param material material to drop
+         * @param amount   drop quantity
+         * @param weight   selection weight
+         * @param quality  catch quality tier for feedback
          * @return this builder
          */
         public Builder addItem(
@@ -618,14 +622,13 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a weighted vanilla material item with a fixed amount
-         * and selection condition.
+         * Adds a vanilla material item catch with a fixed quantity and selection condition.
          *
-         * @param material  the material to produce
-         * @param amount    the amount to produce
-         * @param weight    the selection weight
-         * @param quality   the feedback quality associated with the catch
-         * @param condition the condition required for the entry to be selected
+         * @param material  material to drop
+         * @param amount    drop quantity
+         * @param weight    selection weight
+         * @param quality   catch quality tier for feedback
+         * @param condition condition required for eligibility
          * @return this builder
          */
         public Builder addItem(
@@ -639,12 +642,12 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a weighted registered item with a fixed amount.
+         * Adds a registered item catch with a fixed quantity.
          *
-         * @param itemId  the registered item identifier
-         * @param amount  the amount to produce
-         * @param weight  the selection weight
-         * @param quality the feedback quality associated with the catch
+         * @param itemId  registry ID of item
+         * @param amount  drop quantity
+         * @param weight  selection weight
+         * @param quality catch quality tier for feedback
          * @return this builder
          */
         public Builder addItem(String itemId, int amount, double weight, FishingCatchQuality quality) {
@@ -652,14 +655,13 @@ public final class FishingLootTable {
         }
 
         /**
-         * Adds a weighted registered item with a fixed amount
-         * and selection condition.
+         * Adds a registered item catch with a fixed quantity and selection condition.
          *
-         * @param itemId    the registered item identifier
-         * @param amount    the amount to produce
-         * @param weight    the selection weight
-         * @param quality   the feedback quality associated with the catch
-         * @param condition the condition required for the entry to be selected
+         * @param itemId    registry ID of item
+         * @param amount    drop quantity
+         * @param weight    selection weight
+         * @param quality   catch quality tier for feedback
+         * @param condition condition required for eligibility
          * @return this builder
          */
         public Builder addItem(
@@ -673,9 +675,9 @@ public final class FishingLootTable {
         }
 
         /**
-         * Builds the configured fishing loot table.
+         * Constructs the configured {@link FishingLootTable}.
          *
-         * @return a fishing loot table containing the configured entity and item pools
+         * @return new fishing loot table
          */
         public FishingLootTable build() {
             entityTableBuilder

@@ -1,40 +1,23 @@
 package fr.moussax.blightedMC.engine.entities.registry;
 
-import fr.moussax.blightedMC.content.entities.bosses.CorruptedChampion;
-import fr.moussax.blightedMC.content.entities.factions.blightsworn.*;
 import fr.moussax.blightedMC.engine.entities.BlightedEntity;
 import fr.moussax.blightedMC.engine.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedMC.content.entities.Illusioner;
-import fr.moussax.blightedMC.content.entities.Watchling;
-import fr.moussax.blightedMC.content.entities.powerful.Endersent;
+import fr.moussax.blightedMC.registry.EngineRegistry;
+import fr.moussax.blightedMC.registry.RegistryModule;
 import fr.moussax.blightedMC.utils.debug.Log;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Consumer;
 
+/**
+ * Central registry for all {@link BlightedEntity} prototypes.
+ */
 public final class EntitiesRegistry {
-    private static final Map<String, BlightedEntity> ENTITIES = new HashMap<>();
 
-    private static final List<BlightedEntity> DEFAULT_ENTITIES = List.of(
-            new BlightswornBogged(),
-            new BlightswornDrowned(),
-            new BlightswornHusk(),
-            new BlightswornParched(),
-            new BlightswornPiglin(),
-            new BlightswornSkeleton(),
-            new BlightswornStray(),
-            new BlightswornWitherSkeleton(),
-            new BlightswornZombie(),
-            new BlightswornZombifiedPiglin(),
-
-            new CorruptedChampion(),
-            new Endersent(),
-            new Watchling(),
-            new Illusioner()
-    );
+    private static final EngineRegistry<BlightedEntity> REGISTRY =
+            new EngineRegistry<>("EntitiesRegistry", BlightedEntity::getEntityId);
 
     private static final List<Runnable> onRegisterCallbacks = new ArrayList<>();
 
@@ -45,47 +28,43 @@ public final class EntitiesRegistry {
         onRegisterCallbacks.add(callback);
     }
 
-    public static void initialize() {
+    public static void initialize(List<RegistryModule<Consumer<BlightedEntity>>> modules) {
         clear();
-        DEFAULT_ENTITIES.forEach(EntitiesRegistry::register);
-        Log.success("EntitiesRegistry", "Registered " + ENTITIES.size() + " entities (spawnable: " + SpawnableEntitiesRegistry.count() + ").");
+        REGISTRY.initialize(modules);
     }
 
     public static void register(BlightedEntity entity) {
-        if (ENTITIES.containsKey(entity.getEntityId())) {
-            Log.warn("EntitiesRegistry", "Duplicate entity ID detected: " + entity.getEntityId() + ". Skipping.");
-            return;
-        }
+        if (entity == null) return;
+        boolean isNew = !REGISTRY.contains(entity.getEntityId());
+        REGISTRY.register(entity);
 
-        ENTITIES.put(entity.getEntityId(), entity);
-
-        if (entity instanceof SpawnableEntity spawnable) {
+        if (isNew && entity instanceof SpawnableEntity spawnable) {
             SpawnableEntitiesRegistry.register(spawnable);
         }
 
         onRegisterCallbacks.forEach(callback -> {
             try {
                 callback.run();
-            } catch (Throwable t) {
-                Log.error("EntitiesRegistry", "Failed to execute onRegister callback: " + t.getMessage());
+            } catch (Throwable throwable) {
+                Log.error("EntitiesRegistry", "Failed to execute onRegister callback: " + throwable.getMessage());
             }
         });
     }
 
     @Nullable
     public static BlightedEntity get(String entityId) {
-        BlightedEntity prototype = ENTITIES.get(entityId);
+        BlightedEntity prototype = REGISTRY.get(entityId);
         return prototype != null ? prototype.clone() : null;
     }
 
     public static List<BlightedEntity> getAll() {
-        return ENTITIES.values().stream()
+        return REGISTRY.getAll().stream()
                 .map(BlightedEntity::clone)
                 .toList();
     }
 
     public static void clear() {
-        ENTITIES.clear();
+        REGISTRY.clear();
         SpawnableEntitiesRegistry.clear();
         onRegisterCallbacks.clear();
     }

@@ -4,14 +4,14 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import org.bukkit.Material;
 
-public class BlightedMaterials implements RegistryModule<ItemRegistryHandler> {
+public class BlightedMaterials implements RegistryModule<Consumer<BlightedItem>> {
 
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
         BlightedItem enchantedIronIngot =
                 createMaterialItem("ENCHANTED_IRON_INGOT", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.IRON_INGOT,
                         "Enchanted Iron Ingot", false, false);
@@ -112,31 +112,31 @@ public class BlightedMaterials implements RegistryModule<ItemRegistryHandler> {
                 createMaterialItem("ENCHANTED_SEA_PICKLE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.SEA_PICKLE,
                         "Enchanted Sea Pickle", true, false);
 
-        registry.register(enchantedIronIngot);
-        registry.register(enchantedIronBlock);
-        registry.register(enchantedCopperIngot);
-        registry.register(enchantedGoldIngot);
-        registry.register(enchantedLapisLazuli);
-        registry.register(enchantedRedstone);
-        registry.register(enchantedAmethystShard);
-        registry.register(enchantedEmerald);
-        registry.register(enchantedRottenFlesh);
-        registry.register(enchantedBone);
-        registry.register(enchantedString);
-        registry.register(enchantedGunpowder);
-        registry.register(enchantedSpiderEye);
-        registry.register(enchantedSlimeBall);
-        registry.register(enchantedPhantomMembrane);
-        registry.register(enchantedResinClump);
-        registry.register(enchantedCobblestone);
-        registry.register(enchantedObsidian);
-        registry.register(enchantedPaper);
-        registry.register(enchantedClayBall);
-        registry.register(enchantedCod);
-        registry.register(enchantedSalmon);
-        registry.register(enchantedTropicalFish);
-        registry.register(enchantedPufferfish);
-        registry.register(enchantedSeaPickle);
+        registry.accept(enchantedIronIngot);
+        registry.accept(enchantedIronBlock);
+        registry.accept(enchantedCopperIngot);
+        registry.accept(enchantedGoldIngot);
+        registry.accept(enchantedLapisLazuli);
+        registry.accept(enchantedRedstone);
+        registry.accept(enchantedAmethystShard);
+        registry.accept(enchantedEmerald);
+        registry.accept(enchantedRottenFlesh);
+        registry.accept(enchantedBone);
+        registry.accept(enchantedString);
+        registry.accept(enchantedGunpowder);
+        registry.accept(enchantedSpiderEye);
+        registry.accept(enchantedSlimeBall);
+        registry.accept(enchantedPhantomMembrane);
+        registry.accept(enchantedResinClump);
+        registry.accept(enchantedCobblestone);
+        registry.accept(enchantedObsidian);
+        registry.accept(enchantedPaper);
+        registry.accept(enchantedClayBall);
+        registry.accept(enchantedCod);
+        registry.accept(enchantedSalmon);
+        registry.accept(enchantedTropicalFish);
+        registry.accept(enchantedPufferfish);
+        registry.accept(enchantedSeaPickle);
     }
 
     private BlightedItem createMaterialItem(

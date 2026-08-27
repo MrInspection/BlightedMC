@@ -10,15 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Holds a set of {@link SpawnCondition}s evaluated with AND semantics.
- * All conditions must pass for spawning to be allowed. Fails fast on the first rejection.
+ * Holds a set of {@link SpawnCondition} rules evaluated with AND semantics.
  *
- * <pre>{@code
- * SpawnProfile profile = new SpawnProfile();
- * profile.addCondition(SpawnRules.biome(Biome.PLAINS));
- * profile.addCondition(SpawnRules.nightTime());
- * boolean allowed = profile.canSpawn(location, world);
- * }</pre>
+ * <p>All registered conditions must be satisfied for spawning to be allowed.
+ * Evaluation fails fast on the first failing condition.</p>
  */
 @NoArgsConstructor
 public final class SpawnProfile {
@@ -29,10 +24,22 @@ public final class SpawnProfile {
         this.conditions.addAll(conditions);
     }
 
+    /**
+     * Adds a spawn condition rule to this profile.
+     *
+     * @param condition condition rule to add
+     */
     public void addCondition(@NonNull SpawnCondition condition) {
         conditions.add(condition);
     }
 
+    /**
+     * Tests whether all conditions in this profile permit spawning at the given location.
+     *
+     * @param location target spawn location
+     * @param world    target spawn world
+     * @return {@code true} if all conditions pass, {@code false} if any condition fails
+     */
     public boolean canSpawn(Location location, World world) {
         for (SpawnCondition condition : conditions) {
             if (!condition.testCanSpawnAt(location, world)) return false;
@@ -40,6 +47,11 @@ public final class SpawnProfile {
         return true;
     }
 
+    /**
+     * Creates an independent copy of this spawn profile and its conditions.
+     *
+     * @return a new spawn profile instance with identical conditions
+     */
     public SpawnProfile copy() {
         return new SpawnProfile(this.conditions);
     }

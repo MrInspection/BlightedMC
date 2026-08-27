@@ -5,16 +5,15 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
-import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 
-public class Hyperion implements RegistryModule<ItemRegistryHandler> {
+public class Hyperion implements RegistryModule<Consumer<BlightedItem>> {
 
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
         BlightedItem hyperion = new BlightedItem("HYPERION", ItemType.SWORD, ItemRarity.LEGENDARY, Material.IRON_SWORD);
         hyperion.setDisplayName("Hyperion");
         hyperion.addLore(
@@ -29,8 +28,8 @@ public class Hyperion implements RegistryModule<ItemRegistryHandler> {
         );
         hyperion.setUnbreakable(true);
         hyperion.addItemFlag(ItemFlag.HIDE_UNBREAKABLE);
-        hyperion.addAbility(new Ability(new WitherImpactAbility(), "Whither Impact", AbilityType.RIGHT_CLICK), false);
+        hyperion.addAbility(Ability.rightClick("Wither Impact", new WitherImpactAbility()), false);
 
-        registry.register(hyperion);
+        registry.accept(hyperion);
     }
 }

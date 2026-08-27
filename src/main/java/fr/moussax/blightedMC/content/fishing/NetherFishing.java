@@ -21,7 +21,7 @@ import org.bukkit.potion.PotionType;
 
 import java.util.List;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.FishingCatchQuality.*;
 
 public class NetherFishing implements RegistryModule<FishingRegistryHandler> {
 

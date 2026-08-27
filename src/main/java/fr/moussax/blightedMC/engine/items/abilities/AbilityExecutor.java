@@ -12,9 +12,22 @@ import java.time.Duration;
 
 import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
+/**
+ * Validates player resources, checks active cooldowns, and executes custom item abilities.
+ */
 public final class AbilityExecutor {
-    private AbilityExecutor() {}
 
+    private AbilityExecutor() {
+    }
+
+    /**
+     * Evaluates cooldowns, verifies mana sufficiency, and executes the specified ability.
+     *
+     * @param <T>     event type
+     * @param ability ability to execute
+     * @param player  player context triggering the ability
+     * @param event   triggering Bukkit event
+     */
     public static <T extends Event> void execute(Ability ability, BlightedPlayer player, T event) {
         AbilityManager<T> manager = castManager(ability.manager());
 
@@ -31,14 +44,16 @@ public final class AbilityExecutor {
         }
 
         int manaCost = manager.getManaCost();
-        if (player.getMana().getCurrentMana() < manaCost) {
+        if (!player.hasMana(manaCost)) {
             player.getPlayer().playSound(
                     player.getPlayer().getLocation(),
                     Sound.ENTITY_ENDERMAN_TELEPORT,
                     100f,
                     0.5f
             );
-            ActionbarService.ifPresent(service -> service.sendSlotAlert(player.getPlayer(), PlayerHudManager.SECTION_MANA, "§cNOT ENOUGH MANA", Duration.ofSeconds(2)));
+            ActionbarService.ifPresent(service -> service.sendSlotAlert(
+                    player.getPlayer(), PlayerHudManager.SECTION_MANA, "§c§lNOT ENOUGH MANA", Duration.ofSeconds(2))
+            );
             cancel(event);
             return;
         }
@@ -53,7 +68,7 @@ public final class AbilityExecutor {
             if (manager.cancelEvent(true)) cancel(event);
 
             if (manaCost > 0) {
-                player.getMana().consumeMana(manaCost);
+                player.consumeMana(manaCost);
                 ActionbarService.ifPresent(service -> service.renderPlayer(player.getPlayer()));
             }
 
@@ -62,8 +77,8 @@ public final class AbilityExecutor {
             if (manager.getCooldownSeconds() > 0) {
                 player.setCooldown(manager.getClass(), ability.type(), manager.getCooldownSeconds());
             }
-        } catch (Exception e) {
-            Log.error("§cAbility execution failed: " + e.getClass().getSimpleName());
+        } catch (Exception exception) {
+            Log.error("AbilityExecutor", "Ability execution failed: " + exception.getClass().getSimpleName());
             cancel(event);
         }
     }

@@ -2,7 +2,6 @@ package fr.moussax.blightedMC.server.database;
 
 import fr.moussax.blightedMC.BlightedMC;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,21 +9,27 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
+/**
+ * Manages SQLite database persistence for player resources and forge fuel state.
+ */
 public final class PlayerDataHandler {
     private final UUID playerId;
     private final String playerName;
     private final Connection connection;
 
-    @Setter
     @Getter
-    private int gems;
-    @Setter
+    private int savedGems;
     @Getter
-    private double mana;
+    private double savedMana;
     @Getter
-    @Setter
-    private int forgeFuel;
+    private int savedForgeFuel;
 
+    /**
+     * Creates a player data handler for the specified player, loading initial state from storage.
+     *
+     * @param playerId   unique identifier of the player
+     * @param playerName current username of the player
+     */
     public PlayerDataHandler(UUID playerId, String playerName) {
         this.playerId = playerId;
         this.playerName = playerName;
@@ -33,7 +38,18 @@ public final class PlayerDataHandler {
         load();
     }
 
-    public void save() {
+    /**
+     * Persists player gems, mana, and forge fuel state to the database.
+     *
+     * @param gems      current gems balance to save
+     * @param mana      current mana level to save
+     * @param forgeFuel current forge fuel amount to save
+     */
+    public void save(int gems, double mana, int forgeFuel) {
+        this.savedGems = gems;
+        this.savedMana = mana;
+        this.savedForgeFuel = forgeFuel;
+
         String query = """
                 INSERT INTO players (uuid, name, gems, mana, forge_fuel)
                 VALUES (?, ?, ?, ?, ?)
@@ -52,8 +68,8 @@ public final class PlayerDataHandler {
                 statement.setDouble(4, mana);
                 statement.setInt(5, forgeFuel);
                 statement.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException("Failed to save player data to database.", e);
+            } catch (SQLException exception) {
+                throw new RuntimeException("Failed to save player data to database.", exception);
             }
         }
     }
@@ -66,23 +82,23 @@ public final class PlayerDataHandler {
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    this.gems = resultSet.getInt("gems");
-                    this.mana = resultSet.getDouble("mana");
-                    this.forgeFuel = resultSet.getInt("forge_fuel");
+                    this.savedGems = resultSet.getInt("gems");
+                    this.savedMana = resultSet.getDouble("mana");
+                    this.savedForgeFuel = resultSet.getInt("forge_fuel");
 
                     String storedName = resultSet.getString("name");
                     if (!storedName.equals(playerName)) {
-                        save();
+                        save(savedGems, savedMana, savedForgeFuel);
                     }
                 } else {
-                    this.gems = 0;
-                    this.mana = 100.0;
-                    this.forgeFuel = 0;
-                    save();
+                    this.savedGems = 0;
+                    this.savedMana = 100.0;
+                    this.savedForgeFuel = 0;
+                    save(savedGems, savedMana, savedForgeFuel);
                 }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to load player data from database.", e);
+        } catch (SQLException exception) {
+            throw new RuntimeException("Failed to load player data from database.", exception);
         }
     }
 }

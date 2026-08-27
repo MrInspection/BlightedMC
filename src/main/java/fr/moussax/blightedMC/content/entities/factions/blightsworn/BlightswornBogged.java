@@ -16,7 +16,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootFeedbackDecorator.EntityLootRarity.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.EntityLootRarity.*;
 
 public final class BlightswornBogged extends BlightswornArcherArchetype {
 
@@ -36,7 +36,7 @@ public final class BlightswornBogged extends BlightswornArcherArchetype {
                         0.4,
                         UNCOMMON
                 )
-                .addLootWithDurabilityRange(Material.BOW, 0.10, 0.75, 0.15, RARE)
+                .addDamagedLoot(Material.BOW, 0.10, 0.75, 0.15, RARE)
                 .addGemsLoot(5, 0.04, VERY_RARE)
                 .build());
     }

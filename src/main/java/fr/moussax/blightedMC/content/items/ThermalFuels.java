@@ -4,14 +4,14 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
+import java.util.function.Consumer;
 import fr.moussax.blightedMC.engine.items.rules.ItemRule;
 import org.bukkit.Material;
 
-public class ThermalFuels implements RegistryModule<ItemRegistryHandler> {
+public class ThermalFuels implements RegistryModule<Consumer<BlightedItem>> {
 
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
         BlightedItem enchantedCoal = new BlightedItem("ENCHANTED_COAL", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.COAL);
         enchantedCoal.setDisplayName("Enchanted Coal");
         enchantedCoal.addLore(
@@ -63,9 +63,9 @@ public class ThermalFuels implements RegistryModule<ItemRegistryHandler> {
         plasmaBucket.addEnchantmentGlint();
         plasmaBucket.addRule(ItemRule.PREVENT_BUCKET_INTERACTIONS);
 
-        registry.register(enchantedCoal);
-        registry.register(enchantedLavaBucket);
-        registry.register(magmaBucket);
-        registry.register(plasmaBucket);
+        registry.accept(enchantedCoal);
+        registry.accept(enchantedLavaBucket);
+        registry.accept(magmaBucket);
+        registry.accept(plasmaBucket);
     }
 }

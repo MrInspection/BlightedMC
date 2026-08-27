@@ -1,21 +1,28 @@
 package fr.moussax.blightedMC.engine.items.abilities;
 
 /**
- * Tracks a cooldown for a specific ability.
+ * Tracks an active cooldown for a specific ability execution manager and type.
  *
- * <p>Stores the ability's manager class, type, and expiration time.
- * Provides methods to check remaining cooldown in ticks or seconds.</p>
- *
- * @param abilityManager the class of the {@link AbilityManager} owning this cooldown
- * @param abilityType    the ability type under cooldown
- * @param endTime        when the cooldown expires
+ * @param abilityManager       class of the {@link AbilityManager} owning this cooldown
+ * @param abilityType          ability trigger type under cooldown
+ * @param expirationTimeMillis epoch timestamp in milliseconds when the cooldown expires
  */
 public record CooldownEntry(Class<? extends AbilityManager> abilityManager, AbilityType abilityType, long expirationTimeMillis) {
 
+    /**
+     * Checks whether the cooldown period has elapsed.
+     *
+     * @return {@code true} if the current time has reached or passed the expiration timestamp, {@code false} otherwise
+     */
     public boolean isExpired() {
         return System.currentTimeMillis() >= expirationTimeMillis;
     }
 
+    /**
+     * Calculates the remaining cooldown duration in seconds.
+     *
+     * @return remaining duration in seconds, or {@code 0.0} if expired
+     */
     public double getRemainingCooldownTimeInSeconds() {
         long remainingMillis = expirationTimeMillis - System.currentTimeMillis();
         return Math.max(0, remainingMillis / 1000.0);

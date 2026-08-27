@@ -2,15 +2,15 @@ package fr.moussax.blightedMC.content.recipes;
 
 import fr.moussax.blightedMC.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.recipes.crafting.registry.RecipeRegistryHandler;
+import java.util.function.Consumer;
 
 import static fr.moussax.blightedMC.engine.items.recipes.crafting.registry.RecipeRegistry.shapedRecipe;
 
 import org.bukkit.Material;
 
-public class NetherMaterialRecipes implements RegistryModule<RecipeRegistryHandler> {
+public class NetherMaterialRecipes implements RegistryModule<Consumer<BlightedRecipe>> {
     @Override
-    public void register(RecipeRegistryHandler registry) {
+    public void register(Consumer<BlightedRecipe> registry) {
 
         BlightedRecipe enchantedGhastTearRecipe = shapedRecipe("ENCHANTED_GHAST_TEAR", 1)
             .shape(" i ", "iii", " i ")
@@ -57,13 +57,13 @@ public class NetherMaterialRecipes implements RegistryModule<RecipeRegistryHandl
             .bind('i', Material.NETHERRACK, 12)
             .build();
 
-                registry.register(enchantedGhastTearRecipe);
-        registry.register(enchantedMagmaCreamRecipe);
-        registry.register(enchantedQuartzRecipe);
-        registry.register(enchantedBlazePowderRecipe);
-        registry.register(enchantedBlazeRodRecipe);
-        registry.register(enchantedGlowstoneRecipe);
-        registry.register(enchantedNetherWartRecipe);
-        registry.register(enchantedSulfurRecipe);
+                registry.accept(enchantedGhastTearRecipe);
+        registry.accept(enchantedMagmaCreamRecipe);
+        registry.accept(enchantedQuartzRecipe);
+        registry.accept(enchantedBlazePowderRecipe);
+        registry.accept(enchantedBlazeRodRecipe);
+        registry.accept(enchantedGlowstoneRecipe);
+        registry.accept(enchantedNetherWartRecipe);
+        registry.accept(enchantedSulfurRecipe);
     }
 }

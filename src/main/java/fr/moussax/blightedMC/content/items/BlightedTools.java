@@ -5,14 +5,15 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.ItemRarity;
 import fr.moussax.blightedMC.engine.items.ItemType;
 import fr.moussax.blightedMC.engine.items.abilities.Ability;
-import fr.moussax.blightedMC.engine.items.abilities.AbilityType;
 import fr.moussax.blightedMC.registry.RegistryModule;
-import fr.moussax.blightedMC.engine.items.registry.ItemRegistryHandler;
 import org.bukkit.Material;
 
-public class BlightedTools implements RegistryModule<ItemRegistryHandler> {
+import java.util.function.Consumer;
+
+public class BlightedTools implements RegistryModule<Consumer<BlightedItem>> {
+
     @Override
-    public void register(ItemRegistryHandler registry) {
+    public void register(Consumer<BlightedItem> registry) {
         BlightedItem magmaRod = new BlightedItem("MAGMA_ROD", ItemType.LAVA_FISHING_ROD, ItemRarity.UNCOMMON, Material.FISHING_ROD);
         magmaRod.setDisplayName("Magma Rod");
 
@@ -32,14 +33,13 @@ public class BlightedTools implements RegistryModule<ItemRegistryHandler> {
         voidRod.addLore("");
         voidRod.addLore(ItemRarity.RARE.getName() + " ROD");
 
-
         BlightedItem demoPickaxe = new BlightedItem("DEMO_PICKAXE", ItemType.PICKAXE, ItemRarity.SPECIAL, Material.DIAMOND_PICKAXE);
         demoPickaxe.setDisplayName("Demo Pickaxe");
-        demoPickaxe.addAbility(new Ability(new VeinmineAbility(), "Veinmine", AbilityType.PASSIVE));
+        demoPickaxe.addAbility(Ability.passive("Veinmine", new VeinmineAbility()));
         demoPickaxe.addLore("§8Demonstration tool");
 
-        registry.register(demoPickaxe);
-        registry.register(magmaRod);
-        registry.register(voidRod);
+        registry.accept(demoPickaxe);
+        registry.accept(magmaRod);
+        registry.accept(voidRod);
     }
 }

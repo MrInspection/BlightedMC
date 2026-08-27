@@ -13,7 +13,6 @@ import fr.moussax.blightedMC.utils.ItemBuilder;
 import fr.moussax.blightedMC.utils.Utilities;
 import fr.moussax.blightedMC.shared.text.Formatter;
 import fr.moussax.blightedMC.shared.text.Messenger;
-import fr.moussax.blightedMC.shared.sound.SoundSequence;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -39,7 +38,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
     private double lastPlayerGems = -1;
 
     public RitualAltarMenu(AncientRitual ritual, Menu previousMenu) {
-        super(ritual == null ? "Rituals Altar" : "Invoke Creature", 54);
+        super("Rituals Altar", 54);
         this.ritual = ritual;
         this.previousMenu = previousMenu;
     }
@@ -58,7 +57,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
 
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
         int currentLevel = player.getLevel();
-        double currentGems = blightedPlayer != null ? blightedPlayer.getGemsManager().getGems() : 0;
+        double currentGems = blightedPlayer != null ? blightedPlayer.getGems() : 0;
 
         if (initialCanInvoke != this.canInvoke || lastPlayerLevel != currentLevel || lastPlayerGems != currentGems) {
             this.lastPlayerLevel = currentLevel;
@@ -73,6 +72,12 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
 
     @Override
     public void build(Player player) {
+        if (ritual == null) {
+            setTitle("Rituals Altar");
+        } else {
+            setTitle("Invoke Creature");
+        }
+
         if (ritual != null) {
             checkRequirements(player);
         }
@@ -122,6 +127,11 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
     }
 
     private void checkRequirements(Player player) {
+        if (ritual == null) {
+            this.canInvoke = false;
+            return;
+        }
+
         BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
         Map<String, Integer> requiredCounts = aggregateRequirements();
 
@@ -137,7 +147,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
 
         boolean hasItems = requiredCounts.entrySet().stream()
                 .allMatch(e -> inventoryCounts.getOrDefault(e.getKey(), 0) >= e.getValue());
-        boolean hasGems = blightedPlayer.getGemsManager().hasEnoughGems(ritual.getGemsCost());
+        boolean hasGems = blightedPlayer.hasGems(ritual.getGemsCost());
         boolean hasXp = player.getLevel() >= ritual.getLevelCost();
 
         this.canInvoke = hasItems && hasGems && hasXp;
@@ -145,6 +155,8 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
 
     private Map<String, Integer> aggregateRequirements() {
         Map<String, Integer> counts = new HashMap<>();
+        if (ritual == null) return counts;
+
         for (CraftingObject ingredient : ritual.getOfferings()) {
             counts.merge(ingredient.getId(), ingredient.getAmount(), Integer::sum);
         }
@@ -237,21 +249,21 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
                     " §cand the Ancients do not return",
                     " §cunchanged.",
                     "",
-                    canInvoke ? "§eClick to confirm!" : "§cYou don't meet the requirements!"
+                    canInvoke ? "§eClick to confirm!" : "§cMissing offerings!"
             ).setEnchantmentGlint(canInvoke);
         }
 
-        setItem(32, builder.toItemStack(), (p, _) -> {
+        setItem(32, builder.toItemStack(), (clickingPlayer, _) -> {
             if (ritual != null && canInvoke) {
-                invokeMob(p);
+                invokeMob(clickingPlayer);
             } else {
-                p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
+                clickingPlayer.playSound(clickingPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
             }
         });
     }
 
     private void setupNavigationButtons() {
-        ItemStack recipeBook = new ItemBuilder(Material.WRITABLE_BOOK, "§5Ancient Rituals")
+        ItemStack recipeBook = new ItemBuilder(Material.FLOW_BANNER_PATTERN, "§5Ancient Rituals")
                 .addLore(
                         "§7Browse ancient rituals written eons",
                         "§7ago by the §5Voidling Mages§7, devised",
@@ -262,7 +274,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
                 ).toItemStack();
 
         setCloseButton(49);
-        setItem(50, recipeBook, (p, _) -> openSubMenu(new RitualsDirectoryMenu(this)));
+        setItem(50, recipeBook, (clickingPlayer, _) -> openSubMenu(new AncientRitualsMenu(this)));
     }
 
     private void consumeIngredients(Player player) {

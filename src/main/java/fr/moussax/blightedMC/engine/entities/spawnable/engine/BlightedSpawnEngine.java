@@ -37,6 +37,9 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
     private final List<Player> cachedPlayers = new ArrayList<>();
     private int tickCounter = CACHE_REFRESH_INTERVAL;
 
+    /**
+     * Executes a periodic spawn cycle around online players, evaluating loaded chunk candidates.
+     */
     @Override
     public void run() {
         if (tickCounter++ % CACHE_REFRESH_INTERVAL == 0) {

@@ -19,7 +19,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.function.Consumer;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.FishingCatchQuality.*;
 
 public class OverworldLavaFishing implements RegistryModule<FishingRegistryHandler> {
 
