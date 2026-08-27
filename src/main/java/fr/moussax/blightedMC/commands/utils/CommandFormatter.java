@@ -58,17 +58,6 @@ public final class CommandFormatter {
                 throw new IllegalArgumentException("Command syntax cannot be blank.");
             }
         }
-
-        /**
-         * Creates command information for help display.
-         *
-         * @param syntax      command syntax without the leading slash
-         * @param description short command description
-         * @return command information
-         */
-        public static CommandInfo of(String syntax, String description) {
-            return new CommandInfo(syntax, description);
-        }
     }
 
     /**
@@ -81,6 +70,17 @@ public final class CommandFormatter {
      */
     public static void sendCommands(Player player, String title, String description, CommandInfo... commands) {
         buildCommands(title, description, Arrays.asList(commands)).forEach(player::sendMessage);
+    }
+
+    /**
+     * Sends formatted usage information for a command syntax and description.
+     *
+     * @param player      command recipient
+     * @param syntax      command syntax without the leading slash
+     * @param description short command description
+     */
+    public static void sendUsage(Player player, String syntax, String description) {
+        sendUsage(player, new CommandInfo(syntax, description));
     }
 
     /**

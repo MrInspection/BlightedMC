@@ -17,13 +17,7 @@ public final class SpawnCustomMobCommand extends AdminCommand {
     @Override
     protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
         if (args.length == 0) {
-            CommandFormatter.sendUsage(
-                    player,
-                    CommandFormatter.CommandInfo.of(
-                            "spawncustommob <entity>",
-                            "Summon a custom mob"
-                    )
-            );
+            CommandFormatter.sendUsage(player, "spawncustommob <entity>", "Summon a custom mob");
             return false;
         }
 

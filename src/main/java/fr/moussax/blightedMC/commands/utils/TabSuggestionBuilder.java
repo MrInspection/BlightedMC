@@ -96,7 +96,6 @@ public final class TabSuggestionBuilder implements TabCompleter {
                     matches
             );
 
-            matches.sort(String.CASE_INSENSITIVE_ORDER);
             return matches;
         }
 
@@ -104,6 +103,18 @@ public final class TabSuggestionBuilder implements TabCompleter {
     }
 
     private List<String> resolveCandidates(List<String> suggestions) {
+        boolean hasDynamicKey = false;
+        for (String suggestion : suggestions) {
+            if (suggestion.startsWith("$")) {
+                hasDynamicKey = true;
+                break;
+            }
+        }
+
+        if (!hasDynamicKey) {
+            return suggestions;
+        }
+
         Set<String> candidates = new HashSet<>();
 
         for (String suggestion : suggestions) {
@@ -111,10 +122,9 @@ public final class TabSuggestionBuilder implements TabCompleter {
 
             if (provided == null) {
                 candidates.add(suggestion);
-                continue;
+            } else {
+                candidates.addAll(provided);
             }
-
-            candidates.addAll(provided);
         }
 
         return List.copyOf(candidates);

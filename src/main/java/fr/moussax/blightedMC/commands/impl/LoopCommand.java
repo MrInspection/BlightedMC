@@ -21,12 +21,7 @@ public final class LoopCommand extends AdminCommand {
     @Override
     protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
         if (args.length < 3) {
-            CommandFormatter.sendUsage(player,
-                    CommandFormatter.CommandInfo.of(
-                            "loop [2-50] [1-180] <command>",
-                            "Bulk execute a command."
-                    )
-            );
+            CommandFormatter.sendUsage(player, "loop [2-50] [1-180] <command>", "Bulk execute a command.");
             return false;
         }
 
@@ -36,7 +31,7 @@ public final class LoopCommand extends AdminCommand {
         try {
             amount = Integer.parseInt(args[0]);
             delay = Integer.parseInt(args[1]);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             warn(player, "Amount and delay must be numbers.");
             return false;
         }

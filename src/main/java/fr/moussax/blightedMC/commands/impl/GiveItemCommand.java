@@ -6,7 +6,6 @@ import fr.moussax.blightedMC.engine.items.BlightedItem;
 import fr.moussax.blightedMC.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedMC.engine.items.registry.menu.ItemRegistryMenu;
 import fr.moussax.blightedMC.commands.utils.CommandArgument;
-import fr.moussax.blightedMC.commands.utils.CommandArguments;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
@@ -18,10 +17,8 @@ import static fr.moussax.blightedMC.shared.text.Formatter.formatEnumName;
 import static fr.moussax.blightedMC.shared.text.Messenger.inform;
 import static fr.moussax.blightedMC.shared.text.Messenger.warn;
 
-@CommandArguments({
-        @CommandArgument(position = 0, suggestions = {"$players"}),
-        @CommandArgument(position = 1, suggestions = {"$items"})
-})
+@CommandArgument(position = 0, suggestions = {"$players"})
+@CommandArgument(position = 1, suggestions = {"$items"})
 public final class GiveItemCommand extends AdminCommand {
 
     @Override
@@ -53,7 +50,7 @@ public final class GiveItemCommand extends AdminCommand {
         if (args.length > argumentIndex + 1) {
             try {
                 amount = Math.max(1, Integer.parseInt(args[argumentIndex + 1]));
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException _) {
                 warn(player, "Please provide a valid amount. Provided: §4" + args[argumentIndex + 1]);
                 return false;
             }

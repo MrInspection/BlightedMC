@@ -20,13 +20,13 @@ public final class GemsCommand extends AdminCommand {
         if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
             CommandFormatter.sendCommands(
                     player, "COMMANDS", "Gems Currency",
-                    CommandFormatter.CommandInfo.of("gems add <player> [amount]", "Give gems to a player."),
-                    CommandFormatter.CommandInfo.of("gems remove <player> [amount]", "Take gems from a player."),
-                    CommandFormatter.CommandInfo.of("gems set <player> [amount]", "Set gems for a player."),
-                    CommandFormatter.CommandInfo.of("gems reset <player>", "Reset gems for a player."),
-                    CommandFormatter.CommandInfo.of("gems giveall [amount]", "Give gems to everyone."),
-                    CommandFormatter.CommandInfo.of("gems resetall", "Reset everyone's balance."),
-                    CommandFormatter.CommandInfo.of("gems help", "Prints this help message.")
+                    new CommandFormatter.CommandInfo("gems add <player> [amount]", "Give gems to a player."),
+                    new CommandFormatter.CommandInfo("gems remove <player> [amount]", "Take gems from a player."),
+                    new CommandFormatter.CommandInfo("gems set <player> [amount]", "Set gems for a player."),
+                    new CommandFormatter.CommandInfo("gems reset <player>", "Reset gems for a player."),
+                    new CommandFormatter.CommandInfo("gems giveall [amount]", "Give gems to everyone."),
+                    new CommandFormatter.CommandInfo("gems resetall", "Reset everyone's balance."),
+                    new CommandFormatter.CommandInfo("gems help", "Prints this help message.")
             );
 
             return false;
@@ -48,13 +48,10 @@ public final class GemsCommand extends AdminCommand {
 
     private boolean handleModify(Player sender, String[] args, boolean add) {
         if (args.length < 3) {
-            CommandFormatter.sendUsage(sender,
-                    CommandFormatter.CommandInfo.of(
-                            "gems " + (add ? "add" : "remove") + " <player> [amount]",
-                            add
-                                    ? "Give gems to a player."
-                                    : "Remove gems from a player."
-                    )
+            CommandFormatter.sendUsage(
+                    sender,
+                    "gems " + (add ? "add" : "remove") + " <player> [amount]",
+                    add ? "Give gems to a player." : "Remove gems from a player."
             );
             return false;
         }
@@ -81,13 +78,7 @@ public final class GemsCommand extends AdminCommand {
 
     private boolean handleSet(Player sender, String[] args) {
         if (args.length < 3) {
-            CommandFormatter.sendUsage(
-                    sender,
-                    CommandFormatter.CommandInfo.of(
-                            "gems set <player> [amount]",
-                            "Set gems for a player."
-                    )
-            );
+            CommandFormatter.sendUsage(sender, "gems set <player> [amount]", "Set gems for a player.");
             return false;
         }
 
@@ -105,13 +96,7 @@ public final class GemsCommand extends AdminCommand {
 
     private boolean handleReset(Player sender, String[] args) {
         if (args.length < 2) {
-            CommandFormatter.sendUsage(
-                    sender,
-                    CommandFormatter.CommandInfo.of(
-                            "gems reset <player>",
-                            "Reset gems for a player."
-                    )
-            );
+            CommandFormatter.sendUsage(sender, "gems reset <player>", "Reset gems for a player.");
             return false;
         }
 
@@ -137,13 +122,7 @@ public final class GemsCommand extends AdminCommand {
 
     private boolean handleGiveAll(Player sender, String[] args) {
         if (args.length < 2) {
-            CommandFormatter.sendUsage(
-                    sender,
-                    CommandFormatter.CommandInfo.of(
-                            "gems giveall [amount]",
-                            "Give all online players gems."
-                    )
-            );
+            CommandFormatter.sendUsage(sender, "gems giveall [amount]", "Give all online players gems.");
             return false;
         }
 
