@@ -8,7 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 
-import static fr.moussax.blightedMC.shared.loot.decorators.FishingLootFeedbackDecorator.FishingCatchQuality.*;
+import static fr.moussax.blightedMC.shared.loot.decorators.FishingCatchQuality.*;
 
 public class EndFishing implements RegistryModule<FishingRegistryHandler> {
 
