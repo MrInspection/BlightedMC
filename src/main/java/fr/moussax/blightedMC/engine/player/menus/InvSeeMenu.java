@@ -1,29 +1,26 @@
 package fr.moussax.blightedMC.engine.player.menus;
 
-import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
-import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.blightedMC.utils.ItemBuilder;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitTask;
-import org.jspecify.annotations.NonNull;
 
+import java.net.InetSocketAddress;
 import java.util.Objects;
 
-public final class InvSeeMenu extends Menu {
+public final class InvSeeMenu extends Menu implements TickableMenu {
     private final Player target;
-    private BukkitTask refreshTask;
 
-    private static final ItemStack NO_HELMET = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).setDisplayName("§7Empty Helmet Slot").toItemStack();
-    private static final ItemStack NO_CHESTPLATE = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).setDisplayName("§7Empty Chestplate Slot").toItemStack();
-    private static final ItemStack NO_LEGGINGS = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).setDisplayName("§7Empty Leggings Slot").toItemStack();
-    private static final ItemStack NO_BOOTS = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).setDisplayName("§7Empty Boots Slot").toItemStack();
-    private static final ItemStack NO_OFFHAND = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).setDisplayName("§7Empty Offhand Slot").toItemStack();
+    private static final ItemStack NO_HELMET = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE, "§7Empty Helmet Slot").toItemStack();
+    private static final ItemStack NO_CHESTPLATE = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE, "§7Empty Chestplate Slot").toItemStack();
+    private static final ItemStack NO_LEGGINGS = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE, "§7Empty Leggings Slot").toItemStack();
+    private static final ItemStack NO_BOOTS = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE, "§7Empty Boots Slot").toItemStack();
+    private static final ItemStack NO_OFFHAND = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE, "§7Empty Offhand Slot").toItemStack();
 
     public InvSeeMenu(Player target) {
         super(target.getName() + "'s Inventory", 45);
@@ -31,51 +28,51 @@ public final class InvSeeMenu extends Menu {
     }
 
     @Override
+    public long tickPeriodTicks() {
+        return 1L;
+    }
+
+    @Override
     public void build(Player player) {
         fillSlots(new int[]{0, 6}, MenuElementPreset.EMPTY_SLOT_FILLER);
 
-        ItemStack playerInformation = new ItemBuilder(Material.PLAYER_HEAD)
-            .setDisplayName("§d" + target.getName())
-            .addLore(
-                "§7Health: §f" + (int) target.getHealth() + "§c❤",
-                "§7Food: §f" + target.getFoodLevel() + "§6\uD83C\uDF56",
-                "§7Gamemode: §f" + target.getGameMode().name()
-            )
-            .setSkullOwner(target.getUniqueId())
-            .toItemStack();
-
-        setItem(7, playerInformation, (_, _) -> {
-        });
         setItem(
             8,
             new ItemBuilder(Material.ENDER_CHEST)
                 .setDisplayName("§dView Ender Chest")
                 .addLore("§7Click to view ender chest.")
                 .toItemStack(),
-            (clickingPlayer, _) -> BlightedMC.menuManager().openMenu(
-                new EnderSeeMenu(target, this), clickingPlayer
-            )
+            (_, _) -> openSubMenu(new EnderSeeMenu(target, this))
         );
 
         updateContents();
     }
 
     @Override
-    public void open(@NonNull Player player) {
-        super.open(player);
-        this.refreshTask = Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(), () -> {
-            if (!player.isOnline() || player.getOpenInventory().getTopInventory() != getInventory()) {
-                if (refreshTask != null && !refreshTask.isCancelled()) {
-                    refreshTask.cancel();
-                }
-                return;
-            }
-            updateContents();
-        }, 1L, 1L);
+    public void onTick(Player player) {
+        if (!target.isOnline()) {
+            close();
+            return;
+        }
+        updateContents();
     }
 
     private void updateContents() {
-        Inventory playerInventory = target.getInventory();
+        ItemStack playerInformation = new ItemBuilder(Material.PLAYER_HEAD)
+                .setDisplayName("§d" + target.getName())
+                .addLore( "",
+                        "  §7Health: §f" + (int) target.getHealth() + "§c❤",
+                        "  §7Food: §f" + target.getFoodLevel() + "§c\uD83C\uDF56",
+                        "  §7Gamemode: §f" + target.getGameMode().name() + "  ",
+                        "",
+                        "  §7Ping: §d" + target.getPing() + "ms",
+                        "  §7IP Address: §d" + formatAddress(target.getAddress()) + " ",
+                        ""
+                )
+                .setSkullOwner(target.getUniqueId())
+                .addItemFlag(ItemFlag.HIDE_PROFILE)
+                .toItemStack();
+        updateSlot(7, playerInformation, null);
 
         updateSlot(1, target.getInventory().getHelmet(), NO_HELMET);
         updateSlot(2, target.getInventory().getChestplate(), NO_CHESTPLATE);
@@ -83,26 +80,35 @@ public final class InvSeeMenu extends Menu {
         updateSlot(4, target.getInventory().getBoots(), NO_BOOTS);
         updateSlot(5, target.getInventory().getItemInOffHand(), NO_OFFHAND);
 
+        Inventory playerInventory = target.getInventory();
         for (int slot = 0; slot < 36; slot++) {
-            ItemStack realItem = playerInventory.getItem(slot);
-            int menuSlot = slot + 9;
-            ItemStack currentItem = getInventory().getItem(menuSlot);
-            if (!Objects.equals(realItem, currentItem)) {
-                getInventory().setItem(menuSlot, realItem);
-            }
-            if (realItem != null) {
-                setItem(menuSlot, realItem, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-                });
-            }
+            updateSlot(slot + 9, playerInventory.getItem(slot), null);
         }
     }
 
-    private void updateSlot(int slot, ItemStack item, ItemStack placeholder) {
-        ItemStack displayItem = (item != null && item.getType() != Material.AIR) ? item : placeholder;
-        if (!Objects.equals(getInventory().getItem(slot), displayItem)) {
-            getInventory().setItem(slot, displayItem);
+    private void updateSlot(int menuSlot, ItemStack item, ItemStack placeholder) {
+        ItemStack displayItem = isEmpty(item) ? placeholder : item;
+        ItemStack currentItem = getInventory().getItem(menuSlot);
+
+        if (!isSameItem(displayItem, currentItem)) {
+            setSlotItem(menuSlot, displayItem);
         }
-        setItem(slot, displayItem, (_, _) -> {
-        });
+    }
+
+    private String formatAddress(InetSocketAddress socketAddress) {
+        if (socketAddress == null || socketAddress.getAddress() == null) {
+            return "Unknown";
+        }
+        return socketAddress.getAddress().getHostAddress();
+    }
+
+    private boolean isEmpty(ItemStack item) {
+        return item == null || item.getType() == Material.AIR;
+    }
+
+    private boolean isSameItem(ItemStack first, ItemStack second) {
+        if (isEmpty(first) && isEmpty(second)) return true;
+        if (isEmpty(first) || isEmpty(second)) return false;
+        return Objects.equals(first, second);
     }
 }

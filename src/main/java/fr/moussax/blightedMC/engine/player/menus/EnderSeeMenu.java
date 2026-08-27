@@ -1,33 +1,33 @@
 package fr.moussax.blightedMC.engine.player.menus;
 
-import fr.moussax.blightedMC.BlightedMC;
 import fr.moussax.blightedMC.shared.ui.menu.Menu;
+import fr.moussax.blightedMC.shared.ui.menu.TickableMenu;
 import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuElementPreset;
-import fr.moussax.blightedMC.shared.ui.menu.interaction.MenuItemInteraction;
-import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitTask;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-public final class EnderSeeMenu extends Menu {
+public final class EnderSeeMenu extends Menu implements TickableMenu {
     private final Player target;
-    private BukkitTask refreshTask;
-    private Menu previousMenu;
+    private final Menu previousMenu;
 
     public EnderSeeMenu(Player target) {
-        super(target.getName() + "'s Ender Chest", 36);
-        this.target = target;
-        this.previousMenu = null;
+        this(target, null);
     }
 
-    public EnderSeeMenu(Player target, Menu previousMenu) {
+    public EnderSeeMenu(Player target, @Nullable Menu previousMenu) {
         super(target.getName() + "'s Ender Chest", 36);
         this.target = target;
         this.previousMenu = previousMenu;
+    }
+
+    @Override
+    public long tickPeriodTicks() {
+        return 1L;
     }
 
     @Override
@@ -41,17 +41,12 @@ public final class EnderSeeMenu extends Menu {
     }
 
     @Override
-    public void open(@NonNull Player player) {
-        super.open(player);
-        this.refreshTask = Bukkit.getScheduler().runTaskTimer(BlightedMC.getInstance(), () -> {
-            if (!player.isOnline() || player.getOpenInventory().getTopInventory() != getInventory()) {
-                if (refreshTask != null && !refreshTask.isCancelled()) {
-                    refreshTask.cancel();
-                }
-                return;
-            }
-            updateContents();
-        }, 1L, 1L);
+    public void onTick(Player player) {
+        if (!target.isOnline()) {
+            close();
+            return;
+        }
+        updateContents();
     }
 
     private void updateContents() {
@@ -60,14 +55,19 @@ public final class EnderSeeMenu extends Menu {
             ItemStack realItem = enderChest.getItem(slot);
             int menuSlot = slot + 9;
 
+            ItemStack displayItem = (realItem != null && realItem.getType() != Material.AIR) ? realItem : null;
             ItemStack currentItem = getInventory().getItem(menuSlot);
-            if (!Objects.equals(realItem, currentItem)) {
-                getInventory().setItem(menuSlot, realItem);
-            }
-            if (realItem != null) {
-                setItem(menuSlot, realItem, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-                });
+            if (!isSameItem(displayItem, currentItem)) {
+                setSlotItem(menuSlot, displayItem);
             }
         }
+    }
+
+    private boolean isSameItem(ItemStack first, ItemStack second) {
+        boolean emptyFirst = first == null || first.getType() == Material.AIR;
+        boolean emptySecond = second == null || second.getType() == Material.AIR;
+        if (emptyFirst && emptySecond) return true;
+        if (emptyFirst || emptySecond) return false;
+        return Objects.equals(first, second);
     }
 }
