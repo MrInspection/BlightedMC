@@ -22,8 +22,8 @@ public final class PluginSettings {
             settings.defaultManaRegenerationRate = config.getDouble("default_mana_regeneration_rate", 2.0);
             
             Log.success("Config", "Successfully loaded the configuration file.");
-        } catch (Exception e) {
-            Log.error("Config", "Failed to load configuration: " + e.getMessage());
+        } catch (Exception exception) {
+            Log.error("Config", "Failed to load configuration: " + exception.getMessage());
         }
         return settings;
     }

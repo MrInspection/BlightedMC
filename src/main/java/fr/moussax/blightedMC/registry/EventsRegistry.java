@@ -52,7 +52,7 @@ public final class EventsRegistry {
      * the entity registry changes.</p>
      */
     public void initializeListeners() {
-        PluginManager pm = Bukkit.getPluginManager();
+        PluginManager pluginManager = Bukkit.getPluginManager();
         menuSystem = new MenuSystem(instance);
         menuManager = new MenuManager(menuSystem);
         actionBarService = new ActionbarService(instance);
@@ -62,19 +62,19 @@ public final class EventsRegistry {
         EntitiesRegistry.addOnRegisterCallback(spawnableEntitiesListener::invalidateCache);
         signInputListener = new SignInputListener();
 
-        pm.registerEvents(new MenuListener(menuSystem), instance);
-        pm.registerEvents(signInputListener, instance);
-        pm.registerEvents(new BlightedEntitiesListener(), instance);
-        pm.registerEvents(new EntityComponentListener(), instance);
-        pm.registerEvents(spawnableEntitiesListener, instance);
-        pm.registerEvents(new BlightedBlockListener(), instance);
-        pm.registerEvents(new PlayerListener(), instance);
-        pm.registerEvents(new ItemRuleListener(), instance);
-        pm.registerEvents(new AbilityListener(), instance);
-        pm.registerEvents(new FishingListener(), instance);
-        pm.registerEvents(new UnsafeAnvilListener(), instance);
-        pm.registerEvents(new WitherImpactAbility(), instance);
-        pm.registerEvents(new BlightedQuestListener(), instance);
+        pluginManager.registerEvents(new MenuListener(menuSystem), instance);
+        pluginManager.registerEvents(signInputListener, instance);
+        pluginManager.registerEvents(new BlightedEntitiesListener(), instance);
+        pluginManager.registerEvents(new EntityComponentListener(), instance);
+        pluginManager.registerEvents(spawnableEntitiesListener, instance);
+        pluginManager.registerEvents(new BlightedBlockListener(), instance);
+        pluginManager.registerEvents(new PlayerListener(), instance);
+        pluginManager.registerEvents(new ItemRuleListener(), instance);
+        pluginManager.registerEvents(new AbilityListener(), instance);
+        pluginManager.registerEvents(new FishingListener(), instance);
+        pluginManager.registerEvents(new UnsafeAnvilListener(), instance);
+        pluginManager.registerEvents(new WitherImpactAbility(), instance);
+        pluginManager.registerEvents(new BlightedQuestListener(), instance);
     }
 
     /**

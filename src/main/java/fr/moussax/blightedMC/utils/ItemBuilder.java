@@ -145,8 +145,8 @@ public class ItemBuilder {
 
         try {
             textures.setSkin(new URI(url).toURL());
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid texture URL: " + url, e);
+        } catch (Exception exception) {
+            throw new IllegalArgumentException("Invalid texture URL: " + url, exception);
         }
 
         profile.setTextures(textures);
