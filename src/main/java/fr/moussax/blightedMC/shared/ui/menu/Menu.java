@@ -95,9 +95,9 @@ public abstract class Menu implements InventoryHolder {
         this.viewerId = player.getUniqueId();
 
         slots.clear();
+        this.inventory = Bukkit.createInventory(this, size, this.title);
         build(player);
 
-        this.inventory = Bukkit.createInventory(this, size, this.title);
         for (Map.Entry<Integer, MenuSlot> entry : slots.entrySet()) {
             inventory.setItem(entry.getKey(), entry.getValue().item);
         }
@@ -727,12 +727,19 @@ public abstract class Menu implements InventoryHolder {
      * @param slot inventory slot index
      * @param item new item for the slot
      */
-    protected void setSlotItem(int slot, @NonNull ItemStack item) {
-        MenuSlot existing = slots.get(slot);
-        if (existing != null) {
-            existing.item = item;
+    protected void setSlotItem(int slot, @Nullable ItemStack item) {
+        if (item != null && item.getType() != Material.AIR) {
+            MenuSlot existing = slots.get(slot);
+            if (existing != null) {
+                existing.item = item;
+            } else {
+                slots.put(slot, new MenuSlot(item, MenuItemInteraction.ANY_CLICK, (player, type) -> {}));
+            }
+            inventory.setItem(slot, item);
+        } else {
+            slots.remove(slot);
+            inventory.setItem(slot, null);
         }
-        inventory.setItem(slot, item);
     }
 
     /**
