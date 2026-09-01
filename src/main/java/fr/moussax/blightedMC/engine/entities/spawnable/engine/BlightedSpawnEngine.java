@@ -28,7 +28,7 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
     private static final int CHUNKS_PER_PLAYER_PER_TICK = 1;
     private static final int MIN_CHUNK_DISTANCE = 3; // ~48 blocks away minimum
     private static final int MAX_CHUNK_DISTANCE = 8; // ~128 blocks away maximum
-    private static final int CACHE_REFRESH_INTERVAL = 200;
+    private static final int CACHE_REFRESH_INTERVAL = 10; // 10 cycles (10s at 20L period)
 
     private static final int MAX_MONSTERS_PER_PLAYER = 70;
     private static final int MAX_MONSTERS_PER_CHUNK = 5;
@@ -51,6 +51,7 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
         ThreadLocalRandom random = ThreadLocalRandom.current();
 
         for (Player player : cachedPlayers) {
+            if (!player.isOnline()) continue;
             int nearbyMonsters = 0;
             for (Entity entity : player.getNearbyEntities(128.0, 128.0, 128.0)) {
                 if (entity instanceof Monster) {
