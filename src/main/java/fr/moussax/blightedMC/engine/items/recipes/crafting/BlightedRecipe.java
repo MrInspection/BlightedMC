@@ -19,13 +19,19 @@ import java.util.*;
  */
 public sealed abstract class BlightedRecipe permits BlightedShapedRecipe, BlightedShapelessRecipe {
 
-    /** Global registry of all registered Blighted recipes. */
+    /**
+     * Global registry of all registered Blighted recipes.
+     */
     public static final Set<BlightedRecipe> REGISTERED_RECIPES = new HashSet<>();
 
-    /** @return the logical result definition of this recipe */
+    /**
+     * @return the logical result definition of this recipe
+     */
     public abstract BlightedItem getResult();
 
-    /** @return the base output amount */
+    /**
+     * @return the base output amount
+     */
     public abstract int getAmount();
 
     /**
@@ -37,7 +43,9 @@ public sealed abstract class BlightedRecipe permits BlightedShapedRecipe, Blight
      */
     public abstract ItemStack assemble(List<ItemStack> craftingGrid);
 
-    /** Registers this recipe in the global registry. */
+    /**
+     * Registers this recipe in the global registry.
+     */
     public void addRecipe() {
         REGISTERED_RECIPES.add(this);
     }
@@ -50,7 +58,7 @@ public sealed abstract class BlightedRecipe permits BlightedShapedRecipe, Blight
      */
     public static Set<BlightedRecipe> findMatchingRecipes(List<ItemStack> craftingGrid) {
         boolean isEmpty = craftingGrid.stream()
-            .allMatch(item -> item == null || item.getType() == Material.AIR);
+                .allMatch(item -> item == null || item.getType() == Material.AIR);
         if (isEmpty) return Collections.emptySet();
 
         List<String> craftingGridItemIds = resolveItemIdsFromGrid(craftingGrid);
@@ -61,9 +69,9 @@ public sealed abstract class BlightedRecipe permits BlightedShapedRecipe, Blight
 
             boolean isMatch = switch (recipe) {
                 case BlightedShapedRecipe shapedRecipe ->
-                    matchesShapedRecipe(shapedRecipe, craftingGrid, craftingGridItemIds);
+                        matchesShapedRecipe(shapedRecipe, craftingGrid, craftingGridItemIds);
                 case BlightedShapelessRecipe shapelessRecipe ->
-                    matchesShapelessRecipe(shapelessRecipe, craftingGrid, craftingGridItemIds);
+                        matchesShapelessRecipe(shapelessRecipe, craftingGrid, craftingGridItemIds);
             };
 
             if (isMatch) matchingRecipes.add(recipe);
@@ -72,7 +80,9 @@ public sealed abstract class BlightedRecipe permits BlightedShapedRecipe, Blight
         return matchingRecipes;
     }
 
-    /** Resolves custom or vanilla item IDs for each grid slot. */
+    /**
+     * Resolves custom or vanilla item IDs for each grid slot.
+     */
     private static List<String> resolveItemIdsFromGrid(List<ItemStack> craftingGrid) {
         List<String> itemIdsInGrid = new ArrayList<>(craftingGrid.size());
 
@@ -86,7 +96,9 @@ public sealed abstract class BlightedRecipe permits BlightedShapedRecipe, Blight
         return itemIdsInGrid;
     }
 
-    /** Checks whether a shaped recipe matches the crafting grid exactly. */
+    /**
+     * Checks whether a shaped recipe matches the crafting grid exactly.
+     */
     private static boolean matchesShapedRecipe(BlightedShapedRecipe recipe,
                                                List<ItemStack> craftingGrid,
                                                List<String> craftingGridItemIds) {
@@ -121,7 +133,9 @@ public sealed abstract class BlightedRecipe permits BlightedShapedRecipe, Blight
         return true;
     }
 
-    /** Checks whether a shapeless recipe matches the crafting grid. */
+    /**
+     * Checks whether a shapeless recipe matches the crafting grid.
+     */
     private static boolean matchesShapelessRecipe(BlightedShapelessRecipe recipe, List<ItemStack> craftingGrid, List<String> craftingGridItemIds) {
         Map<String, Integer> remainingRequiredCounts = new HashMap<>(recipe.getIngredientCountMap());
 
@@ -135,9 +149,13 @@ public sealed abstract class BlightedRecipe permits BlightedShapedRecipe, Blight
                 return false;
             }
 
-            int newRemaining = remainingRequiredCounts.get(currentItemId) - currentStack.getAmount();
-            if (newRemaining < 0) return false;
-            remainingRequiredCounts.put(currentItemId, newRemaining);
+            int needed = remainingRequiredCounts.get(currentItemId);
+            if (needed <= 0) {
+                return false;
+            }
+
+            int countToDeduct = Math.min(needed, currentStack.getAmount());
+            remainingRequiredCounts.put(currentItemId, needed - countToDeduct);
         }
 
         return remainingRequiredCounts.values().stream().allMatch(amount -> amount == 0);
@@ -160,19 +178,19 @@ public sealed abstract class BlightedRecipe permits BlightedShapedRecipe, Blight
 
         if (Objects.requireNonNull(sourceMeta).hasEnchants()) {
             sourceMeta.getEnchants().forEach((enchantment, level) ->
-                targetMeta.addEnchant(enchantment, level, true)
+                    targetMeta.addEnchant(enchantment, level, true)
             );
         }
 
         // Transfer repair cost
         if (sourceMeta instanceof Repairable sourceRepair
-            && targetMeta instanceof Repairable targetRepair) {
+                && targetMeta instanceof Repairable targetRepair) {
             targetRepair.setRepairCost(sourceRepair.getRepairCost());
         }
 
         // Transfer durability damage
         if (sourceMeta instanceof Damageable sourceDamage
-            && targetMeta instanceof Damageable targetDamage) {
+                && targetMeta instanceof Damageable targetDamage) {
             if (sourceDamage.hasDamage()) {
                 targetDamage.setDamage(sourceDamage.getDamage());
             }
