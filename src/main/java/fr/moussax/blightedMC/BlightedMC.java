@@ -51,7 +51,9 @@ public final class BlightedMC extends JavaPlugin {
         saveResource(config, false);
 
         settings = PluginSettings.load(this);
-        initializeDatabase();
+        if (!initializeDatabase()) {
+            return;
+        }
 
         CommandsRegistry.register(this);
         RegistrySystem.initialize();
@@ -60,16 +62,20 @@ public final class BlightedMC extends JavaPlugin {
         eventsRegistry.buildSpawnCache();
 
         BlightedServer.rehydrateEntitiesOnLoadedChunks(this);
-        new BlightedSpawnEngine().runTaskTimer(this, 100L, 1L);
+        new BlightedSpawnEngine().runTaskTimer(this, 100L, 20L);
     }
 
     @Override
     public void onDisable() {
         LavaFishingHook.cleanupAll();
         VoidFishingHook.cleanupAll();
-        database.closeConnection();
-        eventsRegistry.shutdownMenus();
-        eventsRegistry.cleanup();
+        if (database != null) {
+            database.closeConnection();
+        }
+        if (eventsRegistry != null) {
+            eventsRegistry.shutdownMenus();
+            eventsRegistry.cleanup();
+        }
         RegistrySystem.clear();
     }
 
@@ -79,7 +85,7 @@ public final class BlightedMC extends JavaPlugin {
      * @return active menu manager
      */
     public MenuManager getMenuManager() {
-        return eventsRegistry.getMenuManager();
+        return eventsRegistry != null ? eventsRegistry.getMenuManager() : null;
     }
 
     /**
@@ -88,7 +94,7 @@ public final class BlightedMC extends JavaPlugin {
      * @return active menu system
      */
     public MenuSystem getMenuSystem() {
-        return eventsRegistry.getMenuSystem();
+        return eventsRegistry != null ? eventsRegistry.getMenuSystem() : null;
     }
 
     /**
@@ -106,7 +112,7 @@ public final class BlightedMC extends JavaPlugin {
      * @return active menu manager
      */
     public static MenuManager menuManager() {
-        return instance.getMenuManager();
+        return instance != null ? instance.getMenuManager() : null;
     }
 
     /**
@@ -115,17 +121,19 @@ public final class BlightedMC extends JavaPlugin {
      * @return active action bar service, or {@code null} if not initialized
      */
     public static ActionbarService actionBarService() {
-        return instance.getActionBarService();
+        return instance != null ? instance.getActionBarService() : null;
     }
 
-    private void initializeDatabase() {
+    private boolean initializeDatabase() {
         try {
             database = new PluginDatabase(getDataFolder().getAbsolutePath() + "/" + PluginFiles.DATABASE.getFileName());
             Log.success("Database", "Successfully connected to the database.");
+            return true;
         } catch (SQLException e) {
             Log.debug(e.getMessage());
             Log.error("Database", "Unable to connect to the database.");
             Bukkit.getPluginManager().disablePlugin(this);
+            return false;
         }
     }
 }

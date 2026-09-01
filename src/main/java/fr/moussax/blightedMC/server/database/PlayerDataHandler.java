@@ -77,28 +77,30 @@ public final class PlayerDataHandler {
     private void load() {
         String query = "SELECT name, gems, mana, forge_fuel FROM players WHERE uuid = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, playerId.toString());
+        synchronized (connection) {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, playerId.toString());
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    this.savedGems = resultSet.getInt("gems");
-                    this.savedMana = resultSet.getDouble("mana");
-                    this.savedForgeFuel = resultSet.getInt("forge_fuel");
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        this.savedGems = resultSet.getInt("gems");
+                        this.savedMana = resultSet.getDouble("mana");
+                        this.savedForgeFuel = resultSet.getInt("forge_fuel");
 
-                    String storedName = resultSet.getString("name");
-                    if (!storedName.equals(playerName)) {
+                        String storedName = resultSet.getString("name");
+                        if (!storedName.equals(playerName)) {
+                            save(savedGems, savedMana, savedForgeFuel);
+                        }
+                    } else {
+                        this.savedGems = 0;
+                        this.savedMana = 100.0;
+                        this.savedForgeFuel = 0;
                         save(savedGems, savedMana, savedForgeFuel);
                     }
-                } else {
-                    this.savedGems = 0;
-                    this.savedMana = 100.0;
-                    this.savedForgeFuel = 0;
-                    save(savedGems, savedMana, savedForgeFuel);
                 }
+            } catch (SQLException exception) {
+                throw new RuntimeException("Failed to load player data from database.", exception);
             }
-        } catch (SQLException exception) {
-            throw new RuntimeException("Failed to load player data from database.", exception);
         }
     }
 }
