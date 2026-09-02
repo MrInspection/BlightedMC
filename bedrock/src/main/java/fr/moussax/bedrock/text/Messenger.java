@@ -5,7 +5,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -45,7 +44,7 @@ public final class Messenger {
      * @param message message to send
      */
     public static void inform(@NonNull CommandSender sender, @NonNull String message) {
-        inform(sender, Collections.singletonList(message));
+        inform(sender, List.of(message));
     }
 
     /**
@@ -83,6 +82,6 @@ public final class Messenger {
      * @param message warning message to send
      */
     public static void warn(@NonNull CommandSender sender, @NonNull String message) {
-        warn(sender, Collections.singletonList(message));
+        warn(sender, List.of(message));
     }
 }
