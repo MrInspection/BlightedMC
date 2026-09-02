@@ -1,11 +1,9 @@
 package fr.moussax.blightedSMP.engine.items.recipes.crafting.menu;
 
-import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
-import fr.moussax.bedrock.ui.menu.system.MenuManager;
 import fr.moussax.bedrock.ui.menu.types.PaginatedMenu;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import org.bukkit.ChatColor;
@@ -36,8 +34,6 @@ public final class RecipeBookMenu extends PaginatedMenu {
     private static final int BACK_BUTTON_SLOT = 48;
     private static final int CLOSE_BUTTON_SLOT = 49;
     private static final int NEXT_BUTTON_SLOT = 50;
-
-    private static final MenuManager manager = BlightedSMP.menuManager();
 
     private final Menu previousMenu;
     private final List<BlightedRecipe> cachedRecipes;
@@ -130,7 +126,7 @@ public final class RecipeBookMenu extends PaginatedMenu {
                     .addLore("§7To " + targetName)
                     .toItemStack();
             setItem(BACK_BUTTON_SLOT, backItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) ->
-                    manager.openMenu(Objects.requireNonNullElseGet(previousMenu, CraftingTableMenu::new), clickingPlayer)
+                    Objects.requireNonNullElseGet(previousMenu, CraftingTableMenu::new).open(clickingPlayer)
             );
         }
 
@@ -153,6 +149,6 @@ public final class RecipeBookMenu extends PaginatedMenu {
     protected void onItemClick(@NonNull Player player, int index, @NonNull ClickType clickType) {
         if (index >= cachedRecipes.size()) return;
 
-        manager.openMenu(new CraftingRecipePreviewMenu(cachedRecipes.get(index), this), player);
+        new CraftingRecipePreviewMenu(cachedRecipes.get(index), this).open(player);
     }
 }

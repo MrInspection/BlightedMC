@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.engine.items.recipes;
 
-import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.blightedSMP.engine.items.recipes.crafting.BlightedShapedRecipe;
@@ -91,11 +90,11 @@ public final class RecipePreviewManager {
 
     public static boolean openPreview(@NonNull Player player, @NonNull Object recipe, @Nullable BlightedItem targetItem, @Nullable Menu previousMenu) {
         if (recipe instanceof BlightedRecipe craftingRecipe) {
-            BlightedSMP.menuManager().openMenu(new CraftingRecipePreviewMenu(craftingRecipe, targetItem, previousMenu), player);
+            new CraftingRecipePreviewMenu(craftingRecipe, targetItem, previousMenu).open(player);
             return true;
         }
         if (recipe instanceof ForgeRecipe forgeRecipe) {
-            BlightedSMP.menuManager().openMenu(new ForgeRecipePreviewMenu(forgeRecipe, targetItem, previousMenu), player);
+            new ForgeRecipePreviewMenu(forgeRecipe, targetItem, previousMenu).open(player);
             return true;
         }
         return false;

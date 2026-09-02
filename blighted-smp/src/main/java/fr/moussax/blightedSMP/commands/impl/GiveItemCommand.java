@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.commands.impl;
 
-import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.commands.AdminCommand;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
@@ -25,7 +24,7 @@ public final class GiveItemCommand extends AdminCommand {
     protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
 
         if (args.length == 0) {
-            BlightedSMP.menuManager().openMenu(new ItemRegistryMenu.ItemCategoriesMenu(), player);
+            new ItemRegistryMenu.ItemCategoriesMenu().open(player);
             return true;
         }
 

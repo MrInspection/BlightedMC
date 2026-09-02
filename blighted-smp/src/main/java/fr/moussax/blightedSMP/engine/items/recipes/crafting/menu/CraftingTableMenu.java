@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.engine.items.recipes.crafting.menu;
 
-import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.recipes.crafting.BlightedRecipe;
 import fr.moussax.blightedSMP.engine.items.recipes.crafting.BlightedShapedRecipe;
 import fr.moussax.blightedSMP.engine.items.recipes.crafting.BlightedShapelessRecipe;
@@ -41,8 +40,7 @@ public final class CraftingTableMenu extends InteractiveMenu {
 
         setItem(25, new ItemBuilder(Material.KNOWLEDGE_BOOK, "§6Crafting Recipes")
                 .addLore("§7A tainted book that holds", "§7secrets of §5blighted §7items.", "", "§eClick to view!")
-                .toItemStack(), (clickingPlayer, _) -> BlightedSMP.menuManager().openMenu(
-                new RecipeBookMenu(new CraftingTableMenu()), clickingPlayer)
+                .toItemStack(), (clickingPlayer, _) -> new RecipeBookMenu(new CraftingTableMenu()).open(clickingPlayer)
         );
 
         setCloseButton(49);

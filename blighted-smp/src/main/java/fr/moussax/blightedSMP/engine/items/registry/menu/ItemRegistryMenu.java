@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.engine.items.registry.menu;
 
-import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.ItemType;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
@@ -9,7 +8,6 @@ import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.types.PaginatedMenu;
 import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
-import fr.moussax.bedrock.ui.menu.system.MenuManager;
 import fr.moussax.bedrock.ui.sign.SignInputMenu;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -35,8 +33,6 @@ public final class ItemRegistryMenu {
 
     private static final int SEARCH_SLOT = 41;
     private static final int[] ITEM_SLOTS = CATEGORY_SLOTS;
-
-    private static final MenuManager manager = BlightedSMP.menuManager();
 
     private static ItemBuilder hideAllItemFlags(ItemBuilder builder) {
         return builder.addItemFlag(
@@ -70,10 +66,10 @@ public final class ItemRegistryMenu {
             for (int i = 0; i < categories.size() && i < CATEGORY_SLOTS.length; i++) {
                 ItemType.Category category = categories.get(i);
                 ItemStack item = buildMenuItem(getCategoryIcon(category), "§b" + formatCategoryName(category), getCategoryLore(category));
-                setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> manager.openMenu(
+                setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) ->
                     new BlightedItemsPaginatedMenu(this,
                         registeredItem -> registeredItem.getItemType() != null && registeredItem.getItemType().getCategory() == category,
-                        "§r" + Formatter.formatEnumName(category.name()) + " Items"), clickingPlayer));
+                        "§r" + Formatter.formatEnumName(category.name()) + " Items").open(clickingPlayer));
             }
 
             setItem(SEARCH_SLOT, buildMenuItem(new ItemStack(Material.PALE_OAK_SIGN), "§eSearch Items", List.of("§7Click to search for items!")),
@@ -124,10 +120,11 @@ public final class ItemRegistryMenu {
             .onComplete(result -> {
                 String search = result.getFirstLine().trim();
                 if (search.isEmpty()) {
-                    manager.openMenu(previousMenu, player);
+                    if (previousMenu != null) previousMenu.open(player);
+                    else player.closeInventory();
                     return;
                 }
-                manager.openMenu(new SearchResultsPaginatedMenu(search, previousMenu), player);
+                new SearchResultsPaginatedMenu(search, previousMenu).open(player);
             })
             .open(player);
     }

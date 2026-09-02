@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.items.blocks;
 
-import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.blocks.BlightedBlock;
 import fr.moussax.blightedSMP.engine.items.recipes.forging.menu.ForgeMenu;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
@@ -22,7 +21,7 @@ public class BlightedForge extends BlightedBlock {
         Player player = event.getPlayer();
         if (event.getAction().toString().contains("RIGHT_CLICK")) {
             event.setCancelled(true);
-            BlightedSMP.menuManager().openMenu(new ForgeMenu(null), player);
+            new ForgeMenu(null).open(player);
         }
     }
 }

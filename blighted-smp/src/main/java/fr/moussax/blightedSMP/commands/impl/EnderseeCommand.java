@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.commands.impl;
 
-import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.commands.AdminCommand;
 import fr.moussax.blightedSMP.engine.player.menus.EnderSeeMenu;
 import fr.moussax.bedrock.text.Messenger;
@@ -18,7 +17,7 @@ public final class EnderseeCommand extends AdminCommand {
         Player target = requireTarget(player, args[0]);
         if (target == null) return false;
 
-        BlightedSMP.menuManager().openMenu(new EnderSeeMenu(target), player);
+        new EnderSeeMenu(target).open(player);
         return true;
     }
 }

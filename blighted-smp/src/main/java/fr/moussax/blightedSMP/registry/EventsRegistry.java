@@ -18,7 +18,6 @@ import fr.moussax.blightedSMP.engine.player.hud.PlayerHudManager;
 import fr.moussax.blightedSMP.engine.quest.BlightedQuestListener;
 import fr.moussax.bedrock.ui.actionbar.ActionbarService;
 import fr.moussax.bedrock.ui.menu.system.MenuListener;
-import fr.moussax.bedrock.ui.menu.system.MenuManager;
 import fr.moussax.bedrock.ui.menu.system.MenuSystem;
 import fr.moussax.bedrock.ui.sign.SignInputListener;
 import lombok.Getter;
@@ -38,8 +37,6 @@ public final class EventsRegistry {
     @Getter
     private MenuSystem menuSystem;
     @Getter
-    private MenuManager menuManager;
-    @Getter
     private ActionbarService actionBarService;
     private PlayerHudManager playerHudManager;
     private SpawnableEntitiesListener spawnableEntitiesListener;
@@ -56,7 +53,6 @@ public final class EventsRegistry {
     public void initializeListeners() {
         PluginManager pluginManager = Bukkit.getPluginManager();
         menuSystem = new MenuSystem(instance);
-        menuManager = new MenuManager(menuSystem);
         actionBarService = new ActionbarService(instance);
         actionBarService.start(20L);
         playerHudManager = new PlayerHudManager(actionBarService);

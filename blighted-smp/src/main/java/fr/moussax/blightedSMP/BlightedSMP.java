@@ -12,7 +12,6 @@ import fr.moussax.blightedSMP.server.PluginSettings;
 import fr.moussax.blightedSMP.server.database.PluginDatabase;
 import fr.moussax.bedrock.scheduling.PluginContext;
 import fr.moussax.bedrock.ui.actionbar.ActionbarService;
-import fr.moussax.bedrock.ui.menu.system.MenuManager;
 import fr.moussax.bedrock.ui.menu.system.MenuSystem;
 import fr.moussax.bedrock.utils.debug.Log;
 import lombok.Getter;
@@ -80,15 +79,6 @@ public final class BlightedSMP extends JavaPlugin {
     }
 
     /**
-     * Returns the menu manager associated with this plugin instance.
-     *
-     * @return active menu manager
-     */
-    public MenuManager getMenuManager() {
-        return eventsRegistry != null ? eventsRegistry.getMenuManager() : null;
-    }
-
-    /**
      * Returns the menu system associated with this plugin instance.
      *
      * @return active menu system
@@ -107,12 +97,12 @@ public final class BlightedSMP extends JavaPlugin {
     }
 
     /**
-     * Returns the menu manager of the active plugin instance.
+     * Returns the menu system of the active plugin instance.
      *
-     * @return active menu manager
+     * @return active menu system
      */
-    public static MenuManager menuManager() {
-        return instance != null ? instance.getMenuManager() : null;
+    public static MenuSystem menuSystem() {
+        return instance != null ? instance.getMenuSystem() : null;
     }
 
     /**

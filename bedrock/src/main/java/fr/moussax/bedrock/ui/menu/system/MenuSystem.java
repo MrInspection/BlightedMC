@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,8 +63,8 @@ public final class MenuSystem {
      * @param menu   menu to open
      * @param player player viewing the menu
      */
-    public void openMenu(@NonNull Menu menu, @NonNull Player player) {
-        if (shutdownInitiated) return;
+    public void openMenu(@Nullable Menu menu, @NonNull Player player) {
+        if (shutdownInitiated || menu == null) return;
         menu.setMenuSystem(this);
         menu.open(player);
     }
@@ -120,11 +121,7 @@ public final class MenuSystem {
             player.closeInventory();
             cleanup(player);
         } else {
-            Menu previousMenu = stack.peek();
-            if (previousMenu != null) {
-                previousMenu.setMenuSystem(this);
-                previousMenu.open(player);
-            }
+            openMenu(stack.peek(), player);
         }
     }
 

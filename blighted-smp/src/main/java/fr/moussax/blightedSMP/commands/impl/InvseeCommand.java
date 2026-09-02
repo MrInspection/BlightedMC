@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.commands.impl;
 
-import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.commands.AdminCommand;
 import fr.moussax.blightedSMP.engine.player.menus.InvSeeMenu;
 import org.bukkit.command.Command;
@@ -20,7 +19,7 @@ public final class InvseeCommand extends AdminCommand {
         Player target = requireTarget(player, args[0]);
         if (target == null) return true;
 
-        BlightedSMP.menuManager().openMenu(new InvSeeMenu(target), player);
+        new InvSeeMenu(target).open(player);
         return true;
     }
 }

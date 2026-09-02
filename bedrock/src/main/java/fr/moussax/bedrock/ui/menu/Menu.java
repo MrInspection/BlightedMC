@@ -257,12 +257,14 @@ public abstract class Menu implements InventoryHolder {
      * @param slot         inventory slot index
      * @param previousMenu menu to open after closing this menu
      */
-    public void setBackButton(int slot, @NonNull Menu previousMenu) {
+    public void setBackButton(int slot, @Nullable Menu previousMenu) {
         setBackButton(slot, (player, _) -> {
-            if (menuSystem != null) {
-                menuSystem.openMenu(previousMenu, player);
+            if (previousMenu != null) {
+                MenuSystem system = menuSystem != null ? menuSystem : MenuSystem.getInstance();
+                if (system != null) system.openMenu(previousMenu, player);
+                else previousMenu.open(player);
             } else {
-                previousMenu.open(player);
+                close();
             }
         });
     }
