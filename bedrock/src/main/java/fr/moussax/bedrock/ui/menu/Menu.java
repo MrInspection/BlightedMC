@@ -35,7 +35,6 @@ import java.util.function.Consumer;
  */
 public abstract class Menu implements InventoryHolder {
 
-    @Setter
     @Getter
     protected String title;
     protected final int size;
@@ -57,6 +56,19 @@ public abstract class Menu implements InventoryHolder {
         this.title = title;
         this.size = size;
         this.inventory = Bukkit.createInventory(this, size, title);
+    }
+
+    /**
+     * Sets the menu title and updates the active viewer's inventory view title if open.
+     *
+     * @param title new menu title
+     */
+    public void setTitle(@NonNull String title) {
+        this.title = title;
+        Player player = getPlayer();
+        if (player != null && player.getOpenInventory().getTopInventory().getHolder() == this) {
+            player.getOpenInventory().setTitle(title);
+        }
     }
 
     /**
@@ -94,8 +106,8 @@ public abstract class Menu implements InventoryHolder {
         this.viewerId = player.getUniqueId();
 
         slots.clear();
-        this.inventory = Bukkit.createInventory(this, size, this.title);
         build(player);
+        this.inventory = Bukkit.createInventory(this, size, this.title);
 
         for (Map.Entry<Integer, MenuSlot> entry : slots.entrySet()) {
             inventory.setItem(entry.getKey(), entry.getValue().item);
