@@ -99,7 +99,7 @@ public final class MenuListener implements Listener {
             }
             Inventory topInventory = player.getOpenInventory().getTopInventory();
             if (!(topInventory.getHolder() instanceof Menu)) {
-                menuSystem.cleanup(player);
+                menuSystem.closeActiveMenu(player);
             }
         }, 1L);
     }

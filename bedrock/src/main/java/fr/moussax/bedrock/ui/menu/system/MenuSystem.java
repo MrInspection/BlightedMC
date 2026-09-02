@@ -126,6 +126,15 @@ public final class MenuSystem {
     }
 
     /**
+     * Removes active menu reference for a player without clearing navigation history.
+     *
+     * @param player player closing active view
+     */
+    public void closeActiveMenu(@NonNull Player player) {
+        activeMenus.remove(player.getUniqueId());
+    }
+
+    /**
      * Removes all menu state associated with a player.
      *
      * @param player player whose menu state should be removed
