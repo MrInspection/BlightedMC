@@ -184,7 +184,7 @@ public final class ActionbarService implements Listener {
     }
 
     private ActionbarComposer getOrCreateComposer(UUID uuid) {
-        return composers.computeIfAbsent(uuid, k -> {
+        return composers.computeIfAbsent(uuid, _ -> {
             ActionbarComposer composer = new ActionbarComposer();
             globalSections.values().forEach(composer::registerSection);
             return composer;

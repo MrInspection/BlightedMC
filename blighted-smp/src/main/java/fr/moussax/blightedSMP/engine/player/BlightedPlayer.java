@@ -4,6 +4,7 @@ import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.ItemType;
 import fr.moussax.blightedSMP.engine.items.abilities.*;
+import fr.moussax.blightedSMP.server.PluginSettings;
 import fr.moussax.blightedSMP.server.database.PlayerDataHandler;
 import lombok.Getter;
 import lombok.Setter;
@@ -64,9 +65,10 @@ public final class BlightedPlayer {
         this.gems = dataHandler.getSavedGems();
 
         this.maxMana = DEFAULT_MAX_MANA;
-        this.manaRegenerationRate = BlightedSMP.getInstance() != null && BlightedSMP.getInstance().getSettings() != null
-                ? BlightedSMP.getInstance().getSettings().getDefaultManaRegenerationRate()
-                : DEFAULT_MANA_REGEN_RATE;
+        this.manaRegenerationRate = Optional.ofNullable(BlightedSMP.getInstance())
+                .map(BlightedSMP::getSettings)
+                .map(PluginSettings::getDefaultManaRegenerationRate)
+                .orElse(DEFAULT_MANA_REGEN_RATE);
         setCurrentMana(dataHandler.getSavedMana());
         this.forgeFuel = dataHandler.getSavedForgeFuel();
 
@@ -88,8 +90,18 @@ public final class BlightedPlayer {
      * @param player player whose context to retrieve
      * @return registered player context, or {@code null} if no context exists
      */
+    public static BlightedPlayer get(Player player) {
+        return player != null ? players.get(player.getUniqueId()) : null;
+    }
+
+    /**
+     * Retrieves the player context associated with a Bukkit player.
+     *
+     * @param player player whose context to retrieve
+     * @return registered player context, or {@code null} if no context exists
+     */
     public static BlightedPlayer getBlightedPlayer(Player player) {
-        return players.get(player.getUniqueId());
+        return get(player);
     }
 
     /**
