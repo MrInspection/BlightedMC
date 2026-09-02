@@ -3,9 +3,9 @@
 <!--suppress XmlWrongRootElement -->
 <project name="BlightedMC" default="Build">
     <target name="Build">
-        <jar jarfile="/Users/moussax/Developer/Minecraft/Server/plugins/${ant.project.name}.jar"
-             basedir="./target/classes/"
-             includes="**/*"
+        <copy file="./blighted-smp/target/blighted-smp-1.0-SNAPSHOT.jar"
+              tofile="/Users/moussax/Developer/Minecraft/Server/plugins/${ant.project.name}.jar"
+              overwrite="true"
         />
     </target>
 </project>
