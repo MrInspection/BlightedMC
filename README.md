@@ -9,6 +9,11 @@ A Spigot 26.2 plugin providing a high-difficulty survival experience inspired by
 - **Loot & Recipe Pipelines:** Weighted and probabilistic drop strategies paired with custom workbench forging.
 - **Player Resource State:** Native player mana, gems currency, forge fuel, and dynamic action bar HUD rendering.
 
+## Architecture
+
+- **`bedrock`**: Core framework module handling UI menus, action bars, announcements, scheduling, and utility systems.
+- **`blighted-smp`**: Primary SMP plugin module containing custom items, mobs, abilities, recipes, and gameplay mechanics.
+
 ## Requirements
 
 - Java 25+
@@ -16,10 +21,10 @@ A Spigot 26.2 plugin providing a high-difficulty survival experience inspired by
 
 ## Building from Source
 
-Build the plugin JAR using Maven:
+Build the multi-module project using Maven:
 
 ```bash
 mvn clean package
 ```
 
-The compiled output will be located at `target/blightedmc-1.0-SNAPSHOT.jar`. Copy the JAR file to your server's `plugins/` directory.
+The compiled plugin JAR will be located at `blighted-smp/target/blighted-smp-1.0-SNAPSHOT.jar`. Copy the JAR file to your server's `plugins/` directory.
