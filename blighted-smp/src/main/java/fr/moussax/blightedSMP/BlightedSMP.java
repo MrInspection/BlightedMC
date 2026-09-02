@@ -11,8 +11,6 @@ import fr.moussax.blightedSMP.server.PluginFiles;
 import fr.moussax.blightedSMP.server.PluginSettings;
 import fr.moussax.blightedSMP.server.database.PluginDatabase;
 import fr.moussax.bedrock.scheduling.PluginContext;
-import fr.moussax.bedrock.ui.actionbar.ActionbarService;
-import fr.moussax.bedrock.ui.menu.system.MenuSystem;
 import fr.moussax.bedrock.utils.debug.Log;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -76,42 +74,6 @@ public final class BlightedSMP extends JavaPlugin {
             eventsRegistry.cleanup();
         }
         RegistrySystem.clear();
-    }
-
-    /**
-     * Returns the menu system associated with this plugin instance.
-     *
-     * @return active menu system
-     */
-    public MenuSystem getMenuSystem() {
-        return eventsRegistry != null ? eventsRegistry.getMenuSystem() : null;
-    }
-
-    /**
-     * Returns the action bar service associated with this plugin instance.
-     *
-     * @return active action bar service, or {@code null} if not initialized
-     */
-    public ActionbarService getActionBarService() {
-        return eventsRegistry != null ? eventsRegistry.getActionBarService() : null;
-    }
-
-    /**
-     * Returns the menu system of the active plugin instance.
-     *
-     * @return active menu system
-     */
-    public static MenuSystem menuSystem() {
-        return instance != null ? instance.getMenuSystem() : null;
-    }
-
-    /**
-     * Returns the action bar service of the active plugin instance.
-     *
-     * @return active action bar service, or {@code null} if not initialized
-     */
-    public static ActionbarService actionBarService() {
-        return instance != null ? instance.getActionBarService() : null;
     }
 
     private boolean initializeDatabase() {
