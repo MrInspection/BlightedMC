@@ -1,4 +1,4 @@
-package fr.moussax.blightedSMP.engine.player.menus;
+package fr.moussax.blightedMod.moderator.menus;
 
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.TickableMenu;
@@ -42,7 +42,7 @@ public final class InvSeeMenu extends Menu implements TickableMenu {
                 .setDisplayName("§dView Ender Chest")
                 .addLore("§7Click to view ender chest.")
                 .toItemStack(),
-            (_, _) -> openSubMenu(new EnderSeeMenu(target, this))
+            (_, _) -> openSubMenu(new EnderseeMenu(target, this))
         );
 
         updateContents();

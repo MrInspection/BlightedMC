@@ -1,4 +1,4 @@
-package fr.moussax.blightedSMP.engine.player.menus;
+package fr.moussax.blightedMod.moderator.menus;
 
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.TickableMenu;
@@ -11,15 +11,15 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-public final class EnderSeeMenu extends Menu implements TickableMenu {
+public final class EnderseeMenu extends Menu implements TickableMenu {
     private final Player target;
     private final Menu previousMenu;
 
-    public EnderSeeMenu(Player target) {
+    public EnderseeMenu(Player target) {
         this(target, null);
     }
 
-    public EnderSeeMenu(Player target, @Nullable Menu previousMenu) {
+    public EnderseeMenu(Player target, @Nullable Menu previousMenu) {
         super(target.getName() + "'s Ender Chest", 36);
         this.target = target;
         this.previousMenu = previousMenu;

@@ -1,0 +1,416 @@
+package fr.moussax.blightedMod.moderator.listeners;
+
+import fr.moussax.bedrock.text.InteractiveMessage;
+import fr.moussax.blightedMod.BlightedMod;
+import fr.moussax.blightedMod.moderator.BlightedModerator;
+import fr.moussax.blightedMod.moderator.ModerationManager;
+import fr.moussax.blightedMod.moderator.menus.InvSeeMenu;
+import fr.moussax.blightedMod.moderator.punishments.PunishmentData;
+import fr.moussax.blightedMod.moderator.punishments.PunishmentManager;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+
+import static fr.moussax.bedrock.text.Messenger.warn;
+
+public final class ModerationListener implements Listener {
+    private static final String PREFIX = " §9§lMOD §f| §7";
+
+    private final ModerationManager moderationManager;
+    private final PunishmentManager punishmentManager;
+    private final Random random = new Random();
+
+    public ModerationListener(ModerationManager moderationManager) {
+        this.moderationManager = moderationManager;
+        this.punishmentManager = moderationManager.getPunishmentManager();
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerChat(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+
+        if (!moderationManager.isModerator(player) && punishmentManager.isMuted(player.getUniqueId())) {
+            event.setCancelled(true);
+            PunishmentData mute = punishmentManager.getActivePunishment(player.getUniqueId(), PunishmentData.PunishmentType.MUTE);
+            if (mute != null) {
+                String durationText = mute.isPermanent() ? "permanently" : "temporarily";
+                player.sendMessage("§cYou are " + durationText + " muted for: §f" + mute.reason());
+            }
+            return;
+        }
+
+        if (moderationManager.isModerator(player) && moderationManager.getChatChannel(player) == ModerationManager.ChatChannel.STAFF) {
+            event.setCancelled(true);
+            String formatted = " §9§lMOD §f| §9" + player.getName() + "§f§l » §b" + event.getMessage();
+            moderationManager.broadcastToModerators(formatted);
+            return;
+        }
+
+        int remainingSlowmodeSeconds = moderationManager.getRemainingSlowmodeCooldown(player);
+        if (remainingSlowmodeSeconds > 0) {
+            event.setCancelled(true);
+            warn(player, "Chat is in slowmode. Please wait §e" + remainingSlowmodeSeconds + "§7 second(s) before typing again.");
+            return;
+        }
+
+        String message = event.getMessage();
+        if (message.startsWith("!!") && moderationManager.isModerator(player)) {
+            event.setCancelled(true);
+            String modMessage = message.substring(2).trim();
+            String formatted = " §9§lMOD §f| §9" + player.getName() + "§f§l » §b" + modMessage;
+            moderationManager.broadcastToModerators(formatted);
+            return;
+        }
+
+        moderationManager.recordPlayerChat(player);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerLogin(PlayerLoginEvent event) {
+        Player player = event.getPlayer();
+        if (moderationManager.isModerator(player)) {
+            return;
+        }
+
+        String ipAddress = PunishmentManager.getPlayerIp(player);
+
+        PunishmentData ipBan = punishmentManager.getActiveIpBan(ipAddress);
+        if (ipBan != null) {
+            event.disallow(PlayerLoginEvent.Result.KICK_BANNED, buildBanMessage(ipBan, "IP BANNED"));
+            return;
+        }
+
+        PunishmentData ban = punishmentManager.getActivePunishment(player.getUniqueId(), PunishmentData.PunishmentType.BAN);
+        if (ban != null) {
+            event.disallow(PlayerLoginEvent.Result.KICK_BANNED, buildBanMessage(ban, "BANNED"));
+        }
+    }
+
+    private String buildBanMessage(PunishmentData ban, String title) {
+        String durationText = ban.isPermanent() ? "Permanent" : "Temporary";
+        return """
+                §c§l%s
+
+                §7Reason: §f%s
+                §7Duration: §f%s
+
+                §7Appeal on our Discord if you believe this was a mistake.""".formatted(title, ban.reason(), durationText);
+    }
+
+    @EventHandler
+    public void onToolInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        if (!moderationManager.isInModerationMode(player)) return;
+
+        event.setCancelled(true);
+
+        ItemStack item = event.getItem();
+        if (item == null) return;
+
+        Action action = event.getAction();
+        if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
+
+        handleToolInteraction(player, item.getType());
+    }
+
+    @EventHandler
+    public void onEntityInteract(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
+        if (!moderationManager.isInModerationMode(player)) return;
+
+        event.setCancelled(true);
+
+        if (!(event.getRightClicked() instanceof Player target)) return;
+
+        Material tool = player.getInventory().getItemInMainHand().getType();
+        handleEntityInteraction(player, target, tool);
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player joiningPlayer = event.getPlayer();
+        if (moderationManager.isModerator(joiningPlayer)) {
+            BlightedModerator moderator = moderationManager.getModerator(joiningPlayer);
+            if (moderator.isVanished()) {
+                event.setJoinMessage(null);
+            }
+            return;
+        }
+
+        moderationManager.getModeratorsView().values().stream()
+                .filter(BlightedModerator::isVanished)
+                .forEach(moderator -> joiningPlayer.hidePlayer(
+                        BlightedMod.getInstance(), moderator.getPlayer()));
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player quittingPlayer = event.getPlayer();
+        if (moderationManager.isModerator(quittingPlayer)) {
+            BlightedModerator moderator = moderationManager.getModerator(quittingPlayer);
+            if (moderator.isVanished()) {
+                event.setQuitMessage(null);
+            }
+        }
+
+        if (!moderationManager.isModerator(quittingPlayer) && moderationManager.isFrozen(quittingPlayer)) {
+            moderationManager.toggleFreeze(quittingPlayer);
+            String reason = "Disconnecting while frozen by a moderator";
+            String ipAddress = PunishmentManager.getPlayerIp(quittingPlayer);
+            punishmentManager.addPunishment(
+                    quittingPlayer.getUniqueId(),
+                    quittingPlayer.getName(),
+                    PunishmentData.PunishmentType.BAN,
+                    reason,
+                    quittingPlayer.getUniqueId(),
+                    "CONSOLE",
+                    null,
+                    ipAddress
+            );
+
+            String notification = PREFIX + "§c" + quittingPlayer.getName() + "§7 disconnected while frozen and was automatically banned.";
+            moderationManager.broadcastToModerators(notification);
+        }
+
+        moderationManager.handlePlayerQuit(quittingPlayer);
+    }
+
+    @EventHandler
+    public void onServerListPing(ServerListPingEvent event) {
+        Iterator<Player> iterator = event.iterator();
+        while (iterator.hasNext()) {
+            Player player = iterator.next();
+            if (moderationManager.isModerator(player)) {
+                BlightedModerator moderator = moderationManager.getModerator(player);
+                if (moderator != null && moderator.isVanished()) {
+                    iterator.remove();
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onFrozenPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        if (moderationManager.isModerator(player) || !moderationManager.isFrozen(player)) return;
+
+        boolean movedHorizontally = event.getFrom().getX() != Objects.requireNonNull(event.getTo()).getX()
+                || event.getFrom().getZ() != event.getTo().getZ();
+
+        if (movedHorizontally) event.setTo(event.getFrom());
+    }
+
+    @EventHandler
+    public void onFrozenPlayerCommand(PlayerCommandPreprocessEvent event) {
+        Player player = event.getPlayer();
+        if (moderationManager.isModerator(player) || !moderationManager.isFrozen(player)) return;
+
+        event.setCancelled(true);
+        player.sendMessage("§cYou cannot execute commands while frozen by a moderator.");
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPrivateMessageSpy(PlayerCommandPreprocessEvent event) {
+        String rawCommandLine = event.getMessage();
+        if (rawCommandLine == null || !rawCommandLine.startsWith("/")) {
+            return;
+        }
+
+        String[] parts = rawCommandLine.substring(1).trim().split("\\s+");
+        if (parts.length == 0 || parts[0].isEmpty()) {
+            return;
+        }
+
+        String commandLabel = parts[0].toLowerCase(Locale.ROOT);
+        Player sender = event.getPlayer();
+
+        if (Set.of("msg", "tell", "w", "whisper", "pm").contains(commandLabel)) {
+            if (parts.length < 3) {
+                return;
+            }
+
+            String targetName = parts[1];
+            Player targetPlayer = Bukkit.getPlayer(targetName);
+            String recipientName = targetPlayer != null ? targetPlayer.getName() : targetName;
+            String messageContent = String.join(" ", Arrays.copyOfRange(parts, 2, parts.length));
+
+            if (targetPlayer != null) {
+                moderationManager.setLastMessageTarget(sender.getUniqueId(), targetPlayer.getUniqueId());
+            }
+
+            moderationManager.broadcastSpyMessage(sender.getName(), recipientName, messageContent);
+        } else if (Set.of("r", "reply").contains(commandLabel)) {
+            if (parts.length < 2) {
+                return;
+            }
+
+            UUID lastTargetId = moderationManager.getLastMessageTarget(sender.getUniqueId());
+            String recipientName = "Unknown";
+            if (lastTargetId != null) {
+                Player lastTargetPlayer = Bukkit.getPlayer(lastTargetId);
+                if (lastTargetPlayer != null) {
+                    recipientName = lastTargetPlayer.getName();
+                }
+            }
+
+            String messageContent = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
+            moderationManager.broadcastSpyMessage(sender.getName(), recipientName, messageContent);
+        }
+    }
+
+    @EventHandler
+    public void onFrozenPlayerAttack(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player attacker)) return;
+        if (moderationManager.isModerator(attacker) || !moderationManager.isFrozen(attacker)) return;
+
+        event.setCancelled(true);
+        attacker.sendMessage("§cYou cannot attack while frozen.");
+    }
+
+    @EventHandler
+    public void onModeratorDropItem(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
+        if (moderationManager.isInModerationMode(player) || (!moderationManager.isModerator(player) && moderationManager.isFrozen(player))) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onModeratorPickupItem(EntityPickupItemEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            if (moderationManager.isInModerationMode(player) || (!moderationManager.isModerator(player) && moderationManager.isFrozen(player))) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onModeratorBreakBlock(BlockBreakEvent event) {
+        if (moderationManager.isInModerationMode(event.getPlayer())) event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onModeratorPlaceBlock(BlockPlaceEvent event) {
+        if (moderationManager.isInModerationMode(event.getPlayer())) event.setCancelled(true);
+    }
+
+    /** Non-entity damage (fall, fire, drown, etc.) against a moderator in moderation mode. */
+    @EventHandler
+    public void onModeratorTakeDamage(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Player player && moderationManager.isInModerationMode(player)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onModeratorEntityDamage(EntityDamageByEntityEvent event) {
+        if (event.getEntity() instanceof Player victim && moderationManager.isInModerationMode(victim)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (!(event.getDamager() instanceof Player attacker)) return;
+        if (!moderationManager.isInModerationMode(attacker)) return;
+
+        Material tool = attacker.getInventory().getItemInMainHand().getType();
+        if (tool == Material.STICK) {
+            event.setDamage(0.0);
+        } else {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onModeratorInventoryClick(InventoryClickEvent event) {
+        if (event.getWhoClicked() instanceof Player player) {
+            if (moderationManager.isInModerationMode(player) || (!moderationManager.isModerator(player) && moderationManager.isFrozen(player))) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    private void handleToolInteraction(Player player, Material tool) {
+        switch (tool) {
+            case ENDER_EYE -> teleportToRandomPlayer(player);
+            case BOOK -> openReportsMenu(player);
+            case PURPLE_DYE, GRAY_DYE -> toggleVanish(player);
+            default -> { }
+        }
+    }
+
+    private void openReportsMenu(Player moderator) {
+        moderator.performCommand("reports");
+    }
+
+    private void handleEntityInteraction(Player player, Player target, Material tool) {
+        switch (tool) {
+            case CHEST -> openInventory(player, target);
+            case PACKED_ICE -> toggleFreeze(player, target);
+            default -> { }
+        }
+    }
+
+    private void toggleVanish(Player player) {
+        BlightedModerator moderator = moderationManager.getModerator(player);
+        moderator.setVanished(!moderator.isVanished());
+    }
+
+    private void openInventory(Player moderator, Player target) {
+        new InvSeeMenu(target).open(moderator);
+    }
+
+    private void toggleFreeze(Player moderator, Player target) {
+        boolean isFrozen = moderationManager.toggleFreeze(target);
+        String status = isFrozen ? "§bFROZEN" : "§aUNFROZEN";
+
+        moderator.sendMessage(PREFIX + target.getName() + " is now " + status);
+
+        if (isFrozen) {
+            target.sendMessage("§c§lYOU HAVE BEEN FROZEN BY A MODERATOR!");
+            target.sendMessage("§cDo not log out or you will be banned.");
+        } else {
+            target.sendMessage("§aYou have been unfrozen.");
+        }
+    }
+
+    private void teleportToRandomPlayer(Player moderator) {
+        List<Player> eligiblePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
+        eligiblePlayers.remove(moderator);
+
+        if (eligiblePlayers.isEmpty()) {
+            moderator.sendMessage("§cNo other players online.");
+            return;
+        }
+
+        Player target = eligiblePlayers.get(random.nextInt(eligiblePlayers.size()));
+        moderator.teleport(target.getLocation());
+        moderationManager.getModerator(moderator).setTargetPlayer(target);
+
+        InteractiveMessage.text(PREFIX + "Teleported to §d" + target.getName() + "  ")
+                .hoverAndExecute("§e§l[INFO]", "§7Click to view user information for §e" + target.getName() + "§7 (/userinfo)", "/userinfo " + target.getName())
+                .send(moderator);
+    }
+}
