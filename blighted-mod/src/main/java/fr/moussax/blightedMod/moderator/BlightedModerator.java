@@ -2,6 +2,7 @@ package fr.moussax.blightedMod.moderator;
 
 import fr.moussax.blightedMod.BlightedMod;
 import fr.moussax.blightedMod.utils.PluginPermissions;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -14,9 +15,13 @@ import java.util.Collection;
 
 public final class BlightedModerator {
 
+    @Getter
     private final Player player;
+    @Getter
     private boolean isInModerationMode;
+    @Getter
     private boolean isVanished;
+    @Getter
     private Player targetPlayer;
 
     private ItemStack[] savedInventory;
@@ -33,23 +38,10 @@ public final class BlightedModerator {
         this.isVanished = false;
     }
 
-    public Player getPlayer() {
-        return player;
-    }
-
-    public boolean isInModerationMode() {
-        return isInModerationMode;
-    }
-
-    public boolean isVanished() {
-        return isVanished;
-    }
-
-    public Player getTargetPlayer() {
-        return targetPlayer;
-    }
-
     public void setTargetPlayer(Player targetPlayer) {
+        if (targetPlayer != null && targetPlayer.equals(player)) {
+            return;
+        }
         this.targetPlayer = targetPlayer;
     }
 

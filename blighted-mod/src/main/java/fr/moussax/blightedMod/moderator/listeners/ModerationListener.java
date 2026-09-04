@@ -25,15 +25,7 @@ import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static fr.moussax.bedrock.text.Messenger.warn;
 
@@ -48,7 +40,6 @@ public final class ModerationListener implements Listener {
         this.punishmentManager = moderationManager.getPunishmentManager();
     }
 
-    // ponytail: kept — Spigot target requires AsyncPlayerChatEvent; non-deprecated replacement (AsyncChatEvent) is Paper-only
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
@@ -114,10 +105,10 @@ public final class ModerationListener implements Listener {
         String durationText = ban.isPermanent() ? "Permanent" : "Temporary";
         return """
                 §c§l%s
-
+                
                 §7Reason: §f%s
                 §7Duration: §f%s
-
+                
                 §7Appeal on our Discord if you believe this was a mistake.""".formatted(title, ban.reason(), durationText);
     }
 
@@ -146,7 +137,7 @@ public final class ModerationListener implements Listener {
 
         event.setCancelled(true);
 
-        if (!(event.getRightClicked() instanceof Player target)) return;
+        if (!(event.getRightClicked() instanceof Player target) || target.equals(player)) return;
 
         BlightedModerator moderator = moderationManager.getModerator(player);
         boolean alreadyTargeted = Objects.equals(moderator.getTargetPlayer(), target);
@@ -237,7 +228,7 @@ public final class ModerationListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPrivateMessageSpy(PlayerCommandPreprocessEvent event) {
         String rawCommandLine = event.getMessage();
-        if (rawCommandLine == null || !rawCommandLine.startsWith("/")) {
+        if (!rawCommandLine.startsWith("/")) {
             return;
         }
 
@@ -307,7 +298,9 @@ public final class ModerationListener implements Listener {
         if (moderationManager.isInModerationMode(event.getPlayer())) event.setCancelled(true);
     }
 
-    /** Non-entity damage (fall, fire, drown, etc.) against a moderator in moderation mode. */
+    /**
+     * Non-entity damage (fall, fire, drown, etc.) against a moderator in moderation mode.
+     */
     @EventHandler
     public void onModeratorTakeDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player player && moderationManager.isInModerationMode(player)) {
@@ -327,7 +320,6 @@ public final class ModerationListener implements Listener {
 
         Material tool = attacker.getInventory().getItemInMainHand().getType();
         if (tool == Material.STICK) {
-            // ponytail: kept — Allow Anti-KB stick hit and damage processing so Minecraft hurt() pipeline applies knockback
             if (event.getEntity() instanceof Player victim) {
                 moderationManager.getModerator(attacker).setTargetPlayer(victim);
             }
@@ -366,7 +358,8 @@ public final class ModerationListener implements Listener {
                     openSanctionsMenu(player, target);
                 }
             }
-            default -> { }
+            default -> {
+            }
         }
     }
 

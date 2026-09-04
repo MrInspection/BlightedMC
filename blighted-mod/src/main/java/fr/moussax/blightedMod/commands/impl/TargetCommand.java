@@ -8,6 +8,7 @@ import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
 import static fr.moussax.bedrock.text.Messenger.inform;
+import static fr.moussax.bedrock.text.Messenger.warn;
 
 /**
  * Moderation command to set or clear the targeted player for the moderation actionbar HUD (/target <player>).
@@ -17,6 +18,11 @@ public final class TargetCommand extends ModerationCommand {
 
     @Override
     protected boolean executeModeration(Player moderator, Command command, String label, String[] arguments) {
+        if (!getModerationManager().isInModerationMode(moderator)) {
+            warn(moderator, "You must be in §dModeration Mode §cto target a player.");
+            return true;
+        }
+
         BlightedModerator blightedModerator = getModerationManager().getModerator(moderator);
 
         if (arguments.length == 0) {
@@ -28,6 +34,11 @@ public final class TargetCommand extends ModerationCommand {
         Player target = requireTarget(moderator, arguments[0]);
         if (target == null) {
             return false;
+        }
+
+        if (target.equals(moderator)) {
+            warn(moderator, "You cannot target yourself.");
+            return true;
         }
 
         blightedModerator.setTargetPlayer(target);
