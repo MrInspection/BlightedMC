@@ -1,4 +1,4 @@
-name: BlightedMC
+name: BlightedSMP
 version: '${version}'
 authors: [ MrInspection ]
 
@@ -24,13 +24,7 @@ commands:
   tppos:
     description: Teleport to a position
   forge:
-    description: Forge command
   altar:
-    description: Altar command
-  endersee:
-    description: Moderator command
-  invsee:
-    description: Moderator command
   gms:
     description: Switch to survival mode
   gmc:
