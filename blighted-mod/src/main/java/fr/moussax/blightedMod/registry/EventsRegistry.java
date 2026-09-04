@@ -20,7 +20,7 @@ public final class EventsRegistry {
     private ActionbarService actionBarService;
 
     public void initializeListeners() {
-        PluginManager manager = Bukkit.getPluginManager();
+        PluginManager pluginManager = Bukkit.getPluginManager();
 
         signInputListener = new SignInputListener();
         menuSystem = new MenuSystem(instance);
@@ -29,10 +29,10 @@ public final class EventsRegistry {
 
         actionBarService.registerSection(ModerationHud.createSection(instance.getModerationManager()));
 
-        manager.registerEvents(signInputListener, instance);
-        manager.registerEvents(new MenuListener(menuSystem), instance);
-        manager.registerEvents(new ModerationListener(instance.getModerationManager()), instance);
-        manager.registerEvents(new InteractiveChatListener(), instance);
+        pluginManager.registerEvents(signInputListener, instance);
+        pluginManager.registerEvents(new MenuListener(menuSystem), instance);
+        pluginManager.registerEvents(new ModerationListener(instance.getModerationManager()), instance);
+        pluginManager.registerEvents(new InteractiveChatListener(), instance);
     }
 
 

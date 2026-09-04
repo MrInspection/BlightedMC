@@ -3,6 +3,7 @@ package fr.moussax.blightedMod.moderator;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 public final class ModerationTools {
@@ -15,7 +16,7 @@ public final class ModerationTools {
     }
 
     public static ItemStack getReportViewer() {
-        return new ItemBuilder(Material.KNOWLEDGE_BOOK)
+        return new ItemBuilder(Material.BOOK)
                 .setDisplayName("§dReport Center §7(Right Click)")
                 .addLore("§7View and manage player reports.")
                 .toItemStack();
@@ -34,6 +35,7 @@ public final class ModerationTools {
                 .setDisplayName("§dAnti Knockback")
                 .addLore("§7Test if target has Anti-KB Cheat.")
                 .addEnchantment(Enchantment.KNOCKBACK, 4)
+                .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                 .toItemStack();
     }
 

@@ -22,6 +22,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -37,7 +38,6 @@ import java.util.UUID;
 import static fr.moussax.bedrock.text.Messenger.warn;
 
 public final class ModerationListener implements Listener {
-    private static final String PREFIX = " §9§lMOD §f| §7";
 
     private final ModerationManager moderationManager;
     private final PunishmentManager punishmentManager;
@@ -48,6 +48,7 @@ public final class ModerationListener implements Listener {
         this.punishmentManager = moderationManager.getPunishmentManager();
     }
 
+    // ponytail: kept — Spigot target requires AsyncPlayerChatEvent; non-deprecated replacement (AsyncChatEvent) is Paper-only
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
@@ -57,14 +58,14 @@ public final class ModerationListener implements Listener {
             PunishmentData mute = punishmentManager.getActivePunishment(player.getUniqueId(), PunishmentData.PunishmentType.MUTE);
             if (mute != null) {
                 String durationText = mute.isPermanent() ? "permanently" : "temporarily";
-                player.sendMessage("§cYou are " + durationText + " muted for: §f" + mute.reason());
+                player.sendMessage(" §c§lMUTED! §7You are " + durationText + " muted for: §f" + mute.reason());
             }
             return;
         }
 
         if (moderationManager.isModerator(player) && moderationManager.getChatChannel(player) == ModerationManager.ChatChannel.STAFF) {
             event.setCancelled(true);
-            String formatted = " §9§lMOD §f| §9" + player.getName() + "§f§l » §b" + event.getMessage();
+            String formatted = " §d§lSTAFF! §9" + player.getName() + "§f§l » §b" + event.getMessage();
             moderationManager.broadcastToModerators(formatted);
             return;
         }
@@ -72,15 +73,15 @@ public final class ModerationListener implements Listener {
         int remainingSlowmodeSeconds = moderationManager.getRemainingSlowmodeCooldown(player);
         if (remainingSlowmodeSeconds > 0) {
             event.setCancelled(true);
-            warn(player, "Chat is in slowmode. Please wait §e" + remainingSlowmodeSeconds + "§7 second(s) before typing again.");
+            player.sendMessage(" §c§lSLOWMODE! §7Please wait §e" + remainingSlowmodeSeconds + "s §7before chatting again.");
             return;
         }
 
         String message = event.getMessage();
         if (message.startsWith("!!") && moderationManager.isModerator(player)) {
             event.setCancelled(true);
-            String modMessage = message.substring(2).trim();
-            String formatted = " §9§lMOD §f| §9" + player.getName() + "§f§l » §b" + modMessage;
+            String moderatorMessage = message.substring(2).trim();
+            String formatted = " §d§lSTAFF! §9" + player.getName() + "§f§l » §b" + moderatorMessage;
             moderationManager.broadcastToModerators(formatted);
             return;
         }
@@ -122,6 +123,7 @@ public final class ModerationListener implements Listener {
 
     @EventHandler
     public void onToolInteract(PlayerInteractEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) return;
         Player player = event.getPlayer();
         if (!moderationManager.isInModerationMode(player)) return;
 
@@ -138,6 +140,7 @@ public final class ModerationListener implements Listener {
 
     @EventHandler
     public void onEntityInteract(PlayerInteractEntityEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) return;
         Player player = event.getPlayer();
         if (!moderationManager.isInModerationMode(player)) return;
 
@@ -145,8 +148,16 @@ public final class ModerationListener implements Listener {
 
         if (!(event.getRightClicked() instanceof Player target)) return;
 
+        BlightedModerator moderator = moderationManager.getModerator(player);
+        boolean alreadyTargeted = Objects.equals(moderator.getTargetPlayer(), target);
+        moderator.setTargetPlayer(target);
+
         Material tool = player.getInventory().getItemInMainHand().getType();
-        handleEntityInteraction(player, target, tool);
+        if (tool != Material.CHEST && tool != Material.PACKED_ICE && tool != Material.ENCHANTED_BOOK && !alreadyTargeted) {
+            InteractiveMessage.text(" §eTargeting §d" + target.getName() + " §ewith §fModeration HUD§e. ")
+                    .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + target.getName() + "§f.", "/userinfo " + target.getName())
+                    .send(player);
+        }
     }
 
     @EventHandler
@@ -191,7 +202,7 @@ public final class ModerationListener implements Listener {
                     ipAddress
             );
 
-            String notification = PREFIX + "§c" + quittingPlayer.getName() + "§7 disconnected while frozen and was automatically banned.";
+            String notification = " §6§lALERT! §d" + quittingPlayer.getName() + "§e was automatically banned for §fdisconnecting §ewhile being frozen by a moderator.";
             moderationManager.broadcastToModerators(notification);
         }
 
@@ -221,15 +232,6 @@ public final class ModerationListener implements Listener {
                 || event.getFrom().getZ() != event.getTo().getZ();
 
         if (movedHorizontally) event.setTo(event.getFrom());
-    }
-
-    @EventHandler
-    public void onFrozenPlayerCommand(PlayerCommandPreprocessEvent event) {
-        Player player = event.getPlayer();
-        if (moderationManager.isModerator(player) || !moderationManager.isFrozen(player)) return;
-
-        event.setCancelled(true);
-        player.sendMessage("§cYou cannot execute commands while frozen by a moderator.");
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -282,28 +284,16 @@ public final class ModerationListener implements Listener {
     }
 
     @EventHandler
-    public void onFrozenPlayerAttack(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Player attacker)) return;
-        if (moderationManager.isModerator(attacker) || !moderationManager.isFrozen(attacker)) return;
-
-        event.setCancelled(true);
-        attacker.sendMessage("§cYou cannot attack while frozen.");
-    }
-
-    @EventHandler
     public void onModeratorDropItem(PlayerDropItemEvent event) {
-        Player player = event.getPlayer();
-        if (moderationManager.isInModerationMode(player) || (!moderationManager.isModerator(player) && moderationManager.isFrozen(player))) {
+        if (moderationManager.isInModerationMode(event.getPlayer())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onModeratorPickupItem(EntityPickupItemEvent event) {
-        if (event.getEntity() instanceof Player player) {
-            if (moderationManager.isInModerationMode(player) || (!moderationManager.isModerator(player) && moderationManager.isFrozen(player))) {
-                event.setCancelled(true);
-            }
+        if (event.getEntity() instanceof Player player && moderationManager.isInModerationMode(player)) {
+            event.setCancelled(true);
         }
     }
 
@@ -337,7 +327,10 @@ public final class ModerationListener implements Listener {
 
         Material tool = attacker.getInventory().getItemInMainHand().getType();
         if (tool == Material.STICK) {
-            event.setDamage(0.0);
+            // ponytail: kept — Allow Anti-KB stick hit and damage processing so Minecraft hurt() pipeline applies knockback
+            if (event.getEntity() instanceof Player victim) {
+                moderationManager.getModerator(attacker).setTargetPlayer(victim);
+            }
         } else {
             event.setCancelled(true);
         }
@@ -345,33 +338,51 @@ public final class ModerationListener implements Listener {
 
     @EventHandler
     public void onModeratorInventoryClick(InventoryClickEvent event) {
-        if (event.getWhoClicked() instanceof Player player) {
-            if (moderationManager.isInModerationMode(player) || (!moderationManager.isModerator(player) && moderationManager.isFrozen(player))) {
-                event.setCancelled(true);
-            }
+        if (event.getWhoClicked() instanceof Player player && moderationManager.isInModerationMode(player)) {
+            event.setCancelled(true);
         }
     }
 
     private void handleToolInteraction(Player player, Material tool) {
         switch (tool) {
             case ENDER_EYE -> teleportToRandomPlayer(player);
-            case BOOK -> openReportsMenu(player);
+            case BOOK, NETHER_STAR -> openReportsMenu(player);
             case PURPLE_DYE, GRAY_DYE -> toggleVanish(player);
+            case PACKED_ICE -> {
+                Player target = getActiveTarget(player);
+                if (target != null) {
+                    toggleFreeze(player, target);
+                }
+            }
+            case CHEST -> {
+                Player target = getActiveTarget(player);
+                if (target != null) {
+                    openInventory(player, target);
+                }
+            }
+            case ENCHANTED_BOOK -> {
+                Player target = getActiveTarget(player);
+                if (target != null) {
+                    openSanctionsMenu(player, target);
+                }
+            }
             default -> { }
         }
+    }
+
+    private Player getActiveTarget(Player moderator) {
+        Player target = moderationManager.getModerator(moderator).getTargetPlayer();
+        if (target == null || !target.isOnline()) {
+            warn(moderator, "No target player selected. Right-click a player or use §e/target <player>§c.");
+            return null;
+        }
+        return target;
     }
 
     private void openReportsMenu(Player moderator) {
         moderator.performCommand("reports");
     }
 
-    private void handleEntityInteraction(Player player, Player target, Material tool) {
-        switch (tool) {
-            case CHEST -> openInventory(player, target);
-            case PACKED_ICE -> toggleFreeze(player, target);
-            default -> { }
-        }
-    }
 
     private void toggleVanish(Player player) {
         BlightedModerator moderator = moderationManager.getModerator(player);
@@ -379,20 +390,28 @@ public final class ModerationListener implements Listener {
     }
 
     private void openInventory(Player moderator, Player target) {
+        moderationManager.getModerator(moderator).setTargetPlayer(target);
         new InvSeeMenu(target).open(moderator);
     }
 
-    private void toggleFreeze(Player moderator, Player target) {
-        boolean isFrozen = moderationManager.toggleFreeze(target);
-        String status = isFrozen ? "§bFROZEN" : "§aUNFROZEN";
+    private void openSanctionsMenu(Player moderator, Player target) {
+        moderationManager.getModerator(moderator).setTargetPlayer(target);
+        moderator.performCommand("sanctions " + target.getName());
+    }
 
-        moderator.sendMessage(PREFIX + target.getName() + " is now " + status);
+    private void toggleFreeze(Player moderator, Player target) {
+        moderationManager.getModerator(moderator).setTargetPlayer(target);
+        boolean isFrozen = moderationManager.toggleFreeze(target);
+        String actionText = isFrozen ? "froze" : "unfroze";
+
+        moderator.sendMessage("§b ❄ §eYou " + actionText + " §d" + target.getName() + "§e.");
 
         if (isFrozen) {
-            target.sendMessage("§c§lYOU HAVE BEEN FROZEN BY A MODERATOR!");
-            target.sendMessage("§cDo not log out or you will be banned.");
+            target.sendMessage("§b ❄ §c§lYOU HAVE BEEN FROZEN BY A MODERATOR!");
+            target.sendMessage(" §7Do not log out or you will be permanently banned.");
         } else {
-            target.sendMessage("§aYou have been unfrozen.");
+            target.sendMessage("§b ❄ §a§lYOU HAVE BEEN UNFROZEN!");
+            target.sendMessage(" §7You are now free to move again.");
         }
     }
 
@@ -409,8 +428,8 @@ public final class ModerationListener implements Listener {
         moderator.teleport(target.getLocation());
         moderationManager.getModerator(moderator).setTargetPlayer(target);
 
-        InteractiveMessage.text(PREFIX + "Teleported to §d" + target.getName() + "  ")
-                .hoverAndExecute("§e§l[INFO]", "§7Click to view user information for §e" + target.getName() + "§7 (/userinfo)", "/userinfo " + target.getName())
+        InteractiveMessage.text(" §eRandomly teleported to §d" + target.getName() + "§e. ")
+                .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + target.getName() + "§f.", "/userinfo " + target.getName())
                 .send(moderator);
     }
 }
