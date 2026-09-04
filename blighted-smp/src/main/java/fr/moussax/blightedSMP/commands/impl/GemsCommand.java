@@ -1,8 +1,7 @@
 package fr.moussax.blightedSMP.commands.impl;
 
 import fr.moussax.blightedSMP.commands.AdminCommand;
-import fr.moussax.blightedSMP.commands.utils.CommandFormatter;
-import fr.moussax.blightedSMP.commands.utils.CommandArgument;
+import fr.moussax.bedrock.commands.CommandArgument;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -12,22 +11,23 @@ import static fr.moussax.bedrock.text.Messenger.inform;
 import static fr.moussax.bedrock.text.Messenger.warn;
 
 @CommandArgument(position = 0, suggestions = {"add", "remove", "set", "reset", "resetall", "giveall", "help"})
-@CommandArgument(position = 1, after = {"add", "remove", "set", "reset"}, suggestions = {"$players"})
+@CommandArgument(position = 1, path = {"add"}, suggestions = {"$players"})
+@CommandArgument(position = 1, path = {"remove"}, suggestions = {"$players"})
+@CommandArgument(position = 1, path = {"set"}, suggestions = {"$players"})
+@CommandArgument(position = 1, path = {"reset"}, suggestions = {"$players"})
 public final class GemsCommand extends AdminCommand {
 
     @Override
     protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
         if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
-            CommandFormatter.sendCommands(
-                    player, "COMMANDS", "Gems Currency",
-                    new CommandFormatter.CommandInfo("gems add <player> [amount]", "Give gems to a player."),
-                    new CommandFormatter.CommandInfo("gems remove <player> [amount]", "Take gems from a player."),
-                    new CommandFormatter.CommandInfo("gems set <player> [amount]", "Set gems for a player."),
-                    new CommandFormatter.CommandInfo("gems reset <player>", "Reset gems for a player."),
-                    new CommandFormatter.CommandInfo("gems giveall [amount]", "Give gems to everyone."),
-                    new CommandFormatter.CommandInfo("gems resetall", "Reset everyone's balance."),
-                    new CommandFormatter.CommandInfo("gems help", "Prints this help message.")
-            );
+            inform(player, "§e§lGEMS CURRENCY §7- Subcommands:");
+            inform(player, " §f  • §e/gems add <player> [amount] §f» §7Give gems to a player.");
+            inform(player, " §f  • §e/gems remove <player> [amount] §f» §7Take gems from a player.");
+            inform(player, " §f  • §e/gems set <player> [amount] §f» §7Set gems for a player.");
+            inform(player, " §f  • §e/gems reset <player> §f» §7Reset gems for a player.");
+            inform(player, " §f  • §e/gems giveall [amount] §f» §7Give gems to everyone.");
+            inform(player, " §f  • §e/gems resetall §f» §7Reset everyone's balance.");
+            inform(player, " §f  • §e/gems help §f» §7Prints this help message.");
 
             return false;
         }
@@ -48,11 +48,7 @@ public final class GemsCommand extends AdminCommand {
 
     private boolean handleModify(Player sender, String[] args, boolean add) {
         if (args.length < 3) {
-            CommandFormatter.sendUsage(
-                    sender,
-                    "gems " + (add ? "add" : "remove") + " <player> [amount]",
-                    add ? "Give gems to a player." : "Remove gems from a player."
-            );
+            warn(sender, "Usage: /gems " + (add ? "add" : "remove") + " <player> [amount]");
             return false;
         }
 
@@ -78,7 +74,7 @@ public final class GemsCommand extends AdminCommand {
 
     private boolean handleSet(Player sender, String[] args) {
         if (args.length < 3) {
-            CommandFormatter.sendUsage(sender, "gems set <player> [amount]", "Set gems for a player.");
+            warn(sender, "Usage: /gems set <player> [amount]");
             return false;
         }
 
@@ -96,7 +92,7 @@ public final class GemsCommand extends AdminCommand {
 
     private boolean handleReset(Player sender, String[] args) {
         if (args.length < 2) {
-            CommandFormatter.sendUsage(sender, "gems reset <player>", "Reset gems for a player.");
+            warn(sender, "Usage: /gems reset <player>");
             return false;
         }
 
@@ -122,7 +118,7 @@ public final class GemsCommand extends AdminCommand {
 
     private boolean handleGiveAll(Player sender, String[] args) {
         if (args.length < 2) {
-            CommandFormatter.sendUsage(sender, "gems giveall [amount]", "Give all online players gems.");
+            warn(sender, "Usage: /gems giveall [amount]");
             return false;
         }
 

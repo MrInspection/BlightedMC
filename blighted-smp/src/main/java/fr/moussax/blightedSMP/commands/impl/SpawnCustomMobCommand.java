@@ -1,8 +1,7 @@
 package fr.moussax.blightedSMP.commands.impl;
 
 import fr.moussax.blightedSMP.commands.AdminCommand;
-import fr.moussax.blightedSMP.commands.utils.CommandArgument;
-import fr.moussax.blightedSMP.commands.utils.CommandFormatter;
+import fr.moussax.bedrock.commands.CommandArgument;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedSMP.engine.entities.rituals.AncientCreature;
@@ -17,7 +16,7 @@ public final class SpawnCustomMobCommand extends AdminCommand {
     @Override
     protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
         if (args.length == 0) {
-            CommandFormatter.sendUsage(player, "spawncustommob <entity>", "Summon a custom mob");
+            warn(player, "Usage: /spawncustommob <entity>");
             return false;
         }
 
