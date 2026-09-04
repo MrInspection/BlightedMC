@@ -99,8 +99,6 @@ public final class TestModCommand extends ModerationCommand {
             inform(moderator, " §a§lUNMUTED! §7You are no longer muted.");
             inform(moderator, "§b ❄ §c§lYOU HAVE BEEN FROZEN BY A MODERATOR!");
             inform(moderator, " §7Do not log out or you will be permanently banned.");
-            inform(moderator, "§b ❄ §cYou cannot run commands while frozen.");
-            inform(moderator, "§b ❄ §cYou cannot attack while frozen.");
             inform(moderator, "§b ❄ §a§lYOU HAVE BEEN UNFROZEN!");
             inform(moderator, " §7You are now free to move again.");
             inform(moderator, " §c§lSLOWMODE! §7Please wait §e5s §7before chatting again.");

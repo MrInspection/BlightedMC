@@ -21,7 +21,7 @@ import java.util.List;
  * Paginated menu displaying historical sanctions for a specific player.
  * Features target player head, Hypixel-style hopper filtering, and real-time updates.
  */
-public final class SanctionsPaginatedMenu extends PaginatedMenu implements TickableMenu {
+public final class SanctionsMenu extends PaginatedMenu implements TickableMenu {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private static final int[] SANCTION_SLOTS = {
@@ -58,15 +58,10 @@ public final class SanctionsPaginatedMenu extends PaginatedMenu implements Ticka
     private final List<PunishmentData> punishments;
     private SanctionFilter currentFilter = SanctionFilter.ALL;
 
-    public SanctionsPaginatedMenu(String targetName, List<PunishmentData> punishments) {
-        super("Sanctions for " + targetName, 54);
+    public SanctionsMenu(String targetName, List<PunishmentData> punishments) {
+        super(targetName +"'s sanctions", 54);
         this.targetName = targetName;
         this.punishments = punishments;
-    }
-
-    @Override
-    public long tickPeriodTicks() {
-        return 20L;
     }
 
     @Override
@@ -126,7 +121,7 @@ public final class SanctionsPaginatedMenu extends PaginatedMenu implements Ticka
     @Override
     public void build(@NonNull Player viewer) {
         List<PunishmentData> filtered = getFilteredPunishments();
-        totalItems = Math.max(0, filtered.size());
+        totalItems = filtered.size();
 
         int itemsPerPage = getItemsPerPage();
         int maxPage = Math.max(0, (totalItems - 1) / itemsPerPage);
@@ -182,7 +177,7 @@ public final class SanctionsPaginatedMenu extends PaginatedMenu implements Ticka
         SkullMeta skullMeta = (SkullMeta) headStack.getItemMeta();
         if (skullMeta != null) {
             skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(targetName));
-            skullMeta.setDisplayName("§eTarget: §b" + targetName);
+            skullMeta.setDisplayName("§d" + targetName);
 
             long activeBans = punishments.stream().filter(punishment -> (punishment.type() == PunishmentData.PunishmentType.BAN || punishment.type() == PunishmentData.PunishmentType.IP_BAN) && punishment.active() && !punishment.isExpired()).count();
             long activeMutes = punishments.stream().filter(punishment -> punishment.type() == PunishmentData.PunishmentType.MUTE && punishment.active() && !punishment.isExpired()).count();
@@ -201,17 +196,16 @@ public final class SanctionsPaginatedMenu extends PaginatedMenu implements Ticka
 
     private void renderFilterHopper() {
         ItemBuilder hopperBuilder = new ItemBuilder(Material.HOPPER)
-                .setDisplayName("§eFilter: §b" + currentFilter.getDisplayName())
-                .addLore("§7Current: §a" + currentFilter.getDisplayName())
+                .setDisplayName("§fFilter")
                 .addLore("")
-                .addLore("§7Filters:")
-                .addLore(currentFilter == SanctionFilter.ALL ? " §b» All Sanctions" : " §7  All Sanctions")
-                .addLore(currentFilter == SanctionFilter.ACTIVE ? " §b» Active Only" : " §7  Active Only")
-                .addLore(currentFilter == SanctionFilter.BAN ? " §b» Bans Only" : " §7  Bans Only")
-                .addLore(currentFilter == SanctionFilter.MUTE ? " §b» Mutes Only" : " §7  Mutes Only")
-                .addLore(currentFilter == SanctionFilter.KICK ? " §b» Kicks Only" : " §7  Kicks Only")
+                .addLore(currentFilter == SanctionFilter.ALL ? " §b▶ All Sanctions" : "§7   All Sanctions")
+                .addLore(currentFilter == SanctionFilter.ACTIVE ? " §b▶ Active Only" : "§7   Active Only")
+                .addLore(currentFilter == SanctionFilter.BAN ? " §b▶ Bans Only" : "§7   Bans Only")
+                .addLore(currentFilter == SanctionFilter.MUTE ? " §b▶ Mutes Only" : "§7   Mutes Only")
+                .addLore(currentFilter == SanctionFilter.KICK ? " §b▶ Kicks Only" : "§7   Kicks Only")
                 .addLore("")
-                .addLore("§eClick to cycle filter!");
+                .addLore("§bRight-click to go backwards!")
+                .addLore("§eClick to switch filter!");
 
         setItem(52, hopperBuilder.toItemStack(), MenuItemInteraction.ANY_CLICK, (player, _) -> {
             currentFilter = currentFilter.next();

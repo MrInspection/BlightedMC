@@ -40,4 +40,13 @@ public final class ReportManager {
     public boolean dismissReport(int reportId) {
         return reports.removeIf(report -> report.id() == reportId);
     }
+
+    public ReportData getReportById(int reportId) {
+        synchronized (reports) {
+            return reports.stream()
+                    .filter(report -> report.id() == reportId)
+                    .findFirst()
+                    .orElse(null);
+        }
+    }
 }

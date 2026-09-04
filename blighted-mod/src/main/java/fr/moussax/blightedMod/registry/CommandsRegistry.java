@@ -3,6 +3,7 @@ package fr.moussax.blightedMod.registry;
 import fr.moussax.bedrock.commands.CommandRegistrar;
 import fr.moussax.bedrock.commands.TabSuggestionRegistry;
 import fr.moussax.blightedMod.commands.impl.BanCommand;
+import fr.moussax.blightedMod.commands.impl.CheckReportCommand;
 import fr.moussax.blightedMod.commands.impl.EnderseeCommand;
 import fr.moussax.blightedMod.commands.impl.FreezeCommand;
 import fr.moussax.blightedMod.commands.impl.InvseeCommand;
@@ -16,6 +17,7 @@ import fr.moussax.blightedMod.commands.impl.SanctionsCommand;
 import fr.moussax.blightedMod.commands.impl.SetSlowmodeCommand;
 import fr.moussax.blightedMod.commands.impl.SocialSpyCommand;
 import fr.moussax.blightedMod.commands.impl.TargetCommand;
+import fr.moussax.blightedMod.commands.impl.TestModCommand;
 import fr.moussax.blightedMod.commands.impl.UserInfoCommand;
 import fr.moussax.blightedMod.commands.impl.VanishCommand;
 import org.bukkit.Bukkit;
@@ -59,6 +61,7 @@ public final class CommandsRegistry {
         registrar.register("setslowmode", slowmodeCommand);
 
         registrar.register("reports", new ReportsCommand());
+        registrar.register("checkreport", new CheckReportCommand());
         registrar.register("target", new TargetCommand());
         registrar.register("sanctions", new SanctionsCommand());
         registrar.register("userinfo", new UserInfoCommand());
@@ -68,6 +71,8 @@ public final class CommandsRegistry {
         registrar.register("msginspect", socialSpyCommand);
         registrar.register("spy", socialSpyCommand);
         registrar.register("socialspy", socialSpyCommand);
+
+        registrar.register("testmod", new TestModCommand());
     }
 
 

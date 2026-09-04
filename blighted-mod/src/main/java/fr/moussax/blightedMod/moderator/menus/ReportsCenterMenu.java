@@ -34,7 +34,7 @@ public final class ReportsCenterMenu extends PaginatedMenu implements TickableMe
     };
 
     public ReportsCenterMenu() {
-        super("§9Active Reports", 54);
+        super("Active Reports", 54);
     }
 
     @Override
