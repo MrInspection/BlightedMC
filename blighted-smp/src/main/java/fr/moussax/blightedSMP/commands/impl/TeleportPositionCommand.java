@@ -1,8 +1,7 @@
 package fr.moussax.blightedSMP.commands.impl;
 
 import fr.moussax.blightedSMP.commands.AdminCommand;
-import fr.moussax.blightedSMP.commands.utils.CommandArgument;
-import fr.moussax.blightedSMP.commands.utils.CommandFormatter;
+import fr.moussax.bedrock.commands.CommandArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -22,11 +21,7 @@ public final class TeleportPositionCommand extends AdminCommand {
     protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
 
         if (args.length < 3) {
-            CommandFormatter.sendUsage(
-                    player,
-                    "tppos [player] <x> <y> <z> [world]",
-                    "Teleport to coordinates. World is optional."
-            );
+            warn(player, "Usage: /tppos [player] <x> <y> <z> [world]");
             return true;
         }
 

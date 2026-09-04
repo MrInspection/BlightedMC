@@ -1,6 +1,6 @@
 package fr.moussax.blightedSMP.commands.impl;
 
-import fr.moussax.blightedSMP.commands.PlayerCommand;
+import fr.moussax.bedrock.commands.PlayerCommand;
 import fr.moussax.blightedSMP.engine.items.recipes.crafting.menu.CraftingTableMenu;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;

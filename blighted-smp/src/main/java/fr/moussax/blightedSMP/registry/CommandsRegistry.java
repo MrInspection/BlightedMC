@@ -1,9 +1,9 @@
 package fr.moussax.blightedSMP.registry;
 
 import fr.moussax.blightedSMP.BlightedSMP;
-import fr.moussax.blightedSMP.commands.CommandRegistrar;
+import fr.moussax.bedrock.commands.CommandRegistrar;
+import fr.moussax.bedrock.commands.TabSuggestionRegistry;
 import fr.moussax.blightedSMP.commands.impl.*;
-import fr.moussax.blightedSMP.commands.utils.TabSuggestionRegistry;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;

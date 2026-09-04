@@ -2,7 +2,6 @@ package fr.moussax.blightedSMP.commands.impl;
 
 import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.commands.AdminCommand;
-import fr.moussax.blightedSMP.commands.utils.CommandFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
@@ -21,7 +20,7 @@ public final class LoopCommand extends AdminCommand {
     @Override
     protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
         if (args.length < 3) {
-            CommandFormatter.sendUsage(player, "loop [2-50] [1-180] <command>", "Bulk execute a command.");
+            warn(player, "Usage: /loop [2-50] [1-180] <command>");
             return false;
         }
 

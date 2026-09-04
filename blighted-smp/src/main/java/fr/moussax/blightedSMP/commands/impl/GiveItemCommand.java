@@ -4,7 +4,7 @@ import fr.moussax.blightedSMP.commands.AdminCommand;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedSMP.engine.items.registry.menu.ItemRegistryMenu;
-import fr.moussax.blightedSMP.commands.utils.CommandArgument;
+import fr.moussax.bedrock.commands.CommandArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;

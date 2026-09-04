@@ -1,5 +1,6 @@
 package fr.moussax.blightedSMP.commands;
 
+import fr.moussax.bedrock.commands.PlayerCommand;
 import fr.moussax.bedrock.text.Messenger;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;

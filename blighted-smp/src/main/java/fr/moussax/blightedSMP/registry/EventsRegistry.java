@@ -34,9 +34,7 @@ import org.bukkit.plugin.PluginManager;
 public final class EventsRegistry {
 
     private final BlightedSMP instance = BlightedSMP.getInstance();
-    @Getter
     private MenuSystem menuSystem;
-    @Getter
     private ActionbarService actionBarService;
     private PlayerHudManager playerHudManager;
     private SpawnableEntitiesListener spawnableEntitiesListener;

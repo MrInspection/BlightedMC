@@ -1,15 +1,18 @@
-package fr.moussax.blightedSMP.commands.utils;
+package fr.moussax.bedrock.commands;
 
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
  * Registry for dynamic, lazily evaluated tab completion providers.
+ *
+ * <p>Keys are case-insensitive and typically prefixed with {@code $} (such as {@code $players}).
  */
 public final class TabSuggestionRegistry {
 
@@ -24,23 +27,32 @@ public final class TabSuggestionRegistry {
     public void register(String key, Supplier<List<String>> provider) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(provider, "provider");
-        providers.put(key, provider);
+        providers.put(normalizeKey(key), provider);
     }
 
     /**
      * Resolves dynamic suggestions registered under a symbolic key.
      *
      * @param key symbolic suggestion key
-     * @return suggestions provided by the registered key, or {@code null} when unregistered
+     * @return list of suggestions provided by the registered key, or {@code null} when unregistered
      */
     public @Nullable List<String> resolve(String key) {
-        Supplier<List<String>> provider = providers.get(key);
+        Supplier<List<String>> provider = providers.get(normalizeKey(key));
 
         if (provider == null) {
             return null;
         }
 
         List<String> suggestions = provider.get();
-        return suggestions == null ? List.of() : suggestions;
+        if (suggestions == null) {
+            return List.of();
+        }
+
+        return suggestions.stream().filter(Objects::nonNull).toList();
+    }
+
+    // ponytail: kept — centralized case-insensitive key normalization
+    private static String normalizeKey(String key) {
+        return key.toLowerCase(Locale.ROOT);
     }
 }

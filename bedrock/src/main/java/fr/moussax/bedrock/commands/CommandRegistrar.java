@@ -1,8 +1,5 @@
-package fr.moussax.blightedSMP.commands;
+package fr.moussax.bedrock.commands;
 
-import fr.moussax.blightedSMP.commands.utils.CommandArgument;
-import fr.moussax.blightedSMP.commands.utils.TabSuggestionBuilder;
-import fr.moussax.blightedSMP.commands.utils.TabSuggestionRegistry;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
