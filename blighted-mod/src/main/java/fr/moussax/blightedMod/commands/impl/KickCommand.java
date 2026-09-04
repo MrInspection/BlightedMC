@@ -13,7 +13,6 @@ import static fr.moussax.bedrock.text.Messenger.warn;
 
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class KickCommand extends ModerationCommand {
-    private static final String PREFIX = " §9§lMOD §f| §7";
 
     @Override
     protected boolean executeModeration(Player moderator, Command command, String label, String[] arguments) {
@@ -62,7 +61,7 @@ public final class KickCommand extends ModerationCommand {
 
         target.kickPlayer(kickMessage);
 
-        String notification = PREFIX + "§9" + moderator.getName() + "§7 kicked §9" + target.getName() + "§7 for §c" + reason;
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e kicked §d" + target.getName() + "§e for §c" + reason + "§e.";
         getModerationManager().broadcastToModerators(notification);
 
         return true;

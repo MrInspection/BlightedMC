@@ -14,13 +14,12 @@ import static fr.moussax.bedrock.text.Messenger.warn;
  */
 @CommandArgument(position = 0, suggestions = {"$channels"})
 public final class ChatCommand extends ModerationCommand {
-    private static final String PREFIX = " §9§lMOD §f| §7";
 
     @Override
     protected boolean executeModeration(Player player, Command command, String label, String[] arguments) {
         if (arguments.length == 0) {
             ModerationManager.ChatChannel currentChannel = getModerationManager().getChatChannel(player);
-            inform(player, PREFIX + "Currently in active chat channel: §e" + currentChannel.name());
+            inform(player, " §7You are now in the §d" + currentChannel.name() + " §7channel.");
             warn(player, "Usage: /chat <staff|all>");
             return true;
         }
@@ -33,13 +32,13 @@ public final class ChatCommand extends ModerationCommand {
             }
 
             getModerationManager().setChatChannel(player, ModerationManager.ChatChannel.STAFF);
-            inform(player, PREFIX + "Switched active chat channel to §9STAFF§7.");
+            inform(player, " §7You are now in the §dSTAFF §7channel.");
             return true;
         }
 
         if (targetChannel.equals("all") || targetChannel.equals("a") || targetChannel.equals("global") || targetChannel.equals("normal")) {
             getModerationManager().setChatChannel(player, ModerationManager.ChatChannel.ALL);
-            inform(player, PREFIX + "Switched active chat channel to §bALL§7.");
+            inform(player, " §7You are now in the §dALL §7channel.");
             return true;
         }
 

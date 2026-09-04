@@ -12,7 +12,6 @@ import static fr.moussax.bedrock.text.Messenger.warn;
  */
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class FreezeCommand extends ModerationCommand {
-    private static final String PREFIX = " §9§lMOD §f| §7";
 
     @Override
     protected boolean executeModeration(Player moderator, Command command, String label, String[] arguments) {
@@ -39,18 +38,13 @@ public final class FreezeCommand extends ModerationCommand {
         boolean isNowFrozen = getModerationManager().toggleFreeze(target);
 
         if (isNowFrozen) {
-            moderator.sendMessage(PREFIX + target.getName() + " is now §bFROZEN");
-            target.sendMessage("§c§lYOU HAVE BEEN FROZEN BY A MODERATOR!");
-            target.sendMessage("§cDo not log out or you will be banned.");
-
-            String notification = PREFIX + "§9" + moderator.getName() + "§7 froze §9" + target.getName();
-            getModerationManager().broadcastToModerators(notification);
+            moderator.sendMessage("§b ❄ §eYou froze §d" + target.getName() + "§e.");
+            target.sendMessage("§b ❄ §c§lYOU HAVE BEEN FROZEN BY A MODERATOR!");
+            target.sendMessage(" §7Do not log out or you will be permanently banned.");
         } else {
-            moderator.sendMessage(PREFIX + target.getName() + " is now §aUNFROZEN");
-            target.sendMessage("§aYou have been unfrozen.");
-
-            String notification = PREFIX + "§9" + moderator.getName() + "§7 unfroze §9" + target.getName();
-            getModerationManager().broadcastToModerators(notification);
+            moderator.sendMessage("§b ❄ §eYou unfroze §d" + target.getName() + "§e.");
+            target.sendMessage("§b ❄ §a§lYOU HAVE BEEN UNFROZEN!");
+            target.sendMessage(" §7You are now free to move again.");
         }
 
         return true;

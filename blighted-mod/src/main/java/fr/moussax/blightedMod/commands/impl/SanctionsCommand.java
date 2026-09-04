@@ -2,7 +2,7 @@ package fr.moussax.blightedMod.commands.impl;
 
 import fr.moussax.bedrock.commands.CommandArgument;
 import fr.moussax.blightedMod.commands.ModerationCommand;
-import fr.moussax.blightedMod.moderator.menus.SanctionsPaginatedMenu;
+import fr.moussax.blightedMod.moderator.menus.SanctionsMenu;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentData;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
@@ -32,7 +32,7 @@ public final class SanctionsCommand extends ModerationCommand {
             return true;
         }
 
-        new SanctionsPaginatedMenu(targetName, punishments).open(moderator);
+        new SanctionsMenu(targetName, punishments).open(moderator);
         return true;
     }
 }

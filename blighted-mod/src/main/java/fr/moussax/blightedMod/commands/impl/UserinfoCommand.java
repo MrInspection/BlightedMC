@@ -18,7 +18,6 @@ import static fr.moussax.bedrock.text.Messenger.warn;
  */
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class UserInfoCommand extends ModerationCommand {
-    private static final String PREFIX = " §9§lMOD §f| §7";
 
     @Override
     protected boolean executeModeration(Player moderator, Command command, String label, String[] arguments) {
@@ -38,15 +37,15 @@ public final class UserInfoCommand extends ModerationCommand {
         int healthPercent = (int) Math.round((target.getHealth() / target.getMaxHealth()) * 100.0);
 
         List<PunishmentData> punishments = getPunishmentManager().getAllPunishments(target.getName());
-        long mutesCount = punishments.stream().filter(p -> p.type() == PunishmentData.PunishmentType.MUTE).count();
-        long bansCount = punishments.stream().filter(p -> p.type() == PunishmentData.PunishmentType.BAN || p.type() == PunishmentData.PunishmentType.IP_BAN).count();
-        long kicksCount = punishments.stream().filter(p -> p.type() == PunishmentData.PunishmentType.KICK).count();
+        long mutesCount = punishments.stream().filter(punishment -> punishment.type() == PunishmentData.PunishmentType.MUTE).count();
+        long bansCount = punishments.stream().filter(punishment -> punishment.type() == PunishmentData.PunishmentType.BAN || punishment.type() == PunishmentData.PunishmentType.IP_BAN).count();
+        long kicksCount = punishments.stream().filter(punishment -> punishment.type() == PunishmentData.PunishmentType.KICK).count();
 
         boolean isFrozen = getModerationManager().isFrozen(target);
         boolean isMuted = getPunishmentManager().isMuted(target.getUniqueId());
         boolean isVanished = getModerationManager().getModerator(target).isVanished();
 
-        inform(moderator, PREFIX + "User info for §e" + target.getName() + "§7:");
+        inform(moderator, " §eUser info for §d" + target.getName() + "§7:");
         moderator.sendMessage(" §f- §7UUID: §f" + target.getUniqueId());
         moderator.sendMessage(" §f- §7IP Address: §f" + ipAddress);
         moderator.sendMessage(" §f- §7State: §a" + healthPercent + "% HP §f| §e" + target.getFoodLevel() + " Food §f| §b" + target.getGameMode().name() + " §f| §dLvl " + target.getLevel());

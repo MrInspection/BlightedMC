@@ -13,7 +13,6 @@ import org.bukkit.potion.PotionEffect;
 import java.util.Collection;
 
 public final class BlightedModerator {
-    private static final String PREFIX = " §9§lMOD §f| §7";
 
     private final Player player;
     private boolean isInModerationMode;
@@ -27,7 +26,6 @@ public final class BlightedModerator {
     private float savedExperience;
     private int savedLevel;
     private Collection<PotionEffect> savedPotionEffects;
-    private org.bukkit.Location savedLocation;
 
     public BlightedModerator(Player player) {
         this.player = player;
@@ -63,7 +61,7 @@ public final class BlightedModerator {
         giveModerationTools();
         this.isInModerationMode = true;
 
-        player.sendMessage(PREFIX + "You are now in §9moderation §7mode.");
+        player.sendMessage(" §dModeration Mode §etoggled §aON§e.");
     }
 
     public void onDisable() {
@@ -73,7 +71,7 @@ public final class BlightedModerator {
         this.isInModerationMode = false;
         this.targetPlayer = null;
 
-        player.sendMessage(PREFIX + "You are no longer in §9moderation §7mode.");
+        player.sendMessage(" §dModeration Mode §etoggled §cOFF§e.");
     }
 
     private void saveState() {
@@ -85,7 +83,6 @@ public final class BlightedModerator {
         this.savedExperience = player.getExp();
         this.savedLevel = player.getLevel();
         this.savedPotionEffects = player.getActivePotionEffects();
-        this.savedLocation = player.getLocation();
     }
 
     private void restoreState() {
@@ -100,10 +97,6 @@ public final class BlightedModerator {
 
         player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
         player.addPotionEffects(savedPotionEffects);
-
-        if (savedLocation != null) {
-            player.teleport(savedLocation);
-        }
 
         player.setInvulnerable(false);
         player.setAllowFlight(false);
@@ -144,10 +137,10 @@ public final class BlightedModerator {
 
         if (vanished) {
             hideFromNonModerators(instance);
-            if (!notifyPlayer) player.sendMessage(PREFIX + "You are now §avanished§7.");
+            if (!notifyPlayer) player.sendMessage(" §dVanish §etoggled §aON§e.");
         } else {
             showToAllPlayers(instance);
-            if (!notifyPlayer) player.sendMessage(PREFIX + "You are now §cvisible§7.");
+            if (!notifyPlayer) player.sendMessage(" §dVanish §etoggled §cOFF§e.");
         }
         updateVanishTool();
     }

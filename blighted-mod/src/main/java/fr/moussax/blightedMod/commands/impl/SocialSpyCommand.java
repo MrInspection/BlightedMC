@@ -14,9 +14,9 @@ public final class SocialSpyCommand extends ModerationCommand {
         ModerationManager manager = getModerationManager();
         boolean enabled = manager.toggleMessageInspect(moderator);
         if (enabled) {
-            inform(moderator, "§9[SPY] §7Private message inspection is now §aENABLED§7.");
+            inform(moderator, " §6Social Spy §etoggled §aON§e.");
         } else {
-            inform(moderator, "§9[SPY] §7Private message inspection is now §cDISABLED§7.");
+            inform(moderator, " §6Social Spy §etoggled §cOFF§e.");
         }
         return true;
     }

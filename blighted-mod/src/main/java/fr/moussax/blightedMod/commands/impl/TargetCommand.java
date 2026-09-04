@@ -14,7 +14,6 @@ import static fr.moussax.bedrock.text.Messenger.inform;
  */
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class TargetCommand extends ModerationCommand {
-    private static final String PREFIX = " §9§lMOD §f| §7";
 
     @Override
     protected boolean executeModeration(Player moderator, Command command, String label, String[] arguments) {
@@ -22,7 +21,7 @@ public final class TargetCommand extends ModerationCommand {
 
         if (arguments.length == 0) {
             blightedModerator.setTargetPlayer(null);
-            inform(moderator, PREFIX + "Cleared moderation HUD target.");
+            inform(moderator, " §eTarget cleared from §fModeration HUD§e.");
             return true;
         }
 
@@ -32,8 +31,8 @@ public final class TargetCommand extends ModerationCommand {
         }
 
         blightedModerator.setTargetPlayer(target);
-        InteractiveMessage.text(PREFIX + "Now targeting §e" + target.getName() + " §7for moderation HUD.  ")
-                .hoverAndExecute("§e§l[INFO]", "§7Click to view user information for §e" + target.getName() + "§7 (/userinfo)", "/userinfo " + target.getName())
+        InteractiveMessage.text(" §eTargeting §d" + target.getName() + " §ewith §fModeration HUD§e. ")
+                .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + target.getName() + "§f.", "/userinfo " + target.getName())
                 .send(moderator);
         return true;
     }

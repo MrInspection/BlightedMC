@@ -15,9 +15,7 @@ public final class ModerationHud {
     }
 
     public static ActionbarSection createSection(ModerationManager moderationManager) {
-        return ActionbarSection.of(
-                SECTION_ID,
-                PRIORITY,
+        return ActionbarSection.of(SECTION_ID, PRIORITY,
                 player -> render(moderationManager, player),
                 moderationManager::isModerator
         );
@@ -40,8 +38,17 @@ public final class ModerationHud {
                 ? String.format(Locale.ROOT, "%.2f blocks", player.getLocation().distance(target.getLocation()))
                 : "N/A";
 
-        String frozenText = moderationManager.isFrozen(target) ? "§b§lYUp!" : "§c§lNOPE!";
+        String frozenText = moderationManager.isFrozen(target) ? "§b§lYUP!" : "§c§lNOPE!";
+        String pingText = target.getPing() < 100 ? "§a" + target.getPing() + "ms"
+                : target.getPing() < 200 ? "§e" + target.getPing() + "ms"
+                : target.getPing() < 300 ? "§6" + target.getPing() + "ms"
+                : target.getPing() < 500 ? "§c" + target.getPing() + "ms"
+                : "§4" + target.getPing() + "ms";
 
-        return "§fTarget: §d" + target.getName() + "     §fHP: §d" + healthPercent + "%       §fDistance: §d" + distanceText + "     §fFrozen: " + frozenText;
+        return "§fTarget: §d" + target.getName()
+                + "     §fHP: §d" + healthPercent + "%"
+                + "     §fDistance: §d" + distanceText
+                + "     §fPing: " + pingText
+                + "     §fFrozen: " + frozenText;
     }
 }

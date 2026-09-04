@@ -10,7 +10,6 @@ import static fr.moussax.bedrock.text.Messenger.warn;
 
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class ModTpCommands extends ModerationCommand {
-    private static final String PREFIX = " §9§lMOD §f| §7";
 
     @Override
     protected boolean executeModeration(Player moderator, Command command, String label, String[] arguments) {
@@ -41,12 +40,9 @@ public final class ModTpCommands extends ModerationCommand {
         moderator.teleport(target.getLocation());
         getModerationManager().getModerator(moderator).setTargetPlayer(target);
 
-        InteractiveMessage.text(PREFIX + "Teleported to §9" + target.getName() + "§7.  ")
-                .hoverAndExecute("§e§l[INFO]", "§7Click to view user information for §e" + target.getName() + "§7 (/userinfo)", "/userinfo " + target.getName())
+        InteractiveMessage.text(" §eTeleported to §d" + target.getName() + "§e. ")
+                .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + target.getName() + "§f.", "/userinfo " + target.getName())
                 .send(moderator);
-
-        String notification = PREFIX + "§9" + moderator.getName() + "§7 teleported to §9" + target.getName();
-        getModerationManager().broadcastToModerators(notification);
         return true;
     }
 
@@ -69,12 +65,9 @@ public final class ModTpCommands extends ModerationCommand {
         target.teleport(moderator.getLocation());
         getModerationManager().getModerator(moderator).setTargetPlayer(target);
 
-        InteractiveMessage.text(PREFIX + "Teleported §9" + target.getName() + "§7 to you.  ")
-                .hoverAndExecute("§e§l[INFO]", "§7Click to view user information for §e" + target.getName() + "§7 (/userinfo)", "/userinfo " + target.getName())
+        InteractiveMessage.text(" §eTeleported §d" + target.getName() + "§e to you. ")
+                .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + target.getName() + "§f.", "/userinfo " + target.getName())
                 .send(moderator);
-
-        String notification = PREFIX + "§9" + moderator.getName() + "§7 teleported §9" + target.getName() + "§7 to them";
-        getModerationManager().broadcastToModerators(notification);
         return true;
     }
 }

@@ -4,6 +4,7 @@ import fr.moussax.bedrock.commands.PlayerCommand;
 import fr.moussax.bedrock.text.InteractiveMessage;
 import fr.moussax.bedrock.ui.book.BookMenu;
 import fr.moussax.blightedMod.moderator.ModerationManager;
+import fr.moussax.blightedMod.moderator.reports.ReportData;
 import fr.moussax.blightedMod.moderator.reports.ReportManager;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
@@ -17,8 +18,6 @@ import static fr.moussax.bedrock.text.Messenger.warn;
  * Handles /report command execution for general reports and chat reports with BookMenu interface.
  */
 public final class ReportCommand extends PlayerCommand {
-
-    private static final String PREFIX = " §c§lREPORT §f| §7";
 
     @Override
     protected boolean execute(Player player, Command command, String label, String[] arguments) {
@@ -108,33 +107,30 @@ public final class ReportCommand extends PlayerCommand {
     }
 
     private void submitChatReport(Player reporter, String targetName, String reason, String chatMessage) {
-        ReportManager.getInstance().submitReport(reporter.getName(), targetName, reason, chatMessage);
+        ReportData report = ReportManager.getInstance().submitReport(reporter.getName(), targetName, reason, chatMessage);
 
-        String formattedReason = reason.replace("/", " / ");
-        String notificationText = chatMessage.equalsIgnoreCase("None")
-                ? PREFIX + "§e" + reporter.getName() + " §7reported §c" + targetName + " §7(" + formattedReason + ")"
-                : PREFIX + "§e" + reporter.getName() + " §7reported §c" + targetName + " §7(" + formattedReason + "): §f\"" + chatMessage + "\"";
-
-        InteractiveMessage notificationMessage = InteractiveMessage.text(notificationText + "  ")
-                .hoverAndExecute("§a§l[TP]", "§7Click to teleport to §e" + targetName + "§7 (/mtp)", "/mtp " + targetName)
+        InteractiveMessage notificationMessage = InteractiveMessage.text(" §6§lALERT! §f" + reporter.getName() + " §ereported §d" + targetName + "§e's chat message: §7\"" + chatMessage + "\"§e. ")
+                .hoverAndExecute("§6[DETAILS]", "§fClick to view §dreport §fdetails.", "/checkreport " + report.id())
                 .append(" ")
-                .hoverAndExecute("§e§l[INFO]", "§7Click to view user information for §e" + targetName + "§7 (/userinfo)", "/userinfo " + targetName);
+                .hoverAndExecute("§b[MTP]", "§fClick to teleport to §d" + targetName + "§f.", "/mtp " + targetName)
+                .append(" ")
+                .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + targetName + "§f.", "/userinfo " + targetName);
 
         ModerationManager.getInstance().broadcastToModerators(notificationMessage);
-        inform(reporter, "§aThank you! Your report against §f" + targetName + " §ahas been submitted to online moderators.");
+        inform(reporter, " §a§lREPORT SENT! §7Your report for §d" + targetName + " §7has been submitted to online staff.");
     }
 
     private void submitGeneralReport(Player reporter, String targetName, String reason) {
-        ReportManager.getInstance().submitReport(reporter.getName(), targetName, reason, "General player report");
+        ReportData report = ReportManager.getInstance().submitReport(reporter.getName(), targetName, reason, "General player report");
 
-        String notificationText = PREFIX + "§e" + reporter.getName() + " §7reported §c" + targetName + " §7for: §f\"" + reason + "\"";
-
-        InteractiveMessage notificationMessage = InteractiveMessage.text(notificationText + "  ")
-                .hoverAndExecute("§a§l[TP]", "§7Click to teleport to §e" + targetName + "§7 (/mtp)", "/mtp " + targetName)
+        InteractiveMessage notificationMessage = InteractiveMessage.text(" §6§lALERT! §d" + targetName + " §ewas reported. ")
+                .hoverAndExecute("§6[DETAILS]", "§fClick to view §dreport §fdetails.", "/checkreport " + report.id())
                 .append(" ")
-                .hoverAndExecute("§e§l[INFO]", "§7Click to view user information for §e" + targetName + "§7 (/userinfo)", "/userinfo " + targetName);
+                .hoverAndExecute("§b[MTP]", "§fClick to teleport to §d" + targetName + "§f.", "/mtp " + targetName)
+                .append(" ")
+                .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + targetName + "§f.", "/userinfo " + targetName);
 
         ModerationManager.getInstance().broadcastToModerators(notificationMessage);
-        inform(reporter, "§aThank you! Your report against §f" + targetName + " §ahas been submitted to online moderators.");
+        inform(reporter, " §a§lREPORT SENT! §7Your report for §d" + targetName + " §7has been submitted to online staff.");
     }
 }

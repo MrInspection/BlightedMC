@@ -14,7 +14,6 @@ import static fr.moussax.bedrock.text.Messenger.warn;
 
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class MuteCommand extends ModerationCommand {
-    private static final String PREFIX = " §9§lMOD §f| §7";
 
     @Override
     protected boolean executeModeration(Player moderator, Command command, String label, String[] arguments) {
@@ -66,12 +65,12 @@ public final class MuteCommand extends ModerationCommand {
                 ipAddress
         );
 
-        String durationText = expiresAt != null ? " (" + DurationParser.formatDuration(arguments[1]) + ")" : " (Permanent)";
-        String notification = PREFIX + "§9" + moderator.getName() + "§e muted §d" + target.getName()
-                + "§e for §f" + reason + "§6" + durationText;
+        String durationText = expiresAt != null ? "for §6" + DurationParser.formatDuration(arguments[1]) + " " : "";
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e muted §d" + target.getName() + " §e" + durationText + "for §c" + reason + "§e.";
 
         getModerationManager().broadcastToModerators(notification);
-        target.sendMessage(" §f§lSANCTION §f| §7You have been muted for: §f" + reason + durationText);
+        String durationString = expiresAt != null ? "for §6" + DurationParser.formatDuration(arguments[1]) + " §7" : "";
+        target.sendMessage(" §c§lMUTED! §7You have been muted " + durationString + "for: §f" + reason);
 
         return true;
     }
@@ -94,9 +93,9 @@ public final class MuteCommand extends ModerationCommand {
 
         getPunishmentManager().removePunishment(target.getUniqueId(), PunishmentData.PunishmentType.MUTE);
 
-        String notification = PREFIX + "§9" + moderator.getName() + "§7 unmuted §9" + target.getName();
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unmuted §d" + target.getName() + "§e.";
         getModerationManager().broadcastToModerators(notification);
-        target.sendMessage("§aYou have been unmuted.");
+        target.sendMessage(" §a§lUNMUTED! §7You are no longer muted.");
         return true;
     }
 }

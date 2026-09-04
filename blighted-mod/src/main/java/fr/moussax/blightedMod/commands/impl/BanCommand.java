@@ -17,7 +17,6 @@ import static fr.moussax.bedrock.text.Messenger.warn;
  */
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class BanCommand extends ModerationCommand {
-    private static final String PREFIX = " §9§lMOD §f| §7";
 
     @Override
     protected boolean executeModeration(Player moderator, Command command, String label, String[] arguments) {
@@ -88,8 +87,8 @@ public final class BanCommand extends ModerationCommand {
 
         target.kickPlayer(banMessage);
 
-        String notification = PREFIX + "§9" + moderator.getName() + "§7 banned §9" + target.getName() +
-                "§7 for §c" + reason + "§7 (" + durationText + ")";
+        String durationString = expiresAt != null ? " for §6" + durationText + "§e" : " permanently";
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e banned §9" + target.getName() + "§e" + durationString + " for §c" + reason + "§e.";
         getModerationManager().broadcastToModerators(notification);
 
         return true;
@@ -113,7 +112,7 @@ public final class BanCommand extends ModerationCommand {
 
         getPunishmentManager().removePunishment(target.getUniqueId(), PunishmentData.PunishmentType.BAN);
 
-        String notification = PREFIX + "§9" + moderator.getName() + "§7 unbanned §9" + target.getName();
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unbanned §9" + target.getName() + "§e.";
         getModerationManager().broadcastToModerators(notification);
 
         return true;
@@ -171,8 +170,7 @@ public final class BanCommand extends ModerationCommand {
 
         target.kickPlayer(banMessage);
 
-        String notification = PREFIX + "§9" + moderator.getName() + "§7 IP banned §9" + target.getName() +
-                "§7 for §c" + reason + "§7 (" + durationText + ")";
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e IP banned §9" + target.getName() + "§e for §c" + reason + "§e.";
         getModerationManager().broadcastToModerators(notification);
 
         return true;
@@ -198,7 +196,7 @@ public final class BanCommand extends ModerationCommand {
 
         getPunishmentManager().removeIpPunishment(ipAddress);
 
-        String notification = PREFIX + "§9" + moderator.getName() + "§7 unbanned IP for §9" + target.getName();
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unbanned IP for §d" + target.getName() + "§e.";
         getModerationManager().broadcastToModerators(notification);
 
         return true;

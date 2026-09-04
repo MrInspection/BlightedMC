@@ -59,7 +59,7 @@ public final class SanctionsPaginatedMenu extends PaginatedMenu implements Ticka
     private SanctionFilter currentFilter = SanctionFilter.ALL;
 
     public SanctionsPaginatedMenu(String targetName, List<PunishmentData> punishments) {
-        super("§9Sanctions for " + targetName, 54);
+        super("Sanctions for " + targetName, 54);
         this.targetName = targetName;
         this.punishments = punishments;
     }
@@ -184,9 +184,9 @@ public final class SanctionsPaginatedMenu extends PaginatedMenu implements Ticka
             skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(targetName));
             skullMeta.setDisplayName("§eTarget: §b" + targetName);
 
-            long activeBans = punishments.stream().filter(p -> (p.type() == PunishmentData.PunishmentType.BAN || p.type() == PunishmentData.PunishmentType.IP_BAN) && p.active() && !p.isExpired()).count();
-            long activeMutes = punishments.stream().filter(p -> p.type() == PunishmentData.PunishmentType.MUTE && p.active() && !p.isExpired()).count();
-            long totalKicks = punishments.stream().filter(p -> p.type() == PunishmentData.PunishmentType.KICK).count();
+            long activeBans = punishments.stream().filter(punishment -> (punishment.type() == PunishmentData.PunishmentType.BAN || punishment.type() == PunishmentData.PunishmentType.IP_BAN) && punishment.active() && !punishment.isExpired()).count();
+            long activeMutes = punishments.stream().filter(punishment -> punishment.type() == PunishmentData.PunishmentType.MUTE && punishment.active() && !punishment.isExpired()).count();
+            long totalKicks = punishments.stream().filter(punishment -> punishment.type() == PunishmentData.PunishmentType.KICK).count();
 
             skullMeta.setLore(List.of(
                     "§7Total Sanctions: §e" + punishments.size(),

@@ -185,7 +185,7 @@ public final class ModerationManager {
     }
 
     public void broadcastSpyMessage(String senderName, String recipientName, String content) {
-        String formatted = " §9[SPY] §7" + senderName + " §8» §7" + recipientName + "§f: " + content;
+        String formatted = " §6§lSPY! §f" + senderName + " §d➟ §f" + recipientName + " §7§l» §d" + content;
         Bukkit.getOnlinePlayers().stream()
                 .filter(this::isModerator)
                 .filter(this::isMessageInspectEnabled)
