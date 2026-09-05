@@ -31,6 +31,11 @@ public final class BlightedModerator {
     private float savedExperience;
     private int savedLevel;
     private Collection<PotionEffect> savedPotionEffects;
+    private double savedHealth;
+    private int savedFoodLevel;
+    private boolean savedInvulnerable;
+    private boolean savedAllowFlight;
+    private boolean savedFlying;
 
     public BlightedModerator(Player player) {
         this.player = player;
@@ -84,6 +89,11 @@ public final class BlightedModerator {
         this.savedExperience = player.getExp();
         this.savedLevel = player.getLevel();
         this.savedPotionEffects = player.getActivePotionEffects();
+        this.savedHealth = player.getHealth();
+        this.savedFoodLevel = player.getFoodLevel();
+        this.savedInvulnerable = player.isInvulnerable();
+        this.savedAllowFlight = player.getAllowFlight();
+        this.savedFlying = player.isFlying();
     }
 
     private void restoreState() {
@@ -93,15 +103,20 @@ public final class BlightedModerator {
         inventory.setItemInOffHand(savedOffHand);
 
         player.setGameMode(savedGameMode);
+        player.setHealth(savedHealth);
+        player.setFoodLevel(savedFoodLevel);
         player.setExp(savedExperience);
         player.setLevel(savedLevel);
 
         player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
         player.addPotionEffects(savedPotionEffects);
-
-        player.setInvulnerable(false);
-        player.setAllowFlight(false);
-        player.setFlying(false);
+        player.setInvulnerable(savedInvulnerable);
+        player.setAllowFlight(savedAllowFlight);
+        if (savedAllowFlight) {
+            player.setFlying(savedFlying);
+        } else {
+            player.setFlying(false);
+        }
     }
 
     private void clearPlayerState() {

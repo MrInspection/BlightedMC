@@ -49,6 +49,7 @@ public final class SanctionsMenu extends PaginatedMenu implements TickableMenu {
     private final String targetName;
     private final List<PunishmentData> punishments;
     private SanctionFilter currentFilter = SanctionFilter.ALL;
+    private List<PunishmentData> cachedFilteredPunishments;
 
     public SanctionsMenu(String targetName, List<PunishmentData> punishments) {
         super(targetName + "'s sanctions", 54);
@@ -61,9 +62,8 @@ public final class SanctionsMenu extends PaginatedMenu implements TickableMenu {
         refresh(player);
     }
 
-
-    private List<PunishmentData> getFilteredPunishments() {
-        return punishments.stream()
+    private void updateFilteredPunishmentsCache() {
+        this.cachedFilteredPunishments = punishments.stream()
                 .filter(punishment -> switch (currentFilter) {
                     case ALL -> true;
                     case ACTIVE -> punishment.active() && !punishment.isExpired();
@@ -77,17 +77,22 @@ public final class SanctionsMenu extends PaginatedMenu implements TickableMenu {
 
     @Override
     protected int getTotalItems(@NonNull Player player) {
-        return getFilteredPunishments().size();
+        if (cachedFilteredPunishments == null) {
+            updateFilteredPunishmentsCache();
+        }
+        return cachedFilteredPunishments.size();
     }
 
     @Override
     protected ItemStack getItem(@NonNull Player player, int index) {
-        List<PunishmentData> filtered = getFilteredPunishments();
-        if (index >= filtered.size()) {
+        if (cachedFilteredPunishments == null) {
+            updateFilteredPunishmentsCache();
+        }
+        if (index >= cachedFilteredPunishments.size()) {
             return new ItemStack(Material.AIR);
         }
 
-        PunishmentData punishment = filtered.get(index);
+        PunishmentData punishment = cachedFilteredPunishments.get(index);
 
         String typeTitle = switch (punishment.type()) {
             case BAN -> "§c§lBAN";
@@ -186,6 +191,7 @@ public final class SanctionsMenu extends PaginatedMenu implements TickableMenu {
 
     @Override
     public void build(@NonNull Player viewer) {
+        updateFilteredPunishmentsCache();
         super.build(viewer);
         renderTargetHead();
         renderFilterHopper();
@@ -233,11 +239,13 @@ public final class SanctionsMenu extends PaginatedMenu implements TickableMenu {
                 (player, _) -> {
                     currentFilter = currentFilter.next();
                     currentPage = 0;
+                    updateFilteredPunishmentsCache();
                     refresh(player);
                 },
                 (player, _) -> {
                     currentFilter = currentFilter.previous();
                     currentPage = 0;
+                    updateFilteredPunishmentsCache();
                     refresh(player);
                 }
         );

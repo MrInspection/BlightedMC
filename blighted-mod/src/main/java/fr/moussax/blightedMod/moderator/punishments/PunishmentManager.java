@@ -76,6 +76,22 @@ public final class PunishmentManager {
         }
     }
 
+    private void deactivatePunishment(int id) {
+        String query = """
+                UPDATE punishments SET is_active = 0
+                WHERE id = ? AND is_active = 1
+                """;
+
+        synchronized (connection) {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setInt(1, id);
+                statement.executeUpdate();
+            } catch (SQLException exception) {
+                throw new RuntimeException("Failed to deactivate punishment", exception);
+            }
+        }
+    }
+
     public PunishmentData getActivePunishment(UUID playerUuid, PunishmentData.PunishmentType type) {
         String query = """
                 SELECT * FROM punishments
@@ -99,7 +115,7 @@ public final class PunishmentManager {
         }
 
         if (punishment.isExpired()) {
-            removePunishment(playerUuid, type);
+            deactivatePunishment(punishment.id());
             return null;
         }
         return punishment;
@@ -127,7 +143,7 @@ public final class PunishmentManager {
         }
 
         if (punishment.isExpired()) {
-            removeIpPunishment(ipAddress);
+            deactivatePunishment(punishment.id());
             return null;
         }
         return punishment;

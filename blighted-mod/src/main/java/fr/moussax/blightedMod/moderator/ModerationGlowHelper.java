@@ -11,13 +11,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import org.bukkit.scoreboard.ScoreboardManager;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class ModerationGlowHelper {
 
     private static final String GLOW_TEAM_NAME = "mod_glow_pink";
+    private static final Map<UUID, Scoreboard> ORIGINAL_SCOREBOARDS = new ConcurrentHashMap<>();
 
     private ModerationGlowHelper() {
     }
@@ -27,9 +32,15 @@ public final class ModerationGlowHelper {
             return;
         }
 
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        if (manager == null) {
+            return;
+        }
+
         Scoreboard scoreboard = moderator.getScoreboard();
-        if (scoreboard.equals(Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard())) {
-            scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        if (scoreboard.equals(manager.getMainScoreboard())) {
+            ORIGINAL_SCOREBOARDS.putIfAbsent(moderator.getUniqueId(), scoreboard);
+            scoreboard = manager.getNewScoreboard();
             moderator.setScoreboard(scoreboard);
         }
 
@@ -59,6 +70,13 @@ public final class ModerationGlowHelper {
 
         if (target.isOnline()) {
             sendGlowPacket(moderator, target, false);
+        }
+
+        if (team == null || team.getEntries().isEmpty()) {
+            Scoreboard originalScoreboard = ORIGINAL_SCOREBOARDS.remove(moderator.getUniqueId());
+            if (originalScoreboard != null) {
+                moderator.setScoreboard(originalScoreboard);
+            }
         }
     }
 

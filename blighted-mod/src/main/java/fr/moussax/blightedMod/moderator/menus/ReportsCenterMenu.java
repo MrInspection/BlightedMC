@@ -117,14 +117,22 @@ public final class ReportsCenterMenu extends PaginatedMenu implements TickableMe
 
     @Override
     protected void onItemLeftClick(@NonNull Player moderator, int index) {
-        ReportData report = ReportManager.getInstance().getActiveReports().get(index);
+        List<ReportData> reports = ReportManager.getInstance().getActiveReports();
+        if (index < 0 || index >= reports.size()) {
+            return;
+        }
+        ReportData report = reports.get(index);
         close();
         moderator.performCommand("mtp " + report.targetName());
     }
 
     @Override
     protected void onItemRightClick(@NonNull Player moderator, int index) {
-        ReportData report = ReportManager.getInstance().getActiveReports().get(index);
+        List<ReportData> reports = ReportManager.getInstance().getActiveReports();
+        if (index < 0 || index >= reports.size()) {
+            return;
+        }
+        ReportData report = reports.get(index);
         ReportManager.getInstance().dismissReport(report.id());
         inform(moderator, " §eYou dismissed §creport #" + report.id() + " §eagainst §d" + report.targetName() + "§e.");
         refresh(moderator);
@@ -132,7 +140,11 @@ public final class ReportsCenterMenu extends PaginatedMenu implements TickableMe
 
     @Override
     protected void onItemShiftClick(@NonNull Player moderator, int index) {
-        ReportData report = ReportManager.getInstance().getActiveReports().get(index);
+        List<ReportData> reports = ReportManager.getInstance().getActiveReports();
+        if (index < 0 || index >= reports.size()) {
+            return;
+        }
+        ReportData report = reports.get(index);
         openReportBook(moderator, report);
     }
 

@@ -61,7 +61,7 @@ public final class DurationParser {
             default -> "";
         };
 
-        int parsedAmount = Integer.parseInt(value);
+        long parsedAmount = Long.parseLong(value);
         if (parsedAmount > 1) {
             unitName += "s";
         }

@@ -31,7 +31,12 @@ public final class SetSlowmodeCommand extends ModerationCommand {
         }
 
         Long secondsDuration = DurationParser.parseDurationSeconds(input);
-        if (secondsDuration == null || secondsDuration <= 0) {
+        if (secondsDuration == null) {
+            warn(moderator, "Invalid duration format. Usage: /slowmode <seconds|off>");
+            return true;
+        }
+
+        if (secondsDuration <= 0) {
             getModerationManager().setSlowmodeDelaySeconds(0);
             getModerationManager().broadcastToModerators(" §d§lSTAFF! §9" + moderator.getName() + " §ehas disabled §fChat Slowmode§e.");
             return true;

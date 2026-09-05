@@ -196,7 +196,7 @@ public final class ModerationListener implements Listener {
                     quittingPlayer.getName(),
                     PunishmentData.PunishmentType.BAN,
                     reason,
-                    quittingPlayer.getUniqueId(),
+                    PunishmentManager.CONSOLE_UUID,
                     "CONSOLE",
                     null,
                     ipAddress
@@ -214,10 +214,11 @@ public final class ModerationListener implements Listener {
         Iterator<Player> iterator = event.iterator();
         while (iterator.hasNext()) {
             Player player = iterator.next();
-            if (moderationManager.isModerator(player)
-                    && moderationManager.getModerator(player) instanceof BlightedModerator moderator
-                    && moderator.isVanished()) {
-                iterator.remove();
+            if (moderationManager.isModerator(player)) {
+                BlightedModerator moderator = moderationManager.getModeratorIfPresent(player);
+                if (moderator != null && moderator.isVanished()) {
+                    iterator.remove();
+                }
             }
         }
     }
@@ -339,6 +340,7 @@ public final class ModerationListener implements Listener {
         Material tool = attacker.getInventory().getItemInMainHand().getType();
         if (tool == Material.STICK && event.getEntity() instanceof Player victim) {
             moderationManager.getModerator(attacker).setTargetPlayer(victim);
+            event.setDamage(0);
             return;
         }
 

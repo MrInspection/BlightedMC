@@ -22,7 +22,7 @@ public final class ModerationManager {
 
     @Getter
     private final PunishmentManager punishmentManager;
-    private final Map<UUID, BlightedModerator> moderators = new HashMap<>();
+    private final Map<UUID, BlightedModerator> moderators = new ConcurrentHashMap<>();
     private final Set<UUID> frozenPlayers = new HashSet<>();
     private final Map<UUID, Location> frozenLocations = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastChatTimestamps = new ConcurrentHashMap<>();
@@ -53,6 +53,10 @@ public final class ModerationManager {
 
     public BlightedModerator getModerator(Player player) {
         return moderators.computeIfAbsent(player.getUniqueId(), _ -> new BlightedModerator(player));
+    }
+
+    public BlightedModerator getModeratorIfPresent(Player player) {
+        return moderators.get(player.getUniqueId());
     }
 
     public boolean isModerator(Player player) {
