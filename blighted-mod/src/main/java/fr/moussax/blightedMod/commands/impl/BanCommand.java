@@ -5,12 +5,12 @@ import fr.moussax.blightedMod.commands.ModerationCommand;
 import fr.moussax.blightedMod.moderator.punishments.DurationParser;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentArguments;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentData;
-import fr.moussax.blightedMod.moderator.punishments.PunishmentManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import static fr.moussax.bedrock.text.Messenger.warn;
 
@@ -84,19 +84,17 @@ public final class BanCommand extends ModerationCommand {
             return false;
         }
 
-        Player target = requireTarget(moderator, arguments[0]);
-        if (target == null) {
+        String targetName = arguments[0];
+        UUID targetId = getPunishmentManager().resolveBannedUuidByName(targetName);
+
+        if (targetId == null) {
+            warn(moderator, targetName + " is not banned.");
             return false;
         }
 
-        if (!getPunishmentManager().isBanned(target.getUniqueId())) {
-            warn(moderator, target.getName() + " is not banned.");
-            return false;
-        }
+        getPunishmentManager().removePunishment(targetId, PunishmentData.PunishmentType.BAN);
 
-        getPunishmentManager().removePunishment(target.getUniqueId(), PunishmentData.PunishmentType.BAN);
-
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unbanned §d" + target.getName() + "§e.";
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unbanned §d" + targetName + "§e.";
         getModerationManager().broadcastToModerators(notification);
 
         return true;
@@ -153,21 +151,29 @@ public final class BanCommand extends ModerationCommand {
             return false;
         }
 
-        Player target = requireTarget(moderator, arguments[0]);
-        if (target == null) {
-            return false;
+        String input = arguments[0];
+        String ipAddress = null;
+        String targetName = input;
+
+        if (getPunishmentManager().isIpBanned(input)) {
+            ipAddress = input;
+        } else {
+            for (PunishmentData punishment : getPunishmentManager().getAllPunishments(targetName)) {
+                if (punishment.ipAddress() != null && !punishment.ipAddress().isEmpty() && !"0.0.0.0".equals(punishment.ipAddress())) {
+                    ipAddress = punishment.ipAddress();
+                    break;
+                }
+            }
         }
 
-        String ipAddress = PunishmentManager.getPlayerIp(target);
-
-        if (!getPunishmentManager().isIpBanned(ipAddress)) {
+        if (ipAddress == null || !getPunishmentManager().isIpBanned(ipAddress)) {
             warn(moderator, "This IP is not banned.");
             return false;
         }
 
         getPunishmentManager().removeIpPunishment(ipAddress);
 
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unbanned IP for §d" + target.getName() + "§e.";
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unbanned IP for §d" + targetName + "§e.";
         getModerationManager().broadcastToModerators(notification);
 
         return true;

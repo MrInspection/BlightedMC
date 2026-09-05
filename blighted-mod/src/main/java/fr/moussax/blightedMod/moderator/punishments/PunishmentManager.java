@@ -149,6 +149,44 @@ public final class PunishmentManager {
         return punishment;
     }
 
+    /**
+     * Resolves the UUID of an actively banned player by name, using persisted punishment
+     * data instead of a live Mojang lookup.
+     *
+     * <p>Used to unban players who are offline — {@code requireTarget} only resolves
+     * online players, but a banned player is disconnected by the time {@code /unban}
+     * is run against them.</p>
+     *
+     * @param playerName the banned player's name
+     * @return the player's UUID, or {@code null} if no active ban matches
+     */
+    public UUID resolveBannedUuidByName(String playerName) {
+        String query = """
+                SELECT * FROM punishments
+                WHERE LOWER(player_name) = LOWER(?) AND punishment_type = 'BAN' AND is_active = 1
+                ORDER BY created_at DESC LIMIT 1
+                """;
+
+        PunishmentData punishment;
+        synchronized (connection) {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, playerName);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (!resultSet.next()) return null;
+                    punishment = mapResultSet(resultSet);
+                }
+            } catch (SQLException exception) {
+                throw new RuntimeException("Failed to resolve banned player", exception);
+            }
+        }
+
+        if (punishment.isExpired()) {
+            deactivatePunishment(punishment.id());
+            return null;
+        }
+        return punishment.playerUuid();
+    }
+
     public boolean isMuted(UUID playerUuid) {
         return getActivePunishment(playerUuid, PunishmentData.PunishmentType.MUTE) != null;
     }
