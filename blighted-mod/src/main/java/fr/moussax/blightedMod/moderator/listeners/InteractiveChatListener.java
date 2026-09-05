@@ -18,8 +18,6 @@ public final class InteractiveChatListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onNormalPlayerChat(AsyncPlayerChatEvent event) {
-        event.setCancelled(true);
-
         Player sender = event.getPlayer();
         String chatMessage = event.getMessage();
         String messageColor = moderationManager.isInModerationMode(sender) ? "§b" : "§f";
@@ -33,5 +31,6 @@ public final class InteractiveChatListener implements Listener {
         for (Player recipient : event.getRecipients()) {
             interactiveMessage.send(recipient);
         }
+        event.getRecipients().clear();
     }
 }
