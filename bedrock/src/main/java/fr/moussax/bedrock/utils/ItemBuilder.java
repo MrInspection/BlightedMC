@@ -12,6 +12,7 @@ import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntitySnapshot;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.inventory.meta.components.*;
@@ -54,7 +55,7 @@ public class ItemBuilder {
     private boolean unstackable;
     private List<Pattern> bannerPatterns;
 
-    private UUID skullOwnerUUID;
+    private PlayerProfile skullOwnerProfile;
     private String base64Texture;
     private Color leatherColor;
     private Color potionColor;
@@ -840,7 +841,23 @@ public class ItemBuilder {
      */
     public ItemBuilder setSkullOwner(@NonNull UUID playerId) {
         item.setType(Material.PLAYER_HEAD);
-        this.skullOwnerUUID = playerId;
+        this.skullOwnerProfile = Bukkit.createPlayerProfile(playerId);
+        this.base64Texture = null;
+        return this;
+    }
+
+    /**
+     * Sets the owner of a player head by player name.
+     *
+     * <p>The item type is changed to {@link Material#PLAYER_HEAD}.</p>
+     *
+     * @param playerName the owner's player name
+     * @return this builder
+     */
+    public ItemBuilder setSkullOwner(@NonNull String playerName) {
+        item.setType(Material.PLAYER_HEAD);
+        Player onlinePlayer = Bukkit.getPlayerExact(playerName);
+        this.skullOwnerProfile = onlinePlayer != null ? onlinePlayer.getPlayerProfile() : Bukkit.createPlayerProfile(playerName);
         this.base64Texture = null;
         return this;
     }
@@ -856,7 +873,7 @@ public class ItemBuilder {
     public ItemBuilder setCustomSkullTexture(@NonNull String base64Texture) {
         item.setType(Material.PLAYER_HEAD);
         this.base64Texture = base64Texture;
-        this.skullOwnerUUID = null;
+        this.skullOwnerProfile = null;
         return this;
     }
 
@@ -1004,9 +1021,8 @@ public class ItemBuilder {
 
     private void applySkullProperties() {
         if (item.getType() == Material.PLAYER_HEAD && itemMeta instanceof SkullMeta skullMeta) {
-            if (skullOwnerUUID != null) {
-                PlayerProfile profile = Bukkit.createPlayerProfile(skullOwnerUUID);
-                skullMeta.setOwnerProfile(profile);
+            if (skullOwnerProfile != null) {
+                skullMeta.setOwnerProfile(skullOwnerProfile);
             } else if (base64Texture != null) {
                 applyBase64Texture(skullMeta, base64Texture);
             }
