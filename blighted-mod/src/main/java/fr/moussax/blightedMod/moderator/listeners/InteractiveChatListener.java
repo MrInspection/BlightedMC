@@ -17,10 +17,10 @@ public final class InteractiveChatListener implements Listener {
         String chatMessage = event.getMessage();
 
         InteractiveMessage interactiveMessage = InteractiveMessage.text(" ")
-                .hoverAndExecute("§c⚑ ", "§cClick to report §f" + sender.getName(),
+                .hoverAndExecute("§c⚑ ", "§cClick to report §d" + sender.getName() + "§c.",
                         "/report chat " + sender.getName() + " " + chatMessage
                 )
-                .append("§7" + sender.getName() + " §f§l» §7" + chatMessage);
+                .append("§7" + sender.getName() + " §8§l» §f" + chatMessage);
 
         for (Player recipient : event.getRecipients()) {
             interactiveMessage.send(recipient);

@@ -64,9 +64,6 @@ public final class InvSeeMenu extends Menu implements TickableMenu {
                         "  §7Health: §f" + (int) target.getHealth() + "§c❤",
                         "  §7Food: §f" + target.getFoodLevel() + "§c\uD83C\uDF56",
                         "  §7Gamemode: §f" + target.getGameMode().name() + "  ",
-                        "",
-                        "  §7Ping: §d" + target.getPing() + "ms",
-                        "  §7IP Address: §d" + formatAddress(target.getAddress()) + " ",
                         ""
                 )
                 .setSkullOwner(target.getUniqueId())
@@ -93,13 +90,6 @@ public final class InvSeeMenu extends Menu implements TickableMenu {
         if (!isSameItem(displayItem, currentItem)) {
             setSlotItem(menuSlot, displayItem);
         }
-    }
-
-    private String formatAddress(InetSocketAddress socketAddress) {
-        if (socketAddress == null || socketAddress.getAddress() == null) {
-            return "Unknown";
-        }
-        return socketAddress.getAddress().getHostAddress();
     }
 
     private boolean isEmpty(ItemStack item) {

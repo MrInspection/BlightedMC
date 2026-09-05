@@ -1,7 +1,7 @@
 package fr.moussax.blightedMod.commands.impl;
 
-import fr.moussax.bedrock.ui.book.BookMenu;
 import fr.moussax.blightedMod.commands.ModerationCommand;
+import fr.moussax.blightedMod.moderator.menus.ReportsCenterMenu;
 import fr.moussax.blightedMod.moderator.reports.ReportData;
 import fr.moussax.blightedMod.moderator.reports.ReportManager;
 import org.bukkit.command.Command;
@@ -32,19 +32,7 @@ public final class CheckReportCommand extends ModerationCommand {
             return true;
         }
 
-        BookMenu bookMenu = BookMenu.builder()
-                .addPage(page -> page
-                        .append("  §1§lREPORT DETAILS\n")
-                        .append("§0Report ID: §8#" + report.id() + "\n")
-                        .append("§0Target: §c" + report.targetName() + "\n")
-                        .append("§0Reporter: §9" + report.reporterName() + "\n\n")
-                        .append("§0Reason: §8" + report.reason() + "\n\n")
-                        .append("§0Message:\n")
-                        .append("§8\"§7" + report.message() + "§8\"\n\n")
-                        .hoverAndExecute("§c▶ Dismiss Report", "§eClick to dismiss this report", "/reports dismiss " + report.id())
-                );
-
-        bookMenu.open(moderator);
+        ReportsCenterMenu.openReportBook(moderator, report);
         return true;
     }
 }

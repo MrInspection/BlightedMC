@@ -198,7 +198,7 @@ public final class SanctionsMenu extends PaginatedMenu implements TickableMenu {
         long totalKicks = punishments.stream().filter(punishment -> punishment.type() == PunishmentData.PunishmentType.KICK).count();
 
         ItemStack headItem = new ItemBuilder(Material.PLAYER_HEAD)
-                .setSkullOwner(Bukkit.getOfflinePlayer(targetName).getUniqueId())
+                .setSkullOwner(targetName)
                 .setDisplayName("§d" + targetName)
                 .addLore(
                         "",

@@ -30,12 +30,14 @@ public final class ReportMenu extends Menu {
                     "§7Destroying claims, stealing items,", "§7or damaging another player's property."),
             new ReportCategory(24, Material.COMPASS, "Cross-Teaming / Exploits",
                     "§7Teaming across alliances or abusing", "§7server bugs and game exploits."),
-            new ReportCategory(30, Material.SCAFFOLDING, "Inappropriate Build",
+            new ReportCategory(29, Material.SCAFFOLDING, "Inappropriate Build",
                     "§7Building offensive structures, hate", "§7symbols, or rule-breaking builds."),
-            new ReportCategory(31, Material.CLOCK, "Spam / Chat Flooding",
+            new ReportCategory(30, Material.CLOCK, "Spam / Chat Flooding",
                     "§7Flooding chat with repeated messages", "§7or excessive unwanted content."),
-            new ReportCategory(32, Material.WITHER_ROSE, "Harassment / Toxicity",
+            new ReportCategory(31, Material.WITHER_ROSE, "Harassment / Toxicity",
                     "§7Targeted harassment, hate speech,", "§7or persistently toxic behavior."),
+            new ReportCategory(32, Material.PAPER, "Other",
+                    "§7Any rule-breaking behavior not", "§7covered by the categories above."),
     };
 
     private final String targetName;
@@ -65,7 +67,7 @@ public final class ReportMenu extends Menu {
 
     private void renderTargetHead() {
         ItemStack headItem = new ItemBuilder(Material.PLAYER_HEAD)
-                .setSkullOwner(Bukkit.getOfflinePlayer(targetName).getUniqueId())
+                .setSkullOwner(targetName)
                 .setDisplayName("§d" + targetName)
                 .addLore(
                         "§8/report " + targetName, "",
@@ -91,23 +93,7 @@ public final class ReportMenu extends Menu {
     }
 
     private void handleReportSubmit(Player reporter, String categoryReason) {
-        ReportData report = ReportManager.getInstance().submitReport(
-                reporter.getName(),
-                targetName,
-                categoryReason,
-                attachedMessage
-        );
-
-        inform(reporter, " §a⚑ §7Your report §7has been submitted to online staff.");
-
-        InteractiveMessage notificationMessage = InteractiveMessage.text(" §d§lSTAFF! §f" + reporter.getName() + " §ereported §d" + targetName + " §efor §c" + categoryReason + "§e. ")
-                .hoverAndExecute("§6[DETAILS]", "§fClick to view §dreport §fdetails.", "/checkreport " + report.id())
-                .append(" ")
-                .hoverAndExecute("§b[MTP]", "§fClick to teleport to §d" + targetName + "§f.", "/mtp " + targetName)
-                .append(" ")
-                .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + targetName + "§f.", "/userinfo " + targetName);
-
-        ModerationManager.getInstance().broadcastToModerators(notificationMessage);
+        ReportManager.getInstance().submitAndNotify(reporter, targetName, categoryReason, attachedMessage);
         close();
     }
 }
