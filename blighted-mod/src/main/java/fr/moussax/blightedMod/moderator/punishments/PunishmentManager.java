@@ -145,39 +145,45 @@ public final class PunishmentManager {
         return getActiveIpBan(ipAddress) != null;
     }
 
-    public void addBan(Player target, Player moderator, String reason, Long expiresAt) {
+    public static final UUID CONSOLE_UUID = UUID.nameUUIDFromBytes("CONSOLE".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+    public static UUID getModeratorUuid(org.bukkit.command.CommandSender sender) {
+        return sender instanceof Player player ? player.getUniqueId() : CONSOLE_UUID;
+    }
+
+    public void addBan(Player target, org.bukkit.command.CommandSender moderator, String reason, Long expiresAt) {
         addPunishment(
                 target.getUniqueId(),
                 target.getName(),
                 PunishmentData.PunishmentType.BAN,
                 reason,
-                moderator.getUniqueId(),
+                getModeratorUuid(moderator),
                 moderator.getName(),
                 expiresAt,
                 getPlayerIp(target)
         );
     }
 
-    public void addMute(Player target, Player moderator, String reason, Long expiresAt) {
+    public void addMute(Player target, org.bukkit.command.CommandSender moderator, String reason, Long expiresAt) {
         addPunishment(
                 target.getUniqueId(),
                 target.getName(),
                 PunishmentData.PunishmentType.MUTE,
                 reason,
-                moderator.getUniqueId(),
+                getModeratorUuid(moderator),
                 moderator.getName(),
                 expiresAt,
                 getPlayerIp(target)
         );
     }
 
-    public void addIpBan(Player target, Player moderator, String reason, Long expiresAt) {
+    public void addIpBan(Player target, org.bukkit.command.CommandSender moderator, String reason, Long expiresAt) {
         addPunishment(
                 target.getUniqueId(),
                 target.getName(),
                 PunishmentData.PunishmentType.IP_BAN,
                 reason,
-                moderator.getUniqueId(),
+                getModeratorUuid(moderator),
                 moderator.getName(),
                 expiresAt,
                 getPlayerIp(target)

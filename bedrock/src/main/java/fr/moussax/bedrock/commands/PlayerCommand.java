@@ -63,11 +63,11 @@ public abstract class PlayerCommand implements CommandExecutor {
      *
      * <p>If no matching player is found, a warning is sent to the command sender.
      *
-     * @param sender the player requesting the lookup
+     * @param sender the command sender requesting the lookup
      * @param name   the exact username to resolve
      * @return the matching online player, or {@code null} if no player exists
      */
-    protected final @Nullable Player requireTarget(Player sender, String name) {
+    protected final @Nullable Player requireTarget(CommandSender sender, String name) {
         Player target = Bukkit.getPlayerExact(name);
 
         if (target == null) {
@@ -75,5 +75,18 @@ public abstract class PlayerCommand implements CommandExecutor {
         }
 
         return target;
+    }
+
+    /**
+     * Resolves an online player by their exact username.
+     *
+     * <p>If no matching player is found, a warning is sent to the command sender.
+     *
+     * @param sender the player requesting the lookup
+     * @param name   the exact username to resolve
+     * @return the matching online player, or {@code null} if no player exists
+     */
+    protected final @Nullable Player requireTarget(Player sender, String name) {
+        return requireTarget((CommandSender) sender, name);
     }
 }

@@ -17,7 +17,6 @@ import fr.moussax.blightedMod.commands.impl.SanctionsCommand;
 import fr.moussax.blightedMod.commands.impl.SetSlowmodeCommand;
 import fr.moussax.blightedMod.commands.impl.SocialSpyCommand;
 import fr.moussax.blightedMod.commands.impl.TargetCommand;
-import fr.moussax.blightedMod.commands.impl.TestModCommand;
 import fr.moussax.blightedMod.commands.impl.UserInfoCommand;
 import fr.moussax.blightedMod.commands.impl.VanishCommand;
 import org.bukkit.Bukkit;
@@ -71,8 +70,6 @@ public final class CommandsRegistry {
         registrar.register("msginspect", socialSpyCommand);
         registrar.register("spy", socialSpyCommand);
         registrar.register("socialspy", socialSpyCommand);
-
-        registrar.register("testmod", new TestModCommand());
     }
 
 

@@ -78,6 +78,3 @@ commands:
     description: Toggle private message inspection (SocialSpy).
     aliases: [spy, socialspy]
     permission: blightedmod.moderator
-  testmod:
-    description: Test and review all moderator chat message formatting.
-    permission: blightedmod.moderator
