@@ -4,7 +4,6 @@ import fr.moussax.bedrock.commands.CommandArgument;
 import fr.moussax.blightedMod.commands.ModerationCommand;
 import fr.moussax.blightedMod.moderator.punishments.DurationParser;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentData;
-import fr.moussax.blightedMod.moderator.punishments.PunishmentManager;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
@@ -52,21 +51,11 @@ public final class MuteCommand extends ModerationCommand {
         String reason = arguments.length > reasonStartIndex
                 ? String.join(" ", Arrays.copyOfRange(arguments, reasonStartIndex, arguments.length))
                 : "No reason specified";
-        String ipAddress = PunishmentManager.getPlayerIp(target);
 
-        getPunishmentManager().addPunishment(
-                target.getUniqueId(),
-                target.getName(),
-                PunishmentData.PunishmentType.MUTE,
-                reason,
-                moderator.getUniqueId(),
-                moderator.getName(),
-                expiresAt,
-                ipAddress
-        );
+        getPunishmentManager().addMute(target, moderator, reason, expiresAt);
 
         String durationText = expiresAt != null ? "for §6" + DurationParser.formatDuration(arguments[1]) + " " : "";
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e muted §d" + target.getName() + " §e" + durationText + "for §c" + reason + "§e.";
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e muted §d" + target.getName() + " §e" + durationText + "§efor §c" + reason + "§e.";
 
         getModerationManager().broadcastToModerators(notification);
         String durationString = expiresAt != null ? "for §6" + DurationParser.formatDuration(arguments[1]) + " §7" : "";

@@ -715,19 +715,32 @@ public abstract class Menu implements InventoryHolder {
         slots.clear();
         build(player);
 
-        if (player.getOpenInventory().getTopInventory().getHolder() == this) {
-            player.getOpenInventory().setTitle(this.title);
+        var openInventory = player.getOpenInventory();
+        if (openInventory.getTopInventory().getHolder() == this && !openInventory.getTitle().equals(this.title)) {
+            openInventory.setTitle(this.title);
         }
 
+        boolean changed = false;
         for (int slot = 0; slot < size; slot++) {
             MenuSlot menuSlot = slots.get(slot);
-            if (menuSlot != null) {
-                inventory.setItem(slot, menuSlot.item);
-            } else if (!isInteractable(slot)) {
-                inventory.setItem(slot, null);
+            ItemStack newItem = menuSlot != null ? menuSlot.item : null;
+            ItemStack currentItem = inventory.getItem(slot);
+
+            if (!isSameItem(currentItem, newItem)) {
+                inventory.setItem(slot, newItem);
+                changed = true;
             }
         }
-        player.updateInventory();
+
+        if (changed) {
+            player.updateInventory();
+        }
+    }
+
+    private boolean isSameItem(@Nullable ItemStack first, @Nullable ItemStack second) {
+        if (first == null && second == null) return true;
+        if (first == null || second == null) return false;
+        return first.getAmount() == second.getAmount() && first.isSimilar(second);
     }
 
     /**

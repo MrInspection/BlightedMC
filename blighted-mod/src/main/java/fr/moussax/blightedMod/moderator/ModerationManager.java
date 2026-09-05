@@ -19,6 +19,7 @@ public final class ModerationManager {
         STAFF
     }
 
+    @Getter
     private final PunishmentManager punishmentManager;
     private final Map<UUID, BlightedModerator> moderators = new HashMap<>();
     private final Set<UUID> frozenPlayers = new HashSet<>();
@@ -26,11 +27,8 @@ public final class ModerationManager {
     private final Map<UUID, ChatChannel> playerChatChannels = new ConcurrentHashMap<>();
     private final Set<UUID> messageInspectEnabled = ConcurrentHashMap.newKeySet();
     private final Map<UUID, UUID> lastMessageTargets = new ConcurrentHashMap<>();
+    @Getter
     private int slowmodeDelaySeconds = 0;
-
-    public PunishmentManager getPunishmentManager() {
-        return punishmentManager;
-    }
 
     private ModerationManager(PunishmentManager punishmentManager) {
         this.punishmentManager = punishmentManager;
@@ -94,10 +92,6 @@ public final class ModerationManager {
 
     public void setSlowmodeDelaySeconds(int seconds) {
         this.slowmodeDelaySeconds = Math.max(0, seconds);
-    }
-
-    public int getSlowmodeDelaySeconds() {
-        return slowmodeDelaySeconds;
     }
 
     public boolean isSlowmodeEnabled() {

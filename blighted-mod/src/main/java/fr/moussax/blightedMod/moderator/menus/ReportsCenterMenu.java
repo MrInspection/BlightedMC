@@ -1,8 +1,6 @@
 package fr.moussax.blightedMod.moderator.menus;
 
 import fr.moussax.bedrock.ui.menu.TickableMenu;
-import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
-import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.bedrock.ui.menu.types.PaginatedMenu;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedMod.moderator.ModerationManager;
@@ -20,26 +18,10 @@ import java.util.List;
 import static fr.moussax.bedrock.text.Messenger.inform;
 import static fr.moussax.bedrock.text.Messenger.warn;
 
-/**
- * Paginated menu displaying active player reports for staff review.
- * Ticks periodically to support real-time updates while open.
- */
 public final class ReportsCenterMenu extends PaginatedMenu implements TickableMenu {
-
-    private static final int[] REPORT_SLOTS = {
-            10, 11, 12, 13, 14, 15, 16,
-            19, 20, 21, 22, 23, 24, 25,
-            28, 29, 30, 31, 32, 33, 34,
-            37, 38, 39, 40, 41, 42, 43
-    };
 
     public ReportsCenterMenu() {
         super("Active Reports", 54);
-    }
-
-    @Override
-    public long tickPeriodTicks() {
-        return 20L;
     }
 
     @Override
@@ -53,8 +35,16 @@ public final class ReportsCenterMenu extends PaginatedMenu implements TickableMe
     }
 
     @Override
-    protected int getItemsPerPage() {
-        return REPORT_SLOTS.length;
+    protected int[] getDisplaySlots() {
+        return INNER_GRID_SLOTS;
+    }
+
+    @Override
+    protected ItemStack getEmptyStateItem(@NonNull Player player) {
+        return new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
+                .setDisplayName("§cNo Active Reports")
+                .addLore("§7There are currently no active reports.")
+                .toItemStack();
     }
 
     @Override
@@ -85,57 +75,6 @@ public final class ReportsCenterMenu extends PaginatedMenu implements TickableMe
                 .addLore("§cRight-Click §7to dismiss");
 
         return builder.toItemStack();
-    }
-
-    @Override
-    public void build(@NonNull Player viewer) {
-        totalItems = Math.max(0, getTotalItems(viewer));
-
-        int itemsPerPage = getItemsPerPage();
-        int maxPage = Math.max(0, (totalItems - 1) / itemsPerPage);
-        currentPage = Math.min(currentPage, maxPage);
-
-        int startIndex = currentPage * itemsPerPage;
-        int endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-        clearInventory();
-
-        List<ReportData> reports = ReportManager.getInstance().getActiveReports();
-        if (reports.isEmpty()) {
-            ItemStack noReportsItem = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
-                    .setDisplayName("§cNo Active Reports")
-                    .addLore("§7There are currently no active reports.")
-                    .toItemStack();
-
-            setItem(22, noReportsItem, MenuItemInteraction.ANY_CLICK, (player, _) -> { });
-        } else {
-            int slotIndex = 0;
-            for (int i = startIndex; i < endIndex && slotIndex < REPORT_SLOTS.length; i++, slotIndex++) {
-                final int index = i;
-                setItem(
-                        REPORT_SLOTS[slotIndex],
-                        getItem(viewer, index),
-                        MenuItemInteraction.ANY_CLICK,
-                        (player, click) -> onItemClick(player, index, click)
-                );
-            }
-        }
-
-        if (currentPage > 0) {
-            setBackButton(48, (player, _) -> {
-                currentPage--;
-                refresh(player);
-            });
-        }
-
-        if (endIndex < totalItems) {
-            setItem(50, MenuElementPreset.NEXT_BUTTON, (player, _) -> {
-                currentPage++;
-                refresh(player);
-            });
-        }
-
-        setCloseButton(49);
     }
 
     @Override

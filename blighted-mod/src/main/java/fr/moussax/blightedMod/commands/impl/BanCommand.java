@@ -9,6 +9,7 @@ import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import static fr.moussax.bedrock.text.Messenger.warn;
 
@@ -20,19 +21,12 @@ public final class BanCommand extends ModerationCommand {
 
     @Override
     protected boolean executeModeration(Player moderator, Command command, String label, String[] arguments) {
-        if (label.equalsIgnoreCase("unban")) {
-            return handleUnban(moderator, arguments);
-        }
-
-        if (label.equalsIgnoreCase("banip")) {
-            return handleBanIp(moderator, arguments);
-        }
-
-        if (label.equalsIgnoreCase("unbanip")) {
-            return handleUnbanIp(moderator, arguments);
-        }
-
-        return handleBan(moderator, arguments);
+        return switch (label.toLowerCase(Locale.ROOT)) {
+            case "unban" -> handleUnban(moderator, arguments);
+            case "banip" -> handleBanIp(moderator, arguments);
+            case "unbanip" -> handleUnbanIp(moderator, arguments);
+            default -> handleBan(moderator, arguments);
+        };
     }
 
     private boolean handleBan(Player moderator, String[] arguments) {
@@ -63,18 +57,8 @@ public final class BanCommand extends ModerationCommand {
         String reason = arguments.length > reasonStartIndex
                 ? String.join(" ", Arrays.copyOfRange(arguments, reasonStartIndex, arguments.length))
                 : "No reason specified";
-        String ipAddress = PunishmentManager.getPlayerIp(target);
 
-        getPunishmentManager().addPunishment(
-                target.getUniqueId(),
-                target.getName(),
-                PunishmentData.PunishmentType.BAN,
-                reason,
-                moderator.getUniqueId(),
-                moderator.getName(),
-                expiresAt,
-                ipAddress
-        );
+        getPunishmentManager().addBan(target, moderator, reason, expiresAt);
 
         String durationText = expiresAt != null ? DurationParser.formatDuration(arguments[1]) : "Permanent";
         String banMessage = """
@@ -88,7 +72,7 @@ public final class BanCommand extends ModerationCommand {
         target.kickPlayer(banMessage);
 
         String durationString = expiresAt != null ? " for §6" + durationText + "§e" : " permanently";
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e banned §9" + target.getName() + "§e" + durationString + " for §c" + reason + "§e.";
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e banned §d" + target.getName() + "§e" + durationString + " for §c" + reason + "§e.";
         getModerationManager().broadcastToModerators(notification);
 
         return true;
@@ -112,7 +96,7 @@ public final class BanCommand extends ModerationCommand {
 
         getPunishmentManager().removePunishment(target.getUniqueId(), PunishmentData.PunishmentType.BAN);
 
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unbanned §9" + target.getName() + "§e.";
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unbanned §d" + target.getName() + "§e.";
         getModerationManager().broadcastToModerators(notification);
 
         return true;
@@ -146,18 +130,8 @@ public final class BanCommand extends ModerationCommand {
         String reason = arguments.length > reasonStartIndex
                 ? String.join(" ", Arrays.copyOfRange(arguments, reasonStartIndex, arguments.length))
                 : "No reason specified";
-        String ipAddress = PunishmentManager.getPlayerIp(target);
 
-        getPunishmentManager().addPunishment(
-                target.getUniqueId(),
-                target.getName(),
-                PunishmentData.PunishmentType.IP_BAN,
-                reason,
-                moderator.getUniqueId(),
-                moderator.getName(),
-                expiresAt,
-                ipAddress
-        );
+        getPunishmentManager().addIpBan(target, moderator, reason, expiresAt);
 
         String durationText = expiresAt != null ? DurationParser.formatDuration(arguments[1]) : "Permanent";
         String banMessage = """
@@ -170,7 +144,7 @@ public final class BanCommand extends ModerationCommand {
 
         target.kickPlayer(banMessage);
 
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e IP banned §9" + target.getName() + "§e for §c" + reason + "§e.";
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e IP banned §d" + target.getName() + "§e for §c" + reason + "§e.";
         getModerationManager().broadcastToModerators(notification);
 
         return true;

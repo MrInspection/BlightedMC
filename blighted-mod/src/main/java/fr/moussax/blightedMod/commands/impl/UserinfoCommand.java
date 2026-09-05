@@ -8,14 +8,13 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
+import org.bukkit.attribute.Attribute;
+import java.util.Objects;
 import java.util.List;
 
 import static fr.moussax.bedrock.text.Messenger.inform;
 import static fr.moussax.bedrock.text.Messenger.warn;
 
-/**
- * Moderation command to view detailed player info (/userinfo <player>).
- */
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class UserInfoCommand extends ModerationCommand {
 
@@ -33,8 +32,8 @@ public final class UserInfoCommand extends ModerationCommand {
 
         String ipAddress = PunishmentManager.getPlayerIp(target);
         Location location = target.getLocation();
-        // ponytail: kept — Spigot 26.2 returns double for getMaxHealth(); direct Bukkit API call used for health percentage.
-        int healthPercent = (int) Math.round((target.getHealth() / target.getMaxHealth()) * 100.0);
+        double maxHealth = Objects.requireNonNull(target.getAttribute(Attribute.MAX_HEALTH)).getValue();
+        int healthPercent = (int) Math.round((target.getHealth() / maxHealth) * 100.0);
 
         List<PunishmentData> punishments = getPunishmentManager().getAllPunishments(target.getName());
         long mutesCount = punishments.stream().filter(punishment -> punishment.type() == PunishmentData.PunishmentType.MUTE).count();

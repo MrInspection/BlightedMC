@@ -227,9 +227,14 @@ public final class PunishmentManager {
     }
 
     public static String getPlayerIp(Player player) {
-        InetSocketAddress address = player.getAddress();
-        if (address == null || address.getAddress() == null) return "0.0.0.0";
-        String host = address.getAddress().getHostAddress();
-        return host != null ? host : "0.0.0.0";
+        try {
+            if (player == null) return "0.0.0.0";
+            InetSocketAddress address = player.getAddress();
+            if (address == null || address.getAddress() == null) return "0.0.0.0";
+            String host = address.getAddress().getHostAddress();
+            return host != null ? host : "0.0.0.0";
+        } catch (Throwable _) {
+            return "0.0.0.0";
+        }
     }
 }

@@ -47,12 +47,15 @@ public final class MenuSystem {
     private void tickActiveMenus() {
         tickCounter++;
         for (Map.Entry<UUID, Menu> entry : activeMenus.entrySet()) {
-            if (!(entry.getValue() instanceof TickableMenu tickable)) continue;
-            if (tickCounter % Math.max(1L, tickable.tickPeriodTicks()) != 0) continue;
+            try {
+                if (!(entry.getValue() instanceof TickableMenu tickable)) continue;
+                if (tickCounter % Math.max(1L, tickable.tickPeriodTicks()) != 0) continue;
 
-            Player player = plugin.getServer().getPlayer(entry.getKey());
-            if (player != null && player.isOnline()) {
-                tickable.onTick(player);
+                Player player = plugin.getServer().getPlayer(entry.getKey());
+                if (player != null && player.isOnline()) {
+                    tickable.onTick(player);
+                }
+            } catch (Throwable _) {
             }
         }
     }

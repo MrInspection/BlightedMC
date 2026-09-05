@@ -7,29 +7,21 @@ import fr.moussax.blightedMod.moderator.ModerationManager;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentManager;
 import fr.moussax.blightedMod.registry.CommandsRegistry;
 import fr.moussax.blightedMod.registry.EventsRegistry;
+import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
 
 public final class BlightedMod extends JavaPlugin {
 
+    @Getter
     private static BlightedMod instance;
 
+    @Getter
     private PluginDatabase pluginDatabase;
+    @Getter
     private ModerationManager moderationManager;
     private EventsRegistry eventsRegistry;
-
-    public static BlightedMod getInstance() {
-        return instance;
-    }
-
-    public PluginDatabase getPluginDatabase() {
-        return pluginDatabase;
-    }
-
-    public ModerationManager getModerationManager() {
-        return moderationManager;
-    }
 
     @Override
     public void onEnable() {

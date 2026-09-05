@@ -106,21 +106,36 @@ public final class ActionbarComposer {
             }
         }
 
-        return sections.values().stream()
+        var visibleSections = sections.values().stream()
                 .filter(section -> section.visibility().test(player))
                 .sorted(Comparator.comparingInt(ActionbarSection::priority))
-                .map(section -> {
-                    TimedAlert alert = slotAlerts.get(section.id());
-                    if (alert != null) {
-                        if (!alert.isExpired()) {
-                            return alert.message();
-                        }
-                        slotAlerts.remove(section.id());
-                    }
-                    return section.textSupplier().apply(player);
-                })
+                .toList();
+
+        // ponytail: kept — exclusive section overrides default actionbar when active
+        for (ActionbarSection section : visibleSections) {
+            if (section.exclusive()) {
+                String text = evaluateSection(section, player);
+                if (text != null && !text.isEmpty()) {
+                    return text;
+                }
+            }
+        }
+
+        return visibleSections.stream()
+                .map(section -> evaluateSection(section, player))
                 .filter(Objects::nonNull)
                 .filter(sectionText -> !sectionText.isEmpty())
                 .collect(Collectors.joining(separator));
+    }
+
+    private String evaluateSection(ActionbarSection section, Player player) {
+        TimedAlert alert = slotAlerts.get(section.id());
+        if (alert != null) {
+            if (!alert.isExpired()) {
+                return alert.message();
+            }
+            slotAlerts.remove(section.id());
+        }
+        return section.textSupplier().apply(player);
     }
 }

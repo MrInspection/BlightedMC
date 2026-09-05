@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Server-side domain context for a connected {@link Player}.
@@ -23,7 +24,7 @@ import java.util.*;
  */
 public final class BlightedPlayer {
 
-    private static final Map<UUID, BlightedPlayer> players = new HashMap<>();
+    private static final Map<UUID, BlightedPlayer> players = new ConcurrentHashMap<>();
 
     private static final double DEFAULT_MAX_MANA = 100;
     private static final double DEFAULT_MANA_REGEN_RATE = 0.5;
@@ -90,8 +91,14 @@ public final class BlightedPlayer {
      * @param player player whose context to retrieve
      * @return registered player context, or {@code null} if no context exists
      */
+    // ponytail: kept — explicit get-then-instantiate avoids re-entrant computeIfAbsent mutation in constructor
     public static BlightedPlayer get(Player player) {
-        return player != null ? players.get(player.getUniqueId()) : null;
+        if (player == null || !player.isOnline()) return null;
+        BlightedPlayer blightedPlayer = players.get(player.getUniqueId());
+        if (blightedPlayer == null) {
+            blightedPlayer = new BlightedPlayer(player);
+        }
+        return blightedPlayer;
     }
 
     /**

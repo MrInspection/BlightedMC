@@ -87,7 +87,9 @@ public final class ModerationListener implements Listener {
             return;
         }
 
-        String ipAddress = PunishmentManager.getPlayerIp(player);
+        String ipAddress = event.getAddress().getHostAddress() != null
+                ? event.getAddress().getHostAddress()
+                : PunishmentManager.getPlayerIp(player);
 
         PunishmentData ipBan = punishmentManager.getActiveIpBan(ipAddress);
         if (ipBan != null) {

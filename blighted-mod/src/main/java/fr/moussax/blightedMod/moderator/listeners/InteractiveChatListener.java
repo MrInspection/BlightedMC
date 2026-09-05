@@ -7,9 +7,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-/**
- * Handles interactive chat flag rendering for chat reporting via /report chat <target> <message>.
- */
 public final class InteractiveChatListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -20,9 +17,7 @@ public final class InteractiveChatListener implements Listener {
         String chatMessage = event.getMessage();
 
         InteractiveMessage interactiveMessage = InteractiveMessage.text(" ")
-                .hoverAndExecute(
-                        "§c⚑ ",
-                        "§cClick to report §f" + sender.getName(),
+                .hoverAndExecute("§c⚑ ", "§cClick to report §f" + sender.getName(),
                         "/report chat " + sender.getName() + " " + chatMessage
                 )
                 .append("§7" + sender.getName() + " §f§l» §7" + chatMessage);

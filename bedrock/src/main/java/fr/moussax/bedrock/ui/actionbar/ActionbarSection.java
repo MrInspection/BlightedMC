@@ -19,7 +19,8 @@ public record ActionbarSection(
         @NonNull String id,
         int priority,
         @NonNull Function<Player, @Nullable String> textSupplier,
-        @NonNull Predicate<Player> visibility
+        @NonNull Predicate<Player> visibility,
+        boolean exclusive
 ) {
     /**
      * Creates an action bar section that is always visible for all players.
@@ -30,7 +31,7 @@ public record ActionbarSection(
      * @return created action bar section
      */
     public static ActionbarSection of(String id, int priority, Function<Player, @Nullable String> textSupplier) {
-        return new ActionbarSection(id, priority, textSupplier, player -> true);
+        return new ActionbarSection(id, priority, textSupplier, player -> true, false);
     }
 
     /**
@@ -43,6 +44,19 @@ public record ActionbarSection(
      * @return created action bar section
      */
     public static ActionbarSection of(String id, int priority, Function<Player, @Nullable String> textSupplier, Predicate<Player> visibility) {
-        return new ActionbarSection(id, priority, textSupplier, visibility);
+        return new ActionbarSection(id, priority, textSupplier, visibility, false);
+    }
+
+    /**
+     * Creates an exclusive action bar section that overrides non-exclusive sections when visible.
+     *
+     * @param id           unique section identifier
+     * @param priority     rendering priority
+     * @param textSupplier text supplier function
+     * @param visibility   predicate controlling section display
+     * @return created exclusive action bar section
+     */
+    public static ActionbarSection exclusiveOf(String id, int priority, Function<Player, @Nullable String> textSupplier, Predicate<Player> visibility) {
+        return new ActionbarSection(id, priority, textSupplier, visibility, true);
     }
 }
