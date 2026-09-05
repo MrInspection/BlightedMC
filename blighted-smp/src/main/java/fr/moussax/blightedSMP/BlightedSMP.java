@@ -13,7 +13,9 @@ import fr.moussax.blightedSMP.server.database.PluginDatabase;
 import fr.moussax.bedrock.scheduling.PluginContext;
 import fr.moussax.bedrock.utils.debug.Log;
 import lombok.Getter;
+import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
@@ -57,6 +59,10 @@ public final class BlightedSMP extends JavaPlugin {
         eventsRegistry = new EventsRegistry();
         eventsRegistry.initializeListeners();
         eventsRegistry.buildSpawnCache();
+
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            BlightedPlayer.get(onlinePlayer);
+        }
 
         BlightedServer.rehydrateEntitiesOnLoadedChunks(this);
         new BlightedSpawnEngine().runTaskTimer(this, 100L, 20L);

@@ -5,12 +5,12 @@ import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Assembles and formats per-player action bar text from active sections and temporary alerts.
@@ -91,8 +91,10 @@ public final class ActionbarComposer {
     /**
      * Compiles the formatted action bar message string for a given player.
      *
-     * <p>If an active modal alert exists, its message is returned immediately. Otherwise,
-     * visible sections are sorted by priority and joined with the configured separator.</p>
+     * <p>If an active modal alert exists, its message is returned immediately. Otherwise, if any
+     * visible exclusive sections produce non-empty text, the exclusive section with the highest priority
+     * is returned. If no exclusive section produces content, visible normal sections are sorted by
+     * rendering priority (lowest first) and joined with the configured separator.</p>
      *
      * @param player player for whom to compile action bar content
      * @return compiled action bar text, or an empty string if no content is visible
@@ -106,21 +108,47 @@ public final class ActionbarComposer {
             }
         }
 
-        return sections.values().stream()
+        List<ActionbarSection> visibleSections = sections.values().stream()
                 .filter(section -> section.visibility().test(player))
+                .toList();
+
+        List<ActionbarSection> exclusiveSections = visibleSections.stream()
+                .filter(ActionbarSection::exclusive)
+                .sorted(Comparator.comparingInt(ActionbarSection::priority).reversed()
+                        .thenComparing(ActionbarSection::id))
+                .toList();
+
+        for (ActionbarSection exclusiveSection : exclusiveSections) {
+            String text = evaluateSection(exclusiveSection, player);
+            if (text != null && !text.isEmpty()) {
+                return text;
+            }
+        }
+
+        List<ActionbarSection> normalSections = visibleSections.stream()
+                .filter(section -> !section.exclusive())
                 .sorted(Comparator.comparingInt(ActionbarSection::priority))
-                .map(section -> {
-                    TimedAlert alert = slotAlerts.get(section.id());
-                    if (alert != null) {
-                        if (!alert.isExpired()) {
-                            return alert.message();
-                        }
-                        slotAlerts.remove(section.id());
-                    }
-                    return section.textSupplier().apply(player);
-                })
-                .filter(Objects::nonNull)
-                .filter(sectionText -> !sectionText.isEmpty())
-                .collect(Collectors.joining(separator));
+                .toList();
+
+        List<String> evaluatedTexts = new ArrayList<>(normalSections.size());
+        for (ActionbarSection section : normalSections) {
+            String text = evaluateSection(section, player);
+            if (text != null && !text.isEmpty()) {
+                evaluatedTexts.add(text);
+            }
+        }
+
+        return String.join(separator, evaluatedTexts);
+    }
+
+    private String evaluateSection(ActionbarSection section, Player player) {
+        TimedAlert alert = slotAlerts.get(section.id());
+        if (alert != null) {
+            if (!alert.isExpired()) {
+                return alert.message();
+            }
+            slotAlerts.remove(section.id());
+        }
+        return section.textSupplier().apply(player);
     }
 }

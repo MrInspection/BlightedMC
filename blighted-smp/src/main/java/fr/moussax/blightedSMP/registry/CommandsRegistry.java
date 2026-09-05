@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.registry;
 
-import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.bedrock.commands.CommandRegistrar;
 import fr.moussax.bedrock.commands.TabSuggestionRegistry;
 import fr.moussax.blightedSMP.commands.impl.*;
@@ -10,6 +9,7 @@ import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Central registry for all plugin commands.
@@ -28,35 +28,31 @@ public final class CommandsRegistry {
      *
      * @param plugin plugin instance used by the command registrar
      */
-    public static void register(BlightedSMP plugin) {
+    public static void register(JavaPlugin plugin) {
         TabSuggestionRegistry suggestions = createSuggestionRegistry();
-        CommandRegistrar commands = new CommandRegistrar(plugin, suggestions);
+        CommandRegistrar registrar = new CommandRegistrar(plugin, suggestions);
 
-        commands.register("altar", new AltarCommand());
-        commands.register("craft", new CraftCommand());
-        commands.register("forge", new ForgeCommand());
+        registrar.register("altar", new AltarCommand());
+        registrar.register("craft", new CraftCommand());
+        registrar.register("forge", new ForgeCommand());
 
         // Administrator Commands
-        commands.register("spawncustommob", new SpawnCustomMobCommand());
-        commands.register("giveitem", new GiveItemCommand());
-        commands.register("gems", new GemsCommand());
-        commands.register("tppos", new TeleportPositionCommand());
-        commands.register("invsee", new InvseeCommand());
-        commands.register("endersee", new EnderseeCommand());
-
-        // Administrator Utilities
+        registrar.register("spawncustommob", new SpawnCustomMobCommand());
+        registrar.register("giveitem", new GiveItemCommand());
+        registrar.register("gems", new GemsCommand());
+        registrar.register("tppos", new TeleportPositionCommand());
         GamemodeCommands gamemodeCommands = new GamemodeCommands();
-        commands.register("gmc", gamemodeCommands);
-        commands.register("gms", gamemodeCommands);
-        commands.register("gma", gamemodeCommands);
-        commands.register("gmspec", gamemodeCommands);
-        commands.register("fly", new FlyCommand());
-        commands.register("god", new GodCommand());
-        commands.register("nightvision", new NightVisionCommand());
-        commands.register("speed", new SpeedCommand());
-        commands.register("butcher", new ButcherCommand());
-        commands.register("loop", new LoopCommand());
-        commands.register("test", new TestCommand());
+        registrar.register("gmc", gamemodeCommands);
+        registrar.register("gms", gamemodeCommands);
+        registrar.register("gma", gamemodeCommands);
+        registrar.register("gmspec", gamemodeCommands);
+        registrar.register("fly", new FlyCommand());
+        registrar.register("god", new GodCommand());
+        registrar.register("nightvision", new NightVisionCommand());
+        registrar.register("speed", new SpeedCommand());
+        registrar.register("butcher", new ButcherCommand());
+        registrar.register("loop", new LoopCommand());
+        registrar.register("test", new TestCommand());
     }
 
     /**
@@ -70,28 +66,22 @@ public final class CommandsRegistry {
     private static TabSuggestionRegistry createSuggestionRegistry() {
         TabSuggestionRegistry suggestions = new TabSuggestionRegistry();
 
-        suggestions.register(
-                "$players",
-                () -> Bukkit.getOnlinePlayers()
-                        .stream()
-                        .map(Player::getName)
-                        .toList()
+        suggestions.register("$players", () -> Bukkit.getOnlinePlayers()
+                .stream()
+                .map(Player::getName)
+                .toList()
         );
 
-        suggestions.register(
-                "$items",
-                () -> ItemRegistry.getAllItems()
-                        .stream()
-                        .map(BlightedItem::getItemId)
-                        .toList()
+        suggestions.register("$items", () -> ItemRegistry.getAllItems()
+                .stream()
+                .map(BlightedItem::getItemId)
+                .toList()
         );
 
-        suggestions.register(
-                "$entities",
-                () -> EntitiesRegistry.getAll()
-                        .stream()
-                        .map(BlightedEntity::getEntityId)
-                        .toList()
+        suggestions.register("$entities", () -> EntitiesRegistry.getAll()
+                .stream()
+                .map(BlightedEntity::getEntityId)
+                .toList()
         );
 
         return suggestions;

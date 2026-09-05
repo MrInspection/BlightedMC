@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Server-side domain context for a connected {@link Player}.
@@ -23,7 +24,7 @@ import java.util.*;
  */
 public final class BlightedPlayer {
 
-    private static final Map<UUID, BlightedPlayer> players = new HashMap<>();
+    private static final Map<UUID, BlightedPlayer> players = new ConcurrentHashMap<>();
 
     private static final double DEFAULT_MAX_MANA = 100;
     private static final double DEFAULT_MANA_REGEN_RATE = 0.5;
@@ -54,11 +55,14 @@ public final class BlightedPlayer {
     private int forgeFuel;
 
     /**
-     * Constructs and registers a player context for an online Bukkit player.
+     * Constructs a player context for an online Bukkit player.
+     *
+     * <p>This constructor is private; instances are instantiated exclusively through
+     * {@link #get(Player)} to ensure registration in the active players map.</p>
      *
      * @param player player represented by this context
      */
-    public BlightedPlayer(Player player) {
+    private BlightedPlayer(Player player) {
         this.player = player;
         this.playerId = player.getUniqueId();
         this.dataHandler = new PlayerDataHandler(playerId, player.getName());
@@ -71,8 +75,6 @@ public final class BlightedPlayer {
                 .orElse(DEFAULT_MANA_REGEN_RATE);
         setCurrentMana(dataHandler.getSavedMana());
         this.forgeFuel = dataHandler.getSavedForgeFuel();
-
-        players.put(playerId, this);
 
         ArmorManager.updatePlayerArmor(this);
     }
@@ -91,7 +93,8 @@ public final class BlightedPlayer {
      * @return registered player context, or {@code null} if no context exists
      */
     public static BlightedPlayer get(Player player) {
-        return player != null ? players.get(player.getUniqueId()) : null;
+        if (player == null || !player.isOnline()) return null;
+        return players.computeIfAbsent(player.getUniqueId(), _ -> new BlightedPlayer(player));
     }
 
     /**

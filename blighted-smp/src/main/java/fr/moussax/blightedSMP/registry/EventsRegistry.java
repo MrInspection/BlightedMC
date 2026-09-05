@@ -20,7 +20,6 @@ import fr.moussax.bedrock.ui.actionbar.ActionbarService;
 import fr.moussax.bedrock.ui.menu.system.MenuListener;
 import fr.moussax.bedrock.ui.menu.system.MenuSystem;
 import fr.moussax.bedrock.ui.sign.SignInputListener;
-import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 

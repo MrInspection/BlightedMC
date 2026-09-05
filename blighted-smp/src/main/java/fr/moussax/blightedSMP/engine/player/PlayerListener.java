@@ -20,7 +20,7 @@ public final class PlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        new BlightedPlayer(event.getPlayer());
+        BlightedPlayer.get(event.getPlayer());
         event.setJoinMessage(" §f" + event.getPlayer().getName() + " §7joined the SMP.");
 
         if (!player.hasPlayedBefore()) {

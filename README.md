@@ -13,6 +13,7 @@ A Spigot 26.2 plugin providing a high-difficulty survival experience inspired by
 
 - **`bedrock`**: Core framework module handling UI menus, action bars, announcements, scheduling, and utility systems.
 - **`blighted-smp`**: Primary SMP plugin module containing custom items, mobs, abilities, recipes, and gameplay mechanics.
+- **`blighted-mod`**: Moderation plugin attaching to the SMP server.
 
 ## Requirements
 

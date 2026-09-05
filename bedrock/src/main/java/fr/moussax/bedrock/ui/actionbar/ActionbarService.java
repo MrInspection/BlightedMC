@@ -25,6 +25,7 @@ import java.util.function.Consumer;
  */
 public final class ActionbarService implements Listener {
 
+    // ponytail: kept — shared instance across plugins avoids actionbar packet collisions
     @Getter
     @Setter
     private static ActionbarService instance;
@@ -52,10 +53,14 @@ public final class ActionbarService implements Listener {
      * @param periodTicks interval between renders in server ticks
      */
     public void start(long periodTicks) {
-        if (running) return;
+        if (running && tickerTask != null && !tickerTask.isCancelled()) return;
         running = true;
 
-        this.tickerTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tickAll, periodTicks, periodTicks);
+        if (tickerTask != null) {
+            tickerTask.cancel();
+        }
+
+        this.tickerTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tickAll, 0L, periodTicks);
     }
 
     /**
@@ -178,7 +183,7 @@ public final class ActionbarService implements Listener {
             try {
                 renderPlayer(player);
             } catch (Exception exception) {
-                Log.warn("ActionbarService", "Failed to render for " + player.getName() + ": " + exception.getMessage());
+                Log.warn("ActionbarService", "Failed to render actionbar for " + player.getName() + ": " + exception.getMessage());
             }
         }
     }
@@ -192,6 +197,7 @@ public final class ActionbarService implements Listener {
     }
 
     private void sendRawPacket(@NonNull Player player, @NonNull String text) {
+        if (text == null || text.isEmpty()) return;
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(text));
     }
 }

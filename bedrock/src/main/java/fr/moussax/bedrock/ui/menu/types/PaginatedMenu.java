@@ -3,6 +3,7 @@ package fr.moussax.bedrock.ui.menu.types;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
@@ -19,8 +20,25 @@ import org.jspecify.annotations.NonNull;
  */
 public abstract class PaginatedMenu extends Menu {
 
+    public static final int[] INNER_GRID_SLOTS = {
+            10, 11, 12, 13, 14, 15, 16,
+            19, 20, 21, 22, 23, 24, 25,
+            28, 29, 30, 31, 32, 33, 34,
+            37, 38, 39, 40, 41, 42, 43
+    };
+
+    @Getter
     protected int currentPage = 0;
     protected int totalItems = 0;
+
+    /**
+     * Returns the total number of items stored for the current page rendering.
+     *
+     * @return stored total item count
+     */
+    public int getTotalItemsCount() {
+        return totalItems;
+    }
 
     /**
      * Creates a paginated menu.
@@ -50,12 +68,24 @@ public abstract class PaginatedMenu extends Menu {
     protected abstract ItemStack getItem(@NonNull Player player, int index);
 
     /**
-     * Returns the 0-based index of the current page.
+     * Returns the target inventory slot indices for displaying paginated items.
      *
-     * @return current page index (0-based)
+     * <p>If {@code null}, items are placed sequentially starting at slot 0.</p>
+     *
+     * @return slot index array, or {@code null} for default sequential placement
      */
-    public int getCurrentPage() {
-        return currentPage;
+    protected int[] getDisplaySlots() {
+        return null;
+    }
+
+    /**
+     * Returns an item to display when the menu has no items, or {@code null}.
+     *
+     * @param player player viewing the menu
+     * @return empty state item, or {@code null} if none
+     */
+    protected ItemStack getEmptyStateItem(@NonNull Player player) {
+        return null;
     }
 
     /**
@@ -65,15 +95,6 @@ public abstract class PaginatedMenu extends Menu {
      */
     public int getCurrentPageNumber() {
         return currentPage + 1;
-    }
-
-    /**
-     * Returns the total item count evaluated during the last build.
-     *
-     * @return total item count
-     */
-    public int getTotalItems() {
-        return totalItems;
     }
 
     /**
@@ -95,6 +116,10 @@ public abstract class PaginatedMenu extends Menu {
      * @return number of items displayed per page
      */
     protected int getItemsPerPage() {
+        int[] displaySlots = getDisplaySlots();
+        if (displaySlots != null) {
+            return displaySlots.length;
+        }
         return size - 9;
     }
 
@@ -109,46 +134,96 @@ public abstract class PaginatedMenu extends Menu {
     @Override
     public void build(@NonNull Player viewer) {
         totalItems = Math.max(0, getTotalItems(viewer));
+        slots.clear();
+
+        int closeSlot = size - 5;
+        int backSlot = size - 6;
+        int nextSlot = size - 4;
+
+        ItemStack emptyItem = getEmptyStateItem(viewer);
+        if (totalItems == 0) {
+            if (emptyItem != null) {
+                int emptySlot = size >= 27 ? 22 : size / 2;
+                setItem(emptySlot, emptyItem, MenuItemInteraction.ANY_CLICK, (_, _) -> { });
+            }
+            setCloseButton(closeSlot);
+            return;
+        }
 
         int itemsPerPage = getItemsPerPage();
-        int maxPage = Math.max(0, (totalItems - 1) / itemsPerPage);
+        int maxPage = (totalItems - 1) / itemsPerPage;
         currentPage = Math.min(currentPage, maxPage);
 
         int startIndex = currentPage * itemsPerPage;
         int endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
-        int slot = 0;
+        int[] displaySlots = getDisplaySlots();
+        int slotIndex = 0;
         for (int i = startIndex; i < endIndex; i++) {
             final int index = i;
+            int slot = displaySlots != null ? displaySlots[slotIndex++] : i - startIndex;
             setItem(
-                    slot++,
+                    slot,
                     getItem(viewer, index),
                     MenuItemInteraction.ANY_CLICK,
-                    (player, click) -> onItemClick(player, index, click)
+                    (player, click) -> {
+                        if (click.isShiftClick()) {
+                            onItemShiftClick(player, index);
+                        } else if (click.isRightClick()) {
+                            onItemRightClick(player, index);
+                        } else if (click.isLeftClick()) {
+                            onItemLeftClick(player, index);
+                        }
+                        onItemClick(player, index, click);
+                    }
             );
         }
 
-        // Previous page
         if (currentPage > 0) {
-            setBackButton(size - 9,
-                    (player, type) -> {
-                        currentPage--;
-                        refresh(player);
-                    }
-            );
+            setBackButton(backSlot, (player, _) -> {
+                currentPage--;
+                refresh(player);
+            });
         }
 
-        // Next page
         if (endIndex < totalItems) {
-            setItem(size - 1, MenuElementPreset.NEXT_BUTTON,
-                    (player, type) -> {
-                        currentPage++;
-                        refresh(player);
-                    }
-            );
+            setItem(nextSlot, MenuElementPreset.NEXT_BUTTON, (player, _) -> {
+                currentPage++;
+                refresh(player);
+            });
         }
 
-        setCloseButton(size - 5);
+        setCloseButton(closeSlot);
+    }
+
+    /**
+     * Called when a paginated item is clicked with a left-click.
+     *
+     * @param player clicking player
+     * @param index  global item index
+     */
+    protected void onItemLeftClick(@NonNull Player player, int index) {
+        // override as needed
+    }
+
+    /**
+     * Called when a paginated item is clicked with a right-click.
+     *
+     * @param player clicking player
+     * @param index  global item index
+     */
+    protected void onItemRightClick(@NonNull Player player, int index) {
+        // override as needed
+    }
+
+    /**
+     * Called when a paginated item is clicked with a shift-click.
+     *
+     * @param player clicking player
+     * @param index  global item index
+     */
+    protected void onItemShiftClick(@NonNull Player player, int index) {
+        // override as needed
     }
 
     /**

@@ -1,16 +1,18 @@
-package fr.moussax.blightedSMP.engine.player.menus;
+package fr.moussax.blightedMod.moderator.menus;
 
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.TickableMenu;
 import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.bedrock.utils.ItemBuilder;
+import fr.moussax.blightedMod.moderator.ModerationManager;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
-import java.net.InetSocketAddress;
 import java.util.Objects;
 
 public final class InvSeeMenu extends Menu implements TickableMenu {
@@ -42,7 +44,7 @@ public final class InvSeeMenu extends Menu implements TickableMenu {
                 .setDisplayName("§dView Ender Chest")
                 .addLore("§7Click to view ender chest.")
                 .toItemStack(),
-            (_, _) -> openSubMenu(new EnderSeeMenu(target, this))
+            (_, _) -> openSubMenu(new EnderseeMenu(target, this))
         );
 
         updateContents();
@@ -58,15 +60,29 @@ public final class InvSeeMenu extends Menu implements TickableMenu {
     }
 
     private void updateContents() {
+        boolean isInModerationMode = ModerationManager.getInstance().isInModerationMode(target);
+        String gameModeText = isInModerationMode ? "§dMODERATOR" : "§f" + target.getGameMode().name();
+
+        double maxHealth = Objects.requireNonNull(target.getAttribute(Attribute.MAX_HEALTH)).getValue();
+        int currentHealth = (int) Math.round(target.getHealth());
+        int maxHp = (int) Math.round(maxHealth);
+
+        int level = target.getLevel();
+        int xpPercent = Math.round(target.getExp() * 100.0f);
+
+        int ping = target.getPing();
+        String dimensionName = formatDimension(target.getWorld().getEnvironment());
+
         ItemStack playerInformation = new ItemBuilder(Material.PLAYER_HEAD)
                 .setDisplayName("§d" + target.getName())
-                .addLore( "",
-                        "  §7Health: §f" + (int) target.getHealth() + "§c❤",
-                        "  §7Food: §f" + target.getFoodLevel() + "§c\uD83C\uDF56",
-                        "  §7Gamemode: §f" + target.getGameMode().name() + "  ",
-                        "",
-                        "  §7Ping: §d" + target.getPing() + "ms",
-                        "  §7IP Address: §d" + formatAddress(target.getAddress()) + " ",
+                .addLore("",
+                        "  §7Health: §f" + currentHealth + "§7/§f" + maxHp + " §c❤",
+                        "  §7Food: §f" + target.getFoodLevel() + "§7/20 §c\uD83C\uDF56",
+                        "  §7XP: §fLevel " + level + " §8(" + xpPercent + "%)",
+                        "  §7Gamemode: " + gameModeText,
+                        "  §7Dimension: §f" + dimensionName,
+                        "  §7Location: §f" + target.getLocation().getBlockX() + ", " + target.getLocation().getBlockY() + ", " + target.getLocation().getBlockZ() + " ",
+                        "  §7Ping: §d" + ping + "ms",
                         ""
                 )
                 .setSkullOwner(target.getUniqueId())
@@ -86,6 +102,15 @@ public final class InvSeeMenu extends Menu implements TickableMenu {
         }
     }
 
+    private String formatDimension(World.Environment environment) {
+        return switch (environment) {
+            case NORMAL -> "OVERWORLD";
+            case NETHER -> "NETHER";
+            case THE_END -> "THE END";
+            default -> environment.name();
+        };
+    }
+
     private void updateSlot(int menuSlot, ItemStack item, ItemStack placeholder) {
         ItemStack displayItem = isEmpty(item) ? placeholder : item;
         ItemStack currentItem = getInventory().getItem(menuSlot);
@@ -93,13 +118,6 @@ public final class InvSeeMenu extends Menu implements TickableMenu {
         if (!isSameItem(displayItem, currentItem)) {
             setSlotItem(menuSlot, displayItem);
         }
-    }
-
-    private String formatAddress(InetSocketAddress socketAddress) {
-        if (socketAddress == null || socketAddress.getAddress() == null) {
-            return "Unknown";
-        }
-        return socketAddress.getAddress().getHostAddress();
     }
 
     private boolean isEmpty(ItemStack item) {

@@ -1,0 +1,80 @@
+name: BlightedMod
+version: '${version}'
+authors: [ MrInspection ]
+
+main: fr.moussax.blightedMod.BlightedMod
+api-version: '26.2'
+load: STARTUP
+
+commands:
+  mtp:
+    description: Teleport to a player.
+    permission: blightedmod.moderator
+  mtphere:
+    description: Teleport a player to you.
+    permission: blightedmod.moderator
+  vanish:
+    description: Toggle vanish mode.
+    aliases: [v]
+    permission: blightedmod.moderator
+  mute:
+    description: Mute a player.
+    permission: blightedmod.moderator
+  unmute:
+    description: Unmute a player.
+    permission: blightedmod.moderator
+  mod:
+    description: Toggle moderation mode or broadcast staff announcement.
+    permission: blightedmod.moderator
+  invsee:
+    description: View and inspect a player's inventory.
+    permission: blightedmod.moderator
+  endersee:
+    description: View and inspect a player's ender chest.
+    permission: blightedmod.moderator
+  kick:
+    description: Kick a player from the server.
+    permission: blightedmod.moderator
+  ban:
+    description: Ban a player.
+    permission: blightedmod.moderator
+  unban:
+    description: Unban a player.
+    permission: blightedmod.moderator
+  banip:
+    description: IP ban a player.
+    permission: blightedmod.moderator
+  unbanip:
+    description: Unban an IP address.
+    permission: blightedmod.moderator
+  freeze:
+    description: Toggle freeze state for a player.
+    permission: blightedmod.moderator
+  report:
+    description: Report a player or message to online moderators.
+  slowmode:
+    description: Set or toggle chat slowmode delay in seconds.
+    aliases: [setslowmode]
+    permission: blightedmod.moderator
+  reports:
+    description: View active player reports.
+    permission: blightedmod.moderator
+  checkreport:
+    description: Inspect detailed information for a specific report.
+    permission: blightedmod.moderator
+  target:
+    description: Manually set or clear targeted player for moderation HUD.
+    permission: blightedmod.moderator
+  sanctions:
+    description: View all recorded sanctions for a player.
+    permission: blightedmod.moderator
+  userinfo:
+    description: Get detailed user information.
+    permission: blightedmod.moderator
+  chat:
+    description: Switch active chat channel (staff, all).
+    aliases: [c]
+  msginspect:
+    description: Toggle private message inspection (SocialSpy).
+    aliases: [spy, socialspy]
+    permission: blightedmod.moderator

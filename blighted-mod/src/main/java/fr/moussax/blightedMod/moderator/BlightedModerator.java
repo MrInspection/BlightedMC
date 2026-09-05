@@ -1,0 +1,185 @@
+package fr.moussax.blightedMod.moderator;
+
+import fr.moussax.blightedMod.BlightedMod;
+import fr.moussax.blightedMod.utils.PluginPermissions;
+import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+
+import java.util.Collection;
+
+public final class BlightedModerator {
+
+    @Getter
+    private final Player player;
+    @Getter
+    private boolean isInModerationMode;
+    @Getter
+    private boolean isVanished;
+    @Getter
+    private Player targetPlayer;
+
+    private ItemStack[] savedInventory;
+    private ItemStack[] savedArmor;
+    private ItemStack savedOffHand;
+    private GameMode savedGameMode;
+    private float savedExperience;
+    private int savedLevel;
+    private Collection<PotionEffect> savedPotionEffects;
+    private double savedHealth;
+    private int savedFoodLevel;
+    private boolean savedInvulnerable;
+    private boolean savedAllowFlight;
+    private boolean savedFlying;
+
+    public BlightedModerator(Player player) {
+        this.player = player;
+        this.isInModerationMode = false;
+        this.isVanished = false;
+    }
+
+    public void setTargetPlayer(Player newTargetPlayer) {
+        if (newTargetPlayer != null && newTargetPlayer.equals(player)) {
+            return;
+        }
+        if (this.targetPlayer != null && !this.targetPlayer.equals(newTargetPlayer)) {
+            ModerationGlowHelper.removePinkGlow(player, this.targetPlayer);
+        }
+        this.targetPlayer = newTargetPlayer;
+        if (newTargetPlayer != null) {
+            ModerationGlowHelper.applyPinkGlow(player, newTargetPlayer);
+        }
+    }
+
+    public void onEnable() {
+        saveState();
+        clearPlayerState();
+        applyModerationState();
+        setVanished(true, true);
+        giveModerationTools();
+        this.isInModerationMode = true;
+
+        player.sendMessage(" §dModeration Mode §etoggled §aON§e.");
+    }
+
+    public void onDisable() {
+        if (this.targetPlayer != null) {
+            ModerationGlowHelper.removePinkGlow(player, this.targetPlayer);
+            this.targetPlayer = null;
+        }
+        player.getInventory().clear();
+        restoreState();
+        setVanished(false, true);
+        this.isInModerationMode = false;
+
+        player.sendMessage(" §dModeration Mode §etoggled §cOFF§e.");
+    }
+
+    private void saveState() {
+        PlayerInventory inventory = player.getInventory();
+        this.savedInventory = inventory.getContents();
+        this.savedArmor = inventory.getArmorContents();
+        this.savedOffHand = inventory.getItemInOffHand();
+        this.savedGameMode = player.getGameMode();
+        this.savedExperience = player.getExp();
+        this.savedLevel = player.getLevel();
+        this.savedPotionEffects = player.getActivePotionEffects();
+        this.savedHealth = player.getHealth();
+        this.savedFoodLevel = player.getFoodLevel();
+        this.savedInvulnerable = player.isInvulnerable();
+        this.savedAllowFlight = player.getAllowFlight();
+        this.savedFlying = player.isFlying();
+    }
+
+    private void restoreState() {
+        PlayerInventory inventory = player.getInventory();
+        inventory.setContents(savedInventory);
+        inventory.setArmorContents(savedArmor);
+        inventory.setItemInOffHand(savedOffHand);
+
+        player.setGameMode(savedGameMode);
+        player.setHealth(savedHealth);
+        player.setFoodLevel(savedFoodLevel);
+        player.setExp(savedExperience);
+        player.setLevel(savedLevel);
+
+        player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
+        player.addPotionEffects(savedPotionEffects);
+        player.setInvulnerable(savedInvulnerable);
+        player.setAllowFlight(savedAllowFlight);
+        if (savedAllowFlight) {
+            player.setFlying(savedFlying);
+        } else {
+            player.setFlying(false);
+        }
+    }
+
+    private void clearPlayerState() {
+        player.getInventory().clear();
+        player.setExp(0);
+        player.setLevel(0);
+        player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
+        player.setHealth(20);
+        player.setFoodLevel(20);
+    }
+
+    private void applyModerationState() {
+        player.setGameMode(GameMode.SURVIVAL);
+        player.setAllowFlight(true);
+        player.setFlying(true);
+        player.setInvulnerable(true);
+    }
+
+    public void giveModerationTools() {
+        PlayerInventory inventory = player.getInventory();
+        inventory.setItem(0, ModerationTools.getRandomTeleporter());
+        inventory.setItem(1, ModerationTools.getReportViewer());
+        inventory.setItem(2, ModerationTools.getSanctionsInspector());
+        inventory.setItem(3, ModerationTools.getKnockbackStick());
+        inventory.setItem(6, ModerationTools.getFreezer());
+        inventory.setItem(7, ModerationTools.getInventoryInspector());
+        inventory.setItem(8, ModerationTools.getVanishTool(isVanished));
+    }
+
+    public void setVanished(boolean vanished, boolean notifyPlayer) {
+        this.isVanished = vanished;
+        JavaPlugin instance = BlightedMod.getInstance();
+
+        if (vanished) {
+            hideFromNonModerators(instance);
+            if (!notifyPlayer) player.sendMessage(" §dVanish §etoggled §aON§e.");
+        } else {
+            showToAllPlayers(instance);
+            if (!notifyPlayer) player.sendMessage(" §dVanish §etoggled §cOFF§e.");
+        }
+        updateVanishTool();
+    }
+
+    public void setVanished(boolean vanished) {
+        setVanished(vanished, false);
+    }
+
+    private void hideFromNonModerators(JavaPlugin instance) {
+        Bukkit.getOnlinePlayers().forEach(onlinePlayer -> {
+            if (!onlinePlayer.hasPermission(PluginPermissions.MODERATOR.toString())) {
+                onlinePlayer.hidePlayer(instance, player);
+            }
+        });
+    }
+
+    private void showToAllPlayers(JavaPlugin instance) {
+        Bukkit.getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.showPlayer(instance, player));
+    }
+
+    private void updateVanishTool() {
+        ItemStack currentItem = player.getInventory().getItem(8);
+        if (currentItem != null && currentItem.getType().name().contains("DYE")) {
+            player.getInventory().setItem(8, ModerationTools.getVanishTool(isVanished));
+        }
+    }
+}

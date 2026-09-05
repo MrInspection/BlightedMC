@@ -20,15 +20,7 @@ public final class GemsCommand extends AdminCommand {
     @Override
     protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
         if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
-            inform(player, "§e§lGEMS CURRENCY §7- Subcommands:");
-            inform(player, " §f  • §e/gems add <player> [amount] §f» §7Give gems to a player.");
-            inform(player, " §f  • §e/gems remove <player> [amount] §f» §7Take gems from a player.");
-            inform(player, " §f  • §e/gems set <player> [amount] §f» §7Set gems for a player.");
-            inform(player, " §f  • §e/gems reset <player> §f» §7Reset gems for a player.");
-            inform(player, " §f  • §e/gems giveall [amount] §f» §7Give gems to everyone.");
-            inform(player, " §f  • §e/gems resetall §f» §7Reset everyone's balance.");
-            inform(player, " §f  • §e/gems help §f» §7Prints this help message.");
-
+            sendHelpMenu(player);
             return false;
         }
 
@@ -46,9 +38,47 @@ public final class GemsCommand extends AdminCommand {
         };
     }
 
+    private void sendHelpMenu(Player player) {
+        player.sendMessage(" ");
+        player.sendMessage(" ");
+        player.sendMessage("    §e§lGEMS CURRENCY§f | §7Subcommands");
+        player.sendMessage(" ");
+        player.sendMessage("§f  • " + formatSyntax("gems add <player> <amount>") + " §f§l» §7Give gems to a player.");
+        player.sendMessage("§f  • " + formatSyntax("gems remove <player> <amount>") + " §f§l» §7Take gems from a player.");
+        player.sendMessage("§f  • " + formatSyntax("gems set <player> <amount>") + " §f§l» §7Set gems for a player.");
+        player.sendMessage("§f  • " + formatSyntax("gems reset <player>") + " §f§l» §7Reset gems for a player.");
+        player.sendMessage("§f  • " + formatSyntax("gems giveall <amount>") + " §f§l» §7Give gems to everyone.");
+        player.sendMessage("§f  • " + formatSyntax("gems resetall") + " §f§l» §7Reset everyone's balance.");
+        player.sendMessage("§f  • " + formatSyntax("gems help") + " §f§l» §7Prints this help message.");
+        player.sendMessage(" ");
+    }
+
+    private String formatSyntax(String syntax) {
+        StringBuilder builder = new StringBuilder("§e/");
+        String[] arguments = syntax.strip().split("\\s+");
+
+        for (int index = 0; index < arguments.length; index++) {
+            if (index > 0) {
+                builder.append(' ');
+            }
+            builder.append(formatToken(arguments[index]));
+        }
+        return builder.toString();
+    }
+
+    private String formatToken(String token) {
+        if (token.length() > 1 && token.charAt(0) == '<' && token.charAt(token.length() - 1) == '>') {
+            return "§e<§f" + token.substring(1, token.length() - 1) + "§e>";
+        }
+        if (token.length() > 1 && token.charAt(0) == '[' && token.charAt(token.length() - 1) == ']') {
+            return "§e[§f" + token.substring(1, token.length() - 1) + "§e]";
+        }
+        return "§f" + token;
+    }
+
     private boolean handleModify(Player sender, String[] args, boolean add) {
         if (args.length < 3) {
-            warn(sender, "Usage: /gems " + (add ? "add" : "remove") + " <player> [amount]");
+            warn(sender, "Usage: /gems " + (add ? "add" : "remove") + " <player> <amount>");
             return false;
         }
 
@@ -74,7 +104,7 @@ public final class GemsCommand extends AdminCommand {
 
     private boolean handleSet(Player sender, String[] args) {
         if (args.length < 3) {
-            warn(sender, "Usage: /gems set <player> [amount]");
+            warn(sender, "Usage: /gems set <player> <amount>");
             return false;
         }
 
@@ -118,7 +148,7 @@ public final class GemsCommand extends AdminCommand {
 
     private boolean handleGiveAll(Player sender, String[] args) {
         if (args.length < 2) {
-            warn(sender, "Usage: /gems giveall [amount]");
+            warn(sender, "Usage: /gems giveall <amount>");
             return false;
         }
 
