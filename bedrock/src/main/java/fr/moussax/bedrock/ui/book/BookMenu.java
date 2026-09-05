@@ -263,7 +263,7 @@ public final class BookMenu {
 
     private TextComponent duplicateComponentWithText(TextComponent source, String text) {
         TextComponent copy = new TextComponent(text);
-        copy.setColor(source.getColor());
+        copy.setColor(source.getColorRaw());
         copy.setBold(source.isBoldRaw());
         copy.setItalic(source.isItalicRaw());
         copy.setUnderlined(source.isUnderlinedRaw());

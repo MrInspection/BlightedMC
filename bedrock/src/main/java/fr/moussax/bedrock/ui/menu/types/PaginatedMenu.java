@@ -18,7 +18,6 @@ import org.jspecify.annotations.NonNull;
  * <p>Subclasses provide the total item count, item contents, and optional
  * click handling through {@link #onItemClick(Player, int, ClickType)}.</p>
  */
-@Getter
 public abstract class PaginatedMenu extends Menu {
 
     public static final int[] INNER_GRID_SLOTS = {
@@ -28,8 +27,18 @@ public abstract class PaginatedMenu extends Menu {
             37, 38, 39, 40, 41, 42, 43
     };
 
+    @Getter
     protected int currentPage = 0;
     protected int totalItems = 0;
+
+    /**
+     * Returns the total number of items stored for the current page rendering.
+     *
+     * @return stored total item count
+     */
+    public int getTotalItemsCount() {
+        return totalItems;
+    }
 
     /**
      * Creates a paginated menu.
@@ -125,7 +134,7 @@ public abstract class PaginatedMenu extends Menu {
     @Override
     public void build(@NonNull Player viewer) {
         totalItems = Math.max(0, getTotalItems(viewer));
-        clearInventory();
+        slots.clear();
 
         int closeSlot = size - 5;
         int backSlot = size - 6;

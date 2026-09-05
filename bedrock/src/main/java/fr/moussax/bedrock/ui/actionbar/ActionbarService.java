@@ -181,10 +181,9 @@ public final class ActionbarService implements Listener {
     private void tickAll() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             try {
-                // ponytail: kept — prevent single player evaluation error from cancelling remaining player renders
                 renderPlayer(player);
-            } catch (Throwable throwable) {
-                Log.warn("ActionbarService", "Failed to render actionbar for " + player.getName() + ": " + throwable.getMessage());
+            } catch (Exception exception) {
+                Log.warn("ActionbarService", "Failed to render actionbar for " + player.getName() + ": " + exception.getMessage());
             }
         }
     }

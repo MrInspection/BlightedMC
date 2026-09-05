@@ -2,6 +2,7 @@ package fr.moussax.bedrock.ui.menu.system;
 
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.TickableMenu;
+import fr.moussax.bedrock.utils.debug.Log;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
@@ -55,7 +56,8 @@ public final class MenuSystem {
                 if (player != null && player.isOnline()) {
                     tickable.onTick(player);
                 }
-            } catch (Throwable _) {
+            } catch (Exception exception) {
+                Log.warn("MenuSystem", "Failed to tick menu for player " + entry.getKey() + ": " + exception.getMessage());
             }
         }
     }

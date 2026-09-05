@@ -723,7 +723,11 @@ public abstract class Menu implements InventoryHolder {
         boolean changed = false;
         for (int slot = 0; slot < size; slot++) {
             MenuSlot menuSlot = slots.get(slot);
-            ItemStack newItem = menuSlot != null ? menuSlot.item : null;
+            if (menuSlot == null) {
+                continue;
+            }
+
+            ItemStack newItem = menuSlot.item;
             ItemStack currentItem = inventory.getItem(slot);
 
             if (!isSameItem(currentItem, newItem)) {
