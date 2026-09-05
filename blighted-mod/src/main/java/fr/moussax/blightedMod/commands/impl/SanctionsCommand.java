@@ -11,9 +11,6 @@ import java.util.List;
 
 import static fr.moussax.bedrock.text.Messenger.warn;
 
-/**
- * Moderation command to view all sanctions for a player (/sanctions <player>).
- */
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class SanctionsCommand extends ModerationCommand {
 

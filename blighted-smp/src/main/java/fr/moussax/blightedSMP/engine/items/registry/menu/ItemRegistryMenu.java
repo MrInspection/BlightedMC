@@ -6,7 +6,6 @@ import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
 import fr.moussax.bedrock.text.Formatter;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.types.PaginatedMenu;
-import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.bedrock.ui.sign.SignInputMenu;
 import fr.moussax.bedrock.utils.ItemBuilder;

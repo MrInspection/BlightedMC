@@ -13,9 +13,6 @@ import java.util.Locale;
 
 import static fr.moussax.bedrock.text.Messenger.warn;
 
-/**
- * Moderation command to ban (/ban, /banip) and unban (/unban, /unbanip) players.
- */
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class BanCommand extends ModerationCommand {
 

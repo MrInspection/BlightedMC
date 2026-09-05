@@ -2,7 +2,6 @@ package fr.moussax.blightedMod.commands.impl;
 
 import fr.moussax.blightedMod.commands.ModerationCommand;
 import fr.moussax.blightedMod.moderator.punishments.DurationParser;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 

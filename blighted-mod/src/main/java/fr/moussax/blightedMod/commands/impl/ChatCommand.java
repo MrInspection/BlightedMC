@@ -9,9 +9,6 @@ import org.bukkit.entity.Player;
 import static fr.moussax.bedrock.text.Messenger.inform;
 import static fr.moussax.bedrock.text.Messenger.warn;
 
-/**
- * Command to switch active chat channel (/chat staff, /chat all).
- */
 @CommandArgument(position = 0, suggestions = {"$channels"})
 public final class ChatCommand extends ModerationCommand {
 

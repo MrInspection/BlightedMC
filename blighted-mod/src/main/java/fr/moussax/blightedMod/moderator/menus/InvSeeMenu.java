@@ -10,7 +10,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
-import java.net.InetSocketAddress;
 import java.util.Objects;
 
 public final class InvSeeMenu extends Menu implements TickableMenu {

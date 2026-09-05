@@ -10,9 +10,6 @@ import org.bukkit.entity.Player;
 import static fr.moussax.bedrock.text.Messenger.inform;
 import static fr.moussax.bedrock.text.Messenger.warn;
 
-/**
- * Moderation command to set or clear the targeted player for the moderation actionbar HUD (/target <player>).
- */
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class TargetCommand extends ModerationCommand {
 

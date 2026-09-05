@@ -6,7 +6,6 @@ import fr.moussax.bedrock.ui.menu.types.PaginatedMenu;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedMod.moderator.reports.ReportData;
 import fr.moussax.blightedMod.moderator.reports.ReportManager;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;

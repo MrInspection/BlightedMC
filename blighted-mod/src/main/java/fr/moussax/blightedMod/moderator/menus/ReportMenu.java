@@ -1,19 +1,13 @@
 package fr.moussax.blightedMod.moderator.menus;
 
-import fr.moussax.bedrock.text.InteractiveMessage;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.utils.ItemBuilder;
-import fr.moussax.blightedMod.moderator.ModerationManager;
-import fr.moussax.blightedMod.moderator.reports.ReportData;
 import fr.moussax.blightedMod.moderator.reports.ReportManager;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
-
-import static fr.moussax.bedrock.text.Messenger.inform;
 
 public final class ReportMenu extends Menu {
 

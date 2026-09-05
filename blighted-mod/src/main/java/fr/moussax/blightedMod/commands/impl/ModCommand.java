@@ -5,9 +5,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-/**
- * Moderation command to toggle moderation mode (/mod) or broadcast a staff announcement (/mod <message>).
- */
 public final class ModCommand extends ModerationCommand {
 
     @Override
