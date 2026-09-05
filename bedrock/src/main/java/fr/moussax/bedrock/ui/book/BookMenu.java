@@ -103,16 +103,13 @@ public final class BookMenu {
     }
 
     private List<BaseComponent[]> splitSinglePageComponents(BaseComponent[] pageComponents) {
-        List<TextComponent> flattenedComponents = new ArrayList<>();
-        for (BaseComponent baseComponent : pageComponents) {
-            flattenComponent(baseComponent, flattenedComponents);
-        }
+        List<TextComponent> leafComponents = flattenToLeafComponents(pageComponents);
 
         List<List<BaseComponent>> lines = new ArrayList<>();
         List<BaseComponent> currentLine = new ArrayList<>();
         int currentLineLength = 0;
 
-        for (TextComponent component : flattenedComponents) {
+        for (TextComponent component : leafComponents) {
             String componentText = component.getText();
             if (componentText == null || componentText.isEmpty()) {
                 continue;
@@ -134,7 +131,17 @@ public final class BookMenu {
                 String[] words = paragraphText.split(" ", -1);
                 for (int wordIndex = 0; wordIndex < words.length; wordIndex++) {
                     String word = words[wordIndex];
-                    if (wordIndex > 0 && !currentLine.isEmpty() && words.length > 1) {
+
+                    if (word.isEmpty()) {
+                        if (!currentLine.isEmpty() || wordIndex < words.length - 1) {
+                            TextComponent spaceComponent = duplicateComponentWithText(component, " ");
+                            currentLine.add(spaceComponent);
+                            currentLineLength += 1;
+                        }
+                        continue;
+                    }
+
+                    if (wordIndex > 0 && !currentLine.isEmpty() && !words[wordIndex - 1].isEmpty()) {
                         word = " " + word;
                     }
 
@@ -142,20 +149,14 @@ public final class BookMenu {
                         String chunk = word.substring(0, MAXIMUM_CHARACTERS_PER_LINE);
                         word = word.substring(MAXIMUM_CHARACTERS_PER_LINE);
 
-                        TextComponent chunkComponent = duplicateComponentWithText(component, chunk);
                         if (currentLineLength + chunk.length() > MAXIMUM_CHARACTERS_PER_LINE && !currentLine.isEmpty()) {
                             lines.add(currentLine);
                             currentLine = new ArrayList<>();
-                            currentLineLength = 0;
                         }
-                        currentLine.add(chunkComponent);
+                        currentLine.add(duplicateComponentWithText(component, chunk));
                         lines.add(currentLine);
                         currentLine = new ArrayList<>();
                         currentLineLength = 0;
-                    }
-
-                    if (word.isEmpty()) {
-                        continue;
                     }
 
                     if (currentLineLength + word.length() > MAXIMUM_CHARACTERS_PER_LINE && !currentLine.isEmpty()) {
@@ -202,13 +203,60 @@ public final class BookMenu {
         return resultPages;
     }
 
-    private void flattenComponent(BaseComponent component, List<TextComponent> targetList) {
-        if (component instanceof TextComponent textComponent) {
-            targetList.add(textComponent);
+    private List<TextComponent> flattenToLeafComponents(BaseComponent[] components) {
+        List<TextComponent> leafComponents = new ArrayList<>();
+        for (BaseComponent component : components) {
+            collectLeafComponents(component, leafComponents);
         }
+        return leafComponents;
+    }
+
+    private void collectLeafComponents(BaseComponent component, List<TextComponent> targetList) {
+        if (component instanceof TextComponent textComponent) {
+            processTextComponent(textComponent, targetList);
+        }
+
+        if (component.getExtra() == null) {
+            return;
+        }
+
+        for (BaseComponent extraComponent : component.getExtra()) {
+            if (extraComponent.getHoverEvent() == null) {
+                extraComponent.setHoverEvent(component.getHoverEvent());
+            }
+            if (extraComponent.getClickEvent() == null) {
+                extraComponent.setClickEvent(component.getClickEvent());
+            }
+            collectLeafComponents(extraComponent, targetList);
+        }
+    }
+
+    private void processTextComponent(TextComponent textComponent, List<TextComponent> targetList) {
+        String text = textComponent.getText();
+        if (text == null || text.isEmpty()) {
+            return;
+        }
+
+        BaseComponent legacyComponent = TextComponent.fromLegacy(text);
+        addParsedLeafComponents(legacyComponent, textComponent, targetList);
+    }
+
+    private void addParsedLeafComponents(BaseComponent component, TextComponent parent, List<TextComponent> targetList) {
+        if (component instanceof TextComponent textComponent) {
+            if (textComponent.getHoverEvent() == null) {
+                textComponent.setHoverEvent(parent.getHoverEvent());
+            }
+            if (textComponent.getClickEvent() == null) {
+                textComponent.setClickEvent(parent.getClickEvent());
+            }
+            if (textComponent.getText() != null && !textComponent.getText().isEmpty()) {
+                targetList.add(textComponent);
+            }
+        }
+
         if (component.getExtra() != null) {
-            for (BaseComponent extraComponent : component.getExtra()) {
-                flattenComponent(extraComponent, targetList);
+            for (BaseComponent extra : component.getExtra()) {
+                addParsedLeafComponents(extra, parent, targetList);
             }
         }
     }
