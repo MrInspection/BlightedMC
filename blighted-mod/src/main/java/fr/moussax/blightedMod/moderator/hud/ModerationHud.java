@@ -36,6 +36,7 @@ public final class ModerationHud {
 
         double maxHealth = Objects.requireNonNull(target.getAttribute(Attribute.MAX_HEALTH)).getValue();
         int healthPercent = (int) Math.round((target.getHealth() / maxHealth) * 100.0);
+        String healthColor = healthPercent >= 60 ? "§a" : healthPercent >= 30 ? "§e" : "§c";
 
         String distanceText = player.getWorld().equals(target.getWorld())
                 ? String.format(Locale.ROOT, "%.2f blocks", player.getLocation().distance(target.getLocation()))
@@ -47,7 +48,7 @@ public final class ModerationHud {
         String pingText = pingColor + ping + "ms";
 
         return "§fTarget: §d" + target.getName()
-                + "     §fHP: §d" + healthPercent + "%"
+                + "     §fHP: " + healthColor + healthPercent + "%"
                 + "     §fDistance: §d" + distanceText
                 + "     §fPing: " + pingText
                 + "     §fFrozen: " + frozenText;
