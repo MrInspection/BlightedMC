@@ -152,7 +152,16 @@ public abstract class PaginatedMenu extends Menu {
                     slot,
                     getItem(viewer, index),
                     MenuItemInteraction.ANY_CLICK,
-                    (player, click) -> onItemClick(player, index, click)
+                    (player, click) -> {
+                        if (click.isShiftClick()) {
+                            onItemShiftClick(player, index);
+                        } else if (click.isRightClick()) {
+                            onItemRightClick(player, index);
+                        } else if (click.isLeftClick()) {
+                            onItemLeftClick(player, index);
+                        }
+                        onItemClick(player, index, click);
+                    }
             );
         }
 
@@ -171,6 +180,36 @@ public abstract class PaginatedMenu extends Menu {
         }
 
         setCloseButton(49);
+    }
+
+    /**
+     * Called when a paginated item is clicked with a left-click.
+     *
+     * @param player clicking player
+     * @param index  global item index
+     */
+    protected void onItemLeftClick(@NonNull Player player, int index) {
+        // override as needed
+    }
+
+    /**
+     * Called when a paginated item is clicked with a right-click.
+     *
+     * @param player clicking player
+     * @param index  global item index
+     */
+    protected void onItemRightClick(@NonNull Player player, int index) {
+        // override as needed
+    }
+
+    /**
+     * Called when a paginated item is clicked with a shift-click.
+     *
+     * @param player clicking player
+     * @param index  global item index
+     */
+    protected void onItemShiftClick(@NonNull Player player, int index) {
+        // override as needed
     }
 
     /**
