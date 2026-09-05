@@ -26,11 +26,6 @@ public final class ChatCommand extends ModerationCommand {
 
         String targetChannel = arguments[0].toLowerCase();
         if (targetChannel.equals("staff") || targetChannel.equals("s")) {
-            if (!getModerationManager().isModerator(player)) {
-                warn(player, "Only staff members can access the staff chat channel.");
-                return false;
-            }
-
             getModerationManager().setChatChannel(player, ModerationManager.ChatChannel.STAFF);
             inform(player, " §7You are now in the §dSTAFF §7channel.");
             return true;

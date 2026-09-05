@@ -7,9 +7,6 @@ import org.bukkit.entity.Player;
 
 import static fr.moussax.bedrock.text.Messenger.warn;
 
-/**
- * Moderation command to toggle freeze status for a player (/freeze <player>).
- */
 @CommandArgument(position = 0, suggestions = {"$players"})
 public final class FreezeCommand extends ModerationCommand {
 
@@ -30,21 +27,17 @@ public final class FreezeCommand extends ModerationCommand {
             return false;
         }
 
-        if (getModerationManager().isModerator(target)) {
-            warn(moderator, "You cannot freeze another moderator.");
-            return false;
-        }
-
         boolean isNowFrozen = getModerationManager().toggleFreeze(target);
 
         if (isNowFrozen) {
             moderator.sendMessage("§b ❄ §eYou froze §d" + target.getName() + "§e.");
-            target.sendMessage("§b ❄ §c§lYOU HAVE BEEN FROZEN BY A MODERATOR!");
-            target.sendMessage(" §7Do not log out or you will be permanently banned.");
+            target.sendMessage("");
+            target.sendMessage("§b ❄ §b§lYOU HAVE BEEN FROZEN BY A MODERATOR!");
+            target.sendMessage("§c ⚠ Do not log out or you will be permanently banned.");
+            target.sendMessage("");
         } else {
             moderator.sendMessage("§b ❄ §eYou unfroze §d" + target.getName() + "§e.");
-            target.sendMessage("§b ❄ §a§lYOU HAVE BEEN UNFROZEN!");
-            target.sendMessage(" §7You are now free to move again.");
+            target.sendMessage("§b ❄ §7You have been unfrozen, you can move again.");
         }
 
         return true;

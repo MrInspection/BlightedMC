@@ -58,8 +58,11 @@ public final class MuteCommand extends ModerationCommand {
         String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e muted §d" + target.getName() + " §e" + durationText + "§efor §c" + reason + "§e.";
 
         getModerationManager().broadcastToModerators(notification);
-        String durationString = expiresAt != null ? "for §6" + DurationParser.formatDuration(arguments[1]) + " §7" : "";
-        target.sendMessage(" §c§lMUTED! §7You have been muted " + durationString + "for: §f" + reason);
+        if (expiresAt != null) {
+            target.sendMessage(" §c⌚ §cYou are muted for §d" + arguments[1] + " §cfor §b" + reason + "§c.");
+        } else {
+            target.sendMessage(" §c⌚ §cYou are muted §cfor §b" + reason + "§c.");
+        }
 
         return true;
     }
@@ -84,7 +87,7 @@ public final class MuteCommand extends ModerationCommand {
 
         String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unmuted §d" + target.getName() + "§e.";
         getModerationManager().broadcastToModerators(notification);
-        target.sendMessage(" §a§lUNMUTED! §7You are no longer muted.");
+        target.sendMessage(" §a⚑ §7You are no longer muted.");
         return true;
     }
 }
