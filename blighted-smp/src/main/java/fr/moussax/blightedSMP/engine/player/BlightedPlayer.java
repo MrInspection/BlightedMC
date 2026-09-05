@@ -73,8 +73,6 @@ public final class BlightedPlayer {
         setCurrentMana(dataHandler.getSavedMana());
         this.forgeFuel = dataHandler.getSavedForgeFuel();
 
-        players.put(playerId, this);
-
         ArmorManager.updatePlayerArmor(this);
     }
 
@@ -91,14 +89,9 @@ public final class BlightedPlayer {
      * @param player player whose context to retrieve
      * @return registered player context, or {@code null} if no context exists
      */
-    // ponytail: kept — explicit get-then-instantiate avoids re-entrant computeIfAbsent mutation in constructor
     public static BlightedPlayer get(Player player) {
         if (player == null || !player.isOnline()) return null;
-        BlightedPlayer blightedPlayer = players.get(player.getUniqueId());
-        if (blightedPlayer == null) {
-            blightedPlayer = new BlightedPlayer(player);
-        }
-        return blightedPlayer;
+        return players.computeIfAbsent(player.getUniqueId(), _ -> new BlightedPlayer(player));
     }
 
     /**

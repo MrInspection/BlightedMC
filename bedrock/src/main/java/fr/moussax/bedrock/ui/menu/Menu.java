@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -714,7 +715,7 @@ public abstract class Menu implements InventoryHolder {
         slots.clear();
         build(player);
 
-        var openInventory = player.getOpenInventory();
+        InventoryView openInventory = player.getOpenInventory();
         if (openInventory.getTopInventory().getHolder() == this && !openInventory.getTitle().equals(this.title)) {
             openInventory.setTitle(this.title);
         }

@@ -127,12 +127,17 @@ public abstract class PaginatedMenu extends Menu {
         totalItems = Math.max(0, getTotalItems(viewer));
         clearInventory();
 
+        int closeSlot = size - 5;
+        int backSlot = size - 6;
+        int nextSlot = size - 4;
+
         ItemStack emptyItem = getEmptyStateItem(viewer);
         if (totalItems == 0) {
             if (emptyItem != null) {
-                setItem(22, emptyItem, MenuItemInteraction.ANY_CLICK, (_, _) -> { });
+                int emptySlot = size >= 27 ? 22 : size / 2;
+                setItem(emptySlot, emptyItem, MenuItemInteraction.ANY_CLICK, (_, _) -> { });
             }
-            setCloseButton(49);
+            setCloseButton(closeSlot);
             return;
         }
 
@@ -166,20 +171,20 @@ public abstract class PaginatedMenu extends Menu {
         }
 
         if (currentPage > 0) {
-            setBackButton(48, (player, _) -> {
+            setBackButton(backSlot, (player, _) -> {
                 currentPage--;
                 refresh(player);
             });
         }
 
         if (endIndex < totalItems) {
-            setItem(50, MenuElementPreset.NEXT_BUTTON, (player, _) -> {
+            setItem(nextSlot, MenuElementPreset.NEXT_BUTTON, (player, _) -> {
                 currentPage++;
                 refresh(player);
             });
         }
 
-        setCloseButton(49);
+        setCloseButton(closeSlot);
     }
 
     /**

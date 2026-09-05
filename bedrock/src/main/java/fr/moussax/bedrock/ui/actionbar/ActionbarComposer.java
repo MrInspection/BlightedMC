@@ -5,12 +5,12 @@ import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Assembles and formats per-player action bar text from active sections and temporary alerts.
@@ -106,26 +106,23 @@ public final class ActionbarComposer {
             }
         }
 
-        var visibleSections = sections.values().stream()
+        List<ActionbarSection> visibleSections = sections.values().stream()
                 .filter(section -> section.visibility().test(player))
                 .sorted(Comparator.comparingInt(ActionbarSection::priority))
                 .toList();
 
-        // ponytail: kept — exclusive section overrides default actionbar when active
+        List<String> evaluatedTexts = new ArrayList<>(visibleSections.size());
         for (ActionbarSection section : visibleSections) {
-            if (section.exclusive()) {
-                String text = evaluateSection(section, player);
-                if (text != null && !text.isEmpty()) {
-                    return text;
-                }
+            String text = evaluateSection(section, player);
+            if (section.exclusive() && text != null && !text.isEmpty()) {
+                return text;
+            }
+            if (text != null && !text.isEmpty()) {
+                evaluatedTexts.add(text);
             }
         }
 
-        return visibleSections.stream()
-                .map(section -> evaluateSection(section, player))
-                .filter(Objects::nonNull)
-                .filter(sectionText -> !sectionText.isEmpty())
-                .collect(Collectors.joining(separator));
+        return String.join(separator, evaluatedTexts);
     }
 
     private String evaluateSection(ActionbarSection section, Player player) {
