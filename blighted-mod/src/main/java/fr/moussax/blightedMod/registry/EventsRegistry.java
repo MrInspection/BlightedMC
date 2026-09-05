@@ -32,7 +32,7 @@ public final class EventsRegistry {
         pluginManager.registerEvents(signInputListener, instance);
         pluginManager.registerEvents(new MenuListener(menuSystem), instance);
         pluginManager.registerEvents(new ModerationListener(instance.getModerationManager()), instance);
-        pluginManager.registerEvents(new InteractiveChatListener(), instance);
+        pluginManager.registerEvents(new InteractiveChatListener(instance.getModerationManager()), instance);
     }
 
 

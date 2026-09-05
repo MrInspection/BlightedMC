@@ -20,6 +20,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerListPingEvent;
@@ -226,10 +227,23 @@ public final class ModerationListener implements Listener {
         Player player = event.getPlayer();
         if (moderationManager.isModerator(player) || !moderationManager.isFrozen(player)) return;
 
-        boolean movedHorizontally = event.getFrom().getX() != Objects.requireNonNull(event.getTo()).getX()
-                || event.getFrom().getZ() != event.getTo().getZ();
+        org.bukkit.Location frozenLocation = moderationManager.getFrozenLocation(player);
+        if (frozenLocation == null) return;
 
-        if (movedHorizontally) event.setTo(event.getFrom());
+        org.bukkit.Location to = event.getTo();
+        if (to == null) return;
+
+        double deltaX = to.getX() - frozenLocation.getX();
+        double deltaY = to.getY() - frozenLocation.getY();
+        double deltaZ = to.getZ() - frozenLocation.getZ();
+        double distanceSquared = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+
+        if (distanceSquared > 0.05) {
+            org.bukkit.Location returnLocation = frozenLocation.clone();
+            returnLocation.setYaw(to.getYaw());
+            returnLocation.setPitch(to.getPitch());
+            event.setTo(returnLocation);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -301,12 +315,14 @@ public final class ModerationListener implements Listener {
     }
 
     /**
-     * Non-entity damage (fall, fire, drown, etc.) against a moderator in moderation mode.
+     * Non-entity damage (fall, fire, drown, freeze, etc.) against a moderator in moderation mode or a frozen player.
      */
     @EventHandler
     public void onModeratorTakeDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player player && moderationManager.isInModerationMode(player)) {
-            event.setCancelled(true);
+        if (event.getEntity() instanceof Player player) {
+            if (moderationManager.isInModerationMode(player) || moderationManager.isFrozen(player)) {
+                event.setCancelled(true);
+            }
         }
     }
 
@@ -332,6 +348,13 @@ public final class ModerationListener implements Listener {
     @EventHandler
     public void onModeratorInventoryClick(InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player player && moderationManager.isInModerationMode(player)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onModeratorFoodLevelChange(FoodLevelChangeEvent event) {
+        if (event.getEntity() instanceof Player player && moderationManager.isInModerationMode(player)) {
             event.setCancelled(true);
         }
     }

@@ -38,11 +38,17 @@ public final class BlightedModerator {
         this.isVanished = false;
     }
 
-    public void setTargetPlayer(Player targetPlayer) {
-        if (targetPlayer != null && targetPlayer.equals(player)) {
+    public void setTargetPlayer(Player newTargetPlayer) {
+        if (newTargetPlayer != null && newTargetPlayer.equals(player)) {
             return;
         }
-        this.targetPlayer = targetPlayer;
+        if (this.targetPlayer != null && !this.targetPlayer.equals(newTargetPlayer)) {
+            ModerationGlowHelper.removePinkGlow(player, this.targetPlayer);
+        }
+        this.targetPlayer = newTargetPlayer;
+        if (newTargetPlayer != null) {
+            ModerationGlowHelper.applyPinkGlow(player, newTargetPlayer);
+        }
     }
 
     public void onEnable() {
@@ -57,11 +63,14 @@ public final class BlightedModerator {
     }
 
     public void onDisable() {
+        if (this.targetPlayer != null) {
+            ModerationGlowHelper.removePinkGlow(player, this.targetPlayer);
+            this.targetPlayer = null;
+        }
         player.getInventory().clear();
         restoreState();
         setVanished(false, true);
         this.isInModerationMode = false;
-        this.targetPlayer = null;
 
         player.sendMessage(" §dModeration Mode §etoggled §cOFF§e.");
     }

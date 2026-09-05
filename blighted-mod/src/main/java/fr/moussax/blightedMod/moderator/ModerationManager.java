@@ -5,6 +5,7 @@ import fr.moussax.blightedMod.moderator.punishments.PunishmentManager;
 import fr.moussax.blightedMod.utils.PluginPermissions;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -23,6 +24,7 @@ public final class ModerationManager {
     private final PunishmentManager punishmentManager;
     private final Map<UUID, BlightedModerator> moderators = new HashMap<>();
     private final Set<UUID> frozenPlayers = new HashSet<>();
+    private final Map<UUID, Location> frozenLocations = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastChatTimestamps = new ConcurrentHashMap<>();
     private final Map<UUID, ChatChannel> playerChatChannels = new ConcurrentHashMap<>();
     private final Set<UUID> messageInspectEnabled = ConcurrentHashMap.newKeySet();
@@ -80,14 +82,33 @@ public final class ModerationManager {
         return frozenPlayers.contains(player.getUniqueId());
     }
 
+    public Location getFrozenLocation(Player player) {
+        return frozenLocations.get(player.getUniqueId());
+    }
+
     public boolean toggleFreeze(Player player) {
         UUID playerId = player.getUniqueId();
         if (frozenPlayers.contains(playerId)) {
             frozenPlayers.remove(playerId);
+            frozenLocations.remove(playerId);
+            player.setFreezeTicks(0);
             return false;
         }
         frozenPlayers.add(playerId);
+        frozenLocations.put(playerId, player.getLocation());
+        player.setFreezeTicks(139);
         return true;
+    }
+
+    public void startFreezeTask(org.bukkit.plugin.Plugin plugin) {
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            for (UUID frozenId : frozenPlayers) {
+                Player player = Bukkit.getPlayer(frozenId);
+                if (player != null && player.isOnline()) {
+                    player.setFreezeTicks(139);
+                }
+            }
+        }, 0L, 5L);
     }
 
     public void setSlowmodeDelaySeconds(int seconds) {
@@ -149,6 +170,7 @@ public final class ModerationManager {
         }
         moderators.remove(playerId);
         frozenPlayers.remove(playerId);
+        frozenLocations.remove(playerId);
         lastChatTimestamps.remove(playerId);
         playerChatChannels.remove(playerId);
         messageInspectEnabled.remove(playerId);

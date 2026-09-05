@@ -43,9 +43,9 @@ public final class BlightedMod extends JavaPlugin {
 
         PunishmentManager punishmentManager = new PunishmentManager(pluginDatabase.getConnection());
         moderationManager = ModerationManager.init(punishmentManager);
+        moderationManager.startFreezeTask(this);
 
         CommandsRegistry.registerCommands(this);
-
         eventsRegistry = new EventsRegistry();
         eventsRegistry.initializeListeners();
     }

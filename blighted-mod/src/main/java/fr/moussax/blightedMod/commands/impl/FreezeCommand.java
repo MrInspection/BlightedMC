@@ -30,12 +30,14 @@ public final class FreezeCommand extends ModerationCommand {
         boolean isNowFrozen = getModerationManager().toggleFreeze(target);
 
         if (isNowFrozen) {
+            target.setFreezeTicks(target.getMaxFreezeTicks());
             moderator.sendMessage("§b ❄ §eYou froze §d" + target.getName() + "§e.");
             target.sendMessage("");
             target.sendMessage("§b ❄ §b§lYOU HAVE BEEN FROZEN BY A MODERATOR!");
             target.sendMessage("§c ⚠ Do not log out or you will be permanently banned.");
             target.sendMessage("");
         } else {
+            target.setFreezeTicks(0);
             moderator.sendMessage("§b ❄ §eYou unfroze §d" + target.getName() + "§e.");
             target.sendMessage("§b ❄ §7You have been unfrozen, you can move again.");
         }
