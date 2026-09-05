@@ -39,13 +39,6 @@ public final class ModerationTools {
                 .toItemStack();
     }
 
-    public static ItemStack getModerationMenu() {
-        return new ItemBuilder(Material.NETHER_STAR)
-                .setDisplayName("§dModeration Menu §7(Right Click)")
-                .addLore("§7Access to extra tools and settings.")
-                .toItemStack();
-    }
-
     public static ItemStack getFreezer() {
         return new ItemBuilder(Material.PACKED_ICE)
                 .setDisplayName("§dFreeze Target §7(Right Click)")

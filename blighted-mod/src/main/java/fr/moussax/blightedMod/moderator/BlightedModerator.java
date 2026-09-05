@@ -117,7 +117,6 @@ public final class BlightedModerator {
         inventory.setItem(1, ModerationTools.getReportViewer());
         inventory.setItem(2, ModerationTools.getSanctionsInspector());
         inventory.setItem(3, ModerationTools.getKnockbackStick());
-        inventory.setItem(4, ModerationTools.getModerationMenu());
         inventory.setItem(6, ModerationTools.getFreezer());
         inventory.setItem(7, ModerationTools.getInventoryInspector());
         inventory.setItem(8, ModerationTools.getVanishTool(isVanished));
