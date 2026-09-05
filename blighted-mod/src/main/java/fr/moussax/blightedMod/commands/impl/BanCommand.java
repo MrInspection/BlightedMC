@@ -3,12 +3,13 @@ package fr.moussax.blightedMod.commands.impl;
 import fr.moussax.bedrock.commands.CommandArgument;
 import fr.moussax.blightedMod.commands.ModerationCommand;
 import fr.moussax.blightedMod.moderator.punishments.DurationParser;
+import fr.moussax.blightedMod.moderator.punishments.PunishmentArguments;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentData;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentManager;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
 import java.util.Locale;
 
 import static fr.moussax.bedrock.text.Messenger.warn;
@@ -17,7 +18,12 @@ import static fr.moussax.bedrock.text.Messenger.warn;
 public final class BanCommand extends ModerationCommand {
 
     @Override
-    protected boolean executeModeration(Player moderator, Command command, String label, String[] arguments) {
+    protected boolean isConsoleAllowed() {
+        return true;
+    }
+
+    @Override
+    protected boolean executeModeration(CommandSender moderator, Command command, String label, String[] arguments) {
         return switch (label.toLowerCase(Locale.ROOT)) {
             case "unban" -> handleUnban(moderator, arguments);
             case "banip" -> handleBanIp(moderator, arguments);
@@ -26,7 +32,7 @@ public final class BanCommand extends ModerationCommand {
         };
     }
 
-    private boolean handleBan(Player moderator, String[] arguments) {
+    private boolean handleBan(CommandSender moderator, String[] arguments) {
         if (arguments.length < 1) {
             warn(moderator, "Usage: /ban <player> [duration] [reason]");
             moderator.sendMessage("§7Duration format: 1d, 3w, 1m, 1y (omit for permanent)");
@@ -43,17 +49,14 @@ public final class BanCommand extends ModerationCommand {
             return false;
         }
 
-        if (getModerationManager().isModerator(target)) {
+        if (moderator instanceof Player && getModerationManager().isModerator(target)) {
             warn(moderator, "You cannot ban another moderator.");
             return false;
         }
 
-        Long expiresAt = arguments.length > 1 ? DurationParser.parseDuration(arguments[1]) : null;
-        int reasonStartIndex = expiresAt != null ? 2 : 1;
-
-        String reason = arguments.length > reasonStartIndex
-                ? String.join(" ", Arrays.copyOfRange(arguments, reasonStartIndex, arguments.length))
-                : "No reason specified";
+        PunishmentArguments punishmentArguments = PunishmentArguments.parse(arguments, 1);
+        Long expiresAt = punishmentArguments.expiresAt();
+        String reason = punishmentArguments.reason();
 
         getPunishmentManager().addBan(target, moderator, reason, expiresAt);
 
@@ -75,7 +78,7 @@ public final class BanCommand extends ModerationCommand {
         return true;
     }
 
-    private boolean handleUnban(Player moderator, String[] arguments) {
+    private boolean handleUnban(CommandSender moderator, String[] arguments) {
         if (arguments.length < 1) {
             warn(moderator, "Usage: /unban <player>");
             return false;
@@ -99,7 +102,7 @@ public final class BanCommand extends ModerationCommand {
         return true;
     }
 
-    private boolean handleBanIp(Player moderator, String[] arguments) {
+    private boolean handleBanIp(CommandSender moderator, String[] arguments) {
         if (arguments.length < 1) {
             warn(moderator, "Usage: /banip <player> [duration] [reason]");
             moderator.sendMessage("§7Duration format: 1d, 3w, 1m, 1y (omit for permanent)");
@@ -116,17 +119,14 @@ public final class BanCommand extends ModerationCommand {
             return false;
         }
 
-        if (getModerationManager().isModerator(target)) {
+        if (moderator instanceof Player && getModerationManager().isModerator(target)) {
             warn(moderator, "You cannot IP ban another moderator.");
             return false;
         }
 
-        Long expiresAt = arguments.length > 1 ? DurationParser.parseDuration(arguments[1]) : null;
-        int reasonStartIndex = expiresAt != null ? 2 : 1;
-
-        String reason = arguments.length > reasonStartIndex
-                ? String.join(" ", Arrays.copyOfRange(arguments, reasonStartIndex, arguments.length))
-                : "No reason specified";
+        PunishmentArguments punishmentArguments = PunishmentArguments.parse(arguments, 1);
+        Long expiresAt = punishmentArguments.expiresAt();
+        String reason = punishmentArguments.reason();
 
         getPunishmentManager().addIpBan(target, moderator, reason, expiresAt);
 
@@ -147,7 +147,7 @@ public final class BanCommand extends ModerationCommand {
         return true;
     }
 
-    private boolean handleUnbanIp(Player moderator, String[] arguments) {
+    private boolean handleUnbanIp(CommandSender moderator, String[] arguments) {
         if (arguments.length < 1) {
             warn(moderator, "Usage: /unbanip <player>");
             return false;

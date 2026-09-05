@@ -5,6 +5,7 @@ import fr.moussax.blightedMod.commands.ModerationCommand;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentData;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentManager;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
@@ -15,7 +16,12 @@ import static fr.moussax.bedrock.text.Messenger.warn;
 public final class KickCommand extends ModerationCommand {
 
     @Override
-    protected boolean executeModeration(Player moderator, Command command, String label, String[] arguments) {
+    protected boolean isConsoleAllowed() {
+        return true;
+    }
+
+    @Override
+    protected boolean executeModeration(CommandSender moderator, Command command, String label, String[] arguments) {
         if (arguments.length < 1) {
             warn(moderator, "Usage: /kick <player> [reason]");
             return false;
@@ -31,7 +37,7 @@ public final class KickCommand extends ModerationCommand {
             return false;
         }
 
-        if (getModerationManager().isModerator(target)) {
+        if (moderator instanceof Player && getModerationManager().isModerator(target)) {
             warn(moderator, "You cannot kick another moderator.");
             return false;
         }
@@ -46,7 +52,7 @@ public final class KickCommand extends ModerationCommand {
                 target.getName(),
                 PunishmentData.PunishmentType.KICK,
                 reason,
-                moderator.getUniqueId(),
+                PunishmentManager.getModeratorUuid(moderator),
                 moderator.getName(),
                 null,
                 ipAddress
@@ -54,10 +60,9 @@ public final class KickCommand extends ModerationCommand {
 
         String kickMessage = """
                 §cYou are kicked from this server!
-
+                
                 §7Reason: §f%s
-
-                §7If you believe this was a mistake, please appeal on our Discord.""".formatted(reason);
+                """.formatted(reason);
 
         target.kickPlayer(kickMessage);
 
