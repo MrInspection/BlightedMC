@@ -74,7 +74,11 @@ public final class ReportsCenterMenu extends PaginatedMenu implements TickableMe
                 );
 
         if (report.message() != null && !report.message().isBlank()) {
-            builder.addLore("  §7Message: §f\"" + report.message() + "\"");
+            String displayMessage = report.message();
+            if (displayMessage.length() > 40) {
+                displayMessage = displayMessage.substring(0, 37) + "...";
+            }
+            builder.addLore("  §7Message: §f\"" + displayMessage + "\"");
         }
 
         builder.addItemFlag(ItemFlag.HIDE_PROFILE);
@@ -140,7 +144,7 @@ public final class ReportsCenterMenu extends PaginatedMenu implements TickableMe
                     page.append("§0" + report.reporterName() + " §0reported §6" + report.targetName() + " §0for §c" + report.reason() + "§0.\n\n");
 
                     if (report.message() != null && !report.message().isBlank() && !report.message().equalsIgnoreCase("General player report") && !report.message().equalsIgnoreCase("None")) {
-                        page.append("§0Chat Message:\n");
+                        page.append("§0Message:\n");
                         page.append("§8\"§3" + report.message() + "§8\"\n\n");
                     }
 
