@@ -5,6 +5,7 @@ import fr.moussax.blightedMod.BlightedMod;
 import fr.moussax.blightedMod.moderator.BlightedModerator;
 import fr.moussax.blightedMod.moderator.ModerationManager;
 import fr.moussax.blightedMod.moderator.menus.InvSeeMenu;
+import fr.moussax.blightedMod.moderator.punishments.DurationParser;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentData;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentManager;
 import org.bukkit.Bukkit;
@@ -48,8 +49,13 @@ public final class ModerationListener implements Listener {
             event.setCancelled(true);
             PunishmentData mute = punishmentManager.getActivePunishment(player.getUniqueId(), PunishmentData.PunishmentType.MUTE);
             if (mute != null) {
-                String durationText = mute.isPermanent() ? "permanently" : "temporarily";
-                player.sendMessage(" §c§lMUTED! §7You are " + durationText + " muted for: §f" + mute.reason());
+                if (mute.isPermanent()) {
+                    player.sendMessage(" §c⌚ §cYou are muted §cfor §b" + mute.reason() + "§c.");
+                } else {
+                    long remainingSeconds = Math.max(1, (mute.expiresAt() - System.currentTimeMillis()) / 1000L);
+                    String durationText = DurationParser.formatShortDuration(remainingSeconds);
+                    player.sendMessage(" §c⌚ §cYou are muted for §d" + durationText + " §cfor §b" + mute.reason() + "§c.");
+                }
             }
             return;
         }
@@ -64,7 +70,7 @@ public final class ModerationListener implements Listener {
         int remainingSlowmodeSeconds = moderationManager.getRemainingSlowmodeCooldown(player);
         if (remainingSlowmodeSeconds > 0) {
             event.setCancelled(true);
-            player.sendMessage(" §c§lSLOWMODE! §7Please wait §e" + remainingSlowmodeSeconds + "s §7before chatting again.");
+            player.sendMessage(" §c⌚ §cPlease wait §d" + remainingSlowmodeSeconds + "s §cbefore chatting again.");
             return;
         }
 
@@ -207,11 +213,10 @@ public final class ModerationListener implements Listener {
         Iterator<Player> iterator = event.iterator();
         while (iterator.hasNext()) {
             Player player = iterator.next();
-            if (moderationManager.isModerator(player)) {
-                BlightedModerator moderator = moderationManager.getModerator(player);
-                if (moderator != null && moderator.isVanished()) {
-                    iterator.remove();
-                }
+            if (moderationManager.isModerator(player)
+                    && moderationManager.getModerator(player) instanceof BlightedModerator moderator
+                    && moderator.isVanished()) {
+                iterator.remove();
             }
         }
     }
@@ -263,13 +268,8 @@ public final class ModerationListener implements Listener {
             }
 
             UUID lastTargetId = moderationManager.getLastMessageTarget(sender.getUniqueId());
-            String recipientName = "Unknown";
-            if (lastTargetId != null) {
-                Player lastTargetPlayer = Bukkit.getPlayer(lastTargetId);
-                if (lastTargetPlayer != null) {
-                    recipientName = lastTargetPlayer.getName();
-                }
-            }
+            Player lastTargetPlayer = lastTargetId != null ? Bukkit.getPlayer(lastTargetId) : null;
+            String recipientName = lastTargetPlayer != null ? lastTargetPlayer.getName() : "Unknown";
 
             String messageContent = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
             moderationManager.broadcastSpyMessage(sender.getName(), recipientName, messageContent);
@@ -321,13 +321,12 @@ public final class ModerationListener implements Listener {
         if (!moderationManager.isInModerationMode(attacker)) return;
 
         Material tool = attacker.getInventory().getItemInMainHand().getType();
-        if (tool == Material.STICK) {
-            if (event.getEntity() instanceof Player victim) {
-                moderationManager.getModerator(attacker).setTargetPlayer(victim);
-            }
-        } else {
-            event.setCancelled(true);
+        if (tool == Material.STICK && event.getEntity() instanceof Player victim) {
+            moderationManager.getModerator(attacker).setTargetPlayer(victim);
+            return;
         }
+
+        event.setCancelled(true);
     }
 
     @EventHandler
@@ -345,7 +344,7 @@ public final class ModerationListener implements Listener {
             case PACKED_ICE -> {
                 Player target = getActiveTarget(player);
                 if (target != null) {
-                    toggleFreeze(player, target);
+                    player.performCommand("freeze " + target.getName());
                 }
             }
             case CHEST -> {
@@ -392,22 +391,6 @@ public final class ModerationListener implements Listener {
     private void openSanctionsMenu(Player moderator, Player target) {
         moderationManager.getModerator(moderator).setTargetPlayer(target);
         moderator.performCommand("sanctions " + target.getName());
-    }
-
-    private void toggleFreeze(Player moderator, Player target) {
-        moderationManager.getModerator(moderator).setTargetPlayer(target);
-        boolean isFrozen = moderationManager.toggleFreeze(target);
-        String actionText = isFrozen ? "froze" : "unfroze";
-
-        moderator.sendMessage("§b ❄ §eYou " + actionText + " §d" + target.getName() + "§e.");
-
-        if (isFrozen) {
-            target.sendMessage("§b ❄ §c§lYOU HAVE BEEN FROZEN BY A MODERATOR!");
-            target.sendMessage(" §7Do not log out or you will be permanently banned.");
-        } else {
-            target.sendMessage("§b ❄ §a§lYOU HAVE BEEN UNFROZEN!");
-            target.sendMessage(" §7You are now free to move again.");
-        }
     }
 
     private void teleportToRandomPlayer(Player moderator) {
