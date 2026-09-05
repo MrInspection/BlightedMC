@@ -55,11 +55,14 @@ public final class BlightedPlayer {
     private int forgeFuel;
 
     /**
-     * Constructs and registers a player context for an online Bukkit player.
+     * Constructs a player context for an online Bukkit player.
+     *
+     * <p>This constructor is private; instances are instantiated exclusively through
+     * {@link #get(Player)} to ensure registration in the active players map.</p>
      *
      * @param player player represented by this context
      */
-    public BlightedPlayer(Player player) {
+    private BlightedPlayer(Player player) {
         this.player = player;
         this.playerId = player.getUniqueId();
         this.dataHandler = new PlayerDataHandler(playerId, player.getName());
