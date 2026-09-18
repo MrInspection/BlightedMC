@@ -272,10 +272,14 @@ public abstract class Menu implements InventoryHolder {
     public void setBackButton(int slot, @Nullable Menu previousMenu) {
         setBackButton(slot, (player, _) -> {
             if (previousMenu == null) {
-                close();
+                goBack();
                 return;
             }
-            previousMenu.open(player);
+            if (menuSystem != null) {
+                menuSystem.popAndOpen(player, previousMenu);
+            } else {
+                previousMenu.open(player);
+            }
         });
     }
 
@@ -712,8 +716,16 @@ public abstract class Menu implements InventoryHolder {
             return;
         }
 
+        Map<Integer, MenuSlot> preservedInteractableSlots = new HashMap<>();
+        for (Map.Entry<Integer, MenuSlot> entry : slots.entrySet()) {
+            if (isInteractable(entry.getKey())) {
+                preservedInteractableSlots.put(entry.getKey(), entry.getValue());
+            }
+        }
+
         slots.clear();
         build(player);
+        preservedInteractableSlots.forEach(slots::putIfAbsent);
 
         InventoryView openInventory = player.getOpenInventory();
         if (openInventory.getTopInventory().getHolder() == this && !openInventory.getTitle().equals(this.title)) {

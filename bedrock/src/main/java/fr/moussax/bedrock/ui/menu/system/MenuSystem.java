@@ -131,6 +131,23 @@ public final class MenuSystem {
     }
 
     /**
+     * Pops active menu from navigation history and opens the target menu.
+     *
+     * @param player     player navigating to target menu
+     * @param targetMenu menu to open
+     */
+    public void popAndOpen(@NonNull Player player, @NonNull Menu targetMenu) {
+        if (shutdownInitiated) return;
+
+        UUID playerId = player.getUniqueId();
+        Deque<Menu> stack = menuHistory.get(playerId);
+        if (stack != null && !stack.isEmpty()) {
+            stack.pop();
+        }
+        openMenu(targetMenu, player);
+    }
+
+    /**
      * Removes active menu reference for a player without clearing navigation history.
      *
      * @param player player closing active view
