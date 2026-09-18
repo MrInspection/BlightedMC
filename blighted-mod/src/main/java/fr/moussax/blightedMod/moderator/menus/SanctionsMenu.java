@@ -185,7 +185,7 @@ public final class SanctionsMenu extends PaginatedMenu implements TickableMenu {
     protected ItemStack getEmptyStateItem(@NonNull Player player) {
         return new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
                 .setDisplayName("§cNo Sanctions Found")
-                .addLore("§7No sanctions match the current filter.")
+                .addLore("§7No sanctions match the", "§7current filter.")
                 .toItemStack();
     }
 

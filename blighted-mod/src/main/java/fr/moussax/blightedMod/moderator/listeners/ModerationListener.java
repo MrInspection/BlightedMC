@@ -1,14 +1,18 @@
 package fr.moussax.blightedMod.moderator.listeners;
 
 import fr.moussax.bedrock.text.InteractiveMessage;
+import fr.moussax.bedrock.ui.menu.Menu;
+import fr.moussax.bedrock.ui.menu.types.InteractiveMenu;
 import fr.moussax.blightedMod.BlightedMod;
 import fr.moussax.blightedMod.moderator.BlightedModerator;
+import fr.moussax.blightedMod.moderator.ModerationGlowHelper;
 import fr.moussax.blightedMod.moderator.ModerationManager;
 import fr.moussax.blightedMod.moderator.menus.InvSeeMenu;
 import fr.moussax.blightedMod.moderator.punishments.DurationParser;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentData;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,6 +24,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
@@ -165,9 +170,13 @@ public final class ModerationListener implements Listener {
         Player joiningPlayer = event.getPlayer();
         if (moderationManager.isModerator(joiningPlayer)) {
             BlightedModerator moderator = moderationManager.getModerator(joiningPlayer);
-            if (moderator.isVanished()) {
+            boolean isVanished = moderator.isVanished();
+            if (isVanished) {
                 event.setJoinMessage(null);
             }
+            String notification = " §d§lSTAFF! §9" + joiningPlayer.getName() + " §econnected."
+                    + (isVanished ? " §7(Vanished)" : "");
+            moderationManager.broadcastToModerators(notification);
             return;
         }
 
@@ -178,29 +187,47 @@ public final class ModerationListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+        if (moderationManager.isInModerationMode(player)) {
+            BlightedModerator moderator = moderationManager.getModerator(player);
+            Player target = moderator.getTargetPlayer();
+            if (target != null && target.isOnline() && target.getWorld().equals(player.getWorld())) {
+                ModerationGlowHelper.applyPinkGlow(player, target);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        moderationManager.getModeratorsView().values().stream()
+                .filter(BlightedModerator::isInModerationMode)
+                .forEach(moderator -> {
+                    if (Objects.equals(moderator.getTargetPlayer(), player) && moderator.getPlayer().getWorld().equals(event.getRespawnLocation().getWorld())) {
+                        ModerationGlowHelper.applyPinkGlow(moderator.getPlayer(), player);
+                    }
+                });
+    }
+
+    @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player quittingPlayer = event.getPlayer();
         if (moderationManager.isModerator(quittingPlayer)) {
-            BlightedModerator moderator = moderationManager.getModerator(quittingPlayer);
-            if (moderator.isVanished()) {
+            BlightedModerator moderator = moderationManager.getModeratorIfPresent(quittingPlayer);
+            boolean isVanished = moderator != null ? moderator.isVanished() : moderationManager.isVanished(quittingPlayer.getUniqueId());
+            if (isVanished) {
                 event.setQuitMessage(null);
             }
+            String notification = " §d§lSTAFF! §9" + quittingPlayer.getName() + " §edisconnected."
+                    + (isVanished ? " §7(Vanished)" : "");
+            moderationManager.broadcastToModerators(notification);
         }
 
         if (!moderationManager.isModerator(quittingPlayer) && moderationManager.isFrozen(quittingPlayer)) {
             moderationManager.toggleFreeze(quittingPlayer);
             String reason = "Disconnecting while frozen by a moderator";
-            String ipAddress = PunishmentManager.getPlayerIp(quittingPlayer);
-            punishmentManager.addPunishment(
-                    quittingPlayer.getUniqueId(),
-                    quittingPlayer.getName(),
-                    PunishmentData.PunishmentType.BAN,
-                    reason,
-                    PunishmentManager.CONSOLE_UUID,
-                    "CONSOLE",
-                    null,
-                    ipAddress
-            );
+            punishmentManager.addBan(quittingPlayer, null, reason, null);
 
             String notification = " §6§lALERT! §d" + quittingPlayer.getName() + "§e was automatically banned for §fdisconnecting §ewhile being frozen by a moderator.";
             moderationManager.broadcastToModerators(notification);
@@ -228,10 +255,10 @@ public final class ModerationListener implements Listener {
         Player player = event.getPlayer();
         if (moderationManager.isModerator(player) || !moderationManager.isFrozen(player)) return;
 
-        org.bukkit.Location frozenLocation = moderationManager.getFrozenLocation(player);
+        Location frozenLocation = moderationManager.getFrozenLocation(player);
         if (frozenLocation == null) return;
 
-        org.bukkit.Location to = event.getTo();
+        Location to = event.getTo();
         if (to == null) return;
 
         double deltaX = to.getX() - frozenLocation.getX();
@@ -240,22 +267,36 @@ public final class ModerationListener implements Listener {
         double distanceSquared = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
 
         if (distanceSquared > 0.05) {
-            org.bukkit.Location returnLocation = frozenLocation.clone();
+            Location returnLocation = frozenLocation.clone();
             returnLocation.setYaw(to.getYaw());
             returnLocation.setPitch(to.getPitch());
             event.setTo(returnLocation);
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPrivateMessageSpy(PlayerCommandPreprocessEvent event) {
-        String rawCommandLine = event.getMessage();
-        if (!rawCommandLine.startsWith("/")) {
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onMutedPlayerCommand(PlayerCommandPreprocessEvent event) {
+        Player player = event.getPlayer();
+        if (moderationManager.isModerator(player) || !punishmentManager.isMuted(player.getUniqueId())) {
             return;
         }
 
-        String[] parts = rawCommandLine.substring(1).trim().split("\\s+");
-        if (parts.length == 0 || parts[0].isEmpty()) {
+        String[] parts = extractCommandParts(event.getMessage());
+        if (parts.length == 0) {
+            return;
+        }
+
+        String commandLabel = parts[0].toLowerCase(Locale.ROOT);
+        if (Set.of("msg", "tell", "w", "whisper", "pm", "r", "reply", "me").contains(commandLabel)) {
+            event.setCancelled(true);
+            player.sendMessage(" §c⌚ §cYou are muted and cannot send private messages.");
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPrivateMessageSpy(PlayerCommandPreprocessEvent event) {
+        String[] parts = extractCommandParts(event.getMessage());
+        if (parts.length == 0) {
             return;
         }
 
@@ -268,7 +309,7 @@ public final class ModerationListener implements Listener {
             }
 
             String targetName = parts[1];
-            Player targetPlayer = Bukkit.getPlayer(targetName);
+            Player targetPlayer = Bukkit.getPlayerExact(targetName);
             String recipientName = targetPlayer != null ? targetPlayer.getName() : targetName;
             String messageContent = String.join(" ", Arrays.copyOfRange(parts, 2, parts.length));
 
@@ -291,6 +332,19 @@ public final class ModerationListener implements Listener {
         }
     }
 
+    private String[] extractCommandParts(String rawCommandLine) {
+        if (rawCommandLine == null || !rawCommandLine.startsWith("/")) {
+            return new String[0];
+        }
+
+        String[] parts = rawCommandLine.substring(1).trim().split("\\s+");
+        if (parts.length == 0 || parts[0].isEmpty()) {
+            return new String[0];
+        }
+
+        return parts;
+    }
+
     @EventHandler
     public void onModeratorDropItem(PlayerDropItemEvent event) {
         if (moderationManager.isInModerationMode(event.getPlayer())) {
@@ -301,6 +355,28 @@ public final class ModerationListener implements Listener {
     @EventHandler
     public void onModeratorPickupItem(EntityPickupItemEvent event) {
         if (event.getEntity() instanceof Player player && moderationManager.isInModerationMode(player)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onModeratorExpChange(PlayerExpChangeEvent event) {
+        if (moderationManager.isInModerationMode(event.getPlayer())) {
+            event.setAmount(0);
+        }
+    }
+
+    @EventHandler
+    public void onMobTargetModerator(EntityTargetLivingEntityEvent event) {
+        if (event.getTarget() instanceof Player targetPlayer && moderationManager.isInModerationMode(targetPlayer)) {
+            event.setCancelled(true);
+            event.setTarget(null);
+        }
+    }
+
+    @EventHandler
+    public void onModeratorPhysicalInteract(PlayerInteractEvent event) {
+        if (event.getAction() == Action.PHYSICAL && moderationManager.isInModerationMode(event.getPlayer())) {
             event.setCancelled(true);
         }
     }
@@ -338,9 +414,10 @@ public final class ModerationListener implements Listener {
         if (!moderationManager.isInModerationMode(attacker)) return;
 
         Material tool = attacker.getInventory().getItemInMainHand().getType();
-        if (tool == Material.STICK && event.getEntity() instanceof Player victim) {
-            moderationManager.getModerator(attacker).setTargetPlayer(victim);
-            event.setDamage(0);
+        if (tool == Material.STICK) {
+            if (event.getEntity() instanceof Player victim) {
+                moderationManager.getModerator(attacker).setTargetPlayer(victim);
+            }
             return;
         }
 
@@ -350,6 +427,11 @@ public final class ModerationListener implements Listener {
     @EventHandler
     public void onModeratorInventoryClick(InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player player && moderationManager.isInModerationMode(player)) {
+            if (event.getView().getTopInventory().getHolder() instanceof Menu menu) {
+                if (menu instanceof InteractiveMenu || menu.isInteractable(event.getRawSlot())) {
+                    return;
+                }
+            }
             event.setCancelled(true);
         }
     }
@@ -423,7 +505,7 @@ public final class ModerationListener implements Listener {
         eligiblePlayers.remove(moderator);
 
         if (eligiblePlayers.isEmpty()) {
-            moderator.sendMessage("§cNo other players online.");
+            warn(moderator, "No other players online.");
             return;
         }
 
@@ -431,8 +513,8 @@ public final class ModerationListener implements Listener {
         moderator.teleport(target.getLocation());
         moderationManager.getModerator(moderator).setTargetPlayer(target);
 
-        InteractiveMessage.text(" §eRandomly teleported to §d" + target.getName() + "§e. ")
-                .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + target.getName() + "§f.", "/userinfo " + target.getName())
+        InteractiveMessage.text(" §eRandomly teleported to §d" + target.getName())
+                .hoverAndExecute("§7∙ §3[Info]", "§fClick to view information about §d" + target.getName() + "§f.", "/userinfo " + target.getName())
                 .send(moderator);
     }
 }
