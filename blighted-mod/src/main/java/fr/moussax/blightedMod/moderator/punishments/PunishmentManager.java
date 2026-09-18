@@ -1,23 +1,67 @@
 package fr.moussax.blightedMod.moderator.punishments;
 
+import fr.moussax.bedrock.utils.debug.Log;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.net.InetSocketAddress;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class PunishmentManager {
-    private final Connection connection;
+    public static final UUID CONSOLE_UUID = UUID.nameUUIDFromBytes("CONSOLE".getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
-    public PunishmentManager(Connection connection) {
+    private final Connection connection;
+    private final Set<UUID> activeMutedPlayers = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> activeBannedPlayers = ConcurrentHashMap.newKeySet();
+    private final Map<String, OfflineTargetIdentity> playerIdentityCache = new ConcurrentHashMap<>();
+
+    public PunishmentManager(@NonNull Connection connection) {
         this.connection = connection;
+        initializeCache();
     }
 
-    public void addPunishment(UUID playerUuid, String playerName, PunishmentData.PunishmentType type,
-                              String reason, UUID moderatorUuid, String moderatorName,
-                              Long expiresAt, String ipAddress) {
+    private void initializeCache() {
+        String query = """
+                SELECT DISTINCT player_uuid, player_name, punishment_type, ip_address, expires_at
+                FROM punishments
+                WHERE is_active = 1
+                """;
+        synchronized (connection) {
+            try (PreparedStatement statement = connection.prepareStatement(query);
+                 ResultSet resultSet = statement.executeQuery()) {
+                long currentTime = System.currentTimeMillis();
+                while (resultSet.next()) {
+                    Long expiresAt = resultSet.getLong("expires_at");
+                    if (resultSet.wasNull()) expiresAt = null;
+                    if (expiresAt != null && currentTime > expiresAt) continue;
+
+                    UUID playerUuid = UUID.fromString(resultSet.getString("player_uuid"));
+                    String playerName = resultSet.getString("player_name");
+                    String ipAddress = resultSet.getString("ip_address");
+                    PunishmentData.PunishmentType type = PunishmentData.PunishmentType.valueOf(resultSet.getString("punishment_type"));
+
+                    if (type == PunishmentData.PunishmentType.MUTE) {
+                        activeMutedPlayers.add(playerUuid);
+                    } else if (type == PunishmentData.PunishmentType.BAN || type == PunishmentData.PunishmentType.IP_BAN) {
+                        activeBannedPlayers.add(playerUuid);
+                    }
+
+                    if (playerName != null && !playerName.isBlank()) {
+                        playerIdentityCache.put(playerName.toLowerCase(Locale.ROOT), new OfflineTargetIdentity(playerUuid, playerName, ipAddress));
+                    }
+                }
+            } catch (SQLException exception) {
+                Log.error("PunishmentManager", "Failed to initialize active punishments cache: " + exception.getMessage());
+            }
+        }
+    }
+
+    public void addPunishment(@NonNull PunishmentRequest request) {
         String query = """
                 INSERT INTO punishments (player_uuid, player_name, punishment_type, reason,
                                          moderator_uuid, moderator_name, created_at, expires_at, ip_address)
@@ -26,21 +70,39 @@ public final class PunishmentManager {
 
         synchronized (connection) {
             try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, playerUuid.toString());
-                statement.setString(2, playerName);
-                statement.setString(3, type.name());
-                statement.setString(4, reason);
-                statement.setString(5, moderatorUuid.toString());
-                statement.setString(6, moderatorName);
+                statement.setString(1, request.playerUuid().toString());
+                statement.setString(2, request.playerName());
+                statement.setString(3, request.type().name());
+                statement.setString(4, request.reason());
+                statement.setString(5, request.moderatorUuid().toString());
+                statement.setString(6, request.moderatorName());
                 statement.setLong(7, System.currentTimeMillis());
-                if (expiresAt != null) statement.setLong(8, expiresAt);
-                else statement.setNull(8, Types.INTEGER);
-                statement.setString(9, ipAddress);
+                if (request.expiresAt() != null) {
+                    statement.setLong(8, request.expiresAt());
+                } else {
+                    statement.setNull(8, Types.INTEGER);
+                }
+                statement.setString(9, request.ipAddress());
                 statement.executeUpdate();
+
+                if (request.type() == PunishmentData.PunishmentType.MUTE) {
+                    activeMutedPlayers.add(request.playerUuid());
+                } else if (request.type() == PunishmentData.PunishmentType.BAN || request.type() == PunishmentData.PunishmentType.IP_BAN) {
+                    activeBannedPlayers.add(request.playerUuid());
+                }
+
+                playerIdentityCache.put(request.playerName().toLowerCase(Locale.ROOT),
+                        new OfflineTargetIdentity(request.playerUuid(), request.playerName(), request.ipAddress()));
             } catch (SQLException exception) {
-                throw new RuntimeException("Failed to add punishment", exception);
+                throw new RuntimeException("Failed to add " + request.type() + " punishment for player " + request.playerName(), exception);
             }
         }
+    }
+
+    public void addPunishment(@NonNull UUID playerUuid, @NonNull String playerName, PunishmentData.@NonNull PunishmentType type,
+                              @NonNull String reason, @NonNull UUID moderatorUuid, @NonNull String moderatorName,
+                              @Nullable Long expiresAt, @Nullable String ipAddress) {
+        addPunishment(new PunishmentRequest(playerUuid, playerName, type, reason, moderatorUuid, moderatorName, expiresAt, ipAddress));
     }
 
     public void removePunishment(UUID playerUuid, PunishmentData.PunishmentType type) {
@@ -54,6 +116,12 @@ public final class PunishmentManager {
                 statement.setString(1, playerUuid.toString());
                 statement.setString(2, type.name());
                 statement.executeUpdate();
+
+                if (type == PunishmentData.PunishmentType.MUTE) {
+                    activeMutedPlayers.remove(playerUuid);
+                } else if (type == PunishmentData.PunishmentType.BAN) {
+                    activeBannedPlayers.remove(playerUuid);
+                }
             } catch (SQLException exception) {
                 throw new RuntimeException("Failed to remove punishment", exception);
             }
@@ -116,6 +184,11 @@ public final class PunishmentManager {
 
         if (punishment.isExpired()) {
             deactivatePunishment(punishment.id());
+            if (type == PunishmentData.PunishmentType.MUTE) {
+                activeMutedPlayers.remove(playerUuid);
+            } else if (type == PunishmentData.PunishmentType.BAN) {
+                activeBannedPlayers.remove(playerUuid);
+            }
             return null;
         }
         return punishment;
@@ -149,49 +222,63 @@ public final class PunishmentManager {
         return punishment;
     }
 
-    /**
-     * Resolves the UUID of an actively banned player by name, using persisted punishment
-     * data instead of a live Mojang lookup.
-     *
-     * <p>Used to unban players who are offline — {@code requireTarget} only resolves
-     * online players, but a banned player is disconnected by the time {@code /unban}
-     * is run against them.</p>
-     *
-     * @param playerName the banned player's name
-     * @return the player's UUID, or {@code null} if no active ban matches
-     */
-    public UUID resolveBannedUuidByName(String playerName) {
+    public OfflineTargetIdentity resolvePlayerIdentity(String playerName) {
+        Player onlinePlayer = Bukkit.getPlayerExact(playerName);
+        if (onlinePlayer != null) {
+            OfflineTargetIdentity identity = new OfflineTargetIdentity(onlinePlayer.getUniqueId(), onlinePlayer.getName(), getPlayerIp(onlinePlayer));
+            playerIdentityCache.put(playerName.toLowerCase(Locale.ROOT), identity);
+            return identity;
+        }
+
+        OfflineTargetIdentity cachedIdentity = playerIdentityCache.get(playerName.toLowerCase(Locale.ROOT));
+        if (cachedIdentity != null) {
+            return cachedIdentity;
+        }
+
         String query = """
-                SELECT * FROM punishments
-                WHERE LOWER(player_name) = LOWER(?) AND punishment_type = 'BAN' AND is_active = 1
+                SELECT player_uuid, player_name, ip_address FROM punishments
+                WHERE LOWER(player_name) = LOWER(?)
                 ORDER BY created_at DESC LIMIT 1
                 """;
-
-        PunishmentData punishment;
         synchronized (connection) {
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 statement.setString(1, playerName);
                 try (ResultSet resultSet = statement.executeQuery()) {
-                    if (!resultSet.next()) return null;
-                    punishment = mapResultSet(resultSet);
+                    if (resultSet.next()) {
+                        UUID uniqueId = UUID.fromString(resultSet.getString("player_uuid"));
+                        String resolvedName = resultSet.getString("player_name");
+                        String ipAddress = resultSet.getString("ip_address");
+                        OfflineTargetIdentity identity = new OfflineTargetIdentity(uniqueId, resolvedName, ipAddress);
+                        playerIdentityCache.put(playerName.toLowerCase(Locale.ROOT), identity);
+                        return identity;
+                    }
                 }
             } catch (SQLException exception) {
-                throw new RuntimeException("Failed to resolve banned player", exception);
+                Log.error("PunishmentManager", "Failed to resolve player identity for " + playerName + ": " + exception.getMessage());
             }
         }
+        return null;
+    }
 
-        if (punishment.isExpired()) {
-            deactivatePunishment(punishment.id());
-            return null;
-        }
-        return punishment.playerUuid();
+    public UUID resolveBannedUuidByName(String playerName) {
+        OfflineTargetIdentity identity = resolvePlayerIdentity(playerName);
+        if (identity == null) return null;
+
+        PunishmentData ban = getActivePunishment(identity.uniqueId(), PunishmentData.PunishmentType.BAN);
+        return ban != null ? identity.uniqueId() : null;
     }
 
     public boolean isMuted(UUID playerUuid) {
+        if (!activeMutedPlayers.contains(playerUuid)) {
+            return false;
+        }
         return getActivePunishment(playerUuid, PunishmentData.PunishmentType.MUTE) != null;
     }
 
     public boolean isBanned(UUID playerUuid) {
+        if (!activeBannedPlayers.contains(playerUuid)) {
+            return false;
+        }
         return getActivePunishment(playerUuid, PunishmentData.PunishmentType.BAN) != null;
     }
 
@@ -199,49 +286,86 @@ public final class PunishmentManager {
         return getActiveIpBan(ipAddress) != null;
     }
 
-    public static final UUID CONSOLE_UUID = UUID.nameUUIDFromBytes("CONSOLE".getBytes(java.nio.charset.StandardCharsets.UTF_8));
-
-    public static UUID getModeratorUuid(org.bukkit.command.CommandSender sender) {
+    public static UUID getModeratorUuid(CommandSender sender) {
         return sender instanceof Player player ? player.getUniqueId() : CONSOLE_UUID;
     }
 
-    public void addBan(Player target, org.bukkit.command.CommandSender moderator, String reason, Long expiresAt) {
-        addPunishment(
-                target.getUniqueId(),
-                target.getName(),
-                PunishmentData.PunishmentType.BAN,
-                reason,
-                getModeratorUuid(moderator),
-                moderator.getName(),
-                expiresAt,
-                getPlayerIp(target)
-        );
+    public void addBan(OfflineTargetIdentity targetIdentity, CommandSender moderator, String reason, Long expiresAt) {
+        addPunishment(PunishmentRequest.builder()
+                .target(targetIdentity)
+                .type(PunishmentData.PunishmentType.BAN)
+                .moderator(moderator)
+                .reason(reason)
+                .expiresAt(expiresAt)
+                .build());
     }
 
-    public void addMute(Player target, org.bukkit.command.CommandSender moderator, String reason, Long expiresAt) {
-        addPunishment(
-                target.getUniqueId(),
-                target.getName(),
-                PunishmentData.PunishmentType.MUTE,
-                reason,
-                getModeratorUuid(moderator),
-                moderator.getName(),
-                expiresAt,
-                getPlayerIp(target)
-        );
+    public void addBan(Player target, CommandSender moderator, String reason, Long expiresAt) {
+        addPunishment(PunishmentRequest.builder()
+                .target(target)
+                .type(PunishmentData.PunishmentType.BAN)
+                .moderator(moderator)
+                .reason(reason)
+                .expiresAt(expiresAt)
+                .build());
     }
 
-    public void addIpBan(Player target, org.bukkit.command.CommandSender moderator, String reason, Long expiresAt) {
-        addPunishment(
-                target.getUniqueId(),
-                target.getName(),
-                PunishmentData.PunishmentType.IP_BAN,
-                reason,
-                getModeratorUuid(moderator),
-                moderator.getName(),
-                expiresAt,
-                getPlayerIp(target)
-        );
+    public void addMute(OfflineTargetIdentity targetIdentity, CommandSender moderator, String reason, Long expiresAt) {
+        addPunishment(PunishmentRequest.builder()
+                .target(targetIdentity)
+                .type(PunishmentData.PunishmentType.MUTE)
+                .moderator(moderator)
+                .reason(reason)
+                .expiresAt(expiresAt)
+                .build());
+    }
+
+    public void addMute(Player target, CommandSender moderator, String reason, Long expiresAt) {
+        addPunishment(PunishmentRequest.builder()
+                .target(target)
+                .type(PunishmentData.PunishmentType.MUTE)
+                .moderator(moderator)
+                .reason(reason)
+                .expiresAt(expiresAt)
+                .build());
+    }
+
+    public void addIpBan(OfflineTargetIdentity targetIdentity, CommandSender moderator, String reason, Long expiresAt) {
+        addPunishment(PunishmentRequest.builder()
+                .target(targetIdentity)
+                .type(PunishmentData.PunishmentType.IP_BAN)
+                .moderator(moderator)
+                .reason(reason)
+                .expiresAt(expiresAt)
+                .build());
+    }
+
+    public void addIpBan(Player target, CommandSender moderator, String reason, Long expiresAt) {
+        addPunishment(PunishmentRequest.builder()
+                .target(target)
+                .type(PunishmentData.PunishmentType.IP_BAN)
+                .moderator(moderator)
+                .reason(reason)
+                .expiresAt(expiresAt)
+                .build());
+    }
+
+    public void addKick(OfflineTargetIdentity targetIdentity, CommandSender moderator, String reason) {
+        addPunishment(PunishmentRequest.builder()
+                .target(targetIdentity)
+                .type(PunishmentData.PunishmentType.KICK)
+                .moderator(moderator)
+                .reason(reason)
+                .build());
+    }
+
+    public void addKick(Player target, CommandSender moderator, String reason) {
+        addPunishment(PunishmentRequest.builder()
+                .target(target)
+                .type(PunishmentData.PunishmentType.KICK)
+                .moderator(moderator)
+                .reason(reason)
+                .build());
     }
 
     private PunishmentData mapResultSet(ResultSet resultSet) throws SQLException {

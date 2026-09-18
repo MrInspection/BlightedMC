@@ -2,6 +2,7 @@ package fr.moussax.blightedMod.commands.impl;
 
 import fr.moussax.bedrock.commands.CommandArgument;
 import fr.moussax.blightedMod.commands.ModerationCommand;
+import fr.moussax.blightedMod.moderator.punishments.OfflineTargetIdentity;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentData;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentManager;
 import org.bukkit.Bukkit;
@@ -30,19 +31,23 @@ public final class UserInfoCommand extends ModerationCommand {
             return false;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(arguments[0]);
-        if (!target.hasPlayedBefore() && !target.isOnline()) {
-            warn(moderator, "Unable to find player §4" + arguments[0]);
+        String targetNameInput = arguments[0];
+        OfflineTargetIdentity targetIdentity = getPunishmentManager().resolvePlayerIdentity(targetNameInput);
+        Player onlinePlayer = Bukkit.getPlayerExact(targetNameInput);
+
+        if (targetIdentity == null && onlinePlayer == null) {
+            warn(moderator, "Unable to find player §4" + targetNameInput);
             return false;
         }
 
-        String targetName = target.getName() != null ? target.getName() : arguments[0];
+        OfflinePlayer target = onlinePlayer != null ? onlinePlayer : Bukkit.getOfflinePlayer(targetIdentity.uniqueId());
+        String targetName = target.getName() != null ? target.getName() : (targetIdentity != null ? targetIdentity.name() : targetNameInput);
         boolean isOnline = target.isOnline();
         String statusDot = isOnline ? "§a●" : "§c●";
 
         Player targetPlayer = target.getPlayer();
         List<PunishmentData> punishments = getPunishmentManager().getAllPunishments(targetName);
-        String ipAddress = targetPlayer != null ? PunishmentManager.getPlayerIp(targetPlayer) : resolveOfflineIp(punishments);
+        String ipAddress = targetPlayer != null ? PunishmentManager.getPlayerIp(targetPlayer) : (targetIdentity != null ? targetIdentity.ipAddress() : resolveOfflineIp(punishments));
 
         long mutesCount = punishments.stream().filter(punishment -> punishment.type() == PunishmentData.PunishmentType.MUTE).count();
         long bansCount = punishments.stream().filter(punishment -> punishment.type() == PunishmentData.PunishmentType.BAN || punishment.type() == PunishmentData.PunishmentType.IP_BAN).count();

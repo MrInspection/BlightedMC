@@ -13,11 +13,7 @@ public final class DurationParser {
 
         Matcher matcher = DURATION_PATTERN.matcher(input.toLowerCase());
         if (!matcher.matches()) {
-            try {
-                return Long.parseLong(input);
-            } catch (NumberFormatException _) {
-                return null;
-            }
+            return null;
         }
 
         long value = Long.parseLong(matcher.group(1));
