@@ -25,7 +25,7 @@ public final class SanctionsCommand extends ModerationCommand {
         List<PunishmentData> punishments = getPunishmentManager().getAllPunishments(targetName);
 
         if (punishments.isEmpty()) {
-            warn(moderator, "No recorded sanctions found for player §4" + targetName + "§c.");
+            warn(moderator, "No recorded sanctions found for §4" + targetName + "§c.");
             return true;
         }
 

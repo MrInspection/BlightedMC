@@ -50,6 +50,9 @@ public final class PluginDatabase {
                         )
                         """
                 );
+                statement.execute("CREATE INDEX IF NOT EXISTS idx_punishments_player_uuid ON punishments(player_uuid)");
+                statement.execute("CREATE INDEX IF NOT EXISTS idx_punishments_ip_address ON punishments(ip_address)");
+                statement.execute("CREATE INDEX IF NOT EXISTS idx_punishments_player_name ON punishments(player_name)");
             }
         }
     }

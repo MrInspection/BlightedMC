@@ -23,12 +23,17 @@ public final class ModerationGlowHelper {
 
     private static final String GLOW_TEAM_NAME = "mod_glow_pink";
     private static final Map<UUID, Scoreboard> ORIGINAL_SCOREBOARDS = new ConcurrentHashMap<>();
+    private static final EntityDataAccessor<Byte> DATA_SHARED_FLAGS = new EntityDataAccessor<>(0, EntityDataSerializers.BYTE);
 
     private ModerationGlowHelper() {
     }
 
     public static void applyPinkGlow(Player moderator, Player target) {
         if (moderator == null || target == null || !moderator.isOnline() || !target.isOnline()) {
+            return;
+        }
+
+        if (!moderator.getWorld().equals(target.getWorld())) {
             return;
         }
 
@@ -68,7 +73,7 @@ public final class ModerationGlowHelper {
             team.removeEntry(target.getName());
         }
 
-        if (target.isOnline()) {
+        if (target.isOnline() && moderator.getWorld().equals(target.getWorld())) {
             sendGlowPacket(moderator, target, false);
         }
 
@@ -82,14 +87,17 @@ public final class ModerationGlowHelper {
 
     private static void sendGlowPacket(Player moderator, Player target, boolean glowing) {
         try {
+            if (!moderator.isOnline() || !target.isOnline() || !moderator.getWorld().equals(target.getWorld())) {
+                return;
+            }
             CraftPlayer craftTarget = (CraftPlayer) target;
             CraftPlayer craftModerator = (CraftPlayer) moderator;
 
-            byte existingFlags = craftTarget.getHandle().getEntityData().get(new EntityDataAccessor<>(0, EntityDataSerializers.BYTE));
+            byte existingFlags = craftTarget.getHandle().getEntityData().get(DATA_SHARED_FLAGS);
             byte updatedFlags = glowing ? (byte) (existingFlags | 0x40) : (byte) (existingFlags & ~0x40);
 
             List<SynchedEntityData.DataValue<?>> dataValues = new ArrayList<>();
-            dataValues.add(SynchedEntityData.DataValue.create(new EntityDataAccessor<>(0, EntityDataSerializers.BYTE), updatedFlags));
+            dataValues.add(SynchedEntityData.DataValue.create(DATA_SHARED_FLAGS, updatedFlags));
 
             ClientboundSetEntityDataPacket packet = new ClientboundSetEntityDataPacket(target.getEntityId(), dataValues);
             craftModerator.getHandle().connection.send(packet);

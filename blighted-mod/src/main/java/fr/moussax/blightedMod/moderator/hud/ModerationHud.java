@@ -2,6 +2,7 @@ package fr.moussax.blightedMod.moderator.hud;
 
 import fr.moussax.bedrock.ui.actionbar.ActionbarSection;
 import fr.moussax.blightedMod.moderator.BlightedModerator;
+import fr.moussax.blightedMod.moderator.ModerationGlowHelper;
 import fr.moussax.blightedMod.moderator.ModerationManager;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
@@ -34,6 +35,10 @@ public final class ModerationHud {
             return null;
         }
 
+        if (player.getWorld().equals(target.getWorld())) {
+            ModerationGlowHelper.applyPinkGlow(player, target);
+        }
+
         double maxHealth = Objects.requireNonNull(target.getAttribute(Attribute.MAX_HEALTH)).getValue();
         int healthPercent = (int) Math.round((target.getHealth() / maxHealth) * 100.0);
         String healthColor = healthPercent >= 60 ? "§a" : healthPercent >= 30 ? "§e" : "§c";
@@ -47,9 +52,9 @@ public final class ModerationHud {
         String pingColor = ping < 100 ? "§a" : ping < 200 ? "§e" : ping < 300 ? "§6" : ping < 500 ? "§c" : "§4";
         String pingText = pingColor + ping + "ms";
 
-        return "§fTarget: §d" + target.getName()
+        return "§fTarget: §a" + target.getName()
                 + "     §fHP: " + healthColor + healthPercent + "%"
-                + "     §fDistance: §d" + distanceText
+                + "     §fDistance: §a" + distanceText
                 + "     §fPing: " + pingText
                 + "     §fFrozen: " + frozenText;
     }

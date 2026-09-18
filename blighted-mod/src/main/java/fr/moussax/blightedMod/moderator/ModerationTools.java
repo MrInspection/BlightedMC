@@ -7,6 +7,10 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 public final class ModerationTools {
+
+    private ModerationTools() {
+    }
+
     public static ItemStack getRandomTeleporter() {
         return new ItemBuilder(Material.ENDER_EYE)
                 .setDisplayName("§dRandom Teleport §7(Right Click)")

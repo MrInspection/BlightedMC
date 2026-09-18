@@ -2,23 +2,7 @@ package fr.moussax.blightedMod.registry;
 
 import fr.moussax.bedrock.commands.CommandRegistrar;
 import fr.moussax.bedrock.commands.TabSuggestionRegistry;
-import fr.moussax.blightedMod.commands.impl.BanCommand;
-import fr.moussax.blightedMod.commands.impl.CheckReportCommand;
-import fr.moussax.blightedMod.commands.impl.EnderseeCommand;
-import fr.moussax.blightedMod.commands.impl.FreezeCommand;
-import fr.moussax.blightedMod.commands.impl.InvseeCommand;
-import fr.moussax.blightedMod.commands.impl.KickCommand;
-import fr.moussax.blightedMod.commands.impl.ModCommand;
-import fr.moussax.blightedMod.commands.impl.ModTpCommands;
-import fr.moussax.blightedMod.commands.impl.MuteCommand;
-import fr.moussax.blightedMod.commands.impl.ReportCommand;
-import fr.moussax.blightedMod.commands.impl.ReportsCommand;
-import fr.moussax.blightedMod.commands.impl.SanctionsCommand;
-import fr.moussax.blightedMod.commands.impl.SetSlowmodeCommand;
-import fr.moussax.blightedMod.commands.impl.SocialSpyCommand;
-import fr.moussax.blightedMod.commands.impl.TargetCommand;
-import fr.moussax.blightedMod.commands.impl.UserInfoCommand;
-import fr.moussax.blightedMod.commands.impl.VanishCommand;
+import fr.moussax.blightedMod.commands.impl.*;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -71,14 +55,6 @@ public final class CommandsRegistry {
         registrar.register("spy", socialSpyCommand);
         registrar.register("socialspy", socialSpyCommand);
     }
-
-
-
-
-
-
-
-
 
     private static TabSuggestionRegistry createSuggestionRegistry() {
         TabSuggestionRegistry suggestions = new TabSuggestionRegistry();
