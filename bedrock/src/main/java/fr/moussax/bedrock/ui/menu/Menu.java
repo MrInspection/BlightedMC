@@ -722,12 +722,12 @@ public abstract class Menu implements InventoryHolder {
 
         boolean changed = false;
         for (int slot = 0; slot < size; slot++) {
-            MenuSlot menuSlot = slots.get(slot);
-            if (menuSlot == null) {
+            if (isInteractable(slot)) {
                 continue;
             }
 
-            ItemStack newItem = menuSlot.item;
+            MenuSlot menuSlot = slots.get(slot);
+            ItemStack newItem = menuSlot != null ? menuSlot.item : null;
             ItemStack currentItem = inventory.getItem(slot);
 
             if (!isSameItem(currentItem, newItem)) {
@@ -742,8 +742,10 @@ public abstract class Menu implements InventoryHolder {
     }
 
     private boolean isSameItem(@Nullable ItemStack first, @Nullable ItemStack second) {
-        if (first == null && second == null) return true;
-        if (first == null || second == null) return false;
+        boolean firstEmpty = first == null || first.getType().isAir();
+        boolean secondEmpty = second == null || second.getType().isAir();
+        if (firstEmpty && secondEmpty) return true;
+        if (firstEmpty || secondEmpty) return false;
         return first.getAmount() == second.getAmount() && first.isSimilar(second);
     }
 
