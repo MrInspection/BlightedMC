@@ -5,6 +5,8 @@ import fr.moussax.blightedMod.commands.ModerationCommand;
 import fr.moussax.blightedMod.moderator.punishments.DurationParser;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentArguments;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentData;
+import fr.moussax.blightedMod.moderator.punishments.OfflineTargetIdentity;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -33,24 +35,36 @@ public final class BanCommand extends ModerationCommand {
     }
 
     private boolean handleBan(CommandSender moderator, String[] arguments) {
+        return executeBanOrIpBan(moderator, arguments, false);
+    }
+
+    private boolean handleBanIp(CommandSender moderator, String[] arguments) {
+        return executeBanOrIpBan(moderator, arguments, true);
+    }
+
+    private boolean executeBanOrIpBan(CommandSender moderator, String[] arguments, boolean isIpBan) {
+        String actionLabel = isIpBan ? "banip" : "ban";
         if (arguments.length < 1) {
-            warn(moderator, "Usage: /ban <player> [duration] [reason]");
+            warn(moderator, "Usage: /" + actionLabel + " <player> [duration] [reason]");
             moderator.sendMessage("§7Duration format: 1d, 3w, 1m, 1y (omit for permanent)");
             return false;
         }
 
-        Player target = requireTarget(moderator, arguments[0]);
-        if (target == null) {
+        String targetName = arguments[0];
+        OfflineTargetIdentity targetIdentity = getPunishmentManager().resolvePlayerIdentity(targetName);
+        if (targetIdentity == null) {
+            warn(moderator, "Unable to find player §4" + targetName);
             return false;
         }
 
-        if (target.equals(moderator)) {
-            warn(moderator, "You cannot ban yourself.");
+        if (moderator instanceof Player executingPlayer && targetIdentity.uniqueId().equals(executingPlayer.getUniqueId())) {
+            warn(moderator, "You cannot " + (isIpBan ? "IP ban" : "ban") + " yourself.");
             return false;
         }
 
-        if (moderator instanceof Player && getModerationManager().isModerator(target)) {
-            warn(moderator, "You cannot ban another moderator.");
+        Player onlineTarget = Bukkit.getPlayerExact(targetName);
+        if (moderator instanceof Player && onlineTarget != null && getModerationManager().isModerator(onlineTarget)) {
+            warn(moderator, "You cannot " + (isIpBan ? "IP ban" : "ban") + " another moderator.");
             return false;
         }
 
@@ -58,23 +72,26 @@ public final class BanCommand extends ModerationCommand {
         Long expiresAt = punishmentArguments.expiresAt();
         String reason = punishmentArguments.reason();
 
-        getPunishmentManager().addBan(target, moderator, reason, expiresAt);
+        if (isIpBan) {
+            getPunishmentManager().addIpBan(targetIdentity, moderator, reason, expiresAt);
+        } else {
+            getPunishmentManager().addBan(targetIdentity, moderator, reason, expiresAt);
+        }
 
-        String durationText = expiresAt != null ? DurationParser.formatDuration(arguments[1]) : "Permanent";
-        String banMessage = """
-                §cYou are banned from this server!
+        if (onlineTarget != null && onlineTarget.isOnline()) {
+            String durationText = expiresAt != null ? DurationParser.formatDuration(arguments[1]) : "Permanent";
+            String header = isIpBan ? "§cYour IP address is banned from this server!" : "§cYou are banned from this server!";
+            String banMessage = """
+                    %s
 
-                §7Reason: §f%s
-                §7Duration: §f%s
+                    §7Reason: §f%s
+                    §7Duration: §f%s
 
-                §7Appeal on our Discord if you believe this was a mistake.""".formatted(reason, durationText);
+                    §7Appeal on our Discord if you believe this was a mistake.""".formatted(header, reason, durationText);
+            onlineTarget.kickPlayer(banMessage);
+        }
 
-        target.kickPlayer(banMessage);
-
-        String durationString = expiresAt != null ? " for §6" + durationText + "§e" : " permanently";
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e banned §d" + target.getName() + "§e" + durationString + " for §c" + reason + "§e.";
-        getModerationManager().broadcastToModerators(notification);
-
+        getModerationManager().handleSanctionNotification(moderator, targetIdentity.name(), isIpBan ? "IP banned" : "banned");
         return true;
     }
 
@@ -93,54 +110,7 @@ public final class BanCommand extends ModerationCommand {
         }
 
         getPunishmentManager().removePunishment(targetId, PunishmentData.PunishmentType.BAN);
-
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unbanned §d" + targetName + "§e.";
-        getModerationManager().broadcastToModerators(notification);
-
-        return true;
-    }
-
-    private boolean handleBanIp(CommandSender moderator, String[] arguments) {
-        if (arguments.length < 1) {
-            warn(moderator, "Usage: /banip <player> [duration] [reason]");
-            moderator.sendMessage("§7Duration format: 1d, 3w, 1m, 1y (omit for permanent)");
-            return false;
-        }
-
-        Player target = requireTarget(moderator, arguments[0]);
-        if (target == null) {
-            return false;
-        }
-
-        if (target.equals(moderator)) {
-            warn(moderator, "You cannot IP ban yourself.");
-            return false;
-        }
-
-        if (moderator instanceof Player && getModerationManager().isModerator(target)) {
-            warn(moderator, "You cannot IP ban another moderator.");
-            return false;
-        }
-
-        PunishmentArguments punishmentArguments = PunishmentArguments.parse(arguments, 1);
-        Long expiresAt = punishmentArguments.expiresAt();
-        String reason = punishmentArguments.reason();
-
-        getPunishmentManager().addIpBan(target, moderator, reason, expiresAt);
-
-        String durationText = expiresAt != null ? DurationParser.formatDuration(arguments[1]) : "Permanent";
-        String banMessage = """
-                §cYour IP address is banned from this server!
-
-                §7Reason: §f%s
-                §7Duration: §f%s
-
-                §7Appeal on our Discord if you believe this was a mistake.""".formatted(reason, durationText);
-
-        target.kickPlayer(banMessage);
-
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e IP banned §d" + target.getName() + "§e for §c" + reason + "§e.";
-        getModerationManager().broadcastToModerators(notification);
+        getModerationManager().handleSanctionNotification(moderator, targetName, "unbanned");
 
         return true;
     }
@@ -172,9 +142,7 @@ public final class BanCommand extends ModerationCommand {
         }
 
         getPunishmentManager().removeIpPunishment(ipAddress);
-
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unbanned IP for §d" + targetName + "§e.";
-        getModerationManager().broadcastToModerators(notification);
+        getModerationManager().handleSanctionNotification(moderator, targetName, "unbanned IP");
 
         return true;
     }

@@ -45,18 +45,7 @@ public final class KickCommand extends ModerationCommand {
         String reason = arguments.length > 1
                 ? String.join(" ", Arrays.copyOfRange(arguments, 1, arguments.length))
                 : "No reason specified";
-        String ipAddress = PunishmentManager.getPlayerIp(target);
-
-        getPunishmentManager().addPunishment(
-                target.getUniqueId(),
-                target.getName(),
-                PunishmentData.PunishmentType.KICK,
-                reason,
-                PunishmentManager.getModeratorUuid(moderator),
-                moderator.getName(),
-                null,
-                ipAddress
-        );
+        getPunishmentManager().addKick(target, moderator, reason);
 
         String kickMessage = """
                 §cYou are kicked from this server!
@@ -66,8 +55,7 @@ public final class KickCommand extends ModerationCommand {
 
         target.kickPlayer(kickMessage);
 
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e kicked §d" + target.getName() + "§e for §c" + reason + "§e.";
-        getModerationManager().broadcastToModerators(notification);
+        getModerationManager().handleSanctionNotification(moderator, target.getName(), "kicked");
 
         return true;
     }

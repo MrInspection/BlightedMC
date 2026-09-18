@@ -3,8 +3,10 @@ package fr.moussax.blightedMod.commands.impl;
 import fr.moussax.bedrock.commands.CommandArgument;
 import fr.moussax.blightedMod.commands.ModerationCommand;
 import fr.moussax.blightedMod.moderator.punishments.DurationParser;
+import fr.moussax.blightedMod.moderator.punishments.OfflineTargetIdentity;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentArguments;
 import fr.moussax.blightedMod.moderator.punishments.PunishmentData;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -35,17 +37,20 @@ public final class MuteCommand extends ModerationCommand {
             return false;
         }
 
-        Player target = requireTarget(moderator, arguments[0]);
-        if (target == null) {
+        String targetName = arguments[0];
+        OfflineTargetIdentity targetIdentity = getPunishmentManager().resolvePlayerIdentity(targetName);
+        if (targetIdentity == null) {
+            warn(moderator, "Unable to find player §4" + targetName);
             return false;
         }
 
-        if (target.equals(moderator)) {
+        if (moderator instanceof Player executingPlayer && targetIdentity.uniqueId().equals(executingPlayer.getUniqueId())) {
             warn(moderator, "You cannot mute yourself.");
             return false;
         }
 
-        if (moderator instanceof Player && getModerationManager().isModerator(target)) {
+        Player onlineTarget = Bukkit.getPlayerExact(targetName);
+        if (moderator instanceof Player && onlineTarget != null && getModerationManager().isModerator(onlineTarget)) {
             warn(moderator, "You cannot mute another moderator.");
             return false;
         }
@@ -54,16 +59,15 @@ public final class MuteCommand extends ModerationCommand {
         Long expiresAt = punishmentArguments.expiresAt();
         String reason = punishmentArguments.reason();
 
-        getPunishmentManager().addMute(target, moderator, reason, expiresAt);
+        getPunishmentManager().addMute(targetIdentity, moderator, reason, expiresAt);
 
-        String durationText = expiresAt != null ? "for §6" + DurationParser.formatDuration(arguments[1]) + " " : "";
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e muted §d" + target.getName() + " §e" + durationText + "§efor §c" + reason + "§e.";
-
-        getModerationManager().broadcastToModerators(notification);
-        if (expiresAt != null) {
-            target.sendMessage(" §c⌚ §cYou are muted for §d" + arguments[1] + " §cfor §b" + reason + "§c.");
-        } else {
-            target.sendMessage(" §c⌚ §cYou are muted §cfor §b" + reason + "§c.");
+        getModerationManager().handleSanctionNotification(moderator, targetIdentity.name(), "muted");
+        if (onlineTarget != null && onlineTarget.isOnline()) {
+            if (expiresAt != null) {
+                onlineTarget.sendMessage(" §c⌚ §cYou are muted for §d" + arguments[1] + " §cfor §b" + reason + "§c.");
+            } else {
+                onlineTarget.sendMessage(" §c⌚ §cYou are muted §cfor §b" + reason + "§c.");
+            }
         }
 
         return true;
@@ -75,21 +79,27 @@ public final class MuteCommand extends ModerationCommand {
             return false;
         }
 
-        Player target = requireTarget(moderator, arguments[0]);
-        if (target == null) {
+        String targetName = arguments[0];
+        OfflineTargetIdentity targetIdentity = getPunishmentManager().resolvePlayerIdentity(targetName);
+        if (targetIdentity == null) {
+            warn(moderator, "Unable to find player §4" + targetName);
             return false;
         }
 
-        if (!getPunishmentManager().isMuted(target.getUniqueId())) {
-            warn(moderator, target.getName() + " is not muted.");
+        if (!getPunishmentManager().isMuted(targetIdentity.uniqueId())) {
+            warn(moderator, targetIdentity.name() + " is not muted.");
             return false;
         }
 
-        getPunishmentManager().removePunishment(target.getUniqueId(), PunishmentData.PunishmentType.MUTE);
+        getPunishmentManager().removePunishment(targetIdentity.uniqueId(), PunishmentData.PunishmentType.MUTE);
 
-        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unmuted §d" + target.getName() + "§e.";
+        String notification = " §d§lSTAFF! §9" + moderator.getName() + "§e unmuted §d" + targetIdentity.name() + "§e.";
         getModerationManager().broadcastToModerators(notification);
-        target.sendMessage(" §a⚑ §7You are no longer muted.");
+
+        Player onlineTarget = Bukkit.getPlayerExact(targetName);
+        if (onlineTarget != null && onlineTarget.isOnline()) {
+            onlineTarget.sendMessage(" §a⚑ §7You are no longer muted.");
+        }
         return true;
     }
 }

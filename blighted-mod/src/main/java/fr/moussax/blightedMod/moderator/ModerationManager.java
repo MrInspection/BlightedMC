@@ -6,6 +6,7 @@ import fr.moussax.blightedMod.utils.PluginPermissions;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -23,12 +24,13 @@ public final class ModerationManager {
     @Getter
     private final PunishmentManager punishmentManager;
     private final Map<UUID, BlightedModerator> moderators = new ConcurrentHashMap<>();
-    private final Set<UUID> frozenPlayers = new HashSet<>();
+    private final Set<UUID> frozenPlayers = ConcurrentHashMap.newKeySet();
     private final Map<UUID, Location> frozenLocations = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastChatTimestamps = new ConcurrentHashMap<>();
     private final Map<UUID, ChatChannel> playerChatChannels = new ConcurrentHashMap<>();
     private final Set<UUID> messageInspectEnabled = ConcurrentHashMap.newKeySet();
     private final Map<UUID, UUID> lastMessageTargets = new ConcurrentHashMap<>();
+    private final Set<UUID> vanishedPlayers = ConcurrentHashMap.newKeySet();
     @Getter
     private int slowmodeDelaySeconds = 0;
 
@@ -52,7 +54,11 @@ public final class ModerationManager {
     }
 
     public BlightedModerator getModerator(Player player) {
-        return moderators.computeIfAbsent(player.getUniqueId(), _ -> new BlightedModerator(player));
+        BlightedModerator moderator = moderators.computeIfAbsent(player.getUniqueId(), _ -> new BlightedModerator(player));
+        if (vanishedPlayers.contains(player.getUniqueId()) && !moderator.isVanished()) {
+            moderator.setVanished(true, false);
+        }
+        return moderator;
     }
 
     public BlightedModerator getModeratorIfPresent(Player player) {
@@ -152,6 +158,40 @@ public final class ModerationManager {
         Bukkit.getOnlinePlayers().stream()
                 .filter(this::isModerator)
                 .forEach(interactiveMessage::send);
+    }
+
+    public void broadcastToModeratorsExcept(CommandSender excludedModerator, InteractiveMessage interactiveMessage) {
+        Bukkit.getOnlinePlayers().stream()
+                .filter(this::isModerator)
+                .filter(moderator -> !moderator.equals(excludedModerator))
+                .forEach(interactiveMessage::send);
+    }
+
+    public void handleSanctionNotification(CommandSender moderator, String targetName, String actionDescription) {
+        if (moderator instanceof Player executingPlayer) {
+            InteractiveMessage.text(" §eSanction applied to §d" + targetName + "§7∙ ")
+                    .hoverAndExecute("§3[View Details]", "§fClick to view sanctions for §d" + targetName + "§f.", "/sanctions " + targetName)
+                    .send(executingPlayer);
+        } else {
+            moderator.sendMessage(" §eSanction applied to §d" + targetName + ".");
+        }
+
+        InteractiveMessage staffMessage = InteractiveMessage.text(" §d§lSTAFF! §9" + moderator.getName() + " §e" + actionDescription + " §d" + targetName + "§7∙ ")
+                .hoverAndExecute("§3[View Details]", "§fClick to view sanctions for §d" + targetName + "§f.", "/sanctions " + targetName);
+
+        broadcastToModeratorsExcept(moderator, staffMessage);
+    }
+
+    public boolean isVanished(UUID playerId) {
+        return vanishedPlayers.contains(playerId);
+    }
+
+    public void setVanished(UUID playerId, boolean vanished) {
+        if (vanished) {
+            vanishedPlayers.add(playerId);
+        } else {
+            vanishedPlayers.remove(playerId);
+        }
     }
 
     public ChatChannel getChatChannel(Player player) {
