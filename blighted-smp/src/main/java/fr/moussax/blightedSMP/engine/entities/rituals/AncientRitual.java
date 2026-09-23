@@ -131,7 +131,7 @@ public final class AncientRitual {
          * @return this builder
          */
         public Builder addOffering(String itemId, int amount) {
-            return addOffering(ItemRegistry.getItem(itemId), amount);
+            return addOffering(ItemRegistry.get(itemId), amount);
         }
 
         /**

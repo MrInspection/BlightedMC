@@ -55,7 +55,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
         boolean initialCanInvoke = this.canInvoke;
         checkRequirements(player);
 
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
         int currentLevel = player.getLevel();
         double currentGems = blightedPlayer != null ? blightedPlayer.getGems() : 0;
 
@@ -132,7 +132,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
             return;
         }
 
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
         Map<String, Integer> requiredCounts = aggregateRequirements();
 
         Map<String, Integer> inventoryCounts = new HashMap<>();
@@ -281,7 +281,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
         for (CraftingObject ingredient : ritual.getOfferings()) {
             Utilities.consumeItemsFromInventory(player, ingredient);
         }
-        BlightedPlayer.getBlightedPlayer(player).removeGems(ritual.getGemsCost());
+        BlightedPlayer.get(player).removeGems(ritual.getGemsCost());
         player.setLevel(player.getLevel() - ritual.getLevelCost());
     }
 

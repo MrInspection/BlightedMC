@@ -322,7 +322,7 @@ public final class BlightedEntitiesListener implements Listener {
         blighted.cleanup();
 
         BlightedPlayer killer = dead.getKiller() != null
-                ? BlightedPlayer.getBlightedPlayer(dead.getKiller())
+                ? BlightedPlayer.get(dead.getKiller())
                 : null;
 
         blighted.dropLoot(dead.getLocation(), killer);

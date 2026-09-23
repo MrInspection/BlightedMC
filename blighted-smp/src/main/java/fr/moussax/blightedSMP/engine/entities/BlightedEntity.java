@@ -501,7 +501,7 @@ public abstract class BlightedEntity implements Cloneable {
      */
     public List<BlightedPlayer> getNearbyBlightedPlayers(Location center, double radius) {
         return getNearbyPlayers(center, radius).stream()
-                .map(BlightedPlayer::getBlightedPlayer)
+                .map(BlightedPlayer::get)
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -514,7 +514,7 @@ public abstract class BlightedEntity implements Cloneable {
      */
     public BlightedPlayer getNearestBlightedPlayer(double radius) {
         Player target = getNearestPlayer(radius);
-        return target != null ? BlightedPlayer.getBlightedPlayer(target) : null;
+        return target != null ? BlightedPlayer.get(target) : null;
     }
 
     /**
@@ -526,7 +526,7 @@ public abstract class BlightedEntity implements Cloneable {
      */
     public BlightedPlayer getNearestBlightedPlayer(Location center, double radius) {
         Player target = getNearestPlayer(center, radius);
-        return target != null ? BlightedPlayer.getBlightedPlayer(target) : null;
+        return target != null ? BlightedPlayer.get(target) : null;
     }
 
     /**

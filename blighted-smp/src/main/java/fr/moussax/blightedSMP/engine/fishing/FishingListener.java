@@ -88,7 +88,7 @@ public final class FishingListener implements Listener {
                 Messenger.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
                 event.setCancelled(true);
             } else {
-                BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+                BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
                 new LavaFishingHook(
                         hook,
                         blightedPlayer,
@@ -106,7 +106,7 @@ public final class FishingListener implements Listener {
                 Messenger.warn(player, "This rod answers only to the void of the End.");
                 event.setCancelled(true);
             } else {
-                BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+                BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
                 new VoidFishingHook(
                         hook,
                         blightedPlayer,
@@ -180,7 +180,7 @@ public final class FishingListener implements Listener {
         int currentCombo = FishingComboTracker.getCombo(player, FishingMethod.WATER);
 
         if (ThreadLocalRandom.current().nextDouble() <= CUSTOM_LOOT_CHANCE) {
-            BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+            BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
             FishingLootTable lootTable = FishingLootRegistry.getTable(environment, FishingMethod.WATER);
 
             Vector velocity = calculateVelocity(hook.getLocation(), player.getLocation());
