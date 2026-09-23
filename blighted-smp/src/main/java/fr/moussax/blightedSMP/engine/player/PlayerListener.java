@@ -24,8 +24,8 @@ public final class PlayerListener implements Listener {
         event.setJoinMessage(" §f" + event.getPlayer().getName() + " §7joined the SMP.");
 
         if (!player.hasPlayedBefore()) {
-            player.getInventory().setHelmet(ItemRegistry.getItem("BLIGHTED_BANNER").toItemStack());
-            player.getInventory().setItemInOffHand(ItemRegistry.getItem("BLIGHTED_CODEX").toItemStack());
+            player.getInventory().setHelmet(ItemRegistry.get("BLIGHTED_BANNER").toItemStack());
+            player.getInventory().setItemInOffHand(ItemRegistry.get("BLIGHTED_CODEX").toItemStack());
 
             player.setHealth(4.0);
             player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 0, false, false, false));
@@ -51,10 +51,9 @@ public final class PlayerListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-
         clearTargetedMobs(player);
 
-        BlightedPlayer blighted = BlightedPlayer.getBlightedPlayer(player);
+        BlightedPlayer blighted = BlightedPlayer.get(player);
         if (blighted != null) {
             blighted.saveData();
             BlightedPlayer.removePlayer(player);

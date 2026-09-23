@@ -53,7 +53,7 @@ public record GemsItem(int amount) implements Supplier<ItemStack> {
         @Override
         public boolean triggerAbility(PlayerInteractEvent event) {
             if (event.getItem() == null) return false;
-            BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(event.getPlayer());
+            BlightedPlayer blightedPlayer = BlightedPlayer.get(event.getPlayer());
             GemsItem gemsItem = new GemsItem(event.getItem());
 
             if (gemsItem.amount <= 0) {
@@ -62,34 +62,11 @@ public record GemsItem(int amount) implements Supplier<ItemStack> {
             }
 
             gemsItem.addGems(blightedPlayer);
-            event.getPlayer().sendMessage("§8 ■ §7You received §d" + gemsItem.amount + "✵ Gems §7from a §5Blighted Gemstone.");
+            event.getPlayer().sendMessage("§8§l +§d" + gemsItem.amount + "✵ Gems §8(Blighted Gemstone)");
             BlightedSounds.BLIGHTED_GEMSTONE_CONSUME.play(event.getPlayer().getLocation());
             event.getPlayer().getInventory().remove(event.getItem());
             event.setCancelled(true);
             return true;
-        }
-
-        @Override
-        public int getCooldownSeconds() {
-            return 0;
-        }
-
-        @Override
-        public int getManaCost() {
-            return 0;
-        }
-
-        @Override
-        public boolean canTrigger(BlightedPlayer player) {
-            return true;
-        }
-
-        @Override
-        public void start(BlightedPlayer player) {
-        }
-
-        @Override
-        public void stop(BlightedPlayer player) {
         }
     }
 
@@ -100,7 +77,7 @@ public record GemsItem(int amount) implements Supplier<ItemStack> {
      */
     @Override
     public ItemStack get() {
-        BlightedItem blightedItem = ItemRegistry.getItem("BLIGHTED_GEMSTONE");
+        BlightedItem blightedItem = ItemRegistry.get("BLIGHTED_GEMSTONE");
 
         blightedItem.setLore(6, "§8 Gems: §d" + this.amount + "✵");
         ItemStack itemStack = blightedItem.toItemStack();

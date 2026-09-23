@@ -215,7 +215,7 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
         String itemId = container.get(BLIGHTED_ID_KEY, PersistentDataType.STRING);
         if (itemId == null) return null;
 
-        return ItemRegistry.getItem(itemId);
+        return ItemRegistry.get(itemId);
     }
 
     /**

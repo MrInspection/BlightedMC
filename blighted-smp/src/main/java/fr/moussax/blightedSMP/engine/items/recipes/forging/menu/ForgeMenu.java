@@ -119,7 +119,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
     }
 
     private void checkRequirements(Player player) {
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
         Map<String, Integer> requiredCounts = aggregateRequirements();
 
         Map<String, Integer> inventoryCounts = new HashMap<>();
@@ -241,7 +241,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
     }
 
     private void setupFuelButtons(Player player) {
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
         int currentFuel = blightedPlayer.getForgeFuel();
 
         setItem(34, createFuelMeter(currentFuel), (_, _) -> {
@@ -388,7 +388,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
         this.isForging = true;
         this.canForge = false;
 
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
 
         consumeIngredients(player);
         blightedPlayer.removeForgeFuel(recipe.getFuelCost());

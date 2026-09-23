@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Tracks persistent player resources (gems, mana pool, forge fuel), equipment state,
  * active armor set bonuses, and ability cooldowns. Context instances are keyed by player
- * {@link UUID} and retrieved via {@link #getBlightedPlayer(Player)}.</p>
+ * {@link UUID} and retrieved via {@link #get(Player)}.</p>
  */
 public final class BlightedPlayer {
 
@@ -98,16 +98,6 @@ public final class BlightedPlayer {
     }
 
     /**
-     * Retrieves the player context associated with a Bukkit player.
-     *
-     * @param player player whose context to retrieve
-     * @return registered player context, or {@code null} if no context exists
-     */
-    public static BlightedPlayer getBlightedPlayer(Player player) {
-        return get(player);
-    }
-
-    /**
      * Returns an unmodifiable view of all active registered player contexts.
      *
      * @return unmodifiable view of active player contexts
@@ -164,6 +154,20 @@ public final class BlightedPlayer {
     }
 
     /**
+     * Sets or replaces the cooldown duration for a string key and ability type.
+     *
+     * @param key     cooldown key or ability name
+     * @param type    ability type associated with the cooldown
+     * @param seconds cooldown duration in seconds
+     */
+    public void setCooldown(String key, AbilityType type, int seconds) {
+        long expire = System.currentTimeMillis() + (seconds * 1000L);
+        cooldowns.removeIf(currentCooldown ->
+                currentCooldown.key().equals(key) && currentCooldown.abilityType() == type);
+        cooldowns.add(new CooldownEntry(key, type, expire));
+    }
+
+    /**
      * Sets or replaces the cooldown duration for an ability manager and ability type.
      *
      * @param managerClass ability manager class associated with the cooldown
@@ -172,10 +176,27 @@ public final class BlightedPlayer {
      */
     @SuppressWarnings("rawtypes")
     public void setCooldown(Class<? extends AbilityManager> managerClass, AbilityType type, int seconds) {
-        long expire = System.currentTimeMillis() + (seconds * 1000L);
-        cooldowns.removeIf(currentCooldown ->
-                currentCooldown.abilityManager().equals(managerClass) && currentCooldown.abilityType() == type);
-        cooldowns.add(new CooldownEntry(managerClass, type, expire));
+        setCooldown(managerClass != null ? managerClass.getName() : "", type, seconds);
+    }
+
+    /**
+     * Returns the remaining cooldown duration in seconds for a string key and ability type.
+     *
+     * <p>Expired cooldown entries are removed before performing the lookup.</p>
+     *
+     * @param key  cooldown key or ability name
+     * @param type ability type associated with the cooldown
+     * @return remaining cooldown in seconds, or {@code 0} if no active cooldown exists
+     */
+    public double getRemainingCooldown(String key, AbilityType type) {
+        cooldowns.removeIf(CooldownEntry::isExpired);
+
+        for (CooldownEntry entry : cooldowns) {
+            if (entry.key().equals(key) && entry.abilityType() == type) {
+                return entry.getRemainingCooldownTimeInSeconds();
+            }
+        }
+        return 0;
     }
 
     /**
@@ -189,14 +210,7 @@ public final class BlightedPlayer {
      */
     @SuppressWarnings("rawtypes")
     public double getRemainingCooldown(Class<? extends AbilityManager> managerClass, AbilityType type) {
-        cooldowns.removeIf(CooldownEntry::isExpired);
-
-        for (CooldownEntry entry : cooldowns) {
-            if (entry.abilityManager().equals(managerClass) && entry.abilityType() == type) {
-                return entry.getRemainingCooldownTimeInSeconds();
-            }
-        }
-        return 0;
+        return getRemainingCooldown(managerClass != null ? managerClass.getName() : "", type);
     }
 
     /**

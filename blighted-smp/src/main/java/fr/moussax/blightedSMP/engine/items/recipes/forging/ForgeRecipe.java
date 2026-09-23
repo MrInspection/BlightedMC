@@ -85,7 +85,7 @@ public final class ForgeRecipe {
          * @return a new forge recipe builder
          */
         public static Builder of(String itemId, int amount) {
-            return new Builder(ItemRegistry.getItem(itemId), amount);
+            return new Builder(ItemRegistry.get(itemId), amount);
         }
 
         /**
@@ -129,7 +129,7 @@ public final class ForgeRecipe {
          * @return this builder
          */
         public Builder addIngredient(String itemId, int amount) {
-            return addIngredient(ItemRegistry.getItem(itemId), amount);
+            return addIngredient(ItemRegistry.get(itemId), amount);
         }
 
         /**

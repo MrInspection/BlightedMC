@@ -43,7 +43,7 @@ public final class ItemRegistry {
     }
 
     @NonNull
-    public static BlightedItem getItem(@NonNull String itemId) {
+    public static BlightedItem get(@NonNull String itemId) {
         BlightedItem item = REGISTRY.get(itemId);
         if (item == null) {
             throw new IllegalArgumentException("Unknown item ID: " + itemId);

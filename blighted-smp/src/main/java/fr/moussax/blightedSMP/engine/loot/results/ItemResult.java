@@ -43,7 +43,7 @@ public final class ItemResult implements LootResult {
      */
     public static ItemResult of(String itemId) {
         ItemStack item = Objects.requireNonNull(
-                ItemRegistry.getItem(itemId), "Item not found in registry: " + itemId
+                ItemRegistry.get(itemId), "Item not found in registry: " + itemId
         ).toItemStack();
         return new ItemResult(item, (Consumer<ItemBuilder>) null);
     }
@@ -77,7 +77,7 @@ public final class ItemResult implements LootResult {
      */
     public static ItemResult of(String itemId, Consumer<ItemBuilder> modifier) {
         ItemStack item = Objects.requireNonNull(
-                ItemRegistry.getItem(itemId), "Item not found in registry: " + itemId
+                ItemRegistry.get(itemId), "Item not found in registry: " + itemId
         ).toItemStack();
         return new ItemResult(item, modifier);
     }
