@@ -6,7 +6,7 @@
 
   <groupId>fr.moussax</groupId>
   <artifactId>blightedmc</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.2.0</version>
   <packaging>pom</packaging>
 
   <name>BlightedMC</name>
@@ -20,7 +20,7 @@
   <properties>
     <java.version>25</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spigot.version>26.2-R0.1-SNAPSHOT</spigot.version>
+    <spigot.version>26.3-R0.1-SNAPSHOT</spigot.version>
     <lombok.version>1.18.46</lombok.version>
     <sqlite-jdbc.version>3.45.3.0</sqlite-jdbc.version>
     <junit.version>5.10.2</junit.version>
