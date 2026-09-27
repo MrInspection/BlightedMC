@@ -89,10 +89,7 @@ public interface FullSetBonus {
      */
     default void activate() {
         if (hasListener()) {
-            Bukkit.getPluginManager().registerEvents(
-                    (Listener) this,
-                    BlightedSMP.getInstance()
-            );
+            Bukkit.getPluginManager().registerEvents((Listener) this, BlightedSMP.getInstance());
         }
         startAbilityEffect();
     }
