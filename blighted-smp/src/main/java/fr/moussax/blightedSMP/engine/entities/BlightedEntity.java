@@ -1,24 +1,20 @@
 package fr.moussax.blightedSMP.engine.entities;
 
+import fr.moussax.bedrock.utils.debug.Log;
 import fr.moussax.blightedSMP.BlightedSMP;
-import fr.moussax.blightedSMP.engine.entities.components.AffixRegistry;
 import fr.moussax.blightedSMP.engine.entities.attachment.AttachmentRole;
 import fr.moussax.blightedSMP.engine.entities.attachment.EntityAttachment;
+import fr.moussax.blightedSMP.engine.entities.components.AffixRegistry;
 import fr.moussax.blightedSMP.engine.entities.components.EntityComponent;
 import fr.moussax.blightedSMP.engine.entities.defense.DamageType;
 import fr.moussax.blightedSMP.engine.entities.defense.EntityDefenses;
 import fr.moussax.blightedSMP.engine.entities.defense.EntityImmunity;
-import fr.moussax.blightedSMP.engine.entities.listeners.BlightedEntitiesListener;
-import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import fr.moussax.blightedSMP.engine.loot.LootContext;
 import fr.moussax.blightedSMP.engine.loot.LootTable;
-import fr.moussax.bedrock.utils.debug.Log;
+import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.*;
-
-import java.util.*;
-
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -32,13 +28,13 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.NonNull;
 
-import java.util.function.Consumer;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
 /**
  * Base class for custom runtime-controlled entities backed by a Bukkit {@link LivingEntity}.
@@ -178,7 +174,7 @@ public abstract class BlightedEntity implements Cloneable {
             createBossBar();
         }
 
-        BlightedEntitiesListener.registerEntity(entity, this);
+        EntityManager.registerEntity(entity, this);
         initComponents();
         initRuntime();
 
@@ -202,7 +198,7 @@ public abstract class BlightedEntity implements Cloneable {
         if (isBoss) {
             createBossBar();
         }
-        BlightedEntitiesListener.registerEntity(existing, this);
+        EntityManager.registerEntity(existing, this);
 
         initComponents();
         onRehydrate(existing);
@@ -241,7 +237,7 @@ public abstract class BlightedEntity implements Cloneable {
         destroyComponents();
         coreTasks.cancelAll();
         phaseTasks.cancelAll();
-        BlightedEntitiesListener.unregisterEntity(entity);
+        EntityManager.unregisterEntity(entity);
     }
 
     /**
@@ -766,7 +762,7 @@ public abstract class BlightedEntity implements Cloneable {
         }
         Vector vector = offset != null ? offset : new Vector(0, 0, 0);
         attachments.add(new EntityAttachment(attachmentEntity, role, vector, syncYaw, syncPitch));
-        BlightedEntitiesListener.registerAttachment(attachmentEntity, this);
+        EntityManager.registerAttachment(attachmentEntity, this);
 
         if (entity != null) {
             attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING, entity.getUniqueId().toString());
@@ -810,7 +806,7 @@ public abstract class BlightedEntity implements Cloneable {
             if (attachedEntity == null || !attachedEntity.isValid() || attachedEntity.isDead()) {
                 attachments.remove(attachment);
                 if (attachedEntity != null) {
-                    BlightedEntitiesListener.unregisterAttachment(attachedEntity);
+                    EntityManager.unregisterAttachment(attachedEntity);
                 }
                 continue;
             }
@@ -828,17 +824,26 @@ public abstract class BlightedEntity implements Cloneable {
             double zPrime = baseLocation.getZ() + (offset.getX() * sin + offset.getZ() * cos);
             double yPrime = baseLocation.getY() + offset.getY();
 
-            // When syncYaw/syncPitch are false, preserve current yaw/pitch
-            float targetYaw = attachment.syncYaw() ? baseLocation.getYaw() : 0.0f;
-            float targetPitch = attachment.syncPitch() ? baseLocation.getPitch() : 0.0f;
+            Location currentLoc = attachedEntity.getLocation();
+            float targetYaw = attachment.syncYaw() ? baseLocation.getYaw() : currentLoc.getYaw();
+            float targetPitch = attachment.syncPitch() ? baseLocation.getPitch() : currentLoc.getPitch();
+
+            if (currentLoc.getWorld() == baseLocation.getWorld()
+                    && Math.abs(currentLoc.getX() - xPrime) < 0.001
+                    && Math.abs(currentLoc.getY() - yPrime) < 0.001
+                    && Math.abs(currentLoc.getZ() - zPrime) < 0.001
+                    && Math.abs(currentLoc.getYaw() - targetYaw) < 0.1f
+                    && Math.abs(currentLoc.getPitch() - targetPitch) < 0.1f) {
+                continue;
+            }
 
             Location targetLocation = new Location(
                     baseLocation.getWorld(),
                     xPrime,
                     yPrime,
                     zPrime,
-                    attachment.syncYaw() ? baseLocation.getYaw() : attachedEntity.getLocation().getYaw(),
-                    attachment.syncPitch() ? baseLocation.getPitch() : attachedEntity.getLocation().getPitch()
+                    targetYaw,
+                    targetPitch
             );
 
             attachedEntity.teleport(targetLocation);
@@ -860,7 +865,7 @@ public abstract class BlightedEntity implements Cloneable {
                 continue;
             }
 
-            BlightedEntitiesListener.unregisterAttachment(attachmentEntity);
+            EntityManager.unregisterAttachment(attachmentEntity);
             attachmentEntity.remove();
         }
         attachments.clear();
@@ -883,7 +888,7 @@ public abstract class BlightedEntity implements Cloneable {
 
             Entity attachmentEntity = attachment.entity();
             if (attachmentEntity != null) {
-                BlightedEntitiesListener.unregisterAttachment(attachmentEntity);
+                EntityManager.unregisterAttachment(attachmentEntity);
                 attachmentEntity.remove();
             }
             attachments.remove(attachment);
@@ -1209,35 +1214,28 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     private void scheduleAbility(LifecycleTaskManager manager, long delayTicks, long periodTicks, Runnable action) {
-        manager.addRepeatingTask(() -> new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!isAlive()) {
-                    cancel();
-                    return;
-                }
-                try {
-                    action.run();
-                } catch (Exception exception) {
-                    Log.warn("BlightedEntity", "Ability threw an exception on entity '" + name + "': " + exception.getMessage());
-                }
+        manager.addRepeatingTask(() -> {
+            if (!isAlive()) {
+                return;
+            }
+            try {
+                action.run();
+            } catch (Exception exception) {
+                Log.warn("BlightedEntity", "Ability threw an exception on entity '" + name + "': " + exception.getMessage());
             }
         }, delayTicks, periodTicks);
         if (canScheduleTask()) manager.scheduleLast();
     }
 
     private void scheduleDelayedAction(LifecycleTaskManager manager, long delayTicks, Runnable action) {
-        manager.addDelayedTask(() -> new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!isAlive()) {
-                    return;
-                }
-                try {
-                    action.run();
-                } catch (Exception exception) {
-                    Log.warn("BlightedEntity", "Delayed action threw an exception on entity '" + name + "': " + exception.getMessage());
-                }
+        manager.addDelayedTask(() -> {
+            if (!isAlive()) {
+                return;
+            }
+            try {
+                action.run();
+            } catch (Exception exception) {
+                Log.warn("BlightedEntity", "Delayed action threw an exception on entity '" + name + "': " + exception.getMessage());
             }
         }, delayTicks);
         if (canScheduleTask()) manager.scheduleLast();
