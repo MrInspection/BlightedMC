@@ -26,10 +26,10 @@ public final class BlightswornPiglin extends BlightswornEliteArchetype {
         super("BLIGHTSWORN_PIGLIN", "Blightsworn Piglin", EntityType.PIGLIN);
         itemInMainHand = new ItemStack(Material.GOLDEN_SWORD);
         setLootTable(new EntityLootTableBuilder()
-                .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0, COMMON)
-                .addLoot(Material.GOLD_INGOT, 1, 3, 0.4, UNCOMMON)
-                .addDamagedLoot(Material.CROSSBOW, 0.10, 0.80, 0.1, RARE)
-                .addGemsLoot(5, 0.04, VERY_RARE)
+                .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0)
+                .addLoot(Material.GOLD_INGOT, 1, 3, 0.4)
+                .addDamagedItem(Material.CROSSBOW, 0.10, 0.80, 0.1, RARE)
+                .addGems(5, 0.04, VERY_RARE)
                 .build()
         );
         setDamage(8);

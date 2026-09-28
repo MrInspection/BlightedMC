@@ -1,4 +1,4 @@
-package fr.moussax.blightedSMP.content.entities;
+package fr.moussax.blightedSMP.content.entities.powerful;
 
 import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.components.impl.ShieldComponent;
@@ -17,16 +17,16 @@ public class Illusioner extends AncientCreature {
         setDamage(12);
 
         this.lootTable = new EntityLootTableBuilder()
-                .addLoot(Material.SPECTRAL_ARROW, 4, 12, 0.6, EntityLootRarity.COMMON)
-                .addLoot(Material.GLASS_BOTTLE, 1, 2, 0.4, EntityLootRarity.COMMON)
-                .addLoot(Material.TOTEM_OF_UNDYING, 1, 0.02, EntityLootRarity.VERY_RARE)
-                .addLoot(Material.OMINOUS_BOTTLE, 1, 0.15, EntityLootRarity.UNCOMMON)
-                .addGemsLoot(12, 0.25, EntityLootRarity.UNCOMMON)
-                .addEnchantedBookLoot(
+                .maxDrops(4)
+                .addLoot(Material.SPECTRAL_ARROW, 4, 12, 0.6)
+                .addLoot(Material.GLASS_BOTTLE, 1, 2, 0.4)
+                .addLoot(Material.TOTEM_OF_UNDYING, 0.02, EntityLootRarity.VERY_RARE)
+                .addLoot(Material.OMINOUS_BOTTLE, 0.15)
+                .addGems(12, 0.25)
+                .addEnchantedBook(
                         List.of(Enchantment.QUICK_CHARGE, Enchantment.PIERCING, Enchantment.POWER),
                         1, 7, 0.07, EntityLootRarity.RARE
                 )
-                .setMaxDrop(4)
                 .build();
     }
 

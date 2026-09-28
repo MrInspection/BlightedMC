@@ -3,6 +3,8 @@ package fr.moussax.blightedSMP.content.entities;
 import fr.moussax.blightedSMP.content.entities.bosses.CorruptedChampion;
 import fr.moussax.blightedSMP.content.entities.factions.blightsworn.*;
 import fr.moussax.blightedSMP.content.entities.powerful.Endersent;
+import fr.moussax.blightedSMP.content.entities.powerful.Illusioner;
+import fr.moussax.blightedSMP.content.entities.powerful.Watchling;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.registry.RegistryModule;
 
@@ -22,7 +24,6 @@ public class BlightedEntities implements RegistryModule<Consumer<BlightedEntity>
         registry.accept(new BlightswornWitherSkeleton());
         registry.accept(new BlightswornZombie());
         registry.accept(new BlightswornZombifiedPiglin());
-
         registry.accept(new CorruptedChampion());
         registry.accept(new Endersent());
         registry.accept(new Watchling());

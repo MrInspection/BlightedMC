@@ -26,18 +26,17 @@ public final class BlightswornBogged extends BlightswornArcherArchetype {
         setDroppedExp(12);
         itemInMainHand = new ItemStack(Material.BOW);
         setLootTable(new EntityLootTableBuilder()
-                .addLoot(Material.BONE, 2, 4, 1.0, COMMON)
-                .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
+                .addLoot(Material.BONE, 2, 4, 1.0)
+                .addLoot(Material.ARROW, 2, 5, 1.0)
                 .addLoot(Material.TIPPED_ARROW,
                         builder -> builder.setItemMeta(
                                 meta -> ((PotionMeta) meta).setBasePotionType(PotionType.POISON)),
                         1,
                         3,
-                        0.4,
-                        UNCOMMON
+                        0.4
                 )
-                .addDamagedLoot(Material.BOW, 0.10, 0.75, 0.15, RARE)
-                .addGemsLoot(5, 0.04, VERY_RARE)
+                .addDamagedItem(Material.BOW, 0.10, 0.75, 0.15, RARE)
+                .addGems(5, 0.04, VERY_RARE)
                 .build());
     }
 

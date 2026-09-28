@@ -26,11 +26,11 @@ public final class BlightswornZombifiedPiglin extends BlightswornEliteArchetype 
         setDamage(8);
         setDroppedExp(16);
         setLootTable(new EntityLootTableBuilder()
-                .setMaxDrop(3)
-                .addLoot(Material.ROTTEN_FLESH, 2, 6, 1.0, COMMON)
-                .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0, COMMON)
+                .maxDrops(3)
+                .addLoot(Material.ROTTEN_FLESH, 2, 6, 1.0)
+                .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0)
                 .addLoot(Material.GOLD_INGOT, 1, 2, 0.15, RARE)
-                .addGemsLoot(5, 0.04, VERY_RARE)
+                .addGems(5, 0.04, VERY_RARE)
                 .build()
         );
     }

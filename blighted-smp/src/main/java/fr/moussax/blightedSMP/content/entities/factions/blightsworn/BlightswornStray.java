@@ -20,18 +20,17 @@ public final class BlightswornStray extends BlightswornArcherArchetype {
         setDamage(6);
         setDroppedExp(12);
         setLootTable(new EntityLootTableBuilder()
-                .setMaxDrop(4)
-                .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
-                .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
+                .maxDrops(4)
+                .addLoot(Material.BONE, 2, 5, 1.0)
+                .addLoot(Material.ARROW, 2, 5, 1.0)
                 .addLoot(Material.TIPPED_ARROW, builder -> builder.setItemMeta(
                                 meta -> ((PotionMeta) meta).setBasePotionType(PotionType.SLOWNESS)
                         ),
                         1,
                         3,
-                        0.4,
-                        UNCOMMON
+                        0.4
                 )
-                .addGemsLoot(5, 0.04, VERY_RARE)
+                .addGems(5, 0.04, VERY_RARE)
                 .build()
         );
     }
