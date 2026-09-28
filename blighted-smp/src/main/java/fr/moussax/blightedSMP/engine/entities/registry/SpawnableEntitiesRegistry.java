@@ -3,37 +3,49 @@ package fr.moussax.blightedSMP.engine.entities.registry;
 import fr.moussax.blightedSMP.engine.entities.spawnable.SpawnableEntity;
 import org.jspecify.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * Convenience view delegating spawnable entity queries to {@link EntitiesRegistry}.
+ */
 public final class SpawnableEntitiesRegistry {
 
-    private static final Map<String, SpawnableEntity> SPAWNABLE_ENTITIES = new HashMap<>();
-
-    private SpawnableEntitiesRegistry() {}
-
-    static void register(SpawnableEntity entity) {
-        SPAWNABLE_ENTITIES.put(entity.getEntityId(), entity);
+    private SpawnableEntitiesRegistry() {
     }
 
+    /**
+     * Retrieves cloned instance of registered spawnable entity prototype by ID.
+     *
+     * @param entityId target entity identifier
+     * @return cloned spawnable entity instance, or {@code null} if untracked or not spawnable
+     */
     @Nullable
     public static SpawnableEntity get(String entityId) {
-        SpawnableEntity prototype = SPAWNABLE_ENTITIES.get(entityId);
-        return prototype != null ? prototype.clone() : null;
+        return EntitiesRegistry.getSpawnable(entityId);
     }
 
+    /**
+     * Returns list of cloned instances of all registered spawnable entity prototypes.
+     *
+     * @return list of cloned spawnable entity prototypes
+     */
     public static List<SpawnableEntity> getAll() {
-        return SPAWNABLE_ENTITIES.values().stream()
-            .map(SpawnableEntity::clone)
-            .toList();
+        return EntitiesRegistry.getSpawnables();
     }
 
+    /**
+     * Returns total number of registered spawnable entity prototypes.
+     *
+     * @return registered spawnable entity count
+     */
     public static int count() {
-        return SPAWNABLE_ENTITIES.size();
+        return EntitiesRegistry.getSpawnables().size();
     }
 
+    /**
+     * No-op delegate for compatibility; delegate clearing is handled by {@link EntitiesRegistry#clear()}.
+     */
     public static void clear() {
-        SPAWNABLE_ENTITIES.clear();
+        // No-op: delegate handled by EntitiesRegistry.clear()
     }
 }
