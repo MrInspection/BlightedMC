@@ -2,6 +2,7 @@ package fr.moussax.blightedSMP.engine.entities.listeners;
 
 import fr.moussax.blightedSMP.engine.entities.registry.SpawnableEntitiesRegistry;
 import fr.moussax.blightedSMP.engine.entities.spawnable.SpawnableEntity;
+import fr.moussax.blightedSMP.engine.entities.spawnable.engine.SpawnEvaluator;
 import fr.moussax.blightedSMP.engine.entities.spawnable.engine.SpawnMode;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -14,6 +15,9 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Event listener replacing natural creature spawns with custom {@link SpawnableEntity} instances.
+ */
 public final class SpawnableEntitiesListener implements Listener {
 
     private volatile Map<EntityType, List<SpawnableEntity>> spawnCache = Collections.emptyMap();
@@ -25,7 +29,7 @@ public final class SpawnableEntitiesListener implements Listener {
 
         CreatureSpawnEvent.SpawnReason reason = event.getSpawnReason();
         if (reason != CreatureSpawnEvent.SpawnReason.NATURAL
-            && reason != CreatureSpawnEvent.SpawnReason.REINFORCEMENTS) {
+                && reason != CreatureSpawnEvent.SpawnReason.REINFORCEMENTS) {
             return;
         }
 
@@ -36,38 +40,16 @@ public final class SpawnableEntitiesListener implements Listener {
         World world = location.getWorld();
         if (world == null) return;
 
-        List<SpawnableEntity> eligible = null;
-        for (SpawnableEntity entity : candidates) {
-            if (!entity.canSpawnAt(location, world)) continue;
-            if (eligible == null) eligible = new ArrayList<>(candidates.size());
-            eligible.add(entity);
-        }
-
-        if (eligible == null) return;
-
-        ThreadLocalRandom random = ThreadLocalRandom.current();
-
-        // First roll: does any replacement spawn happen at all?
-        double totalChance = 0.0;
-        for (SpawnableEntity entity : eligible) {
-            totalChance += entity.getSpawnProbability();
-        }
-
-        if (random.nextDouble() >= Math.min(totalChance, 1.0)) return;
-
-        // Second roll: which entity wins, weighted by individual probability.
-        double selectionRoll = random.nextDouble() * totalChance;
-        double cumulative = 0.0;
-        for (SpawnableEntity entity : eligible) {
-            cumulative += entity.getSpawnProbability();
-            if (selectionRoll < cumulative) {
-                event.setCancelled(true);
-                entity.clone().spawn(location);
-                return;
-            }
+        SpawnableEntity selected = SpawnEvaluator.selectCandidate(candidates, location, world, ThreadLocalRandom.current());
+        if (selected != null) {
+            event.setCancelled(true);
+            selected.clone().spawn(location);
         }
     }
 
+    /**
+     * Rebuilds spawn candidate cache from registered spawnable entities configured for replacement or hybrid spawning.
+     */
     public synchronized void rebuildCache() {
         if (!cacheDirty) return;
 
@@ -83,6 +65,9 @@ public final class SpawnableEntitiesListener implements Listener {
         this.cacheDirty = false;
     }
 
+    /**
+     * Marks spawn cache as dirty to trigger rebuild on the next spawn event.
+     */
     public void invalidateCache() {
         this.cacheDirty = true;
     }
