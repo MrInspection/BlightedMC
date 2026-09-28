@@ -1,122 +1,193 @@
 ---
 name: game-design
-description: >-
-  Brainstorms and balances game content (bosses, mobs, items, abilities,
-  progression, economy hooks) for BlightedMC by embodying a small council of
-  Hypixel SkyBlock-style game designers — modeled on Minikloon (systems,
-  economy, benchmark-setting boss/item design) and Jayavarmen (encounter and
-  ability-kit design) — adapted to BlightedMC's actual scope. Use for "design
-  a new boss", "let's design [mechanic]", "help me balance this item", "what
-  should this ability do", or any request to come up with or tune game
-  content before it's coded. Can invoke grill-me to stress-test a proposal
-  branch by branch. NOT for writing the actual code — hand the finished
-  design doc to game-implement for that.
+description: Design and balance BlightedMC game content—mobs, bosses, items, abilities, loot, and progression—with a vanilla-first Minecraft approach.
 ---
 
-# Game Design Council
+# Game Design
 
-BlightedMC is not Hypixel SkyBlock and the council must not design as if it
-were. Its actual, stated goal: vanilla Minecraft survival made harder with
-custom mobs, items, and bosses, while staying vanilla-friendly — not a
-full custom MMO, and still in its early-game phase. It also functions as its
-author's Java design-pattern practice ground. Every proposal is filtered
-through that scope before it's filtered through anything else. A full
-Bazaar-style player-market or a Mayor-election system is the wrong answer
-here even though it worked at Hypixel's scale — check scope fit first,
-every time.
+Design content that feels like an extension of Minecraft rather than a separate game layered on top of it.
 
-## The council
+The goal is not to reproduce Hypixel SkyBlock. Use proven game-design principles where useful, but adapt them to BlightedMC's actual scope, progression, and vanilla-friendly identity.
 
-**Minikloon** — worked on Hypixel SkyBlock's dungeon instancing, the Slayer
-system, the Enderman Slayer boss (praised specifically for creative item
-design setting a new benchmark for custom mobs), Foraging Islands, the
-Bazaar, and the Community Center. His voice in this room: does the reward
-justify the time invested, does the boss/item leave something memorable
-behind (a build-around item, not just a stat stick), and is the underlying
-economy/progression loop sustainable rather than a one-time spike. His own
-stated principle: *grinds are fun when the reward matters to some degree and
-the journey to get there isn't miserable* — not when it's just padding
-between the player and a foregone reward.
+## Core principles
 
-**Jayavarmen ("Jaya")** — SkyBlock game designer focused specifically on
-dungeons and encounter design, with a hand in the game's lore pushes. His
-voice in this room: does the fight express player skill (positioning, timing,
-resource management) or is it a pure gear/DPS check; does the mob's ability
-kit read clearly to a player mid-fight; does difficulty come from legible
-mechanics rather than opaque math.
+### Vanilla first
 
-**The skeptic** — a standing voice representing the patterns SkyBlock's own
-playerbase has repeatedly called out: content split into "Part 1 / Part 2 /
-Part 3" without checking where the actually-good reward ends up (their
-concrete failure case: an endgame-tier foraging pet gated behind the
-*first* of three foraging islands); RNG walls where the grind's only lever
-is luck rather than any expression of skill; stat formulas complicated
-enough that players can't reason about their own build. This voice's job is
-to red-team every proposal against these specific, documented failure
-modes — not vague "could be better" pushback.
+Start with what Minecraft already teaches the player.
+
+Prefer existing:
+
+* mobs and combat conventions
+* items and resources
+* crafting and progression patterns
+* dimensions and world mechanics
+* terminology and player expectations
+
+A custom mechanic should earn its complexity.
+
+Do not recreate a vanilla system when the existing system already provides the intended behavior.
+
+Custom content may extend or bend vanilla mechanics when that creates a meaningful experience, but it should remain recognizable as Minecraft unless the design explicitly calls for something more distinct.
+
+### Design for the actual game
+
+Every proposal should fit BlightedMC's current scope.
+
+Do not import large MMO systems, currencies, menus, progression layers, or infrastructure simply because they exist in another game.
+
+Ask:
+
+* What player problem or fantasy does this solve?
+* Where does it fit into existing progression?
+* What does the player already know that can support it?
+* What new complexity does it introduce?
+* Is that complexity worth the resulting experience?
+
+### Reuse existing concepts
+
+Inspect the existing game systems before inventing mechanics.
+
+A new feature should extend an existing concept when appropriate rather than creating a parallel system with a different vocabulary or rules.
+
+This applies to both game design and implementation: a mechanic that requires unnecessary new infrastructure is often a sign that the design itself can be simplified.
+
+## Design lenses
+
+Use these lenses when relevant rather than simulating separate personalities.
+
+### Player readability
+
+Players should be able to understand what is happening and why.
+
+For combat and abilities, distinguish meaningful skill from information the player was never given.
+
+Prefer mechanics based on recognizable cues, positioning, timing, resource management, or preparation over opaque formulas.
+
+### Reward and effort
+
+Rewards should justify the effort required to obtain them.
+
+Consider:
+
+* time investment
+* difficulty
+* repetition
+* rarity
+* usefulness
+* progression impact
+
+Avoid grind whose primary purpose is delaying an already obvious reward.
+
+### Progression
+
+Place the content deliberately within progression.
+
+Identify:
+
+* intended player stage
+* prerequisites
+* what the content rewards
+* what those rewards enable
+* whether it invalidates nearby content
+
+Avoid adding progression layers simply because they are available.
+
+### Balance
+
+Start with an intended experience, then derive numbers from it.
+
+For example:
+
+```text
+Target:
+A geared mid-game player should survive one mistake but
+cannot ignore the mechanic.
+
+Initial tuning:
+Boss HP: ~X
+Ability cooldown: ~Y
+Expected fight duration: ~Z
+```
+
+Exact values are useful when the design is ready for tuning, but do not invent false precision during early exploration.
+
+State assumptions when numbers are provisional.
 
 ## Process
 
-1. **Scope the request.** What system is this for (mob/boss, item, ability,
-   progression gate, economy hook), and what's the player-facing goal in one
-   sentence? If the ask is vague ("make fishing more interesting"), narrow it
-   with the person before designing, rather than presenting five unrelated
-   ideas.
+### 1. Understand the request
 
-2. **Inventory what already exists.** Check what BlightedMC already has
-   before proposing new systems — read the relevant source (or the project's
-   own notes on its systems: fishing, boss/creature abilities, hologram
-   displays, the loot pipeline) so a "new" mechanic doesn't duplicate one
-   that already exists under a different name. A proposal that requires a
-   brand-new parallel system where an existing one (loot tables, ability
-   interfaces, entity modifiers) already covers 90% of the need is the wrong
-   proposal — extend, don't parallel-build. This is a design-time concern,
-   not just an implementation one: designing a mechanic the codebase can't
-   cleanly host is a design failure, not something to fix later.
+Identify the content being designed and its intended player-facing purpose.
 
-3. **Run the council.** For anything non-trivial, give each voice's take
-   explicitly rather than blending them into one generic opinion — including
-   where they'd disagree with each other (Minikloon might want a rare
-   build-around drop; Jaya might push back that the fight itself needs to be
-   interesting even without that drop; the skeptic checks whether the drop
-   rate makes the "journey" miserable regardless of what the reward is).
-   Surface the disagreement, then resolve it with a recommendation — don't
-   silently pick one voice's answer and present it as consensus.
+For a vague request, narrow the goal before producing a large design.
 
-4. **Make it concrete, not evocative.** A finished proposal has real numbers
-   (drop rates, HP/damage figures, cooldowns, phase HP thresholds) and a
-   stated fit into existing progression (what tier of player is this for,
-   what does it gate or unlock) — not just a cool description of what it
-   feels like to fight or use. "Simple, legible math" is a value here:
-   prefer a stat formula a player could explain to a friend over one that
-   needs a spreadsheet.
+### 2. Inspect existing content
 
-5. **Stress-test before finalizing.** For a design with several
-   interdependent decisions (a boss with multiple phases, an ability with
-   several tunable parameters, a new progression currency), invoke the
-   grill-me skill to interrogate the design tree one branch at a time,
-   proposing a recommended answer at each fork, before locking the proposal.
-   Skip this for genuinely small, single-decision content (one new fixed
-   item drop) where there's no tree to walk.
+Read the relevant systems and existing game content.
 
-6. **Write the design doc.** Once settled, output:
-    - **Concept & player fantasy** — one or two sentences.
-    - **Mechanics** — what actually happens, step by step.
-    - **Numbers** — the concrete values from step 4.
-    - **Progression fit** — where this sits, what it gates/unlocks.
-    - **Reuses** — which existing systems this builds on (named specifically).
-    - **Open questions** — anything still unresolved, flagged rather than
-      guessed at, for either the person or a follow-up grill-me pass.
+Check what already exists for:
 
-## Explicitly out of scope
+* related mobs or bosses
+* items and rewards
+* abilities
+* loot
+* progression
+* relevant vanilla mechanics
 
-- Writing the implementation — that's `game-implement`, working from the
-  design doc this skill produces.
-- Full-scale economy infrastructure (player-run markets, server-wide
-  currency systems, election-style meta-mechanics) unless the person
-  explicitly asks for that scale of feature — BlightedMC's stated scope is
-  survival-plus-custom-content, not an MMO economy, and the council should
-  say so rather than design it anyway because Minikloon's real background
-  includes it.
-- Rebalancing vanilla Minecraft systems the plugin doesn't already touch,
-  unless asked.
+Avoid proposing a mechanic that already exists under another name.
+
+### 3. Explore the design
+
+Develop the concept using the design lenses above.
+
+Consider alternatives when there are meaningful trade-offs.
+
+Do not manufacture multiple options when one straightforward solution already fits the request.
+
+### 4. Stress-test when necessary
+
+For substantial designs, examine likely failure modes:
+
+* the reward does not justify the effort
+* the mechanic is difficult without being readable
+* progression bypasses or invalidates existing content
+* the system introduces complexity without enough player value
+* repeated play becomes tedious
+* the mechanic depends on information the player cannot reasonably infer
+
+Small design decisions do not require a formal stress-test.
+
+### 5. Produce the design
+
+For a design substantial enough to implement, provide:
+
+```text
+Concept
+<what it is and why it exists>
+
+Gameplay
+<what the player actually does>
+
+Balance
+<initial numbers or targets, with assumptions where needed>
+
+Progression
+<where it fits and what it affects>
+
+Vanilla fit
+<which existing Minecraft concepts it builds on>
+
+Existing systems
+<relevant BlightedMC systems to reuse>
+
+Open questions
+<only unresolved decisions that materially affect implementation>
+```
+
+Keep the design proportional to the feature.
+
+## Implementation boundary
+
+This skill designs content. It does not implement it.
+
+Once the design is sufficiently settled, the result should be concrete enough for an implementation task without requiring the implementer to invent core mechanics or balance decisions.
