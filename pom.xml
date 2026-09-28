@@ -18,10 +18,10 @@
   </modules>
 
   <properties>
-    <java.version>25</java.version>
+    <java.version>26</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spigot.version>26.3-R0.1-SNAPSHOT</spigot.version>
-    <lombok.version>1.18.46</lombok.version>
+    <lombok.version>1.18.48</lombok.version>
     <sqlite-jdbc.version>3.45.3.0</sqlite-jdbc.version>
     <junit.version>5.10.2</junit.version>
   </properties>
