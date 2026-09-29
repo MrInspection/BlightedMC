@@ -53,7 +53,11 @@ public final class ShapedRecipeBuilder {
      * @throws IllegalArgumentException if the item ID is not registered
      */
     public static ShapedRecipeBuilder of(String resultId, int amount) {
-        return new ShapedRecipeBuilder(ItemRegistry.get(resultId), amount);
+        BlightedItem result = ItemRegistry.get(resultId);
+        if (result == null) {
+            throw new IllegalArgumentException("Unknown recipe result item ID: '" + resultId + "'");
+        }
+        return new ShapedRecipeBuilder(result, amount);
     }
 
     /**

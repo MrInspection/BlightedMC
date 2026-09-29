@@ -16,6 +16,7 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -33,17 +34,14 @@ public final class BlightedBlockListener implements Listener {
     }
 
     private String getBlockId(Block block) {
-        if (block.hasMetadata("blighted_id")) {
-            for (MetadataValue value : block.getMetadata("blighted_id")) {
-                if (value.getOwningPlugin() == plugin) return value.asString();
-            }
+        List<MetadataValue> metadata = block.getMetadata("blighted_id");
+        for (MetadataValue value : metadata) {
+            if (value.getOwningPlugin() == plugin) return value.asString();
         }
 
-        BlockState state = block.getState();
-        if (state instanceof TileState tile) {
-            PersistentDataContainer pdc = tile.getPersistentDataContainer();
-            if (pdc.has(BLOCK_ID_KEY, PersistentDataType.STRING)) {
-                String id = pdc.get(BLOCK_ID_KEY, PersistentDataType.STRING);
+        if (block.getState() instanceof TileState tile) {
+            String id = tile.getPersistentDataContainer().get(BLOCK_ID_KEY, PersistentDataType.STRING);
+            if (id != null) {
                 cacheMetadata(block, id);
                 return id;
             }
@@ -62,9 +60,10 @@ public final class BlightedBlockListener implements Listener {
         ItemStack item = event.getItemInHand();
         if (!item.hasItemMeta()) return;
 
-        var meta = item.getItemMeta();
-        String id = Objects.requireNonNull(meta).getPersistentDataContainer().get(BlightedItem.BLIGHTED_ID_KEY, PersistentDataType.STRING);
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
 
+        String id = meta.getPersistentDataContainer().get(BlightedItem.BLIGHTED_ID_KEY, PersistentDataType.STRING);
         if (id == null) return;
 
         BlightedBlock customBlock = BlockRegistry.get(id);

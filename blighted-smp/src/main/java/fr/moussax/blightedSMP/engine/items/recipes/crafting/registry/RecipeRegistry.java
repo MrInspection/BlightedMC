@@ -69,6 +69,16 @@ public final class RecipeRegistry {
     }
 
     /**
+     * Creates a builder for a shapeless custom recipe producing a single item.
+     *
+     * @param resultId the item ID of the recipe result
+     * @return a shapeless recipe builder
+     */
+    public static ShapelessRecipeBuilder shapelessRecipe(String resultId) {
+        return ShapelessRecipeBuilder.of(resultId, 1);
+    }
+
+    /**
      * Creates a builder for a shapeless custom recipe.
      *
      * @param resultId the item ID of the recipe result
@@ -76,7 +86,7 @@ public final class RecipeRegistry {
      * @return a shapeless recipe builder
      */
     public static ShapelessRecipeBuilder shapelessRecipe(String resultId, int amount) {
-        return ShapelessRecipeBuilder.of(resultId);
+        return ShapelessRecipeBuilder.of(resultId, amount);
     }
 
     /**

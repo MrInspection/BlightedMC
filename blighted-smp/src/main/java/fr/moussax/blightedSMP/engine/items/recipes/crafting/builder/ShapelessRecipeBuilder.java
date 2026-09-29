@@ -19,25 +19,38 @@ import java.util.List;
 public final class ShapelessRecipeBuilder {
 
     private final BlightedItem result;
+    private final int amount;
     private final List<CraftingObject> ingredients = new ArrayList<>();
     private CraftingObject attributeSource = null;
 
-    private ShapelessRecipeBuilder(BlightedItem result) {
+    private ShapelessRecipeBuilder(BlightedItem result, int amount) {
         this.result = result;
+        this.amount = amount;
     }
 
     /**
-     * Creates a builder for a shapeless recipe producing the specified item.
+     * Creates a builder for a shapeless recipe producing a single instance of the specified item.
      *
      * @param result the item produced by the recipe
      * @return a new shapeless recipe builder
      */
     public static ShapelessRecipeBuilder of(BlightedItem result) {
-        return new ShapelessRecipeBuilder(result);
+        return of(result, 1);
     }
 
     /**
-     * Creates a builder for a shapeless recipe producing the item registered
+     * Creates a builder for a shapeless recipe producing the specified item and amount.
+     *
+     * @param result the item produced by the recipe
+     * @param amount the amount produced by the recipe
+     * @return a new shapeless recipe builder
+     */
+    public static ShapelessRecipeBuilder of(BlightedItem result, int amount) {
+        return new ShapelessRecipeBuilder(result, amount);
+    }
+
+    /**
+     * Creates a builder for a shapeless recipe producing a single instance of the item registered
      * under the specified ID.
      *
      * @param resultId the ID of the result item
@@ -45,7 +58,24 @@ public final class ShapelessRecipeBuilder {
      * @throws IllegalArgumentException if the item ID is not registered
      */
     public static ShapelessRecipeBuilder of(String resultId) {
-        return new ShapelessRecipeBuilder(ItemRegistry.get(resultId));
+        return of(resultId, 1);
+    }
+
+    /**
+     * Creates a builder for a shapeless recipe producing the item registered
+     * under the specified ID and amount.
+     *
+     * @param resultId the ID of the result item
+     * @param amount   the amount produced by the recipe
+     * @return a new shapeless recipe builder
+     * @throws IllegalArgumentException if the item ID is not registered
+     */
+    public static ShapelessRecipeBuilder of(String resultId, int amount) {
+        BlightedItem result = ItemRegistry.get(resultId);
+        if (result == null) {
+            throw new IllegalArgumentException("Unknown recipe result item ID: '" + resultId + "'");
+        }
+        return new ShapelessRecipeBuilder(result, amount);
     }
 
     /**
@@ -186,7 +216,7 @@ public final class ShapelessRecipeBuilder {
      * @return the constructed shapeless recipe
      */
     public BlightedShapelessRecipe build() {
-        BlightedShapelessRecipe recipe = new BlightedShapelessRecipe(result);
+        BlightedShapelessRecipe recipe = new BlightedShapelessRecipe(result, amount);
         for (CraftingObject ingredient : ingredients) {
             recipe.addIngredient(ingredient);
         }

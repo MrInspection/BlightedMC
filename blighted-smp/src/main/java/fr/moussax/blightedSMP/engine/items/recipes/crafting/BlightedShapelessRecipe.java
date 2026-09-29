@@ -18,6 +18,7 @@ public final class BlightedShapelessRecipe extends BlightedRecipe {
     private final List<CraftingObject> ingredientList = new ArrayList<>();
     private final Map<String, Integer> ingredientCountMap = new HashMap<>();
     private final BlightedItem resultBlightedItem;
+    private final int resultAmount;
 
     /**
      * Ingredient acting as the attribute source.
@@ -26,7 +27,12 @@ public final class BlightedShapelessRecipe extends BlightedRecipe {
     private CraftingObject attributeSourceIngredient = null;
 
     public BlightedShapelessRecipe(BlightedItem resultBlightedItem) {
+        this(resultBlightedItem, 1);
+    }
+
+    public BlightedShapelessRecipe(BlightedItem resultBlightedItem, int resultAmount) {
         this.resultBlightedItem = resultBlightedItem;
+        this.resultAmount = resultAmount;
     }
 
     @Override
@@ -36,7 +42,7 @@ public final class BlightedShapelessRecipe extends BlightedRecipe {
 
     @Override
     public int getAmount() {
-        return 0;
+        return resultAmount;
     }
 
     /**
@@ -49,6 +55,7 @@ public final class BlightedShapelessRecipe extends BlightedRecipe {
     @Override
     public ItemStack assemble(List<ItemStack> craftingGrid) {
         ItemStack result = resultBlightedItem.toItemStack().clone();
+        result.setAmount(resultAmount);
 
         if (attributeSourceIngredient != null) {
             String targetId = attributeSourceIngredient.getId();
