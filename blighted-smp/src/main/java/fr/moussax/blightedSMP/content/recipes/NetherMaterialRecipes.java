@@ -57,7 +57,7 @@ public class NetherMaterialRecipes implements RegistryModule<Consumer<BlightedRe
             .bind('i', Material.NETHERRACK, 12)
             .build();
 
-                registry.accept(enchantedGhastTearRecipe);
+        registry.accept(enchantedGhastTearRecipe);
         registry.accept(enchantedMagmaCreamRecipe);
         registry.accept(enchantedQuartzRecipe);
         registry.accept(enchantedBlazePowderRecipe);

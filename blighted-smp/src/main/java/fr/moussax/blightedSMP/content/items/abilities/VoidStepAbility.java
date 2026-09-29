@@ -1,6 +1,7 @@
 package fr.moussax.blightedSMP.content.items.abilities;
 
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityManager;
+import fr.moussax.blightedSMP.engine.items.abilities.AbilityType;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import fr.moussax.bedrock.text.Messenger;
 import org.bukkit.*;
@@ -15,6 +16,16 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
     private static final int MAX_DISTANCE = 40;
 
     @Override
+    public String getName() {
+        return "Voidstep";
+    }
+
+    @Override
+    public AbilityType getType() {
+        return AbilityType.RIGHT_CLICK;
+    }
+
+    @Override
     public String[] getDescription() {
         return new String[]{
                 "Teleport through the void to the ",
@@ -25,7 +36,7 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
 
     @Override
     public boolean triggerAbility(PlayerInteractEvent event) {
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(event.getPlayer());
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(event.getPlayer());
         Location targetLocation = getTargetedEyeLocation(blightedPlayer);
 
         if (targetLocation == null) {
@@ -55,26 +66,8 @@ public class VoidStepAbility implements AbilityManager<PlayerInteractEvent> {
     }
 
     @Override
-    public int getCooldownSeconds() {
-        return 0;
-    }
-
-    @Override
     public int getManaCost() {
         return 5;
-    }
-
-    @Override
-    public boolean canTrigger(BlightedPlayer player) {
-        return true;
-    }
-
-    @Override
-    public void start(BlightedPlayer player) {
-    }
-
-    @Override
-    public void stop(BlightedPlayer player) {
     }
 
     private Location getTargetedEyeLocation(BlightedPlayer blightedPlayer) {

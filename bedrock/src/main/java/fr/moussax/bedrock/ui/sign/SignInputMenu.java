@@ -3,6 +3,7 @@ package fr.moussax.bedrock.ui.sign;
 import fr.moussax.bedrock.scheduling.PluginContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -63,7 +64,7 @@ public final class SignInputMenu {
             if (!player.isOnline()) {
                 return;
             }
-            nmsPlayer.connection.send(new ClientboundOpenSignEditorPacket(blockPosition, frontSide));
+            nmsPlayer.connection.send(new ClientboundOpenSignEditorPacket(blockPosition, frontSide ? SignTextSlot.FRONT : SignTextSlot.BACK));
             SignInputManager.register(player.getUniqueId(), this, blockPosition);
         }, 2L);
     }

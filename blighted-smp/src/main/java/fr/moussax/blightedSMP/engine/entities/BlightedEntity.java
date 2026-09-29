@@ -831,16 +831,16 @@ public abstract class BlightedEntity implements Cloneable {
             double zPrime = baseLocation.getZ() + (offset.getX() * sin + offset.getZ() * cos);
             double yPrime = baseLocation.getY() + offset.getY();
 
-            Location currentLoc = attachedEntity.getLocation();
-            float targetYaw = attachment.syncYaw() ? baseLocation.getYaw() : currentLoc.getYaw();
-            float targetPitch = attachment.syncPitch() ? baseLocation.getPitch() : currentLoc.getPitch();
+            Location currentLocation = attachedEntity.getLocation();
+            float targetYaw = attachment.syncYaw() ? baseLocation.getYaw() : currentLocation.getYaw();
+            float targetPitch = attachment.syncPitch() ? baseLocation.getPitch() : currentLocation.getPitch();
 
-            if (currentLoc.getWorld() == baseLocation.getWorld()
-                    && Math.abs(currentLoc.getX() - xPrime) < 0.001
-                    && Math.abs(currentLoc.getY() - yPrime) < 0.001
-                    && Math.abs(currentLoc.getZ() - zPrime) < 0.001
-                    && Math.abs(currentLoc.getYaw() - targetYaw) < 0.1f
-                    && Math.abs(currentLoc.getPitch() - targetPitch) < 0.1f) {
+            if (currentLocation.getWorld() == baseLocation.getWorld()
+                    && Math.abs(currentLocation.getX() - xPrime) < 0.001
+                    && Math.abs(currentLocation.getY() - yPrime) < 0.001
+                    && Math.abs(currentLocation.getZ() - zPrime) < 0.001
+                    && Math.abs(currentLocation.getYaw() - targetYaw) < 0.1f
+                    && Math.abs(currentLocation.getPitch() - targetPitch) < 0.1f) {
                 continue;
             }
 

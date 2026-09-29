@@ -12,11 +12,11 @@ public final class EquipmentRecipes implements RegistryModule<Consumer<BlightedR
     public void register(Consumer<BlightedRecipe> registry) {
         BlightedRecipe rocketBoots = shapedRecipe("ROCKET_BOOTS", 1)
                 .shape("aba", "cdc", "e e")
-                .bind('a', Material.PHANTOM_MEMBRANE, 1)
-                .bind('b', Material.WIND_CHARGE, 1)
-                .bind('c', Material.SLIME_BLOCK, 1)
-                .bind('d', Material.COPPER_BOOTS, 1)
-                .bind('e', Material.RABBIT_FOOT, 1)
+                .bind('a', Material.PHANTOM_MEMBRANE)
+                .bind('b', Material.WIND_CHARGE)
+                .bind('c', Material.SLIME_BLOCK)
+                .bind('d', Material.COPPER_BOOTS)
+                .bind('e', Material.RABBIT_FOOT)
                 .attributeSource(4)
                 .build();
 

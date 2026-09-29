@@ -4,7 +4,6 @@ import fr.moussax.blightedSMP.content.items.abilities.tools.VeinmineAbility;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.ItemRarity;
 import fr.moussax.blightedSMP.engine.items.ItemType;
-import fr.moussax.blightedSMP.engine.items.abilities.Ability;
 import fr.moussax.blightedSMP.registry.RegistryModule;
 import org.bukkit.Material;
 
@@ -35,7 +34,7 @@ public class BlightedTools implements RegistryModule<Consumer<BlightedItem>> {
 
         BlightedItem demoPickaxe = new BlightedItem("DEMO_PICKAXE", ItemType.PICKAXE, ItemRarity.SPECIAL, Material.DIAMOND_PICKAXE);
         demoPickaxe.setDisplayName("Demo Pickaxe");
-        demoPickaxe.addAbility(Ability.passive("Veinmine", new VeinmineAbility()));
+        demoPickaxe.addAbility(new VeinmineAbility());
         demoPickaxe.addLore("§8Demonstration tool");
 
         registry.accept(demoPickaxe);

@@ -2,6 +2,7 @@ package fr.moussax.blightedSMP.content.items.abilities;
 
 import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityManager;
+import fr.moussax.blightedSMP.engine.items.abilities.AbilityType;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import fr.moussax.bedrock.text.Formatter;
@@ -36,6 +37,16 @@ public class WitherImpactAbility implements AbilityManager<PlayerInteractEvent>,
     private final long HEALING_COOLDOWN = 5000L;
 
     @Override
+    public String getName() {
+        return "Wither Impact";
+    }
+
+    @Override
+    public AbilityType getType() {
+        return AbilityType.RIGHT_CLICK;
+    }
+
+    @Override
     public boolean triggerAbility(PlayerInteractEvent event) {
         if (event.getHand() != EquipmentSlot.HAND) {
             return false;
@@ -56,31 +67,8 @@ public class WitherImpactAbility implements AbilityManager<PlayerInteractEvent>,
         return true;
     }
 
-    @Override
-    public int getCooldownSeconds() {
-        return 0;
-    }
-
-    @Override
-    public int getManaCost() {
-        return 0;
-    }
-
-    @Override
-    public boolean canTrigger(BlightedPlayer player) {
-        return true;
-    }
-
-    @Override
-    public void start(BlightedPlayer player) {
-    }
-
-    @Override
-    public void stop(BlightedPlayer player) {
-    }
-
     private boolean isHoldingHyperion(Player player) {
-        return player.getInventory().getItemInMainHand().equals(ItemRegistry.getItem("HYPERION").toItemStack());
+        return player.getInventory().getItemInMainHand().equals(ItemRegistry.get("HYPERION").toItemStack());
     }
 
     private void teleport(Player player) {

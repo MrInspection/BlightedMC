@@ -30,7 +30,7 @@ public class EndRecipes implements RegistryModule<Consumer<BlightedRecipe>> {
 
         BlightedRecipe glimmeringEyeRecipe = shapedRecipe("GLIMMERING_EYE", 1)
                 .shape(" i ", "iji", " i ")
-                .bind('i', ItemRegistry.getItem("ENCHANTED_ENDER_PEARL"), 1)
+                .bind('i', ItemRegistry.get("ENCHANTED_ENDER_PEARL"), 1)
                 .bind('j', Material.OPEN_EYEBLOSSOM, 1)
                 .build();
 

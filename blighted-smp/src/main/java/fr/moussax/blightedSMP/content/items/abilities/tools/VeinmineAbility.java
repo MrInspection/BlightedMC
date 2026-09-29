@@ -1,6 +1,7 @@
 package fr.moussax.blightedSMP.content.items.abilities.tools;
 
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityManager;
+import fr.moussax.blightedSMP.engine.items.abilities.AbilityType;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -9,6 +10,16 @@ import org.bukkit.event.block.BlockBreakEvent;
 import java.util.*;
 
 public class VeinmineAbility implements AbilityManager<BlockBreakEvent> {
+
+    @Override
+    public String getName() {
+        return "Veinmine";
+    }
+
+    @Override
+    public AbilityType getType() {
+        return AbilityType.PASSIVE;
+    }
 
     private static final int MAX_BLOCK = 64;
     private static final Set<Material> VEIN_BLOCKS = Set.of(

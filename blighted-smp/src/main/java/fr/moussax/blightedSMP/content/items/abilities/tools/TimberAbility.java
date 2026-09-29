@@ -1,6 +1,7 @@
 package fr.moussax.blightedSMP.content.items.abilities.tools;
 
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityManager;
+import fr.moussax.blightedSMP.engine.items.abilities.AbilityType;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -9,6 +10,16 @@ import org.bukkit.event.block.BlockBreakEvent;
 import java.util.*;
 
 public class TimberAbility implements AbilityManager<BlockBreakEvent> {
+
+    @Override
+    public String getName() {
+        return "Timber";
+    }
+
+    @Override
+    public AbilityType getType() {
+        return AbilityType.PASSIVE;
+    }
 
     private static final int MAX_LOGS = 32;
     private static final Set<Material> LOGS = Set.of(
@@ -99,23 +110,4 @@ public class TimberAbility implements AbilityManager<BlockBreakEvent> {
         return 2;
     }
 
-    @Override
-    public int getManaCost() {
-        return 0;
-    }
-
-    @Override
-    public boolean canTrigger(BlightedPlayer player) {
-        return true;
-    }
-
-    @Override
-    public void start(BlightedPlayer player) {
-
-    }
-
-    @Override
-    public void stop(BlightedPlayer player) {
-
-    }
 }

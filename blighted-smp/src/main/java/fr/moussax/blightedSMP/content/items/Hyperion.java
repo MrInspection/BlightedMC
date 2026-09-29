@@ -4,7 +4,6 @@ import fr.moussax.blightedSMP.content.items.abilities.WitherImpactAbility;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.ItemRarity;
 import fr.moussax.blightedSMP.engine.items.ItemType;
-import fr.moussax.blightedSMP.engine.items.abilities.Ability;
 import fr.moussax.blightedSMP.registry.RegistryModule;
 import java.util.function.Consumer;
 import org.bukkit.Material;
@@ -28,7 +27,7 @@ public class Hyperion implements RegistryModule<Consumer<BlightedItem>> {
         );
         hyperion.setUnbreakable(true);
         hyperion.addItemFlag(ItemFlag.HIDE_UNBREAKABLE);
-        hyperion.addAbility(Ability.rightClick("Wither Impact", new WitherImpactAbility()), false);
+        hyperion.addAbility(new WitherImpactAbility(), false);
 
         registry.accept(hyperion);
     }

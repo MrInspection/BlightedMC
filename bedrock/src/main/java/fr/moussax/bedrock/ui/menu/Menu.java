@@ -649,9 +649,9 @@ public abstract class Menu implements InventoryHolder {
      */
     public void fillPattern(String[] pattern, char symbol, @NonNull ItemStack item) {
         for (int row = 0; row < pattern.length && row < size / 9; row++) {
-            String replaced = pattern[row].replace(" ", "");
-            for (int column = 0; column < replaced.length() && column < 9; column++) {
-                if (replaced.charAt(column) == symbol) {
+            String rowString = pattern[row];
+            for (int column = 0; column < rowString.length() && column < 9; column++) {
+                if (rowString.charAt(column) == symbol) {
                     setItem(getSlot(row, column), item);
                 }
             }

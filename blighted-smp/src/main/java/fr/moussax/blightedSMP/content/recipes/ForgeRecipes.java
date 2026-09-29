@@ -13,8 +13,8 @@ public class ForgeRecipes implements RegistryModule<Consumer<ForgeRecipe>> {
         var plasmaBucket = ForgeRecipe.Builder.of("PLASMA_BUCKET", 1)
                 .fuelCost(10000)
                 .ingredients(
-                        new CraftingObject(ItemRegistry.getItem("MAGMA_BUCKET"), 1),
-                        new CraftingObject(ItemRegistry.getItem("MAGMA_BUCKET"), 1),
+                        new CraftingObject(ItemRegistry.get("MAGMA_BUCKET"), 1),
+                        new CraftingObject(ItemRegistry.get("MAGMA_BUCKET"), 1),
                         new CraftingObject(Material.NETHER_STAR, 1)
                 )
                 .build();
