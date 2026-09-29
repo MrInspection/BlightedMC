@@ -219,7 +219,7 @@ public final class SpawnRules {
                         if (block.getType() != Material.TRIAL_SPAWNER) continue;
 
                         if (block.getBlockData() instanceof TrialSpawner trialData
-                            && trialData.getTrialSpawnerState() == State.ACTIVE) {
+                                && trialData.getTrialSpawnerState() == State.ACTIVE) {
                             return true;
                         }
                     }
@@ -248,8 +248,8 @@ public final class SpawnRules {
                         if (block.getType() != Material.TRIAL_SPAWNER) continue;
 
                         if (block.getBlockData() instanceof TrialSpawner trialData
-                            && trialData.isOminous()
-                            && trialData.getTrialSpawnerState() == State.ACTIVE) {
+                                && trialData.isOminous()
+                                && trialData.getTrialSpawnerState() == State.ACTIVE) {
                             return true;
                         }
                     }

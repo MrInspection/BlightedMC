@@ -11,7 +11,9 @@ import org.bukkit.event.entity.EntityDamageEvent;
  */
 public enum DamageType implements EntityImmunity {
 
-    /** Immunity to fire, lava, fire tick, and campfire damage. */
+    /**
+     * Immunity to fire, lava, fire tick, and campfire damage.
+     */
     FIRE {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
@@ -22,7 +24,9 @@ public enum DamageType implements EntityImmunity {
         }
     },
 
-    /** Immunity to direct melee and sweep attacks. */
+    /**
+     * Immunity to direct melee and sweep attacks.
+     */
     MELEE {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
@@ -31,7 +35,9 @@ public enum DamageType implements EntityImmunity {
         }
     },
 
-    /** Immunity to ranged projectile damage. */
+    /**
+     * Immunity to ranged projectile damage.
+     */
     PROJECTILE {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
@@ -39,7 +45,9 @@ public enum DamageType implements EntityImmunity {
         }
     },
 
-    /** Immunity to fall damage. */
+    /**
+     * Immunity to fall damage.
+     */
     FALL {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
@@ -47,7 +55,9 @@ public enum DamageType implements EntityImmunity {
         }
     },
 
-    /** Immunity to heavy mace weapon attacks. */
+    /**
+     * Immunity to heavy mace weapon attacks.
+     */
     MACE {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {
@@ -62,7 +72,9 @@ public enum DamageType implements EntityImmunity {
         }
     },
 
-    /** Immunity to magic, poison, wither, dragon breath, and sonic boom damage. */
+    /**
+     * Immunity to magic, poison, wither, dragon breath, and sonic boom damage.
+     */
     MAGIC {
         @Override
         public boolean isImmune(LivingEntity livingEntity, EntityDamageEvent event) {

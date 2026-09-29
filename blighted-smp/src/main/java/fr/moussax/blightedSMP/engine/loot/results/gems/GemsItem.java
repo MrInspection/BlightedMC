@@ -4,6 +4,7 @@ import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.content.sound.BlightedSounds;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityManager;
+import fr.moussax.blightedSMP.engine.items.abilities.AbilityType;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import fr.moussax.bedrock.text.Messenger;
@@ -49,6 +50,16 @@ public record GemsItem(int amount) implements Supplier<ItemStack> {
      * Ability handler for consuming Blighted Gemstone items on player interaction.
      */
     public static class BlightedGemstoneAbility implements AbilityManager<PlayerInteractEvent> {
+
+        @Override
+        public String getName() {
+            return "Consume Gems";
+        }
+
+        @Override
+        public AbilityType getType() {
+            return AbilityType.RIGHT_CLICK;
+        }
 
         @Override
         public boolean triggerAbility(PlayerInteractEvent event) {

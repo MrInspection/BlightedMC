@@ -35,7 +35,7 @@ public final class EntityManager {
     }
 
     /**
-     * Initializes background orphan entity cleanup task.
+     * Initializes a background orphan entity cleanup task.
      */
     public static void initialize() {
         Bukkit.getScheduler().runTaskTimer(
@@ -62,7 +62,7 @@ public final class EntityManager {
     }
 
     /**
-     * Registers active entity instance with its runtime wrapper.
+     * Registers an active entity instance with its runtime wrapper.
      *
      * @param entity   living entity to track
      * @param blighted blighted entity wrapper instance
@@ -246,7 +246,8 @@ public final class EntityManager {
             boolean syncYaw = yawByte == null || yawByte == 1;
             boolean syncPitch = pitchByte != null && pitchByte == 1;
 
-            owner.attachments.removeIf(a -> a.entity() != null && a.entity().getUniqueId().equals(entity.getUniqueId()));
+            owner.attachments.removeIf(attachment -> attachment.entity() != null
+                    && attachment.entity().getUniqueId().equals(entity.getUniqueId()));
             owner.attachments.add(new EntityAttachment(entity, role, offset, syncYaw, syncPitch));
             registerAttachment(entity, owner);
         }

@@ -1,9 +1,9 @@
 package fr.moussax.blightedSMP.engine.entities.rituals;
 
+import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
-import fr.moussax.bedrock.utils.ItemBuilder;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -76,7 +76,7 @@ public final class AncientRitual {
         /**
          * Configures the item displayed for this ritual.
          *
-         * @param material base material of the displayed item
+         * @param material  base material of the displayed item
          * @param configure configuration applied to the item builder
          * @return this builder
          */
@@ -105,7 +105,7 @@ public final class AncientRitual {
          * Adds a vanilla material as a required offering.
          *
          * @param material required material
-         * @param amount required amount
+         * @param amount   required amount
          * @return this builder
          */
         public Builder addOffering(Material material, int amount) {
@@ -115,7 +115,7 @@ public final class AncientRitual {
         /**
          * Adds a custom item as a required offering.
          *
-         * @param item required custom item
+         * @param item   required custom item
          * @param amount required amount
          * @return this builder
          */

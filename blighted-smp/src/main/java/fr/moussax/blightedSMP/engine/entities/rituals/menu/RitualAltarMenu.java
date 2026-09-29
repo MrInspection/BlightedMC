@@ -1,24 +1,24 @@
 package fr.moussax.blightedSMP.engine.entities.rituals.menu;
 
+import fr.moussax.bedrock.text.Formatter;
+import fr.moussax.bedrock.text.Messenger;
+import fr.moussax.bedrock.ui.menu.Menu;
+import fr.moussax.bedrock.ui.menu.TickableMenu;
+import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
+import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.content.sound.BlightedSounds;
 import fr.moussax.blightedSMP.engine.entities.rituals.AncientCreature;
 import fr.moussax.blightedSMP.engine.entities.rituals.AncientRitual;
 import fr.moussax.blightedSMP.engine.entities.rituals.RitualAnimations;
 import fr.moussax.blightedSMP.engine.items.recipes.CraftingObject;
-import fr.moussax.bedrock.ui.menu.Menu;
-import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
-import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedSMP.utils.Utilities;
-import fr.moussax.bedrock.text.Formatter;
-import fr.moussax.bedrock.text.Messenger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import fr.moussax.bedrock.ui.menu.TickableMenu;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -110,7 +110,8 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
             ItemStack barrier = new ItemBuilder(Material.BARRIER, "§cRitual Required")
                     .addLore("§7Select an ancient ritual to start", "§7the invocation process.")
                     .toItemStack();
-            setItem(25, barrier, (_, _) -> {});
+            setItem(25, barrier, (_, _) -> {
+            });
             return;
         }
 
@@ -123,7 +124,8 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
             result = builder.toItemStack();
         }
 
-        setItem(25, result, (_, _) -> {});
+        setItem(25, result, (_, _) -> {
+        });
     }
 
     private void checkRequirements(Player player) {
@@ -166,7 +168,8 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
     private void displayRequiredIngredients() {
         for (int i = 0; i < ritual.getOfferings().size() && i < GRID_SLOTS.length; i++) {
             CraftingObject ingredient = ritual.getOfferings().get(i);
-            setItem(GRID_SLOTS[i], createDisplayItem(ingredient), (_, _) -> {});
+            setItem(GRID_SLOTS[i], createDisplayItem(ingredient), (_, _) -> {
+            });
         }
     }
 
@@ -199,7 +202,8 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
                         "§7to invoke ancient forgotten entities."
                 )
                 .toItemStack();
-        setItem(14, shriekerIcon, (_, _) -> {});
+        setItem(14, shriekerIcon, (_, _) -> {
+        });
     }
 
     private Material determineIndicatorMaterial() {

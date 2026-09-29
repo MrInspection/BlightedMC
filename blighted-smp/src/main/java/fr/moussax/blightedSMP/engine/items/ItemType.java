@@ -69,19 +69,12 @@ public enum ItemType {
      * Broad grouping for item types used in inventory filtering and display categories.
      */
     public enum Category {
-        /** Armor equipment category. */
         ARMOR,
-        /** Melee weapon category. */
         MELEE_WEAPON,
-        /** Ranged weapon category. */
         RANGE_WEAPON,
-        /** Tool and utility item category. */
         TOOLS,
-        /** Placeable block category. */
         BLOCKS,
-        /** Material and resource category. */
         MATERIAL,
-        /** Miscellaneous item category. */
         MISCELLANEOUS
     }
 }

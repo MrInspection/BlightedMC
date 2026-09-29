@@ -17,7 +17,8 @@ public final class EntityComponentListener implements Listener {
     public void onEntityDamage(EntityDamageByEntityEvent event) {
         Entity victim = event.getEntity();
         Entity rawDamager = event.getDamager();
-        Entity source = (rawDamager instanceof Projectile projectile && projectile.getShooter() instanceof Entity shooter)
+        Entity source = (rawDamager instanceof Projectile projectile
+                && projectile.getShooter() instanceof Entity shooter)
                 ? shooter
                 : rawDamager;
 

@@ -1,9 +1,9 @@
 package fr.moussax.blightedSMP.server;
 
-import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.bedrock.utils.debug.Log;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Loads and holds runtime configuration settings from {@code config.yml}.
@@ -31,7 +31,7 @@ public final class PluginSettings {
      * @param plugin plugin instance providing configuration access
      * @return loaded settings instance with defensive defaults
      */
-    public static PluginSettings load(BlightedSMP plugin) {
+    public static PluginSettings load(JavaPlugin plugin) {
         PluginSettings settings = new PluginSettings();
         try {
             plugin.reloadConfig();

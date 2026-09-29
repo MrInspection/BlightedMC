@@ -74,7 +74,7 @@ public final class EntitiesRegistry {
     }
 
     /**
-     * Retrieves cloned instance of registered spawnable entity prototype by ID.
+     * Retrieves a cloned instance of a registered spawnable entity prototype by ID.
      *
      * @param entityId target entity identifier
      * @return cloned spawnable entity instance, or {@code null} if untracked or not spawnable
@@ -89,25 +89,23 @@ public final class EntitiesRegistry {
     }
 
     /**
-     * Returns list of cloned instances of all registered entity prototypes.
+     * Returns a list of cloned instances of all registered entity prototypes.
      *
      * @return list of cloned entity prototypes
      */
     public static List<BlightedEntity> getAll() {
-        return REGISTRY.getAll().stream()
-                .map(BlightedEntity::clone)
-                .toList();
+        return REGISTRY.getAll().stream().map(BlightedEntity::clone).toList();
     }
 
     /**
-     * Returns list of cloned instances of all registered spawnable entity prototypes.
+     * Returns a list of cloned instances of all registered spawnable entity prototypes.
      *
      * @return list of cloned spawnable entity prototypes
      */
     public static List<SpawnableEntity> getSpawnables() {
         return REGISTRY.getAll().stream()
                 .filter(SpawnableEntity.class::isInstance)
-                .map(e -> ((SpawnableEntity) e).clone())
+                .map(entity -> ((SpawnableEntity) entity).clone())
                 .toList();
     }
 

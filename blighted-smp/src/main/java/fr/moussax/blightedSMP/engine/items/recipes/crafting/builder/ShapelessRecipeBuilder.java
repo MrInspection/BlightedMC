@@ -45,7 +45,18 @@ public final class ShapelessRecipeBuilder {
      * @throws IllegalArgumentException if the item ID is not registered
      */
     public static ShapelessRecipeBuilder of(String resultId) {
-        return new ShapelessRecipeBuilder(ItemRegistry.getItem(resultId));
+        return new ShapelessRecipeBuilder(ItemRegistry.get(resultId));
+    }
+
+    /**
+     * Adds a single material ingredient to the recipe.
+     *
+     * @param material the material required by the recipe
+     * @return this builder
+     */
+    // ponytail: simplified — single-item quantity default overload
+    public ShapelessRecipeBuilder addIngredient(Material material) {
+        return addIngredient(material, 1, false);
     }
 
     /**
@@ -81,6 +92,17 @@ public final class ShapelessRecipeBuilder {
     }
 
     /**
+     * Adds a single custom item ingredient to the recipe.
+     *
+     * @param item the custom item required by the recipe
+     * @return this builder
+     */
+    // ponytail: simplified — single-item quantity default overload
+    public ShapelessRecipeBuilder addIngredient(BlightedItem item) {
+        return addIngredient(item, 1, false);
+    }
+
+    /**
      * Adds a custom item ingredient to the recipe.
      *
      * @param item   the custom item required by the recipe
@@ -113,6 +135,18 @@ public final class ShapelessRecipeBuilder {
     }
 
     /**
+     * Adds a single registered custom item as an ingredient.
+     *
+     * @param itemId the ID of the required custom item
+     * @return this builder
+     * @throws IllegalArgumentException if the item ID is not registered
+     */
+    // ponytail: simplified — single-item quantity default overload
+    public ShapelessRecipeBuilder addIngredient(String itemId) {
+        return addIngredient(ItemRegistry.get(itemId), 1, false);
+    }
+
+    /**
      * Adds a registered custom item as an ingredient.
      *
      * @param itemId the ID of the required custom item
@@ -121,7 +155,7 @@ public final class ShapelessRecipeBuilder {
      * @throws IllegalArgumentException if the item ID is not registered
      */
     public ShapelessRecipeBuilder addIngredient(String itemId, int amount) {
-        return addIngredient(ItemRegistry.getItem(itemId), amount, false);
+        return addIngredient(ItemRegistry.get(itemId), amount, false);
     }
 
     /**
@@ -140,7 +174,7 @@ public final class ShapelessRecipeBuilder {
             int amount,
             boolean isAttributeSource
     ) {
-        return addIngredient(ItemRegistry.getItem(itemId), amount, isAttributeSource);
+        return addIngredient(ItemRegistry.get(itemId), amount, isAttributeSource);
     }
 
     /**

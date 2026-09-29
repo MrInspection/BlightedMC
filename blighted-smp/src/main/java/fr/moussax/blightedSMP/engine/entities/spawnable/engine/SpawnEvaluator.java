@@ -14,16 +14,17 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class SpawnEvaluator {
 
-    private SpawnEvaluator() {}
+    private SpawnEvaluator() {
+    }
 
     /**
-     * Evaluates a list of candidate entities against a target location and selects an eligible entity weighted by probability.
+     * Evaluates spawn conditions for candidate entities and selects an eligible entity weighted by probability.
      *
      * @param candidates candidate spawnable entity prototypes
      * @param location   target spawn location
      * @param world      target world
      * @param random     random number generator
-     * @return selected entity definition, or {@code null} if no spawn condition was met or the roll failed
+     * @return selected entity prototype, or {@code null} if no spawn condition was met or probability roll failed
      */
     @Nullable
     public static SpawnableEntity selectCandidate(List<SpawnableEntity> candidates, Location location, World world, ThreadLocalRandom random) {

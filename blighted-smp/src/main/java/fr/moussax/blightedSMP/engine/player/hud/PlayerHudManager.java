@@ -11,9 +11,7 @@ import org.jspecify.annotations.NonNull;
  */
 public final class PlayerHudManager {
 
-    /** Action bar section identifier for player gem balance. */
     public static final String SECTION_GEMS = "gems";
-    /** Action bar section identifier for player mana pool. */
     public static final String SECTION_MANA = "mana";
 
     private final ActionbarService actionBarService;

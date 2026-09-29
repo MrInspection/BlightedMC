@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 public final class ItemRegistryMenu {
+
     private static final int[] CATEGORY_SLOTS = PaginatedMenu.INNER_GRID_SLOTS;
     private static final int SEARCH_SLOT = 41;
 

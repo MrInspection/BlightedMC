@@ -48,7 +48,7 @@ public final class BlightedServer {
             final Iterator<Chunk> iterator = chunks.iterator();
             final int BATCH_SIZE = 100;
             int processedCount = 0;
-            long startTime = System.currentTimeMillis();
+            final long startTime = System.currentTimeMillis();
 
             @Override
             public void run() {

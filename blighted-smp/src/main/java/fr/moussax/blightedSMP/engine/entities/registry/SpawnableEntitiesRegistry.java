@@ -14,7 +14,7 @@ public final class SpawnableEntitiesRegistry {
     }
 
     /**
-     * Retrieves cloned instance of registered spawnable entity prototype by ID.
+     * Retrieves a cloned instance of a registered spawnable entity prototype by ID.
      *
      * @param entityId target entity identifier
      * @return cloned spawnable entity instance, or {@code null} if untracked or not spawnable
@@ -25,7 +25,7 @@ public final class SpawnableEntitiesRegistry {
     }
 
     /**
-     * Returns list of cloned instances of all registered spawnable entity prototypes.
+     * Returns a list of cloned instances of all registered spawnable entity prototypes.
      *
      * @return list of cloned spawnable entity prototypes
      */
