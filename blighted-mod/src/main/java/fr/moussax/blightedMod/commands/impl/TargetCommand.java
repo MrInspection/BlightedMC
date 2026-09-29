@@ -39,9 +39,7 @@ public final class TargetCommand extends ModerationCommand {
         }
 
         blightedModerator.setTargetPlayer(target);
-        InteractiveMessage.text(" §eTargeting §d" + target.getName() + " §ewith §fModeration HUD§e. ")
-                .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + target.getName() + "§f.", "/userinfo " + target.getName())
-                .send(moderator);
+        inform(moderator, " §eTargeting §d" + target.getName() + " §ewith §fModeration HUD§e.");
         return true;
     }
 }

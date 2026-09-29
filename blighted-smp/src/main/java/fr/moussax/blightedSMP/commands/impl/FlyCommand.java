@@ -4,8 +4,6 @@ import fr.moussax.blightedSMP.commands.AdminCommand;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-import static fr.moussax.bedrock.text.InteractiveMessage.text;
-
 public final class FlyCommand extends AdminCommand {
     @Override
     protected boolean executeAdmin(Player player, Command command, String label, String[] args) {
@@ -21,7 +19,7 @@ public final class FlyCommand extends AdminCommand {
         } else {
             player.setAllowFlight(true);
             player.setFlying(true);
-            text(" §fFlight Mode §etoggled §aON§e. ").hoverAndExecute("§4[§c➟ Disable§4]", "§eClick to disable your §6Flight Mode§e.", "/fly").send(player);
+            player.sendMessage(" §fFlight Mode §etoggled §aON§e.");
         }
     }
 }

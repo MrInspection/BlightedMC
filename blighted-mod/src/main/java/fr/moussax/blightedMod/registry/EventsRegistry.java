@@ -35,7 +35,6 @@ public final class EventsRegistry {
         pluginManager.registerEvents(new InteractiveChatListener(instance.getModerationManager()), instance);
     }
 
-
     public void cleanup() {
         if (signInputListener != null) {
             signInputListener.cleanup();

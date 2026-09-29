@@ -30,7 +30,7 @@ public final class MaterialRecipes implements RegistryModule<Consumer<BlightedRe
 
         BlightedRecipe enchantedIronBlockRecipe = shapedRecipe("ENCHANTED_IRON_BLOCK", 1)
                 .shape(" e ", "eee", " e ")
-                .bind('e', ItemRegistry.getItem("ENCHANTED_IRON_INGOT"), 8)
+                .bind('e', ItemRegistry.get("ENCHANTED_IRON_INGOT"), 8)
                 .build();
 
         BlightedRecipe enchantedGoldIngotRecipe = shapedRecipe("ENCHANTED_GOLD_INGOT", 1)
@@ -142,7 +142,7 @@ public final class MaterialRecipes implements RegistryModule<Consumer<BlightedRe
 
         var enchantedLavaBucketRecipe = shapedRecipe("ENCHANTED_LAVA_BUCKET", 1)
                 .shape("aaa", "bcb", " b ")
-                .bind('a', ItemRegistry.getItem("ENCHANTED_COAL"), 1)
+                .bind('a', ItemRegistry.get("ENCHANTED_COAL"), 1)
                 .bind('b', Material.IRON_INGOT, 10)
                 .bind('c', Material.LAVA_BUCKET, 1)
                 .build();
@@ -150,8 +150,8 @@ public final class MaterialRecipes implements RegistryModule<Consumer<BlightedRe
         var magmaBucketRecipe = shapedRecipe("MAGMA_BUCKET", 1)
                 .shape("aaa", "bcb", " b ")
                 .bind('a', Material.MAGMA_BLOCK, 64)
-                .bind('b', ItemRegistry.getItem("ENCHANTED_IRON_INGOT"), 4)
-                .bind('c', ItemRegistry.getItem("ENCHANTED_LAVA_BUCKET"), 1)
+                .bind('b', ItemRegistry.get("ENCHANTED_IRON_INGOT"), 4)
+                .bind('c', ItemRegistry.get("ENCHANTED_LAVA_BUCKET"), 1)
                 .build();
 
         var blightedCraftingTable = shapedRecipe("BLIGHTED_WORKBENCH", 1)
@@ -166,9 +166,9 @@ public final class MaterialRecipes implements RegistryModule<Consumer<BlightedRe
                 .shape("aba", "cdc", "aea")
                 .bind('a', Material.IRON_BLOCK, 1)
                 .bind('b', Material.BLAST_FURNACE, 1)
-                .bind('c', ItemRegistry.getItem("ENCHANTED_COAL"), 2)
+                .bind('c', ItemRegistry.get("ENCHANTED_COAL"), 2)
                 .bind('d', Material.LAVA_BUCKET, 1)
-                .bind('e', ItemRegistry.getItem("BLIGHTED_WORKBENCH"), 1)
+                .bind('e', ItemRegistry.get("BLIGHTED_WORKBENCH"), 1)
                 .build();
 
         BlightedRecipe magmaRodRecipe = shapedRecipe("MAGMA_ROD", 1)

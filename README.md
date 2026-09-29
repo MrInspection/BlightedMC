@@ -1,6 +1,6 @@
 # BlightedMC
 
-A Spigot 26.2 plugin providing a high-difficulty survival experience inspired by custom RPG mechanics. Vanilla Minecraft is no longer challenging enough. That's why we're bringing you BlightedMC!
+A Spigot 26.3 plugin providing a high-difficulty survival experience inspired by custom RPG mechanics. Vanilla Minecraft is no longer challenging enough. That's why we're bringing you BlightedMC!
 
 ## Features
 
@@ -17,8 +17,8 @@ A Spigot 26.2 plugin providing a high-difficulty survival experience inspired by
 
 ## Requirements
 
-- Java 25+
-- Spigot 26.2 server build
+- Java 26
+- Spigot 26.3 server build
 
 ## Building from Source
 

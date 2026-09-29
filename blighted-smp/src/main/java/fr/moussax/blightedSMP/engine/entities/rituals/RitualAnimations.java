@@ -169,11 +169,11 @@ public final class RitualAnimations {
             double z = radius * Math.sin(angle);
             double y = Math.sin((tick + i) * 0.4) * 0.8;
 
-            Location particleLoc = center.clone().add(x, y, z);
-            Vector inward = center.toVector().subtract(particleLoc.toVector()).normalize().multiply(0.25);
+            Location particleLocation = center.clone().add(x, y, z);
+            Vector inward = center.toVector().subtract(particleLocation.toVector()).normalize().multiply(0.25);
 
-            world.spawnParticle(Particle.PORTAL, particleLoc, 0, inward.getX(), inward.getY(), inward.getZ(), 0.8);
-            world.spawnParticle(Particle.SOUL_FIRE_FLAME, particleLoc, 0, inward.getX(), inward.getY(), inward.getZ(), 0.05);
+            world.spawnParticle(Particle.PORTAL, particleLocation, 0, inward.getX(), inward.getY(), inward.getZ(), 0.8);
+            world.spawnParticle(Particle.SOUL_FIRE_FLAME, particleLocation, 0, inward.getX(), inward.getY(), inward.getZ(), 0.05);
         }
 
         world.spawnParticle(Particle.REVERSE_PORTAL, center, 4, 0.1, 0.1, 0.1, 0.08);

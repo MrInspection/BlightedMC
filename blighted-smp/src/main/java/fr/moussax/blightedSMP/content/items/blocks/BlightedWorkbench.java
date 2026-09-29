@@ -14,7 +14,7 @@ import org.bukkit.inventory.EquipmentSlot;
 public class BlightedWorkbench extends BlightedBlock {
 
     public BlightedWorkbench() {
-        super(Material.ENCHANTING_TABLE, ItemRegistry.getItem("BLIGHTED_WORKBENCH"));
+        super(Material.ENCHANTING_TABLE, ItemRegistry.get("BLIGHTED_WORKBENCH"));
     }
 
     @Override

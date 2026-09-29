@@ -1,13 +1,13 @@
 package fr.moussax.blightedSMP.engine.items.abilities;
 
 /**
- * Tracks an active cooldown for a specific ability execution manager and type.
+ * Tracks an active cooldown for a specific ability execution manager or key and type.
  *
- * @param abilityManager       class of the {@link AbilityManager} owning this cooldown
+ * @param key                  unique identifier or class name owning this cooldown
  * @param abilityType          ability trigger type under cooldown
  * @param expirationTimeMillis epoch timestamp in milliseconds when the cooldown expires
  */
-public record CooldownEntry(Class<? extends AbilityManager> abilityManager, AbilityType abilityType, long expirationTimeMillis) {
+public record CooldownEntry(String key, AbilityType abilityType, long expirationTimeMillis) {
 
     /**
      * Checks whether the cooldown period has elapsed.

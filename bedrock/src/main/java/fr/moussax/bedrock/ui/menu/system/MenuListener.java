@@ -90,16 +90,16 @@ public final class MenuListener implements Listener {
         if (!(event.getPlayer() instanceof Player player)) return;
         if (!(event.getView().getTopInventory().getHolder() instanceof Menu menu)) return;
 
-        menu.onClose(player);
-
         PluginContext.delay(() -> {
             if (!player.isOnline()) {
+                menu.onClose(player);
                 menuSystem.cleanup(player);
                 return;
             }
             Inventory topInventory = player.getOpenInventory().getTopInventory();
             if (!(topInventory.getHolder() instanceof Menu)) {
-                menuSystem.closeActiveMenu(player);
+                menu.onClose(player);
+                menuSystem.cleanup(player);
             }
         }, 1L);
     }

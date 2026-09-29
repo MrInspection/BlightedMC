@@ -11,9 +11,7 @@ import org.jspecify.annotations.NonNull;
  */
 public final class PlayerHudManager {
 
-    /** Action bar section identifier for player gem balance. */
     public static final String SECTION_GEMS = "gems";
-    /** Action bar section identifier for player mana pool. */
     public static final String SECTION_MANA = "mana";
 
     private final ActionbarService actionBarService;
@@ -30,13 +28,13 @@ public final class PlayerHudManager {
 
     private void initializeDefaultSections() {
         actionBarService.registerSection(ActionbarSection.of(SECTION_GEMS, 0, player -> {
-            BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+            BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
             if (blightedPlayer == null) return null;
             return "§d" + Formatter.formatDecimalWithCommas(blightedPlayer.getGems()) + "✵ Gems";
         }));
 
         actionBarService.registerSection(ActionbarSection.of(SECTION_MANA, 10, player -> {
-            BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+            BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
             if (blightedPlayer == null) return null;
             return "§b" + Formatter.formatDouble(blightedPlayer.getCurrentMana(), 0) + "/"
                     + Formatter.formatDouble(blightedPlayer.getMaxMana(), 0) + "✎ Mana";

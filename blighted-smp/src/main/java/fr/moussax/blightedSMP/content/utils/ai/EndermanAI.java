@@ -4,7 +4,7 @@ import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.LivingEntity;
@@ -16,7 +16,7 @@ public class EndermanAI {
 
     public static void init(LivingEntity spawned) {
         if (!(spawned instanceof CraftMob craftMob)) return;
-        EnderMan nmsEnderman = (EnderMan) craftMob.getHandle();
+        Enderman nmsEnderman = (Enderman) craftMob.getHandle();
 
         nmsEnderman.goalSelector.removeAllGoals(goal -> true);
         nmsEnderman.targetSelector.removeAllGoals(goal -> true);

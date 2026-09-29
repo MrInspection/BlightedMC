@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import static fr.moussax.bedrock.text.InteractiveMessage.text;
 import static fr.moussax.bedrock.text.Messenger.inform;
 
 public final class NightVisionCommand extends AdminCommand {
@@ -23,7 +22,7 @@ public final class NightVisionCommand extends AdminCommand {
             inform(player," §fNight Vision §etoggled §cOFF§e.");
         } else {
             player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, PotionEffect.INFINITE_DURATION, 0, false, false));
-            text(" §fNight Vision §etoggled §aON§e. ").hoverAndExecute("§4[§c➟ Disable§4]", "§eClick to disable your §6Night Vision §eeffect.", "/nv").send(player);
+            inform(player," §fNight Vision §etoggled §aON§e.");
         }
     }
 }

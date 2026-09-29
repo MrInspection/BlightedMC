@@ -178,7 +178,7 @@ public final class BlightedRitualAnimation extends BukkitRunnable {
 
         Objects.requireNonNull(centerLocation.getWorld()).strikeLightningEffect(centerLocation);
 
-        ItemStack rewardItem = ItemRegistry.getItem("BLIGHTED_WORKBENCH").toItemStack();
+        ItemStack rewardItem = ItemRegistry.get("BLIGHTED_WORKBENCH").toItemStack();
         centerLocation.getWorld().dropItem(targetBlock.getLocation().add(0, 1.5, 0), rewardItem);
 
         spawnClimaxParticles();

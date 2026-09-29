@@ -24,10 +24,10 @@ public final class BlightswornSkeleton extends BlightswornArcherArchetype {
         setDamage(6);
         setDroppedExp(12);
         setLootTable(new EntityLootTableBuilder()
-                .addLoot(Material.BONE, 2, 5, 1.0, COMMON)
-                .addLoot(Material.ARROW, 2, 5, 1.0, COMMON)
-                .addDamagedLoot(Material.BOW, 0.1, 0.8, 0.15, RARE)
-                .addGemsLoot(5, 0.04, VERY_RARE)
+                .addLoot(Material.BONE, 2, 5, 1.0)
+                .addLoot(Material.ARROW, 2, 5, 1.0)
+                .addDamagedItem(Material.BOW, 0.1, 0.8, 0.15, RARE)
+                .addGems(5, 0.04, VERY_RARE)
                 .build()
         );
     }

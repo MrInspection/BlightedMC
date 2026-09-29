@@ -43,7 +43,7 @@ public final class GiveItemCommand extends AdminCommand {
         }
 
         String itemId = args[argumentIndex].toUpperCase();
-        BlightedItem blightedItem = ItemRegistry.getItem(itemId);
+        BlightedItem blightedItem = ItemRegistry.get(itemId);
 
         int amount = 1;
         if (args.length > argumentIndex + 1) {

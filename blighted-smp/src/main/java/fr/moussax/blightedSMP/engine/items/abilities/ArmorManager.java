@@ -1,8 +1,8 @@
 package fr.moussax.blightedSMP.engine.items.abilities;
 
+import fr.moussax.bedrock.utils.debug.Log;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
-import fr.moussax.bedrock.utils.debug.Log;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public final class ArmorManager {
 
         bonusCount.forEach((bonusClass, count) -> {
             boolean isRunning = player.getActiveFullSetBonuses().stream()
-                    .anyMatch(b -> b.getClass().equals(bonusClass));
+                    .anyMatch(fullSetBonus -> fullSetBonus.getClass().equals(bonusClass));
 
             if (isRunning) return;
 
@@ -74,7 +74,7 @@ public final class ArmorManager {
     /**
      * Toggles sneak-dependent set bonuses when a player changes sneak state.
      *
-     * @param player player context
+     * @param player     player context
      * @param isSneaking {@code true} if player started sneaking, {@code false} if stopped
      */
     public static void handleSneakUpdate(BlightedPlayer player, boolean isSneaking) {

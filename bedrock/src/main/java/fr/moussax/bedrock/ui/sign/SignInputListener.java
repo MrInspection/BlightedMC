@@ -58,7 +58,7 @@ public final class SignInputListener implements Listener {
                 public void channelRead(ChannelHandlerContext context, Object packet) throws Exception {
                     if (packet instanceof ServerboundSignUpdatePacket signPacket) {
                         if (SignInputManager.hasActiveSession(player.getUniqueId())) {
-                            SignInputManager.handleSignUpdate(player, signPacket.getLines());
+                            SignInputManager.handleSignUpdate(player, signPacket.lines().toArray(String[]::new));
                             return;
                         }
                     }

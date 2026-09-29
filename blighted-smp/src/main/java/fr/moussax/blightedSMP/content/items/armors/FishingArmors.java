@@ -6,9 +6,8 @@ import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.ItemRarity;
 import fr.moussax.blightedSMP.engine.items.ItemType;
 import fr.moussax.blightedSMP.engine.items.abilities.FullSetBonus;
-import fr.moussax.blightedSMP.registry.RegistryModule;
-import java.util.function.Consumer;
 import fr.moussax.blightedSMP.engine.items.rules.ItemRule;
+import fr.moussax.blightedSMP.registry.RegistryModule;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -18,11 +17,64 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 
+import java.util.function.Consumer;
+
 public final class FishingArmors implements RegistryModule<Consumer<BlightedItem>> {
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public void register(Consumer<BlightedItem> registry) {
+
+        String[] anglerArmorLore = new String[]{
+                "",
+                " §8A simple garb from a simple ",
+                " §8craft. Though beneath the",
+                " §8surface, nothing is ever",
+                " §8quite so simple.", "",
+                ItemRarity.COMMON.getName()
+        };
+
+        BlightedItem anglerHelmet = new BlightedItem("ANGLER_HELMET", ItemType.HELMET, ItemRarity.COMMON, Material.COPPER_HELMET);
+        anglerHelmet.setDisplayName("Angler Helmet");
+        anglerHelmet.addAttributeModifier(Attribute.ARMOR, 2.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
+        anglerHelmet.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
+        anglerHelmet.addItemFlag(ItemFlag.HIDE_ATTRIBUTES);
+        anglerHelmet.addLore(anglerArmorLore);
+        anglerHelmet.setMaxDurability(121);
+
+        BlightedItem anglerChestplate = new BlightedItem("ANGLER_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.COMMON, Material.LEATHER_CHESTPLATE);
+        anglerChestplate.setDisplayName("Angler Chestplate");
+        anglerChestplate.addAttributeModifier(Attribute.ARMOR, 4.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST);
+        anglerChestplate.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST);
+        anglerChestplate.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES);
+        anglerChestplate.addLore(anglerArmorLore);
+        anglerChestplate.setLeatherColor("#2B457A");
+        anglerChestplate.setMaxDurability(176);
+
+        BlightedItem anglerLeggings = new BlightedItem("ANGLER_LEGGINGS", ItemType.LEGGINGS, ItemRarity.COMMON, Material.LEATHER_LEGGINGS);
+        anglerLeggings.setDisplayName("Angler Leggings");
+        anglerLeggings.addAttributeModifier(Attribute.ARMOR, 3.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.LEGS);
+        anglerLeggings.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.LEGS);
+        anglerLeggings.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES);
+        anglerLeggings.addLore(anglerArmorLore);
+        anglerLeggings.setLeatherColor("#2B457A");
+        anglerLeggings.setMaxDurability(165);
+
+        BlightedItem anglerBoots = new BlightedItem("ANGLER_BOOTS", ItemType.BOOTS, ItemRarity.COMMON, Material.LEATHER_BOOTS);
+        anglerBoots.setDisplayName("Angler Boots");
+        anglerBoots.addAttributeModifier(Attribute.ARMOR, 1.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.FEET);
+        anglerBoots.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.FEET);
+        anglerBoots.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES);
+        anglerBoots.addLore(anglerArmorLore);
+        anglerBoots.setLeatherColor("#2B457A");
+
+        registry.accept(anglerHelmet);
+        registry.accept(anglerChestplate);
+        registry.accept(anglerLeggings);
+        registry.accept(anglerBoots);
+
+
+
 
         FullSetBonus emberWeaveSetBonus = new EmberWeaveSetBonus();
 
@@ -118,56 +170,6 @@ public final class FishingArmors implements RegistryModule<Consumer<BlightedItem
         ashfangBoots.setFullSetBonus(magmaWeaveSetBonus);
         ashfangBoots.addLore("", ItemRarity.EPIC.getName() + " BOOTS");
 
-        String[] anglerLore = new String[]{
-                "",
-                " §7Worn by those who cast lines",
-                " §7into the §9Deep Seas§7. A relic of",
-                " §7forgotten tradition, guiding",
-                " §7the path toward mastery."
-        };
-
-        BlightedItem anglerHelmet = new BlightedItem("ANGLER_HELMET", ItemType.HELMET, ItemRarity.UNCOMMON, Material.COPPER_HELMET);
-        anglerHelmet.setDisplayName("Angler Helmet");
-        anglerHelmet.addLore(anglerLore);
-        anglerHelmet.addAttributeModifier(Attribute.ARMOR, 2.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
-        anglerHelmet.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
-        anglerHelmet.addAttributeModifier(Attribute.LUCK, 0.25, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.HEAD);
-        anglerHelmet.setMaxDurability(121);
-        anglerHelmet.addLore("", ItemRarity.UNCOMMON.getName() + " HELMET");
-
-        BlightedItem anglerChestplate = new BlightedItem("ANGLER_CHESTPLATE", ItemType.CHESTPLATE, ItemRarity.UNCOMMON, Material.LEATHER_CHESTPLATE);
-        anglerChestplate.setDisplayName("Angler Chestplate");
-        anglerChestplate.addLore(anglerLore);
-        anglerChestplate.addAttributeModifier(Attribute.ARMOR, 4.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST);
-        anglerChestplate.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST);
-        anglerChestplate.addAttributeModifier(Attribute.LUCK, 0.25, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST);
-        anglerChestplate.addItemFlag(ItemFlag.HIDE_DYE);
-        anglerChestplate.setLeatherColor("#4B6D9E");
-        anglerChestplate.setMaxDurability(176);
-        anglerChestplate.addLore("", ItemRarity.UNCOMMON.getName() + " CHESTPLATE");
-
-        BlightedItem anglerLeggings = new BlightedItem("ANGLER_LEGGINGS", ItemType.LEGGINGS, ItemRarity.UNCOMMON, Material.LEATHER_LEGGINGS);
-        anglerLeggings.setDisplayName("Angler Leggings");
-        anglerLeggings.addLore(anglerLore);
-        anglerLeggings.addAttributeModifier(Attribute.ARMOR, 3.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.LEGS);
-        anglerLeggings.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.LEGS);
-        anglerLeggings.addAttributeModifier(Attribute.LUCK, 0.25, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.LEGS);
-        anglerLeggings.addItemFlag(ItemFlag.HIDE_DYE);
-        anglerLeggings.setLeatherColor("#4B6D9E");
-        anglerLeggings.setMaxDurability(165);
-        anglerLeggings.addLore("", ItemRarity.UNCOMMON.getName() + " LEGGINGS");
-
-        BlightedItem anglerBoots = new BlightedItem("ANGLER_BOOTS", ItemType.BOOTS, ItemRarity.UNCOMMON, Material.LEATHER_BOOTS);
-        anglerBoots.setDisplayName("Angler Boots");
-        anglerBoots.addLore(anglerLore);
-        anglerBoots.addAttributeModifier(Attribute.ARMOR, 1.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.FEET);
-        anglerBoots.addAttributeModifier(Attribute.OXYGEN_BONUS, 0.5, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.FEET);
-        anglerBoots.addAttributeModifier(Attribute.LUCK, 0.25, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.FEET);
-        anglerBoots.addItemFlag(ItemFlag.HIDE_DYE);
-        anglerBoots.setLeatherColor("#4B6D9E");
-        anglerBoots.setMaxDurability(143);
-        anglerBoots.addLore("", ItemRarity.UNCOMMON.getName() + " BOOTS");
-
         registry.accept(emberWeaveHelmet);
         registry.accept(emberWeaveChestplate);
         registry.accept(emberWeaveLeggins);
@@ -176,9 +178,5 @@ public final class FishingArmors implements RegistryModule<Consumer<BlightedItem
         registry.accept(ashfangChestplate);
         registry.accept(ashfangLeggins);
         registry.accept(ashfangBoots);
-        registry.accept(anglerHelmet);
-        registry.accept(anglerChestplate);
-        registry.accept(anglerLeggings);
-        registry.accept(anglerBoots);
     }
 }

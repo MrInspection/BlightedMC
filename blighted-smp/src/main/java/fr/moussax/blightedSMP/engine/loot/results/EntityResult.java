@@ -20,7 +20,11 @@ public final class EntityResult implements LootResult {
     private final Function<Location, LivingEntity> customSpawner;
     private final Consumer<LivingEntity> entityModifier;
 
-    private EntityResult(EntityType entityType, Function<Location, LivingEntity> customSpawner, Consumer<LivingEntity> entityModifier) {
+    private EntityResult(
+            EntityType entityType,
+            Function<Location, LivingEntity> customSpawner,
+            Consumer<LivingEntity> entityModifier
+    ) {
         this.entityType = entityType;
         this.customSpawner = customSpawner;
         this.entityModifier = entityModifier;

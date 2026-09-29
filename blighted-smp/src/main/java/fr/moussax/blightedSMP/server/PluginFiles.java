@@ -15,7 +15,7 @@ public enum PluginFiles {
     /**
      * Primary SQLite database file name.
      */
-    DATABASE("blighted_database.db");
+    DATABASE("blightedsmp_database.db");
 
     /**
      * Relative file name within the plugin data directory.

@@ -116,12 +116,9 @@ public final class FishingLootTable {
      */
     public static final class Builder {
         private static final Function<FishingCatchQuality, FeedbackSpecification> FISHING_FEEDBACK_MAPPER = quality -> switch (quality) {
-            case GOOD_CATCH ->
-                    FeedbackSpecification.full(" §5§lGOOD CATCH! §f| §7You found §f", Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 2.0f);
-            case GREAT_CATCH ->
-                    FeedbackSpecification.full(" §6§lGREAT CATCH! §f| §7You found §f", Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5f);
-            case OUTSTANDING_CATCH ->
-                    FeedbackSpecification.full(" §d§lOUTSTANDING CATCH! §f| §7You found §f", Sound.ENTITY_PLAYER_LEVELUP, 1.5f);
+            case GOOD_CATCH -> FeedbackSpecification.full(" §5§lGOOD CATCH! §f| §7You found §f", Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 2.0f);
+            case GREAT_CATCH -> FeedbackSpecification.full(" §6§lGREAT CATCH! §f| §7You found §f", Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5f);
+            case OUTSTANDING_CATCH -> FeedbackSpecification.full(" §d§lOUTSTANDING CATCH! §f| §7You found §f", Sound.ENTITY_PLAYER_LEVELUP, 1.5f);
             default -> null;
         };
 

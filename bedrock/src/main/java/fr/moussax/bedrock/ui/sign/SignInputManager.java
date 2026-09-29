@@ -2,8 +2,10 @@ package fr.moussax.bedrock.ui.sign;
 
 import fr.moussax.bedrock.scheduling.PluginContext;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -29,7 +31,7 @@ public final class SignInputManager {
      * Registers an active sign input session for a player.
      *
      * @param PlayerId player unique identifier
-     * @param menu sign input menu handling the session
+     * @param menu     sign input menu handling the session
      * @param position temporary sign position
      */
     static void register(UUID PlayerId, SignInputMenu menu, BlockPos position) {
@@ -43,7 +45,7 @@ public final class SignInputManager {
      * invoked.</p>
      *
      * @param player player who submitted the input
-     * @param lines submitted sign lines
+     * @param lines  submitted sign lines
      */
     public static void handleSignUpdate(Player player, String[] lines) {
         Session session = sessions.remove(player.getUniqueId());
@@ -54,11 +56,19 @@ public final class SignInputManager {
         BlockState actualState = nmsPlayer.level().getBlockState(session.position);
         nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(session.position, actualState));
 
-        Bukkit.getScheduler().runTask(PluginContext.get(), () -> {
-                if (player.isOnline()) {
-                    session.menu().handleComplete(player, lines);
-                }
+        BlockEntity actualTile = nmsPlayer.level().getBlockEntity(session.position);
+        if (actualTile != null) {
+            Packet<?> updatePacket = actualTile.getUpdatePacket();
+            if (updatePacket != null) {
+                nmsPlayer.connection.send(updatePacket);
             }
+        }
+
+        Bukkit.getScheduler().runTask(PluginContext.get(), () -> {
+                    if (player.isOnline()) {
+                        session.menu().handleComplete(player, lines);
+                    }
+                }
         );
     }
 

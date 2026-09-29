@@ -34,7 +34,7 @@ public final class SpawnRules {
      */
     public static SpawnCondition biome(Biome... allowed) {
         Set<Biome> biomeSet = Set.of(allowed);
-        return (location, world) -> biomeSet.contains(location.getBlock().getBiome());
+        return (location, _) -> biomeSet.contains(location.getBlock().getBiome());
     }
 
     /**
@@ -44,7 +44,7 @@ public final class SpawnRules {
      * @return environment spawn condition predicate
      */
     public static SpawnCondition environment(World.Environment environment) {
-        return (location, world) -> world.getEnvironment() == environment;
+        return (_, world) -> world.getEnvironment() == environment;
     }
 
     /**
@@ -64,7 +64,7 @@ public final class SpawnRules {
      * @return maximum height spawn condition predicate
      */
     public static SpawnCondition atMostY(int maxY) {
-        return (location, world) -> location.getBlockY() <= maxY;
+        return (location, _) -> location.getBlockY() <= maxY;
     }
 
     /**
@@ -74,7 +74,7 @@ public final class SpawnRules {
      * @return block light spawn condition predicate
      */
     public static SpawnCondition maxBlockLight(int max) {
-        return (location, world) -> location.getBlock().getLightFromBlocks() <= max;
+        return (location, _) -> location.getBlock().getLightFromBlocks() <= max;
     }
 
     /**
@@ -84,7 +84,7 @@ public final class SpawnRules {
      * @return light level spawn condition predicate
      */
     public static SpawnCondition maxLightLevel(int max) {
-        return (location, world) -> location.getBlock().getLightLevel() <= max;
+        return (location, _) -> location.getBlock().getLightLevel() <= max;
     }
 
     /**
@@ -111,7 +111,7 @@ public final class SpawnRules {
      * @return nighttime spawn condition predicate
      */
     public static SpawnCondition nightTime() {
-        return (location, world) -> {
+        return (_, world) -> {
             long time = world.getTime();
             return time >= 13000 && time <= 23000;
         };
@@ -219,7 +219,7 @@ public final class SpawnRules {
                         if (block.getType() != Material.TRIAL_SPAWNER) continue;
 
                         if (block.getBlockData() instanceof TrialSpawner trialData
-                            && trialData.getTrialSpawnerState() == State.ACTIVE) {
+                                && trialData.getTrialSpawnerState() == State.ACTIVE) {
                             return true;
                         }
                     }
@@ -248,8 +248,8 @@ public final class SpawnRules {
                         if (block.getType() != Material.TRIAL_SPAWNER) continue;
 
                         if (block.getBlockData() instanceof TrialSpawner trialData
-                            && trialData.isOminous()
-                            && trialData.getTrialSpawnerState() == State.ACTIVE) {
+                                && trialData.isOminous()
+                                && trialData.getTrialSpawnerState() == State.ACTIVE) {
                             return true;
                         }
                     }

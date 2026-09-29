@@ -1,13 +1,13 @@
 package fr.moussax.blightedSMP.engine.entities.rituals.menu;
 
-import fr.moussax.blightedSMP.engine.entities.rituals.AncientRitual;
-import fr.moussax.blightedSMP.engine.entities.rituals.registry.RitualRegistry;
-import fr.moussax.blightedSMP.engine.items.recipes.CraftingObject;
 import fr.moussax.bedrock.text.Formatter;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.bedrock.utils.ItemBuilder;
+import fr.moussax.blightedSMP.engine.entities.rituals.AncientRitual;
+import fr.moussax.blightedSMP.engine.entities.rituals.registry.RitualRegistry;
+import fr.moussax.blightedSMP.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedSMP.utils.Utilities;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

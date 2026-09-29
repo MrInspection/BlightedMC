@@ -39,14 +39,12 @@ public final class ReportManager {
 
     public void submitAndNotify(Player reporter, String targetName, String reason, String message) {
         ReportData report = submitReport(reporter.getName(), targetName, reason, message);
-        inform(reporter, " §a⚑ §7Your report §7has been submitted to online staff.");
+        inform(reporter, " §a⚑ §7Your report has been submitted to online staff.");
 
-        InteractiveMessage notificationMessage = InteractiveMessage.text(" §d§lSTAFF! §f" + reporter.getName() + " §ereported §d" + targetName + " §efor §c" + reason + "§e. ")
-                .hoverAndExecute("§6[DETAILS]", "§fClick to view §dreport §fdetails.", "/checkreport " + report.id())
+        InteractiveMessage notificationMessage = InteractiveMessage.text(" §6§lALERT! §d" + targetName + " §ehas been reported§7∙ ")
+                .hoverAndExecute("§3[Details]", "§fClick to view §dreport §fdetails.", "/checkreport " + report.id())
                 .append(" ")
-                .hoverAndExecute("§b[MTP]", "§fClick to teleport to §d" + targetName + "§f.", "/mtp " + targetName)
-                .append(" ")
-                .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + targetName + "§f.", "/userinfo " + targetName);
+                .hoverAndExecute("§e[MTP]", "§fClick to teleport to §d" + targetName + "§f.", "/mtp " + targetName);
 
         ModerationManager.getInstance().broadcastToModerators(notificationMessage);
     }

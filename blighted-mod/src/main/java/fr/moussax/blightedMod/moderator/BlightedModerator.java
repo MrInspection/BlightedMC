@@ -60,7 +60,7 @@ public final class BlightedModerator {
         saveState();
         clearPlayerState();
         applyModerationState();
-        setVanished(true, true);
+        setVanished(true, false);
         giveModerationTools();
         this.isInModerationMode = true;
 
@@ -74,7 +74,7 @@ public final class BlightedModerator {
         }
         player.getInventory().clear();
         restoreState();
-        setVanished(false, true);
+        setVanished(false, false);
         this.isInModerationMode = false;
 
         player.sendMessage(" §dModeration Mode §etoggled §cOFF§e.");
@@ -148,20 +148,25 @@ public final class BlightedModerator {
 
     public void setVanished(boolean vanished, boolean notifyPlayer) {
         this.isVanished = vanished;
+        ModerationManager.getInstance().setVanished(player.getUniqueId(), vanished);
         JavaPlugin instance = BlightedMod.getInstance();
 
         if (vanished) {
             hideFromNonModerators(instance);
-            if (!notifyPlayer) player.sendMessage(" §dVanish §etoggled §aON§e.");
+            if (notifyPlayer) {
+                player.sendMessage(" §dVanish §etoggled §aON§e.");
+            }
         } else {
             showToAllPlayers(instance);
-            if (!notifyPlayer) player.sendMessage(" §dVanish §etoggled §cOFF§e.");
+            if (notifyPlayer) {
+                player.sendMessage(" §dVanish §etoggled §cOFF§e.");
+            }
         }
         updateVanishTool();
     }
 
     public void setVanished(boolean vanished) {
-        setVanished(vanished, false);
+        setVanished(vanished, true);
     }
 
     private void hideFromNonModerators(JavaPlugin instance) {

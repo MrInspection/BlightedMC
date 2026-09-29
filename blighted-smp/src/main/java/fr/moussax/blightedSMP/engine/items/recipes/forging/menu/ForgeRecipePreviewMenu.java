@@ -58,7 +58,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
 
     @Override
     public void onTick(Player player) {
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
         int currentFuel = blightedPlayer != null ? blightedPlayer.getForgeFuel() : 0;
 
         Map<String, IngredientInfo> requirements = aggregateForgeIngredients(recipe);
@@ -115,7 +115,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
     }
 
     private boolean checkCanHyperforge(Player player) {
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
         int currentFuel = blightedPlayer != null ? blightedPlayer.getForgeFuel() : 0;
         int fuelCost = recipe.getFuelCost();
         boolean hasSufficientFuel = currentFuel >= fuelCost;
@@ -172,7 +172,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
     }
 
     private void setupHyperforgeButton(Player player) {
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
         int currentFuel = blightedPlayer != null ? blightedPlayer.getForgeFuel() : 0;
         int fuelCost = recipe.getFuelCost();
         boolean hasSufficientFuel = currentFuel >= fuelCost;

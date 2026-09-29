@@ -1,4 +1,4 @@
-package fr.moussax.blightedSMP.content.entities;
+package fr.moussax.blightedSMP.content.entities.powerful;
 
 import fr.moussax.blightedSMP.content.utils.ai.EndermanAI;
 import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
@@ -34,9 +34,9 @@ public class Watchling extends SpawnableEntity {
         setDroppedExp(10);
 
         setLootTable(new EntityLootTableBuilder()
-            .setMaxDrop(2)
-            .addLoot(Material.ENDER_PEARL, 1, 2, 1.0, COMMON)
-            .addGemsLoot(5, 0.03, VERY_RARE)
+            .maxDrops(2)
+            .addLoot(Material.ENDER_PEARL, 1, 2, 1.0)
+            .addGems(5, 0.03, VERY_RARE)
             .build()
         );
     }

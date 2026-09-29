@@ -4,12 +4,14 @@ import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseArmorEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -17,6 +19,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.HashSet;
 import java.util.List;
@@ -24,7 +27,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Listens for Bukkit interaction events, armor changes, and player states to trigger abilities and schedule armor updates.
+ * Listens for Bukkit interaction, block break, and inventory events to trigger item abilities and schedule armor updates.
  */
 public final class AbilityListener implements Listener {
     private final Set<UUID> dirtyArmorPlayers = new HashSet<>();
@@ -48,7 +51,7 @@ public final class AbilityListener implements Listener {
             Player player = Bukkit.getPlayer(uuid);
             if (player == null || !player.isOnline()) continue;
 
-            BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+            BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
             if (blightedPlayer == null) continue;
 
             ArmorManager.updatePlayerArmor(blightedPlayer);
@@ -115,7 +118,7 @@ public final class AbilityListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSneakToggle(PlayerToggleSneakEvent event) {
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(event.getPlayer());
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(event.getPlayer());
         if (blightedPlayer != null) {
             ArmorManager.handleSneakUpdate(blightedPlayer, event.isSneaking());
         }
@@ -147,7 +150,7 @@ public final class AbilityListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onBlockBreak(org.bukkit.event.block.BlockBreakEvent event) {
+    public void onBlockBreak(BlockBreakEvent event) {
         trigger(event.getPlayer(), event);
     }
 
@@ -156,8 +159,9 @@ public final class AbilityListener implements Listener {
                 || name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS") || name.equals("ELYTRA");
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private <T extends Event> void trigger(Player player, T event) {
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
         if (blightedPlayer == null) return;
 
         BlightedItem blightedItem = null;
@@ -166,9 +170,9 @@ public final class AbilityListener implements Listener {
             if (interactEvent.getItem() != null) {
                 blightedItem = BlightedItem.fromItemStack(interactEvent.getItem());
             }
-        } else if (event instanceof org.bukkit.event.block.BlockBreakEvent) {
-            org.bukkit.inventory.ItemStack mainHand = player.getInventory().getItemInMainHand();
-            if (mainHand.getType() != org.bukkit.Material.AIR) {
+        } else if (event instanceof BlockBreakEvent) {
+            ItemStack mainHand = player.getInventory().getItemInMainHand();
+            if (mainHand.getType() != Material.AIR) {
                 blightedItem = BlightedItem.fromItemStack(mainHand);
             }
         } else {
@@ -177,19 +181,19 @@ public final class AbilityListener implements Listener {
 
         if (blightedItem == null) return;
 
-        List<Ability> abilities = blightedItem.getAbilities();
+        List<AbilityManager<? extends Event>> abilities = blightedItem.getAbilities();
         if (abilities.isEmpty()) return;
 
-        Ability bestMatch = null;
-        for (Ability ability : abilities) {
-            if (!ability.type().matches(event)) continue;
-            if (bestMatch == null || isMoreSpecific(ability.type(), bestMatch.type())) {
+        AbilityManager<? extends Event> bestMatch = null;
+        for (AbilityManager<? extends Event> ability : abilities) {
+            if (!ability.getType().matches(event)) continue;
+            if (bestMatch == null || isMoreSpecific(ability.getType(), bestMatch.getType())) {
                 bestMatch = ability;
             }
         }
 
         if (bestMatch != null) {
-            AbilityExecutor.execute(bestMatch, blightedPlayer, event);
+            AbilityExecutor.execute((AbilityManager) bestMatch, blightedPlayer, event);
         }
     }
 

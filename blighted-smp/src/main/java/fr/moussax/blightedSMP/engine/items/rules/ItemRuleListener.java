@@ -28,9 +28,9 @@ public final class ItemRuleListener implements Listener {
         if (itemStack == null || !itemStack.hasItemMeta()) return null;
         ItemMeta itemMeta = itemStack.getItemMeta();
         if (itemMeta == null) return null;
-        String id = itemMeta.getPersistentDataContainer().get(BLIGHTED_ID_KEY, PersistentDataType.STRING);
-        if (id == null) return null;
-        return ItemRegistry.getItem(id);
+        String itemId = itemMeta.getPersistentDataContainer().get(BLIGHTED_ID_KEY, PersistentDataType.STRING);
+        if (itemId == null) return null;
+        return ItemRegistry.get(itemId);
     }
 
     @EventHandler(ignoreCancelled = true)

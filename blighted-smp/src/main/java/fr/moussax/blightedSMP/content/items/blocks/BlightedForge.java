@@ -12,7 +12,7 @@ public class BlightedForge extends BlightedBlock {
     public static BlightedForge instance;
 
     public BlightedForge() {
-        super(Material.BLAST_FURNACE, ItemRegistry.getItem("BLIGHTED_FORGE"));
+        super(Material.BLAST_FURNACE, ItemRegistry.get("BLIGHTED_FORGE"));
     }
 
     @Override

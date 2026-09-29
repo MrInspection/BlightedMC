@@ -2,6 +2,7 @@ package fr.moussax.blightedSMP.content.items.abilities;
 
 import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityManager;
+import fr.moussax.blightedSMP.engine.items.abilities.AbilityType;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,8 +21,18 @@ import java.util.Objects;
 
 public class KnightsSlamAbility implements AbilityManager<PlayerInteractEvent> {
     @Override
+    public String getName() {
+        return "Knight's Slam";
+    }
+
+    @Override
+    public AbilityType getType() {
+        return AbilityType.RIGHT_CLICK;
+    }
+
+    @Override
     public boolean triggerAbility(PlayerInteractEvent event) {
-        new KnightSword(event.getPlayer().getTargetBlock(null, 6).getLocation(), BlightedPlayer.getBlightedPlayer(event.getPlayer()));
+        new KnightSword(event.getPlayer().getTargetBlock(null, 6).getLocation(), BlightedPlayer.get(event.getPlayer()));
         return true;
     }
 
@@ -33,19 +44,6 @@ public class KnightsSlamAbility implements AbilityManager<PlayerInteractEvent> {
     @Override
     public int getManaCost() {
         return 20;
-    }
-
-    @Override
-    public boolean canTrigger(BlightedPlayer player) {
-        return true;
-    }
-
-    @Override
-    public void start(BlightedPlayer player) {
-    }
-
-    @Override
-    public void stop(BlightedPlayer player) {
     }
 
     private static class KnightSword extends BukkitRunnable {
@@ -63,7 +61,7 @@ public class KnightsSlamAbility implements AbilityManager<PlayerInteractEvent> {
 
             for (Entity entity : entities) {
                 LivingEntity livingEntity = (LivingEntity) entity;
-                livingEntity.damage(abilityDamage);
+                livingEntity.damage(abilityDamage, player.getPlayer());
                 enemies++;
             }
 

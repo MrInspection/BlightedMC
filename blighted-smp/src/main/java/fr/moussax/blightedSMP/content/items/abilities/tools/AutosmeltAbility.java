@@ -1,6 +1,7 @@
 package fr.moussax.blightedSMP.content.items.abilities.tools;
 
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityManager;
+import fr.moussax.blightedSMP.engine.items.abilities.AbilityType;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import org.bukkit.Material;
 import org.bukkit.event.block.BlockDropItemEvent;
@@ -9,6 +10,16 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Map;
 
 public class AutosmeltAbility implements AbilityManager<BlockDropItemEvent> {
+
+    @Override
+    public String getName() {
+        return "Autosmelt";
+    }
+
+    @Override
+    public AbilityType getType() {
+        return AbilityType.PASSIVE;
+    }
 
     private static final Map<Material, Material> SMELTABLE = Map.ofEntries(
             Map.entry(Material.COBBLESTONE, Material.STONE),

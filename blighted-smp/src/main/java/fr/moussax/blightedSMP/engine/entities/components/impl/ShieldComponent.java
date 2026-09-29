@@ -16,7 +16,7 @@ import org.bukkit.util.Vector;
 /**
  * Directional blocking shield component for entities, blocking frontal attacks unless jump-crit.
  */
-public class ShieldComponent implements EntityComponent {
+public final class ShieldComponent implements EntityComponent {
 
     private final double arcDegrees;
     private long disableUntil = 0;
@@ -51,11 +51,14 @@ public class ShieldComponent implements EntityComponent {
         Entity defender = event.getEntity();
         Entity damager = event.getDamager();
 
-        Entity source = (damager instanceof Projectile projectile && projectile.getShooter() instanceof Entity shooter) ? shooter : damager;
+        Entity source = (damager instanceof Projectile projectile && projectile.getShooter() instanceof Entity shooter)
+                ? shooter
+                : damager;
         Location location = defender.getLocation().add(0, 1.8, 0);
 
         if (source instanceof Player player && isAttackBlocked(defender, source)) {
-            if (player.getLocation().getY() > player.getLocation().getBlockY() || player.getVelocity().getY() > 0.5) {
+            if (player.getLocation().getY() > player.getLocation().getBlockY()
+                    || player.getVelocity().getY() > 0.5) {
                 disable(5000L);
                 defender.getWorld().spawnParticle(Particle.EXPLOSION, location, 1, 0, 0, 0, 0);
                 defender.getWorld().spawnParticle(Particle.WITCH, location, 30, 0.5, 0.5, 0.5, 0.1);
@@ -67,7 +70,16 @@ public class ShieldComponent implements EntityComponent {
         if (isAttackBlocked(defender, source)) {
             event.setCancelled(true);
             defender.getWorld().spawnParticle(Particle.SWEEP_ATTACK, location, 1, 0, 0, 0, 0);
-            defender.getWorld().spawnParticle(Particle.BLOCK_CRUMBLE, location, 20, 0.2, 0.2, 0.2, 0.1, Material.IRON_BLOCK.createBlockData());
+            defender.getWorld()
+                    .spawnParticle(
+                            Particle.BLOCK_CRUMBLE,
+                            location,
+                            20,
+                            0.2,
+                            0.2,
+                            0.2,
+                            0.1,
+                            Material.IRON_BLOCK.createBlockData());
             defender.getWorld().playSound(location, Sound.ITEM_SHIELD_BLOCK, 1.0f, 1.2f);
         }
     }
@@ -86,8 +98,10 @@ public class ShieldComponent implements EntityComponent {
         Location attackerLocation = attacker.getLocation();
 
         Vector defenderDirection = defenderLocation.getDirection();
-        Vector attackerDirection = attackerLocation.toVector()
-                .subtract(defenderLocation.toVector()).normalize();
+        Vector attackerDirection = attackerLocation
+                .toVector()
+                .subtract(defenderLocation.toVector())
+                .normalize();
 
         double dotProduct = defenderDirection.dot(attackerDirection);
         double angle = Math.toDegrees(Math.acos(dotProduct));

@@ -1,16 +1,16 @@
 package fr.moussax.blightedSMP.engine.items;
 
+import fr.moussax.bedrock.ui.menu.Menu;
+import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedSMP.BlightedSMP;
-import fr.moussax.blightedSMP.engine.items.abilities.Ability;
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityExecutor;
+import fr.moussax.blightedSMP.engine.items.abilities.AbilityManager;
 import fr.moussax.blightedSMP.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedSMP.engine.items.recipes.RecipePreviewManager;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedSMP.engine.items.rules.ItemRule;
 import fr.moussax.blightedSMP.engine.items.rules.ItemRuleEngine;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
-import fr.moussax.bedrock.ui.menu.Menu;
-import fr.moussax.bedrock.utils.ItemBuilder;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -52,7 +52,7 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
     @Getter
     private FullSetBonus fullSetBonus;
     @Getter
-    private final List<Ability> abilities = new ArrayList<>();
+    private final List<AbilityManager<? extends Event>> abilities = new ArrayList<>();
     @Getter
     private final ItemRuleEngine ruleEngine = new ItemRuleEngine();
     @Getter
@@ -93,7 +93,7 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
      *
      * @param ability ability to add
      */
-    public void addAbility(Ability ability) {
+    public void addAbility(AbilityManager<? extends Event> ability) {
         addAbility(ability, true);
     }
 
@@ -103,7 +103,7 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
      * @param ability    ability to add
      * @param injectLore {@code true} to append formatted ability description to lore
      */
-    public void addAbility(Ability ability, boolean injectLore) {
+    public void addAbility(AbilityManager<? extends Event> ability, boolean injectLore) {
         if (ability == null) return;
         this.abilities.add(ability);
 
@@ -118,8 +118,9 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
      *
      * @param abilities abilities to add
      */
-    public void addAbilities(Ability... abilities) {
-        for (Ability ability : abilities) {
+    @SafeVarargs
+    public final void addAbilities(AbilityManager<? extends Event>... abilities) {
+        for (AbilityManager<? extends Event> ability : abilities) {
             addAbility(ability, true);
         }
     }
@@ -215,7 +216,7 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
         String itemId = container.get(BLIGHTED_ID_KEY, PersistentDataType.STRING);
         if (itemId == null) return null;
 
-        return ItemRegistry.getItem(itemId);
+        return ItemRegistry.get(itemId);
     }
 
     /**
@@ -224,10 +225,11 @@ public final class BlightedItem extends ItemBuilder implements ItemRule, Supplie
      * @param blightedPlayer player context executing the ability
      * @param event          triggering event
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void triggerAbilities(BlightedPlayer blightedPlayer, Event event) {
-        for (Ability ability : abilities) {
-            if (ability.type().matches(event)) {
-                AbilityExecutor.execute(ability, blightedPlayer, event);
+        for (AbilityManager<? extends Event> ability : abilities) {
+            if (ability.getType().matches(event)) {
+                AbilityExecutor.execute((AbilityManager) ability, blightedPlayer, event);
             }
         }
     }

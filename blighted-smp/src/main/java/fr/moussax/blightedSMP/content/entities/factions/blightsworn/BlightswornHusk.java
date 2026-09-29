@@ -19,10 +19,10 @@ public final class BlightswornHusk extends BlightswornBruteArchetype {
         setDamage(6);
         setDroppedExp(12);
         setLootTable(new EntityLootTableBuilder()
-                .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0, COMMON)
-                .addLoot(Material.SAND, 1, 3, 0.3, UNCOMMON)
+                .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0)
+                .addLoot(Material.SAND, 1, 3, 0.3)
                 .addLoot(Material.IRON_INGOT, 1, 2, 0.1, RARE)
-                .addGemsLoot(5, 0.04, VERY_RARE)
+                .addGems(5, 0.04, VERY_RARE)
                 .build()
         );
     }

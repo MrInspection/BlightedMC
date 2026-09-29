@@ -37,12 +37,9 @@ public final class ReportCommand extends PlayerCommand {
         }
 
         if (subAction.equalsIgnoreCase("submit") && arguments.length >= 3) {
-            Player target = requireTarget(player, arguments[1]);
-            if (target == null) {
-                return false;
-            }
+            String targetName = arguments[1];
 
-            if (target.equals(player)) {
+            if (player.getName().equalsIgnoreCase(targetName)) {
                 warn(player, "You cannot report yourself.");
                 return false;
             }
@@ -52,25 +49,22 @@ public final class ReportCommand extends PlayerCommand {
                     ? String.join(" ", Arrays.copyOfRange(arguments, 3, arguments.length))
                     : "No message content";
 
-            submitDirectReport(player, target.getName(), reason, chatMessage);
+            submitDirectReport(player, targetName, reason, chatMessage);
             return true;
         }
 
-        Player target = requireTarget(player, subAction);
-        if (target == null) {
-            return false;
-        }
+        String targetName = subAction;
 
-        if (target.equals(player)) {
+        if (player.getName().equalsIgnoreCase(targetName)) {
             warn(player, "You cannot report yourself.");
             return false;
         }
 
         if (arguments.length > 1) {
             String reason = String.join(" ", Arrays.copyOfRange(arguments, 1, arguments.length));
-            submitDirectReport(player, target.getName(), reason, "General player report");
+            submitDirectReport(player, targetName, reason, "General player report");
         } else {
-            new ReportMenu(target.getName()).open(player);
+            new ReportMenu(targetName).open(player);
         }
 
         return true;

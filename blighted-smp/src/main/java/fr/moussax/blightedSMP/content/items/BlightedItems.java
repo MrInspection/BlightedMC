@@ -3,7 +3,6 @@ package fr.moussax.blightedSMP.content.items;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.ItemRarity;
 import fr.moussax.blightedSMP.engine.items.ItemType;
-import fr.moussax.blightedSMP.engine.items.abilities.Ability;
 
 import java.util.function.Consumer;
 import fr.moussax.blightedSMP.engine.items.rules.ItemRule;
@@ -82,7 +81,7 @@ public class BlightedItems implements RegistryModule<Consumer<BlightedItem>> {
                 "§5 abomination§7. Within its core lie §dGems ",
                 "§7 sealed and waiting for a daring",
                 "§7 hand to claim them.",
-                "§8 Gems: §d1✵",
+                "§8 Ges: §d1✵",
                 "",
                 "§d Right click to consume!",
                 "",
@@ -92,10 +91,7 @@ public class BlightedItems implements RegistryModule<Consumer<BlightedItem>> {
         blightedGemstone.preventEquipping();
         blightedGemstone.unstackable();
         blightedGemstone.addRule(ItemRule.PREVENT_PLACEMENT);
-        blightedGemstone.addAbility(
-                Ability.rightClick("Consume Gems", new GemsItem.BlightedGemstoneAbility()),
-                false
-        );
+        blightedGemstone.addAbility(new GemsItem.BlightedGemstoneAbility(), false);
 
         registry.accept(blightedBanner);
         registry.accept(blightedCodex);

@@ -18,7 +18,7 @@ public final class ReportsCommand extends ModerationCommand {
                 int reportId = Integer.parseInt(arguments[1]);
                 boolean dismissed = ReportManager.getInstance().dismissReport(reportId);
                 if (dismissed) {
-                    inform(moderator, "§eDismissed report §d#" + reportId +"§e.");
+                    inform(moderator, " §eDismissed report §d#" + reportId + "§e.");
                 } else {
                     warn(moderator, "Report #" + reportId + " not found or already dismissed.");
                 }

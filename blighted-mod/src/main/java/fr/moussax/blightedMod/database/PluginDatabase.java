@@ -25,8 +25,7 @@ public final class PluginDatabase {
                     connection.close();
                 }
             } catch (SQLException exception) {
-                Log.error("PluginDatabase", exception.getMessage());
-                throw new RuntimeException("Unable to close the database connection", exception);
+                Log.error("PluginDatabase", "Failed to close database connection: " + exception.getMessage());
             }
         }
     }
@@ -50,6 +49,9 @@ public final class PluginDatabase {
                         )
                         """
                 );
+                statement.execute("CREATE INDEX IF NOT EXISTS idx_punishments_player_uuid ON punishments(player_uuid)");
+                statement.execute("CREATE INDEX IF NOT EXISTS idx_punishments_ip_address ON punishments(ip_address)");
+                statement.execute("CREATE INDEX IF NOT EXISTS idx_punishments_player_name ON punishments(player_name)");
             }
         }
     }

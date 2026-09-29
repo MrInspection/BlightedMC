@@ -40,11 +40,11 @@ public class Endersent extends SpawnableEntity {
         addAttribute(Attribute.MOVEMENT_SPEED, 0.25);
 
         setLootTable(new EntityLootTableBuilder()
-                .setMaxDrop(2)
-                .addLoot(Material.ENDER_PEARL, 4, 8, 1.0, COMMON)
-                .addLoot(Material.ENDER_EYE, 1, 3, 0.31, UNCOMMON)
+                .maxDrops(2)
+                .addLoot(Material.ENDER_PEARL, 4, 8, 1.0)
+                .addLoot(Material.ENDER_EYE, 1, 3, 0.31)
                 .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, RARE)
-                .addGemsLoot(30, 0.03, VERY_RARE)
+                .addGems(30, 0.03, VERY_RARE)
                 .build()
         );
 

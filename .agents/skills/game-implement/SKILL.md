@@ -1,100 +1,90 @@
 ---
 name: game-implement
-description: >-
-  Implements approved BlightedMC game-design content (bosses, mobs, items,
-  abilities, loot) in code, following the codebase's existing conventions
-  and design-pattern discipline. Use for "implement this boss", "code this
-  mechanic", "build the [feature] from the design doc", or any request to
-  turn a finished game-content design into working Java. NOT for
-  brainstorming or balancing content — use game-design first and hand its
-  output here. Pairs with abstraction-tax as an optional self-check when new
-  content required extending a core system nontrivially.
+description: Implement approved BlightedMC game content using the existing game systems, APIs, and vanilla Minecraft mechanics.
 ---
 
 # Game Implement
 
-Takes a settled design (from `game-design`, or described directly) and
-writes it into the BlightedMC codebase without duplicating an existing
-system, without regressing what's already there, and without introducing
-the kind of over-engineering `abstraction-tax` exists to catch. BlightedMC
-is explicitly its author's practice ground for design patterns and clean
-Java — the implementation quality is as much the point as the feature
-itself.
+Turn a settled game-content design into working code.
+
+The implementation should fit the existing architecture and feel native to Minecraft and BlightedMC.
 
 ## Process
 
-### 1. Get the spec
+### 1. Establish the design
 
-Work from a finished design doc (concept, mechanics, numbers, progression
-fit) — if one doesn't exist yet, either pull it from earlier in the
-conversation or ask for the missing pieces rather than inventing balance
-numbers mid-implementation. Numbers and mechanics are a design decision, not
-an implementation one; don't silently make them up here.
+Use the supplied design, issue, or clearly defined request as the source of truth.
 
-### 2. Inventory existing systems before writing anything new
+Do not silently invent major mechanics, rewards, or progression decisions that belong in game design.
 
-Read the relevant existing code first. BlightedMC already has, among
-others: a generic loot pipeline (`LootTable`/`LootEntry`/`LootResult` with
-pluggable selection strategies and feedback decorators), a custom entity
-system (`BlightedEntity` and boss/creature ability hooks), an item registry
-and builder (`ItemRegistry`/`ItemBuilder`), a hologram/display-attachment
-system, and domain-specific systems for fishing and veinmining. Before
-writing a new class, check whether the design's requirement is actually a
-new instance of one of these (a new `LootResult` implementation, a new
-ability hook, a new `ItemBuilder` configuration) rather than a reason for a
-new parallel system. If it genuinely needs a new abstraction, that's fine —
-but it should be because the existing systems demonstrably can't express it,
-not because it wasn't checked.
+When a small implementation detail is unspecified, use the existing codebase's conventions and choose the simplest reasonable behavior.
 
-### 3. Follow the project's coding discipline
+### 2. Read the existing systems
 
-- YAGNI first: implement what the design doc asks for, nothing speculative
-  ("might need this later" is not a reason to add it now).
-- Reuse before adding: stdlib → existing project utility → a new one-liner
-  → new code, in that order of preference.
-- Early return over nested conditionals; one responsibility per class/method.
-- Descriptive names, no abbreviations except `id`/`url`/`http`.
-- Never skip trust-boundary validation, null-safety on player/entity state
-  that can legitimately be null (disconnects, despawns), or existing
-  concurrency assumptions (e.g. RNG must come from the passed context, not
-  `Math.random()`, matching the rest of the loot system).
-- Where a variant concept exists (a boss's phases, an item's rarity tiers,
-  a mutually-exclusive set of ability triggers), model it as a sealed
-  hierarchy or enum rather than nullable fields with runtime-checked
-  accessors — matching the direction already established in this codebase's
-  own review history, not just as a personal style preference.
-- Mark intentional simplifications and necessarily-kept complexity inline
-  as the project's own convention expects, so a later reviewer (human or
-  agent) doesn't "simplify" something that was already a deliberate choice.
+Before creating new types, inspect the systems relevant to the feature.
 
-### 4. Scope discipline
+Look for existing support for:
 
-Implement only what the design doc specifies. If the code naturally suggests
-an adjacent improvement or extra mechanic while you're in there, don't add
-it — flag it back as a follow-up suggestion (for `game-design` to evaluate,
-or `abstraction-tax` if it's a structural observation about existing code)
-rather than expanding the diff beyond what was asked.
+* entities and spawning
+* abilities
+* items
+* loot
+* registries
+* progression
+* displays
+* configuration
+* other related content
 
-### 5. Protect what already works
+Prefer adding a new instance of an existing concept over creating a parallel mechanism.
 
-If implementing this content requires touching a shared type (adding a case
-to an existing enum/sealed type, changing a shared interface, extending
-`LootContext` or similar), search for every existing call site of what
-you're changing and confirm none of them break before considering the task
-done. New content should never be the reason an unrelated existing feature
-regresses.
+A new abstraction is appropriate when the existing system genuinely cannot express the design.
 
-### 6. Self-check before calling it done
+### 3. Implement the smallest complete feature
 
-If this task required extending a core system in a nontrivial way (new
-interface, new decorator, new strategy, new overload set) rather than just
-adding a new leaf implementation of an existing one, consider running
-`abstraction-tax` against the part you just touched before presenting the
-result — catching a freshly-introduced overload-sprawl or unconsumed
-interface here is cheaper than catching it in a later audit pass.
+Implement the approved behavior without speculative extensions.
 
-## Output
+Reuse existing APIs and domain concepts where they fit.
 
-Actual code, in the project's existing package structure and file
-organization, ready to compile against the existing codebase — not a
-sketch or pseudocode, unless explicitly asked for a rough pass first.
+Keep game-specific logic close to the object or system that owns it.
+
+Do not add infrastructure merely because a future feature might need it.
+
+Preserve the project's existing behavior and contracts unless the design explicitly changes them.
+
+### 4. Preserve vanilla conventions
+
+When the design interacts with Minecraft behavior, prefer existing Minecraft mechanics and terminology over custom replacements.
+
+Do not recreate vanilla functionality unnecessarily.
+
+Custom behavior should integrate with the player's existing understanding of Minecraft unless the design intentionally introduces something new.
+
+### 5. Protect existing behavior
+
+When changing a shared system, inspect its consumers and relevant implementations before changing its contract.
+
+Check that existing content still behaves correctly.
+
+Pay particular attention to shared registries, interfaces, entity behavior, loot selection, and progression systems because a new feature can affect existing content indirectly.
+
+### 6. Verify
+
+Run the relevant build and tests.
+
+For game behavior that cannot be meaningfully covered by automated tests, verify the important invariants that can be checked statically and state what remains dependent on in-game testing.
+
+Do not claim a gameplay behavior was verified without actually testing it.
+
+## Out of scope
+
+Do not add unrelated cleanup, refactors, new mechanics, or speculative infrastructure.
+
+Do not redesign the game while implementing it.
+
+When implementation reveals a genuine design problem, separate it from the implementation and report it rather than silently changing the design.
+
+## Result
+
+Provide working code in the existing package and system structure.
+
+The implementation should be understandable from the surrounding code without requiring a new framework or abstraction layer to explain it.

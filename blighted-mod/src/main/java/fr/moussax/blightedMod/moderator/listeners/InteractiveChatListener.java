@@ -16,7 +16,7 @@ public final class InteractiveChatListener implements Listener {
         this.moderationManager = moderationManager;
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onNormalPlayerChat(AsyncPlayerChatEvent event) {
         Player sender = event.getPlayer();
         String chatMessage = event.getMessage();

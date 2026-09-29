@@ -7,7 +7,10 @@ import fr.moussax.blightedSMP.engine.entities.components.EntityComponent;
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnCondition;
 import fr.moussax.blightedSMP.engine.entities.spawnable.engine.SpawnMode;
 import lombok.Getter;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.persistence.PersistentDataType;
@@ -23,17 +26,23 @@ import java.util.List;
  */
 public abstract class SpawnableEntity extends BlightedEntity {
 
-    /** Persistent data key storing comma-separated active affix IDs assigned to this entity. */
-    public static final NamespacedKey AFFIXES_KEY = new NamespacedKey(BlightedSMP.getInstance(), "blighted_active_affix");
+    /**
+     * Persistent data key storing comma-separated active affix IDs assigned to this entity.
+     */
+    public static final NamespacedKey AFFIXES_KEY =
+            new NamespacedKey(BlightedSMP.getInstance(), "blighted_active_affix");
 
     @Getter
     private final double spawnProbability;
+
     @Getter
     private final SpawnMode spawnMode;
+
     private SpawnProfile spawnProfile;
 
     @Getter
     private double affixChance = 0.0;
+
     @Getter
     private int maxAffixes = 1;
 
@@ -65,7 +74,7 @@ public abstract class SpawnableEntity extends BlightedEntity {
      * @param entityId    unique entity identifier
      * @param name        display name
      * @param maxHealth   maximum health
-     * @param entityType  underlying Minecraft entity type
+     * @param entityType  underlying a Minecraft entity type
      * @param probability spawn probability in range {@code [0.0, 1.0]}
      */
     protected SpawnableEntity(String entityId, String name, int maxHealth, EntityType entityType, double probability) {
@@ -78,11 +87,12 @@ public abstract class SpawnableEntity extends BlightedEntity {
      * @param entityId    unique entity identifier
      * @param name        display name
      * @param maxHealth   maximum health
-     * @param entityType  underlying Minecraft entity type
+     * @param entityType  underlying a Minecraft entity type
      * @param probability spawn probability in range {@code [0.0, 1.0]}
      * @param mode        spawn mode
      */
-    protected SpawnableEntity(String entityId, String name, int maxHealth, EntityType entityType, double probability, SpawnMode mode) {
+    protected SpawnableEntity(
+            String entityId, String name, int maxHealth, EntityType entityType, double probability, SpawnMode mode) {
         this(entityId, name, maxHealth, 1, 0, entityType, probability, mode);
     }
 
@@ -93,11 +103,18 @@ public abstract class SpawnableEntity extends BlightedEntity {
      * @param name        display name
      * @param maxHealth   maximum health
      * @param damage      base attack damage
-     * @param entityType  underlying Minecraft entity type
+     * @param entityType  underlying a Minecraft entity type
      * @param probability spawn probability in range {@code [0.0, 1.0]}
      * @param mode        spawn mode
      */
-    protected SpawnableEntity(String entityId, String name, int maxHealth, int damage, EntityType entityType, double probability, SpawnMode mode) {
+    protected SpawnableEntity(
+            String entityId,
+            String name,
+            int maxHealth,
+            int damage,
+            EntityType entityType,
+            double probability,
+            SpawnMode mode) {
         this(entityId, name, maxHealth, damage, 0, entityType, probability, mode);
     }
 
@@ -109,12 +126,20 @@ public abstract class SpawnableEntity extends BlightedEntity {
      * @param maxHealth   maximum health
      * @param damage      base attack damage
      * @param defense     base armor defense
-     * @param entityType  underlying Minecraft entity type
+     * @param entityType  underlying a Minecraft entity type
      * @param probability spawn probability in range {@code [0.0, 1.0]}
      * @param mode        spawn mode
      * @throws IllegalArgumentException if {@code probability} is outside {@code [0.0, 1.0]}
      */
-    protected SpawnableEntity(String entityId, String name, int maxHealth, int damage, int defense, EntityType entityType, double probability, SpawnMode mode) {
+    protected SpawnableEntity(
+            String entityId,
+            String name,
+            int maxHealth,
+            int damage,
+            int defense,
+            EntityType entityType,
+            double probability,
+            SpawnMode mode) {
         super(name, maxHealth, damage, defense, entityType);
         if (probability < 0.0 || probability > 1.0) {
             throw new IllegalArgumentException("spawnProbability must be in [0.0, 1.0], got: " + probability);
@@ -146,7 +171,8 @@ public abstract class SpawnableEntity extends BlightedEntity {
                     applyAffix(affix);
                 }
 
-                spawned.getPersistentDataContainer().set(AFFIXES_KEY, PersistentDataType.STRING, String.join(",", affixIds));
+                spawned.getPersistentDataContainer()
+                        .set(AFFIXES_KEY, PersistentDataType.STRING, String.join(",", affixIds));
             }
         }
 
@@ -197,9 +223,9 @@ public abstract class SpawnableEntity extends BlightedEntity {
             double angle = time * 0.2;
             double x = Math.cos(angle) * 0.6;
             double z = Math.sin(angle) * 0.6;
-            Location orbitLoc = center.clone().add(x, 0, z);
+            Location orbitLocation = center.clone().add(x, 0, z);
 
-            world.spawnParticle(Particle.SCULK_SOUL, orbitLoc, 1, 0.05, 0.05, 0.05, 0.02);
+            world.spawnParticle(Particle.SCULK_SOUL, orbitLocation, 1, 0.05, 0.05, 0.05, 0.02);
 
             if (time % 10 == 0) {
                 world.spawnParticle(Particle.ENCHANT, center, 5, 0.5, 0.5, 0.5, 0.01);

@@ -8,6 +8,7 @@ import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Fluent builder for creating {@link BlightedShapelessRecipe} instances.
@@ -19,25 +20,38 @@ import java.util.List;
 public final class ShapelessRecipeBuilder {
 
     private final BlightedItem result;
+    private final int amount;
     private final List<CraftingObject> ingredients = new ArrayList<>();
     private CraftingObject attributeSource = null;
 
-    private ShapelessRecipeBuilder(BlightedItem result) {
-        this.result = result;
+    private ShapelessRecipeBuilder(BlightedItem result, int amount) {
+        this.result = Objects.requireNonNull(result, "result");
+        this.amount = amount;
     }
 
     /**
-     * Creates a builder for a shapeless recipe producing the specified item.
+     * Creates a builder for a shapeless recipe producing a single instance of the specified item.
      *
      * @param result the item produced by the recipe
      * @return a new shapeless recipe builder
      */
     public static ShapelessRecipeBuilder of(BlightedItem result) {
-        return new ShapelessRecipeBuilder(result);
+        return of(result, 1);
     }
 
     /**
-     * Creates a builder for a shapeless recipe producing the item registered
+     * Creates a builder for a shapeless recipe producing the specified item and amount.
+     *
+     * @param result the item produced by the recipe
+     * @param amount the amount produced by the recipe
+     * @return a new shapeless recipe builder
+     */
+    public static ShapelessRecipeBuilder of(BlightedItem result, int amount) {
+        return new ShapelessRecipeBuilder(result, amount);
+    }
+
+    /**
+     * Creates a builder for a shapeless recipe producing a single instance of the item registered
      * under the specified ID.
      *
      * @param resultId the ID of the result item
@@ -45,7 +59,35 @@ public final class ShapelessRecipeBuilder {
      * @throws IllegalArgumentException if the item ID is not registered
      */
     public static ShapelessRecipeBuilder of(String resultId) {
-        return new ShapelessRecipeBuilder(ItemRegistry.getItem(resultId));
+        return of(resultId, 1);
+    }
+
+    /**
+     * Creates a builder for a shapeless recipe producing the item registered
+     * under the specified ID and amount.
+     *
+     * @param resultId the ID of the result item
+     * @param amount   the amount produced by the recipe
+     * @return a new shapeless recipe builder
+     * @throws IllegalArgumentException if the item ID is not registered
+     */
+    public static ShapelessRecipeBuilder of(String resultId, int amount) {
+        BlightedItem result = ItemRegistry.get(resultId);
+        if (result == null) {
+            throw new IllegalArgumentException("Unknown recipe result item ID: '" + resultId + "'");
+        }
+        return new ShapelessRecipeBuilder(result, amount);
+    }
+
+    /**
+     * Adds a single material ingredient to the recipe.
+     *
+     * @param material the material required by the recipe
+     * @return this builder
+     */
+    // ponytail: simplified — single-item quantity default overload
+    public ShapelessRecipeBuilder addIngredient(Material material) {
+        return addIngredient(material, 1, false);
     }
 
     /**
@@ -81,6 +123,17 @@ public final class ShapelessRecipeBuilder {
     }
 
     /**
+     * Adds a single custom item ingredient to the recipe.
+     *
+     * @param item the custom item required by the recipe
+     * @return this builder
+     */
+    // ponytail: simplified — single-item quantity default overload
+    public ShapelessRecipeBuilder addIngredient(BlightedItem item) {
+        return addIngredient(item, 1, false);
+    }
+
+    /**
      * Adds a custom item ingredient to the recipe.
      *
      * @param item   the custom item required by the recipe
@@ -113,6 +166,18 @@ public final class ShapelessRecipeBuilder {
     }
 
     /**
+     * Adds a single registered custom item as an ingredient.
+     *
+     * @param itemId the ID of the required custom item
+     * @return this builder
+     * @throws IllegalArgumentException if the item ID is not registered
+     */
+    // ponytail: simplified — single-item quantity default overload
+    public ShapelessRecipeBuilder addIngredient(String itemId) {
+        return addIngredient(ItemRegistry.get(itemId), 1, false);
+    }
+
+    /**
      * Adds a registered custom item as an ingredient.
      *
      * @param itemId the ID of the required custom item
@@ -121,7 +186,7 @@ public final class ShapelessRecipeBuilder {
      * @throws IllegalArgumentException if the item ID is not registered
      */
     public ShapelessRecipeBuilder addIngredient(String itemId, int amount) {
-        return addIngredient(ItemRegistry.getItem(itemId), amount, false);
+        return addIngredient(ItemRegistry.get(itemId), amount, false);
     }
 
     /**
@@ -140,7 +205,7 @@ public final class ShapelessRecipeBuilder {
             int amount,
             boolean isAttributeSource
     ) {
-        return addIngredient(ItemRegistry.getItem(itemId), amount, isAttributeSource);
+        return addIngredient(ItemRegistry.get(itemId), amount, isAttributeSource);
     }
 
     /**
@@ -152,7 +217,7 @@ public final class ShapelessRecipeBuilder {
      * @return the constructed shapeless recipe
      */
     public BlightedShapelessRecipe build() {
-        BlightedShapelessRecipe recipe = new BlightedShapelessRecipe(result);
+        BlightedShapelessRecipe recipe = new BlightedShapelessRecipe(result, amount);
         for (CraftingObject ingredient : ingredients) {
             recipe.addIngredient(ingredient);
         }

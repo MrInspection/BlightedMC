@@ -1,5 +1,7 @@
 package fr.moussax.blightedSMP.engine.entities;
 
+import fr.moussax.bedrock.utils.ItemBuilder;
+import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.loot.LootCondition;
 import fr.moussax.blightedSMP.engine.loot.LootEntry;
 import fr.moussax.blightedSMP.engine.loot.LootTable;
@@ -10,7 +12,6 @@ import fr.moussax.blightedSMP.engine.loot.providers.AmountProvider;
 import fr.moussax.blightedSMP.engine.loot.results.ItemResult;
 import fr.moussax.blightedSMP.engine.loot.results.gems.GemsResult;
 import fr.moussax.blightedSMP.engine.loot.strategies.LootingAwareProbabilisticStrategy;
-import fr.moussax.bedrock.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -44,31 +45,164 @@ public final class EntityLootTableBuilder {
     private int maxDrops = 3;
 
     /**
-     * Adds a registered item loot entry with a variable quantity range.
+     * Adds custom blighted item drop with fixed quantity of 1.
      *
-     * @param itemId        registry ID of the item
+     * @param item       custom blighted item
+     * @param dropChance selection probability (0.0 to 1.0)
+     * @return this builder
+     */
+    public EntityLootTableBuilder addLoot(BlightedItem item, double dropChance) {
+        if (item == null) return this;
+        return addLoot(
+                item.getItemId(),
+                1,
+                1,
+                dropChance,
+                EntityLootRarity.COMMON,
+                LootCondition.alwaysTrue()
+        );
+    }
+
+    /**
+     * Adds custom blighted item drop with fixed quantity of 1 and rarity feedback.
+     *
+     * @param item       custom blighted item
+     * @param dropChance selection probability (0.0 to 1.0)
+     * @param rarity     rarity tier for feedback
+     * @return this builder
+     */
+    public EntityLootTableBuilder addLoot(BlightedItem item, double dropChance, EntityLootRarity rarity) {
+        if (item == null) return this;
+        return addLoot(item.getItemId(), 1, 1, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    /**
+     * Adds custom blighted item drop with quantity range.
+     *
+     * @param item          custom blighted item
+     * @param minAmount     minimum drop quantity
+     * @param maximumAmount maximum drop quantity
+     * @param dropChance    selection probability (0.0 to 1.0)
+     * @return this builder
+     */
+    public EntityLootTableBuilder addLoot(BlightedItem item, int minAmount, int maximumAmount, double dropChance) {
+        if (item == null) return this;
+        return addLoot(item.getItemId(), minAmount, maximumAmount, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    /**
+     * Adds custom blighted item drop with quantity range and rarity feedback.
+     *
+     * @param item          custom blighted item
      * @param minimumAmount minimum drop quantity
      * @param maximumAmount maximum drop quantity
      * @param dropChance    selection probability (0.0 to 1.0)
      * @param rarity        rarity tier for feedback
      * @return this builder
      */
-    public EntityLootTableBuilder addLoot(String itemId, int minimumAmount, int maximumAmount, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addLoot(BlightedItem item, int minimumAmount, int maximumAmount, double dropChance, EntityLootRarity rarity) {
+        if (item == null) return this;
+        return addLoot(item.getItemId(), minimumAmount, maximumAmount, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    /**
+     * Adds custom blighted item drop with quantity range, rarity feedback, and eligibility condition.
+     *
+     * @param item          custom blighted item
+     * @param minimumAmount minimum drop quantity
+     * @param maximumAmount maximum drop quantity
+     * @param dropChance    selection probability (0.0 to 1.0)
+     * @param rarity        rarity tier for feedback
+     * @param condition     eligibility condition
+     * @return this builder
+     */
+    public EntityLootTableBuilder addLoot(
+            BlightedItem item,
+            int minimumAmount,
+            int maximumAmount,
+            double dropChance,
+            EntityLootRarity rarity,
+            LootCondition condition
+    ) {
+        if (item == null) return this;
+        return addLoot(item.getItemId(), minimumAmount, maximumAmount, dropChance, rarity, condition);
+    }
+
+    /**
+     * Adds registered item drop with fixed quantity of 1.
+     *
+     * @param itemId     registered item identifier
+     * @param dropChance selection probability (0.0 to 1.0)
+     * @return this builder
+     */
+    public EntityLootTableBuilder addLoot(String itemId, double dropChance) {
+        return addLoot(itemId, 1, 1, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    /**
+     * Adds registered item drop with fixed quantity of 1 and rarity feedback.
+     *
+     * @param itemId     registered item identifier
+     * @param dropChance selection probability (0.0 to 1.0)
+     * @param rarity     rarity tier for feedback
+     * @return this builder
+     */
+    public EntityLootTableBuilder addLoot(String itemId, double dropChance, EntityLootRarity rarity) {
+        return addLoot(itemId, 1, 1, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    /**
+     * Adds registered item drop with quantity range.
+     *
+     * @param itemId        registered item identifier
+     * @param minimumAmount minimum drop quantity
+     * @param maximumAmount maximum drop quantity
+     * @param dropChance    selection probability (0.0 to 1.0)
+     * @return this builder
+     */
+    public EntityLootTableBuilder addLoot(String itemId, int minimumAmount, int maximumAmount, double dropChance) {
+        return addLoot(itemId, minimumAmount, maximumAmount, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    /**
+     * Adds registered item drop with quantity range and rarity feedback.
+     *
+     * @param itemId        registered item identifier
+     * @param minimumAmount minimum drop quantity
+     * @param maximumAmount maximum drop quantity
+     * @param dropChance    selection probability (0.0 to 1.0)
+     * @param rarity        rarity tier for feedback
+     * @return this builder
+     */
+    public EntityLootTableBuilder addLoot(
+            String itemId,
+            int minimumAmount,
+            int maximumAmount,
+            double dropChance,
+            EntityLootRarity rarity
+    ) {
         return addLoot(itemId, minimumAmount, maximumAmount, dropChance, rarity, LootCondition.alwaysTrue());
     }
 
     /**
-     * Adds a registered item loot entry with a variable quantity range and selection condition.
+     * Adds registered item drop with quantity range, rarity feedback, and eligibility condition.
      *
-     * @param itemId        registry ID of the item
+     * @param itemId        registered item identifier
      * @param minimumAmount minimum drop quantity
      * @param maximumAmount maximum drop quantity
      * @param dropChance    selection probability (0.0 to 1.0)
      * @param rarity        rarity tier for feedback
-     * @param condition     condition required for eligibility
+     * @param condition     eligibility condition
      * @return this builder
      */
-    public EntityLootTableBuilder addLoot(String itemId, int minimumAmount, int maximumAmount, double dropChance, EntityLootRarity rarity, LootCondition condition) {
+    public EntityLootTableBuilder addLoot(
+            String itemId,
+            int minimumAmount,
+            int maximumAmount,
+            double dropChance,
+            EntityLootRarity rarity,
+            LootCondition condition
+    ) {
         builder.addEntry(
                 LootEntry.probabilistic(
                         new GenericFeedbackDecorator<>(
@@ -83,58 +217,85 @@ public final class EntityLootTableBuilder {
     }
 
     /**
-     * Adds a registered item loot entry with a fixed quantity.
+     * Adds vanilla material item drop with fixed quantity of 1.
      *
-     * @param itemId     registry ID of the item
-     * @param amount     drop quantity
+     * @param material   item material
+     * @param dropChance selection probability (0.0 to 1.0)
+     * @return this builder
+     */
+    public EntityLootTableBuilder addLoot(Material material, double dropChance) {
+        return addLoot(material, 1, 1, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    /**
+     * Adds vanilla material item drop with fixed quantity of 1 and rarity feedback.
+     *
+     * @param material   item material
      * @param dropChance selection probability (0.0 to 1.0)
      * @param rarity     rarity tier for feedback
      * @return this builder
      */
-    public EntityLootTableBuilder addLoot(String itemId, int amount, double dropChance, EntityLootRarity rarity) {
-        return addLoot(itemId, amount, amount, dropChance, rarity, LootCondition.alwaysTrue());
+    public EntityLootTableBuilder addLoot(Material material, double dropChance, EntityLootRarity rarity) {
+        return addLoot(material, 1, 1, dropChance, rarity, LootCondition.alwaysTrue());
     }
 
     /**
-     * Adds a registered item loot entry with a fixed quantity and selection condition.
+     * Adds vanilla material item drop with quantity range.
      *
-     * @param itemId     registry ID of the item
-     * @param amount     drop quantity
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @param rarity     rarity tier for feedback
-     * @param condition  condition required for eligibility
+     * @param material      item material
+     * @param minimumAmount minimum drop quantity
+     * @param maximumAmount maximum drop quantity
+     * @param dropChance    selection probability (0.0 to 1.0)
      * @return this builder
      */
-    public EntityLootTableBuilder addLoot(String itemId, int amount, double dropChance, EntityLootRarity rarity, LootCondition condition) {
-        return addLoot(itemId, amount, amount, dropChance, rarity, condition);
+    public EntityLootTableBuilder addLoot(
+            Material material,
+            int minimumAmount,
+            int maximumAmount,
+            double dropChance
+    ) {
+        return addLoot(material, minimumAmount, maximumAmount, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
     }
 
     /**
-     * Adds a material item loot entry with a variable quantity range.
+     * Adds vanilla material item drop with quantity range and rarity feedback.
      *
-     * @param material      material to drop
+     * @param material      item material
      * @param minimumAmount minimum drop quantity
      * @param maximumAmount maximum drop quantity
      * @param dropChance    selection probability (0.0 to 1.0)
      * @param rarity        rarity tier for feedback
      * @return this builder
      */
-    public EntityLootTableBuilder addLoot(Material material, int minimumAmount, int maximumAmount, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addLoot(
+            Material material,
+            int minimumAmount,
+            int maximumAmount,
+            double dropChance,
+            EntityLootRarity rarity
+    ) {
         return addLoot(material, minimumAmount, maximumAmount, dropChance, rarity, LootCondition.alwaysTrue());
     }
 
     /**
-     * Adds a material item loot entry with a variable quantity range and selection condition.
+     * Adds vanilla material item drop with quantity range, rarity feedback, and eligibility condition.
      *
-     * @param material      material to drop
+     * @param material      item material
      * @param minimumAmount minimum drop quantity
      * @param maximumAmount maximum drop quantity
      * @param dropChance    selection probability (0.0 to 1.0)
      * @param rarity        rarity tier for feedback
-     * @param condition     condition required for eligibility
+     * @param condition     eligibility condition
      * @return this builder
      */
-    public EntityLootTableBuilder addLoot(Material material, int minimumAmount, int maximumAmount, double dropChance, EntityLootRarity rarity, LootCondition condition) {
+    public EntityLootTableBuilder addLoot(
+            Material material,
+            int minimumAmount,
+            int maximumAmount,
+            double dropChance,
+            EntityLootRarity rarity,
+            LootCondition condition
+    ) {
         builder.addEntry(
                 LootEntry.probabilistic(
                         new GenericFeedbackDecorator<>(
@@ -149,60 +310,98 @@ public final class EntityLootTableBuilder {
     }
 
     /**
-     * Adds a material item loot entry with a fixed quantity.
+     * Adds modified material item drop with fixed quantity of 1.
      *
-     * @param material   material to drop
-     * @param amount     drop quantity
+     * @param material   item material
+     * @param modifier   item builder modification function
+     * @param dropChance selection probability (0.0 to 1.0)
+     * @return this builder
+     */
+    public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, double dropChance) {
+        return addLoot(material, modifier, 1, 1, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    /**
+     * Adds modified material item drop with fixed quantity of 1 and rarity feedback.
+     *
+     * @param material   item material
+     * @param modifier   item builder modification function
      * @param dropChance selection probability (0.0 to 1.0)
      * @param rarity     rarity tier for feedback
      * @return this builder
      */
-    public EntityLootTableBuilder addLoot(Material material, int amount, double dropChance, EntityLootRarity rarity) {
-        return addLoot(material, amount, amount, dropChance, rarity, LootCondition.alwaysTrue());
+    public EntityLootTableBuilder addLoot(
+            Material material,
+            Consumer<ItemBuilder> modifier,
+            double dropChance,
+            EntityLootRarity rarity
+    ) {
+        return addLoot(material, modifier, 1, 1, dropChance, rarity, LootCondition.alwaysTrue());
     }
 
     /**
-     * Adds a material item loot entry with a fixed quantity and selection condition.
+     * Adds modified material item drop with quantity range.
      *
-     * @param material   material to drop
-     * @param amount     drop quantity
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @param rarity     rarity tier for feedback
-     * @param condition  condition required for eligibility
+     * @param material      item material
+     * @param modifier      item builder modification function
+     * @param minimumAmount minimum drop quantity
+     * @param maximumAmount maximum drop quantity
+     * @param dropChance    selection probability (0.0 to 1.0)
      * @return this builder
      */
-    public EntityLootTableBuilder addLoot(Material material, int amount, double dropChance, EntityLootRarity rarity, LootCondition condition) {
-        return addLoot(material, amount, amount, dropChance, rarity, condition);
+    public EntityLootTableBuilder addLoot(
+            Material material,
+            Consumer<ItemBuilder> modifier,
+            int minimumAmount,
+            int maximumAmount,
+            double dropChance
+    ) {
+        return addLoot(material, modifier, minimumAmount, maximumAmount, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
     }
 
     /**
-     * Adds a modified material item loot entry with a variable quantity range.
+     * Adds modified material item drop with quantity range and rarity feedback.
      *
-     * @param material      material to drop
-     * @param modifier      function to modify the item builder
+     * @param material      item material
+     * @param modifier      item builder modification function
      * @param minimumAmount minimum drop quantity
      * @param maximumAmount maximum drop quantity
      * @param dropChance    selection probability (0.0 to 1.0)
      * @param rarity        rarity tier for feedback
      * @return this builder
      */
-    public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, int minimumAmount, int maximumAmount, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addLoot(
+            Material material,
+            Consumer<ItemBuilder> modifier,
+            int minimumAmount,
+            int maximumAmount,
+            double dropChance,
+            EntityLootRarity rarity
+    ) {
         return addLoot(material, modifier, minimumAmount, maximumAmount, dropChance, rarity, LootCondition.alwaysTrue());
     }
 
     /**
-     * Adds a modified material item loot entry with a variable quantity range and selection condition.
+     * Adds modified material item drop with quantity range, rarity feedback, and eligibility condition.
      *
-     * @param material      material to drop
-     * @param modifier      function to modify the item builder
+     * @param material      item material
+     * @param modifier      item builder modification function
      * @param minimumAmount minimum drop quantity
      * @param maximumAmount maximum drop quantity
      * @param dropChance    selection probability (0.0 to 1.0)
      * @param rarity        rarity tier for feedback
-     * @param condition     condition required for eligibility
+     * @param condition     eligibility condition
      * @return this builder
      */
-    public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, int minimumAmount, int maximumAmount, double dropChance, EntityLootRarity rarity, LootCondition condition) {
+    public EntityLootTableBuilder addLoot(
+            Material material,
+            Consumer<ItemBuilder> modifier,
+            int minimumAmount,
+            int maximumAmount,
+            double dropChance,
+            EntityLootRarity rarity,
+            LootCondition condition
+    ) {
         builder.addEntry(
                 LootEntry.probabilistic(
                         new GenericFeedbackDecorator<>(
@@ -217,43 +416,29 @@ public final class EntityLootTableBuilder {
     }
 
     /**
-     * Adds a modified material item loot entry with a fixed quantity.
+     * Adds enchanted book drop selected from an enchantment map pool.
      *
-     * @param material   material to drop
-     * @param modifier   function to modify the item builder
-     * @param amount     drop quantity
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @param rarity     rarity tier for feedback
+     * @param enchantmentPool map of candidate enchantments to levels
+     * @param dropChance      selection probability (0.0 to 1.0)
      * @return this builder
      */
-    public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, int amount, double dropChance, EntityLootRarity rarity) {
-        return addLoot(material, modifier, amount, amount, dropChance, rarity, LootCondition.alwaysTrue());
+    public EntityLootTableBuilder addEnchantedBook(Map<Enchantment, Integer> enchantmentPool, double dropChance) {
+        return addEnchantedBook(enchantmentPool, dropChance, EntityLootRarity.COMMON);
     }
 
     /**
-     * Adds a modified material item loot entry with a fixed quantity and selection condition.
+     * Adds enchanted book drop selected from an enchantment map pool with rarity feedback.
      *
-     * @param material   material to drop
-     * @param modifier   function to modify the item builder
-     * @param amount     drop quantity
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @param rarity     rarity tier for feedback
-     * @param condition  condition required for eligibility
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, int amount, double dropChance, EntityLootRarity rarity, LootCondition condition) {
-        return addLoot(material, modifier, amount, amount, dropChance, rarity, condition);
-    }
-
-    /**
-     * Adds an enchanted book loot entry where the enchantment and level are selected from a pool.
-     *
-     * @param enchantmentPool map of enchantments to levels
+     * @param enchantmentPool map of candidate enchantments to levels
      * @param dropChance      selection probability (0.0 to 1.0)
      * @param rarity          rarity tier for feedback
      * @return this builder
      */
-    public EntityLootTableBuilder addEnchantedBookLoot(Map<Enchantment, Integer> enchantmentPool, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addEnchantedBook(
+            Map<Enchantment, Integer> enchantmentPool,
+            double dropChance,
+            EntityLootRarity rarity
+    ) {
         builder.addEntry(
                 LootEntry.probabilistic(
                         new GenericFeedbackDecorator<>(
@@ -268,7 +453,25 @@ public final class EntityLootTableBuilder {
     }
 
     /**
-     * Adds an enchanted book loot entry with a level range selected from candidate enchantments.
+     * Adds enchanted book drop with level range selected from candidate enchantments.
+     *
+     * @param enchantments list of candidate enchantments
+     * @param minimumLevel minimum enchantment level
+     * @param maximumLevel maximum enchantment level
+     * @param dropChance   selection probability (0.0 to 1.0)
+     * @return this builder
+     */
+    public EntityLootTableBuilder addEnchantedBook(
+            List<Enchantment> enchantments,
+            int minimumLevel,
+            int maximumLevel,
+            double dropChance
+    ) {
+        return addEnchantedBook(enchantments, minimumLevel, maximumLevel, dropChance, EntityLootRarity.COMMON);
+    }
+
+    /**
+     * Adds enchanted book drop with level range selected from candidate enchantments with rarity feedback.
      *
      * @param enchantments list of candidate enchantments
      * @param minimumLevel minimum enchantment level
@@ -277,7 +480,13 @@ public final class EntityLootTableBuilder {
      * @param rarity       rarity tier for feedback
      * @return this builder
      */
-    public EntityLootTableBuilder addEnchantedBookLoot(List<Enchantment> enchantments, int minimumLevel, int maximumLevel, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addEnchantedBook(
+            List<Enchantment> enchantments,
+            int minimumLevel,
+            int maximumLevel,
+            double dropChance,
+            EntityLootRarity rarity
+    ) {
         builder.addEntry(
                 LootEntry.probabilistic(
                         new GenericFeedbackDecorator<>(
@@ -292,20 +501,48 @@ public final class EntityLootTableBuilder {
     }
 
     /**
-     * Adds an item loot entry whose durability is rolled within a percentage range.
+     * Adds item drop with durability rolled in a percentage range.
      *
-     * @param material          material to drop
+     * @param material          item material
+     * @param minimumPercentage minimum durability percentage
+     * @param maximumPercentage maximum durability percentage
+     * @param dropChance        selection probability (0.0 to 1.0)
+     * @return this builder
+     */
+    public EntityLootTableBuilder addDamagedItem(
+            Material material,
+            double minimumPercentage,
+            double maximumPercentage,
+            double dropChance
+    ) {
+        return addDamagedItem(material, minimumPercentage, maximumPercentage, dropChance, EntityLootRarity.COMMON);
+    }
+
+    /**
+     * Adds item drop with durability rolled in a percentage range with rarity feedback.
+     *
+     * @param material          item material
      * @param minimumPercentage minimum durability percentage
      * @param maximumPercentage maximum durability percentage
      * @param dropChance        selection probability (0.0 to 1.0)
      * @param rarity            rarity tier for feedback
      * @return this builder
      */
-    public EntityLootTableBuilder addDamagedLoot(Material material, double minimumPercentage, double maximumPercentage, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addDamagedItem(
+            Material material,
+            double minimumPercentage,
+            double maximumPercentage,
+            double dropChance,
+            EntityLootRarity rarity
+    ) {
         builder.addEntry(
                 LootEntry.probabilistic(
                         new GenericFeedbackDecorator<>(
-                                ItemResult.randomDurability(material, minimumPercentage, maximumPercentage), rarity, ENTITY_FEEDBACK_MAPPER
+                                ItemResult.randomDurability(
+                                        material,
+                                        minimumPercentage,
+                                        maximumPercentage
+                                ), rarity, ENTITY_FEEDBACK_MAPPER
                         ),
                         dropChance,
                         AmountProvider.fixed(1),
@@ -316,14 +553,25 @@ public final class EntityLootTableBuilder {
     }
 
     /**
-     * Adds a gem reward loot entry.
+     * Adds gem reward drop.
      *
-     * @param gems       quantity of gems granted
+     * @param gems       gem reward quantity
+     * @param dropChance selection probability (0.0 to 1.0)
+     * @return this builder
+     */
+    public EntityLootTableBuilder addGems(int gems, double dropChance) {
+        return addGems(gems, dropChance, EntityLootRarity.COMMON);
+    }
+
+    /**
+     * Adds gem reward drop with rarity feedback.
+     *
+     * @param gems       gem reward quantity
      * @param dropChance selection probability (0.0 to 1.0)
      * @param rarity     rarity tier for feedback
      * @return this builder
      */
-    public EntityLootTableBuilder addGemsLoot(int gems, double dropChance, EntityLootRarity rarity) {
+    public EntityLootTableBuilder addGems(int gems, double dropChance, EntityLootRarity rarity) {
         builder.addEntry(
                 LootEntry.probabilistic(
                         new GenericFeedbackDecorator<>(new GemsResult(), rarity, ENTITY_FEEDBACK_MAPPER),
@@ -336,20 +584,31 @@ public final class EntityLootTableBuilder {
     }
 
     /**
-     * Sets the maximum number of loot drops allowed per roll.
+     * Sets maximum number of loot drops allowed per roll.
      *
-     * @param maxDrops maximum number of drops
+     * @param maxDrops maximum drop count
      * @return this builder
      */
-    public EntityLootTableBuilder setMaxDrop(int maxDrops) {
+    public EntityLootTableBuilder maxDrops(int maxDrops) {
         this.maxDrops = maxDrops;
         return this;
     }
 
     /**
-     * Constructs the configured {@link LootTable} instance.
+     * Sets maximum number of loot drops allowed per roll.
      *
-     * @return a new entity loot table
+     * @param maxDrops maximum drop count
+     * @return this builder
+     */
+    public EntityLootTableBuilder setMaxDrops(int maxDrops) {
+        this.maxDrops = maxDrops;
+        return this;
+    }
+
+    /**
+     * Constructs configured {@link LootTable} instance.
+     *
+     * @return new entity loot table
      */
     public LootTable build() {
         return builder

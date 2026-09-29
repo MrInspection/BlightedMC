@@ -88,7 +88,7 @@ public final class FishingListener implements Listener {
                 Messenger.warn(player, "This rod thirsts for molten depths, not ordinary waters.");
                 event.setCancelled(true);
             } else {
-                BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+                BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
                 new LavaFishingHook(
                         hook,
                         blightedPlayer,
@@ -106,7 +106,7 @@ public final class FishingListener implements Listener {
                 Messenger.warn(player, "This rod answers only to the void of the End.");
                 event.setCancelled(true);
             } else {
-                BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+                BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
                 new VoidFishingHook(
                         hook,
                         blightedPlayer,
@@ -180,7 +180,7 @@ public final class FishingListener implements Listener {
         int currentCombo = FishingComboTracker.getCombo(player, FishingMethod.WATER);
 
         if (ThreadLocalRandom.current().nextDouble() <= CUSTOM_LOOT_CHANCE) {
-            BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(player);
+            BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
             FishingLootTable lootTable = FishingLootRegistry.getTable(environment, FishingMethod.WATER);
 
             Vector velocity = calculateVelocity(hook.getLocation(), player.getLocation());
@@ -196,37 +196,30 @@ public final class FishingListener implements Listener {
         FishingComboTracker.spawnBonusExperience(player.getWorld(), player.getLocation(), newCombo);
     }
 
-    private ItemStack findFishingRodItem(Player player, ItemType requiredType) {
+    private ItemStack getHeldFishingRodStack(Player player) {
         ItemStack mainHandItem = player.getInventory().getItemInMainHand();
-        if (isRodMaterial(mainHandItem)) {
-            BlightedItem mainHandBlightedItem = BlightedItem.fromItemStack(mainHandItem);
-            if (mainHandBlightedItem != null && mainHandBlightedItem.getItemType() == requiredType) {
-                return mainHandItem;
-            }
-        }
+        if (isRodMaterial(mainHandItem)) return mainHandItem;
 
         ItemStack offhandItem = player.getInventory().getItemInOffHand();
-        if (isRodMaterial(offhandItem)) {
-            BlightedItem offhandBlightedItem = BlightedItem.fromItemStack(offhandItem);
-            if (offhandBlightedItem != null && offhandBlightedItem.getItemType() == requiredType) {
-                return offhandItem;
-            }
-        }
+        if (isRodMaterial(offhandItem)) return offhandItem;
 
         return null;
     }
 
-    private int resolveVanillaLuckLevel(Player player) {
-        ItemStack mainHandItem = player.getInventory().getItemInMainHand();
-        if (isRodMaterial(mainHandItem)) {
-            return mainHandItem.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
+    private ItemStack findFishingRodItem(Player player, ItemType requiredType) {
+        ItemStack rodStack = getHeldFishingRodStack(player);
+        if (rodStack != null) {
+            BlightedItem blightedItem = BlightedItem.fromItemStack(rodStack);
+            if (blightedItem != null && blightedItem.getItemType() == requiredType) {
+                return rodStack;
+            }
         }
+        return null;
+    }
 
-        ItemStack offhandItem = player.getInventory().getItemInOffHand();
-        if (isRodMaterial(offhandItem)) {
-            return offhandItem.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA);
-        }
-        return 0;
+    private int resolveVanillaLuckLevel(Player player) {
+        ItemStack rodStack = getHeldFishingRodStack(player);
+        return rodStack != null ? rodStack.getEnchantmentLevel(Enchantment.LUCK_OF_THE_SEA) : 0;
     }
 
     private boolean isRodMaterial(ItemStack itemStack) {

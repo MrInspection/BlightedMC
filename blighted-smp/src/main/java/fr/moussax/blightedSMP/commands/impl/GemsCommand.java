@@ -88,7 +88,7 @@ public final class GemsCommand extends AdminCommand {
         Integer amount = parseAmount(sender, args[2]);
         if (amount == null) return false;
 
-        BlightedPlayer blightedPlayer = BlightedPlayer.getBlightedPlayer(target);
+        BlightedPlayer blightedPlayer = BlightedPlayer.get(target);
 
         if (add) {
             blightedPlayer.addGems(amount);
@@ -114,7 +114,7 @@ public final class GemsCommand extends AdminCommand {
         Integer amount = parseAmount(sender, args[2]);
         if (amount == null) return false;
 
-        BlightedPlayer.getBlightedPlayer(target).setGems(amount);
+        BlightedPlayer.get(target).setGems(amount);
         inform(sender, "§e Set §d" + target.getName() + "§e's gems balance to §d" + amount + "§e.");
         inform(target, "§7 Your gems balance has been set to §d" + amount + "§7.");
         return true;
@@ -131,7 +131,7 @@ public final class GemsCommand extends AdminCommand {
             return false;
         }
 
-        BlightedPlayer.getBlightedPlayer(target).setGems(0);
+        BlightedPlayer.get(target).setGems(0);
         inform(sender, "§e You reset §d" + target.getName() + "§e's gems.");
         inform(target, " §7Your gems balance has been reset.");
         return true;
@@ -139,7 +139,7 @@ public final class GemsCommand extends AdminCommand {
 
     private boolean handleResetAll(Player sender) {
         Bukkit.getOnlinePlayers().forEach(player ->
-                BlightedPlayer.getBlightedPlayer(player).setGems(0)
+                BlightedPlayer.get(player).setGems(0)
         );
 
         inform(sender, "Reset all §donline §7players' gems.");
@@ -156,7 +156,7 @@ public final class GemsCommand extends AdminCommand {
         if (amount == null) return false;
 
         Bukkit.getOnlinePlayers().forEach(player -> {
-            BlightedPlayer.getBlightedPlayer(player).addGems(amount);
+            BlightedPlayer.get(player).addGems(amount);
             inform(player, " §7You received §d" + amount + " §7gems.");
         });
 

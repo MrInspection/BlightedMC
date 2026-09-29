@@ -1,10 +1,14 @@
 package fr.moussax.blightedSMP.engine.items.recipes.crafting.builder;
 
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
+import fr.moussax.blightedSMP.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedSMP.engine.items.recipes.crafting.BlightedShapedRecipe;
 import fr.moussax.blightedSMP.engine.items.recipes.ShapeEncoder;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
 import org.bukkit.Material;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Fluent builder for creating {@link BlightedShapedRecipe} instances.
@@ -17,7 +21,10 @@ public final class ShapedRecipeBuilder {
 
     private final BlightedItem result;
     private final int amount;
-    private ShapeEncoder encoder;
+    private String line1;
+    private String line2;
+    private String line3;
+    private final Map<Character, CraftingObject> bindings = new HashMap<>();
     private int attributeSourceSlot = -1;
 
     private ShapedRecipeBuilder(BlightedItem result, int amount) {
@@ -46,7 +53,11 @@ public final class ShapedRecipeBuilder {
      * @throws IllegalArgumentException if the item ID is not registered
      */
     public static ShapedRecipeBuilder of(String resultId, int amount) {
-        return new ShapedRecipeBuilder(ItemRegistry.getItem(resultId), amount);
+        BlightedItem result = ItemRegistry.get(resultId);
+        if (result == null) {
+            throw new IllegalArgumentException("Unknown recipe result item ID: '" + resultId + "'");
+        }
+        return new ShapedRecipeBuilder(result, amount);
     }
 
     /**
@@ -58,8 +69,22 @@ public final class ShapedRecipeBuilder {
      * @return this builder
      */
     public ShapedRecipeBuilder shape(String line1, String line2, String line3) {
-        this.encoder = new ShapeEncoder(line1, line2, line3);
+        this.line1 = line1;
+        this.line2 = line2;
+        this.line3 = line3;
         return this;
+    }
+
+    /**
+     * Binds a crafting shape character to a single material ingredient.
+     *
+     * @param key      the character used in the recipe shape
+     * @param material the material represented by the character
+     * @return this builder
+     */
+    // ponytail: simplified — single-item quantity default overload
+    public ShapedRecipeBuilder bind(char key, Material material) {
+        return bind(key, material, 1);
     }
 
     /**
@@ -69,13 +94,22 @@ public final class ShapedRecipeBuilder {
      * @param material the material represented by the character
      * @param amount   the required amount of the material
      * @return this builder
-     * @throws IllegalStateException if {@link #shape(String, String, String)}
-     *                               has not been called
      */
     public ShapedRecipeBuilder bind(char key, Material material, int amount) {
-        validateEncoder();
-        encoder.bindKey(key, material, amount);
+        bindings.put(key, new CraftingObject(material, amount));
         return this;
+    }
+
+    /**
+     * Binds a crafting shape character to a single custom item ingredient.
+     *
+     * @param key  the character used in the recipe shape
+     * @param item the custom item represented by the character
+     * @return this builder
+     */
+    // ponytail: simplified — single-item quantity default overload
+    public ShapedRecipeBuilder bind(char key, BlightedItem item) {
+        return bind(key, item, 1);
     }
 
     /**
@@ -85,13 +119,23 @@ public final class ShapedRecipeBuilder {
      * @param item   the custom item represented by the character
      * @param amount the required amount of the item
      * @return this builder
-     * @throws IllegalStateException if {@link #shape(String, String, String)}
-     *                               has not been called
      */
     public ShapedRecipeBuilder bind(char key, BlightedItem item, int amount) {
-        validateEncoder();
-        encoder.bindKey(key, item, amount);
+        bindings.put(key, new CraftingObject(item, amount));
         return this;
+    }
+
+    /**
+     * Binds a crafting shape character to a single registered custom item ingredient.
+     *
+     * @param key    the character used in the recipe shape
+     * @param itemId the ID of the custom item represented by the character
+     * @return this builder
+     * @throws IllegalArgumentException if the item ID is not registered
+     */
+    // ponytail: simplified — single-item quantity default overload
+    public ShapedRecipeBuilder bind(char key, String itemId) {
+        return bind(key, itemId, 1);
     }
 
     /**
@@ -102,11 +146,9 @@ public final class ShapedRecipeBuilder {
      * @param amount the required amount of the item
      * @return this builder
      * @throws IllegalArgumentException if the item ID is not registered
-     * @throws IllegalStateException    if {@link #shape(String, String, String)}
-     *                                  has not been called
      */
     public ShapedRecipeBuilder bind(char key, String itemId, int amount) {
-        return bind(key, ItemRegistry.getItem(itemId), amount);
+        return bind(key, ItemRegistry.get(itemId), amount);
     }
 
     /**
@@ -137,8 +179,14 @@ public final class ShapedRecipeBuilder {
      * @return the constructed shaped recipe
      * @throws IllegalStateException if the recipe shape has not been defined
      */
+    // ponytail: simplified — order-independent shape and key binding resolution upon build
     public BlightedShapedRecipe build() {
-        validateEncoder();
+        if (line1 == null || line2 == null || line3 == null) {
+            throw new IllegalStateException("Recipe shape has not been defined yet. Call .shape() first.");
+        }
+        ShapeEncoder encoder = new ShapeEncoder(line1, line2, line3);
+        bindings.forEach(encoder::bindKey);
+
         BlightedShapedRecipe recipe = new BlightedShapedRecipe(result, amount);
         recipe.setRecipe(encoder.encodeCraftingRecipe());
 
@@ -147,11 +195,5 @@ public final class ShapedRecipeBuilder {
         }
 
         return recipe;
-    }
-
-    private void validateEncoder() {
-        if (encoder == null) {
-            throw new IllegalStateException("Recipe shape has not been defined yet. Call .shape() first.");
-        }
     }
 }

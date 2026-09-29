@@ -125,30 +125,10 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
 
             Location location = new Location(world, x + 0.5, y, z + 0.5);
 
-            List<SpawnableEntity> eligible = null;
-            for (SpawnableEntity entity : cachedIndependentEntities) {
-                if (!entity.canSpawnAt(location, world)) continue;
-                if (eligible == null) eligible = new ArrayList<>(cachedIndependentEntities.size());
-                eligible.add(entity);
-            }
-
-            if (eligible == null) continue;
-
-            double totalChance = 0.0;
-            for (SpawnableEntity entity : eligible) {
-                totalChance += entity.getSpawnProbability();
-            }
-
-            if (random.nextDouble() >= Math.min(totalChance, 1.0)) continue;
-
-            double selectionRoll = random.nextDouble() * totalChance;
-            double cumulative = 0.0;
-            for (SpawnableEntity entity : eligible) {
-                cumulative += entity.getSpawnProbability();
-                if (selectionRoll < cumulative) {
-                    entity.clone().spawn(location);
-                    return; // Stop scanning column once an entity spawns
-                }
+            SpawnableEntity selected = SpawnEvaluator.selectCandidate(cachedIndependentEntities, location, world, random);
+            if (selected != null) {
+                selected.clone().spawn(location);
+                return; // Stop scanning column once an entity spawns
             }
         }
     }

@@ -1,6 +1,6 @@
 package fr.moussax.blightedSMP.content.rituals;
 
-import fr.moussax.blightedSMP.content.entities.Illusioner;
+import fr.moussax.blightedSMP.content.entities.powerful.Illusioner;
 import fr.moussax.blightedSMP.engine.entities.rituals.AncientRitual;
 import fr.moussax.blightedSMP.registry.RegistryModule;
 import java.util.function.Consumer;

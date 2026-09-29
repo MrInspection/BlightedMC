@@ -36,14 +36,16 @@ public final class ModTpCommands extends ModerationCommand {
             moderator.teleport(target.getLocation());
         }
 
-        getModerationManager().getModerator(moderator).setTargetPlayer(target);
+        if (getModerationManager().isInModerationMode(moderator)) {
+            getModerationManager().getModerator(moderator).setTargetPlayer(target);
+        }
 
         String textMessage = isHere
-                ? " §eTeleported §d" + target.getName() + "§e to you. "
-                : " §eTeleported to §d" + target.getName() + "§e. ";
+                ? " §eTeleported §d" + target.getName() + "§e to you"
+                : " §eTeleported to §d" + target.getName();
 
         InteractiveMessage.text(textMessage)
-                .hoverAndExecute("§3[INFO]", "§fClick to view information about §d" + target.getName() + "§f.", "/userinfo " + target.getName())
+                .hoverAndExecute("§7∙ §3[Info]", "§fClick to view information about §d" + target.getName() + "§f.", "/userinfo " + target.getName())
                 .send(moderator);
 
         return true;

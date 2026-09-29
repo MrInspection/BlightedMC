@@ -13,29 +13,53 @@ import org.bukkit.event.player.PlayerInteractEvent;
 @Getter
 public enum AbilityType {
 
-    /** Ability triggered by right-clicking. */
+    /**
+     * Ability triggered by right-clicking.
+     */
     RIGHT_CLICK("§d§lRIGHT CLICK"),
-    /** Ability triggered by left-clicking. */
+    /**
+     * Ability triggered by left-clicking.
+     */
     LEFT_CLICK("§d§lLEFT CLICK"),
-    /** Ability triggered by either left or right clicking. */
+    /**
+     * Ability triggered by either left or right clicking.
+     */
     LEFT_OR_RIGHT_CLICK("§d§lCLICK"),
-    /** Ability triggered while sneaking. */
+    /**
+     * Ability triggered while sneaking.
+     */
     SNEAK("§d§lSNEAK"),
-    /** Ability triggered by sneaking and right-clicking. */
-    SNEAK_RIGHT_CLICK("§d§lSNEAK + RIGHT CLICK"),
-    /** Ability triggered by sneaking and left-clicking. */
-    SNEAK_LEFT_CLICK("§d§lSNEAK + LEFT CLICK"),
-    /** Ability triggered by sneaking and clicking. */
-    SNEAK_LEFT_OR_RIGHT_CLICK("§d§lSNEAK + CLICK"),
-    /** Ability activated when a full armor set is worn. */
+    /**
+     * Ability triggered by sneaking and right-clicking.
+     */
+    SNEAK_RIGHT_CLICK("§d§lSNEAK RIGHT CLICK"),
+    /**
+     * Ability triggered by sneaking and left-clicking.
+     */
+    SNEAK_LEFT_CLICK("§d§lSNEAK LEFT CLICK"),
+    /**
+     * Ability triggered by sneaking and clicking.
+     */
+    SNEAK_LEFT_OR_RIGHT_CLICK("§d§lSNEAK CLICK"),
+    /**
+     * Ability activated when a full armor set is worn.
+     */
     FULL_SET_BONUS("§6§lFULL SET BONUS"),
-    /** Ability triggered when hitting an entity. */
+    /**
+     * Ability triggered when hitting an entity.
+     */
     ENTITY_HIT("§d§lON HIT"),
-    /** Ability triggered before dealing damage. */
+    /**
+     * Ability triggered before dealing damage.
+     */
     PRE_HIT("§d§lPRE HIT"),
-    /** Ability triggered after dealing damage. */
+    /**
+     * Ability triggered after dealing damage.
+     */
     AFTER_HIT("§d§lAFTER HIT"),
-    /** Passive ability continuously active or triggered on passive events. */
+    /**
+     * Passive ability continuously active or triggered on passive events.
+     */
     PASSIVE("");
 
     private final String displayName;
@@ -45,7 +69,7 @@ public enum AbilityType {
     }
 
     /**
-     * Determines whether the given event matches the trigger criteria for this ability type.
+     * Determines whether a Bukkit event satisfies this trigger condition.
      *
      * @param event Bukkit event to evaluate
      * @return {@code true} if the event satisfies this trigger condition, {@code false} otherwise

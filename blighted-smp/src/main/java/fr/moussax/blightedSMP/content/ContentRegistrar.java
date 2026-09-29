@@ -21,11 +21,7 @@ import fr.moussax.blightedSMP.content.items.materials.BlightedMaterials;
 import fr.moussax.blightedSMP.content.items.materials.EndMaterials;
 import fr.moussax.blightedSMP.content.items.materials.FishingMaterials;
 import fr.moussax.blightedSMP.content.items.materials.NetherMaterials;
-import fr.moussax.blightedSMP.content.recipes.EndRecipes;
-import fr.moussax.blightedSMP.content.recipes.EquipmentRecipes;
-import fr.moussax.blightedSMP.content.recipes.ForgeRecipes;
-import fr.moussax.blightedSMP.content.recipes.MaterialRecipes;
-import fr.moussax.blightedSMP.content.recipes.NetherMaterialRecipes;
+import fr.moussax.blightedSMP.content.recipes.*;
 import fr.moussax.blightedSMP.content.rituals.AncientRituals;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.engine.entities.rituals.AncientRitual;
@@ -75,7 +71,8 @@ public final class ContentRegistrar {
             new MaterialRecipes(),
             new NetherMaterialRecipes(),
             new EndRecipes(),
-            new EquipmentRecipes()
+            new EquipmentRecipes(),
+            new FishingArmorsRecipes()
     );
 
     public static final List<RegistryModule<Consumer<ForgeRecipe>>> FORGE_MODULES = List.of(

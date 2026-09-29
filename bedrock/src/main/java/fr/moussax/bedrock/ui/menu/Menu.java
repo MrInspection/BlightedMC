@@ -272,10 +272,14 @@ public abstract class Menu implements InventoryHolder {
     public void setBackButton(int slot, @Nullable Menu previousMenu) {
         setBackButton(slot, (player, _) -> {
             if (previousMenu == null) {
-                close();
+                goBack();
                 return;
             }
-            previousMenu.open(player);
+            if (menuSystem != null) {
+                menuSystem.popAndOpen(player, previousMenu);
+            } else {
+                previousMenu.open(player);
+            }
         });
     }
 
@@ -645,9 +649,9 @@ public abstract class Menu implements InventoryHolder {
      */
     public void fillPattern(String[] pattern, char symbol, @NonNull ItemStack item) {
         for (int row = 0; row < pattern.length && row < size / 9; row++) {
-            String replaced = pattern[row].replace(" ", "");
-            for (int column = 0; column < replaced.length() && column < 9; column++) {
-                if (replaced.charAt(column) == symbol) {
+            String rowString = pattern[row];
+            for (int column = 0; column < rowString.length() && column < 9; column++) {
+                if (rowString.charAt(column) == symbol) {
                     setItem(getSlot(row, column), item);
                 }
             }
@@ -712,8 +716,16 @@ public abstract class Menu implements InventoryHolder {
             return;
         }
 
+        Map<Integer, MenuSlot> preservedInteractableSlots = new HashMap<>();
+        for (Map.Entry<Integer, MenuSlot> entry : slots.entrySet()) {
+            if (isInteractable(entry.getKey())) {
+                preservedInteractableSlots.put(entry.getKey(), entry.getValue());
+            }
+        }
+
         slots.clear();
         build(player);
+        preservedInteractableSlots.forEach(slots::putIfAbsent);
 
         InventoryView openInventory = player.getOpenInventory();
         if (openInventory.getTopInventory().getHolder() == this && !openInventory.getTitle().equals(this.title)) {
@@ -722,12 +734,12 @@ public abstract class Menu implements InventoryHolder {
 
         boolean changed = false;
         for (int slot = 0; slot < size; slot++) {
-            MenuSlot menuSlot = slots.get(slot);
-            if (menuSlot == null) {
+            if (isInteractable(slot)) {
                 continue;
             }
 
-            ItemStack newItem = menuSlot.item;
+            MenuSlot menuSlot = slots.get(slot);
+            ItemStack newItem = menuSlot != null ? menuSlot.item : null;
             ItemStack currentItem = inventory.getItem(slot);
 
             if (!isSameItem(currentItem, newItem)) {
@@ -742,8 +754,10 @@ public abstract class Menu implements InventoryHolder {
     }
 
     private boolean isSameItem(@Nullable ItemStack first, @Nullable ItemStack second) {
-        if (first == null && second == null) return true;
-        if (first == null || second == null) return false;
+        boolean firstEmpty = first == null || first.getType().isAir();
+        boolean secondEmpty = second == null || second.getType().isAir();
+        if (firstEmpty && secondEmpty) return true;
+        if (firstEmpty || secondEmpty) return false;
         return first.getAmount() == second.getAmount() && first.isSimilar(second);
     }
 

@@ -2,7 +2,7 @@ package fr.moussax.blightedSMP.content.items.abilities;
 
 import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityManager;
-import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
+import fr.moussax.blightedSMP.engine.items.abilities.AbilityType;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
@@ -13,6 +13,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -20,13 +21,10 @@ import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
-    private static final NamespacedKey UUID_KEY = new NamespacedKey(BlightedSMP.getInstance(), "bonemerang_uuid");
-    private static final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
 
+    private static final NamespacedKey THROWN_KEY = new NamespacedKey(BlightedSMP.getInstance(), "thrown_bonemerang");
     private static final int OUTBOUND_TICKS = 13;
     private static final int RETURN_TICKS = 13;
     private static final double PROJECTILE_SPEED = 1.16;
@@ -34,6 +32,16 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
     private static final double DAMAGE_AMOUNT = 12.0;
     private static final double SPAWN_HEIGHT_OFFSET = 1.1;
     private static final double ROTATION_SPEED = 35.0;
+
+    @Override
+    public String getName() {
+        return "Swing";
+    }
+
+    @Override
+    public AbilityType getType() {
+        return AbilityType.RIGHT_CLICK;
+    }
 
     @Override
     public boolean triggerAbility(PlayerInteractEvent event) {
@@ -48,14 +56,6 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
             return false;
         }
 
-        String itemUuid = getOrAssignItemUuid(hand);
-
-        if (isItemOnCooldown(player, itemUuid)) {
-            return false;
-        }
-
-        setItemCooldown(player, itemUuid, getCooldownSeconds());
-
         ItemStack thrownCopy = hand.clone();
         reduceStackInHand(player, hand);
         setThrownVisualInHand(player, thrownCopy);
@@ -66,50 +66,7 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
 
     @Override
     public int getCooldownSeconds() {
-        return 0;
-    }
-
-    @Override
-    public int getManaCost() {
-        return 0;
-    }
-
-    @Override
-    public boolean canTrigger(BlightedPlayer player) {
-        return true;
-    }
-
-    @Override
-    public void start(BlightedPlayer player) {
-    }
-
-    @Override
-    public void stop(BlightedPlayer player) {
-    }
-
-    private boolean isItemOnCooldown(Player player, String uuid) {
-        Map<String, Long> playerCooldowns = cooldowns.computeIfAbsent(player.getUniqueId(), k -> new ConcurrentHashMap<>());
-        long currentTime = System.currentTimeMillis();
-        return playerCooldowns.getOrDefault(uuid, 0L) > currentTime;
-    }
-
-    private void setItemCooldown(Player player, String uuid, int seconds) {
-        cooldowns.computeIfAbsent(player.getUniqueId(), k -> new ConcurrentHashMap<>())
-            .put(uuid, System.currentTimeMillis() + (seconds * 1000L));
-    }
-
-    private String getOrAssignItemUuid(ItemStack item) {
-        var meta = item.getItemMeta();
-        if (meta == null) {
-            return "LEGACY";
-        }
-
-        var container = meta.getPersistentDataContainer();
-        if (!container.has(UUID_KEY, PersistentDataType.STRING)) {
-            container.set(UUID_KEY, PersistentDataType.STRING, UUID.randomUUID().toString());
-            item.setItemMeta(meta);
-        }
-        return container.get(UUID_KEY, PersistentDataType.STRING);
+        return 2;
     }
 
     private void reduceStackInHand(Player player, ItemStack hand) {
@@ -121,20 +78,21 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
     }
 
     private void setThrownVisualInHand(Player player, ItemStack from) {
-        ItemStack nugget = from.clone();
-        nugget.setType(Material.IRON_NUGGET);
-        var meta = from.getItemMeta();
+        ItemStack nugget = new ItemStack(Material.IRON_NUGGET);
+        var meta = nugget.getItemMeta();
         if (meta != null) {
-            nugget.setItemMeta(meta.clone());
+            meta.getPersistentDataContainer().set(THROWN_KEY, PersistentDataType.BYTE, (byte) 1);
+            meta.setDisplayName("§7Bonemerang (Thrown...)");
+            nugget.setItemMeta(meta);
         }
         player.getInventory().setItemInMainHand(nugget);
     }
 
     private void launchProjectile(Player player, ItemStack toRestore) {
         ArmorStand projectile = player.getWorld().spawn(
-            player.getLocation().add(0, SPAWN_HEIGHT_OFFSET, 0),
-            ArmorStand.class,
-            this::configureArmorStand
+                player.getLocation().add(0, SPAWN_HEIGHT_OFFSET, 0),
+                ArmorStand.class,
+                this::configureArmorStand
         );
 
         player.playSound(player.getLocation(), Sound.BLOCK_BONE_BLOCK_BREAK, 2.0f, 1.75f);
@@ -200,17 +158,17 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
 
     private void updateProjectilePosition(ArmorStand projectile, Player player, Vector direction, boolean returning) {
         Vector movement = returning
-            ? player.getLocation().subtract(projectile.getLocation()).toVector().normalize().multiply(PROJECTILE_SPEED)
-            : direction.clone().multiply(PROJECTILE_SPEED);
+                ? player.getLocation().subtract(projectile.getLocation()).toVector().normalize().multiply(PROJECTILE_SPEED)
+                : direction.clone().multiply(PROJECTILE_SPEED);
 
         projectile.teleport(projectile.getLocation().add(movement));
     }
 
     private void updateProjectileRotation(ArmorStand projectile, int tick) {
         projectile.setRightArmPose(new EulerAngle(
-            0,
-            Math.toRadians(90 + (ROTATION_SPEED * tick)),
-            0
+                0,
+                Math.toRadians(90 + (ROTATION_SPEED * tick)),
+                0
         ));
     }
 
@@ -243,30 +201,22 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
         Map<Integer, ItemStack> leftovers = inventory.addItem(original);
         if (!leftovers.isEmpty()) {
             leftovers.values().forEach(item ->
-                player.getWorld().dropItemNaturally(player.getLocation(), item)
+                    player.getWorld().dropItemNaturally(player.getLocation(), item)
             );
         }
     }
 
-    private boolean replaceNuggetWithOriginal(org.bukkit.inventory.Inventory inventory, ItemStack original) {
+    private boolean replaceNuggetWithOriginal(Inventory inventory, ItemStack original) {
         for (int i = 0; i < inventory.getSize(); i++) {
             ItemStack slot = inventory.getItem(i);
-            if (isSameCustomNugget(slot, original)) {
-                inventory.setItem(i, original);
-                return true;
+            if (slot != null && slot.getType() == Material.IRON_NUGGET && slot.hasItemMeta()) {
+                var meta = slot.getItemMeta();
+                if (meta != null && meta.getPersistentDataContainer().has(THROWN_KEY, PersistentDataType.BYTE)) {
+                    inventory.setItem(i, original);
+                    return true;
+                }
             }
         }
         return false;
-    }
-
-    private boolean isSameCustomNugget(ItemStack a, ItemStack b) {
-        if (a == null || b == null || a.getType() != Material.IRON_NUGGET) {
-            return false;
-        }
-
-        var aMeta = a.getItemMeta();
-        var bMeta = b.getItemMeta();
-
-        return aMeta != null && aMeta.equals(bMeta);
     }
 }

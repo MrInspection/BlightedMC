@@ -1,14 +1,13 @@
 package fr.moussax.blightedSMP.content.entities.bosses;
 
+import fr.moussax.bedrock.utils.ItemBuilder;
+import fr.moussax.bedrock.utils.debug.Log;
 import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.engine.entities.defense.DamageType;
 import fr.moussax.blightedSMP.engine.entities.defense.EntityImmunities;
 import fr.moussax.blightedSMP.engine.entities.defense.EntityResistance;
-import fr.moussax.blightedSMP.engine.entities.defense.EntityResistances;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
-import fr.moussax.bedrock.utils.ItemBuilder;
-import fr.moussax.bedrock.utils.debug.Log;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -25,13 +24,14 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @EntityImmunities({DamageType.FALL, DamageType.MACE, DamageType.PROJECTILE})
-@EntityResistances({
-        @EntityResistance(type = DamageType.MAGIC, percent = 75.0),
-})
+@EntityResistance(type = DamageType.MAGIC, percent = 75.0)
 public class CorruptedChampion extends BlightedEntity {
 
     private static final int MELEE_DAMAGE = 28;
@@ -47,7 +47,7 @@ public class CorruptedChampion extends BlightedEntity {
     private static final Particle.DustOptions VOID_PURPLE = new Particle.DustOptions(Color.fromRGB(150, 40, 240), 1.2f);
     private static final Particle.DustOptions CHAMPION_GOLD = new Particle.DustOptions(Color.fromRGB(255, 200, 30), 1.5f);
 
-    private final List<StabPlayer> activeStabs = new CopyOnWriteArrayList<>();
+    private List<StabPlayer> activeStabs = new CopyOnWriteArrayList<>();
     private int currentPhase = 1;
 
     public CorruptedChampion() {
@@ -257,7 +257,7 @@ public class CorruptedChampion extends BlightedEntity {
             return;
         }
 
-        BlightedPlayer blightedTarget = BlightedPlayer.getBlightedPlayer(target);
+        BlightedPlayer blightedTarget = BlightedPlayer.get(target);
         if (blightedTarget == null) {
             return;
         }
@@ -778,13 +778,7 @@ public class CorruptedChampion extends BlightedEntity {
     @Override
     public CorruptedChampion clone() {
         CorruptedChampion clone = (CorruptedChampion) super.clone();
-        try {
-            var activeStabsField = CorruptedChampion.class.getDeclaredField("activeStabs");
-            activeStabsField.setAccessible(true);
-            activeStabsField.set(clone, new CopyOnWriteArrayList<>());
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to clone sword lists", e);
-        }
+        clone.activeStabs = new CopyOnWriteArrayList<>();
         return clone;
     }
 
