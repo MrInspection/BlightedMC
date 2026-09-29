@@ -6,6 +6,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -118,6 +119,22 @@ public final class InteractiveMessage {
      */
     public void send(@NonNull Player player) {
         player.spigot().sendMessage(root);
+    }
+
+    /**
+     * Sends the message to a command sender.
+     *
+     * <p>If the sender is a {@link Player}, rich Bungee components with click/hover actions are delivered.
+     * Otherwise, plain text is sent.</p>
+     *
+     * @param sender the recipient
+     */
+    public void send(@NonNull CommandSender sender) {
+        if (sender instanceof Player player) {
+            send(player);
+        } else {
+            sender.sendMessage(root.toLegacyText());
+        }
     }
 
     /**

@@ -435,10 +435,19 @@ public class ItemBuilder {
             return this;
         }
 
-        CustomModelDataComponent component = itemMeta.getCustomModelDataComponent();
-        component.setFloats(List.of(data.floatValue()));
-        itemMeta.setCustomModelDataComponent(component);
+        return setCustomModelData(data.intValue());
+    }
 
+    /**
+     * Sets the item's custom model data.
+     *
+     * @param data the custom model data value
+     * @return this builder
+     */
+    public ItemBuilder setCustomModelData(int data) {
+        CustomModelDataComponent component = itemMeta.getCustomModelDataComponent();
+        component.setFloats(List.of((float) data));
+        itemMeta.setCustomModelDataComponent(component);
         return this;
     }
 
