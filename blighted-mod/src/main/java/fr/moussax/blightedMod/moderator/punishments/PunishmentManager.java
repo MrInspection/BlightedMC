@@ -119,7 +119,7 @@ public final class PunishmentManager {
 
                 if (type == PunishmentData.PunishmentType.MUTE) {
                     activeMutedPlayers.remove(playerUuid);
-                } else if (type == PunishmentData.PunishmentType.BAN) {
+                } else if (type == PunishmentData.PunishmentType.BAN || type == PunishmentData.PunishmentType.IP_BAN) {
                     activeBannedPlayers.remove(playerUuid);
                 }
             } catch (SQLException exception) {
@@ -186,7 +186,7 @@ public final class PunishmentManager {
             deactivatePunishment(punishment.id());
             if (type == PunishmentData.PunishmentType.MUTE) {
                 activeMutedPlayers.remove(playerUuid);
-            } else if (type == PunishmentData.PunishmentType.BAN) {
+            } else if (type == PunishmentData.PunishmentType.BAN || type == PunishmentData.PunishmentType.IP_BAN) {
                 activeBannedPlayers.remove(playerUuid);
             }
             return null;

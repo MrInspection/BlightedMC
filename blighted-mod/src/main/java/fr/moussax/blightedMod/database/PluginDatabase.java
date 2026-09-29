@@ -25,8 +25,7 @@ public final class PluginDatabase {
                     connection.close();
                 }
             } catch (SQLException exception) {
-                Log.error("PluginDatabase", exception.getMessage());
-                throw new RuntimeException("Unable to close the database connection", exception);
+                Log.error("PluginDatabase", "Failed to close database connection: " + exception.getMessage());
             }
         }
     }
