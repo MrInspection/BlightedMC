@@ -3,7 +3,7 @@ version: '${version}'
 authors: [ MrInspection ]
 
 main: fr.moussax.blightedMod.BlightedMod
-api-version: '26.2'
+api-version: '26.3'
 load: STARTUP
 
 commands:
@@ -15,7 +15,7 @@ commands:
     permission: blightedmod.moderator
   vanish:
     description: Toggle vanish mode.
-    aliases: [v]
+    aliases: [ v ]
     permission: blightedmod.moderator
   mute:
     description: Mute a player.
@@ -54,7 +54,7 @@ commands:
     description: Report a player or message to online moderators.
   slowmode:
     description: Set or toggle chat slowmode delay in seconds.
-    aliases: [setslowmode]
+    aliases: [ setslowmode ]
     permission: blightedmod.moderator
   reports:
     description: View active player reports.
@@ -73,8 +73,8 @@ commands:
     permission: blightedmod.moderator
   chat:
     description: Switch active chat channel (staff, all).
-    aliases: [c]
+    aliases: [ c ]
   msginspect:
     description: Toggle private message inspection (SocialSpy).
-    aliases: [spy, socialspy]
+    aliases: [ spy, socialspy ]
     permission: blightedmod.moderator
