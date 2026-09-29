@@ -101,9 +101,8 @@ public final class BlightedEntitiesListener implements Listener {
         if (!target.getScoreboardTags().contains(FAST_PASS_TAG)) return;
 
         UUID entityId = target.getUniqueId();
-        if (processingDamageIds.contains(entityId)) return;
+        if (!processingDamageIds.add(entityId)) return;
 
-        processingDamageIds.add(entityId);
         try {
             BlightedEntity owner = EntityManager.getAttachmentOwner(entityId);
             if (owner != null) {
@@ -135,24 +134,24 @@ public final class BlightedEntitiesListener implements Listener {
     }
 
     private AttachmentRole getAttachmentRole(BlightedEntity owner, Entity attachmentEntity) {
+        if (attachmentEntity == null) {
+            return AttachmentRole.SUBORDINATE;
+        }
+
         if (owner != null && owner.attachments != null) {
             for (EntityAttachment attachment : owner.attachments) {
-                if (attachment.entity() != null && attachment.entity().equals(attachmentEntity)) {
+                if (attachmentEntity.equals(attachment.entity())) {
                     return attachment.role();
                 }
             }
         }
 
-        if (attachmentEntity != null) {
-            PersistentDataContainer persistentDataContainer = attachmentEntity.getPersistentDataContainer();
-            if (persistentDataContainer.has(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING)) {
-                String roleString = persistentDataContainer.get(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING);
-                if (roleString != null) {
-                    try {
-                        return AttachmentRole.valueOf(roleString);
-                    } catch (IllegalArgumentException _) {
-                    }
-                }
+        PersistentDataContainer persistentDataContainer = attachmentEntity.getPersistentDataContainer();
+        String roleString = persistentDataContainer.get(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING);
+        if (roleString != null) {
+            try {
+                return AttachmentRole.valueOf(roleString);
+            } catch (IllegalArgumentException _) {
             }
         }
         return AttachmentRole.SUBORDINATE;
@@ -160,9 +159,10 @@ public final class BlightedEntitiesListener implements Listener {
 
     private void handleDamageDealt(EntityDamageByEntityEvent event) {
         Entity rawDamager = event.getDamager();
-        Entity source = (rawDamager instanceof Projectile projectile && projectile.getShooter() instanceof Entity shooter)
-                ? shooter
-                : rawDamager;
+        Entity source =
+                (rawDamager instanceof Projectile projectile && projectile.getShooter() instanceof Entity shooter)
+                        ? shooter
+                        : rawDamager;
 
         BlightedEntity damager = getBlightedEntity(source);
         if (damager != null) {
@@ -170,11 +170,7 @@ public final class BlightedEntitiesListener implements Listener {
         }
     }
 
-    private void handleAttachmentDamage(
-            BlightedEntity owner,
-            Entity attachmentEntity,
-            EntityDamageEvent event
-    ) {
+    private void handleAttachmentDamage(BlightedEntity owner, Entity attachmentEntity, EntityDamageEvent event) {
         LivingEntity ownerEntity = owner.getEntity();
         if (ownerEntity == null || ownerEntity.isDead()) {
             attachmentEntity.remove();
@@ -215,12 +211,16 @@ public final class BlightedEntitiesListener implements Listener {
         double remainingHealth = entity.getHealth() - event.getFinalDamage();
 
         if (remainingHealth > 0) {
-            Bukkit.getScheduler().runTaskLater(BlightedSMP.getInstance(), () -> {
-                if (entity.isValid() && !entity.isDead()) {
-                    blighted.updateBossBar();
-                    blighted.evaluatePhases(entity.getHealth());
-                }
-            }, 1L);
+            Bukkit.getScheduler()
+                    .runTaskLater(
+                            BlightedSMP.getInstance(),
+                            () -> {
+                                if (entity.isValid() && !entity.isDead()) {
+                                    blighted.updateBossBar();
+                                    blighted.evaluatePhases(entity.getHealth());
+                                }
+                            },
+                            1L);
             return;
         }
         blighted.killAllAttachments();
@@ -326,9 +326,7 @@ public final class BlightedEntitiesListener implements Listener {
 
         blighted.cleanup();
 
-        BlightedPlayer killer = dead.getKiller() != null
-                ? BlightedPlayer.get(dead.getKiller())
-                : null;
+        BlightedPlayer killer = dead.getKiller() != null ? BlightedPlayer.get(dead.getKiller()) : null;
 
         blighted.dropLoot(dead.getLocation(), killer);
         blighted.onDeath(dead.getLocation());
@@ -339,9 +337,7 @@ public final class BlightedEntitiesListener implements Listener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
-        Bukkit.getScheduler().runTaskLater(
-                BlightedSMP.getInstance(), () -> rehydrateChunk(event.getChunk()), 1L
-        );
+        Bukkit.getScheduler().runTaskLater(BlightedSMP.getInstance(), () -> rehydrateChunk(event.getChunk()), 1L);
     }
 
     public static Collection<BlightedEntity> getActiveEntities() {

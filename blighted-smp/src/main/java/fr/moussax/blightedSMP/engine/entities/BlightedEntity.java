@@ -96,6 +96,7 @@ public abstract class BlightedEntity implements Cloneable {
 
     @Setter
     protected boolean isBoss = false;
+
     @Getter
     @Setter
     protected boolean isPerformingAbility = false;
@@ -107,6 +108,7 @@ public abstract class BlightedEntity implements Cloneable {
 
     @Getter
     private EntityDefenses defenses = EntityDefenses.fromClass(getClass());
+
     private boolean runtimeInitialized = false;
     private boolean componentsInitialized = false;
 
@@ -375,6 +377,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param delayTicks delay in server ticks
      * @param action     task action
      */
+    @SuppressWarnings("SameParameterValue")
     protected final void addPhaseDelayedAction(long delayTicks, Runnable action) {
         scheduleDelayedAction(phaseTasks, delayTicks, action);
     }
@@ -446,9 +449,15 @@ public abstract class BlightedEntity implements Cloneable {
      */
     public List<Player> getNearbyPlayers(Location center, double radius) {
         if (!isAlive() || center == null || center.getWorld() == null) return Collections.emptyList();
-        return center.getWorld().getNearbyEntities(center, radius, radius, radius,
-                        entity -> entity instanceof Player player && player.getGameMode() == GameMode.SURVIVAL
-                ).stream()
+        return center
+                .getWorld()
+                .getNearbyEntities(
+                        center,
+                        radius,
+                        radius,
+                        radius,
+                        entity -> entity instanceof Player player && player.getGameMode() == GameMode.SURVIVAL)
+                .stream()
                 .map(entity -> (Player) entity)
                 .toList();
     }
@@ -472,8 +481,7 @@ public abstract class BlightedEntity implements Cloneable {
      */
     public Player getNearestPlayer(Location center, double radius) {
         if (center == null) return null;
-        return getNearbyPlayers(center, radius)
-                .stream()
+        return getNearbyPlayers(center, radius).stream()
                 .min(Comparator.comparingDouble(player -> player.getLocation().distanceSquared(center)))
                 .orElse(null);
     }
@@ -509,8 +517,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return nearest BlightedMC player, or {@code null}
      */
     public BlightedPlayer getNearestBlightedPlayer(double radius) {
-        Player target = getNearestPlayer(radius);
-        return target != null ? BlightedPlayer.get(target) : null;
+        return getNearestBlightedPlayer(entity != null ? entity.getLocation() : null, radius);
     }
 
     /**
@@ -660,9 +667,9 @@ public abstract class BlightedEntity implements Cloneable {
         }
         Vector localOffset = offset != null ? offset : new Vector(0, 0, 0);
         Location spawnLoc = entity.getLocation().clone().add(localOffset);
-        ItemDisplay display = entity.getWorld().spawn(spawnLoc, ItemDisplay.class, d -> {
+        ItemDisplay display = entity.getWorld().spawn(spawnLoc, ItemDisplay.class, itemDisplay -> {
             if (configurator != null) {
-                configurator.accept(d);
+                configurator.accept(itemDisplay);
             }
         });
         addAttachment(display, AttachmentRole.VISUAL, localOffset, true, false);
@@ -837,14 +844,7 @@ public abstract class BlightedEntity implements Cloneable {
                 continue;
             }
 
-            Location targetLocation = new Location(
-                    baseLocation.getWorld(),
-                    xPrime,
-                    yPrime,
-                    zPrime,
-                    targetYaw,
-                    targetPitch
-            );
+            Location targetLocation = new Location(baseLocation.getWorld(), xPrime, yPrime, zPrime, targetYaw, targetPitch);
 
             attachedEntity.teleport(targetLocation);
         }
@@ -881,18 +881,17 @@ public abstract class BlightedEntity implements Cloneable {
             return;
         }
 
-        for (EntityAttachment attachment : attachments) {
+        attachments.removeIf(attachment -> {
             if (attachment.role() != role) {
-                continue;
+                return false;
             }
-
             Entity attachmentEntity = attachment.entity();
             if (attachmentEntity != null) {
                 EntityManager.unregisterAttachment(attachmentEntity);
                 attachmentEntity.remove();
             }
-            attachments.remove(attachment);
-        }
+            return true;
+        });
     }
 
     /**
@@ -1042,14 +1041,7 @@ public abstract class BlightedEntity implements Cloneable {
 
         World world = Objects.requireNonNull(location.getWorld());
         Biome biome = world.getBiome(location);
-        LootContext context = new LootContext(
-                player,
-                world,
-                biome,
-                location,
-                ThreadLocalRandom.current(),
-                null
-        );
+        LootContext context = new LootContext(player, world, biome, location, ThreadLocalRandom.current(), null);
         lootTable.execute(context);
     }
 
@@ -1276,13 +1268,16 @@ public abstract class BlightedEntity implements Cloneable {
         double rangeSquared = BOSS_BAR_RANGE * BOSS_BAR_RANGE;
 
         for (Player player : new ArrayList<>(bossBar.getPlayers())) {
-            if (!player.isOnline() || player.getWorld() != world || player.getLocation().distanceSquared(entityLocation) > rangeSquared) {
+            if (!player.isOnline()
+                    || player.getWorld() != world
+                    || player.getLocation().distanceSquared(entityLocation) > rangeSquared) {
                 bossBar.removePlayer(player);
             }
         }
 
         for (Player player : world.getPlayers()) {
-            if (player.getLocation().distanceSquared(entityLocation) <= rangeSquared && !bossBar.getPlayers().contains(player)) {
+            if (player.getLocation().distanceSquared(entityLocation) <= rangeSquared
+                    && !bossBar.getPlayers().contains(player)) {
                 bossBar.addPlayer(player);
             }
         }
