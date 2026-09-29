@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 26
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '26'
           distribution: 'temurin'
@@ -45,8 +45,16 @@ jobs:
 
       - name: Verify plugin.yml api-version matches target
         run: |
-          grep -q "api-version: '26.3'" src/main/resources/plugin.yml || {
-            echo "::error::plugin.yml api-version doesn't match Spigot target 26.3"; exit 1; }
+          found=0
+          for file in $(find . -path "*/src/main/resources/plugin.yml"); do
+            found=1
+            grep -q "api-version: '26.3'" "$file" || {
+              echo "::error::$file api-version doesn't match Spigot target 26.3"; exit 1;
+            }
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "::error::No plugin.yml files found to verify"; exit 1;
+          fi
 
       - name: Build and Run Tests
         run: mvn -B package --file pom.xml
@@ -63,5 +71,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: BlightedMC-Plugin
-          path: target/*.jar
+          path: '**/target/blighted-*.jar'
           retention-days: 5
