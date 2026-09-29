@@ -113,7 +113,12 @@ public final class LifecycleTaskManager {
         private BukkitTask currentTask;
         private BukkitRunnable currentRunnable;
 
-        private ScheduledTask(Runnable action, Supplier<BukkitRunnable> factory, long delayTicks, long periodTicks, boolean repeating) {
+        private ScheduledTask(
+                Runnable action,
+                Supplier<BukkitRunnable> factory,
+                long delayTicks,
+                long periodTicks,
+                boolean repeating) {
             this.action = action;
             this.factory = factory;
             this.delayTicks = delayTicks;
@@ -124,38 +129,36 @@ public final class LifecycleTaskManager {
         private void schedule(LifecycleTaskManager manager) {
             cancel();
 
+            var plugin = BlightedSMP.getInstance();
+
             if (repeating) {
                 if (action != null) {
-                    currentTask = Bukkit.getScheduler().runTaskTimer(BlightedSMP.getInstance(), action, delayTicks, periodTicks);
+                    currentTask = Bukkit.getScheduler().runTaskTimer(plugin, action, delayTicks, periodTicks);
                 } else if (factory != null) {
                     currentRunnable = factory.get();
-                    currentTask = currentRunnable.runTaskTimer(BlightedSMP.getInstance(), delayTicks, periodTicks);
+                    if (currentRunnable != null) {
+                        currentTask = currentRunnable.runTaskTimer(plugin, delayTicks, periodTicks);
+                    }
                 }
-            } else {
-                if (action != null) {
-                    currentTask = Bukkit.getScheduler().runTaskLater(BlightedSMP.getInstance(), () -> {
-                        try {
-                            action.run();
-                        } finally {
-                            manager.onTaskComplete(ScheduledTask.this);
-                        }
-                    }, delayTicks);
-                } else if (factory != null) {
-                    currentRunnable = new BukkitRunnable() {
-                        private final BukkitRunnable inner = factory.get();
-
-                        @Override
-                        public void run() {
-                            try {
-                                if (inner != null) inner.run();
-                            } finally {
-                                manager.onTaskComplete(ScheduledTask.this);
-                            }
-                        }
-                    };
-                    currentTask = currentRunnable.runTaskLater(BlightedSMP.getInstance(), delayTicks);
-                }
+                return;
             }
+
+            Runnable taskAction = action != null ? action : () -> {
+                if (factory != null) {
+                    currentRunnable = factory.get();
+                    if (currentRunnable != null) {
+                        currentRunnable.run();
+                    }
+                }
+            };
+
+            currentTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                try {
+                    taskAction.run();
+                } finally {
+                    manager.onTaskComplete(ScheduledTask.this);
+                }
+            }, delayTicks);
         }
 
         private void cancel() {
