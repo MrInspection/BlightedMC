@@ -61,7 +61,7 @@ public class KnightsSlamAbility implements AbilityManager<PlayerInteractEvent> {
 
             for (Entity entity : entities) {
                 LivingEntity livingEntity = (LivingEntity) entity;
-                livingEntity.damage(abilityDamage);
+                livingEntity.damage(abilityDamage, player.getPlayer());
                 enemies++;
             }
 

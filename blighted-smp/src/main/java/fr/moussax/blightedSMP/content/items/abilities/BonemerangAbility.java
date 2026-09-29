@@ -4,6 +4,7 @@ import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityManager;
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityType;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
@@ -14,6 +15,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
@@ -21,6 +23,8 @@ import org.bukkit.util.Vector;
 import java.util.Map;
 
 public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
+
+    private static final NamespacedKey THROWN_KEY = new NamespacedKey(BlightedSMP.getInstance(), "thrown_bonemerang");
     private static final int OUTBOUND_TICKS = 13;
     private static final int RETURN_TICKS = 13;
     private static final double PROJECTILE_SPEED = 1.16;
@@ -74,20 +78,21 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
     }
 
     private void setThrownVisualInHand(Player player, ItemStack from) {
-        ItemStack nugget = from.clone();
-        nugget.setType(Material.IRON_NUGGET);
-        var meta = from.getItemMeta();
+        ItemStack nugget = new ItemStack(Material.IRON_NUGGET);
+        var meta = nugget.getItemMeta();
         if (meta != null) {
-            nugget.setItemMeta(meta.clone());
+            meta.getPersistentDataContainer().set(THROWN_KEY, PersistentDataType.BYTE, (byte) 1);
+            meta.setDisplayName("§7Bonemerang (Thrown...)");
+            nugget.setItemMeta(meta);
         }
         player.getInventory().setItemInMainHand(nugget);
     }
 
     private void launchProjectile(Player player, ItemStack toRestore) {
         ArmorStand projectile = player.getWorld().spawn(
-            player.getLocation().add(0, SPAWN_HEIGHT_OFFSET, 0),
-            ArmorStand.class,
-            this::configureArmorStand
+                player.getLocation().add(0, SPAWN_HEIGHT_OFFSET, 0),
+                ArmorStand.class,
+                this::configureArmorStand
         );
 
         player.playSound(player.getLocation(), Sound.BLOCK_BONE_BLOCK_BREAK, 2.0f, 1.75f);
@@ -153,17 +158,17 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
 
     private void updateProjectilePosition(ArmorStand projectile, Player player, Vector direction, boolean returning) {
         Vector movement = returning
-            ? player.getLocation().subtract(projectile.getLocation()).toVector().normalize().multiply(PROJECTILE_SPEED)
-            : direction.clone().multiply(PROJECTILE_SPEED);
+                ? player.getLocation().subtract(projectile.getLocation()).toVector().normalize().multiply(PROJECTILE_SPEED)
+                : direction.clone().multiply(PROJECTILE_SPEED);
 
         projectile.teleport(projectile.getLocation().add(movement));
     }
 
     private void updateProjectileRotation(ArmorStand projectile, int tick) {
         projectile.setRightArmPose(new EulerAngle(
-            0,
-            Math.toRadians(90 + (ROTATION_SPEED * tick)),
-            0
+                0,
+                Math.toRadians(90 + (ROTATION_SPEED * tick)),
+                0
         ));
     }
 
@@ -196,7 +201,7 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
         Map<Integer, ItemStack> leftovers = inventory.addItem(original);
         if (!leftovers.isEmpty()) {
             leftovers.values().forEach(item ->
-                player.getWorld().dropItemNaturally(player.getLocation(), item)
+                    player.getWorld().dropItemNaturally(player.getLocation(), item)
             );
         }
     }
@@ -204,22 +209,14 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
     private boolean replaceNuggetWithOriginal(Inventory inventory, ItemStack original) {
         for (int i = 0; i < inventory.getSize(); i++) {
             ItemStack slot = inventory.getItem(i);
-            if (isSameCustomNugget(slot, original)) {
-                inventory.setItem(i, original);
-                return true;
+            if (slot != null && slot.getType() == Material.IRON_NUGGET && slot.hasItemMeta()) {
+                var meta = slot.getItemMeta();
+                if (meta != null && meta.getPersistentDataContainer().has(THROWN_KEY, PersistentDataType.BYTE)) {
+                    inventory.setItem(i, original);
+                    return true;
+                }
             }
         }
         return false;
-    }
-
-    private boolean isSameCustomNugget(ItemStack a, ItemStack b) {
-        if (a == null || b == null || a.getType() != Material.IRON_NUGGET) {
-            return false;
-        }
-
-        var aMeta = a.getItemMeta();
-        var bMeta = b.getItemMeta();
-
-        return aMeta != null && aMeta.equals(bMeta);
     }
 }

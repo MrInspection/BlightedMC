@@ -1,9 +1,9 @@
 package fr.moussax.blightedSMP.content.items.abilities;
 
 import fr.moussax.blightedSMP.BlightedSMP;
+import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityManager;
 import fr.moussax.blightedSMP.engine.items.abilities.AbilityType;
-import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import fr.moussax.bedrock.text.Formatter;
 import fr.moussax.bedrock.text.Messenger;
@@ -53,12 +53,10 @@ public class WitherImpactAbility implements AbilityManager<PlayerInteractEvent>,
         }
 
         Player player = event.getPlayer();
-        ItemStack item = player.getInventory().getItemInMainHand();
 
         if (!isHoldingHyperion(player)) return false;
         teleport(player);
-        int entitiesDamaged = damageNearbyEntities(player);
-        notifyPlayerOfAbilityDamage(player, entitiesDamaged);
+        damageNearbyEntities(player);
 
         if (canUseHealingAbility(player)) {
             applyHealingEffect(player);
@@ -68,7 +66,8 @@ public class WitherImpactAbility implements AbilityManager<PlayerInteractEvent>,
     }
 
     private boolean isHoldingHyperion(Player player) {
-        return player.getInventory().getItemInMainHand().equals(ItemRegistry.get("HYPERION").toItemStack());
+        BlightedItem blightedItem = BlightedItem.fromItemStack(player.getInventory().getItemInMainHand());
+        return blightedItem != null && "HYPERION".equals(blightedItem.getItemId());
     }
 
     private void teleport(Player player) {
@@ -90,22 +89,24 @@ public class WitherImpactAbility implements AbilityManager<PlayerInteractEvent>,
         return location.clone().add(direction.clone().multiply(TELEPORT_DISTANCE));
     }
 
-    private int damageNearbyEntities(Player origin) {
+    private double damageNearbyEntities(Player origin) {
         double damage = MIN_DAMAGE + (Math.random() * (MAX_DAMAGE - MIN_DAMAGE));
+        double totalDamageDealt = 0.0;
         int entitiesDamaged = 0;
 
         for (Entity entity : origin.getNearbyEntities(DAMAGE_RANGE, DAMAGE_RANGE, DAMAGE_RANGE)) {
-            if (entity instanceof LivingEntity && !(entity instanceof Player)) {
-                ((LivingEntity) entity).damage(damage);
+            if (entity instanceof LivingEntity livingEntity && !(entity instanceof Player)) {
+                livingEntity.damage(damage, origin);
+                totalDamageDealt += damage;
                 entitiesDamaged++;
             }
         }
-        return entitiesDamaged;
+        notifyPlayerOfAbilityDamage(origin, entitiesDamaged, totalDamageDealt);
+        return totalDamageDealt;
     }
 
-    private void notifyPlayerOfAbilityDamage(Player player, int entitiesDamaged) {
+    private void notifyPlayerOfAbilityDamage(Player player, int entitiesDamaged, double totalDamage) {
         if (entitiesDamaged > 0) {
-            double totalDamage = (double) entitiesDamaged * (15000.0D + Math.random() * 135000.0D);
             Messenger.inform(player, "Your implosion hit §d" + entitiesDamaged + " §7enem" + (entitiesDamaged > 1 ? "ies" : "y") + " for §d" + Formatter.formatDecimalWithCommas(totalDamage) + " §7damage.");
         }
     }

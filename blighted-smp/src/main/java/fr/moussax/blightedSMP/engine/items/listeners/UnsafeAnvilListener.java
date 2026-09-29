@@ -16,9 +16,11 @@ import org.bukkit.inventory.view.AnvilView;
 
 import java.util.Map;
 
+@SuppressWarnings("UnstableApiUsage")
 public final class UnsafeAnvilListener implements Listener {
 
     private static final int ENCHANTMENT_HARD_CAP = 10;
+    private static final int OVERCAP_XP_COST_PER_TIER = 4;
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPrepareAnvil(PrepareAnvilEvent event) {
@@ -38,11 +40,13 @@ public final class UnsafeAnvilListener implements Listener {
         if (resultMeta == null) return;
 
         boolean isResultBook = result.getType() == Material.ENCHANTED_BOOK;
-        Map<Enchantment, Integer> currentEnchants = isResultBook && resultMeta instanceof EnchantmentStorageMeta storageMeta
+        Map<Enchantment, Integer> currentEnchants = isResultBook
+                && resultMeta instanceof EnchantmentStorageMeta storageMeta
                 ? storageMeta.getStoredEnchants()
                 : resultMeta.getEnchants();
 
         boolean changed = false;
+        int maxOvercapTier = 0;
 
         for (Map.Entry<Enchantment, Integer> entry : bookMeta.getStoredEnchants().entrySet()) {
             Enchantment enchant = entry.getKey();
@@ -51,13 +55,14 @@ public final class UnsafeAnvilListener implements Listener {
             if (!enchant.canEnchantItem(result) && !isResultBook) continue;
 
             int currentLevel = currentEnchants.getOrDefault(enchant, 0);
+            int vanillaMax = enchant.getMaxLevel();
 
-            int targetLevel = (currentLevel == bookLevel && currentLevel != enchant.getMaxLevel())
-                    ? currentLevel + 1
-                    : Math.max(currentLevel, bookLevel);
-            int finalLevel = Math.min(targetLevel, ENCHANTMENT_HARD_CAP);
-
+            int finalLevel = getFinalLevel(bookLevel, vanillaMax, currentLevel);
             if (finalLevel <= currentLevel) continue;
+
+            if (finalLevel > vanillaMax) {
+                maxOvercapTier = Math.max(maxOvercapTier, finalLevel - vanillaMax);
+            }
 
             if (isResultBook && resultMeta instanceof EnchantmentStorageMeta storageMeta) {
                 storageMeta.addStoredEnchant(enchant, finalLevel, true);
@@ -83,12 +88,24 @@ public final class UnsafeAnvilListener implements Listener {
             int rightRepairCost = rightMeta instanceof Repairable repairable ? repairable.getRepairCost() : 0;
             resultRepairable.setRepairCost(leftRepairCost + rightRepairCost + 2);
 
-            int xpCost = Math.max(1, (leftRepairCost + rightRepairCost) + 2);
+            int xpCost = Math.max(1, (leftRepairCost + rightRepairCost) + 2 + (maxOvercapTier * OVERCAP_XP_COST_PER_TIER));
             anvilView.setRepairCost(xpCost);
         }
 
         result.setItemMeta(resultMeta);
         event.setResult(result);
+    }
+
+    private static int getFinalLevel(int bookLevel, int vanillaMax, int currentLevel) {
+        int targetLevel;
+        if (bookLevel <= vanillaMax && currentLevel <= vanillaMax) {
+            // Vanilla combining logic capped at standard vanilla max level
+            targetLevel = (currentLevel == bookLevel) ? Math.min(currentLevel + 1, vanillaMax) : Math.max(currentLevel, bookLevel);
+        } else {
+            // Unsafe combining logic for custom over-capped book drops
+            targetLevel = (currentLevel == bookLevel) ? currentLevel + 1 : Math.max(currentLevel, bookLevel);
+        }
+        return Math.min(targetLevel, ENCHANTMENT_HARD_CAP);
     }
 
     private static boolean isCustomNonEquipment(ItemStack itemStack) {
