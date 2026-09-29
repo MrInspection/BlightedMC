@@ -58,7 +58,6 @@ public final class BlightedBlockListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         ItemStack item = event.getItemInHand();
-        if (!item.hasItemMeta()) return;
 
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;

@@ -8,6 +8,7 @@ import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Fluent builder for creating {@link BlightedShapelessRecipe} instances.
@@ -24,7 +25,7 @@ public final class ShapelessRecipeBuilder {
     private CraftingObject attributeSource = null;
 
     private ShapelessRecipeBuilder(BlightedItem result, int amount) {
-        this.result = result;
+        this.result = Objects.requireNonNull(result, "result");
         this.amount = amount;
     }
 
