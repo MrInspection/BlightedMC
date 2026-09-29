@@ -63,7 +63,7 @@ public abstract class BlightedEntity implements Cloneable {
     private LifecycleTaskManager coreTasks = new LifecycleTaskManager();
     private LifecycleTaskManager phaseTasks = new LifecycleTaskManager();
     private Map<String, EntityComponent> components = new HashMap<>();
-    public Set<EntityAttachment> attachments = new CopyOnWriteArraySet<>();
+    protected Set<EntityAttachment> attachments = new CopyOnWriteArraySet<>();
 
     private long lastDamageTick = -1L;
     private UUID lastDamagerUuid = null;
@@ -699,7 +699,7 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     /**
-     * Attaches a multi-part hittable {@link Interaction} hitbox entity.
+     * Attaches a multipart hittable {@link Interaction} hitbox entity.
      *
      * @param offset       local offset relative to base entity origin and facing yaw
      * @param width        hitbox width
@@ -712,8 +712,8 @@ public abstract class BlightedEntity implements Cloneable {
             return null;
         }
         Vector localOffset = offset != null ? offset : new Vector(0, 0, 0);
-        Location spawnLoc = entity.getLocation().clone().add(localOffset);
-        Interaction interaction = entity.getWorld().spawn(spawnLoc, Interaction.class, i -> {
+        Location spawnLocation = entity.getLocation().clone().add(localOffset);
+        Interaction interaction = entity.getWorld().spawn(spawnLocation, Interaction.class, i -> {
             i.setInteractionWidth(width);
             i.setInteractionHeight(height);
             if (configurator != null) {
@@ -963,6 +963,15 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     /**
+     * Returns an unmodifiable view of active entity attachments.
+     *
+     * @return active entity attachments
+     */
+    public Set<EntityAttachment> getAttachments() {
+        return Collections.unmodifiableSet(attachments);
+    }
+
+    /**
      * Returns a registered component by identifier.
      *
      * @param id  component identifier
@@ -972,6 +981,25 @@ public abstract class BlightedEntity implements Cloneable {
     @SuppressWarnings("unchecked")
     public <T extends EntityComponent> T getComponent(String id) {
         return (T) components.get(id);
+    }
+
+    /**
+     * Returns the first registered component matching the specified class type.
+     *
+     * @param componentClass expected component class type
+     * @param <T>            expected component type
+     * @return matching component instance, or {@code null} if not registered
+     */
+    public <T extends EntityComponent> T getComponent(Class<T> componentClass) {
+        if (componentClass == null) {
+            return null;
+        }
+        for (EntityComponent component : components.values()) {
+            if (componentClass.isInstance(component)) {
+                return componentClass.cast(component);
+            }
+        }
+        return null;
     }
 
     /**

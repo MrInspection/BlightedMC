@@ -138,8 +138,8 @@ public final class BlightedEntitiesListener implements Listener {
             return AttachmentRole.SUBORDINATE;
         }
 
-        if (owner != null && owner.attachments != null) {
-            for (EntityAttachment attachment : owner.attachments) {
+        if (owner != null) {
+            for (EntityAttachment attachment : owner.getAttachments()) {
                 if (attachmentEntity.equals(attachment.entity())) {
                     return attachment.role();
                 }
@@ -159,10 +159,9 @@ public final class BlightedEntitiesListener implements Listener {
 
     private void handleDamageDealt(EntityDamageByEntityEvent event) {
         Entity rawDamager = event.getDamager();
-        Entity source =
-                (rawDamager instanceof Projectile projectile && projectile.getShooter() instanceof Entity shooter)
-                        ? shooter
-                        : rawDamager;
+        Entity source = (rawDamager instanceof Projectile projectile && projectile.getShooter() instanceof Entity shooter)
+                ? shooter
+                : rawDamager;
 
         BlightedEntity damager = getBlightedEntity(source);
         if (damager != null) {
@@ -211,16 +210,13 @@ public final class BlightedEntitiesListener implements Listener {
         double remainingHealth = entity.getHealth() - event.getFinalDamage();
 
         if (remainingHealth > 0) {
-            Bukkit.getScheduler()
-                    .runTaskLater(
-                            BlightedSMP.getInstance(),
-                            () -> {
-                                if (entity.isValid() && !entity.isDead()) {
-                                    blighted.updateBossBar();
-                                    blighted.evaluatePhases(entity.getHealth());
-                                }
-                            },
-                            1L);
+            Bukkit.getScheduler().runTaskLater(BlightedSMP.getInstance(),
+                    () -> {
+                        if (entity.isValid() && !entity.isDead()) {
+                            blighted.updateBossBar();
+                            blighted.evaluatePhases(entity.getHealth());
+                        }
+                    }, 1L);
             return;
         }
         blighted.killAllAttachments();
@@ -237,7 +233,7 @@ public final class BlightedEntitiesListener implements Listener {
             ownerEntity.playHurtAnimation(0.0f);
         }
 
-        for (EntityAttachment attachment : owner.attachments) {
+        for (EntityAttachment attachment : owner.getAttachments()) {
             if (attachment.role() == AttachmentRole.SUBORDINATE) {
                 continue;
             }
