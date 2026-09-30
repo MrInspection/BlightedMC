@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 /**
  * High-performance, flicker-free text animation engine for Minecraft user interfaces.
@@ -33,6 +34,8 @@ import java.util.function.Consumer;
  * through in-place packet updates and automatic background HUD suspension during playback.</p>
  */
 public class TextAnimation {
+
+    private static final Pattern COLOR_PATTERN = Pattern.compile("§[0-9a-fk-orA-FK-OR]");
 
     /**
      * An individual frame within a text animation sequence.
@@ -176,9 +179,9 @@ public class TextAnimation {
     /**
      * Constructs a typewriter text-reveal animation where characters appear incrementally.
      *
-     * @param fullText      the complete text to reveal
-     * @param ticksPerChar  tick delay between revealing each character
-     * @param clickSound    sound played when each letter appears, or null for silent
+     * @param fullText     the complete text to reveal
+     * @param ticksPerChar tick delay between revealing each character
+     * @param clickSound   sound played when each letter appears, or null for silent
      * @return configured typewriter animation
      */
     public static TextAnimation typewriter(
@@ -232,7 +235,7 @@ public class TextAnimation {
     }
 
     private static void buildTypewriterFrames(Builder builder, String text, @Nullable String subtitle, @Nullable Sound sound) {
-        String stripped = text.replaceAll("§[0-9a-fk-orA-FK-OR]", "");
+        String stripped = COLOR_PATTERN.matcher(text).replaceAll("");
         int visibleLength = stripped.length();
 
         if (visibleLength == 0) {
@@ -382,19 +385,22 @@ public class TextAnimation {
     ) {
         Builder builder = builder().interval(1L).finalTimes(finalTimes);
         String prefix = bold ? "§l" : "";
+        String highlight = highlightColor + prefix;
+        String mid = midColor + prefix;
+        String base = baseColor + prefix;
         int length = text.length();
 
         for (int cycle = 0; cycle < cycles; cycle++) {
-            for (int highlight = -2; highlight < length + 2; highlight++) {
-                StringBuilder frameBuilder = new StringBuilder();
+            for (int highlightIndex = -2; highlightIndex < length + 2; highlightIndex++) {
+                StringBuilder frameBuilder = new StringBuilder(length * 4);
                 for (int index = 0; index < length; index++) {
                     char character = text.charAt(index);
-                    if (index == highlight) {
-                        frameBuilder.append(highlightColor).append(prefix).append(character);
-                    } else if (Math.abs(index - highlight) == 1) {
-                        frameBuilder.append(midColor).append(prefix).append(character);
+                    if (index == highlightIndex) {
+                        frameBuilder.append(highlight).append(character);
+                    } else if (Math.abs(index - highlightIndex) == 1) {
+                        frameBuilder.append(mid).append(character);
                     } else {
-                        frameBuilder.append(baseColor).append(prefix).append(character);
+                        frameBuilder.append(base).append(character);
                     }
                 }
                 builder.frame(frameBuilder.toString(), subtitle);
@@ -407,12 +413,12 @@ public class TextAnimation {
     /**
      * Constructs a flashing pulse animation alternating between a primary and highlight color.
      *
-     * @param text            message text
-     * @param primaryColor    standard color code (e.g. "§c")
-     * @param flashColor      bright pulse color code (e.g. "§f")
-     * @param ticksPerPulse   tick delay per pulse phase
-     * @param pulses          number of complete pulses
-     * @param sound           sound played on each flash, or null for silent
+     * @param text          message text
+     * @param primaryColor  standard color code (e.g. "§c")
+     * @param flashColor    bright pulse color code (e.g. "§f")
+     * @param ticksPerPulse tick delay per pulse phase
+     * @param pulses        number of complete pulses
+     * @param sound         sound played on each flash, or null for silent
      * @return configured pulse animation
      */
     public static TextAnimation pulse(
@@ -430,10 +436,6 @@ public class TextAnimation {
         }
         return builder.build();
     }
-
-    // =========================================================================
-    // Actionbar Playback
-    // =========================================================================
 
     /**
      * Plays this text animation on the target player's action bar.
@@ -510,7 +512,7 @@ public class TextAnimation {
             }
             if (onComplete != null) onComplete.accept(player);
             long stayTicks = Math.max(0L, finalStay.toMillis() / 50L);
-            if (Bukkit.getServer() != null && stayTicks > 0) {
+            if (stayTicks > 0) {
                 return Bukkit.getScheduler().runTaskLater(plugin, () -> finishActionbar(player, extraOnComplete), stayTicks);
             } else {
                 finishActionbar(player, extraOnComplete);
@@ -526,6 +528,9 @@ public class TextAnimation {
                 if (!player.isOnline()) {
                     cleanupActionbar(player);
                     cancel();
+                    if (extraOnComplete != null) {
+                        extraOnComplete.run();
+                    }
                     return;
                 }
 
@@ -552,7 +557,7 @@ public class TextAnimation {
                         nextAnimation.playActionbar(plugin, player, extraOnComplete);
                     } else {
                         long stayTicks = Math.max(0L, finalStay.toMillis() / 50L);
-                        if (Bukkit.getServer() != null && stayTicks > 0) {
+                        if (stayTicks > 0) {
                             Bukkit.getScheduler().runTaskLater(plugin, () -> finishActionbar(player, extraOnComplete), stayTicks);
                         } else {
                             finishActionbar(player, extraOnComplete);
@@ -596,26 +601,7 @@ public class TextAnimation {
     ) {
         Objects.requireNonNull(plugin, "plugin cannot be null");
         Objects.requireNonNull(players, "players cannot be null");
-
-        List<? extends Player> targetPlayers = players.stream()
-                .filter(p -> p != null && p.isOnline())
-                .toList();
-
-        if (targetPlayers.isEmpty()) {
-            if (extraOnComplete != null) extraOnComplete.run();
-            return;
-        }
-
-        AtomicInteger remaining = new AtomicInteger(targetPlayers.size());
-        Runnable barrier = (extraOnComplete != null) ? () -> {
-            if (remaining.decrementAndGet() == 0) {
-                extraOnComplete.run();
-            }
-        } : null;
-
-        for (Player player : targetPlayers) {
-            playActionbar(plugin, player, barrier);
-        }
+        dispatchCollection(players, extraOnComplete, (player, barrier) -> playActionbar(plugin, player, barrier));
     }
 
     /**
@@ -663,10 +649,6 @@ public class TextAnimation {
             service.setAnimating(player.getUniqueId(), false);
         }
     }
-
-    // =========================================================================
-    // Title Playback
-    // =========================================================================
 
     /**
      * Plays this text animation on the target player as an in-place title sequence.
@@ -730,17 +712,15 @@ public class TextAnimation {
             titleService.setAnimating(player.getUniqueId(), true);
         }
 
-        // Initialize display with sufficient stay to cover the entire sequence with zero fade-in
-        int totalTicks = (int) (frames.size() * tickInterval);
         Frame firstFrame = frames.getFirst();
-        TitlePacketSender.sendFull(player, firstFrame.title(), firstFrame.subtitle(), 0, totalTicks + 60, 0);
-
         if (firstFrame.sound() != null) {
             player.playSound(player.getLocation(), firstFrame.sound(), 1.0f, firstFrame.soundPitch());
         }
 
         if (frames.size() == 1) {
             if (nextAnimation != null) {
+                int totalTicks = (int) (frames.size() * tickInterval);
+                TitlePacketSender.sendFull(player, firstFrame.title(), firstFrame.subtitle(), 0, totalTicks + 60, 0);
                 if (onComplete != null) onComplete.accept(player);
                 return nextAnimation.playTitle(plugin, player, extraOnComplete);
             }
@@ -749,13 +729,17 @@ public class TextAnimation {
             if (onComplete != null) onComplete.accept(player);
 
             long finishDelay = finalTimes.stay() + finalTimes.fadeOut();
-            if (Bukkit.getServer() != null && finishDelay > 0) {
+            if (finishDelay > 0) {
                 return Bukkit.getScheduler().runTaskLater(plugin, () -> finishTitle(player, extraOnComplete), finishDelay);
             } else {
                 finishTitle(player, extraOnComplete);
                 return null;
             }
         }
+
+        // Initialize display with sufficient stay to cover the entire sequence with zero fade-in
+        int totalTicks = (int) (frames.size() * tickInterval);
+        TitlePacketSender.sendFull(player, firstFrame.title(), firstFrame.subtitle(), 0, totalTicks + 60, 0);
 
         return new BukkitRunnable() {
             private int frameIndex = 1;
@@ -765,6 +749,9 @@ public class TextAnimation {
                 if (!player.isOnline()) {
                     cleanupTitle(player);
                     cancel();
+                    if (extraOnComplete != null) {
+                        extraOnComplete.run();
+                    }
                     return;
                 }
 
@@ -802,7 +789,7 @@ public class TextAnimation {
                         }
 
                         long finishDelay = finalTimes.stay() + finalTimes.fadeOut();
-                        if (Bukkit.getServer() != null && finishDelay > 0) {
+                        if (finishDelay > 0) {
                             Bukkit.getScheduler().runTaskLater(plugin, () -> finishTitle(player, extraOnComplete), finishDelay);
                         } else {
                             finishTitle(player, extraOnComplete);
@@ -846,7 +833,14 @@ public class TextAnimation {
     ) {
         Objects.requireNonNull(plugin, "plugin cannot be null");
         Objects.requireNonNull(players, "players cannot be null");
+        dispatchCollection(players, extraOnComplete, (player, barrier) -> playTitle(plugin, player, barrier));
+    }
 
+    private static void dispatchCollection(
+            @NonNull Collection<? extends Player> players,
+            @Nullable Runnable extraOnComplete,
+            @NonNull BiConsumer<Player, Runnable> dispatcher
+    ) {
         List<? extends Player> targetPlayers = players.stream()
                 .filter(p -> p != null && p.isOnline())
                 .toList();
@@ -864,7 +858,7 @@ public class TextAnimation {
         } : null;
 
         for (Player player : targetPlayers) {
-            playTitle(plugin, player, barrier);
+            dispatcher.accept(player, barrier);
         }
     }
 
@@ -885,10 +879,6 @@ public class TextAnimation {
             service.setAnimating(player.getUniqueId(), false);
         }
     }
-
-    // =========================================================================
-    // Generic Frame Consumer Playback
-    // =========================================================================
 
     /**
      * Plays this text animation dispatching each rendered frame to a custom consumer.
@@ -972,6 +962,9 @@ public class TextAnimation {
             public void run() {
                 if (!player.isOnline()) {
                     cancel();
+                    if (extraOnComplete != null) {
+                        extraOnComplete.run();
+                    }
                     return;
                 }
 
@@ -1001,10 +994,6 @@ public class TextAnimation {
             }
         }.runTaskTimer(plugin, tickInterval, tickInterval);
     }
-
-    // =========================================================================
-    // Utilities & Resolution
-    // =========================================================================
 
     private static Plugin resolvePlugin() {
         ActionbarService actionbarService = ActionbarService.getInstance();
@@ -1055,7 +1044,7 @@ public class TextAnimation {
         protected Consumer<Player> onComplete;
 
         public Builder frame(@NonNull String text) {
-            return frame(text, (String) null);
+            return frame(text, null);
         }
 
         public Builder frame(@NonNull String text, @Nullable Sound sound, float pitch) {

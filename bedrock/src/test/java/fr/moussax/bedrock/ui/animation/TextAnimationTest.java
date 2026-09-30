@@ -239,4 +239,51 @@ class TextAnimationTest {
         assertDoesNotThrow(() -> anim.playActionbar(createMockPlugin(), players, () -> completed.set(true)));
         assertTrue(completed.get());
     }
+
+    @Test
+    @DisplayName("Expects collection title dispatch to filter nulls and complete barrier")
+    void testCollectionTitleDispatch() {
+        UUID uuid = UUID.randomUUID();
+        List<String> titlePackets = new ArrayList<>();
+        Player player = createMockPlayer(uuid, titlePackets);
+
+        List<Player> players = new ArrayList<>();
+        players.add(null);
+        players.add(player);
+
+        TextAnimation anim = TextAnimation.builder()
+                .frame("Title Test")
+                .finalTimes(TimeableTitle.of(0, 0, 0))
+                .build();
+        AtomicBoolean completed = new AtomicBoolean(false);
+
+        assertDoesNotThrow(() -> anim.playTitle(createMockPlugin(), players, () -> completed.set(true)));
+        assertTrue(completed.get());
+        assertTrue(titlePackets.contains("Title Test"));
+    }
+
+    @Test
+    @DisplayName("Expects offline player to immediately invoke completion callback without deadlocking barrier")
+    void testOfflinePlayerCompletesBarrier() {
+        Player offlinePlayer = createOfflineMockPlayer(UUID.randomUUID());
+        AtomicBoolean completed = new AtomicBoolean(false);
+
+        TextAnimation anim = TextAnimation.builder().frame("Test").build();
+        anim.play(createMockPlugin(), offlinePlayer, (_, _) -> {}, () -> completed.set(true));
+
+        assertTrue(completed.get(), "Offline player must trigger completion callback");
+    }
+
+    private Player createOfflineMockPlayer(UUID uuid) {
+        return (Player) Proxy.newProxyInstance(
+                Player.class.getClassLoader(),
+                new Class<?>[]{Player.class},
+                (_, method, _) -> {
+                    String name = method.getName();
+                    if ("getUniqueId".equals(name)) return uuid;
+                    if ("isOnline".equals(name)) return false;
+                    return null;
+                }
+        );
+    }
 }
