@@ -88,14 +88,12 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
 
         setItem(WORKBENCH_SLOT, new ItemBuilder(Material.CRAFTING_TABLE, "§fBlighted Workbench")
                 .addLore("§7Craft this recipe by using a blighted", "§7workbench or Quickcraft. ")
-                .toItemStack(), (_, _) -> {
-        });
+                .toItemStack());
 
         ItemStack resultItem = recipe.assemble(createVirtualCraftingGrid());
         int amount = recipe.getAmount() > 0 ? recipe.getAmount() : 1;
         resultItem.setAmount(amount);
-        setItem(RESULT_SLOT, resultItem, (_, _) -> {
-        });
+        setItem(RESULT_SLOT, resultItem);
 
         setupQuickcraftButton(player);
     }
@@ -107,8 +105,7 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
             CraftingObject craftingObject = pattern.get(i);
 
             if (craftingObject == null) {
-                setItem(CRAFTING_GRID_SLOTS[i], new ItemStack(Material.AIR), (_, _) -> {
-                });
+                setItem(CRAFTING_GRID_SLOTS[i], new ItemStack(Material.AIR));
                 continue;
             }
 
@@ -133,8 +130,7 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
                     RecipePreviewManager.openPreview(clickingPlayer, ingredient.getManager(), this);
                 });
             } else {
-                setItem(CRAFTING_GRID_SLOTS[i], new ItemStack(Material.AIR), (_, _) -> {
-                });
+                setItem(CRAFTING_GRID_SLOTS[i], new ItemStack(Material.AIR));
             }
         }
     }
@@ -176,11 +172,12 @@ public final class CraftingRecipePreviewMenu extends Menu implements TickableMen
 
         setItem(QUICKCRAFT_SLOT, builder.toItemStack(), (clickingPlayer, _) -> {
             if (!canQuickcraft) {
+                playErrorSound(clickingPlayer);
                 Messenger.warn(clickingPlayer, "You're missing some ingredients to Quickcraft this item!");
                 return;
             }
             PluginContext.delay(() -> executeQuickcraft(clickingPlayer, requirements), 1L);
-        });
+        }).withoutSound();
     }
 
     private void executeQuickcraft(Player player, Map<String, IngredientInfo> requirements) {

@@ -50,6 +50,56 @@ class MenuTest {
     }
 
     @Test
+    @DisplayName("Expects static MenuSlot to have no actions and muted sound")
+    void testStaticSlotBehavior() {
+        ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        Menu.MenuSlot staticSlot = new Menu.MenuSlot(item);
+
+        assertFalse(staticSlot.hasAction());
+        assertFalse(staticSlot.hasAction(ClickType.LEFT));
+        assertFalse(staticSlot.hasAction(ClickType.RIGHT));
+        assertTrue(staticSlot.isSoundMuted());
+
+        // Handling a click on an actionless slot must be a no-op
+        assertDoesNotThrow(() -> staticSlot.handle(null, ClickType.LEFT));
+    }
+
+    @Test
+    @DisplayName("Expects interactive MenuSlot to have default click sound and allow custom/muted sound")
+    void testInteractiveSlotSoundCustomization() {
+        ItemStack item = new ItemStack(Material.COMPASS);
+        Menu.MenuSlot slot = new Menu.MenuSlot(item, MenuItemInteraction.ANY_CLICK, (_, _) -> {});
+
+        assertTrue(slot.hasAction());
+        assertTrue(slot.hasAction(ClickType.LEFT));
+        assertFalse(slot.isSoundMuted());
+        assertTrue(slot.isUsingDefaultClickSound());
+        assertNull(slot.getSound());
+
+        // Custom page turn sound
+        slot.withPageTurnSound();
+        assertFalse(slot.isSoundMuted());
+        assertFalse(slot.isUsingDefaultClickSound());
+        assertTrue(slot.isUsingPageTurnSound());
+        assertNull(slot.getSound());
+
+        // Muted sound
+        slot.withoutSound();
+        assertTrue(slot.isSoundMuted());
+        assertFalse(slot.isUsingDefaultClickSound());
+        assertFalse(slot.isUsingPageTurnSound());
+
+        // Custom sound configuration with volume and pitch
+        slot.withSound(null, 0.8f, 0.5f);
+        assertNull(slot.getSound());
+        assertEquals(0.8f, slot.getVolume());
+        assertEquals(0.5f, slot.getPitch());
+        assertTrue(slot.isSoundMuted());
+        assertFalse(slot.isUsingDefaultClickSound());
+        assertFalse(slot.isUsingPageTurnSound());
+    }
+
+    @Test
     @DisplayName("Expects standard framed grid and border slots to match 54-slot inventory geometry")
     void testFramedSlotGeometry() {
         assertEquals(28, PaginatedMenu.INNER_GRID_SLOTS.length);
@@ -71,3 +121,5 @@ class MenuTest {
         }
     }
 }
+
+

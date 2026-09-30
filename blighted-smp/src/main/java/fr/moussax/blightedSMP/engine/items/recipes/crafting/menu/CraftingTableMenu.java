@@ -48,12 +48,10 @@ public final class CraftingTableMenu extends InteractiveMenu {
                 .setDisplayName("§r").setHideTooltip(true).toItemStack();
 
         for (int slot : INDICATOR_SLOTS_LEFT)
-            setItem(slot, indicator, (p, t) -> {
-            });
+            setItem(slot, indicator);
 
         for (int slot : INDICATOR_SLOTS_RIGHT)
-            setItem(slot, indicator, (p, t) -> {
-            });
+            setItem(slot, indicator);
 
         setupOutputSlot();
     }
@@ -70,6 +68,7 @@ public final class CraftingTableMenu extends InteractiveMenu {
             BlightedRecipe recipe = getMatchingRecipe();
             if (recipe == null) return;
 
+            playClickSound(player);
             if (isShiftClick(type)) {
                 craftMaximum(recipe, player);
             } else {
@@ -77,7 +76,7 @@ public final class CraftingTableMenu extends InteractiveMenu {
             }
 
             onUpdate(player);
-        });
+        }).withoutSound();
     }
 
     private void craftOnce(BlightedRecipe recipe, Player player) {

@@ -107,15 +107,13 @@ public final class ForgeMenu extends Menu implements TickableMenu {
             ItemStack noRecipe = new ItemBuilder(Material.BARRIER, "§cRecipe Required")
                     .addLore("§7Select a recipe from the", "§7recipe book to start forging.")
                     .toItemStack();
-            setItem(25, noRecipe, (_, _) -> {
-            });
+            setItem(25, noRecipe);
             return;
         }
 
         ItemStack result = recipe.getForgedItem().toItemStack().clone();
         result.setAmount(recipe.getForgedAmount());
-        setItem(25, result, (_, _) -> {
-        });
+        setItem(25, result);
     }
 
     private void checkRequirements(Player player) {
@@ -153,8 +151,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
         for (int i = 0; i < recipe.getIngredients().size() && i < GRID_SLOTS.length; i++) {
             CraftingObject ingredient = recipe.getIngredients().get(i);
             ItemStack displayItem = createDisplayItem(ingredient);
-            setItem(GRID_SLOTS[i], displayItem, (_, _) -> {
-            });
+            setItem(GRID_SLOTS[i], displayItem);
         }
     }
 
@@ -179,10 +176,8 @@ public final class ForgeMenu extends Menu implements TickableMenu {
 
         fillSlots(REQUIRED_ITEM_INDICATOR_SLOTS, sacrificedItemPane);
         fillSlots(FORGED_ITEM_INDICATOR_SLOTS, forgedItemPane);
-        setItem(ITEM_INDICATOR, new ItemBuilder(indicator).hideTooltip().toItemStack(), (_, _) -> {
-        });
-        setItem(14, new ItemBuilder(Material.BLAST_FURNACE).hideTooltip().toItemStack(), (_, _) -> {
-        });
+        setItem(ITEM_INDICATOR, new ItemBuilder(indicator).hideTooltip().toItemStack());
+        setItem(14, new ItemBuilder(Material.BLAST_FURNACE).hideTooltip().toItemStack());
     }
 
     private Material determineIndicatorMaterial() {
@@ -226,9 +221,9 @@ public final class ForgeMenu extends Menu implements TickableMenu {
             if (recipe != null && canForge) {
                 forgeItem(clickingPlayer);
             } else {
-                clickingPlayer.playSound(clickingPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
+                playErrorSound(clickingPlayer);
             }
-        });
+        }).withoutSound();
     }
 
     private void setupNavigationButtons() {
@@ -244,10 +239,8 @@ public final class ForgeMenu extends Menu implements TickableMenu {
         BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
         int currentFuel = blightedPlayer.getForgeFuel();
 
-        setItem(34, createFuelMeter(currentFuel), (_, _) -> {
-        });
-        setItem(52, createFuelGuide(), (_, _) -> {
-        });
+        setItem(34, createFuelMeter(currentFuel));
+        setItem(52, createFuelGuide());
         setItem(53, createInsertFuelButton(player), (_, _) -> handleFuelInsertion(blightedPlayer));
     }
 
@@ -454,8 +447,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
 
         ItemStack pane = new ItemBuilder(material).hideTooltip().toItemStack();
         for (int slot : slots) {
-            setItem(slot, pane, (_, _) -> {
-            });
+            setItem(slot, pane);
             inventory.setItem(slot, pane);
         }
     }
@@ -467,8 +459,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
         }
 
         ItemStack pane = new ItemBuilder(material).hideTooltip().toItemStack();
-        setItem(slot, pane, (_, _) -> {
-        });
+        setItem(slot, pane);
         inventory.setItem(slot, pane);
     }
 

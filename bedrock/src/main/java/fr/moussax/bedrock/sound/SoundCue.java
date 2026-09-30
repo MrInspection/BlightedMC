@@ -3,6 +3,7 @@ package fr.moussax.bedrock.sound;
 import fr.moussax.bedrock.scheduling.PluginContext;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
@@ -30,4 +31,15 @@ public record SoundCue(Sound sound, float volume, float pitch, long delay) {
         PluginContext.delay(() -> Objects.requireNonNull(location.getWorld())
             .playSound(location, sound, volume, pitch), delay);
     }
+
+    /**
+     * Plays this sound directly to the specified player after the configured delay.
+     *
+     * @param player the player who should hear the sound
+     */
+    public void play(@NonNull Player player) {
+        PluginContext.delay(() -> player.playSound(player.getLocation(), sound, volume, pitch), delay);
+    }
 }
+
+

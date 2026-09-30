@@ -280,10 +280,9 @@ public abstract class PaginatedMenu extends Menu {
                     .addLore("§7Page " + (pageNum - 1) + "/" + totalPages)
                     .toItemStack();
             setItem(backSlot, prevItem, (player, _) -> {
-                playPageTurnSound(player);
                 currentPage--;
                 refresh(player);
-            });
+            }).withPageTurnSound();
         } else {
             renderParentBackButton(backSlot);
         }
@@ -293,10 +292,9 @@ public abstract class PaginatedMenu extends Menu {
                     .addLore("§7Page " + (pageNum + 1) + "/" + totalPages)
                     .toItemStack();
             setItem(nextSlot, nextItem, (player, _) -> {
-                playPageTurnSound(player);
                 currentPage++;
                 refresh(player);
-            });
+            }).withPageTurnSound();
         } else if (useStandardFrame() && nextSlot < size) {
             setItem(nextSlot, MenuElementPreset.EMPTY_SLOT_FILLER);
         }
@@ -316,7 +314,6 @@ public abstract class PaginatedMenu extends Menu {
                 .toItemStack();
 
         setItem(slot, backItem, (player, _) -> {
-            playClickSound(player);
             if (menuSystem != null) {
                 menuSystem.popAndOpen(player, previousMenu);
             } else {

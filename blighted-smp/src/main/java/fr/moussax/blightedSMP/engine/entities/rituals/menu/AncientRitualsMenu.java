@@ -66,11 +66,7 @@ public final class AncientRitualsMenu extends Menu {
         }
 
         if (previousMenu != null) {
-            String targetName = ChatColor.stripColor(previousMenu.getTitle());
-            ItemStack backItem = new ItemBuilder(Material.ARROW, "§aGo Back")
-                    .addLore("§7To " + targetName)
-                    .toItemStack();
-            setItem(BACK_BUTTON_SLOT, backItem, (clickingPlayer, _) -> openSubMenu(previousMenu));
+            setBackButton(BACK_BUTTON_SLOT, previousMenu);
         }
 
         setCloseButton(CLOSE_BUTTON_SLOT);

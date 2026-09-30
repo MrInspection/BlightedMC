@@ -140,7 +140,7 @@ public final class RecipePreviewManager {
             ItemStack previousRecipeItem = new ItemBuilder(Material.ARROW, "§aPrevious Recipe").toItemStack();
             menu.setItem(48, previousRecipeItem, (clickingPlayer, _) ->
                     openPreview(clickingPlayer, previousRecipeObject, targetItem, previousMenu)
-            );
+            ).withPageTurnSound();
         } else if (previousMenu != null) {
             menu.setBackButton(48, previousMenu);
         }
@@ -150,7 +150,7 @@ public final class RecipePreviewManager {
             ItemStack nextRecipeItem = new ItemBuilder(Material.ARROW, "§aNext Recipe").toItemStack();
             menu.setItem(50, nextRecipeItem, (clickingPlayer, _) ->
                     openPreview(clickingPlayer, nextRecipeObject, targetItem, previousMenu)
-            );
+            ).withPageTurnSound();
         } else {
             menu.setItem(50, MenuElementPreset.EMPTY_SLOT_FILLER);
         }
