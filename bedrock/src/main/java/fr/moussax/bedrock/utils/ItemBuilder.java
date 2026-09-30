@@ -127,21 +127,29 @@ public class ItemBuilder {
     }
 
     private static int validateAmount(@NonNull Material material, int amount) {
-        if (amount < 1 || amount > material.getMaxStackSize()) {
-            throw new IllegalArgumentException("Amount must be between 1 and " + material.getMaxStackSize());
+        if (amount < 1 || amount > 99) {
+            throw new IllegalArgumentException("Amount must be between 1 and 99, but was " + amount);
         }
         return amount;
     }
 
-    private static void applyBase64Texture(SkullMeta meta, String base64Texture) {
-        String json = new String(Base64.getDecoder().decode(base64Texture), StandardCharsets.UTF_8);
-        JsonObject object = JsonParser.parseString(json)
-                .getAsJsonObject().getAsJsonObject("textures")
-                .getAsJsonObject("SKIN");
+    private static void applyCustomTexture(SkullMeta meta, String textureInput) {
+        String url;
+        if (textureInput.startsWith("http://") || textureInput.startsWith("https://")) {
+            url = textureInput;
+        } else if (textureInput.matches("^[a-fA-F0-9]{64}$")) {
+            url = "http://textures.minecraft.net/texture/" + textureInput;
+        } else {
+            String json = new String(Base64.getDecoder().decode(textureInput), StandardCharsets.UTF_8);
+            JsonObject object = JsonParser.parseString(json)
+                    .getAsJsonObject().getAsJsonObject("textures")
+                    .getAsJsonObject("SKIN");
+            url = object.get("url").getAsString();
+        }
 
-        String url = object.get("url").getAsString();
-        UUID id = UUID.randomUUID();
-        PlayerProfile profile = Bukkit.createPlayerProfile(id, id.toString().substring(0, 16));
+        UUID id = UUID.nameUUIDFromBytes(url.getBytes(StandardCharsets.UTF_8));
+        String profileName = id.toString().replace("-", "").substring(0, 16);
+        PlayerProfile profile = Bukkit.createPlayerProfile(id, profileName);
         PlayerTextures textures = profile.getTextures();
 
         try {
@@ -185,25 +193,13 @@ public class ItemBuilder {
     }
 
     /**
-     * Adds a line to the item lore.
-     *
-     * @param line the lore line
-     * @return this builder
-     */
-    public ItemBuilder addLore(String line) {
-        List<String> lore = itemMeta.getLore() != null ? new ArrayList<>(itemMeta.getLore()) : new ArrayList<>();
-        lore.add(ColorUtils.colorize(line));
-        itemMeta.setLore(lore);
-        return this;
-    }
-
-    /**
      * Adds multiple lore lines to the item.
      *
      * @param lines the lore lines to add
      * @return this builder
      */
-    public ItemBuilder addLore(List<String> lines) {
+    public ItemBuilder addLore(@Nullable List<String> lines) {
+        if (lines == null || lines.isEmpty()) return this;
         List<String> lore = itemMeta.getLore() != null ? new ArrayList<>(itemMeta.getLore()) : new ArrayList<>();
         lore.addAll(ColorUtils.colorize(lines));
         itemMeta.setLore(lore);
@@ -211,13 +207,57 @@ public class ItemBuilder {
     }
 
     /**
-     * Adds multiple lore lines to the item.
+     * Adds one or more lore lines to the item.
      *
      * @param lines the lore lines to add
      * @return this builder
      */
     public ItemBuilder addLore(String... lines) {
-        return addLore(Arrays.asList(lines));
+        return lines != null ? addLore(Arrays.asList(lines)) : this;
+    }
+
+    /**
+     * Sets the item lore, replacing any existing lore.
+     *
+     * @param lines the lore lines
+     * @return this builder
+     */
+    public ItemBuilder setLore(@Nullable List<String> lines) {
+        if (lines == null || lines.isEmpty()) {
+            itemMeta.setLore(null);
+            return this;
+        }
+        itemMeta.setLore(ColorUtils.colorize(lines));
+        return this;
+    }
+
+    /**
+     * Sets the item lore, replacing any existing lore.
+     *
+     * @param lines the lore lines
+     * @return this builder
+     */
+    public ItemBuilder setLore(String... lines) {
+        return setLore(lines != null ? Arrays.asList(lines) : Collections.emptyList());
+    }
+
+    /**
+     * Adds an empty line to the item lore.
+     *
+     * @return this builder
+     */
+    public ItemBuilder addEmptyLore() {
+        return addLore("");
+    }
+
+    /**
+     * Clears all lore from the item.
+     *
+     * @return this builder
+     */
+    public ItemBuilder clearLore() {
+        itemMeta.setLore(null);
+        return this;
     }
 
     /**
@@ -246,7 +286,7 @@ public class ItemBuilder {
      * @throws IllegalArgumentException if the amount exceeds the maximum stack size
      */
     public ItemBuilder setAmount(int amount) {
-        int effectiveMax = itemMeta.hasMaxStackSize() ? itemMeta.getMaxStackSize() : item.getType().getMaxStackSize();
+        int effectiveMax = itemMeta.hasMaxStackSize() ? itemMeta.getMaxStackSize() : 99;
         if (amount < 1 || amount > effectiveMax) {
             throw new IllegalArgumentException("Amount must be between 1 and " + effectiveMax);
         }
@@ -403,28 +443,18 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets the item's custom model identifier.
+     * Sets the item's custom model identifier, or {@code null} to clear it.
      *
-     * @param itemModel the model namespace key
+     * @param itemModel the model namespace key, or {@code null}
      * @return this builder
      */
-    public ItemBuilder setItemModel(@NonNull NamespacedKey itemModel) {
+    public ItemBuilder setItemModel(@Nullable NamespacedKey itemModel) {
         itemMeta.setItemModel(itemModel);
         return this;
     }
 
     /**
-     * Clears the item's custom model identifier.
-     *
-     * @return this builder
-     */
-    public ItemBuilder clearItemModel() {
-        itemMeta.setItemModel(null);
-        return this;
-    }
-
-    /**
-     * Sets the item's custom model data.
+     * Sets the item's custom model data, or {@code null} to remove it.
      *
      * @param data the custom model data value, or {@code null} to remove it
      * @return this builder
@@ -435,16 +465,6 @@ public class ItemBuilder {
             return this;
         }
 
-        return setCustomModelData(data.intValue());
-    }
-
-    /**
-     * Sets the item's custom model data.
-     *
-     * @param data the custom model data value
-     * @return this builder
-     */
-    public ItemBuilder setCustomModelData(int data) {
         CustomModelDataComponent component = itemMeta.getCustomModelDataComponent();
         component.setFloats(List.of((float) data));
         itemMeta.setCustomModelDataComponent(component);
@@ -452,23 +472,13 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets the tooltip style of the item.
+     * Sets the tooltip style of the item, or {@code null} to clear it.
      *
-     * @param tooltipStyle the tooltip style namespace key
+     * @param tooltipStyle the tooltip style namespace key, or {@code null}
      * @return this builder
      */
-    public ItemBuilder setTooltipStyle(@NonNull NamespacedKey tooltipStyle) {
+    public ItemBuilder setTooltipStyle(@Nullable NamespacedKey tooltipStyle) {
         itemMeta.setTooltipStyle(tooltipStyle);
-        return this;
-    }
-
-    /**
-     * Clears the item's tooltip style.
-     *
-     * @return this builder
-     */
-    public ItemBuilder clearTooltipStyle() {
-        itemMeta.setTooltipStyle(null);
         return this;
     }
 
@@ -543,7 +553,12 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder addEnchantmentGlint() {
+    /**
+     * Displays an enchantment glint on the item without enchantments.
+     *
+     * @return this builder
+     */
+    public ItemBuilder glow() {
         return setEnchantmentGlint(true);
     }
 
@@ -559,7 +574,30 @@ public class ItemBuilder {
     }
 
     /**
+     * Removes item flags from the item.
+     *
+     * @param flags the item flags to remove
+     * @return this builder
+     */
+    public ItemBuilder removeItemFlag(ItemFlag... flags) {
+        itemMeta.removeItemFlags(flags);
+        return this;
+    }
+
+    /**
+     * Adds all item flags to hide default vanilla item tooltips.
+     *
+     * @return this builder
+     */
+    public ItemBuilder hideAllFlags() {
+        return addItemFlag(ItemFlag.values());
+    }
+
+    /**
      * Adds or replaces an attribute modifier on the item.
+     *
+     * <p>If a modifier with the same {@link NamespacedKey} already exists for this attribute,
+     * it will be replaced.</p>
      *
      * @param attribute the attribute affected by the modifier
      * @param modifier  the attribute modifier
@@ -569,7 +607,9 @@ public class ItemBuilder {
         if (itemMeta.getAttributeModifiers() != null) {
             Collection<AttributeModifier> existing = itemMeta.getAttributeModifiers().get(attribute);
             for (AttributeModifier old : new ArrayList<>(existing)) {
-                itemMeta.removeAttributeModifier(attribute, old);
+                if (old.getKey().equals(modifier.getKey())) {
+                    itemMeta.removeAttributeModifier(attribute, old);
+                }
             }
         }
         itemMeta.addAttributeModifier(attribute, modifier);
@@ -577,7 +617,7 @@ public class ItemBuilder {
     }
 
     /**
-     * Adds an attribute modifier using the provided values.
+     * Adds an attribute modifier using the provided values and a deterministic namespaced key.
      *
      * @param attribute the attribute affected by the modifier
      * @param amount    the modifier amount
@@ -591,9 +631,43 @@ public class ItemBuilder {
             AttributeModifier.Operation operation,
             EquipmentSlotGroup slotGroup
     ) {
-        NamespacedKey key = new NamespacedKey(PluginContext.get(), UUID.randomUUID().toString());
+        String keyName = attribute.getKeyOrThrow().getKey() + "_" + slotGroup.toString().toLowerCase(Locale.ROOT);
+        NamespacedKey key = new NamespacedKey(PluginContext.get(), keyName);
         AttributeModifier modifier = new AttributeModifier(key, amount, operation, slotGroup);
         return addAttributeModifier(attribute, modifier);
+    }
+
+    /**
+     * Sets the item's base attack damage attribute modifier in the main hand.
+     *
+     * <p><b>Note:</b> In Minecraft's Data Component model, entity attack damage is managed via
+     * this attribute modifier rather than {@link #editWeapon(Consumer)}.</p>
+     *
+     * @param damage the attack damage value
+     * @return this builder
+     */
+    public ItemBuilder setAttackDamage(double damage) {
+        return addAttributeModifier(
+                Attribute.ATTACK_DAMAGE,
+                damage,
+                AttributeModifier.Operation.ADD_NUMBER,
+                EquipmentSlotGroup.MAINHAND
+        );
+    }
+
+    /**
+     * Sets the item's attack speed attribute modifier in the main hand.
+     *
+     * @param speed the attack speed modifier value
+     * @return this builder
+     */
+    public ItemBuilder setAttackSpeed(double speed) {
+        return addAttributeModifier(
+                Attribute.ATTACK_SPEED,
+                speed,
+                AttributeModifier.Operation.ADD_NUMBER,
+                EquipmentSlotGroup.MAINHAND
+        );
     }
 
     /**
@@ -602,7 +676,8 @@ public class ItemBuilder {
      * @param consumer the component modifier
      * @return this builder
      */
-    public ItemBuilder editEquippable(Consumer<EquippableComponent> consumer) {
+    public ItemBuilder editEquippable(@NonNull Consumer<EquippableComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
         EquippableComponent equippable = itemMeta.getEquippable();
         consumer.accept(equippable);
         itemMeta.setEquippable(equippable);
@@ -629,7 +704,8 @@ public class ItemBuilder {
      * @param consumer the component modifier
      * @return this builder
      */
-    public ItemBuilder editFood(Consumer<FoodComponent> consumer) {
+    public ItemBuilder editFood(@NonNull Consumer<FoodComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
         FoodComponent food = itemMeta.getFood();
         consumer.accept(food);
         itemMeta.setFood(food);
@@ -642,7 +718,8 @@ public class ItemBuilder {
      * @param consumer the component modifier
      * @return this builder
      */
-    public ItemBuilder editTool(Consumer<ToolComponent> consumer) {
+    public ItemBuilder editTool(@NonNull Consumer<ToolComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
         ToolComponent tool = itemMeta.getTool();
         consumer.accept(tool);
         itemMeta.setTool(tool);
@@ -652,13 +729,151 @@ public class ItemBuilder {
     /**
      * Modifies the item's weapon component.
      *
+     * <p><b>Important:</b> In Minecraft's Data Component model, {@link WeaponComponent} controls
+     * durability damage sustained by the weapon per attack ({@link WeaponComponent#setItemDamagePerAttack(int)})
+     * and shield disable duration ({@link WeaponComponent#setDisableBlockingForSeconds(float)}).
+     * It does <b>not</b> define the attack damage dealt to entities. To configure entity attack damage,
+     * use {@link #setAttackDamage(double)}.</p>
+     *
      * @param consumer the component modifier
      * @return this builder
      */
-    public ItemBuilder editWeapon(Consumer<WeaponComponent> consumer) {
+    public ItemBuilder editWeapon(@NonNull Consumer<WeaponComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
         WeaponComponent weapon = itemMeta.getWeapon();
         consumer.accept(weapon);
         itemMeta.setWeapon(weapon);
+        return this;
+    }
+
+    /**
+     * Modifies the item's piercing weapon component (spears, projectiles).
+     *
+     * @param consumer the component modifier
+     * @return this builder
+     */
+    public ItemBuilder editPiercingWeapon(@NonNull Consumer<PiercingWeaponComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
+        PiercingWeaponComponent piercing = itemMeta.getPiercingWeapon();
+        consumer.accept(piercing);
+        itemMeta.setPiercingWeapon(piercing);
+        return this;
+    }
+
+    /**
+     * Modifies the item's kinetic weapon component (maces, charge weapons).
+     *
+     * @param consumer the component modifier
+     * @return this builder
+     */
+    public ItemBuilder editKineticWeapon(@NonNull Consumer<KineticWeaponComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
+        KineticWeaponComponent kinetic = itemMeta.getKineticWeapon();
+        consumer.accept(kinetic);
+        itemMeta.setKineticWeapon(kinetic);
+        return this;
+    }
+
+    /**
+     * Modifies the item's attack range component (reach distance and margins).
+     *
+     * @param consumer the component modifier
+     * @return this builder
+     */
+    public ItemBuilder editAttackRange(@NonNull Consumer<AttackRangeComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
+        AttackRangeComponent attackRange = itemMeta.getAttackRange();
+        consumer.accept(attackRange);
+        itemMeta.setAttackRange(attackRange);
+        return this;
+    }
+
+    /**
+     * Modifies the item's attack blocking component (shields, defensive items).
+     *
+     * @param consumer the component modifier
+     * @return this builder
+     */
+    public ItemBuilder editBlocksAttacks(@NonNull Consumer<BlocksAttacksComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
+        BlocksAttacksComponent blocksAttacks = itemMeta.getBlocksAttacks();
+        consumer.accept(blocksAttacks);
+        itemMeta.setBlocksAttacks(blocksAttacks);
+        return this;
+    }
+
+    /**
+     * Modifies the item's swing animation component.
+     *
+     * @param consumer the component modifier
+     * @return this builder
+     */
+    public ItemBuilder editSwingAnimation(@NonNull Consumer<SwingAnimationComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
+        SwingAnimationComponent swing = itemMeta.getSwingAnimation();
+        consumer.accept(swing);
+        itemMeta.setSwingAnimation(swing);
+        return this;
+    }
+
+    /**
+     * Modifies the item's use effects component.
+     *
+     * @param consumer the component modifier
+     * @return this builder
+     */
+    public ItemBuilder editUseEffects(@NonNull Consumer<UseEffectsComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
+        UseEffectsComponent useEffects = itemMeta.getUseEffects();
+        consumer.accept(useEffects);
+        itemMeta.setUseEffects(useEffects);
+        return this;
+    }
+
+    /**
+     * Modifies the item's custom model data component (floats, strings, flags, colors).
+     *
+     * @param consumer the component modifier
+     * @return this builder
+     */
+    public ItemBuilder editCustomModelData(@NonNull Consumer<CustomModelDataComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
+        CustomModelDataComponent component = itemMeta.getCustomModelDataComponent();
+        consumer.accept(component);
+        itemMeta.setCustomModelDataComponent(component);
+        return this;
+    }
+
+    /**
+     * Sets the minimum attack charge required to strike with this item.
+     *
+     * @param charge minimum charge fraction (between 0.0 and 1.0), or null to clear
+     * @return this builder
+     */
+    public ItemBuilder setMinimumAttackCharge(@Nullable Float charge) {
+        itemMeta.setMinimumAttackCharge(charge);
+        return this;
+    }
+
+    /**
+     * Sets the break sound played when the item runs out of durability.
+     *
+     * @param sound the break sound, or null to clear
+     * @return this builder
+     */
+    public ItemBuilder setBreakSound(@Nullable Sound sound) {
+        itemMeta.setBreakSound(sound);
+        return this;
+    }
+
+    /**
+     * Sets the custom damage type dealt by this item.
+     *
+     * @param damageType the damage type, or null to clear
+     * @return this builder
+     */
+    public ItemBuilder setDamageType(@Nullable DamageType damageType) {
+        itemMeta.setDamageType(damageType);
         return this;
     }
 
@@ -668,7 +883,8 @@ public class ItemBuilder {
      * @param consumer the component modifier
      * @return this builder
      */
-    public ItemBuilder editJukeboxPlayable(Consumer<JukeboxPlayableComponent> consumer) {
+    public ItemBuilder editJukeboxPlayable(@NonNull Consumer<JukeboxPlayableComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
         JukeboxPlayableComponent jukebox = itemMeta.getJukeboxPlayable();
         consumer.accept(jukebox);
         itemMeta.setJukeboxPlayable(jukebox);
@@ -681,7 +897,8 @@ public class ItemBuilder {
      * @param consumer the component modifier
      * @return this builder
      */
-    public ItemBuilder editUseCooldown(Consumer<UseCooldownComponent> consumer) {
+    public ItemBuilder editUseCooldown(@NonNull Consumer<UseCooldownComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
         UseCooldownComponent cooldown = itemMeta.getUseCooldown();
         consumer.accept(cooldown);
         itemMeta.setUseCooldown(cooldown);
@@ -694,7 +911,8 @@ public class ItemBuilder {
      * @param consumer the component modifier
      * @return this builder
      */
-    public ItemBuilder editConsumable(Consumer<ConsumableComponent> consumer) {
+    public ItemBuilder editConsumable(@NonNull Consumer<ConsumableComponent> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
         ConsumableComponent consumable = itemMeta.getConsumable();
         consumer.accept(consumable);
         itemMeta.setConsumable(consumable);
@@ -761,6 +979,9 @@ public class ItemBuilder {
      */
     public ItemBuilder setPotionColor(@NonNull String hex) {
         this.potionColor = ColorUtils.fromHex(hex);
+        if (this.itemMeta instanceof PotionMeta potionMeta) {
+            potionMeta.setColor(this.potionColor);
+        }
         return this;
     }
 
@@ -810,6 +1031,9 @@ public class ItemBuilder {
      */
     public ItemBuilder setLeatherColor(@NonNull String hex) {
         this.leatherColor = ColorUtils.fromHex(hex);
+        if (isLeatherDyeable(item.getType()) && itemMeta instanceof LeatherArmorMeta leatherArmorMeta) {
+            leatherArmorMeta.setColor(this.leatherColor);
+        }
         return this;
     }
 
@@ -824,6 +1048,9 @@ public class ItemBuilder {
      */
     public ItemBuilder setArmorTrim(@NonNull TrimMaterial material, @NonNull TrimPattern pattern) {
         this.armorTrim = new ArmorTrim(material, pattern);
+        if (itemMeta instanceof ArmorMeta armorMeta) {
+            armorMeta.setTrim(this.armorTrim);
+        }
         return this;
     }
 
@@ -837,6 +1064,9 @@ public class ItemBuilder {
      */
     public ItemBuilder addBannerPatterns(List<Pattern> patterns) {
         this.bannerPatterns = patterns;
+        if (itemMeta instanceof BannerMeta bannerMeta) {
+            bannerMeta.setPatterns(patterns);
+        }
         return this;
     }
 
@@ -849,7 +1079,7 @@ public class ItemBuilder {
      * @return this builder
      */
     public ItemBuilder setSkullOwner(@NonNull UUID playerId) {
-        item.setType(Material.PLAYER_HEAD);
+        ensureSkullMeta();
         this.skullOwnerProfile = Bukkit.createPlayerProfile(playerId);
         this.base64Texture = null;
         return this;
@@ -864,7 +1094,7 @@ public class ItemBuilder {
      * @return this builder
      */
     public ItemBuilder setSkullOwner(@NonNull String playerName) {
-        item.setType(Material.PLAYER_HEAD);
+        ensureSkullMeta();
         Player onlinePlayer = Bukkit.getPlayerExact(playerName);
         this.skullOwnerProfile = onlinePlayer != null ? onlinePlayer.getPlayerProfile() : Bukkit.createPlayerProfile(playerName);
         this.base64Texture = null;
@@ -872,15 +1102,15 @@ public class ItemBuilder {
     }
 
     /**
-     * Sets the skull texture using a Base64 texture value.
+     * Sets the skull texture using a Base64 texture value, texture URL, or skin hash.
      *
      * <p>The item type is changed to {@link Material#PLAYER_HEAD}.</p>
      *
-     * @param base64Texture the Base64 encoded texture data
+     * @param base64Texture the Base64 encoded texture data, URL, or hash
      * @return this builder
      */
     public ItemBuilder setCustomSkullTexture(@NonNull String base64Texture) {
-        item.setType(Material.PLAYER_HEAD);
+        ensureSkullMeta();
         this.base64Texture = base64Texture;
         this.skullOwnerProfile = null;
         return this;
@@ -894,7 +1124,14 @@ public class ItemBuilder {
     public ItemBuilder enchantedBook() {
         if (item.getType() != Material.ENCHANTED_BOOK) {
             item.setType(Material.ENCHANTED_BOOK);
-            this.itemMeta = this.item.getItemMeta();
+            ItemMeta newMeta = Bukkit.getItemFactory().getItemMeta(Material.ENCHANTED_BOOK);
+            if (newMeta != null) {
+                if (itemMeta.hasDisplayName()) newMeta.setDisplayName(itemMeta.getDisplayName());
+                if (itemMeta.hasItemName()) newMeta.setItemName(itemMeta.getItemName());
+                if (itemMeta.hasLore()) newMeta.setLore(itemMeta.getLore());
+                newMeta.addItemFlags(itemMeta.getItemFlags().toArray(new ItemFlag[0]));
+                this.itemMeta = newMeta;
+            }
         }
         return this;
     }
@@ -971,24 +1208,6 @@ public class ItemBuilder {
         return itemMeta.getDisplayName();
     }
 
-    /**
-     * Returns the configured enchantments.
-     *
-     * @return unmodifiable enchantment map
-     */
-    public Map<Enchantment, Integer> getEnchantments() {
-        return Collections.unmodifiableMap(enchantments);
-    }
-
-    /**
-     * Returns the configured banner patterns.
-     *
-     * @return an unmodifiable list of banner patterns
-     */
-    public List<Pattern> getBannerPatterns() {
-        return bannerPatterns != null ? Collections.unmodifiableList(bannerPatterns) : Collections.emptyList();
-    }
-
     private void applyEnchantments() {
         if (enchantments.isEmpty()) return;
         if (itemMeta instanceof EnchantmentStorageMeta storageMeta) {
@@ -1033,7 +1252,21 @@ public class ItemBuilder {
             if (skullOwnerProfile != null) {
                 skullMeta.setOwnerProfile(skullOwnerProfile);
             } else if (base64Texture != null) {
-                applyBase64Texture(skullMeta, base64Texture);
+                applyCustomTexture(skullMeta, base64Texture);
+            }
+        }
+    }
+
+    private void ensureSkullMeta() {
+        if (item.getType() != Material.PLAYER_HEAD) {
+            item.setType(Material.PLAYER_HEAD);
+            ItemMeta newMeta = Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
+            if (newMeta != null) {
+                if (itemMeta.hasDisplayName()) newMeta.setDisplayName(itemMeta.getDisplayName());
+                if (itemMeta.hasItemName()) newMeta.setItemName(itemMeta.getItemName());
+                if (itemMeta.hasLore()) newMeta.setLore(itemMeta.getLore());
+                newMeta.addItemFlags(itemMeta.getItemFlags().toArray(new ItemFlag[0]));
+                this.itemMeta = newMeta;
             }
         }
     }
