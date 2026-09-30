@@ -19,7 +19,7 @@ import fr.moussax.blightedSMP.engine.quest.BlightedQuestListener;
 import fr.moussax.bedrock.ui.actionbar.Actionbar;
 import fr.moussax.bedrock.ui.menu.system.MenuListener;
 import fr.moussax.bedrock.ui.menu.system.MenuSystem;
-import fr.moussax.bedrock.ui.sign.SignInputListener;
+import fr.moussax.bedrock.ui.sign.SignInput;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
@@ -36,7 +36,6 @@ public final class EventsRegistry {
     private MenuSystem menuSystem;
     private PlayerHudManager playerHudManager;
     private SpawnableEntitiesListener spawnableEntitiesListener;
-    private SignInputListener signInputListener;
 
     /**
      * Initializes the event-driven subsystems and registers all BlightedMC
@@ -49,6 +48,7 @@ public final class EventsRegistry {
     public void initializeListeners() {
         PluginManager pluginManager = Bukkit.getPluginManager();
         menuSystem = new MenuSystem(instance);
+        SignInput.initialize(instance);
         Actionbar.initialize(instance, 20L);
         playerHudManager = new PlayerHudManager(instance);
 
@@ -60,10 +60,8 @@ public final class EventsRegistry {
 
         spawnableEntitiesListener = new SpawnableEntitiesListener();
         EntitiesRegistry.addOnRegisterCallback(spawnableEntitiesListener::invalidateCache);
-        signInputListener = new SignInputListener();
 
         pluginManager.registerEvents(new MenuListener(menuSystem), instance);
-        pluginManager.registerEvents(signInputListener, instance);
         pluginManager.registerEvents(new BlightedEntitiesListener(), instance);
         pluginManager.registerEvents(new EntityComponentListener(), instance);
         pluginManager.registerEvents(spawnableEntitiesListener, instance);
@@ -91,13 +89,9 @@ public final class EventsRegistry {
 
     /**
      * Cleans up listener-specific resources that require explicit disposal.
-     *
-     * <p>If the sign input listener has not been initialized, this method has no effect.</p>
      */
     public void cleanup() {
-        if (signInputListener != null) {
-            signInputListener.cleanup();
-        }
+        SignInput.cleanup(instance);
         Actionbar.unregisterAll(instance);
     }
 

@@ -7,7 +7,7 @@ import fr.moussax.bedrock.text.Formatter;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.types.PaginatedMenu;
 import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
-import fr.moussax.bedrock.ui.sign.SignInputMenu;
+import fr.moussax.bedrock.ui.sign.SignInput;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -108,18 +108,11 @@ public final class ItemRegistryMenu {
     }
 
     private static void openSearchSign(Player player, Menu previousMenu) {
-        SignInputMenu.builder()
-            .lines("", "^^^^^^", "Enter your", "search!")
-            .onComplete(result -> {
-                String search = result.getFirstLine().trim();
-                if (search.isEmpty()) {
-                    if (previousMenu != null) previousMenu.open(player);
-                    else player.closeInventory();
-                    return;
-                }
-                new SearchResultsPaginatedMenu(search, previousMenu).open(player);
-            })
-            .open(player);
+        SignInput.builder()
+                .lines("", "^^^^^^", "Enter your", "search!")
+                .reopenOnCancel(previousMenu)
+                .onSubmit((_, search) -> new SearchResultsPaginatedMenu(search, previousMenu).open(player))
+                .open(player);
     }
 
     public static class BlightedItemsPaginatedMenu extends PaginatedMenu {

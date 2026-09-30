@@ -20,6 +20,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.lang.reflect.Field;
 import java.util.NoSuchElementException;
 
+/**
+ * Listens for player connections and intercepts incoming sign update packets in the Netty channel pipeline.
+ */
 public final class SignInputListener implements Listener {
     private static final String HANDLER_NAME = "blighted_sign_input";
     private static final Field NETWORK_CONNECTION_FIELD;
@@ -33,11 +36,30 @@ public final class SignInputListener implements Listener {
         }
     }
 
+    /**
+     * Constructs a sign input listener and injects packet interception for all currently online players.
+     */
+    public SignInputListener() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            inject(player);
+        }
+    }
+
+    /**
+     * Intercepts the player's network pipeline upon joining the server.
+     *
+     * @param event the join event containing the connecting player
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent event) {
         inject(event.getPlayer());
     }
 
+    /**
+     * Cleans up packet interception and active sign input sessions when a player disconnects.
+     *
+     * @param event the quit event containing the disconnecting player
+     */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
@@ -48,6 +70,11 @@ public final class SignInputListener implements Listener {
         }
     }
 
+    /**
+     * Injects the sign update packet interceptor into a player's Netty channel pipeline.
+     *
+     * @param player player to inject
+     */
     public void inject(Player player) {
         try {
             ChannelPipeline pipeline = getPipeline(player);
@@ -70,6 +97,11 @@ public final class SignInputListener implements Listener {
         }
     }
 
+    /**
+     * Removes the sign update packet interceptor from a player's channel pipeline.
+     *
+     * @param player player to uninject
+     */
     public void uninject(Player player) {
         try {
             ChannelPipeline pipeline = getPipeline(player);
@@ -92,6 +124,9 @@ public final class SignInputListener implements Listener {
         }
     }
 
+    /**
+     * Uninjects packet interceptors from all currently online players and clears active sessions.
+     */
     public void cleanup() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             uninject(player);

@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 import java.util.UUID;
@@ -24,18 +25,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class SignInputManager {
     private static final Map<UUID, Session> sessions = new ConcurrentHashMap<>();
 
-    private record Session(SignInputMenu menu, BlockPos position) {
+    private SignInputManager() {
+    }
+
+    private record Session(SignInput input, BlockPos position) {
     }
 
     /**
      * Registers an active sign input session for a player.
      *
-     * @param PlayerId player unique identifier
-     * @param menu     sign input menu handling the session
+     * @param playerId player unique identifier
+     * @param input    sign input handling the session
      * @param position temporary sign position
      */
-    static void register(UUID PlayerId, SignInputMenu menu, BlockPos position) {
-        sessions.put(PlayerId, new Session(menu, position));
+    static void register(UUID playerId, SignInput input, BlockPos position) {
+        sessions.put(playerId, new Session(input, position));
     }
 
     /**
@@ -47,7 +51,7 @@ public final class SignInputManager {
      * @param player player who submitted the input
      * @param lines  submitted sign lines
      */
-    public static void handleSignUpdate(Player player, String[] lines) {
+    public static void handleSignUpdate(@NonNull Player player, String @NonNull [] lines) {
         Session session = sessions.remove(player.getUniqueId());
         if (session == null) return;
 
@@ -65,11 +69,10 @@ public final class SignInputManager {
         }
 
         Bukkit.getScheduler().runTask(PluginContext.get(), () -> {
-                    if (player.isOnline()) {
-                        session.menu().handleComplete(player, lines);
-                    }
-                }
-        );
+            if (player.isOnline()) {
+                session.input().handleComplete(player, lines);
+            }
+        });
     }
 
     /**
