@@ -260,7 +260,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
                         " §7craft advanced items.",
                         ""
                 )
-                .addEnchantmentGlint().toItemStack();
+                .glow().toItemStack();
     }
 
     private ItemStack createFuelGuide() {
@@ -282,7 +282,7 @@ public final class ForgeMenu extends Menu implements TickableMenu {
                         "   §8‣ §cPlasma Bucket §8- §650,000mB",
                         ""
                 )
-                .addEnchantmentGlint()
+                .glow()
                 .toItemStack();
     }
 

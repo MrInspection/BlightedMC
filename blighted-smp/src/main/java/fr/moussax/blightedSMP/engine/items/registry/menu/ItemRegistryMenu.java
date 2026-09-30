@@ -26,20 +26,17 @@ public final class ItemRegistryMenu {
     private static final int[] CATEGORY_SLOTS = PaginatedMenu.INNER_GRID_SLOTS;
     private static final int SEARCH_SLOT = 41;
 
-    private static ItemBuilder hideAllItemFlags(ItemBuilder builder) {
-        return builder.addItemFlag(
-            ItemFlag.HIDE_ATTRIBUTES,
-            ItemFlag.HIDE_UNBREAKABLE,
-            ItemFlag.HIDE_ENCHANTS,
-            ItemFlag.HIDE_DESTROYS,
-            ItemFlag.HIDE_PLACED_ON
-        );
-    }
-
     private static ItemStack buildMenuItem(ItemStack base, String name, List<String> lore) {
-        ItemBuilder builder = new ItemBuilder(base).setDisplayName(name);
-        if (lore != null) lore.forEach(builder::addLore);
-        hideAllItemFlags(builder);
+        ItemBuilder builder = new ItemBuilder(base)
+                .setDisplayName(name)
+                .addItemFlag(
+                        ItemFlag.HIDE_ATTRIBUTES,
+                        ItemFlag.HIDE_UNBREAKABLE,
+                        ItemFlag.HIDE_ENCHANTS,
+                        ItemFlag.HIDE_DESTROYS,
+                        ItemFlag.HIDE_PLACED_ON
+                );
+        if (lore != null) builder.setLore(lore);
         return builder.toItemStack();
     }
 
@@ -163,7 +160,7 @@ public final class ItemRegistryMenu {
                 stack.setItemMeta(meta);
             }
 
-            return hideAllItemFlags(new ItemBuilder(stack)).toItemStack();
+            return stack;
         }
 
         @Override

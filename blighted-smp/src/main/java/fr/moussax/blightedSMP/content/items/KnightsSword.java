@@ -7,9 +7,6 @@ import fr.moussax.blightedSMP.engine.items.ItemType;
 import fr.moussax.blightedSMP.registry.RegistryModule;
 import java.util.function.Consumer;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.inventory.EquipmentSlotGroup;
 
 public class KnightsSword implements RegistryModule<Consumer<BlightedItem>> {
 
@@ -29,8 +26,8 @@ public class KnightsSword implements RegistryModule<Consumer<BlightedItem>> {
         );
 
         knightSword.addAbility(new KnightsSlamAbility(), false);
-        knightSword.addAttributeModifier(Attribute.ATTACK_DAMAGE, 10, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
-        knightSword.addAttributeModifier(Attribute.ATTACK_SPEED, 1.2, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
+        knightSword.setAttackDamage(10);
+        knightSword.setAttackSpeed(1.2);
 
         registry.accept(knightSword);
     }

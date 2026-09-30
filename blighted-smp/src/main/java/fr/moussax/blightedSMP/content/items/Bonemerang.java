@@ -24,7 +24,7 @@ public class Bonemerang implements RegistryModule<Consumer<BlightedItem>> {
                 ItemRarity.EPIC.getName() + " BOW"
         );
         bonemerang.addAbility(new BonemerangAbility(), false);
-        bonemerang.addEnchantmentGlint();
+        bonemerang.glow();
         bonemerang.unstackable();
 
         registry.accept(bonemerang);

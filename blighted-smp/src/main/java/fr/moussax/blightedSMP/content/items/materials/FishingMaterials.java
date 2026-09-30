@@ -29,7 +29,7 @@ public class FishingMaterials implements RegistryModule<Consumer<BlightedItem>> 
                 ItemRarity.UNCOMMON.getName()
         );
         blightedAlgae.addRule(ItemRule.PREVENT_PLACEMENT);
-        blightedAlgae.addEnchantmentGlint();
+        blightedAlgae.glow();
 
         BlightedItem smokedSalmonPlate = new BlightedItem("SMOKED_SALMON_PLATE", ItemType.UNCATEGORIZED, ItemRarity.UNCOMMON, Material.COOKED_SALMON);
         smokedSalmonPlate.setDisplayName("Smoked Salmon Plate");
@@ -105,7 +105,7 @@ public class FishingMaterials implements RegistryModule<Consumer<BlightedItem>> 
                 "",
                 ItemRarity.RARE.getName()
         );
-        barnacleCluster.addEnchantmentGlint();
+        barnacleCluster.glow();
 
         BlightedItem coralFragment = new BlightedItem("CORAL_FRAGMENT", ItemType.MATERIAL, ItemRarity.RARE, Material.FIRE_CORAL);
         coralFragment.setDisplayName("Coral Fragment");
@@ -118,7 +118,7 @@ public class FishingMaterials implements RegistryModule<Consumer<BlightedItem>> 
                 ItemRarity.RARE.getName()
         );
         coralFragment.addRule(ItemRule.PREVENT_PLACEMENT);
-        coralFragment.addEnchantmentGlint();
+        coralFragment.glow();
 
         BlightedItem messageInABottle = new BlightedItem("MESSAGE_IN_A_BOTTLE", ItemType.UNCATEGORIZED, ItemRarity.RARE, Material.GLASS_BOTTLE);
         messageInABottle.setDisplayName("Message in a Bottle");
@@ -159,7 +159,7 @@ public class FishingMaterials implements RegistryModule<Consumer<BlightedItem>> 
                 player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 300, 0));
             }
         });
-        blightedSushi.addEnchantmentGlint();
+        blightedSushi.glow();
 
         BlightedItem abyssalPearl = new BlightedItem("ABYSSAL_PEARL", ItemType.MATERIAL, ItemRarity.EPIC, Material.ENDER_PEARL);
         abyssalPearl.setDisplayName("Abyssal Pearl");
@@ -172,7 +172,7 @@ public class FishingMaterials implements RegistryModule<Consumer<BlightedItem>> 
                 ItemRarity.EPIC.getName()
         );
         abyssalPearl.addRule(ItemRule.PREVENT_PROJECTILE_LAUNCH);
-        abyssalPearl.addEnchantmentGlint();
+        abyssalPearl.glow();
 
         BlightedItem drownedResearchCodex = new BlightedItem("DROWNED_RESEARCH_CODEX", ItemType.UNCATEGORIZED, ItemRarity.EPIC, Material.KNOWLEDGE_BOOK);
         drownedResearchCodex.setDisplayName("Drowned Research Codex");

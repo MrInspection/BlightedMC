@@ -16,7 +16,7 @@ public class GlimmeringEye implements RegistryModule<Consumer<BlightedItem>> {
         BlightedItem glimmeringEye = new BlightedItem("GLIMMERING_EYE", ItemType.UNCATEGORIZED, ItemRarity.RARE, Material.ENDER_EYE);
         glimmeringEye.setDisplayName("Glimmering Eye");
 
-        glimmeringEye.addEnchantmentGlint();
+        glimmeringEye.glow();
         glimmeringEye.addAbility(new VoidStepAbility());
         glimmeringEye.addLore("", ItemRarity.RARE.getName());
         glimmeringEye.addRule(ItemRule.PREVENT_PROJECTILE_LAUNCH);

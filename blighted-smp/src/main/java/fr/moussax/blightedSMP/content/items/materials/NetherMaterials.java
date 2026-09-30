@@ -16,37 +16,37 @@ public class NetherMaterials implements RegistryModule<Consumer<BlightedItem>> {
         BlightedItem enchantedGhastTear = new BlightedItem("ENCHANTED_GHAST_TEAR", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.GHAST_TEAR);
         enchantedGhastTear.setDisplayName("Enchanted Ghast Tear");
         enchantedGhastTear.addLore(ItemRarity.UNCOMMON.getName());
-        enchantedGhastTear.addEnchantmentGlint();
+        enchantedGhastTear.glow();
 
         BlightedItem enchantedMagmaCream = new BlightedItem("ENCHANTED_MAGMA_CREAM", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.MAGMA_CREAM);
         enchantedMagmaCream.setDisplayName("Enchanted Magma Cream");
         enchantedMagmaCream.addLore(ItemRarity.UNCOMMON.getName());
-        enchantedMagmaCream.addEnchantmentGlint();
+        enchantedMagmaCream.glow();
 
         BlightedItem enchantedQuartz = new BlightedItem("ENCHANTED_QUARTZ", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.QUARTZ);
         enchantedQuartz.setDisplayName("Enchanted Quartz");
         enchantedQuartz.addLore(ItemRarity.UNCOMMON.getName());
-        enchantedQuartz.addEnchantmentGlint();
+        enchantedQuartz.glow();
 
         BlightedItem enchantedBlazePowder = new BlightedItem("ENCHANTED_BLAZE_POWDER", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.BLAZE_POWDER);
         enchantedBlazePowder.setDisplayName("Enchanted Blaze Powder");
         enchantedBlazePowder.addLore(ItemRarity.UNCOMMON.getName());
-        enchantedBlazePowder.addEnchantmentGlint();
+        enchantedBlazePowder.glow();
 
         BlightedItem enchantedBlazeRod = new BlightedItem("ENCHANTED_BLAZE_ROD", ItemType.MATERIAL, ItemRarity.RARE, Material.BLAZE_ROD);
         enchantedBlazeRod.setDisplayName("Enchanted Blaze Rod");
         enchantedBlazeRod.addLore(ItemRarity.RARE.getName());
-        enchantedBlazeRod.addEnchantmentGlint();
+        enchantedBlazeRod.glow();
 
         BlightedItem enchantedGlowstoneDust = new BlightedItem("ENCHANTED_GLOWSTONE_DUST", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.GLOWSTONE_DUST);
         enchantedGlowstoneDust.setDisplayName("Enchanted Glowstone Dust");
         enchantedGlowstoneDust.addLore(ItemRarity.UNCOMMON.getName());
-        enchantedGlowstoneDust.addEnchantmentGlint();
+        enchantedGlowstoneDust.glow();
 
         BlightedItem enchantedNetherWart = new BlightedItem("ENCHANTED_NETHER_WART", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.NETHER_WART);
         enchantedNetherWart.setDisplayName("Enchanted Nether Wart");
         enchantedNetherWart.addLore(ItemRarity.UNCOMMON.getName());
-        enchantedNetherWart.addEnchantmentGlint();
+        enchantedNetherWart.glow();
 
         BlightedItem flames = new BlightedItem("FLAMES", ItemType.MATERIAL, ItemRarity.RARE, Material.BLAZE_POWDER);
         flames.setDisplayName("Flames");
@@ -57,7 +57,7 @@ public class NetherMaterials implements RegistryModule<Consumer<BlightedItem>> {
                 "",
                 ItemRarity.RARE.getName()
         );
-        flames.addEnchantmentGlint();
+        flames.glow();
 
         BlightedItem sulfur = new BlightedItem("SULFUR", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.GLOWSTONE_DUST);
         sulfur.setDisplayName("Sulfur");
@@ -72,12 +72,12 @@ public class NetherMaterials implements RegistryModule<Consumer<BlightedItem>> {
         BlightedItem enchantedSulfur = new BlightedItem("ENCHANTED_SULFUR", ItemType.MATERIAL, ItemRarity.RARE, Material.GLOWSTONE_DUST);
         enchantedSulfur.setDisplayName("Enchanted Sulfur");
         enchantedSulfur.addLore(ItemRarity.RARE.getName());
-        enchantedSulfur.addEnchantmentGlint();
+        enchantedSulfur.glow();
 
         BlightedItem enchantedNetherrack = new BlightedItem("ENCHANTED_NETHERRACK", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.NETHERRACK);
         enchantedNetherrack.setDisplayName("Enchanted Netherrack");
         enchantedNetherrack.addLore(ItemRarity.UNCOMMON.getName());
-        enchantedNetherrack.addEnchantmentGlint();
+        enchantedNetherrack.glow();
 
         // TODO - Finish items
         BlightedItem vengefulEye = new BlightedItem("VENGEFUL_EYE", ItemType.UNCATEGORIZED, ItemRarity.EPIC, Material.PLAYER_HEAD);
@@ -105,13 +105,13 @@ public class NetherMaterials implements RegistryModule<Consumer<BlightedItem>> {
             food.setSaturation(14.4f);
             food.setCanAlwaysEat(true);
         });
-        cremeBrulee.addEnchantmentGlint();
+        cremeBrulee.glow();
 
         BlightedItem suspiciousFungus = new BlightedItem("SUSPICIOUS_FUNGUS", ItemType.UNCATEGORIZED, ItemRarity.RARE, Material.CRIMSON_FUNGUS);
         suspiciousFungus.setDisplayName("SuSpIcIoUs Fungus");
         suspiciousFungus.addLore(ItemRarity.RARE.getName());
         suspiciousFungus.addRule(ItemRule.PREVENT_PLACEMENT);
-        suspiciousFungus.addEnchantmentGlint();
+        suspiciousFungus.glow();
 
         registry.accept(enchantedGhastTear);
         registry.accept(enchantedMagmaCream);
