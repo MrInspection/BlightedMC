@@ -7,7 +7,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
@@ -68,7 +67,7 @@ public final class SignInputManager {
             }
         }
 
-        Bukkit.getScheduler().runTask(PluginContext.get(), () -> {
+        PluginContext.run(() -> {
             if (player.isOnline()) {
                 session.input().handleComplete(player, lines);
             }
