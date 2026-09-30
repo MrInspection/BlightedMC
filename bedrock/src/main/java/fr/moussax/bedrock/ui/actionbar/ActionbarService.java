@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  */
 public final class ActionbarService implements Listener {
 
-    private static final long FADE_TIMEOUT_MILLIS = 1750L;
+    private static final long MIN_BURST_INTERVAL_MILLIS = 250L;
 
     @Getter
     @Setter
@@ -470,7 +470,16 @@ public final class ActionbarService implements Listener {
         String lastText = lastSentTexts.get(uuid);
         Long lastSentTimestamp = lastSentTimestamps.get(uuid);
 
-        if (content.equals(lastText) && lastSentTimestamp != null && (now - lastSentTimestamp) < FADE_TIMEOUT_MILLIS) {
+        if (content.isEmpty()) {
+            if (lastText != null && !lastText.isEmpty()) {
+                sendRawPacket(player, "");
+                lastSentTexts.put(uuid, "");
+                lastSentTimestamps.put(uuid, now);
+            }
+            return;
+        }
+
+        if (content.equals(lastText) && lastSentTimestamp != null && (now - lastSentTimestamp) < MIN_BURST_INTERVAL_MILLIS) {
             return;
         }
 
