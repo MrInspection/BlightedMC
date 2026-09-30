@@ -1,5 +1,7 @@
 package fr.moussax.blightedSMP.engine.player;
 
+import fr.moussax.bedrock.ui.title.TimeableTitle;
+import fr.moussax.bedrock.ui.title.Title;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.engine.entities.listeners.BlightedEntitiesListener;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
@@ -32,7 +34,7 @@ public final class PlayerListener implements Listener {
             player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 140, 0, false, false, false));
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 1, false, false, false));
 
-            player.sendTitle("§f§lThe Blight Awakens", "§7The whispers fade into reality...", 10, 80, 20);
+            Title.send(player, "§f§lThe Blight Awakens", "§7The whispers fade into reality...", TimeableTitle.of(10, 80, 20));
 
             player.sendMessage("\n \n");
             player.sendMessage(" §f" + player.getName() + "§7, the §5§lBlight §7has already begun to take root...\n ");

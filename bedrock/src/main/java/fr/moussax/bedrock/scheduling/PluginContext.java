@@ -25,6 +25,13 @@ public final class PluginContext {
     }
 
     /**
+     * Unbinds the current plugin instance from this context.
+     */
+    public static void unbind() {
+        plugin = null;
+    }
+
+    /**
      * Retrieves the bound plugin instance.
      *
      * @return the bound plugin instance

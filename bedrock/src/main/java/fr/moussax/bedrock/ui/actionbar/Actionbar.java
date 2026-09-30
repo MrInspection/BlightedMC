@@ -1,12 +1,16 @@
 package fr.moussax.bedrock.ui.actionbar;
 
+import fr.moussax.bedrock.ui.animation.TextAnimation;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
@@ -427,5 +431,49 @@ public final class Actionbar {
         if (service != null) {
             service.clearAlerts(player);
         }
+    }
+
+    /**
+     * Plays a high-performance text animation on the player's action bar.
+     *
+     * @param player    target player
+     * @param animation text animation to play
+     * @return the running Bukkit task handle
+     */
+    public static BukkitTask animate(@NonNull Player player, @NonNull TextAnimation animation) {
+        return animate(player, animation, null);
+    }
+
+    /**
+     * Plays a high-performance text animation on the player's action bar with a completion callback.
+     *
+     * @param player     target player
+     * @param animation  text animation to play
+     * @param onComplete optional action executed upon animation completion
+     * @return the running Bukkit task handle
+     */
+    public static BukkitTask animate(@NonNull Player player, @NonNull TextAnimation animation, @Nullable Runnable onComplete) {
+        return animation.playActionbar(player, onComplete);
+    }
+
+    /**
+     * Plays a text animation across a collection of players' action bars.
+     *
+     * @param players   target players
+     * @param animation text animation to play
+     */
+    public static void animate(@NonNull Collection<? extends Player> players, @NonNull TextAnimation animation) {
+        animate(players, animation, null);
+    }
+
+    /**
+     * Plays a text animation across a collection of players' action bars with a completion callback.
+     *
+     * @param players    target players
+     * @param animation  text animation to play
+     * @param onComplete optional action executed when all animations complete
+     */
+    public static void animate(@NonNull Collection<? extends Player> players, @NonNull TextAnimation animation, @Nullable Runnable onComplete) {
+        animation.playActionbar(players, onComplete);
     }
 }

@@ -20,6 +20,7 @@ import fr.moussax.bedrock.ui.actionbar.Actionbar;
 import fr.moussax.bedrock.ui.menu.system.MenuListener;
 import fr.moussax.bedrock.ui.menu.system.MenuSystem;
 import fr.moussax.bedrock.ui.sign.SignInput;
+import fr.moussax.bedrock.ui.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
@@ -50,6 +51,7 @@ public final class EventsRegistry {
         menuSystem = new MenuSystem(instance);
         SignInput.initialize(instance);
         Actionbar.initialize(instance, 20L);
+        Title.initialize(instance, 10L);
         playerHudManager = new PlayerHudManager(instance);
 
         Bukkit.getScheduler().runTaskTimer(instance, () -> {

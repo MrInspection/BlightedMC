@@ -38,12 +38,14 @@ public final class ActionbarService implements Listener {
     @Setter
     private static volatile ActionbarService instance;
 
+    @Getter
     private final Plugin plugin;
     private final Map<UUID, ActionbarComposer> composers = new ConcurrentHashMap<>();
     private final Map<String, ActionbarSection> globalSections = new ConcurrentHashMap<>();
     private final Map<Plugin, Set<String>> pluginSections = new ConcurrentHashMap<>();
     private final Map<UUID, String> lastSentTexts = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastSentTimestamps = new ConcurrentHashMap<>();
+    private final Set<UUID> animatingPlayers = ConcurrentHashMap.newKeySet();
 
     private volatile String separator = "     ";
     private BukkitTask tickerTask;
@@ -442,12 +444,38 @@ public final class ActionbarService implements Listener {
     }
 
     /**
+     * Marks whether a player currently has an active text animation running on their action bar.
+     * When animating, periodic HUD rendering is temporarily suspended to prevent frame stutter.
+     *
+     * @param uuid      target player UUID
+     * @param animating whether an animation is currently executing
+     */
+    public void setAnimating(@NonNull UUID uuid, boolean animating) {
+        if (animating) {
+            animatingPlayers.add(uuid);
+        } else {
+            animatingPlayers.remove(uuid);
+        }
+    }
+
+    /**
+     * Checks if a player currently has an active text animation running on their action bar.
+     *
+     * @param uuid target player UUID
+     * @return true if an animation is active
+     */
+    public boolean isAnimating(@NonNull UUID uuid) {
+        return animatingPlayers.contains(uuid);
+    }
+
+    /**
      * Removes and cleans up cached composer and tracking state for a player.
      *
      * @param player player to clean up
      */
     public void handleQuit(@NonNull Player player) {
         UUID uuid = player.getUniqueId();
+        animatingPlayers.remove(uuid);
         composers.remove(uuid);
         lastSentTexts.remove(uuid);
         lastSentTimestamps.remove(uuid);
@@ -461,6 +489,7 @@ public final class ActionbarService implements Listener {
      */
     public void renderPlayer(@NonNull Player player) {
         if (!player.isOnline()) return;
+        if (isAnimating(player.getUniqueId())) return;
 
         ActionbarComposer composer = getOrCreateComposer(player.getUniqueId());
         String content = composer.compile(player);
