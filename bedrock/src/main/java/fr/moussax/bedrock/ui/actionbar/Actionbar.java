@@ -412,6 +412,8 @@ public final class Actionbar {
     /**
      * Unregisters all sections registered by an owning plugin.
      *
+     * <p>If the plugin is the service's owning plugin, stops the service.</p>
+     *
      * @param plugin owning plugin to clean up
      */
     public static void unregisterAll(@NonNull Plugin plugin) {

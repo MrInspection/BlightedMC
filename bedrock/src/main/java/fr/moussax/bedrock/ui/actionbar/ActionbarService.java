@@ -8,6 +8,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
@@ -62,7 +63,9 @@ public final class ActionbarService implements Listener {
         if (instance == null) {
             instance = this;
         }
-        Bukkit.getPluginManager().registerEvents(this, plugin);
+        if (Bukkit.getServer() != null) {
+            Bukkit.getPluginManager().registerEvents(this, plugin);
+        }
     }
 
     /**
@@ -121,6 +124,12 @@ public final class ActionbarService implements Listener {
         composers.clear();
         lastSentTexts.clear();
         lastSentTimestamps.clear();
+        HandlerList.unregisterAll(this);
+        synchronized (ActionbarService.class) {
+            if (instance == this) {
+                instance = null;
+            }
+        }
     }
 
     /**
@@ -225,14 +234,22 @@ public final class ActionbarService implements Listener {
     }
 
     /**
-     * Unregisters all sections associated with an owning plugin without stopping the service.
+     * Unregisters all sections associated with a plugin.
+     *
+     * <p>If the supplied plugin is the service's owning plugin, stops the service and clears the
+     * singleton instance; otherwise, removes only that plugin's registered sections while keeping
+     * the service running.</p>
      *
      * @param plugin owning plugin to clean up
      */
     public void unregisterAll(@NonNull Plugin plugin) {
+        Objects.requireNonNull(plugin, "plugin cannot be null");
         Set<String> sectionIds = pluginSections.remove(plugin);
         if (sectionIds != null) {
             sectionIds.forEach(this::unregisterSection);
+        }
+        if (this.plugin.equals(plugin)) {
+            stop();
         }
     }
 
