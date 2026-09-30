@@ -1124,12 +1124,8 @@ public class ItemBuilder {
     public ItemBuilder enchantedBook() {
         if (item.getType() != Material.ENCHANTED_BOOK) {
             item.setType(Material.ENCHANTED_BOOK);
-            ItemMeta newMeta = Bukkit.getItemFactory().getItemMeta(Material.ENCHANTED_BOOK);
+            ItemMeta newMeta = Bukkit.getItemFactory().asMetaFor(itemMeta, Material.ENCHANTED_BOOK);
             if (newMeta != null) {
-                if (itemMeta.hasDisplayName()) newMeta.setDisplayName(itemMeta.getDisplayName());
-                if (itemMeta.hasItemName()) newMeta.setItemName(itemMeta.getItemName());
-                if (itemMeta.hasLore()) newMeta.setLore(itemMeta.getLore());
-                newMeta.addItemFlags(itemMeta.getItemFlags().toArray(new ItemFlag[0]));
                 this.itemMeta = newMeta;
             }
         }
@@ -1260,12 +1256,8 @@ public class ItemBuilder {
     private void ensureSkullMeta() {
         if (item.getType() != Material.PLAYER_HEAD) {
             item.setType(Material.PLAYER_HEAD);
-            ItemMeta newMeta = Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
+            ItemMeta newMeta = Bukkit.getItemFactory().asMetaFor(itemMeta, Material.PLAYER_HEAD);
             if (newMeta != null) {
-                if (itemMeta.hasDisplayName()) newMeta.setDisplayName(itemMeta.getDisplayName());
-                if (itemMeta.hasItemName()) newMeta.setItemName(itemMeta.getItemName());
-                if (itemMeta.hasLore()) newMeta.setLore(itemMeta.getLore());
-                newMeta.addItemFlags(itemMeta.getItemFlags().toArray(new ItemFlag[0]));
                 this.itemMeta = newMeta;
             }
         }
