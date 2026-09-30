@@ -3,18 +3,12 @@ package fr.moussax.bedrock.ui.sign;
 import fr.moussax.bedrock.scheduling.PluginContext;
 import fr.moussax.bedrock.ui.menu.Menu;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
-import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.entity.SignTextSlot;
-import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -196,28 +190,18 @@ public final class SignInput {
         }
 
         Location location = player.getLocation().clone();
-        location.setY(location.getY() + 1);
+        location.setY(location.getY() + 3);
+        player.sendBlockChange(location, Material.PALE_OAK_SIGN.createBlockData());
+
+        String[] safeLines = new String[]{"", "", "", ""};
+        for (int i = 0; i < Math.min(4, lines.length); i++) {
+            safeLines[i] = lines[i] != null ? lines[i] : "";
+        }
+        player.sendSignChange(location, safeLines);
 
         BlockPos blockPosition = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
-
-        BlockState blockState = Blocks.OAK_SIGN.defaultBlockState();
-        nmsPlayer.connection.send(new ClientboundBlockUpdatePacket(blockPosition, blockState));
-
-        SignBlockEntity signTile = new SignBlockEntity(blockPosition, blockState);
-        signTile.setAllowedPlayerEditor(player.getUniqueId());
-        signTile.setWaxed(false);
-
         SignTextSlot slot = frontSide ? SignTextSlot.FRONT : SignTextSlot.BACK;
-        SignText.Mutable mutableText = SignText.EMPTY.asMutable();
-        for (int i = 0; i < Math.min(4, lines.length); i++) {
-            String lineText = lines[i] != null ? lines[i] : "";
-            mutableText.setLine(i, Component.literal(lineText));
-        }
-        signTile.setText(mutableText.asImmutable(), slot);
-
-        ClientboundBlockEntityDataPacket tilePacket = signTile.getUpdatePacket();
-        nmsPlayer.connection.send(tilePacket);
 
         Bukkit.getScheduler().runTaskLater(PluginContext.get(), () -> {
             if (!player.isOnline()) {
