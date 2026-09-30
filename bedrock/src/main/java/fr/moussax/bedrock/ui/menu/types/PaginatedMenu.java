@@ -2,18 +2,25 @@ package fr.moussax.bedrock.ui.menu.types;
 
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
-import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
+import fr.moussax.bedrock.utils.ItemBuilder;
 import lombok.Getter;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base class for menus with automatic pagination.
  *
  * <p>Items are displayed across pages, with navigation controls rendered in
  * the bottom row. The current page is preserved when the menu is refreshed.</p>
+ *
+ * <p>Supports optional framed layouts via {@link #useStandardFrame()}, parent
+ * menu back navigation via {@link #getPreviousMenu()}, and title hooks via
+ * {@link #onBuildHeader(Player)}.</p>
  *
  * <p>Subclasses provide the total item count, item contents, and optional
  * click handling through {@link #onItemClick(Player, int, ClickType)}.</p>
@@ -27,6 +34,14 @@ public abstract class PaginatedMenu extends Menu {
             37, 38, 39, 40, 41, 42, 43
     };
 
+    public static final int[] FRAME_SLOTS = {
+            0, 1, 2, 3, 4, 5, 6, 7, 8,
+            9, 17, 18, 26, 27, 35, 36,
+            44, 45, 46, 47, 51, 52, 53
+    };
+
+    @Getter
+    protected final Menu previousMenu;
     @Getter
     protected int currentPage = 0;
     protected int totalItems = 0;
@@ -47,7 +62,19 @@ public abstract class PaginatedMenu extends Menu {
      * @param size  inventory size (multiple of 9)
      */
     protected PaginatedMenu(String title, int size) {
+        this(title, size, null);
+    }
+
+    /**
+     * Creates a paginated menu with a link to a previous parent menu.
+     *
+     * @param title        menu title
+     * @param size         inventory size (multiple of 9)
+     * @param previousMenu parent menu to open when returning from page 0
+     */
+    protected PaginatedMenu(String title, int size, @Nullable Menu previousMenu) {
         super(title, size);
+        this.previousMenu = previousMenu;
     }
 
     /**
@@ -68,6 +95,40 @@ public abstract class PaginatedMenu extends Menu {
     protected abstract ItemStack getItem(@NonNull Player player, int index);
 
     /**
+     * Determines whether this menu uses the standard 54-slot framed layout.
+     *
+     * <p>When enabled, {@link #getDisplaySlots()} defaults to {@link #INNER_GRID_SLOTS}
+     * and the framing border slots are populated with {@link MenuElementPreset#EMPTY_SLOT_FILLER}.</p>
+     *
+     * @return {@code true} to enable framed layout
+     */
+    protected boolean useStandardFrame() {
+        return false;
+    }
+
+    /**
+     * Fills the framing border slots with the specified item.
+     *
+     * @param item item displayed in the frame
+     */
+    public void fillFrame(@NonNull ItemStack item) {
+        for (int slot : FRAME_SLOTS) {
+            if (slot < size) {
+                setItem(slot, item);
+            }
+        }
+    }
+
+    /**
+     * Fills the framing border slots with the specified preset.
+     *
+     * @param preset item preset displayed in the frame
+     */
+    public void fillFrame(@NonNull MenuElementPreset preset) {
+        fillFrame(preset.getItem());
+    }
+
+    /**
      * Returns the target inventory slot indices for displaying paginated items.
      *
      * <p>If {@code null}, items are placed sequentially starting at slot 0.</p>
@@ -75,7 +136,7 @@ public abstract class PaginatedMenu extends Menu {
      * @return slot index array, or {@code null} for default sequential placement
      */
     protected int[] getDisplaySlots() {
-        return null;
+        return useStandardFrame() ? INNER_GRID_SLOTS : null;
     }
 
     /**
@@ -124,6 +185,33 @@ public abstract class PaginatedMenu extends Menu {
     }
 
     /**
+     * Initializes pagination metrics and clamps {@code currentPage}.
+     *
+     * @param viewer player viewing the menu
+     */
+    protected void initPage(@NonNull Player viewer) {
+        totalItems = Math.max(0, getTotalItems(viewer));
+        int itemsPerPage = getItemsPerPage();
+        if (itemsPerPage > 0 && totalItems > 0) {
+            int maxPage = (totalItems - 1) / itemsPerPage;
+            currentPage = Math.min(currentPage, maxPage);
+        } else {
+            currentPage = 0;
+        }
+    }
+
+    /**
+     * Hook called at the start of {@link #build(Player)}, after {@link #initPage(Player)}
+     * and before slots are rendered.
+     *
+     * <p>Override to set dynamic titles (e.g. page counts).</p>
+     *
+     * @param viewer player viewing the menu
+     */
+    protected void onBuildHeader(@NonNull Player viewer) {
+    }
+
+    /**
      * Builds the current page and its navigation controls.
      *
      * <p>The current page is clamped to the last available page when the
@@ -133,8 +221,13 @@ public abstract class PaginatedMenu extends Menu {
      */
     @Override
     public void build(@NonNull Player viewer) {
-        totalItems = Math.max(0, getTotalItems(viewer));
+        initPage(viewer);
         slots.clear();
+        onBuildHeader(viewer);
+
+        if (useStandardFrame()) {
+            fillFrame(MenuElementPreset.EMPTY_SLOT_FILLER);
+        }
 
         int closeSlot = size - 5;
         int backSlot = size - 6;
@@ -144,16 +237,17 @@ public abstract class PaginatedMenu extends Menu {
         if (totalItems == 0) {
             if (emptyItem != null) {
                 int emptySlot = size >= 27 ? 22 : size / 2;
-                setItem(emptySlot, emptyItem, MenuItemInteraction.ANY_CLICK, (_, _) -> { });
+                setItem(emptySlot, emptyItem);
             }
+            if (useStandardFrame() && nextSlot < size) {
+                setItem(nextSlot, MenuElementPreset.EMPTY_SLOT_FILLER);
+            }
+            renderParentBackButton(backSlot);
             setCloseButton(closeSlot);
             return;
         }
 
         int itemsPerPage = getItemsPerPage();
-        int maxPage = (totalItems - 1) / itemsPerPage;
-        currentPage = Math.min(currentPage, maxPage);
-
         int startIndex = currentPage * itemsPerPage;
         int endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
@@ -165,7 +259,6 @@ public abstract class PaginatedMenu extends Menu {
             setItem(
                     slot,
                     getItem(viewer, index),
-                    MenuItemInteraction.ANY_CLICK,
                     (player, click) -> {
                         if (click.isShiftClick()) {
                             onItemShiftClick(player, index);
@@ -179,21 +272,57 @@ public abstract class PaginatedMenu extends Menu {
             );
         }
 
+        int totalPages = getTotalPages();
+        int pageNum = getCurrentPageNumber();
+
         if (currentPage > 0) {
-            setBackButton(backSlot, (player, _) -> {
+            ItemStack prevItem = new ItemBuilder(Material.ARROW, "§aPrevious Page")
+                    .addLore("§7Page " + (pageNum - 1) + "/" + totalPages)
+                    .toItemStack();
+            setItem(backSlot, prevItem, (player, _) -> {
+                playPageTurnSound(player);
                 currentPage--;
                 refresh(player);
             });
+        } else {
+            renderParentBackButton(backSlot);
         }
 
         if (endIndex < totalItems) {
-            setItem(nextSlot, MenuElementPreset.NEXT_BUTTON, (player, _) -> {
+            ItemStack nextItem = new ItemBuilder(Material.ARROW, "§aNext Page")
+                    .addLore("§7Page " + (pageNum + 1) + "/" + totalPages)
+                    .toItemStack();
+            setItem(nextSlot, nextItem, (player, _) -> {
+                playPageTurnSound(player);
                 currentPage++;
                 refresh(player);
             });
+        } else if (useStandardFrame() && nextSlot < size) {
+            setItem(nextSlot, MenuElementPreset.EMPTY_SLOT_FILLER);
         }
 
         setCloseButton(closeSlot);
+    }
+
+    private void renderParentBackButton(int slot) {
+        if (previousMenu == null) return;
+
+        String rawTitle = previousMenu.getTitle();
+        String stripped = ChatColor.stripColor(rawTitle);
+        String targetName = stripped.isBlank() ? "Previous Menu" : stripped;
+
+        ItemStack backItem = new ItemBuilder(Material.ARROW, "§aGo Back")
+                .addLore("§7To " + targetName)
+                .toItemStack();
+
+        setItem(slot, backItem, (player, _) -> {
+            playClickSound(player);
+            if (menuSystem != null) {
+                menuSystem.popAndOpen(player, previousMenu);
+            } else {
+                previousMenu.open(player);
+            }
+        });
     }
 
     /**
@@ -203,7 +332,6 @@ public abstract class PaginatedMenu extends Menu {
      * @param index  global item index
      */
     protected void onItemLeftClick(@NonNull Player player, int index) {
-        // override as needed
     }
 
     /**
@@ -213,7 +341,6 @@ public abstract class PaginatedMenu extends Menu {
      * @param index  global item index
      */
     protected void onItemRightClick(@NonNull Player player, int index) {
-        // override as needed
     }
 
     /**
@@ -223,7 +350,6 @@ public abstract class PaginatedMenu extends Menu {
      * @param index  global item index
      */
     protected void onItemShiftClick(@NonNull Player player, int index) {
-        // override as needed
     }
 
     /**
@@ -234,6 +360,5 @@ public abstract class PaginatedMenu extends Menu {
      * @param clickType click type
      */
     protected void onItemClick(@NonNull Player player, int index, @NonNull ClickType clickType) {
-        // override as needed
     }
 }

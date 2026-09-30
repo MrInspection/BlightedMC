@@ -6,7 +6,6 @@ import fr.moussax.blightedSMP.engine.items.recipes.crafting.BlightedShapelessRec
 import fr.moussax.blightedSMP.engine.items.recipes.CraftingObject;
 import fr.moussax.bedrock.ui.menu.types.InteractiveMenu;
 import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
-import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedSMP.utils.Utilities;
 import org.bukkit.Material;
@@ -67,7 +66,7 @@ public final class CraftingTableMenu extends InteractiveMenu {
     }
 
     private void setupOutputSlot() {
-        setItem(OUTPUT_SLOT, RECIPE_REQUIRED(), MenuItemInteraction.ANY_CLICK, (player, type) -> {
+        setItem(OUTPUT_SLOT, RECIPE_REQUIRED(), (player, type) -> {
             BlightedRecipe recipe = getMatchingRecipe();
             if (recipe == null) return;
 

@@ -11,7 +11,6 @@ import fr.moussax.bedrock.text.Formatter;
 import fr.moussax.bedrock.text.Messenger;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.TickableMenu;
-import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedSMP.utils.Utilities;
 import org.bukkit.ChatColor;
@@ -138,7 +137,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
             CraftingObject ingredient = ingredients.get(i);
             ItemStack displayItem = createIngredientDisplay(ingredient);
 
-            setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
+            setItem(GRID_SLOTS[i], displayItem, (clickingPlayer, _) -> {
                 if (!ingredient.isCustom() || ingredient.getManager() == null) return;
                 RecipePreviewManager.openPreview(clickingPlayer, ingredient.getManager(), this);
             });
@@ -156,7 +155,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
     private void setupResultDisplay() {
         ItemStack result = recipe.getForgedItem().toItemStack().clone();
         result.setAmount(Math.max(1, recipe.getForgedAmount()));
-        setItem(RESULT_SLOT, result, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        setItem(RESULT_SLOT, result, (_, _) -> {
         });
     }
 
@@ -167,7 +166,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
                         "§7to power the forging process."
                 )
                 .toItemStack();
-        setItem(FUEL_INFO_SLOT, fuelInfo, MenuItemInteraction.ANY_CLICK, (_, _) -> {
+        setItem(FUEL_INFO_SLOT, fuelInfo, (_, _) -> {
         });
     }
 
@@ -221,7 +220,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
                 canHyperforge ? "§eClick to Hyperforge!" : "§cMissing ingredients or insufficient fuel!"
         ).setEnchantmentGlint(canHyperforge);
 
-        setItem(HYPERFORGE_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
+        setItem(HYPERFORGE_SLOT, builder.toItemStack(), (clickingPlayer, _) -> {
             if (!canHyperforge) {
                 Messenger.warn(clickingPlayer, "You're missing some ingredients or insufficient fuel to Hyperforge this item!");
                 return;

@@ -10,7 +10,6 @@ import fr.moussax.blightedSMP.engine.items.recipes.forging.menu.ForgeRecipePrevi
 import fr.moussax.blightedSMP.engine.items.recipes.forging.registry.ForgeRegistry;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
-import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedSMP.utils.Utilities;
 import org.bukkit.Material;
@@ -139,7 +138,7 @@ public final class RecipePreviewManager {
         if (currentIndex > 0) {
             Object previousRecipeObject = allRecipes.get(currentIndex - 1);
             ItemStack previousRecipeItem = new ItemBuilder(Material.ARROW, "§aPrevious Recipe").toItemStack();
-            menu.setItem(48, previousRecipeItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) ->
+            menu.setItem(48, previousRecipeItem, (clickingPlayer, _) ->
                     openPreview(clickingPlayer, previousRecipeObject, targetItem, previousMenu)
             );
         } else if (previousMenu != null) {
@@ -149,7 +148,7 @@ public final class RecipePreviewManager {
         if (currentIndex < totalRecipes - 1) {
             Object nextRecipeObject = allRecipes.get(currentIndex + 1);
             ItemStack nextRecipeItem = new ItemBuilder(Material.ARROW, "§aNext Recipe").toItemStack();
-            menu.setItem(50, nextRecipeItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) ->
+            menu.setItem(50, nextRecipeItem, (clickingPlayer, _) ->
                     openPreview(clickingPlayer, nextRecipeObject, targetItem, previousMenu)
             );
         } else {

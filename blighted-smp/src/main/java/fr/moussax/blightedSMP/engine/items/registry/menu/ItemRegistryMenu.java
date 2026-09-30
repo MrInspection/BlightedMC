@@ -6,7 +6,6 @@ import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
 import fr.moussax.bedrock.text.Formatter;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.types.PaginatedMenu;
-import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.bedrock.ui.sign.SignInput;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -59,14 +58,14 @@ public final class ItemRegistryMenu {
             for (int i = 0; i < categories.size() && i < CATEGORY_SLOTS.length; i++) {
                 ItemType.Category category = categories.get(i);
                 ItemStack item = buildMenuItem(getCategoryIcon(category), "§b" + formatCategoryName(category), getCategoryLore(category));
-                setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) ->
+                setItem(CATEGORY_SLOTS[i], item, (clickingPlayer, _) ->
                     new BlightedItemsPaginatedMenu(this,
                         registeredItem -> registeredItem.getItemType() != null && registeredItem.getItemType().getCategory() == category,
                         "§r" + Formatter.formatEnumName(category.name()) + " Items").open(clickingPlayer));
             }
 
             setItem(SEARCH_SLOT, buildMenuItem(new ItemStack(Material.PALE_OAK_SIGN), "§eSearch Items", List.of("§7Click to search for items!")),
-                MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> openSearchSign(clickingPlayer, this));
+                (clickingPlayer, _) -> openSearchSign(clickingPlayer, this));
             setCloseButton(40);
         }
 
@@ -116,12 +115,10 @@ public final class ItemRegistryMenu {
     }
 
     public static class BlightedItemsPaginatedMenu extends PaginatedMenu {
-        private final Menu previousMenu;
         private final List<BlightedItem> blightedItems;
 
         public BlightedItemsPaginatedMenu(Menu previousMenu, Predicate<BlightedItem> filter, String title) {
-            super(title, 54);
-            this.previousMenu = previousMenu;
+            super(title, 54, previousMenu);
             this.blightedItems = ItemRegistry.getAllItems().stream()
                     .filter(filter)
                     .sorted((firstItem, secondItem) -> {
@@ -167,14 +164,6 @@ public final class ItemRegistryMenu {
             }
 
             return hideAllItemFlags(new ItemBuilder(stack)).toItemStack();
-        }
-
-        @Override
-        public void build(@NonNull Player player) {
-            super.build(player);
-            if (currentPage == 0 && previousMenu != null) {
-                setBackButton(48, previousMenu);
-            }
         }
 
         @Override

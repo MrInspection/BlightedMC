@@ -50,7 +50,9 @@ public final class MenuSystem {
         for (Map.Entry<UUID, Menu> entry : activeMenus.entrySet()) {
             try {
                 if (!(entry.getValue() instanceof TickableMenu tickable)) continue;
-                if (tickCounter % Math.max(1L, tickable.tickPeriodTicks()) != 0) continue;
+                long period = Math.max(1L, tickable.tickPeriodTicks());
+                long offset = Math.floorMod(entry.getKey().hashCode(), period);
+                if ((tickCounter + offset) % period != 0) continue;
 
                 Player player = plugin.getServer().getPlayer(entry.getKey());
                 if (player != null && player.isOnline()) {
