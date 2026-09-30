@@ -18,10 +18,11 @@ public final class ModerationHud {
     }
 
     public static ActionbarSection createSection(ModerationManager moderationManager) {
-        return ActionbarSection.exclusiveOf(SECTION_ID, PRIORITY,
-                player -> render(moderationManager, player),
-                moderationManager::isInModerationMode
-        );
+        return ActionbarSection.builder(SECTION_ID)
+                .exclusive(PRIORITY)
+                .visibleWhen(moderationManager::isInModerationMode)
+                .render(player -> render(moderationManager, player))
+                .build();
     }
 
     private static String render(ModerationManager moderationManager, Player player) {

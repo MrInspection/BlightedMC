@@ -1,9 +1,10 @@
 package fr.moussax.blightedSMP.engine.player.hud;
 
-import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
-import fr.moussax.bedrock.ui.actionbar.ActionbarSection;
-import fr.moussax.bedrock.ui.actionbar.ActionbarService;
 import fr.moussax.bedrock.text.Formatter;
+import fr.moussax.bedrock.ui.actionbar.Actionbar;
+import fr.moussax.bedrock.ui.actionbar.ActionbarSection;
+import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
+import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -14,30 +15,47 @@ public final class PlayerHudManager {
     public static final String SECTION_GEMS = "gems";
     public static final String SECTION_MANA = "mana";
 
-    private final ActionbarService actionBarService;
+    private final Plugin plugin;
 
     /**
-     * Constructs a HUD manager and registers default gems and mana display sections.
+     * Constructs a HUD manager and registers default gems and mana display sections for the plugin.
      *
-     * @param actionBarService action bar service managing player displays
+     * @param plugin owning plugin instance
      */
-    public PlayerHudManager(@NonNull ActionbarService actionBarService) {
-        this.actionBarService = actionBarService;
+    public PlayerHudManager(@NonNull Plugin plugin) {
+        this.plugin = plugin;
         initializeDefaultSections();
     }
 
     private void initializeDefaultSections() {
-        actionBarService.registerSection(ActionbarSection.of(SECTION_GEMS, 0, player -> {
-            BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
-            if (blightedPlayer == null) return null;
-            return "§d" + Formatter.formatDecimalWithCommas(blightedPlayer.getGems()) + "✵ Gems";
-        }));
+        ActionbarSection gemsSection = ActionbarSection.builder(SECTION_GEMS)
+                .order(0)
+                .render(player -> {
+                    BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
+                    if (blightedPlayer == null) return null;
+                    return "§d" + Formatter.formatDecimalWithCommas(blightedPlayer.getGems()) + "✵ Gems";
+                })
+                .build();
 
-        actionBarService.registerSection(ActionbarSection.of(SECTION_MANA, 10, player -> {
-            BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
-            if (blightedPlayer == null) return null;
-            return "§b" + Formatter.formatDouble(blightedPlayer.getCurrentMana(), 0) + "/"
-                    + Formatter.formatDouble(blightedPlayer.getMaxMana(), 0) + "✎ Mana";
-        }));
+        ActionbarSection manaSection = ActionbarSection.builder(SECTION_MANA)
+                .order(10)
+                .render(player -> {
+                    BlightedPlayer blightedPlayer = BlightedPlayer.get(player);
+                    if (blightedPlayer == null) return null;
+                    return "§b" + Formatter.formatDouble(blightedPlayer.getCurrentMana(), 0) + "/"
+                            + Formatter.formatDouble(blightedPlayer.getMaxMana(), 0) + "✎ Mana";
+                })
+                .build();
+
+        Actionbar.register(plugin, gemsSection);
+        Actionbar.register(plugin, manaSection);
+    }
+
+    /**
+     * Unregisters all sections managed by this HUD manager.
+     */
+    public void unregister() {
+        Actionbar.unregister(SECTION_GEMS);
+        Actionbar.unregister(SECTION_MANA);
     }
 }

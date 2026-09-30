@@ -16,7 +16,7 @@ import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import fr.moussax.blightedSMP.engine.player.PlayerListener;
 import fr.moussax.blightedSMP.engine.player.hud.PlayerHudManager;
 import fr.moussax.blightedSMP.engine.quest.BlightedQuestListener;
-import fr.moussax.bedrock.ui.actionbar.ActionbarService;
+import fr.moussax.bedrock.ui.actionbar.Actionbar;
 import fr.moussax.bedrock.ui.menu.system.MenuListener;
 import fr.moussax.bedrock.ui.menu.system.MenuSystem;
 import fr.moussax.bedrock.ui.sign.SignInputListener;
@@ -34,7 +34,6 @@ public final class EventsRegistry {
 
     private final BlightedSMP instance = BlightedSMP.getInstance();
     private MenuSystem menuSystem;
-    private ActionbarService actionBarService;
     private PlayerHudManager playerHudManager;
     private SpawnableEntitiesListener spawnableEntitiesListener;
     private SignInputListener signInputListener;
@@ -50,9 +49,8 @@ public final class EventsRegistry {
     public void initializeListeners() {
         PluginManager pluginManager = Bukkit.getPluginManager();
         menuSystem = new MenuSystem(instance);
-        actionBarService = new ActionbarService(instance);
-        actionBarService.start(20L);
-        playerHudManager = new PlayerHudManager(actionBarService);
+        Actionbar.initialize(instance, 20L);
+        playerHudManager = new PlayerHudManager(instance);
 
         Bukkit.getScheduler().runTaskTimer(instance, () -> {
             for (BlightedPlayer player : BlightedPlayer.getPlayers()) {
@@ -100,9 +98,7 @@ public final class EventsRegistry {
         if (signInputListener != null) {
             signInputListener.cleanup();
         }
-        if (actionBarService != null) {
-            actionBarService.stop();
-        }
+        Actionbar.unregisterAll(instance);
     }
 
     /**

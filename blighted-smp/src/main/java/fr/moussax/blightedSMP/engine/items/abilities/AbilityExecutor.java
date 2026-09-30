@@ -1,6 +1,6 @@
 package fr.moussax.blightedSMP.engine.items.abilities;
 
-import fr.moussax.bedrock.ui.actionbar.ActionbarService;
+import fr.moussax.bedrock.ui.actionbar.Actionbar;
 import fr.moussax.bedrock.utils.debug.Log;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import fr.moussax.blightedSMP.engine.player.hud.PlayerHudManager;
@@ -48,9 +48,7 @@ public final class AbilityExecutor {
         int manaCost = ability.getManaCost();
         if (!player.hasMana(manaCost)) {
             player.getPlayer().playSound(player.getPlayer().getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 100f, 0.5f);
-            ActionbarService.ifPresent(service -> service.sendSlotAlert(
-                    player.getPlayer(), PlayerHudManager.SECTION_MANA, "§c§lNOT ENOUGH MANA", Duration.ofSeconds(2))
-            );
+            Actionbar.sendSlotAlert(player.getPlayer(), PlayerHudManager.SECTION_MANA, "§c§lNOT ENOUGH MANA", Duration.ofSeconds(2));
             cancel(event);
             return;
         }
@@ -66,7 +64,7 @@ public final class AbilityExecutor {
 
             if (manaCost > 0) {
                 player.consumeMana(manaCost);
-                ActionbarService.ifPresent(service -> service.renderPlayer(player.getPlayer()));
+                Actionbar.update(player.getPlayer());
             }
 
             ability.start(player);
