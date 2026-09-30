@@ -1,276 +1,353 @@
 package fr.moussax.bedrock.ui.book;
 
-import fr.moussax.bedrock.text.InteractiveMessage;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.jspecify.annotations.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * Builds and opens interactive written books for players.
+ * Fluent builder for creating and opening interactive written books.
  *
- * <p>Pages are composed from {@link InteractiveMessage} instances
- * and may contain interactive chat components.</p>
+ * <p>Supports custom titles, authors, book generations, structured page composition
+ * via {@link BookPage}, and automatic multipage text pagination.</p>
  */
 public final class BookMenu {
 
-    private static final int MAXIMUM_CHARACTERS_PER_LINE = 19;
-    private static final int MAXIMUM_LINES_PER_PAGE = 14;
-
-    private final List<BaseComponent[]> rawPages = new ArrayList<>();
+    private String title = "BlightedMenu";
+    private String author = "BlightedMC";
+    private BookMeta.Generation generation = BookMeta.Generation.ORIGINAL;
+    private final List<BookPage> pages = new ArrayList<>();
 
     private BookMenu() {
     }
 
     /**
-     * Creates an empty book menu.
+     * Creates a new book menu builder.
      *
-     * @return new book menu
+     * @return a new book menu builder
      */
     public static BookMenu builder() {
         return new BookMenu();
     }
 
     /**
-     * Appends a page from an interactive message.
+     * Sets the title of the book.
      *
-     * @param message message used to build the page
-     * @return this book menu
+     * @param title book title
+     * @return this builder
      */
-    public BookMenu addPage(@NonNull InteractiveMessage message) {
-        this.rawPages.add(message.build());
+    public BookMenu title(@NonNull String title) {
+        this.title = title;
         return this;
     }
 
     /**
-     * Appends a page configured through a callback.
+     * Sets the author of the book.
      *
-     * <p>The callback receives an empty interactive message that can be
-     * configured before the page is built.</p>
-     *
-     * @param pageConfigurator callback used to configure the page
-     * @return this book menu
+     * @param author book author
+     * @return this builder
      */
-    public BookMenu addPage(@NonNull Consumer<InteractiveMessage> pageConfigurator) {
-        InteractiveMessage message = InteractiveMessage.text("");
-        pageConfigurator.accept(message);
-        this.rawPages.add(message.build());
+    public BookMenu author(@NonNull String author) {
+        this.author = author;
         return this;
     }
 
     /**
-     * Opens the configured book for a player.
+     * Sets the generation copy status of the book.
      *
-     * <p>The generated book uses the default BlightedMC title and author,
-     * and automatically paginates content overflowing single-page dimensions.</p>
-     *
-     * @param player player receiving the book
+     * @param generation book generation
+     * @return this builder
      */
-    public void open(@NonNull Player player) {
-        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-        BookMeta meta = (BookMeta) book.getItemMeta();
-        if (meta == null) return;
-
-        meta.setTitle("BlightedMenu");
-        meta.setAuthor("BlightedMC");
-        meta.setGeneration(BookMeta.Generation.ORIGINAL);
-
-        List<BaseComponent[]> paginatedPages = buildPaginatedPages();
-        for (BaseComponent[] pageComponents : paginatedPages) {
-            meta.spigot().addPage(pageComponents);
-        }
-
-        book.setItemMeta(meta);
-        player.openBook(book);
+    public BookMenu generation(BookMeta.@NonNull Generation generation) {
+        this.generation = generation;
+        return this;
     }
 
-    private List<BaseComponent[]> buildPaginatedPages() {
-        List<BaseComponent[]> formattedPages = new ArrayList<>();
-
-        for (BaseComponent[] pageComponents : rawPages) {
-            List<BaseComponent[]> splitPages = splitSinglePageComponents(pageComponents);
-            formattedPages.addAll(splitPages);
-        }
-
-        return formattedPages;
+    /**
+     * Configures and appends a page using a callback.
+     *
+     * @param configurator callback to configure the page
+     * @return this builder
+     */
+    public BookMenu page(@NonNull Consumer<BookPage> configurator) {
+        BookPage page = new BookPage();
+        configurator.accept(page);
+        this.pages.add(page);
+        return this;
     }
 
-    private List<BaseComponent[]> splitSinglePageComponents(BaseComponent[] pageComponents) {
-        List<TextComponent> leafComponents = flattenToLeafComponents(pageComponents);
-
-        List<List<BaseComponent>> lines = new ArrayList<>();
-        List<BaseComponent> currentLine = new ArrayList<>();
-        int currentLineLength = 0;
-
-        for (TextComponent component : leafComponents) {
-            String componentText = component.getText();
-            if (componentText == null || componentText.isEmpty()) {
-                continue;
-            }
-
-            String[] paragraphs = componentText.split("\r?\n", -1);
-            for (int paragraphIndex = 0; paragraphIndex < paragraphs.length; paragraphIndex++) {
-                if (paragraphIndex > 0) {
-                    lines.add(currentLine);
-                    currentLine = new ArrayList<>();
-                    currentLineLength = 0;
-                }
-
-                String paragraphText = paragraphs[paragraphIndex];
-                if (paragraphText.isEmpty()) {
-                    continue;
-                }
-
-                String[] words = paragraphText.split(" ", -1);
-                for (int wordIndex = 0; wordIndex < words.length; wordIndex++) {
-                    String word = words[wordIndex];
-
-                    if (word.isEmpty()) {
-                        if (!currentLine.isEmpty() || wordIndex < words.length - 1) {
-                            TextComponent spaceComponent = duplicateComponentWithText(component, " ");
-                            currentLine.add(spaceComponent);
-                            currentLineLength += 1;
-                        }
-                        continue;
-                    }
-
-                    if (wordIndex > 0 && !currentLine.isEmpty() && !words[wordIndex - 1].isEmpty()) {
-                        word = " " + word;
-                    }
-
-                    while (word.length() > MAXIMUM_CHARACTERS_PER_LINE) {
-                        String chunk = word.substring(0, MAXIMUM_CHARACTERS_PER_LINE);
-                        word = word.substring(MAXIMUM_CHARACTERS_PER_LINE);
-
-                        if (currentLineLength + chunk.length() > MAXIMUM_CHARACTERS_PER_LINE && !currentLine.isEmpty()) {
-                            lines.add(currentLine);
-                            currentLine = new ArrayList<>();
-                        }
-                        currentLine.add(duplicateComponentWithText(component, chunk));
-                        lines.add(currentLine);
-                        currentLine = new ArrayList<>();
-                        currentLineLength = 0;
-                    }
-
-                    if (currentLineLength + word.length() > MAXIMUM_CHARACTERS_PER_LINE && !currentLine.isEmpty()) {
-                        lines.add(currentLine);
-                        currentLine = new ArrayList<>();
-                        currentLineLength = 0;
-                        if (word.startsWith(" ")) {
-                            word = word.substring(1);
-                        }
-                    }
-
-                    TextComponent wordComponent = duplicateComponentWithText(component, word);
-                    currentLine.add(wordComponent);
-                    currentLineLength += word.length();
-                }
-            }
-        }
-
-        if (!currentLine.isEmpty()) {
-            lines.add(currentLine);
-        }
-
-        if (lines.isEmpty()) {
-            return List.of(new BaseComponent[][]{pageComponents});
-        }
-
-        List<BaseComponent[]> resultPages = new ArrayList<>();
-        for (int lineIndex = 0; lineIndex < lines.size(); lineIndex += MAXIMUM_LINES_PER_PAGE) {
-            int endIndex = Math.min(lineIndex + MAXIMUM_LINES_PER_PAGE, lines.size());
-            List<List<BaseComponent>> pageLines = lines.subList(lineIndex, endIndex);
-
-            List<BaseComponent> pageComponentsList = new ArrayList<>();
-            for (int lineSubIndex = 0; lineSubIndex < pageLines.size(); lineSubIndex++) {
-                List<BaseComponent> line = pageLines.get(lineSubIndex);
-                pageComponentsList.addAll(line);
-                if (lineSubIndex < pageLines.size() - 1) {
-                    pageComponentsList.add(new TextComponent("\n"));
-                }
-            }
-
-            resultPages.add(pageComponentsList.toArray(new BaseComponent[0]));
-        }
-
-        return resultPages;
+    /**
+     * Configures and appends a named book page using a callback.
+     *
+     * @param id           unique identifier or anchor name for this page
+     * @param configurator callback to configure the page
+     * @return this builder
+     */
+    public BookMenu page(@NonNull String id, @NonNull Consumer<BookPage> configurator) {
+        BookPage page = new BookPage().id(id);
+        configurator.accept(page);
+        this.pages.add(page);
+        return this;
     }
 
-    private List<TextComponent> flattenToLeafComponents(BaseComponent[] components) {
-        List<TextComponent> leafComponents = new ArrayList<>();
-        for (BaseComponent component : components) {
-            collectLeafComponents(component, leafComponents);
-        }
-        return leafComponents;
+    /**
+     * Appends a pre-configured book page.
+     *
+     * @param page book page to append
+     * @return this builder
+     */
+    public BookMenu page(@NonNull BookPage page) {
+        this.pages.add(page);
+        return this;
     }
 
-    private void collectLeafComponents(BaseComponent component, List<TextComponent> targetList) {
-        if (component instanceof TextComponent textComponent) {
-            processTextComponent(textComponent, targetList);
-        }
-
-        if (component.getExtra() == null) {
-            return;
-        }
-
-        for (BaseComponent extraComponent : component.getExtra()) {
-            if (extraComponent.getHoverEvent() == null) {
-                extraComponent.setHoverEvent(component.getHoverEvent());
-            }
-            if (extraComponent.getClickEvent() == null) {
-                extraComponent.setClickEvent(component.getClickEvent());
-            }
-            collectLeafComponents(extraComponent, targetList);
-        }
+    /**
+     * Appends a pre-configured named book page.
+     *
+     * @param id   unique identifier or anchor name for this page
+     * @param page book page to append
+     * @return this builder
+     */
+    public BookMenu page(@NonNull String id, @NonNull BookPage page) {
+        page.id(id);
+        this.pages.add(page);
+        return this;
     }
 
-    private void processTextComponent(TextComponent textComponent, List<TextComponent> targetList) {
-        String text = textComponent.getText();
-        if (text == null || text.isEmpty()) {
-            return;
-        }
-
-        BaseComponent legacyComponent = TextComponent.fromLegacy(text);
-        addParsedLeafComponents(legacyComponent, textComponent, targetList);
+    /**
+     * Appends multiple pre-configured book pages.
+     *
+     * @param pages book pages to append
+     * @return this builder
+     */
+    public BookMenu pages(@NonNull BookPage... pages) {
+        this.pages.addAll(List.of(pages));
+        return this;
     }
 
-    private void addParsedLeafComponents(BaseComponent component, TextComponent parent, List<TextComponent> targetList) {
-        if (component instanceof TextComponent textComponent) {
-            if (textComponent.getHoverEvent() == null) {
-                textComponent.setHoverEvent(parent.getHoverEvent());
+    /**
+     * Appends a collection of book pages.
+     *
+     * @param pages collection of book pages
+     * @return this builder
+     */
+    public BookMenu pages(@NonNull Collection<BookPage> pages) {
+        this.pages.addAll(pages);
+        return this;
+    }
+
+    /**
+     * Automatically word-wraps and paginates long text across multiple pages.
+     *
+     * @param text long text to paginate
+     * @return this builder
+     */
+    public BookMenu paginatedText(@NonNull String text) {
+        this.pages.addAll(BookPaginator.paginateText(text));
+        return this;
+    }
+
+    /**
+     * Paginates a list of pre-formatted lines across multiple pages.
+     *
+     * @param lines lines to paginate
+     * @return this builder
+     */
+    public BookMenu paginatedLines(@NonNull List<String> lines) {
+        this.pages.addAll(BookPaginator.paginateLines(lines));
+        return this;
+    }
+
+    /**
+     * Returns the configured title of the book.
+     *
+     * @return book title
+     */
+    public String title() {
+        return title;
+    }
+
+    /**
+     * Returns the configured author of the book.
+     *
+     * @return book author
+     */
+    public String author() {
+        return author;
+    }
+
+    /**
+     * Returns the configured generation copy tier of the book.
+     *
+     * @return book generation
+     */
+    public BookMeta.Generation generation() {
+        return generation;
+    }
+
+    /**
+     * Returns an unmodifiable snapshot of the configured book pages.
+     *
+     * @return list of book pages
+     */
+    public List<BookPage> pages() {
+        return List.copyOf(pages);
+    }
+
+    /**
+     * Builds and resolves all pages into an ordered list of physical book pages.
+     *
+     * <p>Any {@link net.md_5.bungee.api.chat.ClickEvent.Action#CHANGE_PAGE} click actions referencing
+     * page names or logical builder page indices are resolved to their target physical page numbers,
+     * accounting for any automatic multi-page overflow spilling across previous sections.</p>
+     *
+     * @return list of physical book pages ready for rendering
+     */
+    public List<BaseComponent[]> buildPhysicalPages() {
+        if (pages.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, Integer> targetToPhysical = new HashMap<>();
+        Map<Integer, Integer> logicalToPhysical = new HashMap<>();
+        List<BaseComponent[]> physicalPages = new ArrayList<>();
+
+        for (int index = 0; index < pages.size(); index++) {
+            BookPage page = pages.get(index);
+            int startPhysicalPage = physicalPages.size() + 1;
+            logicalToPhysical.put(index + 1, startPhysicalPage);
+
+            if (page.id() != null && !page.id().isBlank()) {
+                targetToPhysical.put(page.id().trim().toLowerCase(Locale.ROOT), startPhysicalPage);
             }
-            if (textComponent.getClickEvent() == null) {
-                textComponent.setClickEvent(parent.getClickEvent());
+
+            physicalPages.addAll(page.buildPages());
+        }
+
+        int totalPhysicalPages = physicalPages.size();
+        for (BaseComponent[] pageComponents : physicalPages) {
+            for (BaseComponent component : pageComponents) {
+                resolvePageLinks(component, targetToPhysical, logicalToPhysical, totalPhysicalPages);
             }
-            if (textComponent.getText() != null && !textComponent.getText().isEmpty()) {
-                targetList.add(textComponent);
+        }
+
+        return physicalPages;
+    }
+
+    private void resolvePageLinks(
+            BaseComponent component,
+            Map<String, Integer> targetToPhysical,
+            Map<Integer, Integer> logicalToPhysical,
+            int totalPhysicalPages
+    ) {
+        ClickEvent clickEvent = component.getClickEvent();
+        if (clickEvent != null && clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
+            String resolved = resolveTarget(clickEvent.getValue(), targetToPhysical, logicalToPhysical, totalPhysicalPages);
+            if (!resolved.equals(clickEvent.getValue())) {
+                component.setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, resolved));
             }
         }
 
         if (component.getExtra() != null) {
             for (BaseComponent extra : component.getExtra()) {
-                addParsedLeafComponents(extra, parent, targetList);
+                resolvePageLinks(extra, targetToPhysical, logicalToPhysical, totalPhysicalPages);
             }
         }
     }
 
-    private TextComponent duplicateComponentWithText(TextComponent source, String text) {
-        TextComponent copy = new TextComponent(text);
-        copy.setColor(source.getColorRaw());
-        copy.setBold(source.isBoldRaw());
-        copy.setItalic(source.isItalicRaw());
-        copy.setUnderlined(source.isUnderlinedRaw());
-        copy.setStrikethrough(source.isStrikethroughRaw());
-        copy.setObfuscated(source.isObfuscatedRaw());
-        copy.setHoverEvent(source.getHoverEvent());
-        copy.setClickEvent(source.getClickEvent());
-        return copy;
+    private String resolveTarget(
+            String target,
+            Map<String, Integer> targetToPhysical,
+            Map<Integer, Integer> logicalToPhysical,
+            int totalPhysicalPages
+    ) {
+        if (target == null || target.isBlank()) {
+            return "1";
+        }
+
+        Integer namedTarget = targetToPhysical.get(target.trim().toLowerCase(Locale.ROOT));
+        if (namedTarget != null) {
+            return String.valueOf(namedTarget);
+        }
+
+        try {
+            int pageNumber = Integer.parseInt(target.trim());
+            Integer logicalPhysical = logicalToPhysical.get(pageNumber);
+            if (logicalPhysical != null) {
+                return String.valueOf(logicalPhysical);
+            }
+            if (pageNumber >= 1 && pageNumber <= totalPhysicalPages) {
+                return String.valueOf(pageNumber);
+            }
+        } catch (NumberFormatException ignored) {
+        }
+
+        return target;
+    }
+
+    /**
+     * Assembles the book into an {@link ItemStack}.
+     *
+     * @return the configured written book item
+     */
+    public ItemStack toItemStack() {
+        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+        BookMeta meta = (BookMeta) book.getItemMeta();
+        if (meta == null) {
+            return book;
+        }
+
+        meta.setTitle(title);
+        meta.setAuthor(author);
+        meta.setGeneration(generation);
+
+        List<BaseComponent[]> physicalPages = buildPhysicalPages();
+        if (physicalPages.isEmpty()) {
+            meta.spigot().addPage(new BaseComponent[0]);
+        } else {
+            for (BaseComponent[] pageComponents : physicalPages) {
+                meta.spigot().addPage(pageComponents);
+            }
+        }
+
+        book.setItemMeta(meta);
+        return book;
+    }
+
+    /**
+     * Builds and opens the book for the specified player.
+     *
+     * @param player player to receive and view the book
+     */
+    public void open(@NonNull Player player) {
+        ItemStack book = toItemStack();
+        player.openBook(book);
+    }
+
+    /**
+     * Opens a single-page book for the player using default metadata.
+     *
+     * @param player       player viewing the book
+     * @param configurator callback configuring the single page
+     */
+    public static void open(@NonNull Player player, @NonNull Consumer<BookPage> configurator) {
+        builder().page(configurator).open(player);
+    }
+
+    /**
+     * Opens a single-page book for the player with a custom title.
+     *
+     * @param player       player viewing the book
+     * @param title        title of the book
+     * @param configurator callback configuring the single page
+     */
+    public static void open(@NonNull Player player, @NonNull String title, @NonNull Consumer<BookPage> configurator) {
+        builder().title(title).page(configurator).open(player);
     }
 }
