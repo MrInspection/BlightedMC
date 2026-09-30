@@ -6,13 +6,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.util.StringUtil;
 import org.jspecify.annotations.NonNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Produces positional tab completions for commands from {@link CommandArgument} declarations.
@@ -98,7 +92,7 @@ public final class TabSuggestionBuilder implements TabCompleter {
             }
 
             if (entry.rule().matches(args)) {
-                aggregatedCandidates.addAll(resolveCandidates(entry.suggestions()));
+                aggregatedCandidates.addAll(resolveCandidates(sender, entry.suggestions()));
             }
         }
 
@@ -112,7 +106,7 @@ public final class TabSuggestionBuilder implements TabCompleter {
         return matchedResults;
     }
 
-    private List<String> resolveCandidates(List<String> suggestions) {
+    private List<String> resolveCandidates(@NonNull CommandSender sender, List<String> suggestions) {
         // ponytail: fast-path check avoiding collection allocation when no dynamic tokens are present
         boolean hasDynamicKey = false;
         for (String suggestion : suggestions) {
@@ -134,7 +128,7 @@ public final class TabSuggestionBuilder implements TabCompleter {
             }
 
             if (suggestion.startsWith("$")) {
-                List<String> provided = suggestionRegistry.resolve(suggestion);
+                List<String> provided = suggestionRegistry.resolve(sender, suggestion);
                 if (provided != null) {
                     resolvedValues.addAll(provided);
                 }
@@ -163,15 +157,26 @@ public final class TabSuggestionBuilder implements TabCompleter {
                 return true;
             }
 
-            // ponytail: match ancestor chain sequentially leading up to position
             int offset = position - path.size();
             for (int index = 0; index < path.size(); index++) {
-                if (!input[offset + index].equalsIgnoreCase(path.get(index))) {
+                if (!matchesStep(input[offset + index], path.get(index))) {
                     return false;
                 }
             }
 
             return true;
+        }
+
+        private static boolean matchesStep(String actual, String expected) {
+            if (expected.contains("|")) {
+                for (String branch : expected.split("\\|")) {
+                    if (actual.equalsIgnoreCase(branch.strip())) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return actual.equalsIgnoreCase(expected);
         }
     }
 }

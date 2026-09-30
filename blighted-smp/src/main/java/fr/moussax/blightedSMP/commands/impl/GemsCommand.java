@@ -11,10 +11,7 @@ import static fr.moussax.bedrock.text.Messenger.inform;
 import static fr.moussax.bedrock.text.Messenger.warn;
 
 @CommandArgument(position = 0, suggestions = {"add", "remove", "set", "reset", "resetall", "giveall", "help"})
-@CommandArgument(position = 1, path = {"add"}, suggestions = {"$players"})
-@CommandArgument(position = 1, path = {"remove"}, suggestions = {"$players"})
-@CommandArgument(position = 1, path = {"set"}, suggestions = {"$players"})
-@CommandArgument(position = 1, path = {"reset"}, suggestions = {"$players"})
+@CommandArgument(position = 1, path = {"add|remove|set|reset"}, suggestions = {"$players"})
 public final class GemsCommand extends AdminCommand {
 
     @Override
