@@ -9,8 +9,11 @@ import net.minecraft.world.level.block.entity.SignTextSlot;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -32,6 +35,7 @@ public final class SignInput {
     private static final String DEFAULT_POINTER = "^^^^^^^^^^^^^^^";
     private static final Set<Plugin> ACTIVE_PLUGINS = ConcurrentHashMap.newKeySet();
     private static volatile SignInputListener listenerInstance;
+    private static Plugin listenerOwner;
 
     private final String[] lines;
     private final int inputLine;
@@ -68,6 +72,7 @@ public final class SignInput {
         if (listenerInstance == null) {
             listenerInstance = new SignInputListener();
             Bukkit.getPluginManager().registerEvents(listenerInstance, plugin);
+            listenerOwner = plugin;
             for (Player player : Bukkit.getOnlinePlayers()) {
                 listenerInstance.inject(player);
             }
@@ -86,6 +91,12 @@ public final class SignInput {
         if (ACTIVE_PLUGINS.isEmpty() && listenerInstance != null) {
             listenerInstance.cleanup();
             listenerInstance = null;
+            listenerOwner = null;
+        } else if (plugin.equals(listenerOwner)) {
+            Plugin replacementOwner = ACTIVE_PLUGINS.iterator().next();
+            HandlerList.unregisterAll(listenerInstance);
+            Bukkit.getPluginManager().registerEvents(listenerInstance, replacementOwner);
+            listenerOwner = replacementOwner;
         }
     }
 
@@ -197,7 +208,12 @@ public final class SignInput {
         for (int i = 0; i < Math.min(4, lines.length); i++) {
             safeLines[i] = lines[i] != null ? lines[i] : "";
         }
-        player.sendSignChange(location, safeLines);
+        Sign signState = (Sign) Material.PALE_OAK_SIGN.createBlockData().createBlockState();
+        Side side = frontSide ? Side.FRONT : Side.BACK;
+        for (int i = 0; i < safeLines.length; i++) {
+            signState.getSide(side).setLine(i, safeLines[i]);
+        }
+        player.sendBlockUpdate(location, signState);
 
         BlockPos blockPosition = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
