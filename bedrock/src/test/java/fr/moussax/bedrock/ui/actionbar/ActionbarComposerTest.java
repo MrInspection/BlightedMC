@@ -3,8 +3,6 @@ package fr.moussax.bedrock.ui.actionbar;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Objects;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class ActionbarComposerTest {
@@ -256,8 +254,7 @@ class ActionbarComposerTest {
     @DisplayName("Expects automated countdown alert to format remaining seconds")
     void testCountdownAlert() {
         TimedAlert alert = TimedAlert.countdown("Rebooting in %ds...", 0, 5);
-        assertEquals("Rebooting in 5ds...", Objects.requireNonNull(alert.message(null)).replace("5s...", "5ds..."));
-        assertTrue(Objects.requireNonNull(alert.message(null)).startsWith("Rebooting in "));
+        assertEquals("Rebooting in 5s...", alert.message(null));
     }
 
     @Test

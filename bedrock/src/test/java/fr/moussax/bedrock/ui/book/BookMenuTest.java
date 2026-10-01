@@ -290,6 +290,15 @@ class BookMenuTest {
     }
 
     @Test
+    @DisplayName("BookPaginator preserves ampersand colors across wrapped lines")
+    void shouldPreserveAmpersandColorsAcrossWrappedLines() {
+        List<String> wrappedLines = BookPaginator.wrapText("&a" + "green ".repeat(30));
+
+        assertTrue(wrappedLines.size() > 1);
+        assertTrue(wrappedLines.stream().allMatch(line -> line.startsWith("§a")));
+    }
+
+    @Test
     @DisplayName("BookMenu builder sets metadata and builds pages")
     void shouldBuildBookModel() {
         BookMenu menu = BookMenu.builder()
@@ -376,6 +385,30 @@ class BookMenuTest {
         assertNotNull(backBtn);
         assertNotNull(backBtn.getClickEvent());
         assertEquals("1", backBtn.getClickEvent().getValue(), "Logical page 1 must resolve to physical page 1");
+    }
+
+    @Test
+    @DisplayName("BookMenu resolves page links independently for each build")
+    void shouldResolvePageLinksWithoutMutatingConfiguredComponents() {
+        BookMenu menu = BookMenu.builder()
+                .page(page -> {
+                    for (int i = 1; i <= 14; i++) {
+                        page.line("TOC line " + i);
+                    }
+                    page.actionPage("[Go to Chapter 2]", "Chapter 2", 2);
+                })
+                .page(page -> page.title("CHAPTER 2"))
+                .page(page -> page.title("CHAPTER 3"));
+
+        List<BaseComponent[]> firstBuild = menu.buildPhysicalPages();
+        List<BaseComponent[]> secondBuild = menu.buildPhysicalPages();
+
+        TextComponent firstLink = findComponentWithText(firstBuild.get(1), "[Go to Chapter 2]");
+        TextComponent secondLink = findComponentWithText(secondBuild.get(1), "[Go to Chapter 2]");
+        assertNotNull(firstLink);
+        assertNotNull(secondLink);
+        assertEquals("3", firstLink.getClickEvent().getValue());
+        assertEquals("3", secondLink.getClickEvent().getValue());
     }
 
     @Test

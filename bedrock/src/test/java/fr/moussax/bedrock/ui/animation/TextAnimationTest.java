@@ -1,5 +1,6 @@
 package fr.moussax.bedrock.ui.animation;
 
+import fr.moussax.bedrock.scheduling.PluginContext;
 import fr.moussax.bedrock.ui.actionbar.Actionbar;
 import fr.moussax.bedrock.ui.actionbar.ActionbarService;
 import fr.moussax.bedrock.ui.title.TimeableTitle;
@@ -9,7 +10,6 @@ import fr.moussax.bedrock.ui.title.TitleService;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import fr.moussax.bedrock.scheduling.PluginContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,12 +30,15 @@ class TextAnimationTest {
     @BeforeEach
     void setUp() {
         PluginContext.bind(createMockPlugin());
+        TextAnimation.setCustomActionbarHandler((_, _) -> {
+        });
     }
 
     @AfterEach
     void tearDown() {
         TitlePacketSender.setCustomHandler(null);
         TextAnimation.setCustomActionbarHandler(null);
+        TextAnimation.clearActivePlaybacks();
         ActionbarService.setInstance(null);
         TitleService.setInstance(null);
         PluginContext.unbind();
@@ -46,11 +50,23 @@ class TextAnimationTest {
                 new Class<?>[]{Player.class},
                 (_, method, args) -> {
                     String name = method.getName();
-                    if ("getUniqueId".equals(name)) return uuid;
-                    if ("isOnline".equals(name)) return true;
-                    if ("getName".equals(name)) return "TestPlayer";
-                    if ("getLocation".equals(name)) return new Location(null, 0, 0, 0);
-                    if ("playSound".equals(name)) return null;
+                    switch (name) {
+                        case "getUniqueId" -> {
+                            return uuid;
+                        }
+                        case "isOnline" -> {
+                            return true;
+                        }
+                        case "getName" -> {
+                            return "TestPlayer";
+                        }
+                        case "getLocation" -> {
+                            return new Location(null, 0, 0, 0);
+                        }
+                        case "playSound" -> {
+                            return null;
+                        }
+                    }
                     if ("sendTitle".equals(name) && args != null && args.length > 0) {
                         titleRef.add((String) args[0]);
                         return null;
@@ -269,9 +285,149 @@ class TextAnimationTest {
         AtomicBoolean completed = new AtomicBoolean(false);
 
         TextAnimation anim = TextAnimation.builder().frame("Test").build();
-        anim.play(createMockPlugin(), offlinePlayer, (_, _) -> {}, () -> completed.set(true));
+        anim.play(createMockPlugin(), offlinePlayer, (_, _) -> {
+        }, () -> completed.set(true));
 
         assertTrue(completed.get(), "Offline player must trigger completion callback");
+    }
+
+    @Test
+    @DisplayName("Expects playActionbar replacement to cancel previous playback and invoke its callback")
+    void testPlayActionbarReplacementCancelsPreviousPlayback() {
+        Plugin plugin = createMockPlugin();
+        UUID uuid = UUID.randomUUID();
+        Player player = createMockPlayer(uuid, new ArrayList<>());
+        ActionbarService service = new ActionbarService(plugin);
+
+        AtomicBoolean completed1 = new AtomicBoolean(false);
+        AtomicBoolean completed2 = new AtomicBoolean(false);
+
+        TextAnimation anim1 = TextAnimation.builder().frame("Frame 1").finalStay(Duration.ofSeconds(10)).build();
+        TextAnimation anim2 = TextAnimation.builder().frame("Frame 2").finalStay(Duration.ofSeconds(10)).build();
+
+        TextAnimation.Playback playback1 = anim1.playActionbar(plugin, player, () -> completed1.set(true));
+        assertNotNull(playback1);
+        assertEquals(playback1, TextAnimation.getActivePlayback(player, TextAnimation.Channel.ACTIONBAR));
+        assertFalse(playback1.isCancelled());
+        assertTrue(service.isAnimating(uuid));
+
+        TextAnimation.Playback playback2 = anim2.playActionbar(plugin, player, () -> completed2.set(true));
+        assertNotNull(playback2);
+        assertTrue(playback1.isCancelled(), "Previous playback must be cancelled on replacement");
+        assertTrue(completed1.get(), "Previous playback callback must be invoked upon cancellation");
+        assertEquals(playback2, TextAnimation.getActivePlayback(player, TextAnimation.Channel.ACTIONBAR));
+    }
+
+    @Test
+    @DisplayName("Expects playTitle replacement to cancel previous playback and invoke its callback")
+    void testPlayTitleReplacementCancelsPreviousPlayback() {
+        Plugin plugin = createMockPlugin();
+        UUID uuid = UUID.randomUUID();
+        Player player = createMockPlayer(uuid, new ArrayList<>());
+        TitleService service = new TitleService(plugin);
+
+        AtomicBoolean completed1 = new AtomicBoolean(false);
+        AtomicBoolean completed2 = new AtomicBoolean(false);
+
+        TextAnimation anim1 = TextAnimation.builder().frame("Title 1").finalTimes(TimeableTitle.of(0, 100, 0)).build();
+        TextAnimation anim2 = TextAnimation.builder().frame("Title 2").finalTimes(TimeableTitle.of(0, 100, 0)).build();
+
+        TextAnimation.Playback playback1 = anim1.playTitle(plugin, player, () -> completed1.set(true));
+        assertNotNull(playback1);
+        assertEquals(playback1, TextAnimation.getActivePlayback(player, TextAnimation.Channel.TITLE));
+        assertFalse(playback1.isCancelled());
+        assertTrue(service.isAnimating(uuid));
+
+        TextAnimation.Playback playback2 = anim2.playTitle(plugin, player, () -> completed2.set(true));
+        assertNotNull(playback2);
+        assertTrue(playback1.isCancelled(), "Previous playback must be cancelled on replacement");
+        assertTrue(completed1.get(), "Previous playback callback must be invoked upon cancellation");
+        assertEquals(playback2, TextAnimation.getActivePlayback(player, TextAnimation.Channel.TITLE));
+    }
+
+    @Test
+    @DisplayName("Expects actionbar and title playbacks to be tracked independently per channel")
+    void testChannelsAreIndependent() {
+        Plugin plugin = createMockPlugin();
+        UUID uuid = UUID.randomUUID();
+        Player player = createMockPlayer(uuid, new ArrayList<>());
+
+        TextAnimation animBar = TextAnimation.builder().frame("Actionbar").finalStay(Duration.ofSeconds(10)).build();
+        TextAnimation animTitle = TextAnimation.builder().frame("Title").finalTimes(TimeableTitle.of(0, 100, 0)).build();
+
+        TextAnimation.Playback barPlayback = animBar.playActionbar(plugin, player, null);
+        TextAnimation.Playback titlePlayback = animTitle.playTitle(plugin, player, null);
+
+        assertNotNull(barPlayback);
+        assertNotNull(titlePlayback);
+        assertFalse(barPlayback.isCancelled());
+        assertFalse(titlePlayback.isCancelled());
+        assertEquals(barPlayback, TextAnimation.getActivePlayback(player, TextAnimation.Channel.ACTIONBAR));
+        assertEquals(titlePlayback, TextAnimation.getActivePlayback(player, TextAnimation.Channel.TITLE));
+    }
+
+    @Test
+    @DisplayName("Expects handle cancellation to clear animation state, restore HUD, and invoke callback exactly once")
+    void testHandleCancellationClearsStateAndInvokesCallbackExactlyOnce() {
+        Plugin plugin = createMockPlugin();
+        UUID uuid = UUID.randomUUID();
+        Player player = createMockPlayer(uuid, new ArrayList<>());
+        ActionbarService service = new ActionbarService(plugin);
+
+        AtomicInteger callbackCalls = new AtomicInteger(0);
+        TextAnimation anim = TextAnimation.builder().frame("Frame").finalStay(Duration.ofSeconds(10)).build();
+
+        TextAnimation.Playback playback = anim.playActionbar(plugin, player, callbackCalls::incrementAndGet);
+        assertNotNull(playback);
+        assertTrue(service.isAnimating(uuid));
+        assertFalse(playback.isCancelled());
+
+        playback.cancel();
+        assertTrue(playback.isCancelled());
+        assertFalse(service.isAnimating(uuid), "Animation state must be cleared on cancellation");
+        assertEquals(1, callbackCalls.get(), "Callback must be invoked exactly once on cancellation");
+        assertNull(TextAnimation.getActivePlayback(player, TextAnimation.Channel.ACTIONBAR));
+
+        // Subsequent cancellation should be idempotent
+        playback.cancel();
+        assertEquals(1, callbackCalls.get(), "Subsequent cancellation must not re-invoke callback");
+    }
+
+    @Test
+    @DisplayName("Expects returned handle to own chained stages and cancelling it during final stay cleans up properly")
+    void testHandleOwnsChainedStagesAndCancellingHaltsSequence() {
+        Plugin plugin = createMockPlugin();
+        UUID uuid = UUID.randomUUID();
+        Player player = createMockPlayer(uuid, new ArrayList<>());
+        ActionbarService service = new ActionbarService(plugin);
+
+        AtomicBoolean stage1Ran = new AtomicBoolean(false);
+        AtomicBoolean stage2Ran = new AtomicBoolean(false);
+        AtomicInteger completionCount = new AtomicInteger(0);
+
+        TextAnimation stage1 = TextAnimation.builder().frame("Stage 1")
+                .onComplete(_ -> stage1Ran.set(true))
+                .build();
+        TextAnimation stage2 = TextAnimation.builder().frame("Stage 2")
+                .onComplete(_ -> stage2Ran.set(true))
+                .finalStay(Duration.ofSeconds(10))
+                .build();
+
+        TextAnimation chained = stage1.then(stage2);
+        TextAnimation.Playback handle = chained.playActionbar(plugin, player, completionCount::incrementAndGet);
+
+        assertNotNull(handle);
+        assertTrue(stage1Ran.get(), "Stage 1 should complete and transition to Stage 2");
+        assertTrue(stage2Ran.get(), "Stage 2 should execute");
+        assertTrue(service.isAnimating(uuid));
+        assertEquals(handle, TextAnimation.getActivePlayback(player, TextAnimation.Channel.ACTIONBAR));
+
+        handle.cancel();
+
+        assertTrue(handle.isCancelled());
+        assertFalse(service.isAnimating(uuid));
+        assertEquals(1, completionCount.get());
+        assertNull(TextAnimation.getActivePlayback(player, TextAnimation.Channel.ACTIONBAR));
     }
 
     private Player createOfflineMockPlayer(UUID uuid) {
