@@ -91,6 +91,13 @@ public final class TitleComposer {
         clearAlerts();
         clearPersistentTitle();
         player.resetTitle();
+        invalidateCache();
+    }
+
+    /**
+     * Invalidates cached title, subtitle, and timing states so the next render pass resends them.
+     */
+    public void invalidateCache() {
         lastSentTitle = null;
         lastSentSubtitle = null;
         lastSentTimes = null;

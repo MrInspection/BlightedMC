@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
@@ -124,6 +125,28 @@ public final class TitleService implements Listener {
     @NonNull
     public TitleComposer getOrCreateComposer(@NonNull UUID uuid) {
         return composers.computeIfAbsent(uuid, _ -> new TitleComposer());
+    }
+
+    /**
+     * Retrieves the title composer for the specified player UUID if present.
+     *
+     * @param uuid player unique ID
+     * @return player's title composer, or null if absent
+     */
+    public @Nullable TitleComposer getComposer(@NonNull UUID uuid) {
+        return composers.get(uuid);
+    }
+
+    /**
+     * Invalidates the cached title render state for a player, ensuring the next render resends.
+     *
+     * @param uuid player unique ID
+     */
+    public void invalidateCache(@NonNull UUID uuid) {
+        TitleComposer composer = composers.get(uuid);
+        if (composer != null) {
+            composer.invalidateCache();
+        }
     }
 
     /**

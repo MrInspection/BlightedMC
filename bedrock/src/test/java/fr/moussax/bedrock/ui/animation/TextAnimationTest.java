@@ -45,6 +45,10 @@ class TextAnimationTest {
     }
 
     private Player createMockPlayer(UUID uuid, List<String> titleRef) {
+        return createMockPlayer(uuid, titleRef, new AtomicInteger());
+    }
+
+    private Player createMockPlayer(UUID uuid, List<String> titleRef, AtomicInteger resetCount) {
         return (Player) Proxy.newProxyInstance(
                 Player.class.getClassLoader(),
                 new Class<?>[]{Player.class},
@@ -64,6 +68,10 @@ class TextAnimationTest {
                             return new Location(null, 0, 0, 0);
                         }
                         case "playSound" -> {
+                            return null;
+                        }
+                        case "resetTitle" -> {
+                            resetCount.incrementAndGet();
                             return null;
                         }
                     }
@@ -428,6 +436,41 @@ class TextAnimationTest {
         assertFalse(service.isAnimating(uuid));
         assertEquals(1, completionCount.get());
         assertNull(TextAnimation.getActivePlayback(player, TextAnimation.Channel.ACTIONBAR));
+    }
+
+    @Test
+    @DisplayName("Expects title cancellation to reset client title and invalidate composer cache while normal completion preserves fadeout")
+    void testTitleCleanupDistinguishesCancellationFromNormalCompletion() {
+        Plugin plugin = createMockPlugin();
+        UUID uuid = UUID.randomUUID();
+        AtomicInteger resetCalls = new AtomicInteger(0);
+        List<String> titlesSent = new ArrayList<>();
+        Player player = createMockPlayer(uuid, titlesSent, resetCalls);
+        TitleService service = new TitleService(plugin);
+
+        service.setPersistent(player, fr.moussax.bedrock.ui.title.PersistentTitle.of("Persistent Title", "Persistent Subtitle"));
+        titlesSent.clear();
+
+        TextAnimation anim = TextAnimation.builder().frame("Anim Frame").finalTimes(TimeableTitle.of(0, 100, 0)).build();
+        TextAnimation.Playback playback = anim.playTitle(plugin, player, null);
+        assertNotNull(playback);
+        assertTrue(service.isAnimating(uuid));
+
+        playback.cancel();
+        assertTrue(playback.isCancelled());
+        assertFalse(service.isAnimating(uuid));
+        assertEquals(1, resetCalls.get(), "Cancelled title playback must reset client title");
+        assertTrue(titlesSent.contains("Persistent Title"), "Invalidated cache must cause renderPlayer to resend persistent title");
+
+        resetCalls.set(0);
+        titlesSent.clear();
+        TextAnimation normalAnim = TextAnimation.builder().frame("Normal Frame").finalTimes(TimeableTitle.of(0, 0, 0)).build();
+        TextAnimation.Playback normalPlayback = normalAnim.playTitle(plugin, player, null);
+        assertNotNull(normalPlayback);
+
+        assertFalse(normalPlayback.isCancelled());
+        assertEquals(0, resetCalls.get(), "Normal completion must NOT reset client title so fade-out is preserved");
+        assertTrue(titlesSent.contains("Persistent Title"), "Normal completion must also restore persistent title via invalidated cache");
     }
 
     private Player createOfflineMockPlayer(UUID uuid) {

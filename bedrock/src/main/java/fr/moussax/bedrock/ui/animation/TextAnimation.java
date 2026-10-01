@@ -603,9 +603,13 @@ public class TextAnimation {
                     service.renderPlayer(player);
                 }
             } else {
+                if (cancelled.get()) {
+                    player.resetTitle();
+                }
                 TitleService service = TitleService.getInstance();
                 if (service != null) {
                     service.setAnimating(uuid, false);
+                    service.invalidateCache(uuid);
                     service.renderPlayer(player);
                 }
             }
