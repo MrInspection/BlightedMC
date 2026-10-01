@@ -1,8 +1,11 @@
 package fr.moussax.bedrock.ui.title;
 
+import fr.moussax.bedrock.scheduling.PluginContext;
+import fr.moussax.bedrock.sound.SoundCue;
 import fr.moussax.bedrock.ui.animation.TextAnimation;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +14,12 @@ import java.lang.reflect.Proxy;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,6 +36,16 @@ class TitleTest {
             AtomicReference<TitleCall> titleRef,
             AtomicReference<SimpleTitleCall> simpleTitleRef,
             AtomicBoolean resetRef
+    ) {
+        return createMockPlayer(titleRef, simpleTitleRef, resetRef, UUID.randomUUID(), new AtomicInteger());
+    }
+
+    private Player createMockPlayer(
+            AtomicReference<TitleCall> titleRef,
+            AtomicReference<SimpleTitleCall> simpleTitleRef,
+            AtomicBoolean resetRef,
+            UUID uuid,
+            AtomicInteger soundCountRef
     ) {
         return (Player) Proxy.newProxyInstance(
                 Player.class.getClassLoader(),
@@ -60,10 +78,14 @@ class TitleTest {
                     if ("isOnline".equals(name)) {
                         return true;
                     }
+                    if ("getUniqueId".equals(name)) {
+                        return uuid;
+                    }
                     if ("getLocation".equals(name)) {
                         return new Location(null, 0, 0, 0);
                     }
                     if ("playSound".equals(name)) {
+                        soundCountRef.incrementAndGet();
                         return null;
                     }
                     return null;
@@ -459,6 +481,27 @@ class TitleTest {
     }
 
     @Test
+    @DisplayName("Expects countdown to return without scheduling when no plugin is available")
+    void testCountdownWithoutBoundPlugin() {
+        TitleService.setInstance(null);
+        PluginContext.unbind();
+
+        Player player = createMockPlayer(new AtomicReference<>(), new AtomicReference<>(), new AtomicBoolean(false));
+        BukkitTask task = assertDoesNotThrow(() -> Title.countdown(
+                List.of(player),
+                1,
+                remaining -> String.valueOf(remaining),
+                "Complete",
+                null,
+                null,
+                null,
+                null
+        ));
+
+        assertNull(task);
+    }
+
+    @Test
     @DisplayName("Expects chained animations with three or more stages to preserve and execute all stages in sequence")
     void testChainedAnimationPreservesAllStages() {
         AtomicReference<TitleCall> titleRef = new AtomicReference<>();
@@ -472,6 +515,7 @@ class TitleTest {
                         renderedTitles.add((String) args[0]);
                         return null;
                     }
+                    if ("getUniqueId".equals(name)) return UUID.randomUUID();
                     if ("isOnline".equals(name)) return true;
                     if ("getLocation".equals(name)) return new Location(null, 0, 0, 0);
                     return null;
@@ -483,7 +527,7 @@ class TitleTest {
 
         TextAnimation stage1 = TextAnimation.builder().frame("Stage 1").build();
         TextAnimation stage2 = TextAnimation.builder().frame("Stage 2").build();
-        TextAnimation stage3 = TextAnimation.builder().frame("Stage 3").build();
+        TextAnimation stage3 = TextAnimation.builder().frame("Stage 3").finalTimes(TimeableTitle.of(0, 0, 0)).build();
 
         org.bukkit.plugin.Plugin mockPlugin = (org.bukkit.plugin.Plugin) Proxy.newProxyInstance(
                 org.bukkit.plugin.Plugin.class.getClassLoader(),
@@ -557,5 +601,74 @@ class TitleTest {
         assertDoesNotThrow(() -> Title.send(mixed, "Title", "Sub"));
         assertNotNull(titleRef.get());
         assertEquals("Title", titleRef.get().title());
+    }
+
+    @Test
+    @DisplayName("Expects TitleAlert sound cue to play once per player across multiple composers")
+    void testTitleAlertSoundCuePlayedOncePerPlayer() {
+        AtomicInteger soundCount1 = new AtomicInteger(0);
+        AtomicInteger soundCount2 = new AtomicInteger(0);
+        Player player1 = createMockPlayer(new AtomicReference<>(), new AtomicReference<>(), new AtomicBoolean(false), UUID.randomUUID(), soundCount1);
+        Player player2 = createMockPlayer(new AtomicReference<>(), new AtomicReference<>(), new AtomicBoolean(false), UUID.randomUUID(), soundCount2);
+
+        SoundCue cue = new SoundCue(null, 1.0f, 1.0f, 0L);
+        TitleAlert alert = TitleAlert.of("Alert Title", "Alert Subtitle", 10, Duration.ofSeconds(5), TimeableTitle.ALERT, cue);
+
+        TitleComposer composer1 = new TitleComposer();
+        TitleComposer composer2 = new TitleComposer();
+
+        composer1.sendModalAlert(alert);
+        composer2.sendModalAlert(alert);
+
+        // First render pass on composer 1
+        composer1.render(player1);
+        assertEquals(1, soundCount1.get(), "Player 1 should receive the sound cue on initial render");
+        assertEquals(0, soundCount2.get(), "Player 2 should not have received the sound cue yet");
+
+        // Subsequent render pass on composer 1 for player 1
+        composer1.render(player1);
+        assertEquals(1, soundCount1.get(), "Player 1 should not receive duplicate sound cues on subsequent renders");
+
+        // First render pass on composer 2 for player 2
+        composer2.render(player2);
+        assertEquals(1, soundCount2.get(), "Player 2 should receive the sound cue once on initial render");
+
+        // Subsequent render pass on composer 2 for player 2
+        composer2.render(player2);
+        assertEquals(1, soundCount2.get(), "Player 2 should not receive duplicate sound cues");
+    }
+
+    @Test
+    @DisplayName("Expects concurrent playSoundIfNeeded calls for the same player to only play sound cue once")
+    void testConcurrentPlaySoundIfNeededExecutesOncePerPlayer() throws InterruptedException {
+        AtomicInteger soundCount = new AtomicInteger(0);
+        Player player = createMockPlayer(new AtomicReference<>(), new AtomicReference<>(), new AtomicBoolean(false), UUID.randomUUID(), soundCount);
+
+        SoundCue cue = new SoundCue(null, 1.0f, 1.0f, 0L);
+        TitleAlert alert = TitleAlert.of("Alert", "Sub", 10, Duration.ofSeconds(5), TimeableTitle.ALERT, cue);
+
+        int threadCount = 10;
+        ExecutorService service = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch finishLatch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            service.submit(() -> {
+                try {
+                    startLatch.await();
+                    alert.playSoundIfNeeded(player);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    finishLatch.countDown();
+                }
+            });
+        }
+
+        startLatch.countDown();
+        finishLatch.await();
+        service.shutdown();
+
+        assertEquals(1, soundCount.get(), "Concurrent playSoundIfNeeded invocations must only trigger the sound once");
     }
 }

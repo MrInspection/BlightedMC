@@ -8,6 +8,9 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -25,7 +28,7 @@ public final class TitleAlert implements Comparable<TitleAlert> {
     private final long expiresAt;
     private final TimeableTitle times;
     private final SoundCue soundCue;
-    private boolean soundPlayed = false;
+    private final Set<UUID> playedPlayers = ConcurrentHashMap.newKeySet();
 
     /**
      * Constructs a modal title alert with explicit parameters.
@@ -224,13 +227,13 @@ public final class TitleAlert implements Comparable<TitleAlert> {
     }
 
     /**
-     * Plays the associated sound cue if not already played.
+     * Plays the associated sound cue for the given player if not already played.
      *
      * @param player target player
      */
     public void playSoundIfNeeded(@NonNull Player player) {
-        if (!soundPlayed && soundCue != null) {
-            soundPlayed = true;
+        Objects.requireNonNull(player, "player cannot be null");
+        if (soundCue != null && playedPlayers.add(player.getUniqueId())) {
             soundCue.play(player);
         }
     }

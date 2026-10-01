@@ -90,7 +90,11 @@ public final class TitleComposer {
     public void clear(@NonNull Player player) {
         clearAlerts();
         clearPersistentTitle();
-        render(player);
+        player.resetTitle();
+        lastSentTitle = null;
+        lastSentSubtitle = null;
+        lastSentTimes = null;
+        lastTimingSentTimestamp = 0L;
     }
 
     /**

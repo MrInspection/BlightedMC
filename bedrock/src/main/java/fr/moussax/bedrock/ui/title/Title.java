@@ -844,9 +844,10 @@ public final class Title {
         Objects.requireNonNull(players, "players cannot be null");
         Objects.requireNonNull(secondFormatter, "secondFormatter cannot be null");
         Objects.requireNonNull(completionTitle, "completionTitle cannot be null");
+        List<Player> countdownPlayers = List.copyOf(players);
 
         if (seconds <= 0) {
-            for (Player player : players) {
+            for (Player player : countdownPlayers) {
                 if (player.isOnline()) {
                     builder()
                             .title(completionTitle)
@@ -861,7 +862,12 @@ public final class Title {
             return null;
         }
 
-        Plugin plugin = resolvePlugin();
+        Plugin plugin;
+        try {
+            plugin = resolvePlugin();
+        } catch (IllegalStateException _) {
+            return null;
+        }
 
         return new BukkitRunnable() {
             private int remaining = seconds;
@@ -869,7 +875,7 @@ public final class Title {
             @Override
             public void run() {
                 boolean anyOnline = false;
-                for (Player player : players) {
+                for (Player player : countdownPlayers) {
                     if (player.isOnline()) {
                         anyOnline = true;
                         break;
@@ -884,7 +890,7 @@ public final class Title {
                     String titleText = secondFormatter.apply(remaining);
                     float pitch = Math.min(2.0f, 1.0f + (seconds - remaining) * 0.25f);
 
-                    for (Player player : players) {
+                    for (Player player : countdownPlayers) {
                         if (player.isOnline()) {
                             TitleBuilder builder = builder()
                                     .title(titleText)
@@ -899,7 +905,7 @@ public final class Title {
 
                     remaining--;
                 } else {
-                    for (Player player : players) {
+                    for (Player player : countdownPlayers) {
                         if (player.isOnline()) {
                             TitleBuilder builder = builder()
                                     .title(completionTitle)

@@ -49,7 +49,9 @@ public final class TitleService implements Listener {
         if (instance == null) {
             instance = this;
         }
-        Bukkit.getPluginManager().registerEvents(this, plugin);
+        if (Bukkit.getServer() != null) {
+            Bukkit.getPluginManager().registerEvents(this, plugin);
+        }
     }
 
     /**
@@ -106,6 +108,11 @@ public final class TitleService implements Listener {
         }
         composers.clear();
         HandlerList.unregisterAll(this);
+        synchronized (TitleService.class) {
+            if (instance == this) {
+                instance = null;
+            }
+        }
     }
 
     /**
