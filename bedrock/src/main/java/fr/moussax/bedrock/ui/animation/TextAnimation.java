@@ -17,10 +17,9 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -240,11 +239,12 @@ public class TextAnimation {
 
         if (visibleLength == 0) {
             builder.frame(text, subtitle, sound, 1.2f);
-        } else {
-            for (int i = 1; i <= visibleLength; i++) {
-                String partial = substringWithColors(text, i);
-                builder.frame(partial, subtitle, sound, 1.2f);
-            }
+            return;
+        }
+
+        for (int i = 1; i <= visibleLength; i++) {
+            String partial = substringWithColors(text, i);
+            builder.frame(partial, subtitle, sound, 1.2f);
         }
     }
 
@@ -438,12 +438,191 @@ public class TextAnimation {
     }
 
     /**
+     * UI channel on which text animations can be played.
+     */
+    public enum Channel {
+        ACTIONBAR,
+        TITLE
+    }
+
+    private static final Map<UUID, Playback> activeActionbars = new ConcurrentHashMap<>();
+    private static final Map<UUID, Playback> activeTitles = new ConcurrentHashMap<>();
+
+    /**
+     * Retrieves the currently active playback for a player on the specified channel, if any.
+     *
+     * @param player  target player
+     * @param channel playback channel
+     * @return active playback or null
+     */
+    public static @Nullable Playback getActivePlayback(@NonNull Player player, @NonNull Channel channel) {
+        Objects.requireNonNull(player, "player cannot be null");
+        Objects.requireNonNull(channel, "channel cannot be null");
+        return getActivePlayback(player.getUniqueId(), channel);
+    }
+
+    /**
+     * Retrieves the currently active playback for a player UUID on the specified channel, if any.
+     *
+     * @param uuid    target player UUID
+     * @param channel playback channel
+     * @return active playback or null
+     */
+    public static @Nullable Playback getActivePlayback(@NonNull UUID uuid, @NonNull Channel channel) {
+        Objects.requireNonNull(uuid, "uuid cannot be null");
+        Objects.requireNonNull(channel, "channel cannot be null");
+        Map<UUID, Playback> map = (channel == Channel.ACTIONBAR) ? activeActionbars : activeTitles;
+        return map.get(uuid);
+    }
+
+    /**
+     * Cancels all active text animation playbacks across all channels and clears tracking.
+     */
+    public static void clearActivePlaybacks() {
+        activeActionbars.values().forEach(Playback::cancel);
+        activeActionbars.clear();
+        activeTitles.values().forEach(Playback::cancel);
+        activeTitles.clear();
+    }
+
+    /**
+     * Represents an active playback handle for a text animation on an action bar or title channel.
+     *
+     * <p>A playback handle owns all stages in chained sequences and any final stay task.
+     * Cancelling the handle stops the active task, clears the animation state, restores the player's
+     * persistent HUD, and invokes the supplied completion callback exactly once.</p>
+     */
+    public static final class Playback implements BukkitTask {
+        private final Plugin plugin;
+        private final Player player;
+        private final Channel channel;
+        private final Runnable extraOnComplete;
+        private final AtomicBoolean finished = new AtomicBoolean(false);
+        private final AtomicBoolean cancelled = new AtomicBoolean(false);
+        private volatile BukkitTask currentTask;
+
+        Playback(
+                @NonNull Plugin plugin,
+                @NonNull Player player,
+                @NonNull Channel channel,
+                @Nullable Runnable extraOnComplete
+        ) {
+            this.plugin = plugin;
+            this.player = player;
+            this.channel = channel;
+            this.extraOnComplete = extraOnComplete;
+        }
+
+        void setCurrentTask(@Nullable BukkitTask task) {
+            this.currentTask = task;
+        }
+
+        /**
+         * Returns the target player receiving this animation playback.
+         *
+         * @return target player
+         */
+        @NonNull
+        public Player getPlayer() {
+            return player;
+        }
+
+        /**
+         * Returns the UI channel on which this animation is playing.
+         *
+         * @return playback channel
+         */
+        @NonNull
+        public Channel getChannel() {
+            return channel;
+        }
+
+        @Override
+        public int getTaskId() {
+            BukkitTask task = this.currentTask;
+            return task != null ? task.getTaskId() : -1;
+        }
+
+        @Override
+        @NonNull
+        public Plugin getOwner() {
+            return plugin;
+        }
+
+        @Override
+        public boolean isSync() {
+            return true;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return cancelled.get();
+        }
+
+        /**
+         * Checks whether this playback has completed or was cancelled.
+         *
+         * @return true if finished
+         */
+        public boolean isFinished() {
+            return finished.get();
+        }
+
+        @Override
+        public void cancel() {
+            if (!cancelled.compareAndSet(false, true)) {
+                return;
+            }
+            BukkitTask task = this.currentTask;
+            if (task != null) {
+                task.cancel();
+            }
+            cleanupAndComplete();
+        }
+
+        void completeNormally() {
+            if (cancelled.get()) {
+                return;
+            }
+            cleanupAndComplete();
+        }
+
+        private void cleanupAndComplete() {
+            if (!finished.compareAndSet(false, true)) {
+                return;
+            }
+
+            UUID uuid = player.getUniqueId();
+            Map<UUID, Playback> activeMap = (channel == Channel.ACTIONBAR) ? activeActionbars : activeTitles;
+            activeMap.remove(uuid, this);
+
+            if (channel == Channel.ACTIONBAR) {
+                ActionbarService service = ActionbarService.getInstance();
+                if (service != null) {
+                    service.setAnimating(uuid, false);
+                    service.renderPlayer(player);
+                }
+            } else {
+                TitleService service = TitleService.getInstance();
+                if (service != null) {
+                    service.setAnimating(uuid, false);
+                    service.renderPlayer(player);
+                }
+            }
+
+            if (extraOnComplete != null) {
+                extraOnComplete.run();
+            }
+        }
+    }
+
+    /**
      * Plays this text animation on the target player's action bar.
      *
      * @param player target player
-     * @return the running Bukkit task handle
+     * @return the running playback handle
      */
-    public BukkitTask playActionbar(@NonNull Player player) {
+    public Playback playActionbar(@NonNull Player player) {
         return playActionbar(player, null);
     }
 
@@ -452,9 +631,9 @@ public class TextAnimation {
      *
      * @param player          target player
      * @param extraOnComplete additional action executed upon completion
-     * @return the running Bukkit task handle
+     * @return the running playback handle
      */
-    public BukkitTask playActionbar(@NonNull Player player, @Nullable Runnable extraOnComplete) {
+    public Playback playActionbar(@NonNull Player player, @Nullable Runnable extraOnComplete) {
         return playActionbar(resolvePlugin(), player, extraOnComplete);
     }
 
@@ -463,9 +642,9 @@ public class TextAnimation {
      *
      * @param plugin owning plugin
      * @param player target player
-     * @return the running Bukkit task handle
+     * @return the running playback handle
      */
-    public BukkitTask playActionbar(@NonNull Plugin plugin, @NonNull Player player) {
+    public Playback playActionbar(@NonNull Plugin plugin, @NonNull Player player) {
         return playActionbar(plugin, player, null);
     }
 
@@ -475,97 +654,141 @@ public class TextAnimation {
      * @param plugin          owning plugin
      * @param player          target player
      * @param extraOnComplete additional action executed upon completion
-     * @return the running Bukkit task handle
+     * @return the running playback handle
      */
-    public BukkitTask playActionbar(@NonNull Plugin plugin, @NonNull Player player, @Nullable Runnable extraOnComplete) {
+    public Playback playActionbar(@NonNull Plugin plugin, @NonNull Player player, @Nullable Runnable extraOnComplete) {
         Objects.requireNonNull(plugin, "plugin cannot be null");
         Objects.requireNonNull(player, "player cannot be null");
 
-        if (frames.isEmpty()) {
-            if (nextAnimation != null) {
-                return nextAnimation.playActionbar(plugin, player, extraOnComplete);
-            }
-            if (extraOnComplete != null) extraOnComplete.run();
-            return null;
+        UUID uuid = player.getUniqueId();
+        Playback previous = activeActionbars.get(uuid);
+        if (previous != null) {
+            previous.cancel();
         }
 
         if (!player.isOnline()) {
-            if (extraOnComplete != null) extraOnComplete.run();
+            if (extraOnComplete != null) {
+                extraOnComplete.run();
+            }
             return null;
         }
 
+        Playback playback = new Playback(plugin, player, Channel.ACTIONBAR, extraOnComplete);
+        activeActionbars.put(uuid, playback);
         ActionbarService service = ActionbarService.getInstance();
         if (service != null) {
-            service.setAnimating(player.getUniqueId(), true);
+            service.setAnimating(uuid, true);
         }
 
-        Frame firstFrame = frames.getFirst();
+        executeActionbarStage(playback, this);
+        return playback;
+    }
+
+    private void executeActionbarStage(@NonNull Playback playback, @NonNull TextAnimation stage) {
+        if (playback.isCancelled()) {
+            return;
+        }
+
+        Player player = playback.getPlayer();
+        Plugin plugin = playback.getOwner();
+
+        if (!player.isOnline()) {
+            playback.cancel();
+            return;
+        }
+
+        if (stage.frames.isEmpty()) {
+            if (stage.nextAnimation != null) {
+                executeActionbarStage(playback, stage.nextAnimation);
+                return;
+            }
+            playback.completeNormally();
+            return;
+        }
+
+        Frame firstFrame = stage.frames.getFirst();
         sendRawActionbar(player, firstFrame.text());
         if (firstFrame.sound() != null) {
             player.playSound(player.getLocation(), firstFrame.sound(), 1.0f, firstFrame.soundPitch());
         }
 
-        if (frames.size() == 1) {
-            if (nextAnimation != null) {
-                if (onComplete != null) onComplete.accept(player);
-                return nextAnimation.playActionbar(plugin, player, extraOnComplete);
+        if (stage.frames.size() == 1) {
+            if (stage.onComplete != null) {
+                stage.onComplete.accept(player);
             }
-            if (onComplete != null) onComplete.accept(player);
-            long stayTicks = Math.max(0L, finalStay.toMillis() / 50L);
+
+            if (stage.nextAnimation != null) {
+                executeActionbarStage(playback, stage.nextAnimation);
+                return;
+            }
+
+            long stayTicks = Math.max(0L, stage.finalStay.toMillis() / 50L);
             if (stayTicks > 0) {
-                return Bukkit.getScheduler().runTaskLater(plugin, () -> finishActionbar(player, extraOnComplete), stayTicks);
+                if (Bukkit.getServer() != null) {
+                    BukkitTask stayTask = Bukkit.getScheduler().runTaskLater(plugin, playback::completeNormally, stayTicks);
+                    playback.setCurrentTask(stayTask);
+                }
             } else {
-                finishActionbar(player, extraOnComplete);
-                return null;
+                playback.completeNormally();
             }
+            return;
         }
 
-        return new BukkitRunnable() {
+        BukkitTask task = new BukkitRunnable() {
             private int frameIndex = 1;
 
             @Override
             public void run() {
-                if (!player.isOnline()) {
-                    cleanupActionbar(player);
+                if (playback.isCancelled()) {
                     cancel();
-                    if (extraOnComplete != null) {
-                        extraOnComplete.run();
-                    }
                     return;
                 }
 
-                if (frameIndex < frames.size() - 1) {
-                    Frame frame = frames.get(frameIndex);
+                if (!player.isOnline()) {
+                    cancel();
+                    playback.cancel();
+                    return;
+                }
+
+                if (frameIndex < stage.frames.size() - 1) {
+                    Frame frame = stage.frames.get(frameIndex);
                     sendRawActionbar(player, frame.text());
                     if (frame.sound() != null) {
                         player.playSound(player.getLocation(), frame.sound(), 1.0f, frame.soundPitch());
                     }
                     frameIndex++;
+                    return;
+                }
+
+                Frame last = stage.frames.getLast();
+                cancel();
+
+                sendRawActionbar(player, last.text());
+                if (last.sound() != null) {
+                    player.playSound(player.getLocation(), last.sound(), 1.0f, last.soundPitch());
+                }
+                if (stage.onComplete != null) {
+                    stage.onComplete.accept(player);
+                }
+
+                if (stage.nextAnimation != null) {
+                    executeActionbarStage(playback, stage.nextAnimation);
+                    return;
+                }
+
+                long stayTicks = Math.max(0L, stage.finalStay.toMillis() / 50L);
+                if (stayTicks > 0) {
+                    if (Bukkit.getServer() != null) {
+                        BukkitTask stayTask = Bukkit.getScheduler().runTaskLater(plugin, playback::completeNormally, stayTicks);
+                        playback.setCurrentTask(stayTask);
+                    }
                 } else {
-                    Frame last = frames.getLast();
-                    cancel();
-
-                    sendRawActionbar(player, last.text());
-                    if (last.sound() != null) {
-                        player.playSound(player.getLocation(), last.sound(), 1.0f, last.soundPitch());
-                    }
-                    if (onComplete != null) {
-                        onComplete.accept(player);
-                    }
-
-                    if (nextAnimation != null) {
-                        nextAnimation.playActionbar(plugin, player, extraOnComplete);
-                    } else {
-                        long stayTicks = Math.max(0L, finalStay.toMillis() / 50L);
-                        if (stayTicks > 0) {
-                            Bukkit.getScheduler().runTaskLater(plugin, () -> finishActionbar(player, extraOnComplete), stayTicks);
-                        } else {
-                            finishActionbar(player, extraOnComplete);
-                        }
-                    }
+                    playback.completeNormally();
                 }
             }
-        }.runTaskTimer(plugin, tickInterval, tickInterval);
+        }.runTaskTimer(plugin, stage.tickInterval, stage.tickInterval);
+
+        playback.setCurrentTask(task);
     }
 
     /**
@@ -632,31 +855,13 @@ public class TextAnimation {
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(text));
     }
 
-    private static void finishActionbar(@NonNull Player player, @Nullable Runnable extraOnComplete) {
-        ActionbarService service = ActionbarService.getInstance();
-        if (service != null) {
-            service.setAnimating(player.getUniqueId(), false);
-            service.renderPlayer(player);
-        }
-        if (extraOnComplete != null) {
-            extraOnComplete.run();
-        }
-    }
-
-    private static void cleanupActionbar(@NonNull Player player) {
-        ActionbarService service = ActionbarService.getInstance();
-        if (service != null) {
-            service.setAnimating(player.getUniqueId(), false);
-        }
-    }
-
     /**
      * Plays this text animation on the target player as an in-place title sequence.
      *
      * @param player target player
-     * @return the running Bukkit task handle
+     * @return the running playback handle
      */
-    public BukkitTask playTitle(@NonNull Player player) {
+    public Playback playTitle(@NonNull Player player) {
         return playTitle(player, null);
     }
 
@@ -665,9 +870,9 @@ public class TextAnimation {
      *
      * @param player          target player
      * @param extraOnComplete additional action executed upon completion
-     * @return the running Bukkit task handle
+     * @return the running playback handle
      */
-    public BukkitTask playTitle(@NonNull Player player, @Nullable Runnable extraOnComplete) {
+    public Playback playTitle(@NonNull Player player, @Nullable Runnable extraOnComplete) {
         return playTitle(resolvePlugin(), player, extraOnComplete);
     }
 
@@ -676,9 +881,9 @@ public class TextAnimation {
      *
      * @param plugin owning plugin
      * @param player target player
-     * @return the running Bukkit task handle
+     * @return the running playback handle
      */
-    public BukkitTask playTitle(@NonNull Plugin plugin, @NonNull Player player) {
+    public Playback playTitle(@NonNull Plugin plugin, @NonNull Player player) {
         return playTitle(plugin, player, null);
     }
 
@@ -688,116 +893,152 @@ public class TextAnimation {
      * @param plugin          owning plugin
      * @param player          target player
      * @param extraOnComplete additional action executed upon completion
-     * @return the running Bukkit task handle
+     * @return the running playback handle
      */
-    public BukkitTask playTitle(@NonNull Plugin plugin, @NonNull Player player, @Nullable Runnable extraOnComplete) {
+    public Playback playTitle(@NonNull Plugin plugin, @NonNull Player player, @Nullable Runnable extraOnComplete) {
         Objects.requireNonNull(plugin, "plugin cannot be null");
         Objects.requireNonNull(player, "player cannot be null");
 
-        if (frames.isEmpty()) {
-            if (nextAnimation != null) {
-                return nextAnimation.playTitle(plugin, player, extraOnComplete);
-            }
-            if (extraOnComplete != null) extraOnComplete.run();
-            return null;
+        UUID uuid = player.getUniqueId();
+        Playback previous = activeTitles.get(uuid);
+        if (previous != null) {
+            previous.cancel();
         }
 
         if (!player.isOnline()) {
-            if (extraOnComplete != null) extraOnComplete.run();
+            if (extraOnComplete != null) {
+                extraOnComplete.run();
+            }
             return null;
         }
 
+        Playback playback = new Playback(plugin, player, Channel.TITLE, extraOnComplete);
+        activeTitles.put(uuid, playback);
         TitleService titleService = TitleService.getInstance();
         if (titleService != null) {
-            titleService.setAnimating(player.getUniqueId(), true);
+            titleService.setAnimating(uuid, true);
         }
 
-        Frame firstFrame = frames.getFirst();
+        executeTitleStage(playback, this);
+        return playback;
+    }
+
+    private void executeTitleStage(@NonNull Playback playback, @NonNull TextAnimation stage) {
+        if (playback.isCancelled()) {
+            return;
+        }
+
+        Player player = playback.getPlayer();
+        Plugin plugin = playback.getOwner();
+
+        if (!player.isOnline()) {
+            playback.cancel();
+            return;
+        }
+
+        if (stage.frames.isEmpty()) {
+            if (stage.nextAnimation != null) {
+                executeTitleStage(playback, stage.nextAnimation);
+                return;
+            }
+            playback.completeNormally();
+            return;
+        }
+
+        Frame firstFrame = stage.frames.getFirst();
         if (firstFrame.sound() != null) {
             player.playSound(player.getLocation(), firstFrame.sound(), 1.0f, firstFrame.soundPitch());
         }
 
-        if (frames.size() == 1) {
-            if (nextAnimation != null) {
-                int totalTicks = (int) (frames.size() * tickInterval);
-                TitlePacketSender.sendFull(player, firstFrame.title(), firstFrame.subtitle(), 0, totalTicks + 60, 0);
-                if (onComplete != null) onComplete.accept(player);
-                return nextAnimation.playTitle(plugin, player, extraOnComplete);
+        if (stage.frames.size() == 1) {
+            if (stage.onComplete != null) {
+                stage.onComplete.accept(player);
             }
-            TitlePacketSender.sendFull(player, firstFrame.title(), firstFrame.subtitle(),
-                    finalTimes.fadeIn(), finalTimes.stay(), finalTimes.fadeOut());
-            if (onComplete != null) onComplete.accept(player);
 
-            long finishDelay = finalTimes.stay() + finalTimes.fadeOut();
-            if (finishDelay > 0) {
-                return Bukkit.getScheduler().runTaskLater(plugin, () -> finishTitle(player, extraOnComplete), finishDelay);
-            } else {
-                finishTitle(player, extraOnComplete);
-                return null;
+            if (stage.nextAnimation != null) {
+                int totalTicks = (int) (stage.frames.size() * stage.tickInterval);
+                TitlePacketSender.sendFull(player, firstFrame.title(), firstFrame.subtitle(), 0, totalTicks + 60, 0);
+                executeTitleStage(playback, stage.nextAnimation);
+                return;
             }
+
+            TitlePacketSender.sendFull(player, firstFrame.title(), firstFrame.subtitle(),
+                    stage.finalTimes.fadeIn(), stage.finalTimes.stay(), stage.finalTimes.fadeOut());
+
+            long finishDelay = stage.finalTimes.stay() + stage.finalTimes.fadeOut();
+            if (finishDelay > 0) {
+                if (Bukkit.getServer() != null) {
+                    BukkitTask stayTask = Bukkit.getScheduler().runTaskLater(plugin, playback::completeNormally, finishDelay);
+                    playback.setCurrentTask(stayTask);
+                }
+            } else {
+                playback.completeNormally();
+            }
+            return;
         }
 
-        // Initialize display with sufficient stay to cover the entire sequence with zero fade-in
-        int totalTicks = (int) (frames.size() * tickInterval);
+        int totalTicks = (int) (stage.frames.size() * stage.tickInterval);
         TitlePacketSender.sendFull(player, firstFrame.title(), firstFrame.subtitle(), 0, totalTicks + 60, 0);
 
-        return new BukkitRunnable() {
+        BukkitTask task = new BukkitRunnable() {
             private int frameIndex = 1;
 
             @Override
             public void run() {
-                if (!player.isOnline()) {
-                    cleanupTitle(player);
+                if (playback.isCancelled()) {
                     cancel();
-                    if (extraOnComplete != null) {
-                        extraOnComplete.run();
-                    }
                     return;
                 }
 
-                if (frameIndex < frames.size() - 1) {
-                    Frame frame = frames.get(frameIndex);
-                    // Pure text update: no ClientboundSetTitlesAnimationPacket is sent, preventing opacity reset
+                if (!player.isOnline()) {
+                    cancel();
+                    playback.cancel();
+                    return;
+                }
+
+                if (frameIndex < stage.frames.size() - 1) {
+                    Frame frame = stage.frames.get(frameIndex);
                     TitlePacketSender.sendTextOnly(player, frame.title(), frame.subtitle());
                     if (frame.sound() != null) {
                         player.playSound(player.getLocation(), frame.sound(), 1.0f, frame.soundPitch());
                     }
                     frameIndex++;
-                } else {
-                    Frame last = frames.getLast();
-                    cancel();
+                    return;
+                }
 
-                    if (nextAnimation != null) {
-                        // In-place transfer to the next animation
-                        TitlePacketSender.sendTextOnly(player, last.title(), last.subtitle());
-                        if (last.sound() != null) {
-                            player.playSound(player.getLocation(), last.sound(), 1.0f, last.soundPitch());
-                        }
-                        if (onComplete != null) {
-                            onComplete.accept(player);
-                        }
-                        nextAnimation.playTitle(plugin, player, extraOnComplete);
-                    } else {
-                        // Climax frame: apply final sustain and fade-out timings
-                        TitlePacketSender.sendFull(player, last.title(), last.subtitle(),
-                                finalTimes.fadeIn(), finalTimes.stay(), finalTimes.fadeOut());
-                        if (last.sound() != null) {
-                            player.playSound(player.getLocation(), last.sound(), 1.0f, last.soundPitch());
-                        }
-                        if (onComplete != null) {
-                            onComplete.accept(player);
-                        }
+                Frame last = stage.frames.getLast();
+                cancel();
 
-                        long finishDelay = finalTimes.stay() + finalTimes.fadeOut();
-                        if (finishDelay > 0) {
-                            Bukkit.getScheduler().runTaskLater(plugin, () -> finishTitle(player, extraOnComplete), finishDelay);
-                        } else {
-                            finishTitle(player, extraOnComplete);
-                        }
+                if (last.sound() != null) {
+                    player.playSound(player.getLocation(), last.sound(), 1.0f, last.soundPitch());
+                }
+                if (stage.onComplete != null) {
+                    stage.onComplete.accept(player);
+                }
+
+                if (stage.nextAnimation != null) {
+                    TitlePacketSender.sendTextOnly(player, last.title(), last.subtitle());
+                    executeTitleStage(playback, stage.nextAnimation);
+                    return;
+                }
+
+                TitlePacketSender.sendFull(player, last.title(), last.subtitle(),
+                        stage.finalTimes.fadeIn(), stage.finalTimes.stay(), stage.finalTimes.fadeOut());
+
+                long finishDelay = stage.finalTimes.stay() + stage.finalTimes.fadeOut();
+                if (finishDelay > 0) {
+                    if (Bukkit.getServer() == null) return;
+                    {
+                        BukkitTask stayTask = Bukkit.getScheduler().runTaskLater(plugin, playback::completeNormally, finishDelay);
+                        playback.setCurrentTask(stayTask);
                     }
+                } else {
+                    playback.completeNormally();
                 }
             }
-        }.runTaskTimer(plugin, tickInterval, tickInterval);
+        }.runTaskTimer(plugin, stage.tickInterval, stage.tickInterval);
+
+        playback.setCurrentTask(task);
     }
 
     /**
@@ -859,24 +1100,6 @@ public class TextAnimation {
 
         for (Player player : targetPlayers) {
             dispatcher.accept(player, barrier);
-        }
-    }
-
-    private static void finishTitle(@NonNull Player player, @Nullable Runnable extraOnComplete) {
-        TitleService service = TitleService.getInstance();
-        if (service != null) {
-            service.setAnimating(player.getUniqueId(), false);
-            service.renderPlayer(player);
-        }
-        if (extraOnComplete != null) {
-            extraOnComplete.run();
-        }
-    }
-
-    private static void cleanupTitle(@NonNull Player player) {
-        TitleService service = TitleService.getInstance();
-        if (service != null) {
-            service.setAnimating(player.getUniqueId(), false);
         }
     }
 
@@ -946,12 +1169,15 @@ public class TextAnimation {
         }
 
         if (frames.size() == 1) {
+            if (onComplete != null) {
+                onComplete.accept(player);
+            }
             if (nextAnimation != null) {
-                if (onComplete != null) onComplete.accept(player);
                 return nextAnimation.play(plugin, player, frameConsumer, extraOnComplete);
             }
-            if (onComplete != null) onComplete.accept(player);
-            if (extraOnComplete != null) extraOnComplete.run();
+            if (extraOnComplete != null) {
+                extraOnComplete.run();
+            }
             return null;
         }
 
@@ -975,21 +1201,22 @@ public class TextAnimation {
                         player.playSound(player.getLocation(), frame.sound(), 1.0f, frame.soundPitch());
                     }
                     frameIndex++;
-                } else {
-                    Frame last = frames.getLast();
-                    cancel();
-                    frameConsumer.accept(player, last);
-                    if (last.sound() != null) {
-                        player.playSound(player.getLocation(), last.sound(), 1.0f, last.soundPitch());
-                    }
-                    if (onComplete != null) {
-                        onComplete.accept(player);
-                    }
-                    if (nextAnimation != null) {
-                        nextAnimation.play(plugin, player, frameConsumer, extraOnComplete);
-                    } else if (extraOnComplete != null) {
-                        extraOnComplete.run();
-                    }
+                    return;
+                }
+
+                Frame last = frames.getLast();
+                cancel();
+                frameConsumer.accept(player, last);
+                if (last.sound() != null) {
+                    player.playSound(player.getLocation(), last.sound(), 1.0f, last.soundPitch());
+                }
+                if (onComplete != null) {
+                    onComplete.accept(player);
+                }
+                if (nextAnimation != null) {
+                    nextAnimation.play(plugin, player, frameConsumer, extraOnComplete);
+                } else if (extraOnComplete != null) {
+                    extraOnComplete.run();
                 }
             }
         }.runTaskTimer(plugin, tickInterval, tickInterval);
@@ -997,11 +1224,11 @@ public class TextAnimation {
 
     private static Plugin resolvePlugin() {
         ActionbarService actionbarService = ActionbarService.getInstance();
-        if (actionbarService != null && actionbarService.getPlugin() != null) {
+        if (actionbarService != null) {
             return actionbarService.getPlugin();
         }
         TitleService titleService = TitleService.getInstance();
-        if (titleService != null && titleService.getPlugin() != null) {
+        if (titleService != null) {
             return titleService.getPlugin();
         }
         return PluginContext.get();
