@@ -8,6 +8,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
@@ -16,45 +17,93 @@ import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 /**
  * Manages player action bar lifecycle, section registrations, timed alerts, and periodic rendering.
+ *
+ * <p>Centralizes action bar rendering across all plugins to prevent packet collisions and flickering.
+ * Incorporates packet diff suppression to avoid sending redundant network packets when displayed
+ * content is unchanged.</p>
  */
 public final class ActionbarService implements Listener {
 
-    // ponytail: kept — shared instance across plugins avoids actionbar packet collisions
+    private static final long MIN_BURST_INTERVAL_MILLIS = 250L;
+
     @Getter
     @Setter
-    private static ActionbarService instance;
+    private static volatile ActionbarService instance;
+
+    @Getter
     private final Plugin plugin;
     private final Map<UUID, ActionbarComposer> composers = new ConcurrentHashMap<>();
     private final Map<String, ActionbarSection> globalSections = new ConcurrentHashMap<>();
+    private final Map<Plugin, Set<String>> pluginSections = new ConcurrentHashMap<>();
+    private final Map<UUID, String> lastSentTexts = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastSentTimestamps = new ConcurrentHashMap<>();
+    private final Set<UUID> animatingPlayers = ConcurrentHashMap.newKeySet();
 
+    private volatile String separator = "     ";
     private BukkitTask tickerTask;
     private volatile boolean running = false;
+    private long currentPeriodTicks = 20L;
 
     /**
-     * Constructs an action bar service and registers its listener with the plugin manager.
+     * Constructs an action bar service and registers quit events with the Bukkit plugin manager.
      *
      * @param plugin owning plugin instance
      */
     public ActionbarService(@NonNull Plugin plugin) {
-        this.plugin = plugin;
-        instance = this;
-        Bukkit.getPluginManager().registerEvents(this, plugin);
+        this.plugin = Objects.requireNonNull(plugin, "plugin cannot be null");
+        if (instance == null) {
+            instance = this;
+        }
+        if (Bukkit.getServer() != null) {
+            Bukkit.getPluginManager().registerEvents(this, plugin);
+        }
     }
 
     /**
-     * Starts the periodic action bar render task.
+     * Obtains the shared {@link ActionbarService} singleton, or constructs one if not yet initialized.
+     *
+     * @param plugin owning plugin
+     * @return the active action bar service
+     */
+    @NonNull
+    public static ActionbarService getOrCreate(@NonNull Plugin plugin) {
+        if (instance == null) {
+            synchronized (ActionbarService.class) {
+                if (instance == null) {
+                    new ActionbarService(plugin);
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * Starts or updates the periodic action bar render task.
+     * If already running with a slower refresh rate, speeds up to match the faster requested period.
      *
      * @param periodTicks interval between renders in server ticks
      */
     public void start(long periodTicks) {
-        if (running && tickerTask != null && !tickerTask.isCancelled()) return;
-        running = true;
+        if (running && tickerTask != null && !tickerTask.isCancelled()) {
+            if (periodTicks < currentPeriodTicks) {
+                this.currentPeriodTicks = periodTicks;
+                tickerTask.cancel();
+                this.tickerTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tickAll, 0L, periodTicks);
+            }
+            return;
+        }
+
+        this.currentPeriodTicks = periodTicks;
+        this.running = true;
 
         if (tickerTask != null) {
             tickerTask.cancel();
@@ -73,20 +122,96 @@ public final class ActionbarService implements Listener {
             tickerTask = null;
         }
         composers.clear();
+        lastSentTexts.clear();
+        lastSentTimestamps.clear();
+        HandlerList.unregisterAll(this);
+        synchronized (ActionbarService.class) {
+            if (instance == this) {
+                instance = null;
+            }
+        }
     }
 
     /**
-     * Registers an action bar section globally for all present and future player composers.
+     * Sets the default delimiter string rendered between adjacent standard sections.
+     *
+     * @param separator delimiter text
+     */
+    public void setSeparator(@NonNull String separator) {
+        this.separator = Objects.requireNonNull(separator, "separator cannot be null");
+        composers.values().forEach(composer -> composer.setSeparator(separator));
+    }
+
+    /**
+     * Sets the default delimiter string rendered between adjacent standard sections for a specific player.
+     *
+     * @param player    target player
+     * @param separator delimiter text
+     */
+    public void setSeparator(@NonNull Player player, @NonNull String separator) {
+        Objects.requireNonNull(player, "player cannot be null");
+        Objects.requireNonNull(separator, "separator cannot be null");
+        ActionbarComposer composer = getOrCreateComposer(player.getUniqueId());
+        composer.setSeparator(separator);
+    }
+
+    /**
+     * Returns the current section delimiter.
+     *
+     * @return separator string
+     */
+    @NonNull
+    public String getSeparator() {
+        return separator;
+    }
+
+    /**
+     * Returns the section delimiter configured for a specific player, or the global default.
+     *
+     * @param player target player
+     * @return separator string
+     */
+    @NonNull
+    public String getSeparator(@NonNull Player player) {
+        Objects.requireNonNull(player, "player cannot be null");
+        ActionbarComposer composer = composers.get(player.getUniqueId());
+        return composer != null ? composer.getSeparator() : separator;
+    }
+
+    /**
+     * Registers a persistent section globally across all players.
      *
      * @param section section to register
      */
     public void registerSection(@NonNull ActionbarSection section) {
         globalSections.put(section.id(), section);
-        composers.values().forEach(composer -> composer.registerSection(section));
     }
 
     /**
-     * Unregisters a section globally across all active player composers.
+     * Registers a persistent global section associated with an owning plugin.
+     * Allows bulk unregistration when the owning plugin disables or reloads.
+     *
+     * @param plugin  owning plugin
+     * @param section section to register
+     */
+    public void registerSection(@NonNull Plugin plugin, @NonNull ActionbarSection section) {
+        pluginSections.computeIfAbsent(plugin, _ -> ConcurrentHashMap.newKeySet()).add(section.id());
+        registerSection(section);
+    }
+
+    /**
+     * Registers a section visible exclusively to a specific player.
+     *
+     * @param player  target player
+     * @param section section to register
+     */
+    public void registerSection(@NonNull Player player, @NonNull ActionbarSection section) {
+        ActionbarComposer composer = getOrCreateComposer(player.getUniqueId());
+        composer.registerSection(section);
+    }
+
+    /**
+     * Unregisters a section globally.
      *
      * @param sectionId identifier of section to unregister
      */
@@ -96,14 +221,46 @@ public final class ActionbarService implements Listener {
     }
 
     /**
-     * Executes an action with the active action bar service if present.
+     * Unregisters a player-specific section.
      *
-     * @param action consumer accepting the active service instance
+     * @param player    target player
+     * @param sectionId section identifier
      */
-    public static void ifPresent(@NonNull Consumer<ActionbarService> action) {
-        if (instance != null) {
-            action.accept(instance);
+    public void unregisterSection(@NonNull Player player, @NonNull String sectionId) {
+        ActionbarComposer composer = composers.get(player.getUniqueId());
+        if (composer != null) {
+            composer.unregisterSection(sectionId);
         }
+    }
+
+    /**
+     * Unregisters all sections associated with a plugin.
+     *
+     * <p>If the supplied plugin is the service's owning plugin, stops the service and clears the
+     * singleton instance; otherwise, removes only that plugin's registered sections while keeping
+     * the service running.</p>
+     *
+     * @param plugin owning plugin to clean up
+     */
+    public void unregisterAll(@NonNull Plugin plugin) {
+        Objects.requireNonNull(plugin, "plugin cannot be null");
+        Set<String> sectionIds = pluginSections.remove(plugin);
+        if (sectionIds != null) {
+            sectionIds.forEach(this::unregisterSection);
+        }
+        if (this.plugin.equals(plugin)) {
+            stop();
+        }
+    }
+
+    /**
+     * Sends a modal alert to a player using the default duration (2 seconds) and immediately renders.
+     *
+     * @param player  target player
+     * @param message alert text
+     */
+    public void sendAlert(@NonNull Player player, @NonNull String message) {
+        sendAlert(player, message, 0, Actionbar.DEFAULT_DURATION);
     }
 
     /**
@@ -126,9 +283,99 @@ public final class ActionbarService implements Listener {
      * @param duration alert display duration
      */
     public void sendAlert(@NonNull Player player, @NonNull String message, int priority, @NonNull Duration duration) {
+        sendAlert(player, TimedAlert.of(message, priority, duration));
+    }
+
+    /**
+     * Sends a dynamic modal alert that evaluates text dynamically on every render pass.
+     *
+     * @param player   target player
+     * @param supplier dynamic text supplier
+     * @param priority alert priority
+     * @param duration alert display duration
+     */
+    public void sendAlert(@NonNull Player player, @NonNull Supplier<String> supplier, int priority, @NonNull Duration duration) {
+        sendAlert(player, TimedAlert.of(supplier, priority, duration));
+    }
+
+    /**
+     * Sends a dynamic modal alert with default priority (0).
+     *
+     * @param player   target player
+     * @param supplier dynamic text supplier
+     * @param duration alert display duration
+     */
+    public void sendAlert(@NonNull Player player, @NonNull Supplier<String> supplier, @NonNull Duration duration) {
+        sendAlert(player, supplier, 0, duration);
+    }
+
+    /**
+     * Sends a prepared {@link TimedAlert} as a modal alert to a player.
+     *
+     * @param player target player
+     * @param alert  timed alert
+     */
+    public void sendAlert(@NonNull Player player, @NonNull TimedAlert alert) {
         ActionbarComposer composer = getOrCreateComposer(player.getUniqueId());
-        composer.sendModalAlert(message, priority, duration);
+        composer.sendModalAlert(alert);
         renderPlayer(player);
+    }
+
+    /**
+     * Sends an automated decrementing countdown alert to a player.
+     *
+     * @param player   target player
+     * @param format   string format containing {@code %d}
+     * @param seconds  countdown seconds
+     * @param priority alert priority
+     */
+    public void sendCountdown(@NonNull Player player, @NonNull String format, int seconds, int priority) {
+        sendAlert(player, TimedAlert.countdown(format, priority, seconds));
+    }
+
+    /**
+     * Sends an automated decrementing countdown alert to a player with default priority (0).
+     *
+     * @param player  target player
+     * @param format  string format containing {@code %d}
+     * @param seconds countdown seconds
+     */
+    public void sendCountdown(@NonNull Player player, @NonNull String format, int seconds) {
+        sendCountdown(player, format, seconds, 0);
+    }
+
+    /**
+     * Sends an automated decrementing countdown alert with a custom formatter.
+     *
+     * @param player    target player
+     * @param formatter function receiving remaining seconds
+     * @param seconds   countdown seconds
+     * @param priority  alert priority
+     */
+    public void sendCountdown(@NonNull Player player, @NonNull IntFunction<String> formatter, int seconds, int priority) {
+        sendAlert(player, TimedAlert.countdown(formatter, priority, seconds));
+    }
+
+    /**
+     * Sends an automated decrementing countdown alert with a custom formatter and default priority (0).
+     *
+     * @param player    target player
+     * @param formatter function receiving remaining seconds
+     * @param seconds   countdown seconds
+     */
+    public void sendCountdown(@NonNull Player player, @NonNull IntFunction<String> formatter, int seconds) {
+        sendCountdown(player, formatter, seconds, 0);
+    }
+
+    /**
+     * Sends a slot-specific alert replacing a section's text using the default duration (2 seconds).
+     *
+     * @param player    target player
+     * @param sectionId target section identifier
+     * @param message   alert text
+     */
+    public void sendSlotAlert(@NonNull Player player, @NonNull String sectionId, @NonNull String message) {
+        sendSlotAlert(player, sectionId, message, Actionbar.DEFAULT_DURATION);
     }
 
     /**
@@ -139,14 +386,72 @@ public final class ActionbarService implements Listener {
      * @param message   alert text
      * @param duration  alert display duration
      */
-    public void sendSlotAlert(@NonNull Player player, @NonNull String sectionId, @NonNull String message, @NonNull Duration duration) {
+    public void sendSlotAlert(
+            @NonNull Player player,
+            @NonNull String sectionId,
+            @NonNull String message,
+            @NonNull Duration duration
+    ) {
+        sendSlotAlert(player, sectionId, TimedAlert.of(message, duration));
+    }
+
+    /**
+     * Sends a slot-specific alert with dynamic text evaluation for a player.
+     *
+     * @param player    target player
+     * @param sectionId target section identifier
+     * @param supplier  dynamic text supplier
+     * @param duration  alert display duration
+     */
+    public void sendSlotAlert(
+            @NonNull Player player,
+            @NonNull String sectionId,
+            @NonNull Supplier<String> supplier,
+            @NonNull Duration duration
+    ) {
+        sendSlotAlert(player, sectionId, TimedAlert.of(supplier, 0, duration));
+    }
+
+    /**
+     * Sends a prepared {@link TimedAlert} to override a specific section for a player.
+     *
+     * @param player    target player
+     * @param sectionId target section identifier
+     * @param alert     timed alert
+     */
+    public void sendSlotAlert(@NonNull Player player, @NonNull String sectionId, @NonNull TimedAlert alert) {
         ActionbarComposer composer = getOrCreateComposer(player.getUniqueId());
-        composer.sendSlotAlert(sectionId, message, duration);
+        composer.sendSlotAlert(sectionId, alert);
         renderPlayer(player);
     }
 
     /**
-     * Listens for player disconnects to clear cached composer instances.
+     * Sends an automated decrementing countdown alert to override a specific section.
+     *
+     * @param player    target player
+     * @param sectionId target section identifier
+     * @param format    format string containing {@code %d}
+     * @param seconds   countdown seconds
+     */
+    public void sendSlotCountdown(@NonNull Player player, @NonNull String sectionId, @NonNull String format, int seconds) {
+        sendSlotAlert(player, sectionId, TimedAlert.countdown(format, 0, seconds));
+    }
+
+    /**
+     * Clears all active modal and slot alerts for a player and immediately updates their action bar.
+     *
+     * @param player target player
+     */
+    public void clearAlerts(@NonNull Player player) {
+        ActionbarComposer composer = composers.get(player.getUniqueId());
+        if (composer != null) {
+            composer.clearAlerts();
+            renderPlayer(player);
+        }
+    }
+
+    /**
+     * Removes and cleans up cached composer and tracking state when a player leaves the server.
      *
      * @param event player quit event
      */
@@ -156,26 +461,77 @@ public final class ActionbarService implements Listener {
     }
 
     /**
-     * Removes and cleans up cached composer state for a player.
+     * Marks whether a player currently has an active text animation running on their action bar.
+     * When animating, periodic HUD rendering is temporarily suspended to prevent frame stutter.
+     *
+     * @param uuid      target player UUID
+     * @param animating whether an animation is currently executing
+     */
+    public void setAnimating(@NonNull UUID uuid, boolean animating) {
+        if (animating) {
+            animatingPlayers.add(uuid);
+        } else {
+            animatingPlayers.remove(uuid);
+        }
+    }
+
+    /**
+     * Checks if a player currently has an active text animation running on their action bar.
+     *
+     * @param uuid target player UUID
+     * @return true if an animation is active
+     */
+    public boolean isAnimating(@NonNull UUID uuid) {
+        return animatingPlayers.contains(uuid);
+    }
+
+    /**
+     * Removes and cleans up cached composer and tracking state for a player.
      *
      * @param player player to clean up
      */
     public void handleQuit(@NonNull Player player) {
-        composers.remove(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        animatingPlayers.remove(uuid);
+        composers.remove(uuid);
+        lastSentTexts.remove(uuid);
+        lastSentTimestamps.remove(uuid);
     }
 
     /**
-     * Compiles and sends the current action bar content packet to an online player.
+     * Compiles and sends the action bar content packet to an online player.
+     * Skips sending duplicate packets if the content has not changed and has not neared client fade-out.
      *
      * @param player target player to render
      */
     public void renderPlayer(@NonNull Player player) {
         if (!player.isOnline()) return;
+        if (isAnimating(player.getUniqueId())) return;
 
         ActionbarComposer composer = getOrCreateComposer(player.getUniqueId());
         String content = composer.compile(player);
+        UUID uuid = player.getUniqueId();
+
+        long now = System.currentTimeMillis();
+        String lastText = lastSentTexts.get(uuid);
+        Long lastSentTimestamp = lastSentTimestamps.get(uuid);
+
+        if (content.isEmpty()) {
+            if (lastText != null && !lastText.isEmpty()) {
+                sendRawPacket(player, "");
+                lastSentTexts.put(uuid, "");
+                lastSentTimestamps.put(uuid, now);
+            }
+            return;
+        }
+
+        if (content.equals(lastText) && lastSentTimestamp != null && (now - lastSentTimestamp) < MIN_BURST_INTERVAL_MILLIS) {
+            return;
+        }
 
         sendRawPacket(player, content);
+        lastSentTexts.put(uuid, content);
+        lastSentTimestamps.put(uuid, now);
     }
 
     private void tickAll() {
@@ -190,14 +546,13 @@ public final class ActionbarService implements Listener {
 
     private ActionbarComposer getOrCreateComposer(UUID uuid) {
         return composers.computeIfAbsent(uuid, _ -> {
-            ActionbarComposer composer = new ActionbarComposer();
-            globalSections.values().forEach(composer::registerSection);
+            ActionbarComposer composer = new ActionbarComposer(() -> globalSections);
+            composer.setSeparator(separator);
             return composer;
         });
     }
 
     private void sendRawPacket(@NonNull Player player, @NonNull String text) {
-        if (text == null || text.isEmpty()) return;
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(text));
     }
 }

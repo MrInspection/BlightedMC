@@ -2,14 +2,15 @@ package fr.moussax.bedrock.scheduling;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.jspecify.annotations.NonNull;
 
 /**
- * Utility for accessing the main plugin instance and scheduling delayed tasks.
+ * Utility for accessing the main plugin instance and scheduling synchronous tasks.
  */
 public final class PluginContext {
 
-    private static Plugin plugin;
+    private static volatile Plugin plugin;
 
     private PluginContext() {
     }
@@ -21,6 +22,13 @@ public final class PluginContext {
      */
     public static void bind(@NonNull Plugin pluginInstance) {
         plugin = pluginInstance;
+    }
+
+    /**
+     * Unbinds the current plugin instance from this context.
+     */
+    public static void unbind() {
+        plugin = null;
     }
 
     /**
@@ -37,12 +45,23 @@ public final class PluginContext {
     }
 
     /**
+     * Schedules a task to run synchronously on the next server tick.
+     *
+     * @param runnable the task to execute
+     * @return the scheduled task handle
+     */
+    public static BukkitTask run(@NonNull Runnable runnable) {
+        return Bukkit.getScheduler().runTask(get(), runnable);
+    }
+
+    /**
      * Schedules a task to run after a specified number of server ticks.
      *
      * @param runnable the task to execute
      * @param ticks    number of server ticks to wait before execution
+     * @return the scheduled task handle
      */
-    public static void delay(@NonNull Runnable runnable, long ticks) {
-        Bukkit.getScheduler().runTaskLater(get(), runnable, ticks);
+    public static BukkitTask delay(@NonNull Runnable runnable, long ticks) {
+        return Bukkit.getScheduler().runTaskLater(get(), runnable, ticks);
     }
 }

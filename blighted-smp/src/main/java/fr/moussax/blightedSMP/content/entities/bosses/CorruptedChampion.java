@@ -66,7 +66,7 @@ public class CorruptedChampion extends BlightedEntity {
                         .toItemStack()
         };
 
-        itemInMainHand = new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack();
+        itemInMainHand = new ItemBuilder(Material.NETHERITE_SWORD).glow().toItemStack();
     }
 
     private static ItemStack createRocketBoots() {
@@ -748,7 +748,7 @@ public class CorruptedChampion extends BlightedEntity {
             scaleAttribute.setBaseValue(scale);
         }
 
-        Objects.requireNonNull(giant.getEquipment()).setItemInMainHand(new ItemBuilder(Material.NETHERITE_SWORD).addEnchantmentGlint().toItemStack());
+        Objects.requireNonNull(giant.getEquipment()).setItemInMainHand(new ItemBuilder(Material.NETHERITE_SWORD).glow().toItemStack());
     }
 
     private void setBootsEquipped(ItemStack bootsItem) {

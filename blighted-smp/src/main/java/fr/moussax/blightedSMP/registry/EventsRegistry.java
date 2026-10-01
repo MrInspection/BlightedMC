@@ -16,10 +16,11 @@ import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import fr.moussax.blightedSMP.engine.player.PlayerListener;
 import fr.moussax.blightedSMP.engine.player.hud.PlayerHudManager;
 import fr.moussax.blightedSMP.engine.quest.BlightedQuestListener;
-import fr.moussax.bedrock.ui.actionbar.ActionbarService;
+import fr.moussax.bedrock.ui.actionbar.Actionbar;
 import fr.moussax.bedrock.ui.menu.system.MenuListener;
 import fr.moussax.bedrock.ui.menu.system.MenuSystem;
-import fr.moussax.bedrock.ui.sign.SignInputListener;
+import fr.moussax.bedrock.ui.sign.SignInput;
+import fr.moussax.bedrock.ui.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
@@ -34,10 +35,8 @@ public final class EventsRegistry {
 
     private final BlightedSMP instance = BlightedSMP.getInstance();
     private MenuSystem menuSystem;
-    private ActionbarService actionBarService;
     private PlayerHudManager playerHudManager;
     private SpawnableEntitiesListener spawnableEntitiesListener;
-    private SignInputListener signInputListener;
 
     /**
      * Initializes the event-driven subsystems and registers all BlightedMC
@@ -50,9 +49,10 @@ public final class EventsRegistry {
     public void initializeListeners() {
         PluginManager pluginManager = Bukkit.getPluginManager();
         menuSystem = new MenuSystem(instance);
-        actionBarService = new ActionbarService(instance);
-        actionBarService.start(20L);
-        playerHudManager = new PlayerHudManager(actionBarService);
+        SignInput.initialize(instance);
+        Actionbar.initialize(instance, 20L);
+        Title.initialize(instance, 10L);
+        playerHudManager = new PlayerHudManager(instance);
 
         Bukkit.getScheduler().runTaskTimer(instance, () -> {
             for (BlightedPlayer player : BlightedPlayer.getPlayers()) {
@@ -62,10 +62,8 @@ public final class EventsRegistry {
 
         spawnableEntitiesListener = new SpawnableEntitiesListener();
         EntitiesRegistry.addOnRegisterCallback(spawnableEntitiesListener::invalidateCache);
-        signInputListener = new SignInputListener();
 
         pluginManager.registerEvents(new MenuListener(menuSystem), instance);
-        pluginManager.registerEvents(signInputListener, instance);
         pluginManager.registerEvents(new BlightedEntitiesListener(), instance);
         pluginManager.registerEvents(new EntityComponentListener(), instance);
         pluginManager.registerEvents(spawnableEntitiesListener, instance);
@@ -93,16 +91,10 @@ public final class EventsRegistry {
 
     /**
      * Cleans up listener-specific resources that require explicit disposal.
-     *
-     * <p>If the sign input listener has not been initialized, this method has no effect.</p>
      */
     public void cleanup() {
-        if (signInputListener != null) {
-            signInputListener.cleanup();
-        }
-        if (actionBarService != null) {
-            actionBarService.stop();
-        }
+        SignInput.cleanup(instance);
+        Actionbar.unregisterAll(instance);
     }
 
     /**

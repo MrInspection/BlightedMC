@@ -3,7 +3,6 @@ package fr.moussax.blightedSMP.engine.entities.rituals.menu;
 import fr.moussax.bedrock.text.Formatter;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
-import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedSMP.engine.entities.rituals.AncientRitual;
 import fr.moussax.blightedSMP.engine.entities.rituals.registry.RitualRegistry;
@@ -63,15 +62,11 @@ public final class AncientRitualsMenu extends Menu {
         for (int i = 0; i < cachedRituals.size() && i < RITUAL_SLOTS.length; i++) {
             AncientRitual ritual = cachedRituals.get(i);
             ItemStack displayItem = buildRiteDisplayItem(ritual);
-            setItem(RITUAL_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> openSubMenu(new RitualAltarMenu(ritual, this)));
+            setItem(RITUAL_SLOTS[i], displayItem, (clickingPlayer, _) -> openSubMenu(new RitualAltarMenu(ritual, this)));
         }
 
         if (previousMenu != null) {
-            String targetName = ChatColor.stripColor(previousMenu.getTitle());
-            ItemStack backItem = new ItemBuilder(Material.ARROW, "§aGo Back")
-                    .addLore("§7To " + targetName)
-                    .toItemStack();
-            setItem(BACK_BUTTON_SLOT, backItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> openSubMenu(previousMenu));
+            setBackButton(BACK_BUTTON_SLOT, previousMenu);
         }
 
         setCloseButton(CLOSE_BUTTON_SLOT);

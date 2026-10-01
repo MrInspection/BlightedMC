@@ -15,7 +15,7 @@ public final class ModerationTools {
         return new ItemBuilder(Material.ENDER_EYE)
                 .setDisplayName("§dRandom Teleport §7(Right Click)")
                 .addLore("§7Teleport to a random player.")
-                .addEnchantmentGlint()
+                .glow()
                 .toItemStack();
     }
 

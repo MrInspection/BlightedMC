@@ -14,19 +14,19 @@ public class EndMaterials implements RegistryModule<Consumer<BlightedItem>> {
         BlightedItem enchantedEnderPearl = new BlightedItem("ENCHANTED_ENDER_PEARL", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.ENDER_PEARL);
         enchantedEnderPearl.setDisplayName("Enchanted Ender Pearl");
         enchantedEnderPearl.addLore(ItemRarity.UNCOMMON.getName());
-        enchantedEnderPearl.addEnchantmentGlint();
+        enchantedEnderPearl.glow();
         enchantedEnderPearl.addRule(ItemRule.PREVENT_PROJECTILE_LAUNCH);
 
         BlightedItem enchantedEndstone = new BlightedItem("ENCHANTED_END_STONE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.END_STONE);
         enchantedEndstone.setDisplayName("Enchanted End Stone");
         enchantedEndstone.addLore(ItemRarity.UNCOMMON.getName());
-        enchantedEndstone.addEnchantmentGlint();
+        enchantedEndstone.glow();
         enchantedEndstone.addRule(ItemRule.PREVENT_PLACEMENT);
 
         BlightedItem enchantedChorusFruit = new BlightedItem("ENCHANTED_CHORUS_FRUIT", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.CHORUS_FRUIT);
         enchantedChorusFruit.setDisplayName("Enchanted Chorus Fruit");
         enchantedChorusFruit.addLore(ItemRarity.UNCOMMON.getName());
-        enchantedChorusFruit.addEnchantmentGlint();
+        enchantedChorusFruit.glow();
 
         BlightedItem voidResidue = new BlightedItem("VOID_RESIDUE", ItemType.MATERIAL, ItemRarity.UNCOMMON, Material.PURPLE_DYE);
         voidResidue.setDisplayName("Voidling Residue");
@@ -37,7 +37,7 @@ public class EndMaterials implements RegistryModule<Consumer<BlightedItem>> {
                 "",
                 ItemRarity.UNCOMMON.getName()
         );
-        voidResidue.addEnchantmentGlint();
+        voidResidue.glow();
 
         registry.accept(enchantedEnderPearl);
         registry.accept(enchantedEndstone);

@@ -151,7 +151,7 @@ public class BlightedMaterials implements RegistryModule<Consumer<BlightedItem>>
         BlightedItem item = new BlightedItem(id, type, rarity, material);
         item.setDisplayName(displayName);
         item.addLore(rarity.getName());
-        item.addEnchantmentGlint();
+        item.glow();
 
         if (preventPlacement) {
             item.addRule(ItemRule.PREVENT_PLACEMENT);

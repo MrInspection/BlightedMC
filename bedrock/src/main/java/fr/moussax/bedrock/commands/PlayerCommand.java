@@ -22,8 +22,8 @@ public abstract class PlayerCommand implements CommandExecutor {
     /**
      * {@inheritDoc}
      *
-     * <p>If the sender is not a player, the command is rejected and
-     * {@code false} is returned.
+     * <p>If the sender is not a player, a warning is sent to the sender and
+     * {@code true} is returned.
      */
     @Override
     public final boolean onCommand(
@@ -33,7 +33,8 @@ public abstract class PlayerCommand implements CommandExecutor {
             String @NonNull [] arguments
     ) {
         if (!(sender instanceof Player player)) {
-            return false;
+            warn(sender, "This command can only be executed by in-game players.");
+            return true;
         }
 
         return execute(player, command, label, arguments);

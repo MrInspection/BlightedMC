@@ -11,7 +11,6 @@ import fr.moussax.bedrock.text.Formatter;
 import fr.moussax.bedrock.text.Messenger;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.TickableMenu;
-import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedSMP.utils.Utilities;
 import org.bukkit.ChatColor;
@@ -105,13 +104,11 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
         fillSlots(REQUIRED_ITEM_INDICATOR_SLOTS, requiredItemsPane);
         fillSlots(FORGED_ITEM_INDICATOR_SLOTS, forgedItemPane);
 
-        setItem(ITEM_INDICATOR, new ItemBuilder(indicator).hideTooltip().toItemStack(), (_, _) -> {
-        });
+        setItem(ITEM_INDICATOR, new ItemBuilder(indicator).hideTooltip().toItemStack());
 
         setItem(FORGE_SLOT, new ItemBuilder(Material.BLAST_FURNACE, "§fBlighted Forge")
                 .addLore("§7Forge this recipe using a blighted", "§7forge or Hyperforge.")
-                .toItemStack(), (_, _) -> {
-        });
+                .toItemStack());
     }
 
     private boolean checkCanHyperforge(Player player) {
@@ -138,7 +135,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
             CraftingObject ingredient = ingredients.get(i);
             ItemStack displayItem = createIngredientDisplay(ingredient);
 
-            setItem(GRID_SLOTS[i], displayItem, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
+            setItem(GRID_SLOTS[i], displayItem, (clickingPlayer, _) -> {
                 if (!ingredient.isCustom() || ingredient.getManager() == null) return;
                 RecipePreviewManager.openPreview(clickingPlayer, ingredient.getManager(), this);
             });
@@ -156,8 +153,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
     private void setupResultDisplay() {
         ItemStack result = recipe.getForgedItem().toItemStack().clone();
         result.setAmount(Math.max(1, recipe.getForgedAmount()));
-        setItem(RESULT_SLOT, result, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-        });
+        setItem(RESULT_SLOT, result);
     }
 
     private void setupFuelDisplay() {
@@ -167,8 +163,7 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
                         "§7to power the forging process."
                 )
                 .toItemStack();
-        setItem(FUEL_INFO_SLOT, fuelInfo, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-        });
+        setItem(FUEL_INFO_SLOT, fuelInfo);
     }
 
     private void setupHyperforgeButton(Player player) {
@@ -221,13 +216,14 @@ public final class ForgeRecipePreviewMenu extends Menu implements TickableMenu {
                 canHyperforge ? "§eClick to Hyperforge!" : "§cMissing ingredients or insufficient fuel!"
         ).setEnchantmentGlint(canHyperforge);
 
-        setItem(HYPERFORGE_SLOT, builder.toItemStack(), MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> {
+        setItem(HYPERFORGE_SLOT, builder.toItemStack(), (clickingPlayer, _) -> {
             if (!canHyperforge) {
+                playErrorSound(clickingPlayer);
                 Messenger.warn(clickingPlayer, "You're missing some ingredients or insufficient fuel to Hyperforge this item!");
                 return;
             }
             PluginContext.delay(() -> executeHyperforge(clickingPlayer, blightedPlayer, requirements, fuelCost), 1L);
-        });
+        }).withoutSound();
     }
 
     private void executeHyperforge(Player player, BlightedPlayer blightedPlayer, Map<String, IngredientInfo> requirements, int fuelCost) {

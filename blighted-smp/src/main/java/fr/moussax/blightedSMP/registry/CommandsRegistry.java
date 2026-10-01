@@ -66,8 +66,9 @@ public final class CommandsRegistry {
     private static TabSuggestionRegistry createSuggestionRegistry() {
         TabSuggestionRegistry suggestions = new TabSuggestionRegistry();
 
-        suggestions.register("$players", () -> Bukkit.getOnlinePlayers()
+        suggestions.register("$players", sender -> Bukkit.getOnlinePlayers()
                 .stream()
+                .filter(target -> !(sender instanceof Player player) || player.canSee(target))
                 .map(Player::getName)
                 .toList()
         );

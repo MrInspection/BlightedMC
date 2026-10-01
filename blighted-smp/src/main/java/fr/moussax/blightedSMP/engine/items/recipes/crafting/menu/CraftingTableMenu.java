@@ -6,7 +6,6 @@ import fr.moussax.blightedSMP.engine.items.recipes.crafting.BlightedShapelessRec
 import fr.moussax.blightedSMP.engine.items.recipes.CraftingObject;
 import fr.moussax.bedrock.ui.menu.types.InteractiveMenu;
 import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
-import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedSMP.utils.Utilities;
 import org.bukkit.Material;
@@ -49,12 +48,10 @@ public final class CraftingTableMenu extends InteractiveMenu {
                 .setDisplayName("§r").setHideTooltip(true).toItemStack();
 
         for (int slot : INDICATOR_SLOTS_LEFT)
-            setItem(slot, indicator, (p, t) -> {
-            });
+            setItem(slot, indicator);
 
         for (int slot : INDICATOR_SLOTS_RIGHT)
-            setItem(slot, indicator, (p, t) -> {
-            });
+            setItem(slot, indicator);
 
         setupOutputSlot();
     }
@@ -67,10 +64,11 @@ public final class CraftingTableMenu extends InteractiveMenu {
     }
 
     private void setupOutputSlot() {
-        setItem(OUTPUT_SLOT, RECIPE_REQUIRED(), MenuItemInteraction.ANY_CLICK, (player, type) -> {
+        setItem(OUTPUT_SLOT, RECIPE_REQUIRED(), (player, type) -> {
             BlightedRecipe recipe = getMatchingRecipe();
             if (recipe == null) return;
 
+            playClickSound(player);
             if (isShiftClick(type)) {
                 craftMaximum(recipe, player);
             } else {
@@ -78,7 +76,7 @@ public final class CraftingTableMenu extends InteractiveMenu {
             }
 
             onUpdate(player);
-        });
+        }).withoutSound();
     }
 
     private void craftOnce(BlightedRecipe recipe, Player player) {

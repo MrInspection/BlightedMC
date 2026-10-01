@@ -14,6 +14,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.jspecify.annotations.NonNull;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 public final class MenuListener implements Listener {
     private final MenuSystem menuSystem;
 

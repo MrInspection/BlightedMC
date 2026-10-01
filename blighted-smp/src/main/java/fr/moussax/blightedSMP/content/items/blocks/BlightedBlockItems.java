@@ -24,7 +24,7 @@ public class BlightedBlockItems implements RegistryModule<Consumer<BlightedItem>
                 "",
                 ItemRarity.UNCOMMON.getName() + " BLOCK"
         );
-        blightedWorkbench.addEnchantmentGlint();
+        blightedWorkbench.glow();
 
         BlightedItem blightedForge = new BlightedItem("BLIGHTED_FORGE", ItemType.BLOCK, ItemRarity.RARE, Material.BLAST_FURNACE);
         blightedForge.setDisplayName("Blighted Forge");
@@ -38,7 +38,7 @@ public class BlightedBlockItems implements RegistryModule<Consumer<BlightedItem>
                 "",
                 ItemRarity.RARE.getName() + " MACHINE"
         );
-        blightedForge.addEnchantmentGlint();
+        blightedForge.glow();
 
         registry.accept(blightedWorkbench);
         registry.accept(blightedForge);

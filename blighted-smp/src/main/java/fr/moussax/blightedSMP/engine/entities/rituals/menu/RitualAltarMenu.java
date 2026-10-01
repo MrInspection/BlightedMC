@@ -110,8 +110,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
             ItemStack barrier = new ItemBuilder(Material.BARRIER, "§cRitual Required")
                     .addLore("§7Select an ancient ritual to start", "§7the invocation process.")
                     .toItemStack();
-            setItem(25, barrier, (_, _) -> {
-            });
+            setItem(25, barrier);
             return;
         }
 
@@ -124,8 +123,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
             result = builder.toItemStack();
         }
 
-        setItem(25, result, (_, _) -> {
-        });
+        setItem(25, result);
     }
 
     private void checkRequirements(Player player) {
@@ -168,8 +166,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
     private void displayRequiredIngredients() {
         for (int i = 0; i < ritual.getOfferings().size() && i < GRID_SLOTS.length; i++) {
             CraftingObject ingredient = ritual.getOfferings().get(i);
-            setItem(GRID_SLOTS[i], createDisplayItem(ingredient), (_, _) -> {
-            });
+            setItem(GRID_SLOTS[i], createDisplayItem(ingredient));
         }
     }
 
@@ -202,8 +199,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
                         "§7to invoke ancient forgotten entities."
                 )
                 .toItemStack();
-        setItem(14, shriekerIcon, (_, _) -> {
-        });
+        setItem(14, shriekerIcon);
     }
 
     private Material determineIndicatorMaterial() {
@@ -261,9 +257,9 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
             if (ritual != null && canInvoke) {
                 invokeMob(clickingPlayer);
             } else {
-                clickingPlayer.playSound(clickingPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.5f);
+                playErrorSound(clickingPlayer);
             }
-        });
+        }).withoutSound();
     }
 
     private void setupNavigationButtons() {

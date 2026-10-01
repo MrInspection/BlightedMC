@@ -22,7 +22,7 @@ public class ThermalFuels implements RegistryModule<Consumer<BlightedItem>> {
                 " §7machine.", ""
         );
         enchantedCoal.addLore(ItemRarity.UNCOMMON.getName());
-        enchantedCoal.addEnchantmentGlint();
+        enchantedCoal.glow();
 
         BlightedItem enchantedLavaBucket = new BlightedItem("ENCHANTED_LAVA_BUCKET", ItemType.UNCATEGORIZED, ItemRarity.RARE, Material.LAVA_BUCKET);
         enchantedLavaBucket.setDisplayName("Enchanted Lava Bucket");
@@ -34,7 +34,7 @@ public class ThermalFuels implements RegistryModule<Consumer<BlightedItem>> {
                 " §7machine.", ""
         );
         enchantedLavaBucket.addLore(ItemRarity.RARE.getName());
-        enchantedLavaBucket.addEnchantmentGlint();
+        enchantedLavaBucket.glow();
         enchantedLavaBucket.addRule(ItemRule.PREVENT_BUCKET_INTERACTIONS);
 
         BlightedItem magmaBucket = new BlightedItem("MAGMA_BUCKET", ItemType.UNCATEGORIZED, ItemRarity.EPIC, Material.LAVA_BUCKET);
@@ -47,7 +47,7 @@ public class ThermalFuels implements RegistryModule<Consumer<BlightedItem>> {
                 " §7machine.", ""
         );
         magmaBucket.addLore(ItemRarity.EPIC.getName());
-        magmaBucket.addEnchantmentGlint();
+        magmaBucket.glow();
         magmaBucket.addRule(ItemRule.PREVENT_BUCKET_INTERACTIONS);
 
         BlightedItem plasmaBucket = new BlightedItem("PLASMA_BUCKET", ItemType.UNCATEGORIZED, ItemRarity.LEGENDARY, Material.LAVA_BUCKET);
@@ -60,7 +60,7 @@ public class ThermalFuels implements RegistryModule<Consumer<BlightedItem>> {
                 " §7machine.", ""
         );
         plasmaBucket.addLore(ItemRarity.LEGENDARY.getName());
-        plasmaBucket.addEnchantmentGlint();
+        plasmaBucket.glow();
         plasmaBucket.addRule(ItemRule.PREVENT_BUCKET_INTERACTIONS);
 
         registry.accept(enchantedCoal);

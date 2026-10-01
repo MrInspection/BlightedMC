@@ -6,8 +6,7 @@ import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
 import fr.moussax.bedrock.text.Formatter;
 import fr.moussax.bedrock.ui.menu.Menu;
 import fr.moussax.bedrock.ui.menu.types.PaginatedMenu;
-import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
-import fr.moussax.bedrock.ui.sign.SignInputMenu;
+import fr.moussax.bedrock.ui.sign.SignInput;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -27,20 +26,17 @@ public final class ItemRegistryMenu {
     private static final int[] CATEGORY_SLOTS = PaginatedMenu.INNER_GRID_SLOTS;
     private static final int SEARCH_SLOT = 41;
 
-    private static ItemBuilder hideAllItemFlags(ItemBuilder builder) {
-        return builder.addItemFlag(
-            ItemFlag.HIDE_ATTRIBUTES,
-            ItemFlag.HIDE_UNBREAKABLE,
-            ItemFlag.HIDE_ENCHANTS,
-            ItemFlag.HIDE_DESTROYS,
-            ItemFlag.HIDE_PLACED_ON
-        );
-    }
-
     private static ItemStack buildMenuItem(ItemStack base, String name, List<String> lore) {
-        ItemBuilder builder = new ItemBuilder(base).setDisplayName(name);
-        if (lore != null) lore.forEach(builder::addLore);
-        hideAllItemFlags(builder);
+        ItemBuilder builder = new ItemBuilder(base)
+                .setDisplayName(name)
+                .addItemFlag(
+                        ItemFlag.HIDE_ATTRIBUTES,
+                        ItemFlag.HIDE_UNBREAKABLE,
+                        ItemFlag.HIDE_ENCHANTS,
+                        ItemFlag.HIDE_DESTROYS,
+                        ItemFlag.HIDE_PLACED_ON
+                );
+        if (lore != null) builder.setLore(lore);
         return builder.toItemStack();
     }
 
@@ -59,14 +55,14 @@ public final class ItemRegistryMenu {
             for (int i = 0; i < categories.size() && i < CATEGORY_SLOTS.length; i++) {
                 ItemType.Category category = categories.get(i);
                 ItemStack item = buildMenuItem(getCategoryIcon(category), "§b" + formatCategoryName(category), getCategoryLore(category));
-                setItem(CATEGORY_SLOTS[i], item, MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) ->
+                setItem(CATEGORY_SLOTS[i], item, (clickingPlayer, _) ->
                     new BlightedItemsPaginatedMenu(this,
                         registeredItem -> registeredItem.getItemType() != null && registeredItem.getItemType().getCategory() == category,
                         "§r" + Formatter.formatEnumName(category.name()) + " Items").open(clickingPlayer));
             }
 
             setItem(SEARCH_SLOT, buildMenuItem(new ItemStack(Material.PALE_OAK_SIGN), "§eSearch Items", List.of("§7Click to search for items!")),
-                MenuItemInteraction.ANY_CLICK, (clickingPlayer, _) -> openSearchSign(clickingPlayer, this));
+                (clickingPlayer, _) -> openSearchSign(clickingPlayer, this));
             setCloseButton(40);
         }
 
@@ -108,27 +104,18 @@ public final class ItemRegistryMenu {
     }
 
     private static void openSearchSign(Player player, Menu previousMenu) {
-        SignInputMenu.builder()
-            .lines("", "^^^^^^", "Enter your", "search!")
-            .onComplete(result -> {
-                String search = result.getFirstLine().trim();
-                if (search.isEmpty()) {
-                    if (previousMenu != null) previousMenu.open(player);
-                    else player.closeInventory();
-                    return;
-                }
-                new SearchResultsPaginatedMenu(search, previousMenu).open(player);
-            })
-            .open(player);
+        SignInput.builder()
+                .lines("", "^^^^^^", "Enter your", "search!")
+                .reopenOnCancel(previousMenu)
+                .onSubmit((_, search) -> new SearchResultsPaginatedMenu(search, previousMenu).open(player))
+                .open(player);
     }
 
     public static class BlightedItemsPaginatedMenu extends PaginatedMenu {
-        private final Menu previousMenu;
         private final List<BlightedItem> blightedItems;
 
         public BlightedItemsPaginatedMenu(Menu previousMenu, Predicate<BlightedItem> filter, String title) {
-            super(title, 54);
-            this.previousMenu = previousMenu;
+            super(title, 54, previousMenu);
             this.blightedItems = ItemRegistry.getAllItems().stream()
                     .filter(filter)
                     .sorted((firstItem, secondItem) -> {
@@ -173,15 +160,7 @@ public final class ItemRegistryMenu {
                 stack.setItemMeta(meta);
             }
 
-            return hideAllItemFlags(new ItemBuilder(stack)).toItemStack();
-        }
-
-        @Override
-        public void build(@NonNull Player player) {
-            super.build(player);
-            if (currentPage == 0 && previousMenu != null) {
-                setBackButton(48, previousMenu);
-            }
+            return stack;
         }
 
         @Override

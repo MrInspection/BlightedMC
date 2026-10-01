@@ -1,70 +1,133 @@
 package fr.moussax.bedrock.ui.actionbar;
 
+import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Assembles and formats per-player action bar text from active sections and temporary alerts.
+ *
+ * <p>Supports modular standard sections joined by a separator, priority-based exclusive sections,
+ * localized slot alerts overriding specific sections, dynamic countdowns, and high-priority modal broadcast alerts.</p>
  */
 public final class ActionbarComposer {
-    private final Map<String, ActionbarSection> sections = new ConcurrentHashMap<>();
+
+    private final Map<String, ActionbarSection> localSections = new ConcurrentHashMap<>();
+    private final Supplier<Map<String, ActionbarSection>> globalSectionsSupplier;
     private final Map<String, TimedAlert> slotAlerts = new ConcurrentHashMap<>();
     private final PriorityQueue<TimedAlert> modalAlerts = new PriorityQueue<>();
     private final Object alertLock = new Object();
 
+    @Getter
     @Setter
     @NonNull
     private String separator = "     ";
 
     /**
-     * Registers a content section to be rendered by this composer.
+     * Constructs a standalone action bar composer with no shared global sections.
+     */
+    public ActionbarComposer() {
+        this(Collections::emptyMap);
+    }
+
+    /**
+     * Constructs an action bar composer querying shared global sections from a supplier.
+     *
+     * @param globalSectionsSupplier supplier returning active global sections
+     */
+    public ActionbarComposer(@NonNull Supplier<Map<String, ActionbarSection>> globalSectionsSupplier) {
+        this.globalSectionsSupplier = Objects.requireNonNull(globalSectionsSupplier, "globalSectionsSupplier cannot be null");
+    }
+
+    /**
+     * Registers a local content section for this composer. Local sections override global sections
+     * sharing the same identifier.
      *
      * @param section section to register
      */
     public void registerSection(@NonNull ActionbarSection section) {
-        sections.put(section.id(), section);
+        localSections.put(section.id(), section);
     }
 
     /**
-     * Unregisters a content section and any active slot alert associated with it.
+     * Unregisters a local content section and any active slot alert associated with it.
      *
-     * @param id identifier of section to unregister
+     * @param id identifier of a section to unregister
      */
     public void unregisterSection(@NonNull String id) {
-        sections.remove(id);
+        localSections.remove(id);
         slotAlerts.remove(id);
     }
 
     /**
-     * Queues a high-priority modal alert that overrides all standard sections for a duration.
+     * Queues a timed alert object as a modal alert that overrides all standard and exclusive sections.
      *
-     * @param message  alert text to display
-     * @param priority alert priority; higher values take precedence
-     * @param duration display duration
+     * @param alert alert to queue
      */
-    public void sendModalAlert(@NonNull String message, int priority, @NonNull Duration duration) {
+    public void sendModalAlert(@NonNull TimedAlert alert) {
+        Objects.requireNonNull(alert, "alert cannot be null");
         synchronized (alertLock) {
-            modalAlerts.add(new TimedAlert(message, priority, duration.toMillis()));
+            modalAlerts.add(alert);
         }
     }
 
     /**
-     * Queues a default-priority modal alert that overrides all standard sections for a duration.
+     * Queues a high-priority modal alert that overrides all standard and exclusive sections.
+     *
+     * @param message  alert text to display
+     * @param priority precedence priority (higher values take precedence)
+     * @param duration display duration
+     */
+    public void sendModalAlert(@NonNull String message, int priority, @NonNull Duration duration) {
+        sendModalAlert(new TimedAlert(message, priority, duration.toMillis()));
+    }
+
+    /**
+     * Queues a default-priority modal alert that overrides all sections.
      *
      * @param message  alert text to display
      * @param duration display duration
      */
     public void sendModalAlert(@NonNull String message, @NonNull Duration duration) {
         sendModalAlert(message, 0, duration);
+    }
+
+    /**
+     * Queues a dynamic modal alert that evaluates text dynamically on every render pass.
+     *
+     * @param supplier dynamic text supplier
+     * @param priority precedence priority
+     * @param duration display duration
+     */
+    public void sendModalAlert(@NonNull Function<Player, @Nullable String> supplier, int priority, @NonNull Duration duration) {
+        sendModalAlert(TimedAlert.of(supplier, priority, duration));
+    }
+
+    /**
+     * Overrides the content of a specific action bar section with an alert.
+     * If the target section is not registered locally or globally, it falls back to a modal alert
+     * so that the message is never dropped.
+     *
+     * @param sectionId target section identifier
+     * @param alert     timed alert
+     */
+    public void sendSlotAlert(@NonNull String sectionId, @NonNull TimedAlert alert) {
+        Objects.requireNonNull(sectionId, "sectionId cannot be null");
+        Objects.requireNonNull(alert, "alert cannot be null");
+        Map<String, ActionbarSection> globalSections = globalSectionsSupplier.get();
+        if (!localSections.containsKey(sectionId) && (globalSections == null || !globalSections.containsKey(sectionId))) {
+            sendModalAlert(alert);
+            return;
+        }
+        slotAlerts.put(sectionId, alert);
     }
 
     /**
@@ -75,11 +138,11 @@ public final class ActionbarComposer {
      * @param duration  display duration
      */
     public void sendSlotAlert(@NonNull String sectionId, @NonNull String message, @NonNull Duration duration) {
-        slotAlerts.put(sectionId, TimedAlert.of(message, duration));
+        sendSlotAlert(sectionId, TimedAlert.of(message, duration));
     }
 
     /**
-     * Clears all active modal and slot alerts.
+     * Clears all active modal and slot alerts, restoring underlying sections.
      */
     public void clearAlerts() {
         synchronized (alertLock) {
@@ -89,63 +152,114 @@ public final class ActionbarComposer {
     }
 
     /**
-     * Compiles the formatted action bar message string for a given player.
+     * Compiles the formatted action bar message string for a player.
      *
-     * <p>If an active modal alert exists, its message is returned immediately. Otherwise, if any
-     * visible exclusive sections produce non-empty text, the exclusive section with the highest priority
-     * is returned. If no exclusive section produces content, visible normal sections are sorted by
-     * rendering priority (lowest first) and joined with the configured separator.</p>
+     * <p>Evaluation order:
+     * <ol>
+     *   <li>Active modal alerts: returns the highest priority alert message immediately.</li>
+     *   <li>Visible exclusive sections: returns highest precedence non-empty exclusive section text.</li>
+     *   <li>Visible standard sections: evaluates each section (or its active slot alert), sorted
+     *       by layout order ascending, and joins non-empty results with {@code separator}.</li>
+     * </ol>
      *
-     * @param player player for whom to compile action bar content
-     * @return compiled action bar text, or an empty string if no content is visible
+     * @param player viewing player, or {@code null} during detached evaluation
+     * @return compiled action bar text, or empty string if no content is visible
      */
     @NonNull
-    public String compile(@NonNull Player player) {
+    public String compile(@Nullable Player player) {
         synchronized (alertLock) {
             modalAlerts.removeIf(TimedAlert::isExpired);
             if (!modalAlerts.isEmpty()) {
-                return modalAlerts.peek().message();
+                String text = modalAlerts.peek().message(player);
+                if (text != null && !text.isEmpty()) {
+                    return text;
+                }
             }
         }
 
-        List<ActionbarSection> visibleSections = sections.values().stream()
-                .filter(section -> section.visibility().test(player))
-                .toList();
+        Map<String, ActionbarSection> globalSections = globalSectionsSupplier.get();
+        Collection<ActionbarSection> sectionsToEvaluate;
 
-        List<ActionbarSection> exclusiveSections = visibleSections.stream()
-                .filter(ActionbarSection::exclusive)
-                .sorted(Comparator.comparingInt(ActionbarSection::priority).reversed()
-                        .thenComparing(ActionbarSection::id))
-                .toList();
+        if (localSections.isEmpty()) {
+            sectionsToEvaluate = globalSections != null ? globalSections.values() : Collections.emptyList();
+        } else {
+            Map<String, ActionbarSection> combined = new HashMap<>(globalSections != null ? globalSections : Collections.emptyMap());
+            combined.putAll(localSections);
+            sectionsToEvaluate = combined.values();
+        }
 
-        for (ActionbarSection exclusiveSection : exclusiveSections) {
-            String text = evaluateSection(exclusiveSection, player);
-            if (text != null && !text.isEmpty()) {
-                return text;
+        List<ActionbarSection> exclusiveSections = null;
+        List<ActionbarSection> normalSections = null;
+
+        for (ActionbarSection section : sectionsToEvaluate) {
+            if (player != null && !section.visibility().test(player)) {
+                continue;
+            }
+            if (section.exclusive()) {
+                if (exclusiveSections == null) {
+                    exclusiveSections = new ArrayList<>(2);
+                }
+                exclusiveSections.add(section);
+            } else {
+                if (normalSections == null) {
+                    normalSections = new ArrayList<>(sectionsToEvaluate.size());
+                }
+                normalSections.add(section);
             }
         }
 
-        List<ActionbarSection> normalSections = visibleSections.stream()
-                .filter(section -> !section.exclusive())
-                .sorted(Comparator.comparingInt(ActionbarSection::priority))
-                .toList();
+        if (exclusiveSections != null && !exclusiveSections.isEmpty()) {
+            exclusiveSections.sort(Comparator.comparingInt(ActionbarSection::priority).reversed()
+                    .thenComparing(ActionbarSection::id));
+            for (ActionbarSection exclusiveSection : exclusiveSections) {
+                String text = evaluateSection(exclusiveSection, player);
+                if (text != null && !text.isEmpty()) {
+                    return text;
+                }
+            }
+        }
 
-        List<String> evaluatedTexts = new ArrayList<>(normalSections.size());
+        if (normalSections == null || normalSections.isEmpty()) {
+            return "";
+        }
+
+        normalSections.sort(Comparator.comparingInt(ActionbarSection::priority));
+        List<ActionbarSection> activeSections = new ArrayList<>(normalSections.size());
+        List<String> activeTexts = new ArrayList<>(normalSections.size());
+
         for (ActionbarSection section : normalSections) {
             String text = evaluateSection(section, player);
             if (text != null && !text.isEmpty()) {
-                evaluatedTexts.add(text);
+                activeSections.add(section);
+                activeTexts.add(text);
             }
         }
 
-        return String.join(separator, evaluatedTexts);
+        if (activeTexts.isEmpty()) {
+            return "";
+        }
+
+        if (activeTexts.size() == 1) {
+            return activeTexts.getFirst();
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < activeTexts.size(); i++) {
+            builder.append(activeTexts.get(i));
+            if (i < activeTexts.size() - 1) {
+                String delimiter = activeSections.get(i).separator();
+                builder.append(delimiter != null ? delimiter : separator);
+            }
+        }
+
+        return builder.toString();
     }
 
-    private String evaluateSection(ActionbarSection section, Player player) {
+    private String evaluateSection(ActionbarSection section, @Nullable Player player) {
         TimedAlert alert = slotAlerts.get(section.id());
         if (alert != null) {
             if (!alert.isExpired()) {
-                return alert.message();
+                return alert.message(player);
             }
             slotAlerts.remove(section.id());
         }

@@ -6,9 +6,9 @@ import fr.moussax.blightedSMP.engine.items.ItemRarity;
 import fr.moussax.blightedSMP.engine.items.ItemType;
 import fr.moussax.blightedSMP.engine.items.abilities.FullSetBonus;
 import fr.moussax.blightedSMP.registry.RegistryModule;
-import java.util.function.Consumer;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemFlag;
+
+import java.util.function.Consumer;
 
 public class HomodeusArmor implements RegistryModule<Consumer<BlightedItem>> {
 
@@ -39,10 +39,10 @@ public class HomodeusArmor implements RegistryModule<Consumer<BlightedItem>> {
     }
 
     private void setupHomodeusPiece(BlightedItem piece, FullSetBonus bonus) {
-        piece.setUnbreakable(true);
-        piece.addEnchantmentGlint();
+        piece.unbreakable();
+        piece.glow();
         piece.setLeatherColor("#ffffff");
-        piece.addItemFlag(ItemFlag.HIDE_DYE, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
+        piece.hideAllFlags();
 
         piece.setFullSetBonus(bonus);
         piece.addLore("", ItemRarity.LEGENDARY.getName());

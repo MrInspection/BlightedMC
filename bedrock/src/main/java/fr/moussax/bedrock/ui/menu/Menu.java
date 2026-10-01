@@ -1,5 +1,6 @@
 package fr.moussax.bedrock.ui.menu;
 
+import fr.moussax.bedrock.sound.SoundCue;
 import fr.moussax.bedrock.ui.menu.interaction.MenuAction;
 import fr.moussax.bedrock.ui.menu.interaction.MenuElementPreset;
 import fr.moussax.bedrock.ui.menu.interaction.MenuItemInteraction;
@@ -9,6 +10,7 @@ import fr.moussax.bedrock.utils.ItemBuilder;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
@@ -35,13 +37,9 @@ import java.util.function.Consumer;
  */
 public abstract class Menu implements InventoryHolder {
 
-    @Getter
     protected String title;
     protected final int size;
-
-    @Getter
     protected final Map<Integer, MenuSlot> slots = new HashMap<>();
-
     protected Inventory inventory;
     protected UUID viewerId;
     protected MenuSystem menuSystem;
@@ -128,24 +126,48 @@ public abstract class Menu implements InventoryHolder {
     }
 
     /**
+     * Returns the title of this menu.
+     *
+     * @return menu title
+     */
+    @NonNull
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Returns the slot definitions for this menu.
+     *
+     * @return map of slot index to menu slot
+     */
+    @NonNull
+    public Map<Integer, MenuSlot> getSlots() {
+        return slots;
+    }
+
+    /**
      * Places an item in a slot with an interaction-specific action.
      *
-     * <p>If the slot already exists, its displayed item and action are updated
-     * without removing its other registered actions.</p>
+     * <p>If the slot is already interactive, its displayed item and action are updated
+     * without removing its other registered actions. Static slots are replaced so the
+     * new action receives the default click sound.</p>
      *
      * @param slot        inventory slot index
      * @param item        item displayed in the slot
      * @param interaction interaction that triggers the action
      * @param action      action executed when triggered
+     * @return the configured menu slot
      */
-    public void setItem(int slot, @NonNull ItemStack item, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
+    public MenuSlot setItem(int slot, @NonNull ItemStack item, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
         MenuSlot existing = slots.get(slot);
-        if (existing != null) {
+        if (existing != null && existing.hasAction()) {
             existing.item = item;
             existing.addAction(interaction, action);
-        } else {
-            slots.put(slot, new MenuSlot(item, interaction, action));
+            return existing;
         }
+        MenuSlot created = new MenuSlot(item, interaction, action);
+        slots.put(slot, created);
+        return created;
     }
 
     /**
@@ -155,13 +177,15 @@ public abstract class Menu implements InventoryHolder {
      * @param item    item displayed in the slot
      * @param onLeft  action executed on left-click
      * @param onRight action executed on right-click
+     * @return the configured menu slot
      */
-    public void setItem(int slot, @NonNull ItemStack item, @NonNull MenuAction onLeft, @NonNull MenuAction onRight) {
+    public MenuSlot setItem(int slot, @NonNull ItemStack item, @NonNull MenuAction onLeft, @NonNull MenuAction onRight) {
         setItem(slot, item, MenuItemInteraction.LEFT_CLICK, onLeft);
         MenuSlot menuSlot = slots.get(slot);
         if (menuSlot != null) {
             menuSlot.addAction(MenuItemInteraction.RIGHT_CLICK, onRight);
         }
+        return menuSlot;
     }
 
     /**
@@ -170,9 +194,12 @@ public abstract class Menu implements InventoryHolder {
      * @param slot    inventory slot index
      * @param item    item displayed in the slot
      * @param actions interaction-to-action mappings
+     * @return the configured menu slot
      */
-    public void setItem(int slot, @NonNull ItemStack item, @NonNull Map<MenuItemInteraction, MenuAction> actions) {
-        slots.put(slot, new MenuSlot(item, actions));
+    public MenuSlot setItem(int slot, @NonNull ItemStack item, @NonNull Map<MenuItemInteraction, MenuAction> actions) {
+        MenuSlot slotObj = new MenuSlot(item, actions);
+        slots.put(slot, slotObj);
+        return slotObj;
     }
 
     /**
@@ -181,12 +208,20 @@ public abstract class Menu implements InventoryHolder {
      * @param slot        inventory slot index
      * @param interaction interaction that triggers the action
      * @param action      action executed when triggered
+     * @return the menu slot, or {@code null} if no slot existed at that index
      */
-    public void addAction(int slot, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
+    public @Nullable MenuSlot addAction(int slot, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
         MenuSlot existing = slots.get(slot);
-        if (existing != null) {
-            existing.addAction(interaction, action);
+        if (existing == null) {
+            return null;
         }
+        if (existing.hasAction()) {
+            return existing.addAction(interaction, action);
+        }
+
+        MenuSlot interactiveSlot = new MenuSlot(existing.item, interaction, action);
+        slots.put(slot, interactiveSlot);
+        return interactiveSlot;
     }
 
     /**
@@ -196,20 +231,31 @@ public abstract class Menu implements InventoryHolder {
      * @param preset      item preset
      * @param interaction interaction that triggers the action
      * @param action      action executed when triggered
+     * @return the configured menu slot
      */
-    public void setItem(int slot, @NonNull MenuElementPreset preset, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
-        setItem(slot, preset.getItem(), interaction, action);
+    public MenuSlot setItem(int slot, @NonNull MenuElementPreset preset, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
+        return setItem(slot, preset.getItem(), interaction, action);
     }
 
     /**
      * Places a static item without an action.
      *
+     * <p>Slots placed with this method are non-interactive and will not trigger
+     * click actions or button click sounds.</p>
+     *
      * @param slot inventory slot index
      * @param item item displayed in the slot
+     * @return the configured menu slot
      */
-    public void setItem(int slot, @NonNull ItemStack item) {
-        setItem(slot, item, MenuItemInteraction.ANY_CLICK, (player, type) -> {
-        });
+    public MenuSlot setItem(int slot, @NonNull ItemStack item) {
+        MenuSlot existing = slots.get(slot);
+        if (existing != null) {
+            existing.item = item;
+            return existing;
+        }
+        MenuSlot created = new MenuSlot(item);
+        slots.put(slot, created);
+        return created;
     }
 
     /**
@@ -217,9 +263,10 @@ public abstract class Menu implements InventoryHolder {
      *
      * @param slot   inventory slot index
      * @param preset item preset
+     * @return the configured menu slot
      */
-    public void setItem(int slot, @NonNull MenuElementPreset preset) {
-        setItem(slot, preset.getItem());
+    public MenuSlot setItem(int slot, @NonNull MenuElementPreset preset) {
+        return setItem(slot, preset.getItem());
     }
 
     /**
@@ -228,9 +275,10 @@ public abstract class Menu implements InventoryHolder {
      * @param slot   inventory slot index
      * @param item   item displayed in the slot
      * @param action action executed on click
+     * @return the configured menu slot
      */
-    public void setItem(int slot, @NonNull ItemStack item, @NonNull MenuAction action) {
-        setItem(slot, item, MenuItemInteraction.ANY_CLICK, action);
+    public MenuSlot setItem(int slot, @NonNull ItemStack item, @NonNull MenuAction action) {
+        return setItem(slot, item, MenuItemInteraction.ANY_CLICK, action);
     }
 
     /**
@@ -239,18 +287,20 @@ public abstract class Menu implements InventoryHolder {
      * @param slot   inventory slot index
      * @param preset item preset
      * @param action action executed on click
+     * @return the configured menu slot
      */
-    public void setItem(int slot, @NonNull MenuElementPreset preset, @NonNull MenuAction action) {
-        setItem(slot, preset.getItem(), MenuItemInteraction.ANY_CLICK, action);
+    public MenuSlot setItem(int slot, @NonNull MenuElementPreset preset, @NonNull MenuAction action) {
+        return setItem(slot, preset.getItem(), MenuItemInteraction.ANY_CLICK, action);
     }
 
     /**
      * Places the standard close button in the specified slot.
      *
      * @param slot inventory slot index
+     * @return the configured menu slot
      */
-    public void setCloseButton(int slot) {
-        setItem(slot, MenuElementPreset.CLOSE_BUTTON, MenuItemInteraction.ANY_CLICK, (player, type) -> close());
+    public MenuSlot setCloseButton(int slot) {
+        return setItem(slot, MenuElementPreset.CLOSE_BUTTON, (player, _) -> close());
     }
 
     /**
@@ -258,9 +308,10 @@ public abstract class Menu implements InventoryHolder {
      *
      * @param slot   inventory slot index
      * @param action action executed when clicked
+     * @return the configured menu slot
      */
-    public void setBackButton(int slot, @NonNull MenuAction action) {
-        setItem(slot, MenuElementPreset.BACK_BUTTON, MenuItemInteraction.ANY_CLICK, action);
+    public MenuSlot setBackButton(int slot, @NonNull MenuAction action) {
+        return setItem(slot, MenuElementPreset.BACK_BUTTON, action);
     }
 
     /**
@@ -268,9 +319,10 @@ public abstract class Menu implements InventoryHolder {
      *
      * @param slot         inventory slot index
      * @param previousMenu menu to open after closing this menu
+     * @return the configured menu slot
      */
-    public void setBackButton(int slot, @Nullable Menu previousMenu) {
-        setBackButton(slot, (player, _) -> {
+    public MenuSlot setBackButton(int slot, @Nullable Menu previousMenu) {
+        return setBackButton(slot, (player, _) -> {
             if (previousMenu == null) {
                 goBack();
                 return;
@@ -291,8 +343,9 @@ public abstract class Menu implements InventoryHolder {
      * @param builder  item configuration callback
      * @param onLeft   action executed on left-click
      * @param onRight  action executed on right-click
+     * @return the configured menu slot
      */
-    public void setItem(
+    public MenuSlot setItem(
             int slot,
             @NonNull Material material,
             @NonNull Consumer<ItemBuilder> builder,
@@ -301,7 +354,7 @@ public abstract class Menu implements InventoryHolder {
     ) {
         ItemBuilder itemBuilder = new ItemBuilder(material);
         builder.accept(itemBuilder);
-        setItem(slot, itemBuilder.toItemStack(), onLeft, onRight);
+        return setItem(slot, itemBuilder.toItemStack(), onLeft, onRight);
     }
 
     /**
@@ -312,8 +365,9 @@ public abstract class Menu implements InventoryHolder {
      * @param builder     item configuration callback
      * @param interaction interaction that triggers the action
      * @param action      action executed when triggered
+     * @return the configured menu slot
      */
-    public void setItem(
+    public MenuSlot setItem(
             int slot,
             @NonNull Material material,
             @NonNull Consumer<ItemBuilder> builder,
@@ -322,7 +376,7 @@ public abstract class Menu implements InventoryHolder {
     ) {
         ItemBuilder itemBuilder = new ItemBuilder(material);
         builder.accept(itemBuilder);
-        setItem(slot, itemBuilder.toItemStack(), interaction, action);
+        return setItem(slot, itemBuilder.toItemStack(), interaction, action);
     }
 
     /**
@@ -332,14 +386,15 @@ public abstract class Menu implements InventoryHolder {
      * @param material base material
      * @param builder  item configuration callback
      * @param action   action executed on click
+     * @return the configured menu slot
      */
-    public void setItem(
+    public MenuSlot setItem(
             int slot,
             @NonNull Material material,
             @NonNull Consumer<ItemBuilder> builder,
             @NonNull MenuAction action
     ) {
-        setItem(slot, material, builder, MenuItemInteraction.ANY_CLICK, action);
+        return setItem(slot, material, builder, MenuItemInteraction.ANY_CLICK, action);
     }
 
     /**
@@ -348,10 +403,12 @@ public abstract class Menu implements InventoryHolder {
      * @param slot     inventory slot index
      * @param material base material
      * @param builder  item configuration callback
+     * @return the configured menu slot
      */
-    public void setItem(int slot, @NonNull Material material, @NonNull Consumer<ItemBuilder> builder) {
-        setItem(slot, material, builder, (player, type) -> {
-        });
+    public MenuSlot setItem(int slot, @NonNull Material material, @NonNull Consumer<ItemBuilder> builder) {
+        ItemBuilder itemBuilder = new ItemBuilder(material);
+        builder.accept(itemBuilder);
+        return setItem(slot, itemBuilder.toItemStack());
     }
 
     /**
@@ -368,51 +425,25 @@ public abstract class Menu implements InventoryHolder {
     }
 
     /**
-     * Fills the specified slots with an item and interaction type.
-     *
-     * @param slots       inventory slot indices
-     * @param item        item displayed in each slot
-     * @param interaction interaction that triggers each slot
-     */
-    public void fillSlots(int[] slots, @NonNull ItemStack item, @NonNull MenuItemInteraction interaction) {
-        for (int slot : slots) {
-            setItem(slot, item, interaction, (player, type) -> {
-            });
-        }
-    }
-
-    /**
-     * Fills the specified slots with a preset and interaction type.
-     *
-     * @param slots       inventory slot indices
-     * @param preset      item preset
-     * @param interaction interaction that triggers each slot
-     */
-    public void fillSlots(int[] slots, @NonNull MenuElementPreset preset, @NonNull MenuItemInteraction interaction) {
-        for (int slot : slots) {
-            setItem(slot, preset, interaction, (player, type) -> {
-            });
-        }
-    }
-
-    /**
-     * Fills the specified slots with an item using {@link MenuItemInteraction#ANY_CLICK}.
+     * Fills the specified slots with an item.
      *
      * @param slots inventory slot indices
      * @param item  item displayed in each slot
      */
     public void fillSlots(int[] slots, @NonNull ItemStack item) {
-        fillSlots(slots, item, MenuItemInteraction.ANY_CLICK);
+        for (int slot : slots) {
+            setItem(slot, item);
+        }
     }
 
     /**
-     * Fills the specified slots with a preset using {@link MenuItemInteraction#ANY_CLICK}.
+     * Fills the specified slots with a preset.
      *
      * @param slots  inventory slot indices
      * @param preset item preset
      */
     public void fillSlots(int[] slots, @NonNull MenuElementPreset preset) {
-        fillSlots(slots, preset.getItem(), MenuItemInteraction.ANY_CLICK);
+        fillSlots(slots, preset.getItem());
     }
 
     /**
@@ -437,8 +468,7 @@ public abstract class Menu implements InventoryHolder {
     public void fillEmptyWith(@NonNull ItemStack item) {
         for (int slot = 0; slot < size; slot++) {
             if (!slots.containsKey(slot)) {
-                setItem(slot, item, MenuItemInteraction.ANY_CLICK, (_, _) -> {
-                });
+                setItem(slot, item);
             }
         }
     }
@@ -478,10 +508,10 @@ public abstract class Menu implements InventoryHolder {
      */
     public void openSubMenu(@NonNull Menu submenu) {
         Player player = getPlayer();
-        if (player != null && menuSystem != null) {
-            submenu.setMenuSystem(menuSystem);
-            submenu.open(player);
-        }
+        if (player == null || menuSystem == null) return;
+
+        submenu.setMenuSystem(menuSystem);
+        submenu.open(player);
     }
 
     /**
@@ -489,7 +519,9 @@ public abstract class Menu implements InventoryHolder {
      */
     public void goBack() {
         Player player = getPlayer();
-        if (player != null && menuSystem != null) {
+        if (player == null) return;
+
+        if (menuSystem != null) {
             menuSystem.goBack(player);
         }
     }
@@ -499,9 +531,36 @@ public abstract class Menu implements InventoryHolder {
      */
     public void close() {
         Player player = getPlayer();
-        if (player != null) {
-            player.closeInventory();
-        }
+        if (player == null) return;
+
+        player.closeInventory();
+    }
+
+    /**
+     * Plays the standard UI button click sound to the specified player.
+     *
+     * @param player player to hear the sound
+     */
+    public void playClickSound(@NonNull Player player) {
+        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
+    }
+
+    /**
+     * Plays the book page flip sound to the specified player.
+     *
+     * @param player player to hear the sound
+     */
+    public void playPageTurnSound(@NonNull Player player) {
+        player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.0f, 1.0f);
+    }
+
+    /**
+     * Plays the error/denial sound to the specified player.
+     *
+     * @param player player to hear the sound
+     */
+    public void playErrorSound(@NonNull Player player) {
+        player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.5f);
     }
 
     /**
@@ -513,160 +572,6 @@ public abstract class Menu implements InventoryHolder {
      */
     public static int getSlot(int row, int column) {
         return row * 9 + column;
-    }
-
-    /**
-     * Places an item at the specified row and column.
-     *
-     * @param row         zero-based row index
-     * @param column      zero-based column index
-     * @param item        item displayed in the slot
-     * @param interaction interaction that triggers the action
-     * @param action      action executed when triggered
-     */
-    public void setItem(int row, int column, @NonNull ItemStack item, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
-        setItem(getSlot(row, column), item, interaction, action);
-    }
-
-    /**
-     * Places an item at the specified row and column with separate left- and right-click actions.
-     *
-     * @param row     zero-based row index
-     * @param column  zero-based column index
-     * @param item    item displayed in the slot
-     * @param onLeft  action executed on left-click
-     * @param onRight action executed on right-click
-     */
-    public void setItem(int row, int column, @NonNull ItemStack item, @NonNull MenuAction onLeft, @NonNull MenuAction onRight) {
-        setItem(getSlot(row, column), item, onLeft, onRight);
-    }
-
-    /**
-     * Places an item at the specified row and column with an ANY_CLICK action.
-     *
-     * @param row    zero-based row index
-     * @param column zero-based column index
-     * @param item   item displayed in the slot
-     * @param action action executed on click
-     */
-    public void setItem(int row, int column, @NonNull ItemStack item, @NonNull MenuAction action) {
-        setItem(getSlot(row, column), item, action);
-    }
-
-    /**
-     * Places a static item at the specified row and column.
-     *
-     * @param row    zero-based row index
-     * @param column zero-based column index
-     * @param item   item displayed in the slot
-     */
-    public void setItem(int row, int column, @NonNull ItemStack item) {
-        setItem(getSlot(row, column), item, (player, type) -> {
-        });
-    }
-
-    /**
-     * Builds and places an item at the specified row and column.
-     *
-     * @param row      zero-based row index
-     * @param column   zero-based column index
-     * @param material base material
-     * @param builder  item configuration callback
-     * @param action   action executed on click
-     */
-    public void setItem(int row, int column, @NonNull Material material, @NonNull Consumer<ItemBuilder> builder, @NonNull MenuAction action) {
-        setItem(getSlot(row, column), material, builder, action);
-    }
-
-    /**
-     * Builds and places a decorative item at the specified row and column.
-     *
-     * @param row      zero-based row index
-     * @param column   zero-based column index
-     * @param material base material
-     * @param builder  item configuration callback
-     */
-    public void setItem(int row, int column, @NonNull Material material, @NonNull Consumer<ItemBuilder> builder) {
-        setItem(getSlot(row, column), material, builder);
-    }
-
-    /**
-     * Places a preset item at the specified row and column with an ANY_CLICK action.
-     *
-     * @param row    zero-based row index
-     * @param column zero-based column index
-     * @param preset item preset
-     * @param action action executed on click
-     */
-    public void setItem(int row, int column, @NonNull MenuElementPreset preset, @NonNull MenuAction action) {
-        setItem(getSlot(row, column), preset, action);
-    }
-
-    /**
-     * Places a preset item at the specified row and column.
-     *
-     * @param row    zero-based row index
-     * @param column zero-based column index
-     * @param preset item preset
-     */
-    public void setItem(int row, int column, @NonNull MenuElementPreset preset) {
-        setItem(getSlot(row, column), preset.getItem());
-    }
-
-    /**
-     * Fills the outermost row and column slots with an item.
-     *
-     * @param item item displayed on the border
-     */
-    public void fillBorder(@NonNull ItemStack item) {
-        int rows = size / 9;
-        for (int row = 0; row < rows; row++) {
-            for (int column = 0; column < 9; column++) {
-                if (row == 0 || row == rows - 1 || column == 0 || column == 8) {
-                    setItem(getSlot(row, column), item);
-                }
-            }
-        }
-    }
-
-    /**
-     * Fills the outermost row and column slots with a preset.
-     *
-     * @param preset item preset displayed on the border
-     */
-    public void fillBorder(@NonNull MenuElementPreset preset) {
-        fillBorder(preset.getItem());
-    }
-
-    /**
-     * Fills slots matching a symbol in a two-dimensional pattern.
-     *
-     * <p>Spaces are ignored, allowing patterns to be formatted for readability.</p>
-     *
-     * @param pattern pattern rows
-     * @param symbol  character identifying slots to fill
-     * @param item    item displayed in matching slots
-     */
-    public void fillPattern(String[] pattern, char symbol, @NonNull ItemStack item) {
-        for (int row = 0; row < pattern.length && row < size / 9; row++) {
-            String rowString = pattern[row];
-            for (int column = 0; column < rowString.length() && column < 9; column++) {
-                if (rowString.charAt(column) == symbol) {
-                    setItem(getSlot(row, column), item);
-                }
-            }
-        }
-    }
-
-    /**
-     * Fills slots matching a symbol in a two-dimensional pattern with a preset.
-     *
-     * @param pattern pattern rows
-     * @param symbol  character identifying slots to fill
-     * @param preset  item preset displayed in matching slots
-     */
-    public void fillPattern(String[] pattern, char symbol, @NonNull MenuElementPreset preset) {
-        fillPattern(pattern, symbol, preset.getItem());
     }
 
     /**
@@ -775,7 +680,7 @@ public abstract class Menu implements InventoryHolder {
             if (existing != null) {
                 existing.item = item;
             } else {
-                slots.put(slot, new MenuSlot(item, MenuItemInteraction.ANY_CLICK, (player, type) -> {}));
+                slots.put(slot, new MenuSlot(item));
             }
             inventory.setItem(slot, item);
         } else {
@@ -785,15 +690,54 @@ public abstract class Menu implements InventoryHolder {
     }
 
     /**
-     * Represents an inventory slot and its registered click actions.
+     * Updates a single slot only if the specified item differs from the currently displayed item.
+     *
+     * <p>Useful for {@link TickableMenu} implementations to avoid full rebuilds and eliminate
+     * client-side rendering flicker.</p>
+     *
+     * @param slot inventory slot index
+     * @param item new item for the slot
+     * @return {@code true} if the slot was updated, {@code false} if it already matched
+     */
+    public boolean updateSlotItem(int slot, @Nullable ItemStack item) {
+        ItemStack current = inventory.getItem(slot);
+        if (isSameItem(current, item)) {
+            return false;
+        }
+        setSlotItem(slot, item);
+        return true;
+    }
+
+    /**
+     * Represents an inventory slot and its registered click actions and sound behavior.
      */
     public static class MenuSlot {
 
         public ItemStack item;
         private final Map<MenuItemInteraction, MenuAction> actions = new EnumMap<>(MenuItemInteraction.class);
+        private Sound sound = null;
+        @Getter
+        private float volume = 1.0f;
+        @Getter
+        private float pitch = 1.0f;
+        @Getter
+        private boolean soundMuted = false;
+        private boolean useDefaultClickSound = true;
+        private boolean usePageTurnSound = false;
 
         /**
-         * Creates a slot with a single interaction action.
+         * Creates a static slot with no interactive actions and muted sound.
+         *
+         * @param item item displayed in the slot
+         */
+        public MenuSlot(@NonNull ItemStack item) {
+            this.item = item;
+            this.soundMuted = true;
+            this.useDefaultClickSound = false;
+        }
+
+        /**
+         * Creates a slot with a single interaction action and default click sound.
          *
          * @param item        item displayed in the slot
          * @param interaction interaction that triggers the action
@@ -805,7 +749,7 @@ public abstract class Menu implements InventoryHolder {
         }
 
         /**
-         * Creates a slot with multiple interaction actions.
+         * Creates a slot with multiple interaction actions and default click sound.
          *
          * @param item    item displayed in the slot
          * @param actions interaction-to-action mappings
@@ -813,6 +757,117 @@ public abstract class Menu implements InventoryHolder {
         public MenuSlot(@NonNull ItemStack item, @NonNull Map<MenuItemInteraction, MenuAction> actions) {
             this.item = item;
             this.actions.putAll(actions);
+        }
+
+        /**
+         * Returns whether any click actions are registered on this slot.
+         *
+         * @return {@code true} if this slot has at least one registered action
+         */
+        public boolean hasAction() {
+            return !actions.isEmpty();
+        }
+
+        /**
+         * Returns whether this slot handles the specified click type.
+         *
+         * @param clickType click type received
+         * @return {@code true} if an action is registered for this click
+         */
+        public boolean hasAction(@NonNull ClickType clickType) {
+            return resolveAction(clickType) != null;
+        }
+
+        /**
+         * Suppresses any sound when this slot is clicked.
+         *
+         * @return this slot
+         */
+        public MenuSlot withoutSound() {
+            this.soundMuted = true;
+            this.useDefaultClickSound = false;
+            this.usePageTurnSound = false;
+            return this;
+        }
+
+        /**
+         * Sets a custom sound to play when this slot is clicked.
+         *
+         * @param sound sound to play
+         * @return this slot
+         */
+        public MenuSlot withSound(@Nullable Sound sound) {
+            this.sound = sound;
+            this.volume = 1.0f;
+            this.pitch = 1.0f;
+            this.useDefaultClickSound = false;
+            this.usePageTurnSound = false;
+            this.soundMuted = (sound == null);
+            return this;
+        }
+
+        /**
+         * Sets a custom sound with volume and pitch to play when this slot is clicked.
+         *
+         * @param sound  sound to play
+         * @param volume volume of the sound
+         * @param pitch  pitch of the sound
+         * @return this slot
+         */
+        public MenuSlot withSound(@Nullable Sound sound, float volume, float pitch) {
+            this.sound = sound;
+            this.volume = volume;
+            this.pitch = pitch;
+            this.useDefaultClickSound = false;
+            this.usePageTurnSound = false;
+            this.soundMuted = (sound == null);
+            return this;
+        }
+
+        /**
+         * Sets the standard book page turn sound to play when this slot is clicked.
+         *
+         * @return this slot
+         */
+        public MenuSlot withPageTurnSound() {
+            this.sound = null;
+            this.volume = 1.0f;
+            this.pitch = 1.0f;
+            this.useDefaultClickSound = false;
+            this.usePageTurnSound = true;
+            this.soundMuted = false;
+            return this;
+        }
+
+        /**
+         * Sets a {@link SoundCue} to play when this slot is clicked.
+         *
+         * @param cue sound cue to play
+         * @return this slot
+         */
+        public MenuSlot withSound(@Nullable SoundCue cue) {
+            if (cue == null) {
+                return withoutSound();
+            }
+            this.sound = cue.sound();
+            this.volume = cue.volume();
+            this.pitch = cue.pitch();
+            this.useDefaultClickSound = false;
+            this.usePageTurnSound = false;
+            this.soundMuted = false;
+            return this;
+        }
+
+        public @Nullable Sound getSound() {
+            return sound;
+        }
+
+        public boolean isUsingDefaultClickSound() {
+            return useDefaultClickSound;
+        }
+
+        public boolean isUsingPageTurnSound() {
+            return usePageTurnSound;
         }
 
         /**
@@ -830,29 +885,47 @@ public abstract class Menu implements InventoryHolder {
         /**
          * Executes the action matching the specified click type.
          *
-         * <p>Specific left, right, or middle-click actions take precedence
-         * over {@link MenuItemInteraction#ANY_CLICK}.</p>
+         * <p>Plays the configured sound (by default UI button click) unless muted,
+         * then dispatches the action.</p>
          *
          * @param player    player who clicked the slot
          * @param clickType click type received
          */
-        public void handle(@NonNull Player player, @NonNull ClickType clickType) {
-            boolean handled = false;
+        public void handle(@Nullable Player player, @NonNull ClickType clickType) {
+            MenuAction action = resolveAction(clickType);
+            if (action == null) {
+                return;
+            }
 
+            if (player != null && !soundMuted) {
+                Sound soundToPlay = sound;
+                if (soundToPlay == null) {
+                    if (usePageTurnSound) {
+                        soundToPlay = Sound.ITEM_BOOK_PAGE_TURN;
+                    } else if (useDefaultClickSound) {
+                        soundToPlay = Sound.UI_BUTTON_CLICK;
+                    }
+                }
+                if (soundToPlay != null) {
+                    player.playSound(player.getLocation(), soundToPlay, volume, pitch);
+                }
+            }
+
+            action.execute(player, clickType);
+        }
+
+        @Nullable
+        private MenuAction resolveAction(@NonNull ClickType clickType) {
             if (clickType.isLeftClick() && actions.containsKey(MenuItemInteraction.LEFT_CLICK)) {
-                actions.get(MenuItemInteraction.LEFT_CLICK).execute(player, clickType);
-                handled = true;
-            } else if (clickType.isRightClick() && actions.containsKey(MenuItemInteraction.RIGHT_CLICK)) {
-                actions.get(MenuItemInteraction.RIGHT_CLICK).execute(player, clickType);
-                handled = true;
-            } else if (clickType == ClickType.MIDDLE && actions.containsKey(MenuItemInteraction.MIDDLE_CLICK)) {
-                actions.get(MenuItemInteraction.MIDDLE_CLICK).execute(player, clickType);
-                handled = true;
+                return actions.get(MenuItemInteraction.LEFT_CLICK);
             }
-
-            if (!handled && actions.containsKey(MenuItemInteraction.ANY_CLICK)) {
-                actions.get(MenuItemInteraction.ANY_CLICK).execute(player, clickType);
+            if (clickType.isRightClick() && actions.containsKey(MenuItemInteraction.RIGHT_CLICK)) {
+                return actions.get(MenuItemInteraction.RIGHT_CLICK);
             }
+            if (clickType == ClickType.MIDDLE && actions.containsKey(MenuItemInteraction.MIDDLE_CLICK)) {
+                return actions.get(MenuItemInteraction.MIDDLE_CLICK);
+            }
+            return actions.get(MenuItemInteraction.ANY_CLICK);
         }
     }
 }

@@ -150,20 +150,21 @@ public final class ReportsCenterMenu extends PaginatedMenu implements TickableMe
 
     public static void openReportBook(Player moderator, ReportData report) {
         String dateText = DATE_FORMAT.format(new Date(report.timestamp()));
-        BookMenu bookMenu = BookMenu.builder()
-                .addPage(page -> {
-                    page.append("  §0§lREPORT DETAILS\n\n");
-                    page.append("§0" + report.reporterName() + " §0reported §6" + report.targetName() + " §0for §c" + report.reason() + "§0.\n\n");
+        BookMenu.open(moderator, "Report #" + report.id(), page -> {
+            page.title("REPORT DETAILS")
+                .blank()
+                .paragraph("§0" + report.reporterName() + " §0reported §6" + report.targetName() + " §0for §c" + report.reason() + "§0.")
+                .blank();
 
-                    if (report.message() != null && !report.message().isBlank() && !report.message().equalsIgnoreCase("General player report") && !report.message().equalsIgnoreCase("None")) {
-                        page.append("§0Message:\n");
-                        page.append("§8\"§3" + report.message() + "§8\"\n\n");
-                    }
+            if (report.message() != null && !report.message().isBlank() && !report.message().equalsIgnoreCase("General player report") && !report.message().equalsIgnoreCase("None")) {
+                page.line("§0Message:")
+                    .quote(report.message())
+                    .blank();
+            }
 
-                    page.append("§0Submitted: §8" + dateText + "\n\n");
-                    page.hoverAndExecute("§4▶ Dismiss Report", "§eClick to dismiss this report", "/reports dismiss " + report.id());
-                });
-
-        bookMenu.open(moderator);
+            page.field("Submitted", "§8" + dateText)
+                .blank()
+                .actionButton("§4§l[DISMISS REPORT]", "§eClick to dismiss this report", "/reports dismiss " + report.id());
+        });
     }
 }
