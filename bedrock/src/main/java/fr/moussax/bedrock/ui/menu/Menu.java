@@ -148,8 +148,9 @@ public abstract class Menu implements InventoryHolder {
     /**
      * Places an item in a slot with an interaction-specific action.
      *
-     * <p>If the slot already exists, its displayed item and action are updated
-     * without removing its other registered actions.</p>
+     * <p>If the slot is already interactive, its displayed item and action are updated
+     * without removing its other registered actions. Static slots are replaced so the
+     * new action receives the default click sound.</p>
      *
      * @param slot        inventory slot index
      * @param item        item displayed in the slot
@@ -159,7 +160,7 @@ public abstract class Menu implements InventoryHolder {
      */
     public MenuSlot setItem(int slot, @NonNull ItemStack item, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
         MenuSlot existing = slots.get(slot);
-        if (existing != null) {
+        if (existing != null && existing.hasAction()) {
             existing.item = item;
             existing.addAction(interaction, action);
             return existing;
@@ -211,10 +212,16 @@ public abstract class Menu implements InventoryHolder {
      */
     public @Nullable MenuSlot addAction(int slot, @NonNull MenuItemInteraction interaction, @NonNull MenuAction action) {
         MenuSlot existing = slots.get(slot);
-        if (existing != null) {
-            existing.addAction(interaction, action);
+        if (existing == null) {
+            return null;
         }
-        return existing;
+        if (existing.hasAction()) {
+            return existing.addAction(interaction, action);
+        }
+
+        MenuSlot interactiveSlot = new MenuSlot(existing.item, interaction, action);
+        slots.put(slot, interactiveSlot);
+        return interactiveSlot;
     }
 
     /**
