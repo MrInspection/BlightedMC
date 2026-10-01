@@ -1,5 +1,6 @@
 package fr.moussax.bedrock.ui.book;
 
+import fr.moussax.bedrock.utils.ColorUtils;
 import org.bukkit.ChatColor;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -76,7 +77,7 @@ public final class BookPaginator {
      */
     public static List<String> wrapText(@NonNull String text) {
         List<String> wrappedLines = new ArrayList<>();
-        String[] paragraphs = text.split("\r?\n", -1);
+        String[] paragraphs = ColorUtils.colorize(text).split("\r?\n", -1);
 
         for (String paragraph : paragraphs) {
             if (paragraph.isEmpty()) {

@@ -231,13 +231,18 @@ public final class BookMenu {
         }
 
         int totalPhysicalPages = physicalPages.size();
+        List<BaseComponent[]> resolvedPages = new ArrayList<>(physicalPages.size());
         for (BaseComponent[] pageComponents : physicalPages) {
-            for (BaseComponent component : pageComponents) {
+            BaseComponent[] resolvedComponents = new BaseComponent[pageComponents.length];
+            for (int index = 0; index < pageComponents.length; index++) {
+                BaseComponent component = pageComponents[index].duplicate();
                 resolvePageLinks(component, targetToPhysical, logicalToPhysical, totalPhysicalPages);
+                resolvedComponents[index] = component;
             }
+            resolvedPages.add(resolvedComponents);
         }
 
-        return physicalPages;
+        return resolvedPages;
     }
 
     private void resolvePageLinks(
