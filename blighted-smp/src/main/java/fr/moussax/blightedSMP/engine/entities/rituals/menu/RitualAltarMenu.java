@@ -314,7 +314,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
         Bukkit.broadcastMessage("§5 ☤ §dThe §4" + ritual.getSummonedCreature().getName() + " §dhas been summoned by §f" + player.getName() + "§d.");
 
         AncientCreature creature = ritual.getSummonedCreature().createInstance();
-        creature.setSummoner(player);
+        creature.summoner(player);
         creature.spawn(location);
     }
 }

@@ -670,6 +670,18 @@ public abstract class BlightedEntity {
         EntityAttributesBuilder builder = new EntityAttributesBuilder();
         consumer.accept(builder);
         builder.applyTo(this.attributes, this.entity);
+        Double configuredMaxHealth = builder.getAttributes().get(Attribute.MAX_HEALTH);
+        if (configuredMaxHealth != null) {
+            this.maxHealth = (int) Math.round(configuredMaxHealth);
+        }
+        Double configuredDamage = builder.getAttributes().get(Attribute.ATTACK_DAMAGE);
+        if (configuredDamage != null) {
+            this.damage = (int) Math.round(configuredDamage);
+        }
+        Double configuredDefense = builder.getAttributes().get(Attribute.ARMOR);
+        if (configuredDefense != null) {
+            this.defense = (int) Math.round(configuredDefense);
+        }
     }
 
     /**

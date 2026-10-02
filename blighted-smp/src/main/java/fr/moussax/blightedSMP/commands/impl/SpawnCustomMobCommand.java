@@ -28,7 +28,7 @@ public final class SpawnCustomMobCommand extends AdminCommand {
         }
 
         if (entity instanceof AncientCreature ancientCreature) {
-            ancientCreature.setSummoner(player);
+            ancientCreature.summoner(player);
         }
 
         try {

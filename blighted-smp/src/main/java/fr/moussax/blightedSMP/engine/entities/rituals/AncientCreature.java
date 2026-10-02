@@ -22,6 +22,9 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.time.Duration;
+import java.util.Objects;
+
 /**
  * Base class for ancient creatures summoned through an {@link AncientRitual}.
  *
@@ -36,8 +39,14 @@ public abstract class AncientCreature extends BlightedEntity {
 
     private static final int DEFAULT_TIME_ALLOWANCE_SECONDS = 240;
     private static final double HOLOGRAM_RESCAN_RADIUS = 8.0;
-    private static final NamespacedKey HOLOGRAM_KEY =
-            new NamespacedKey(BlightedSMP.getInstance(), "ancient_creature_hologram");
+    private static NamespacedKey hologramKey;
+
+    private static NamespacedKey getHologramKey() {
+        if (hologramKey == null) {
+            hologramKey = new NamespacedKey(BlightedSMP.getInstance(), "ancient_creature_hologram");
+        }
+        return hologramKey;
+    }
 
     @Getter
     protected int timeAllowance = DEFAULT_TIME_ALLOWANCE_SECONDS;
@@ -66,47 +75,77 @@ public abstract class AncientCreature extends BlightedEntity {
     }
 
     /**
-     * Sets the time allowance to defeat this creature, in seconds.
-     * Also updates the remaining countdown seconds if the creature has not collapsed.
+     * Sets the countdown time allowance to defeat this ancient creature.
      *
-     * @param timeAllowanceSeconds time allowed in seconds
+     * @param duration time allowance
+     * @return this creature
      */
-    public void setTimeAllowance(int timeAllowanceSeconds) {
-        this.timeAllowance = timeAllowanceSeconds;
-        this.remainingSeconds = timeAllowanceSeconds;
+    public AncientCreature timeAllowance(@NonNull Duration duration) {
+        Objects.requireNonNull(duration, "duration cannot be null");
+        if (duration.toSeconds() <= 0) {
+            throw new IllegalArgumentException("timeAllowance must be at least 1 second, got: " + duration);
+        }
+        this.timeAllowance = (int) duration.toSeconds();
+        this.remainingSeconds = this.timeAllowance;
+        return this;
+    }
+
+    /**
+     * Sets the countdown time allowance in seconds to defeat this ancient creature.
+     *
+     * @param seconds time allowance in seconds
+     * @return this creature
+     */
+    public AncientCreature timeAllowance(int seconds) {
+        if (seconds <= 0) {
+            throw new IllegalArgumentException("timeAllowance must be positive, got: " + seconds);
+        }
+        return timeAllowance(Duration.ofSeconds(seconds));
     }
 
     /**
      * Sets the player who summoned this creature.
      *
-     * <p>The player's name is stored for display in the creature's hologram.
-     * If no player is supplied, the summoner is set to {@code "Unknown"}.</p>
-     *
-     * @param player summoning player, or {@code null}
+     * @param player summoning player, or {@code null} for unknown
+     * @return this creature
      */
-    public void setSummoner(@Nullable Player player) {
+    public AncientCreature summoner(@Nullable Player player) {
         this.summonerName = (player != null) ? player.getName() : "Unknown";
+        updateHologramText();
+        return this;
     }
 
     /**
-     * Sets the name of the ability currently active on this creature.
+     * Sets the summoner name directly.
      *
-     * <p>The attached hologram is updated immediately after the ability name
-     * changes.</p>
+     * @param summonerName summoner name
+     * @return this creature
+     */
+    public AncientCreature summoner(@NonNull String summonerName) {
+        this.summonerName = Objects.requireNonNull(summonerName, "summonerName cannot be null");
+        updateHologramText();
+        return this;
+    }
+
+    /**
+     * Sets the name of the ability currently active on this creature and updates the hologram.
      *
      * @param abilityName active ability name, or {@code null} when no ability is active
+     * @return this creature
      */
-    public void setActiveAbilityName(@Nullable String abilityName) {
+    public AncientCreature activeAbility(@Nullable String abilityName) {
         this.activeAbilityName = abilityName;
         updateHologramText();
+        return this;
     }
 
     /**
      * Clears the currently active ability and updates the hologram.
+     *
+     * @return this creature
      */
-    public void clearActiveAbility() {
-        this.activeAbilityName = null;
-        updateHologramText();
+    public AncientCreature clearActiveAbility() {
+        return activeAbility(null);
     }
 
     /**
@@ -141,7 +180,7 @@ public abstract class AncientCreature extends BlightedEntity {
             String attachedOwner = persistentDataContainer.get(EntityAttachmentManager.ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
             if (!ownerUuid.equals(attachedOwner)) continue;
 
-            if (persistentDataContainer.has(HOLOGRAM_KEY, PersistentDataType.BYTE)) {
+            if (persistentDataContainer.has(getHologramKey(), PersistentDataType.BYTE)) {
                 this.hologram = display;
                 break;
             }
@@ -177,7 +216,7 @@ public abstract class AncientCreature extends BlightedEntity {
         );
         display.setTransformation(transformation);
 
-        display.getPersistentDataContainer().set(HOLOGRAM_KEY, PersistentDataType.BYTE, (byte) 1);
+        display.getPersistentDataContainer().set(getHologramKey(), PersistentDataType.BYTE, (byte) 1);
 
         this.hologram = display;
         this.hologram.setText(buildHologramContent());
