@@ -20,7 +20,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
 
@@ -64,11 +67,6 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
         return true;
     }
 
-    @Override
-    public int getCooldownSeconds() {
-        return 2;
-    }
-
     private void reduceStackInHand(Player player, ItemStack hand) {
         if (hand.getAmount() <= 1) {
             player.getInventory().setItemInMainHand(null);
@@ -99,6 +97,7 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
 
         Vector direction = player.getLocation().getDirection().normalize();
         String playerName = player.getName();
+        Set<UUID> hitEntities = new HashSet<>();
 
         new BukkitRunnable() {
             int tick = 0;
@@ -123,11 +122,12 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
 
                 if (tick == OUTBOUND_TICKS) {
                     returning = true;
+                    hitEntities.clear();
                 }
 
                 updateProjectilePosition(projectile, player, direction, returning);
                 updateProjectileRotation(projectile, tick);
-                damageNearbyEntities(projectile, player);
+                damageNearbyEntities(projectile, player, hitEntities);
                 spawnParticles(projectile, returning);
 
                 if (tick >= OUTBOUND_TICKS + RETURN_TICKS) {
@@ -172,9 +172,9 @@ public class BonemerangAbility implements AbilityManager<PlayerInteractEvent> {
         ));
     }
 
-    private void damageNearbyEntities(ArmorStand projectile, Player player) {
+    private void damageNearbyEntities(ArmorStand projectile, Player player, Set<UUID> hitEntities) {
         for (Entity entity : projectile.getNearbyEntities(COLLISION_RADIUS, 1, COLLISION_RADIUS)) {
-            if (entity != player && entity instanceof LivingEntity damageable) {
+            if (entity != player && entity instanceof LivingEntity damageable && hitEntities.add(entity.getUniqueId())) {
                 damageable.damage(DAMAGE_AMOUNT, player);
             }
         }
