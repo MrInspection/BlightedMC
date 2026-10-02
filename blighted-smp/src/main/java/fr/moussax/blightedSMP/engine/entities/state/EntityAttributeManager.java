@@ -29,8 +29,8 @@ public final class EntityAttributeManager {
     }
 
     /**
-     * Sets an attribute base value. If the entity is currently active, strips all
-     * existing modifiers and updates the live Bukkit AttributeInstance immediately.
+     * Sets an attribute base value. If the entity is currently active,
+     * updates the live Bukkit AttributeInstance immediately.
      *
      * @param attribute  target attribute
      * @param value      base attribute value
@@ -39,8 +39,11 @@ public final class EntityAttributeManager {
     public void setAttribute(@NonNull Attribute attribute, double value, @Nullable LivingEntity liveEntity) {
         Objects.requireNonNull(attribute, "attribute cannot be null");
         attributes.put(attribute, value);
-        if (liveEntity != null) {
-            applyAttributeToLiveEntity(attribute, value, liveEntity);
+        if (liveEntity != null && liveEntity.isValid() && !liveEntity.isDead()) {
+            AttributeInstance instance = liveEntity.getAttribute(attribute);
+            if (instance != null) {
+                instance.setBaseValue(value);
+            }
         }
     }
 
@@ -57,7 +60,7 @@ public final class EntityAttributeManager {
         if (liveEntity != null && liveEntity.isValid() && !liveEntity.isDead()) {
             AttributeInstance instance = liveEntity.getAttribute(attribute);
             if (instance != null) {
-                return instance.getValue();
+                return instance.getBaseValue();
             }
         }
         return attributes.getOrDefault(attribute, 0.0);
