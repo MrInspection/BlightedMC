@@ -17,6 +17,7 @@ public final class EntityPhaseManager {
     private final NavigableMap<Double, Runnable> phaseThresholds;
     private LifecycleTaskManager coreTasks = new LifecycleTaskManager();
     private LifecycleTaskManager phaseTasks = new LifecycleTaskManager();
+    private boolean isPhaseCallbackRunning;
 
     public EntityPhaseManager(@NonNull BlightedEntity owner, @NonNull DoubleToLongFunction transitionHandler) {
         this(owner, transitionHandler, new TreeMap<>(Collections.reverseOrder()));
@@ -63,7 +64,12 @@ public final class EntityPhaseManager {
 
             phaseTasks.cancelAll();
             phaseTasks = new LifecycleTaskManager();
-            entry.getValue().run();
+            isPhaseCallbackRunning = true;
+            try {
+                entry.getValue().run();
+            } finally {
+                isPhaseCallbackRunning = false;
+            }
             long transitionDuration = transitionHandler.applyAsLong(entry.getKey());
 
             if (transitionDuration > 0) {
@@ -154,7 +160,7 @@ public final class EntityPhaseManager {
                 Log.warn("EntityPhaseManager", "Ability threw an exception on entity '" + owner.getName() + "': " + exception.getMessage());
             }
         }, delayTicks, periodTicks);
-        if (canScheduleTask()) {
+        if (canScheduleTask() && (!isPhaseCallbackRunning || manager != phaseTasks)) {
             manager.scheduleLast();
         }
     }
@@ -170,7 +176,7 @@ public final class EntityPhaseManager {
                 Log.warn("EntityPhaseManager", "Delayed action threw an exception on entity '" + owner.getName() + "': " + exception.getMessage());
             }
         }, delayTicks);
-        if (canScheduleTask()) {
+        if (canScheduleTask() && (!isPhaseCallbackRunning || manager != phaseTasks)) {
             manager.scheduleLast();
         }
     }
