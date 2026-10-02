@@ -13,7 +13,10 @@ public final class BlightswornZombie extends BlightswornBruteArchetype {
         setDamage(6);
         setDroppedExp(12);
 
-        spawning(spawn -> spawn.overworldHostile());
+        spawning(spawn -> spawn
+                .overworld()
+                .overworldHostile()
+        );
 
         loot(loot -> loot
                 .maxDrops(3)

@@ -125,4 +125,17 @@ class SpawningRuleTest {
         assertThrows(IllegalArgumentException.class, () -> builder.affixes(-0.1));
         assertThrows(IllegalArgumentException.class, () -> builder.affixes(1.1));
     }
+
+    @Test
+    @DisplayName("SpawningBuilder should configure environment conditions")
+    void testEnvironmentConditions() {
+        SpawningBuilder builder = new SpawningBuilder();
+        builder.overworld()
+                .nether()
+                .theEnd()
+                .environment(org.bukkit.World.Environment.CUSTOM);
+
+        assertEquals(4, builder.getConditions().size());
+        assertEquals(4, builder.buildProfile().conditions().size());
+    }
 }

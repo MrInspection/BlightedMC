@@ -153,6 +153,33 @@ public final class SpawningBuilder {
     }
 
     /**
+     * Adds an Overworld environment requirement.
+     *
+     * @return this builder
+     */
+    public SpawningBuilder overworld() {
+        return condition(SpawnRules.overworld());
+    }
+
+    /**
+     * Adds a Nether environment requirement.
+     *
+     * @return this builder
+     */
+    public SpawningBuilder nether() {
+        return condition(SpawnRules.nether());
+    }
+
+    /**
+     * Adds The End environment requirement.
+     *
+     * @return this builder
+     */
+    public SpawningBuilder theEnd() {
+        return condition(SpawnRules.theEnd());
+    }
+
+    /**
      * Adds standard Overworld hostile monster conditions (darkness, non-liquid).
      *
      * @return this builder

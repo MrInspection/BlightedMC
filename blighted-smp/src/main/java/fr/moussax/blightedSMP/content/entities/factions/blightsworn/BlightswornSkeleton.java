@@ -20,7 +20,10 @@ public final class BlightswornSkeleton extends BlightswornArcherArchetype {
         setDroppedExp(12);
         equipment(eq -> eq.mainHand(Material.BOW));
 
-        spawning(spawn -> spawn.overworldHostile());
+        spawning(spawn -> spawn
+                .overworld()
+                .overworldHostile()
+        );
 
         loot(loot -> loot
                 .drop(Material.BONE, 2, 5, 1.0)
