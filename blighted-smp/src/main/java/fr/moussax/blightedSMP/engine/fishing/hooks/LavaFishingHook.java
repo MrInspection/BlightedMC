@@ -8,6 +8,7 @@ import fr.moussax.blightedSMP.engine.fishing.modifiers.FishingSpeedCalculator;
 import fr.moussax.blightedSMP.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import fr.moussax.bedrock.text.Messenger;
+import fr.moussax.blightedSMP.engine.items.ItemType;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -21,7 +22,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class LavaFishingHook {
+public final class LavaFishingHook implements CustomFishingHook {
     private static final Map<UUID, LavaFishingHook> ACTIVE_HOOKS = new HashMap<>();
 
     private static final double FLOAT_TARGET_HIGH = 0.95;
@@ -170,6 +171,7 @@ public final class LavaFishingHook {
         hook.setVelocity(currentOffset < targetOffset ? FLOAT_UP : FLOAT_DOWN);
     }
 
+    @Override
     public boolean reelIn() {
         remove();
 
@@ -186,11 +188,7 @@ public final class LavaFishingHook {
         world.playSound(hookLocation, Sound.BLOCK_LAVA_EXTINGUISH, 1.0f, 1.0f);
 
         Location playerLocation = player.getLocation();
-        Vector velocity = playerLocation.toVector().subtract(hookLocation.toVector());
-
-        double distance = velocity.length();
-        velocity.multiply(0.08);
-        velocity.setY(velocity.getY() + (Math.sqrt(distance) * 0.05) + 0.15);
+        Vector velocity = CustomFishingHook.calculateLaunchVelocity(hookLocation, playerLocation);
 
         Location spawnLocation = hookLocation.add(0, 0.5, 0);
 
@@ -209,12 +207,18 @@ public final class LavaFishingHook {
         return success;
     }
 
+    @Override
     public void remove() {
         ACTIVE_HOOKS.remove(hook.getUniqueId());
         if (task != null && !task.isCancelled()) {
             task.cancel();
             task = null;
         }
+    }
+
+    @Override
+    public ItemType getRequiredRodType() {
+        return ItemType.LAVA_FISHING_ROD;
     }
 
     public static LavaFishingHook get(FishHook hook) {

@@ -1,6 +1,7 @@
 package fr.moussax.blightedSMP.engine.fishing;
 
 import fr.moussax.blightedSMP.BlightedSMP;
+import fr.moussax.blightedSMP.engine.fishing.hooks.CustomFishingHook;
 import fr.moussax.blightedSMP.engine.fishing.hooks.LavaFishingHook;
 import fr.moussax.blightedSMP.engine.fishing.hooks.VoidFishingHook;
 import fr.moussax.blightedSMP.engine.fishing.modifiers.FishingSpeedCalculator;
@@ -47,15 +48,9 @@ public final class FishingListener implements Listener {
             return;
         }
 
-        LavaFishingHook lavaHook = LavaFishingHook.get(hook);
-        if (lavaHook != null) {
-            handleCustomFishingReel(event, player, lavaHook::reelIn, lavaHook::remove, ItemType.LAVA_FISHING_ROD);
-            return;
-        }
-
-        VoidFishingHook voidHook = VoidFishingHook.get(hook);
-        if (voidHook != null) {
-            handleCustomFishingReel(event, player, voidHook::reelIn, voidHook::remove, ItemType.VOID_FISHING_ROD);
+        CustomFishingHook customHook = CustomFishingHook.get(hook);
+        if (customHook != null) {
+            handleCustomFishingReel(event, player, customHook);
             return;
         }
 
@@ -141,9 +136,7 @@ public final class FishingListener implements Listener {
     private void handleCustomFishingReel(
             PlayerFishEvent event,
             Player player,
-            CustomReelAction reelAction,
-            Runnable removeAction,
-            ItemType rodType
+            CustomFishingHook customHook
     ) {
         PlayerFishEvent.State state = event.getState();
 
@@ -151,11 +144,11 @@ public final class FishingListener implements Listener {
                 || state == PlayerFishEvent.State.IN_GROUND
                 || state == PlayerFishEvent.State.CAUGHT_FISH) {
 
-            if (reelAction.reelIn()) {
-                damageRod(player, rodType);
+            if (customHook.reelIn()) {
+                damageRod(player, customHook.getRequiredRodType());
             }
         } else {
-            removeAction.run();
+            customHook.remove();
         }
     }
 
@@ -263,10 +256,5 @@ public final class FishingListener implements Listener {
         velocity.setY(velocity.getY() + Math.sqrt(distance) * 0.08);
 
         return velocity;
-    }
-
-    @FunctionalInterface
-    private interface CustomReelAction {
-        boolean reelIn();
     }
 }

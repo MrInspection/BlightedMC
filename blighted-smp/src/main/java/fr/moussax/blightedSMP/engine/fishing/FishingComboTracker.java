@@ -125,10 +125,10 @@ public final class FishingComboTracker {
 
     public static void spawnBonusExperience(World world, Location location, int combo) {
         if (world == null || location == null) return;
-        int bonusOrbCount = Math.min(4, combo / 5);
-        if (bonusOrbCount <= 0) return;
+        int bonusExperience = getBonusExperience(combo);
+        if (bonusExperience <= 0) return;
 
         ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(location, EntityType.EXPERIENCE_ORB);
-        orb.setExperience(bonusOrbCount * 2);
+        orb.setExperience(bonusExperience);
     }
 }
