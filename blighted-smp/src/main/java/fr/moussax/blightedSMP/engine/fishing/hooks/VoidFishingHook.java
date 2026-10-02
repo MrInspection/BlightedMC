@@ -8,6 +8,7 @@ import fr.moussax.blightedSMP.engine.fishing.modifiers.FishingSpeedCalculator;
 import fr.moussax.blightedSMP.engine.fishing.registry.FishingLootRegistry;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import fr.moussax.bedrock.text.Messenger;
+import fr.moussax.blightedSMP.engine.items.ItemType;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -21,7 +22,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class VoidFishingHook {
+public final class VoidFishingHook implements CustomFishingHook {
     private static final Map<UUID, VoidFishingHook> ACTIVE_HOOKS = new HashMap<>();
 
     private static final double CENTRAL_ISLAND_RADIUS_SQUARED = 1000.0 * 1000.0;
@@ -263,6 +264,7 @@ public final class VoidFishingHook {
         return false;
     }
 
+    @Override
     public boolean reelIn() {
         remove();
 
@@ -280,11 +282,7 @@ public final class VoidFishingHook {
         player.playSound(player.getLocation(), Sound.ITEM_TRIDENT_RETURN, 0.6f, 0.7f);
 
         Location playerLocation = player.getLocation();
-        Vector velocity = playerLocation.toVector().subtract(hookLocation.toVector());
-
-        double distance = velocity.length();
-        velocity.multiply(0.08);
-        velocity.setY(velocity.getY() + (Math.sqrt(distance) * 0.05) + 0.15);
+        Vector velocity = CustomFishingHook.calculateLaunchVelocity(hookLocation, playerLocation);
 
         Location spawnLocation = hookLocation.add(0, 0.5, 0);
 
@@ -315,6 +313,7 @@ public final class VoidFishingHook {
         world.spawnParticle(Particle.END_ROD, center, 8, 0.1, 0.3, 0.1, 0.02);
     }
 
+    @Override
     public void remove() {
         ACTIVE_HOOKS.remove(hook.getUniqueId());
         if (task != null && !task.isCancelled()) {
@@ -324,6 +323,11 @@ public final class VoidFishingHook {
         if (!hook.isDead()) {
             hook.setGravity(true);
         }
+    }
+
+    @Override
+    public ItemType getRequiredRodType() {
+        return ItemType.VOID_FISHING_ROD;
     }
 
     public static VoidFishingHook get(FishHook hook) {

@@ -1,8 +1,7 @@
 package fr.moussax.blightedSMP;
 
 import fr.moussax.blightedSMP.engine.entities.spawnable.engine.BlightedSpawnEngine;
-import fr.moussax.blightedSMP.engine.fishing.hooks.LavaFishingHook;
-import fr.moussax.blightedSMP.engine.fishing.hooks.VoidFishingHook;
+import fr.moussax.blightedSMP.engine.fishing.hooks.CustomFishingHook;
 import fr.moussax.blightedSMP.registry.CommandsRegistry;
 import fr.moussax.blightedSMP.registry.EventsRegistry;
 import fr.moussax.blightedSMP.registry.RegistrySystem;
@@ -70,8 +69,7 @@ public final class BlightedSMP extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        LavaFishingHook.cleanupAll();
-        VoidFishingHook.cleanupAll();
+        CustomFishingHook.cleanupAll();
         if (database != null) {
             database.closeConnection();
         }
