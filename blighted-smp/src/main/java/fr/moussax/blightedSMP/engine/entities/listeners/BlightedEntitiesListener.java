@@ -159,8 +159,12 @@ public final class BlightedEntitiesListener implements Listener {
         for (var component : blighted.getComponents()) {
             component.onDamageTaken(blighted, event);
         }
-        double remainingHealth = entity.getHealth() - event.getFinalDamage();
 
+        if (event.isCancelled()) {
+            return;
+        }
+
+        double remainingHealth = entity.getHealth() - event.getFinalDamage();
         if (remainingHealth > 0) {
             Bukkit.getScheduler().runTaskLater(BlightedSMP.getInstance(),
                     () -> {
@@ -169,9 +173,7 @@ public final class BlightedEntitiesListener implements Listener {
                             blighted.evaluatePhases(entity.getHealth());
                         }
                     }, 1L);
-            return;
         }
-        blighted.killAllAttachments();
     }
 
     private void flashHurtAndCancelKnockback(BlightedEntity owner, Entity hitEntity) {
