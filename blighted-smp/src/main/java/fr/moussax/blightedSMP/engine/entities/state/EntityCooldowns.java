@@ -5,6 +5,7 @@ import org.jspecify.annotations.NonNull;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.LongSupplier;
 
 /**
@@ -60,10 +61,18 @@ public final class EntityCooldowns {
      * @return {@code true} if ready and triggered, {@code false} otherwise
      */
     public boolean checkAndTrigger(@NonNull String abilityKey, long cooldownMillis) {
+        Objects.requireNonNull(abilityKey, "abilityKey cannot be null");
         long now = timeSupplier.getAsLong();
-        return cooldowns.compute(abilityKey, (_, last) ->
-                (last == null || (now - last) >= cooldownMillis) ? now : last
-        ) == now;
+        AtomicBoolean triggered = new AtomicBoolean(false);
+        cooldowns.compute(abilityKey, (_, last) -> {
+            if (last == null || (now - last) >= cooldownMillis) {
+                triggered.set(true);
+                return now;
+            }
+            triggered.set(false);
+            return last;
+        });
+        return triggered.get();
     }
 
     /**
