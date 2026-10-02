@@ -151,33 +151,25 @@ public final class EntitiesRegistry {
     }
 
     /**
-     * Returns a list of fresh instances of all registered entities.
+     * Returns an unmodifiable list of all registered entity definitions.
      *
-     * @return list of fresh entity instances
+     * @return unmodifiable list of registered entity definitions
      */
     @NonNull
     public static List<BlightedEntity> getAll() {
-        return REGISTRY.getAll().stream()
-                .map(entity -> {
-                    BlightedEntity fresh = create(entity.getEntityId());
-                    return fresh != null ? fresh : entity;
-                })
-                .toList();
+        return List.copyOf(REGISTRY.getAll());
     }
 
     /**
-     * Returns a list of fresh instances of all registered spawnable entities.
+     * Returns an unmodifiable list of all registered spawnable entity definitions.
      *
-     * @return list of fresh spawnable entity instances
+     * @return unmodifiable list of registered spawnable entity definitions
      */
     @NonNull
     public static List<SpawnableEntity> getSpawnables() {
         return REGISTRY.getAll().stream()
                 .filter(SpawnableEntity.class::isInstance)
-                .map(entity -> {
-                    SpawnableEntity fresh = createSpawnable(entity.getEntityId());
-                    return fresh != null ? fresh : (SpawnableEntity) entity;
-                })
+                .map(SpawnableEntity.class::cast)
                 .toList();
     }
 
