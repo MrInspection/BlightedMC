@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -9,7 +8,6 @@ import org.bukkit.block.Biome;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -19,14 +17,20 @@ public final class BlightswornParched extends BlightswornArcherArchetype {
 
     public BlightswornParched() {
         super("BLIGHTSWORN_PARCHED", "Blightsworn Parched", EntityType.PARCHED);
-        setItemInMainHand(new ItemStack(Material.BOW));
         setDamage(6);
         setDroppedExp(12);
-        loot(table -> table
-                .addLoot(Material.BONE, 2, 5, 1.0)
-                .addLoot(Material.ARROW, 2, 5, 1.0)
-                .addDamagedItem(Material.BOW, 0.10, 0.75, 0.15, RARE)
-                .addGems(5, 0.04, VERY_RARE)
+        equipment(eq -> eq.mainHand(Material.BOW));
+
+        spawning(spawn -> spawn
+                .biomes(Biome.DESERT)
+                .overworldSurfaceHostile()
+        );
+
+        loot(loot -> loot
+                .drop(Material.BONE, 2, 5, 1.0)
+                .drop(Material.ARROW, 2, 5, 1.0)
+                .damagedItem(Material.BOW, 0.10, 0.75, 0.15, RARE)
+                .gems(5, 0.04, VERY_RARE)
         );
     }
 
@@ -49,10 +53,5 @@ public final class BlightswornParched extends BlightswornArcherArchetype {
         entity.getWorld().playSound(location, Sound.ITEM_FIRECHARGE_USE, 1.0f, 0.8f);
         entity.getWorld().spawnParticle(Particle.FLAME, location, 30, 0.5, 1.0, 0.5, 0.05);
         entity.getWorld().spawnParticle(Particle.DUST, location, 30, 0.5, 1.0, 0.5, 0.0, BLIGHT_DUST);
-    }
-
-    @Override
-    protected void defineSpawnConditions() {
-        addCondition(SpawnRules.biome(Biome.DESERT).and(SpawnRules.overworldSurfaceHostile()));
     }
 }

@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -35,15 +34,28 @@ public final class BlightswornDrowned extends BlightswornCreature {
         super("BLIGHTSWORN_DROWNED", "Blightsworn Drowned", EntityType.DROWNED, MAX_HEALTH);
         setDamage(6);
         setDroppedExp(10);
-        loot(table -> table
-                .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0)
-                .addLoot(Material.COPPER_INGOT, 1, 3, 0.4)
-                .addLoot(Material.NAUTILUS_SHELL, 0.08, RARE)
-                .addDamagedItem(Material.TRIDENT, 0.05, 0.80, 0.02, VERY_RARE)
-                .addGems(5, 0.04, VERY_RARE)
+        loot(loot -> loot
+                .drop(Material.ROTTEN_FLESH, 2, 5, 1.0)
+                .drop(Material.COPPER_INGOT, 1, 3, 0.4)
+                .drop(Material.NAUTILUS_SHELL, 0.08, RARE)
+                .damagedItem(Material.TRIDENT, 0.05, 0.80, 0.02, VERY_RARE)
+                .gems(5, 0.04, VERY_RARE)
         );
 
-        setItemInMainHand(new ItemBuilder(Material.TRIDENT).unbreakable().toItemStack());
+        equipment(eq -> eq.mainHand(new ItemBuilder(Material.TRIDENT).unbreakable().toItemStack()));
+
+        spawning(spawn -> spawn
+                .biomes(
+                        Biome.RIVER, Biome.FROZEN_RIVER,
+                        Biome.OCEAN, Biome.COLD_OCEAN, Biome.FROZEN_OCEAN,
+                        Biome.LUKEWARM_OCEAN, Biome.WARM_OCEAN, Biome.DEEP_OCEAN,
+                        Biome.DEEP_COLD_OCEAN, Biome.DEEP_FROZEN_OCEAN,
+                        Biome.DEEP_LUKEWARM_OCEAN, Biome.DRIPSTONE_CAVES
+                )
+                .maxBlockLight(0)
+                .maxLightLevel(7)
+                .inLiquid()
+        );
     }
 
     @Override
@@ -160,22 +172,6 @@ public final class BlightswornDrowned extends BlightswornCreature {
                         .toItemStack(),
                 new ItemBuilder(Material.IRON_LEGGINGS).unbreakable().toItemStack(),
                 new ItemBuilder(Material.IRON_BOOTS).unbreakable().toItemStack()
-        );
-    }
-
-    @Override
-    protected void defineSpawnConditions() {
-        addCondition(
-                SpawnRules.biome(
-                                Biome.RIVER, Biome.FROZEN_RIVER,
-                                Biome.OCEAN, Biome.COLD_OCEAN, Biome.FROZEN_OCEAN,
-                                Biome.LUKEWARM_OCEAN, Biome.WARM_OCEAN, Biome.DEEP_OCEAN,
-                                Biome.DEEP_COLD_OCEAN, Biome.DEEP_FROZEN_OCEAN,
-                                Biome.DEEP_LUKEWARM_OCEAN, Biome.DRIPSTONE_CAVES
-                        )
-                        .and(SpawnRules.maxBlockLight(0))
-                        .and(SpawnRules.maxLightLevel(7))
-                        .and(SpawnRules.notInLiquid().negate())
         );
     }
 }

@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -10,7 +9,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -23,15 +21,20 @@ public final class BlightswornPiglin extends BlightswornEliteArchetype {
 
     public BlightswornPiglin() {
         super("BLIGHTSWORN_PIGLIN", "Blightsworn Piglin", EntityType.PIGLIN);
-        setItemInMainHand(new ItemStack(Material.GOLDEN_SWORD));
-        loot(table -> table
-                .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0)
-                .addLoot(Material.GOLD_INGOT, 1, 3, 0.4)
-                .addDamagedItem(Material.CROSSBOW, 0.10, 0.80, 0.1, RARE)
-                .addGems(5, 0.04, VERY_RARE)
+        equipment(eq -> eq.mainHand(Material.GOLDEN_SWORD));
+        loot(loot -> loot
+                .drop(Material.GOLD_NUGGET, 2, 6, 1.0)
+                .drop(Material.GOLD_INGOT, 1, 3, 0.4)
+                .damagedItem(Material.CROSSBOW, 0.10, 0.80, 0.1, RARE)
+                .gems(5, 0.04, VERY_RARE)
         );
         setDamage(8);
         setDroppedExp(16);
+
+        spawning(spawn -> spawn
+                .biomes(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST)
+                .netherHostile()
+        );
     }
 
     @Override
@@ -96,10 +99,5 @@ public final class BlightswornPiglin extends BlightswornEliteArchetype {
                     Material.COBWEB.createBlockData()
             );
         });
-    }
-
-    @Override
-    protected void defineSpawnConditions() {
-        addCondition(SpawnRules.biome(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST).and(SpawnRules.netherHostile()));
     }
 }

@@ -42,7 +42,7 @@ public sealed abstract class BlightswornCreature extends SpawnableEntity
     protected BlightswornCreature(String entityId, String name, EntityType entityType, int maxHealth, double spawnProbability) {
         super(entityId, name, entityType);
         setMaxHealth(maxHealth);
-        setSpawnProbability(spawnProbability);
+        spawning(spawn -> spawn.probability(spawnProbability));
         setupDefaultArmor();
     }
 

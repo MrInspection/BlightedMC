@@ -27,7 +27,13 @@ public class Watchling extends SpawnableEntity {
         setMaxHealth(20);
         setDamage(10);
         setDroppedExp(10);
-        setSpawnProbability(0.001);
+        spawning(spawn -> spawn
+                .probability(0.001)
+                .anyOf(
+                        SpawnRules.biome(Biome.END_BARRENS, Biome.END_MIDLANDS),
+                        SpawnRules.insideStructure(Structure.END_CITY)
+                )
+        );
 
         attributes(attributes -> attributes
                 .scale(0.7)
@@ -35,10 +41,10 @@ public class Watchling extends SpawnableEntity {
                 .followRange(50)
         );
 
-        loot(table -> table
-            .maxDrops(2)
-            .addLoot(Material.ENDER_PEARL, 1, 2, 1.0)
-            .addGems(5, 0.03, VERY_RARE)
+        loot(loot -> loot
+                .maxDrops(2)
+                .drop(Material.ENDER_PEARL, 1, 2, 1.0)
+                .gems(5, 0.03, VERY_RARE)
         );
     }
 
@@ -106,13 +112,5 @@ public class Watchling extends SpawnableEntity {
     @Override
     protected void onConfigureAI(LivingEntity spawned) {
         EndermanAI.init(spawned);
-    }
-
-    @Override
-    protected void defineSpawnConditions() {
-        addCondition(SpawnRules
-            .biome(Biome.END_BARRENS, Biome.END_MIDLANDS)
-            .or(SpawnRules.insideStructure(Structure.END_CITY))
-        );
     }
 }

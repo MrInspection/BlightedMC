@@ -15,7 +15,7 @@ public abstract class CelestialCreature extends SpawnableEntity {
     protected CelestialCreature(String entityId, String name, int maxHealth, EntityType entityType, double probability) {
         super(entityId, name, entityType);
         setMaxHealth(maxHealth);
-        setSpawnProbability(probability);
+        spawning(spawn -> spawn.probability(probability));
     }
 
     @Override

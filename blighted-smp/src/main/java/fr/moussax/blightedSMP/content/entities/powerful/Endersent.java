@@ -5,7 +5,6 @@ import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.engine.entities.attachment.AttachmentRole;
 import fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedSMP.engine.entities.spawnable.SpawnableEntity;
-import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -34,7 +33,10 @@ public class Endersent extends SpawnableEntity {
         setMaxHealth(200);
         setDamage(20);
         setDroppedExp(40);
-        setSpawnProbability(0.002);
+        spawning(spawn -> spawn
+                .probability(0.002)
+                .biomes(Biome.END_MIDLANDS)
+        );
 
         attributes(attributes -> attributes
                 .followRange(60)
@@ -43,15 +45,15 @@ public class Endersent extends SpawnableEntity {
                 .movementSpeed(0.25)
         );
 
-        loot(table -> table
+        loot(loot -> loot
                 .maxDrops(2)
-                .addLoot(Material.ENDER_PEARL, 4, 8, 1.0)
-                .addLoot(Material.ENDER_EYE, 1, 3, 0.31)
-                .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, RARE)
-                .addGems(30, 0.03, VERY_RARE)
+                .drop(Material.ENDER_PEARL, 4, 8, 1.0)
+                .drop(Material.ENDER_EYE, 1, 3, 0.31)
+                .drop("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, RARE)
+                .gems(30, 0.03, VERY_RARE)
         );
 
-        setBoss(true);
+        boss();
     }
 
     @Override
@@ -171,10 +173,5 @@ public class Endersent extends SpawnableEntity {
     @Override
     protected void onConfigureAI(LivingEntity spawned) {
         EndermanAI.init(spawned);
-    }
-
-    @Override
-    protected void defineSpawnConditions() {
-        addCondition(SpawnRules.biome(Biome.END_MIDLANDS));
     }
 }
