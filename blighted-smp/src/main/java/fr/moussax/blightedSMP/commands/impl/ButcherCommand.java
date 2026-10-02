@@ -2,7 +2,7 @@ package fr.moussax.blightedSMP.commands.impl;
 
 import fr.moussax.blightedSMP.commands.AdminCommand;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
-import fr.moussax.blightedSMP.engine.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedSMP.engine.entities.EntityManager;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.entity.LivingEntity;
@@ -75,7 +75,7 @@ public final class ButcherCommand extends AdminCommand {
     }
 
     private void removeEntity(LivingEntity entity) {
-        BlightedEntity blighted = BlightedEntitiesListener.getBlightedEntity(entity);
+        BlightedEntity blighted = EntityManager.getBlightedEntity(entity);
         if (blighted != null) {
             blighted.cleanup();
         }

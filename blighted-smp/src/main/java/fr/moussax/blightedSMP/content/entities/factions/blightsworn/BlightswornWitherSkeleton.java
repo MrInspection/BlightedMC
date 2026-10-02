@@ -1,7 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
-import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -11,7 +9,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.generator.structure.Structure;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -24,18 +21,22 @@ public final class BlightswornWitherSkeleton extends BlightswornEliteArchetype {
 
     public BlightswornWitherSkeleton() {
         super("BLIGHTSWORN_WITHER_SKELETON", "Blightsworn Wither Skeleton", EntityType.WITHER_SKELETON);
-        setLootTable(new EntityLootTableBuilder()
+        loot(loot -> loot
                 .maxDrops(4)
-                .addLoot(Material.BONE, 2, 5, 1.0)
-                .addLoot(Material.COAL, 1, 3, 0.5)
-                .addLoot(Material.WITHER_SKELETON_SKULL, 0.03, VERY_RARE)
-                .addGems(5, 0.04, VERY_RARE)
-                .build()
+                .drop(Material.BONE, 2, 5, 1.0)
+                .drop(Material.COAL, 1, 3, 0.5)
+                .drop(Material.WITHER_SKELETON_SKULL, 0.03, VERY_RARE)
+                .gems(5, 0.04, VERY_RARE)
         );
 
         setDamage(8);
         setDroppedExp(20);
-        itemInMainHand = new ItemStack(Material.STONE_SWORD);
+        equipment(eq -> eq.mainHand(Material.STONE_SWORD));
+
+        spawning(spawn -> spawn
+                .insideStructure(Structure.FORTRESS)
+                .maxBlockLight(0)
+        );
     }
 
     @Override
@@ -91,10 +92,5 @@ public final class BlightswornWitherSkeleton extends BlightswornEliteArchetype {
         cloud.setWaitTime(0);
         cloud.setParticle(Particle.SMOKE);
         cloud.addCustomEffect(new PotionEffect(PotionEffectType.WITHER, 60, 0), true);
-    }
-
-    @Override
-    protected void defineSpawnConditions() {
-        addCondition(SpawnRules.insideStructure(Structure.FORTRESS).and(SpawnRules.maxBlockLight(0)));
     }
 }

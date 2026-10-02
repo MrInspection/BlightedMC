@@ -19,7 +19,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static fr.moussax.blightedSMP.engine.entities.BlightedEntity.*;
+import static fr.moussax.blightedSMP.engine.entities.BlightedEntity.ENTITY_ID_KEY;
+import static fr.moussax.blightedSMP.engine.entities.BlightedEntity.FAST_PASS_TAG;
+import static fr.moussax.blightedSMP.engine.entities.attachment.EntityAttachmentManager.*;
 
 /**
  * Central runtime entity manager tracking active {@link BlightedEntity} instances,
@@ -198,10 +200,10 @@ public final class EntityManager {
             }
 
             String entityId = persistentDataContainer.get(ENTITY_ID_KEY, PersistentDataType.STRING);
-            BlightedEntity prototype = EntitiesRegistry.get(entityId);
-            if (prototype == null) continue;
+            BlightedEntity blighted = EntitiesRegistry.create(entityId);
+            if (blighted == null) continue;
 
-            prototype.clone().attachToExisting(living);
+            blighted.attachToExisting(living);
         }
 
         // Pass 2: re-register attachment entities carrying ATTACHMENT_OWNER_KEY.
@@ -246,9 +248,8 @@ public final class EntityManager {
             boolean syncYaw = yawByte == null || yawByte == 1;
             boolean syncPitch = pitchByte != null && pitchByte == 1;
 
-            owner.attachments.removeIf(attachment -> attachment.entity() != null
-                    && attachment.entity().getUniqueId().equals(entity.getUniqueId()));
-            owner.attachments.add(new EntityAttachment(entity, role, offset, syncYaw, syncPitch));
+            owner.getAttachmentManager().registerRehydratedAttachment(
+                    new EntityAttachment(entity, role, offset, syncYaw, syncPitch));
             registerAttachment(entity, owner);
         }
 

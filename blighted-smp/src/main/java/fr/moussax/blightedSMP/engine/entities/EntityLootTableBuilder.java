@@ -4,6 +4,7 @@ import fr.moussax.bedrock.utils.ItemBuilder;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.loot.LootCondition;
 import fr.moussax.blightedSMP.engine.loot.LootEntry;
+import fr.moussax.blightedSMP.engine.loot.LootResult;
 import fr.moussax.blightedSMP.engine.loot.LootTable;
 import fr.moussax.blightedSMP.engine.loot.decorators.EntityLootRarity;
 import fr.moussax.blightedSMP.engine.loot.decorators.FeedbackSpecification;
@@ -15,17 +16,16 @@ import fr.moussax.blightedSMP.engine.loot.strategies.LootingAwareProbabilisticSt
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Fluent builder for creating {@link LootTable} instances associated with blighted entities.
- *
- * <p>Entries added through this builder are selected probabilistically using a
- * {@link LootingAwareProbabilisticStrategy} and wrapped with rarity-based feedback.</p>
+ * Fluent builder for configuring probabilistic entity loot tables with rarity feedback.
  */
 public final class EntityLootTableBuilder {
 
@@ -45,546 +45,7 @@ public final class EntityLootTableBuilder {
     private int maxDrops = 3;
 
     /**
-     * Adds custom blighted item drop with fixed quantity of 1.
-     *
-     * @param item       custom blighted item
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(BlightedItem item, double dropChance) {
-        if (item == null) return this;
-        return addLoot(
-                item.getItemId(),
-                1,
-                1,
-                dropChance,
-                EntityLootRarity.COMMON,
-                LootCondition.alwaysTrue()
-        );
-    }
-
-    /**
-     * Adds custom blighted item drop with fixed quantity of 1 and rarity feedback.
-     *
-     * @param item       custom blighted item
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @param rarity     rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(BlightedItem item, double dropChance, EntityLootRarity rarity) {
-        if (item == null) return this;
-        return addLoot(item.getItemId(), 1, 1, dropChance, rarity, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds custom blighted item drop with quantity range.
-     *
-     * @param item          custom blighted item
-     * @param minAmount     minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(BlightedItem item, int minAmount, int maximumAmount, double dropChance) {
-        if (item == null) return this;
-        return addLoot(item.getItemId(), minAmount, maximumAmount, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds custom blighted item drop with quantity range and rarity feedback.
-     *
-     * @param item          custom blighted item
-     * @param minimumAmount minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @param rarity        rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(BlightedItem item, int minimumAmount, int maximumAmount, double dropChance, EntityLootRarity rarity) {
-        if (item == null) return this;
-        return addLoot(item.getItemId(), minimumAmount, maximumAmount, dropChance, rarity, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds custom blighted item drop with quantity range, rarity feedback, and eligibility condition.
-     *
-     * @param item          custom blighted item
-     * @param minimumAmount minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @param rarity        rarity tier for feedback
-     * @param condition     eligibility condition
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(
-            BlightedItem item,
-            int minimumAmount,
-            int maximumAmount,
-            double dropChance,
-            EntityLootRarity rarity,
-            LootCondition condition
-    ) {
-        if (item == null) return this;
-        return addLoot(item.getItemId(), minimumAmount, maximumAmount, dropChance, rarity, condition);
-    }
-
-    /**
-     * Adds registered item drop with fixed quantity of 1.
-     *
-     * @param itemId     registered item identifier
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(String itemId, double dropChance) {
-        return addLoot(itemId, 1, 1, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds registered item drop with fixed quantity of 1 and rarity feedback.
-     *
-     * @param itemId     registered item identifier
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @param rarity     rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(String itemId, double dropChance, EntityLootRarity rarity) {
-        return addLoot(itemId, 1, 1, dropChance, rarity, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds registered item drop with quantity range.
-     *
-     * @param itemId        registered item identifier
-     * @param minimumAmount minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(String itemId, int minimumAmount, int maximumAmount, double dropChance) {
-        return addLoot(itemId, minimumAmount, maximumAmount, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds registered item drop with quantity range and rarity feedback.
-     *
-     * @param itemId        registered item identifier
-     * @param minimumAmount minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @param rarity        rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(
-            String itemId,
-            int minimumAmount,
-            int maximumAmount,
-            double dropChance,
-            EntityLootRarity rarity
-    ) {
-        return addLoot(itemId, minimumAmount, maximumAmount, dropChance, rarity, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds registered item drop with quantity range, rarity feedback, and eligibility condition.
-     *
-     * @param itemId        registered item identifier
-     * @param minimumAmount minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @param rarity        rarity tier for feedback
-     * @param condition     eligibility condition
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(
-            String itemId,
-            int minimumAmount,
-            int maximumAmount,
-            double dropChance,
-            EntityLootRarity rarity,
-            LootCondition condition
-    ) {
-        builder.addEntry(
-                LootEntry.probabilistic(
-                        new GenericFeedbackDecorator<>(
-                                ItemResult.of(itemId), rarity, ENTITY_FEEDBACK_MAPPER
-                        ),
-                        dropChance,
-                        AmountProvider.range(minimumAmount, maximumAmount),
-                        condition
-                )
-        );
-        return this;
-    }
-
-    /**
-     * Adds vanilla material item drop with fixed quantity of 1.
-     *
-     * @param material   item material
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(Material material, double dropChance) {
-        return addLoot(material, 1, 1, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds vanilla material item drop with fixed quantity of 1 and rarity feedback.
-     *
-     * @param material   item material
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @param rarity     rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(Material material, double dropChance, EntityLootRarity rarity) {
-        return addLoot(material, 1, 1, dropChance, rarity, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds vanilla material item drop with quantity range.
-     *
-     * @param material      item material
-     * @param minimumAmount minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(
-            Material material,
-            int minimumAmount,
-            int maximumAmount,
-            double dropChance
-    ) {
-        return addLoot(material, minimumAmount, maximumAmount, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds vanilla material item drop with quantity range and rarity feedback.
-     *
-     * @param material      item material
-     * @param minimumAmount minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @param rarity        rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(
-            Material material,
-            int minimumAmount,
-            int maximumAmount,
-            double dropChance,
-            EntityLootRarity rarity
-    ) {
-        return addLoot(material, minimumAmount, maximumAmount, dropChance, rarity, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds vanilla material item drop with quantity range, rarity feedback, and eligibility condition.
-     *
-     * @param material      item material
-     * @param minimumAmount minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @param rarity        rarity tier for feedback
-     * @param condition     eligibility condition
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(
-            Material material,
-            int minimumAmount,
-            int maximumAmount,
-            double dropChance,
-            EntityLootRarity rarity,
-            LootCondition condition
-    ) {
-        builder.addEntry(
-                LootEntry.probabilistic(
-                        new GenericFeedbackDecorator<>(
-                                ItemResult.of(material), rarity, ENTITY_FEEDBACK_MAPPER
-                        ),
-                        dropChance,
-                        AmountProvider.range(minimumAmount, maximumAmount),
-                        condition
-                )
-        );
-        return this;
-    }
-
-    /**
-     * Adds modified material item drop with fixed quantity of 1.
-     *
-     * @param material   item material
-     * @param modifier   item builder modification function
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(Material material, Consumer<ItemBuilder> modifier, double dropChance) {
-        return addLoot(material, modifier, 1, 1, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds modified material item drop with fixed quantity of 1 and rarity feedback.
-     *
-     * @param material   item material
-     * @param modifier   item builder modification function
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @param rarity     rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(
-            Material material,
-            Consumer<ItemBuilder> modifier,
-            double dropChance,
-            EntityLootRarity rarity
-    ) {
-        return addLoot(material, modifier, 1, 1, dropChance, rarity, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds modified material item drop with quantity range.
-     *
-     * @param material      item material
-     * @param modifier      item builder modification function
-     * @param minimumAmount minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(
-            Material material,
-            Consumer<ItemBuilder> modifier,
-            int minimumAmount,
-            int maximumAmount,
-            double dropChance
-    ) {
-        return addLoot(material, modifier, minimumAmount, maximumAmount, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds modified material item drop with quantity range and rarity feedback.
-     *
-     * @param material      item material
-     * @param modifier      item builder modification function
-     * @param minimumAmount minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @param rarity        rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(
-            Material material,
-            Consumer<ItemBuilder> modifier,
-            int minimumAmount,
-            int maximumAmount,
-            double dropChance,
-            EntityLootRarity rarity
-    ) {
-        return addLoot(material, modifier, minimumAmount, maximumAmount, dropChance, rarity, LootCondition.alwaysTrue());
-    }
-
-    /**
-     * Adds modified material item drop with quantity range, rarity feedback, and eligibility condition.
-     *
-     * @param material      item material
-     * @param modifier      item builder modification function
-     * @param minimumAmount minimum drop quantity
-     * @param maximumAmount maximum drop quantity
-     * @param dropChance    selection probability (0.0 to 1.0)
-     * @param rarity        rarity tier for feedback
-     * @param condition     eligibility condition
-     * @return this builder
-     */
-    public EntityLootTableBuilder addLoot(
-            Material material,
-            Consumer<ItemBuilder> modifier,
-            int minimumAmount,
-            int maximumAmount,
-            double dropChance,
-            EntityLootRarity rarity,
-            LootCondition condition
-    ) {
-        builder.addEntry(
-                LootEntry.probabilistic(
-                        new GenericFeedbackDecorator<>(
-                                ItemResult.of(material, modifier), rarity, ENTITY_FEEDBACK_MAPPER
-                        ),
-                        dropChance,
-                        AmountProvider.range(minimumAmount, maximumAmount),
-                        condition
-                )
-        );
-        return this;
-    }
-
-    /**
-     * Adds enchanted book drop selected from an enchantment map pool.
-     *
-     * @param enchantmentPool map of candidate enchantments to levels
-     * @param dropChance      selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addEnchantedBook(Map<Enchantment, Integer> enchantmentPool, double dropChance) {
-        return addEnchantedBook(enchantmentPool, dropChance, EntityLootRarity.COMMON);
-    }
-
-    /**
-     * Adds enchanted book drop selected from an enchantment map pool with rarity feedback.
-     *
-     * @param enchantmentPool map of candidate enchantments to levels
-     * @param dropChance      selection probability (0.0 to 1.0)
-     * @param rarity          rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addEnchantedBook(
-            Map<Enchantment, Integer> enchantmentPool,
-            double dropChance,
-            EntityLootRarity rarity
-    ) {
-        builder.addEntry(
-                LootEntry.probabilistic(
-                        new GenericFeedbackDecorator<>(
-                                ItemResult.randomEnchantedBook(enchantmentPool), rarity, ENTITY_FEEDBACK_MAPPER
-                        ),
-                        dropChance,
-                        AmountProvider.fixed(1),
-                        LootCondition.alwaysTrue()
-                )
-        );
-        return this;
-    }
-
-    /**
-     * Adds enchanted book drop with level range selected from candidate enchantments.
-     *
-     * @param enchantments list of candidate enchantments
-     * @param minimumLevel minimum enchantment level
-     * @param maximumLevel maximum enchantment level
-     * @param dropChance   selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addEnchantedBook(
-            List<Enchantment> enchantments,
-            int minimumLevel,
-            int maximumLevel,
-            double dropChance
-    ) {
-        return addEnchantedBook(enchantments, minimumLevel, maximumLevel, dropChance, EntityLootRarity.COMMON);
-    }
-
-    /**
-     * Adds enchanted book drop with level range selected from candidate enchantments with rarity feedback.
-     *
-     * @param enchantments list of candidate enchantments
-     * @param minimumLevel minimum enchantment level
-     * @param maximumLevel maximum enchantment level
-     * @param dropChance   selection probability (0.0 to 1.0)
-     * @param rarity       rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addEnchantedBook(
-            List<Enchantment> enchantments,
-            int minimumLevel,
-            int maximumLevel,
-            double dropChance,
-            EntityLootRarity rarity
-    ) {
-        builder.addEntry(
-                LootEntry.probabilistic(
-                        new GenericFeedbackDecorator<>(
-                                ItemResult.randomEnchantedBook(enchantments, minimumLevel, maximumLevel), rarity, ENTITY_FEEDBACK_MAPPER
-                        ),
-                        dropChance,
-                        AmountProvider.fixed(1),
-                        LootCondition.alwaysTrue()
-                )
-        );
-        return this;
-    }
-
-    /**
-     * Adds item drop with durability rolled in a percentage range.
-     *
-     * @param material          item material
-     * @param minimumPercentage minimum durability percentage
-     * @param maximumPercentage maximum durability percentage
-     * @param dropChance        selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addDamagedItem(
-            Material material,
-            double minimumPercentage,
-            double maximumPercentage,
-            double dropChance
-    ) {
-        return addDamagedItem(material, minimumPercentage, maximumPercentage, dropChance, EntityLootRarity.COMMON);
-    }
-
-    /**
-     * Adds item drop with durability rolled in a percentage range with rarity feedback.
-     *
-     * @param material          item material
-     * @param minimumPercentage minimum durability percentage
-     * @param maximumPercentage maximum durability percentage
-     * @param dropChance        selection probability (0.0 to 1.0)
-     * @param rarity            rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addDamagedItem(
-            Material material,
-            double minimumPercentage,
-            double maximumPercentage,
-            double dropChance,
-            EntityLootRarity rarity
-    ) {
-        builder.addEntry(
-                LootEntry.probabilistic(
-                        new GenericFeedbackDecorator<>(
-                                ItemResult.randomDurability(
-                                        material,
-                                        minimumPercentage,
-                                        maximumPercentage
-                                ), rarity, ENTITY_FEEDBACK_MAPPER
-                        ),
-                        dropChance,
-                        AmountProvider.fixed(1),
-                        LootCondition.alwaysTrue()
-                )
-        );
-        return this;
-    }
-
-    /**
-     * Adds gem reward drop.
-     *
-     * @param gems       gem reward quantity
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @return this builder
-     */
-    public EntityLootTableBuilder addGems(int gems, double dropChance) {
-        return addGems(gems, dropChance, EntityLootRarity.COMMON);
-    }
-
-    /**
-     * Adds gem reward drop with rarity feedback.
-     *
-     * @param gems       gem reward quantity
-     * @param dropChance selection probability (0.0 to 1.0)
-     * @param rarity     rarity tier for feedback
-     * @return this builder
-     */
-    public EntityLootTableBuilder addGems(int gems, double dropChance, EntityLootRarity rarity) {
-        builder.addEntry(
-                LootEntry.probabilistic(
-                        new GenericFeedbackDecorator<>(new GemsResult(), rarity, ENTITY_FEEDBACK_MAPPER),
-                        dropChance,
-                        AmountProvider.fixed(gems),
-                        LootCondition.alwaysTrue()
-                )
-        );
-        return this;
-    }
-
-    /**
-     * Sets maximum number of loot drops allowed per roll.
+     * Sets the maximum number of loot drops allowed per roll.
      *
      * @param maxDrops maximum drop count
      * @return this builder
@@ -594,14 +55,247 @@ public final class EntityLootTableBuilder {
         return this;
     }
 
-    /**
-     * Sets maximum number of loot drops allowed per roll.
-     *
-     * @param maxDrops maximum drop count
-     * @return this builder
-     */
-    public EntityLootTableBuilder setMaxDrops(int maxDrops) {
-        this.maxDrops = maxDrops;
+    public EntityLootTableBuilder drop(@NonNull Material material, double dropChance) {
+        return drop(material, 1, 1, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull Material material, double dropChance, @NonNull EntityLootRarity rarity) {
+        return drop(material, 1, 1, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull Material material, int count, double dropChance) {
+        return drop(material, count, count, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull Material material, int count, double dropChance, @NonNull EntityLootRarity rarity) {
+        return drop(material, count, count, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull Material material, int minAmount, int maxAmount, double dropChance) {
+        return drop(material, minAmount, maxAmount, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull Material material, int minAmount, int maxAmount, double dropChance, @NonNull EntityLootRarity rarity) {
+        return drop(material, minAmount, maxAmount, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(
+            @NonNull Material material,
+            int minAmount,
+            int maxAmount,
+            double dropChance,
+            @NonNull EntityLootRarity rarity,
+            @NonNull LootCondition condition
+    ) {
+        Objects.requireNonNull(material, "material cannot be null");
+        return registerEntry(ItemResult.of(material), minAmount, maxAmount, dropChance, rarity, condition);
+    }
+
+    public EntityLootTableBuilder drop(@NonNull Material material, @NonNull Consumer<ItemBuilder> modifier, double dropChance) {
+        return drop(material, modifier, 1, 1, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull Material material, @NonNull Consumer<ItemBuilder> modifier, double dropChance, @NonNull EntityLootRarity rarity) {
+        return drop(material, modifier, 1, 1, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull Material material, @NonNull Consumer<ItemBuilder> modifier, int minAmount, int maxAmount, double dropChance) {
+        return drop(material, modifier, minAmount, maxAmount, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull Material material, @NonNull Consumer<ItemBuilder> modifier, int minAmount, int maxAmount, double dropChance, @NonNull EntityLootRarity rarity) {
+        return drop(material, modifier, minAmount, maxAmount, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(
+            @NonNull Material material,
+            @NonNull Consumer<ItemBuilder> modifier,
+            int minAmount,
+            int maxAmount,
+            double dropChance,
+            @NonNull EntityLootRarity rarity,
+            @NonNull LootCondition condition
+    ) {
+        Objects.requireNonNull(material, "material cannot be null");
+        Objects.requireNonNull(modifier, "modifier cannot be null");
+        return registerEntry(ItemResult.of(material, modifier), minAmount, maxAmount, dropChance, rarity, condition);
+    }
+
+    public EntityLootTableBuilder drop(@NonNull String itemId, double dropChance) {
+        return drop(itemId, 1, 1, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull String itemId, double dropChance, @NonNull EntityLootRarity rarity) {
+        return drop(itemId, 1, 1, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull String itemId, int count, double dropChance) {
+        return drop(itemId, count, count, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull String itemId, int count, double dropChance, @NonNull EntityLootRarity rarity) {
+        return drop(itemId, count, count, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull String itemId, int minAmount, int maxAmount, double dropChance) {
+        return drop(itemId, minAmount, maxAmount, dropChance, EntityLootRarity.COMMON, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(@NonNull String itemId, int minAmount, int maxAmount, double dropChance, @NonNull EntityLootRarity rarity) {
+        return drop(itemId, minAmount, maxAmount, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder drop(
+            @NonNull String itemId,
+            int minAmount,
+            int maxAmount,
+            double dropChance,
+            @NonNull EntityLootRarity rarity,
+            @NonNull LootCondition condition
+    ) {
+        Objects.requireNonNull(itemId, "itemId cannot be null");
+        return registerEntry(ItemResult.of(itemId), minAmount, maxAmount, dropChance, rarity, condition);
+    }
+
+    public EntityLootTableBuilder drop(@NonNull BlightedItem item, double dropChance) {
+        Objects.requireNonNull(item, "item cannot be null");
+        return drop(item.getItemId(), dropChance);
+    }
+
+    public EntityLootTableBuilder drop(@NonNull BlightedItem item, double dropChance, @NonNull EntityLootRarity rarity) {
+        Objects.requireNonNull(item, "item cannot be null");
+        return drop(item.getItemId(), dropChance, rarity);
+    }
+
+    public EntityLootTableBuilder drop(@NonNull BlightedItem item, int count, double dropChance) {
+        Objects.requireNonNull(item, "item cannot be null");
+        return drop(item.getItemId(), count, dropChance);
+    }
+
+    public EntityLootTableBuilder drop(@NonNull BlightedItem item, int count, double dropChance, @NonNull EntityLootRarity rarity) {
+        Objects.requireNonNull(item, "item cannot be null");
+        return drop(item.getItemId(), count, dropChance, rarity);
+    }
+
+    public EntityLootTableBuilder drop(@NonNull BlightedItem item, int minAmount, int maxAmount, double dropChance) {
+        Objects.requireNonNull(item, "item cannot be null");
+        return drop(item.getItemId(), minAmount, maxAmount, dropChance);
+    }
+
+    public EntityLootTableBuilder drop(@NonNull BlightedItem item, int minAmount, int maxAmount, double dropChance, @NonNull EntityLootRarity rarity) {
+        Objects.requireNonNull(item, "item cannot be null");
+        return drop(item.getItemId(), minAmount, maxAmount, dropChance, rarity);
+    }
+
+    public EntityLootTableBuilder drop(
+            @NonNull BlightedItem item,
+            int minAmount,
+            int maxAmount,
+            double dropChance,
+            @NonNull EntityLootRarity rarity,
+            @NonNull LootCondition condition
+    ) {
+        Objects.requireNonNull(item, "item cannot be null");
+        return drop(item.getItemId(), minAmount, maxAmount, dropChance, rarity, condition);
+    }
+
+    public EntityLootTableBuilder gems(int gems, double dropChance) {
+        return gems(gems, dropChance, EntityLootRarity.COMMON);
+    }
+
+    public EntityLootTableBuilder gems(int gems, double dropChance, @NonNull EntityLootRarity rarity) {
+        Objects.requireNonNull(rarity, "rarity cannot be null");
+        return registerEntry(new GemsResult(), gems, gems, dropChance, rarity, LootCondition.alwaysTrue());
+    }
+
+    public EntityLootTableBuilder damagedItem(
+            @NonNull Material material,
+            double minPercentage,
+            double maxPercentage,
+            double dropChance
+    ) {
+        return damagedItem(material, minPercentage, maxPercentage, dropChance, EntityLootRarity.COMMON);
+    }
+
+    public EntityLootTableBuilder damagedItem(
+            @NonNull Material material,
+            double minPercentage,
+            double maxPercentage,
+            double dropChance,
+            @NonNull EntityLootRarity rarity
+    ) {
+        Objects.requireNonNull(material, "material cannot be null");
+        Objects.requireNonNull(rarity, "rarity cannot be null");
+        return registerEntry(
+                ItemResult.randomDurability(material, minPercentage, maxPercentage),
+                1, 1, dropChance, rarity, LootCondition.alwaysTrue()
+        );
+    }
+
+    public EntityLootTableBuilder enchantedBook(
+            @NonNull List<Enchantment> enchantments,
+            int minLevel,
+            int maxLevel,
+            double dropChance
+    ) {
+        return enchantedBook(enchantments, minLevel, maxLevel, dropChance, EntityLootRarity.COMMON);
+    }
+
+    public EntityLootTableBuilder enchantedBook(
+            @NonNull List<Enchantment> enchantments,
+            int minLevel,
+            int maxLevel,
+            double dropChance,
+            @NonNull EntityLootRarity rarity
+    ) {
+        Objects.requireNonNull(enchantments, "enchantments cannot be null");
+        Objects.requireNonNull(rarity, "rarity cannot be null");
+        return registerEntry(
+                ItemResult.randomEnchantedBook(enchantments, minLevel, maxLevel),
+                1, 1, dropChance, rarity, LootCondition.alwaysTrue()
+        );
+    }
+
+    public EntityLootTableBuilder enchantedBook(
+            @NonNull Map<Enchantment, Integer> enchantmentPool,
+            double dropChance
+    ) {
+        return enchantedBook(enchantmentPool, dropChance, EntityLootRarity.COMMON);
+    }
+
+    public EntityLootTableBuilder enchantedBook(
+            @NonNull Map<Enchantment, Integer> enchantmentPool,
+            double dropChance,
+            @NonNull EntityLootRarity rarity
+    ) {
+        Objects.requireNonNull(enchantmentPool, "enchantmentPool cannot be null");
+        Objects.requireNonNull(rarity, "rarity cannot be null");
+        return registerEntry(
+                ItemResult.randomEnchantedBook(enchantmentPool),
+                1, 1, dropChance, rarity, LootCondition.alwaysTrue()
+        );
+    }
+
+    private EntityLootTableBuilder registerEntry(
+            LootResult result,
+            int minAmount,
+            int maxAmount,
+            double dropChance,
+            EntityLootRarity rarity,
+            LootCondition condition
+    ) {
+        AmountProvider amountProvider = (minAmount == maxAmount)
+                ? AmountProvider.fixed(minAmount)
+                : AmountProvider.range(minAmount, maxAmount);
+
+        builder.addEntry(
+                LootEntry.probabilistic(
+                        new GenericFeedbackDecorator<>(result, rarity, ENTITY_FEEDBACK_MAPPER),
+                        dropChance,
+                        amountProvider,
+                        condition
+                )
+        );
         return this;
     }
 
@@ -610,6 +304,7 @@ public final class EntityLootTableBuilder {
      *
      * @return new entity loot table
      */
+    @NonNull
     public LootTable build() {
         return builder
                 .selectionStrategy(new LootingAwareProbabilisticStrategy(maxDrops))

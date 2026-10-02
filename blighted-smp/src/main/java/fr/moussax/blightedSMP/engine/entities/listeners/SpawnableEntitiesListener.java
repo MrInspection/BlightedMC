@@ -1,6 +1,6 @@
 package fr.moussax.blightedSMP.engine.entities.listeners;
 
-import fr.moussax.blightedSMP.engine.entities.registry.SpawnableEntitiesRegistry;
+import fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedSMP.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedSMP.engine.entities.spawnable.engine.SpawnEvaluator;
 import fr.moussax.blightedSMP.engine.entities.spawnable.engine.SpawnMode;
@@ -43,7 +43,7 @@ public final class SpawnableEntitiesListener implements Listener {
         SpawnableEntity selected = SpawnEvaluator.selectCandidate(candidates, location, world, ThreadLocalRandom.current());
         if (selected != null) {
             event.setCancelled(true);
-            selected.clone().spawn(location);
+            selected.createInstance().spawn(location);
         }
     }
 
@@ -54,10 +54,10 @@ public final class SpawnableEntitiesListener implements Listener {
         if (!cacheDirty) return;
 
         Map<EntityType, List<SpawnableEntity>> newCache = new EnumMap<>(EntityType.class);
-        for (SpawnableEntity entity : SpawnableEntitiesRegistry.getAll()) {
+        for (SpawnableEntity entity : EntitiesRegistry.getSpawnables()) {
             SpawnMode mode = entity.getSpawnMode();
             if (mode == SpawnMode.REPLACEMENT || mode == SpawnMode.HYBRID) {
-                newCache.computeIfAbsent(entity.getEntityType(), k -> new ArrayList<>()).add(entity);
+                newCache.computeIfAbsent(entity.getEntityType(), entityType -> new ArrayList<>()).add(entity);
             }
         }
 

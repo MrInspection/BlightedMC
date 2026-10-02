@@ -3,7 +3,7 @@ package fr.moussax.blightedSMP.engine.player;
 import fr.moussax.bedrock.ui.title.TimeableTitle;
 import fr.moussax.bedrock.ui.title.Title;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
-import fr.moussax.blightedSMP.engine.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedSMP.engine.entities.EntityManager;
 import fr.moussax.blightedSMP.engine.items.registry.ItemRegistry;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -82,7 +82,7 @@ public final class PlayerListener implements Listener {
 
         if (killer == null) return;
 
-        BlightedEntity blighted = BlightedEntitiesListener.getBlightedEntity(killer);
+        BlightedEntity blighted = EntityManager.getBlightedEntity(killer);
         if (blighted == null) return;
 
         String victimName = event.getEntity().getName();
@@ -104,7 +104,7 @@ public final class PlayerListener implements Listener {
     }
 
     private void clearTargetedMobs(Player targetPlayer) {
-        for (BlightedEntity blighted : BlightedEntitiesListener.getActiveEntities()) {
+        for (BlightedEntity blighted : EntityManager.getActiveEntities()) {
             LivingEntity entity = blighted.getEntity();
             if (entity instanceof Mob mob && targetPlayer.equals(mob.getTarget())) {
                 mob.setTarget(null);

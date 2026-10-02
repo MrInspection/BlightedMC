@@ -1,6 +1,6 @@
 package fr.moussax.blightedSMP.server;
 
-import fr.moussax.blightedSMP.engine.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedSMP.engine.entities.EntityManager;
 import fr.moussax.bedrock.utils.debug.Log;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,7 +58,7 @@ public final class BlightedServer {
                     Chunk chunk = iterator.next();
 
                     if (chunk.isLoaded()) {
-                        BlightedEntitiesListener.rehydrateChunk(chunk);
+                        EntityManager.rehydrateChunk(chunk);
                     }
 
                     currentBatch++;

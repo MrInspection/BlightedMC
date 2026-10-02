@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,7 +10,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.generator.structure.Structure;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import static fr.moussax.blightedSMP.engine.loot.decorators.EntityLootRarity.*;
@@ -22,16 +20,24 @@ public final class BlightswornZombifiedPiglin extends BlightswornEliteArchetype 
 
     public BlightswornZombifiedPiglin() {
         super("BLIGHTSWORN_ZOMBIFIED_PIGLIN", "Blightsworn Zombified Piglin", EntityType.ZOMBIFIED_PIGLIN);
-        itemInMainHand = new ItemStack(Material.GOLDEN_SWORD);
         setDamage(8);
         setDroppedExp(16);
-        setLootTable(new EntityLootTableBuilder()
+        equipment(eq -> eq.mainHand(Material.GOLDEN_SWORD));
+
+        spawning(spawn -> spawn
+                .anyOf(
+                        SpawnRules.biome(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST),
+                        SpawnRules.insideStructure(Structure.FORTRESS)
+                )
+                .netherHostile()
+        );
+
+        loot(loot -> loot
                 .maxDrops(3)
-                .addLoot(Material.ROTTEN_FLESH, 2, 6, 1.0)
-                .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0)
-                .addLoot(Material.GOLD_INGOT, 1, 2, 0.15, RARE)
-                .addGems(5, 0.04, VERY_RARE)
-                .build()
+                .drop(Material.ROTTEN_FLESH, 2, 6, 1.0)
+                .drop(Material.GOLD_NUGGET, 2, 6, 1.0)
+                .drop(Material.GOLD_INGOT, 1, 2, 0.15, RARE)
+                .gems(5, 0.04, VERY_RARE)
         );
     }
 
@@ -92,14 +98,5 @@ public final class BlightswornZombifiedPiglin extends BlightswornEliteArchetype 
             player.damage(this.damage * 0.5, entity);
             player.setFireTicks(80); // 4 seconds of fire
         });
-    }
-
-    @Override
-    protected void defineSpawnConditions() {
-        addCondition(
-                SpawnRules.biome(Biome.NETHER_WASTES, Biome.CRIMSON_FOREST)
-                        .or(SpawnRules.insideStructure(Structure.FORTRESS))
-                        .and(SpawnRules.netherHostile())
-        );
     }
 }

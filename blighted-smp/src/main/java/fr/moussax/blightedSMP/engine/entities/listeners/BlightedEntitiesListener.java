@@ -8,7 +8,6 @@ import fr.moussax.blightedSMP.engine.entities.attachment.EntityAttachment;
 import fr.moussax.blightedSMP.engine.entities.defense.EntityImmunity;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -24,12 +23,13 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static fr.moussax.blightedSMP.engine.entities.BlightedEntity.*;
+import static fr.moussax.blightedSMP.engine.entities.BlightedEntity.FAST_PASS_TAG;
+import static fr.moussax.blightedSMP.engine.entities.attachment.EntityAttachmentManager.ATTACHMENT_OWNER_KEY;
+import static fr.moussax.blightedSMP.engine.entities.attachment.EntityAttachmentManager.ATTACHMENT_ROLE_KEY;
 
 /**
  * Event listener handling damage, potion effects, health updates, death, and chunk loading
@@ -41,54 +41,6 @@ public final class BlightedEntitiesListener implements Listener {
 
     public BlightedEntitiesListener() {
         EntityManager.initialize();
-    }
-
-    /**
-     * Delegates entity registration to {@link EntityManager#registerEntity(LivingEntity, BlightedEntity)}.
-     *
-     * @param entity   living entity to track
-     * @param blighted blighted entity wrapper instance
-     */
-    public static void registerEntity(LivingEntity entity, BlightedEntity blighted) {
-        EntityManager.registerEntity(entity, blighted);
-    }
-
-    /**
-     * Delegates entity unregistration to {@link EntityManager#unregisterEntity(LivingEntity)}.
-     *
-     * @param entity living entity to stop tracking
-     */
-    public static void unregisterEntity(LivingEntity entity) {
-        EntityManager.unregisterEntity(entity);
-    }
-
-    /**
-     * Delegates attachment registration to {@link EntityManager#registerAttachment(Entity, BlightedEntity)}.
-     *
-     * @param attachment attachment entity
-     * @param owner      owning blighted entity wrapper
-     */
-    public static void registerAttachment(Entity attachment, BlightedEntity owner) {
-        EntityManager.registerAttachment(attachment, owner);
-    }
-
-    /**
-     * Delegates attachment unregistration to {@link EntityManager#unregisterAttachment(Entity)}.
-     *
-     * @param attachment attachment entity to unregister
-     */
-    public static void unregisterAttachment(Entity attachment) {
-        EntityManager.unregisterAttachment(attachment);
-    }
-
-    /**
-     * Delegates entity lookup to {@link EntityManager#getBlightedEntity(Entity)}.
-     *
-     * @param entity target entity
-     * @return blighted entity wrapper, or {@code null} if untracked
-     */
-    public static BlightedEntity getBlightedEntity(Entity entity) {
-        return EntityManager.getBlightedEntity(entity);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -163,7 +115,7 @@ public final class BlightedEntitiesListener implements Listener {
                 ? shooter
                 : rawDamager;
 
-        BlightedEntity damager = getBlightedEntity(source);
+        BlightedEntity damager = EntityManager.getBlightedEntity(source);
         if (damager != null) {
             damager.onDamageDealt(event);
         }
@@ -207,8 +159,12 @@ public final class BlightedEntitiesListener implements Listener {
         for (var component : blighted.getComponents()) {
             component.onDamageTaken(blighted, event);
         }
-        double remainingHealth = entity.getHealth() - event.getFinalDamage();
 
+        if (event.isCancelled()) {
+            return;
+        }
+
+        double remainingHealth = entity.getHealth() - event.getFinalDamage();
         if (remainingHealth > 0) {
             Bukkit.getScheduler().runTaskLater(BlightedSMP.getInstance(),
                     () -> {
@@ -217,9 +173,7 @@ public final class BlightedEntitiesListener implements Listener {
                             blighted.evaluatePhases(entity.getHealth());
                         }
                     }, 1L);
-            return;
         }
-        blighted.killAllAttachments();
     }
 
     private void flashHurtAndCancelKnockback(BlightedEntity owner, Entity hitEntity) {
@@ -333,15 +287,7 @@ public final class BlightedEntitiesListener implements Listener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
-        Bukkit.getScheduler().runTaskLater(BlightedSMP.getInstance(), () -> rehydrateChunk(event.getChunk()), 1L);
-    }
-
-    public static Collection<BlightedEntity> getActiveEntities() {
-        return EntityManager.getActiveEntities();
-    }
-
-    public static void rehydrateChunk(Chunk chunk) {
-        EntityManager.rehydrateChunk(chunk);
+        Bukkit.getScheduler().runTaskLater(BlightedSMP.getInstance(), () -> EntityManager.rehydrateChunk(event.getChunk()), 1L);
     }
 
     private Player getPlayerDamager(Entity damager) {

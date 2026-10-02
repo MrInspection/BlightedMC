@@ -1,7 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
-import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
@@ -18,12 +16,17 @@ public final class BlightswornHusk extends BlightswornBruteArchetype {
         super("BLIGHTSWORN_HUSK", "Blightsworn Husk", EntityType.HUSK);
         setDamage(6);
         setDroppedExp(12);
-        setLootTable(new EntityLootTableBuilder()
-                .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0)
-                .addLoot(Material.SAND, 1, 3, 0.3)
-                .addLoot(Material.IRON_INGOT, 1, 2, 0.1, RARE)
-                .addGems(5, 0.04, VERY_RARE)
-                .build()
+
+        spawning(spawn -> spawn
+                .biomes(Biome.DESERT)
+                .overworldSurfaceHostile()
+        );
+
+        loot(loot -> loot
+                .drop(Material.ROTTEN_FLESH, 2, 5, 1.0)
+                .drop(Material.SAND, 1, 3, 0.3)
+                .drop(Material.IRON_INGOT, 1, 2, 0.1, RARE)
+                .gems(5, 0.04, VERY_RARE)
         );
     }
 
@@ -37,10 +40,5 @@ public final class BlightswornHusk extends BlightswornBruteArchetype {
     @Override
     protected void applySurgeHitEffects(Player player) {
         player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 80, 1));
-    }
-
-    @Override
-    protected void defineSpawnConditions() {
-        addCondition(SpawnRules.biome(Biome.DESERT).and(SpawnRules.overworldSurfaceHostile()));
     }
 }

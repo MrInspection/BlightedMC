@@ -5,6 +5,8 @@ import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.content.sound.BlightedSounds;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.engine.entities.attachment.AttachmentRole;
+import fr.moussax.blightedSMP.engine.entities.attachment.EntityAttachmentManager;
+import fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -20,6 +22,9 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.time.Duration;
+import java.util.Objects;
+
 /**
  * Base class for ancient creatures summoned through an {@link AncientRitual}.
  *
@@ -34,14 +39,19 @@ public abstract class AncientCreature extends BlightedEntity {
 
     private static final int DEFAULT_TIME_ALLOWANCE_SECONDS = 240;
     private static final double HOLOGRAM_RESCAN_RADIUS = 8.0;
-    private static final NamespacedKey HOLOGRAM_KEY =
-            new NamespacedKey(BlightedSMP.getInstance(), "ancient_creature_hologram");
+    private static NamespacedKey hologramKey;
+
+    private static NamespacedKey getHologramKey() {
+        if (hologramKey == null) {
+            hologramKey = new NamespacedKey(BlightedSMP.getInstance(), "ancient_creature_hologram");
+        }
+        return hologramKey;
+    }
 
     @Getter
-    @Setter
-    protected int timeAllowance;
+    protected int timeAllowance = DEFAULT_TIME_ALLOWANCE_SECONDS;
     @Getter
-    protected int remainingSeconds;
+    protected int remainingSeconds = DEFAULT_TIME_ALLOWANCE_SECONDS;
     @Getter
     @Setter
     protected String summonerName = "Unknown";
@@ -53,114 +63,89 @@ public abstract class AncientCreature extends BlightedEntity {
     private boolean isCollapsing = false;
 
     /**
-     * Creates an ancient creature using the default time allowance.
+     * Creates an ancient creature with identity requirements using the default time allowance.
      *
+     * @param entityId   unique entity identifier
      * @param name       creature display name
-     * @param maxHealth  creature maximum health
      * @param entityType Bukkit entity type
      */
-    public AncientCreature(@NonNull String name, int maxHealth, EntityType entityType) {
-        this(name, maxHealth, 1, 0, entityType, DEFAULT_TIME_ALLOWANCE_SECONDS);
+    public AncientCreature(@NonNull String entityId, @NonNull String name, @NonNull EntityType entityType) {
+        super(entityId, name, entityType);
+        boss();
     }
 
     /**
-     * Creates an ancient creature using the default time allowance.
+     * Sets the countdown time allowance to defeat this ancient creature.
      *
-     * @param name       creature display name
-     * @param maxHealth  creature maximum health
-     * @param damage     base attack damage
-     * @param entityType Bukkit entity type
+     * @param duration time allowance
+     * @return this creature
      */
-    public AncientCreature(@NonNull String name, int maxHealth, int damage, EntityType entityType) {
-        this(name, maxHealth, damage, 0, entityType, DEFAULT_TIME_ALLOWANCE_SECONDS);
+    public AncientCreature timeAllowance(@NonNull Duration duration) {
+        Objects.requireNonNull(duration, "duration cannot be null");
+        if (duration.toSeconds() <= 0) {
+            throw new IllegalArgumentException("timeAllowance must be at least 1 second, got: " + duration);
+        }
+        this.timeAllowance = (int) duration.toSeconds();
+        this.remainingSeconds = this.timeAllowance;
+        return this;
     }
 
     /**
-     * Creates an ancient creature using the default time allowance.
+     * Sets the countdown time allowance in seconds to defeat this ancient creature.
      *
-     * @param name       creature display name
-     * @param maxHealth  creature maximum health
-     * @param damage     base attack damage
-     * @param defense    base armor value
-     * @param entityType Bukkit entity type
+     * @param seconds time allowance in seconds
+     * @return this creature
      */
-    public AncientCreature(@NonNull String name, int maxHealth, int damage, int defense, EntityType entityType) {
-        this(name, maxHealth, damage, defense, entityType, DEFAULT_TIME_ALLOWANCE_SECONDS);
-    }
-
-    /**
-     * Creates an ancient creature using the specified time allowance.
-     *
-     * @param name                 creature display name
-     * @param maxHealth            creature maximum health
-     * @param entityType           Bukkit entity type
-     * @param timeAllowanceSeconds time allowed to defeat the creature, in seconds
-     */
-    public AncientCreature(@NonNull String name, int maxHealth, EntityType entityType, int timeAllowanceSeconds) {
-        this(name, maxHealth, 1, 0, entityType, timeAllowanceSeconds);
-    }
-
-    /**
-     * Creates an ancient creature using the specified damage and time allowance.
-     *
-     * @param name                 creature display name
-     * @param maxHealth            creature maximum health
-     * @param damage               base attack damage
-     * @param entityType           Bukkit entity type
-     * @param timeAllowanceSeconds time allowed to defeat the creature, in seconds
-     */
-    public AncientCreature(@NonNull String name, int maxHealth, int damage, EntityType entityType, int timeAllowanceSeconds) {
-        this(name, maxHealth, damage, 0, entityType, timeAllowanceSeconds);
-    }
-
-    /**
-     * Creates an ancient creature using the specified combat stats and time allowance.
-     *
-     * @param name                 creature display name
-     * @param maxHealth            creature maximum health
-     * @param damage               base attack damage
-     * @param defense              base armor value
-     * @param entityType           Bukkit entity type
-     * @param timeAllowanceSeconds time allowed to defeat the creature, in seconds
-     */
-    public AncientCreature(@NonNull String name, int maxHealth, int damage, int defense, EntityType entityType, int timeAllowanceSeconds) {
-        super(name, maxHealth, damage, defense, entityType);
-        this.timeAllowance = timeAllowanceSeconds;
-        this.remainingSeconds = timeAllowanceSeconds;
-        setBoss(true);
+    public AncientCreature timeAllowance(int seconds) {
+        if (seconds <= 0) {
+            throw new IllegalArgumentException("timeAllowance must be positive, got: " + seconds);
+        }
+        return timeAllowance(Duration.ofSeconds(seconds));
     }
 
     /**
      * Sets the player who summoned this creature.
      *
-     * <p>The player's name is stored for display in the creature's hologram.
-     * If no player is supplied, the summoner is set to {@code "Unknown"}.</p>
-     *
-     * @param player summoning player, or {@code null}
+     * @param player summoning player, or {@code null} for unknown
+     * @return this creature
      */
-    public void setSummoner(@Nullable Player player) {
+    public AncientCreature summoner(@Nullable Player player) {
         this.summonerName = (player != null) ? player.getName() : "Unknown";
+        updateHologramText();
+        return this;
     }
 
     /**
-     * Sets the name of the ability currently active on this creature.
+     * Sets the summoner name directly.
      *
-     * <p>The attached hologram is updated immediately after the ability name
-     * changes.</p>
+     * @param summonerName summoner name
+     * @return this creature
+     */
+    public AncientCreature summoner(@NonNull String summonerName) {
+        this.summonerName = Objects.requireNonNull(summonerName, "summonerName cannot be null");
+        updateHologramText();
+        return this;
+    }
+
+    /**
+     * Sets the name of the ability currently active on this creature and updates the hologram.
      *
      * @param abilityName active ability name, or {@code null} when no ability is active
+     * @return this creature
      */
-    public void setActiveAbilityName(@Nullable String abilityName) {
+    public AncientCreature activeAbility(@Nullable String abilityName) {
         this.activeAbilityName = abilityName;
         updateHologramText();
+        return this;
     }
 
     /**
      * Clears the currently active ability and updates the hologram.
+     *
+     * @return this creature
      */
-    public void clearActiveAbility() {
-        this.activeAbilityName = null;
-        updateHologramText();
+    public AncientCreature clearActiveAbility() {
+        return activeAbility(null);
     }
 
     /**
@@ -192,10 +177,10 @@ public abstract class AncientCreature extends BlightedEntity {
             if (!(nearby instanceof TextDisplay display)) continue;
 
             PersistentDataContainer persistentDataContainer = display.getPersistentDataContainer();
-            String attachedOwner = persistentDataContainer.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
+            String attachedOwner = persistentDataContainer.get(EntityAttachmentManager.ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
             if (!ownerUuid.equals(attachedOwner)) continue;
 
-            if (persistentDataContainer.has(HOLOGRAM_KEY, PersistentDataType.BYTE)) {
+            if (persistentDataContainer.has(getHologramKey(), PersistentDataType.BYTE)) {
                 this.hologram = display;
                 break;
             }
@@ -231,7 +216,7 @@ public abstract class AncientCreature extends BlightedEntity {
         );
         display.setTransformation(transformation);
 
-        display.getPersistentDataContainer().set(HOLOGRAM_KEY, PersistentDataType.BYTE, (byte) 1);
+        display.getPersistentDataContainer().set(getHologramKey(), PersistentDataType.BYTE, (byte) 1);
 
         this.hologram = display;
         this.hologram.setText(buildHologramContent());
@@ -293,5 +278,15 @@ public abstract class AncientCreature extends BlightedEntity {
     public void onDeath(Location location) {
         super.onDeath(location);
         BlightedSounds.ANCIENT_MOB_DEFEAT.play(location);
+    }
+
+    @NonNull
+    @Override
+    public AncientCreature createInstance() {
+        BlightedEntity fresh = EntitiesRegistry.create(getEntityId());
+        if (fresh instanceof AncientCreature ancient) {
+            return ancient;
+        }
+        return (AncientCreature) super.createInstance();
     }
 }

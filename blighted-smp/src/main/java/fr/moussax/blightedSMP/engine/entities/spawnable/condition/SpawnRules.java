@@ -1,17 +1,15 @@
 package fr.moussax.blightedSMP.engine.entities.spawnable.condition;
 
-import org.bukkit.Material;
-import org.bukkit.Raid;
 import org.bukkit.World;
+import org.bukkit.World.Environment;
 import org.bukkit.block.Biome;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.type.TrialSpawner;
-import org.bukkit.block.data.type.TrialSpawner.State;
 import org.bukkit.generator.structure.GeneratedStructure;
 import org.bukkit.generator.structure.Structure;
 import org.bukkit.generator.structure.StructurePiece;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -32,7 +30,7 @@ public final class SpawnRules {
      * @param allowed biomes permitted for spawning
      * @return biome spawn condition predicate
      */
-    public static SpawnCondition biome(Biome... allowed) {
+    public static SpawnCondition biome(@NonNull Biome... allowed) {
         Set<Biome> biomeSet = Set.of(allowed);
         return (location, _) -> biomeSet.contains(location.getBlock().getBiome());
     }
@@ -43,28 +41,36 @@ public final class SpawnRules {
      * @param environment target world environment
      * @return environment spawn condition predicate
      */
-    public static SpawnCondition environment(World.Environment environment) {
+    public static SpawnCondition environment(@NonNull Environment environment) {
+        Objects.requireNonNull(environment, "environment cannot be null");
         return (_, world) -> world.getEnvironment() == environment;
     }
 
     /**
-     * Creates a condition permitting spawning at or above a minimum Y coordinate.
+     * Creates a condition permitting spawning only in the Overworld environment.
      *
-     * @param minY minimum Y coordinate
-     * @return minimum height spawn condition predicate
+     * @return Overworld environment spawn condition predicate
      */
-    public static SpawnCondition atLeastY(int minY) {
-        return (location, world) -> location.getBlockY() >= minY;
+    public static SpawnCondition overworld() {
+        return environment(World.Environment.NORMAL);
     }
 
     /**
-     * Creates a condition permitting spawning at or below a maximum Y coordinate.
+     * Creates a condition permitting spawning only in the Nether environment.
      *
-     * @param maxY maximum Y coordinate
-     * @return maximum height spawn condition predicate
+     * @return Nether environment spawn condition predicate
      */
-    public static SpawnCondition atMostY(int maxY) {
-        return (location, _) -> location.getBlockY() <= maxY;
+    public static SpawnCondition nether() {
+        return environment(World.Environment.NETHER);
+    }
+
+    /**
+     * Creates a condition permitting spawning only in The End environment.
+     *
+     * @return The End environment spawn condition predicate
+     */
+    public static SpawnCondition theEnd() {
+        return environment(World.Environment.THE_END);
     }
 
     /**
@@ -97,51 +103,21 @@ public final class SpawnRules {
     }
 
     /**
+     * Creates a condition permitting spawning inside liquid blocks (water or lava).
+     *
+     * @return liquid spawn condition predicate
+     */
+    public static SpawnCondition inLiquid() {
+        return (location, _) -> location.getBlock().isLiquid();
+    }
+
+    /**
      * Creates a condition permitting spawning only outside liquid blocks (water or lava).
      *
      * @return non-liquid spawn condition predicate
      */
     public static SpawnCondition notInLiquid() {
-        return (location, world) -> !location.getBlock().isLiquid();
-    }
-
-    /**
-     * Creates a condition permitting spawning during nighttime hours (ticks 13000 to 23000).
-     *
-     * @return nighttime spawn condition predicate
-     */
-    public static SpawnCondition nightTime() {
-        return (_, world) -> {
-            long time = world.getTime();
-            return time >= 13000 && time <= 23000;
-        };
-    }
-
-    /**
-     * Creates a condition permitting spawning only during clear weather.
-     *
-     * @return clear sky spawn condition predicate
-     */
-    public static SpawnCondition clearSky() {
-        return (location, world) -> !world.hasStorm();
-    }
-
-    /**
-     * Creates a condition permitting spawning during rain or stormy weather.
-     *
-     * @return rain spawn condition predicate
-     */
-    public static SpawnCondition isRaining() {
-        return (location, world) -> world.hasStorm();
-    }
-
-    /**
-     * Creates a condition permitting spawning during thunder storms.
-     *
-     * @return thunder spawn condition predicate
-     */
-    public static SpawnCondition isThundering() {
-        return (location, world) -> world.isThundering();
+        return inLiquid().negate();
     }
 
     /**
@@ -150,7 +126,8 @@ public final class SpawnRules {
      * @param structure world structure type
      * @return structure spawn condition predicate
      */
-    public static SpawnCondition insideStructure(Structure structure) {
+    public static SpawnCondition insideStructure(@NonNull Structure structure) {
+        Objects.requireNonNull(structure, "structure cannot be null");
         return (location, world) -> {
             int chunkX = location.getBlockX() >> 4;
             int chunkZ = location.getBlockZ() >> 4;
@@ -161,97 +138,6 @@ public final class SpawnRules {
                 for (StructurePiece piece : generatedStructure.getPieces()) {
                     if (piece.getBoundingBox().contains(location.getX(), location.getY(), location.getZ())) {
                         return true;
-                    }
-                }
-            }
-            return false;
-        };
-    }
-
-    /**
-     * Creates a condition permitting spawning inside Trial Chambers structures.
-     *
-     * @return trial chamber structure spawn condition predicate
-     */
-    public static SpawnCondition insideTrialChamber() {
-        return insideStructure(Structure.TRIAL_CHAMBERS);
-    }
-
-    /**
-     * Creates a condition permitting spawning near an active raid within a specified block radius.
-     *
-     * @param radius search radius in blocks
-     * @return active raid spawn condition predicate
-     */
-    public static SpawnCondition nearActiveRaid(int radius) {
-        return (location, world) -> {
-            Raid nearest = world.locateNearestRaid(location, radius);
-            return nearest != null && nearest.isStarted();
-        };
-    }
-
-    /**
-     * Creates a condition permitting spawning only when no active raid is within the specified radius.
-     *
-     * @param radius search radius in blocks
-     * @return no nearby raid spawn condition predicate
-     */
-    public static SpawnCondition noNearbyRaid(int radius) {
-        return nearActiveRaid(radius).negate();
-    }
-
-    /**
-     * Creates a condition permitting spawning near an active Trial Spawner within a specified block radius.
-     *
-     * @param radius search radius in blocks
-     * @return active trial spawner spawn condition predicate
-     */
-    public static SpawnCondition nearActiveTrialSpawner(int radius) {
-        return (location, world) -> {
-            int originX = location.getBlockX();
-            int originY = location.getBlockY();
-            int originZ = location.getBlockZ();
-
-            for (int dx = -radius; dx <= radius; dx++) {
-                for (int dy = -radius; dy <= radius; dy++) {
-                    for (int dz = -radius; dz <= radius; dz++) {
-                        Block block = world.getBlockAt(originX + dx, originY + dy, originZ + dz);
-                        if (block.getType() != Material.TRIAL_SPAWNER) continue;
-
-                        if (block.getBlockData() instanceof TrialSpawner trialData
-                                && trialData.getTrialSpawnerState() == State.ACTIVE) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        };
-    }
-
-    /**
-     * Creates a condition permitting spawning near an active Ominous Trial Spawner within a specified block radius.
-     *
-     * @param radius search radius in blocks
-     * @return active ominous trial spawner spawn condition predicate
-     */
-    public static SpawnCondition nearOminousTrialSpawner(int radius) {
-        return (location, world) -> {
-            int originX = location.getBlockX();
-            int originY = location.getBlockY();
-            int originZ = location.getBlockZ();
-
-            for (int dx = -radius; dx <= radius; dx++) {
-                for (int dy = -radius; dy <= radius; dy++) {
-                    for (int dz = -radius; dz <= radius; dz++) {
-                        Block block = world.getBlockAt(originX + dx, originY + dy, originZ + dz);
-                        if (block.getType() != Material.TRIAL_SPAWNER) continue;
-
-                        if (block.getBlockData() instanceof TrialSpawner trialData
-                                && trialData.isOminous()
-                                && trialData.getTrialSpawnerState() == State.ACTIVE) {
-                            return true;
-                        }
                     }
                 }
             }

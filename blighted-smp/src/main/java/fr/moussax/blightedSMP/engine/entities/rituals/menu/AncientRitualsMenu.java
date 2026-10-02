@@ -8,8 +8,6 @@ import fr.moussax.blightedSMP.engine.entities.rituals.AncientRitual;
 import fr.moussax.blightedSMP.engine.entities.rituals.registry.RitualRegistry;
 import fr.moussax.blightedSMP.engine.items.recipes.CraftingObject;
 import fr.moussax.blightedSMP.utils.Utilities;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;

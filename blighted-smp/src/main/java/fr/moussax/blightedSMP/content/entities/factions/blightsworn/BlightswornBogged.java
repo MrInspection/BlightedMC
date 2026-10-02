@@ -1,7 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
-import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -10,7 +8,6 @@ import org.bukkit.block.Biome;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -24,20 +21,26 @@ public final class BlightswornBogged extends BlightswornArcherArchetype {
         super("BLIGHTSWORN_BOGGED", "Blightsworn Bogged", EntityType.BOGGED);
         setDamage(6);
         setDroppedExp(12);
-        itemInMainHand = new ItemStack(Material.BOW);
-        setLootTable(new EntityLootTableBuilder()
-                .addLoot(Material.BONE, 2, 4, 1.0)
-                .addLoot(Material.ARROW, 2, 5, 1.0)
-                .addLoot(Material.TIPPED_ARROW,
+        equipment(eq -> eq.mainHand(Material.BOW));
+
+        spawning(spawn -> spawn
+                .biomes(Biome.SWAMP, Biome.MANGROVE_SWAMP)
+                .overworldHostile()
+        );
+
+        loot(loot -> loot
+                .drop(Material.BONE, 2, 4, 1.0)
+                .drop(Material.ARROW, 2, 5, 1.0)
+                .drop(Material.TIPPED_ARROW,
                         builder -> builder.setItemMeta(
                                 meta -> ((PotionMeta) meta).setBasePotionType(PotionType.POISON)),
                         1,
                         3,
                         0.4
                 )
-                .addDamagedItem(Material.BOW, 0.10, 0.75, 0.15, RARE)
-                .addGems(5, 0.04, VERY_RARE)
-                .build());
+                .damagedItem(Material.BOW, 0.10, 0.75, 0.15, RARE)
+                .gems(5, 0.04, VERY_RARE)
+        );
     }
 
     @Override
@@ -53,10 +56,5 @@ public final class BlightswornBogged extends BlightswornArcherArchetype {
         entity.getWorld().playSound(location, Sound.ENTITY_BOGGED_DEATH, 1.0f, 0.5f);
         entity.getWorld().spawnParticle(Particle.SNEEZE, location, 50, 0.5, 1.0, 0.5, 0.05);
         entity.getWorld().spawnParticle(Particle.DUST, location, 30, 0.5, 1.0, 0.5, 0.0, BLIGHT_DUST);
-    }
-
-    @Override
-    protected void defineSpawnConditions() {
-        addCondition(SpawnRules.biome(Biome.SWAMP, Biome.MANGROVE_SWAMP).and(SpawnRules.overworldHostile()));
     }
 }

@@ -156,31 +156,19 @@ public sealed abstract class BlightswornBruteArchetype extends BlightswornCreatu
 
     @Override
     protected void equipEnragedArmor(EntityEquipment equipment) {
-        if (equipment == null) return;
-
-        equipment.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
-                .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.FLOW)
-                .setLeatherColor(PHASE_TWO_COLOR)
-                .unbreakable()
-                .toItemStack()
+        setArmor(
+                new ItemBuilder(Material.LEATHER_HELMET)
+                        .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.FLOW)
+                        .setLeatherColor(PHASE_TWO_COLOR)
+                        .unbreakable()
+                        .toItemStack(),
+                new ItemBuilder(Material.LEATHER_CHESTPLATE)
+                        .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.SNOUT)
+                        .setLeatherColor(PHASE_TWO_COLOR)
+                        .unbreakable()
+                        .toItemStack(),
+                new ItemBuilder(Material.IRON_LEGGINGS).unbreakable().toItemStack(),
+                new ItemBuilder(Material.IRON_BOOTS).unbreakable().toItemStack()
         );
-        equipment.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.SNOUT)
-                .setLeatherColor(PHASE_TWO_COLOR)
-                .unbreakable()
-                .toItemStack()
-        );
-        equipment.setLeggings(new ItemBuilder(Material.IRON_LEGGINGS).unbreakable().toItemStack());
-        equipment.setBoots(new ItemBuilder(Material.IRON_BOOTS).unbreakable().toItemStack());
-    }
-
-    @Override
-    public BlightswornBruteArchetype clone() {
-        BlightswornBruteArchetype clone = (BlightswornBruteArchetype) super.clone();
-        clone.blightStacks = 0;
-        clone.isSurging = false;
-        clone.isRecovering = false;
-        clone.isPhaseTwo = false;
-        return clone;
     }
 }

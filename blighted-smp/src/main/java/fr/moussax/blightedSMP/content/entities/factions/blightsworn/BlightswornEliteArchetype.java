@@ -66,42 +66,33 @@ public sealed abstract class BlightswornEliteArchetype extends BlightswornCreatu
                 BLIGHT_DUST
         );
 
-        double wardSpeed = Objects.requireNonNull(
-                entity.getAttribute(Attribute.MOVEMENT_SPEED)).getBaseValue() * WARD_SPEED_MULTIPLIER;
-        Objects.requireNonNull(entity.getAttribute(Attribute.MOVEMENT_SPEED)).setBaseValue(wardSpeed);
+        double baseSpeed = getAttributeValue(Attribute.MOVEMENT_SPEED);
+        setAttribute(Attribute.MOVEMENT_SPEED, baseSpeed * WARD_SPEED_MULTIPLIER);
 
         addCoreDelayedAction(WARD_DURATION_TICKS, () -> {
             if (!isAlive()) return;
             isWarded = false;
-            Objects.requireNonNull(entity.getAttribute(Attribute.MOVEMENT_SPEED))
-                    .setBaseValue(wardSpeed / WARD_SPEED_MULTIPLIER);
+            setAttribute(Attribute.MOVEMENT_SPEED, baseSpeed);
         });
     }
 
     @Override
     protected void equipEnragedArmor(EntityEquipment equipment) {
-        if (equipment == null) return;
-
-        equipment.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
-                .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.FLOW)
-                .setLeatherColor(PHASE_TWO_COLOR)
-                .unbreakable()
-                .toItemStack()
+        setArmor(
+                new ItemBuilder(Material.LEATHER_HELMET)
+                        .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.FLOW)
+                        .setLeatherColor(PHASE_TWO_COLOR)
+                        .unbreakable()
+                        .toItemStack(),
+                new ItemBuilder(Material.LEATHER_CHESTPLATE)
+                        .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.FLOW)
+                        .setLeatherColor(PHASE_TWO_COLOR)
+                        .unbreakable()
+                        .toItemStack(),
+                new ItemBuilder(Material.IRON_LEGGINGS).unbreakable().toItemStack(),
+                new ItemBuilder(Material.IRON_BOOTS).unbreakable().toItemStack()
         );
-        equipment.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.FLOW)
-                .setLeatherColor(PHASE_TWO_COLOR)
-                .unbreakable()
-                .toItemStack()
-        );
-        equipment.setLeggings(new ItemBuilder(Material.IRON_LEGGINGS).unbreakable().toItemStack());
-        equipment.setBoots(new ItemBuilder(Material.IRON_BOOTS).unbreakable().toItemStack());
     }
 
-    @Override
-    public BlightswornEliteArchetype clone() {
-        BlightswornEliteArchetype clone = (BlightswornEliteArchetype) super.clone();
-        clone.isWarded = false;
-        return clone;
-    }
+
 }

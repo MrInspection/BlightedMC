@@ -165,29 +165,21 @@ public sealed abstract class BlightswornArcherArchetype extends BlightswornCreat
 
     @Override
     protected void equipEnragedArmor(EntityEquipment equipment) {
-        if (equipment == null) return;
-
-        equipment.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
-                .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.SENTRY)
-                .setLeatherColor(PHASE_TWO_COLOR)
-                .unbreakable()
-                .toItemStack()
+        setArmor(
+                new ItemBuilder(Material.LEATHER_HELMET)
+                        .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.SENTRY)
+                        .setLeatherColor(PHASE_TWO_COLOR)
+                        .unbreakable()
+                        .toItemStack(),
+                new ItemBuilder(Material.LEATHER_CHESTPLATE)
+                        .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.SENTRY)
+                        .setLeatherColor(PHASE_TWO_COLOR)
+                        .unbreakable()
+                        .toItemStack(),
+                new ItemBuilder(Material.IRON_LEGGINGS).unbreakable().toItemStack(),
+                new ItemBuilder(Material.IRON_BOOTS).unbreakable().toItemStack()
         );
-        equipment.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                .setArmorTrim(TrimMaterial.AMETHYST, TrimPattern.SENTRY)
-                .setLeatherColor(PHASE_TWO_COLOR)
-                .unbreakable()
-                .toItemStack()
-        );
-        equipment.setLeggings(new ItemBuilder(Material.IRON_LEGGINGS).unbreakable().toItemStack());
-        equipment.setBoots(new ItemBuilder(Material.IRON_BOOTS).unbreakable().toItemStack());
     }
 
-    @Override
-    public BlightswornArcherArchetype clone() {
-        BlightswornArcherArchetype clone = (BlightswornArcherArchetype) super.clone();
-        clone.isAiming = false;
-        clone.nextScatterTick = 0;
-        return clone;
-    }
+
 }

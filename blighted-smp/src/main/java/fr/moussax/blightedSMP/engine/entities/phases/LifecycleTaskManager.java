@@ -1,16 +1,15 @@
-package fr.moussax.blightedSMP.engine.entities;
+package fr.moussax.blightedSMP.engine.entities.phases;
 
 import fr.moussax.blightedSMP.BlightedSMP;
 import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.Objects;
 
 /**
- * Manages scheduler tasks bound to the lifecycle of a {@link BlightedEntity}.
+ * Manages scheduler tasks bound to the lifecycle of a {@link fr.moussax.blightedSMP.engine.entities.BlightedEntity}.
  * <p>
  * Allows entities to register delayed or repeating tasks that are automatically
  * scheduled on initialization and canceled on destruction.
@@ -28,7 +27,7 @@ public final class LifecycleTaskManager {
      */
     public void addRepeatingTask(Runnable action, long delayTicks, long periodTicks) {
         ensureList();
-        tasks.add(new ScheduledTask(action, null, delayTicks, periodTicks, true));
+        tasks.add(new ScheduledTask(Objects.requireNonNull(action, "action cannot be null"), delayTicks, periodTicks, true));
     }
 
     /**
@@ -39,30 +38,7 @@ public final class LifecycleTaskManager {
      */
     public void addDelayedTask(Runnable action, long delayTicks) {
         ensureList();
-        tasks.add(new ScheduledTask(action, null, delayTicks, 0L, false));
-    }
-
-    /**
-     * Adds a repeating task using a {@link BukkitRunnable} supplier (for backwards compatibility).
-     *
-     * @param factory     supplier creating a new {@link BukkitRunnable} instance
-     * @param delayTicks  initial delay before the first execution, in ticks
-     * @param periodTicks interval between consecutive runs, in ticks
-     */
-    public void addRepeatingTask(Supplier<BukkitRunnable> factory, long delayTicks, long periodTicks) {
-        ensureList();
-        tasks.add(new ScheduledTask(null, factory, delayTicks, periodTicks, true));
-    }
-
-    /**
-     * Adds a delayed task using a {@link BukkitRunnable} supplier (for backwards compatibility).
-     *
-     * @param factory    supplier creating a new {@link BukkitRunnable} instance
-     * @param delayTicks delay before execution, in ticks
-     */
-    public void addDelayedTask(Supplier<BukkitRunnable> factory, long delayTicks) {
-        ensureList();
-        tasks.add(new ScheduledTask(null, factory, delayTicks, 0L, false));
+        tasks.add(new ScheduledTask(Objects.requireNonNull(action, "action cannot be null"), delayTicks, 0L, false));
     }
 
     /**
@@ -106,21 +82,13 @@ public final class LifecycleTaskManager {
 
     private static final class ScheduledTask {
         private final Runnable action;
-        private final Supplier<BukkitRunnable> factory;
         private final long delayTicks;
         private final long periodTicks;
         private final boolean repeating;
         private BukkitTask currentTask;
-        private BukkitRunnable currentRunnable;
 
-        private ScheduledTask(
-                Runnable action,
-                Supplier<BukkitRunnable> factory,
-                long delayTicks,
-                long periodTicks,
-                boolean repeating) {
+        private ScheduledTask(Runnable action, long delayTicks, long periodTicks, boolean repeating) {
             this.action = action;
-            this.factory = factory;
             this.delayTicks = delayTicks;
             this.periodTicks = periodTicks;
             this.repeating = repeating;
@@ -132,29 +100,13 @@ public final class LifecycleTaskManager {
             var plugin = BlightedSMP.getInstance();
 
             if (repeating) {
-                if (action != null) {
-                    currentTask = Bukkit.getScheduler().runTaskTimer(plugin, action, delayTicks, periodTicks);
-                } else if (factory != null) {
-                    currentRunnable = factory.get();
-                    if (currentRunnable != null) {
-                        currentTask = currentRunnable.runTaskTimer(plugin, delayTicks, periodTicks);
-                    }
-                }
+                currentTask = Bukkit.getScheduler().runTaskTimer(plugin, action, delayTicks, periodTicks);
                 return;
             }
 
-            Runnable taskAction = action != null ? action : () -> {
-                if (factory != null) {
-                    currentRunnable = factory.get();
-                    if (currentRunnable != null) {
-                        currentRunnable.run();
-                    }
-                }
-            };
-
             currentTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 try {
-                    taskAction.run();
+                    action.run();
                 } finally {
                     manager.onTaskComplete(ScheduledTask.this);
                 }
@@ -169,15 +121,7 @@ public final class LifecycleTaskManager {
                 }
                 currentTask = null;
             }
-            if (currentRunnable != null) {
-                try {
-                    if (!currentRunnable.isCancelled()) {
-                        currentRunnable.cancel();
-                    }
-                } catch (Exception _) {
-                }
-                currentRunnable = null;
-            }
         }
     }
 }
+

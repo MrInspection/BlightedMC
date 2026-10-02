@@ -4,7 +4,7 @@ import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.engine.entities.components.AffixRegistry;
 import fr.moussax.blightedSMP.engine.entities.components.EntityComponent;
-import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnCondition;
+import fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedSMP.engine.entities.spawnable.engine.SpawnMode;
 import lombok.Getter;
 import org.bukkit.Location;
@@ -14,31 +14,39 @@ import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.persistence.PersistentDataType;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Abstract base class for custom entities capable of spawning naturally in the world.
  *
  * <p>Extends {@link BlightedEntity} with spawn probabilities, spawn evaluation rules
- * ({@link SpawnProfile}), spawn modes ({@link SpawnMode}), and optional elite affix rolling.</p>
+ * ({@link SpawnProfile}), spawn modes ({@link SpawnMode}), and elite affix mechanics.</p>
  */
 public abstract class SpawnableEntity extends BlightedEntity {
 
-    /**
-     * Persistent data key storing comma-separated active affix IDs assigned to this entity.
-     */
-    public static final NamespacedKey AFFIXES_KEY =
-            new NamespacedKey(BlightedSMP.getInstance(), "blighted_active_affix");
+    private static NamespacedKey affixesKey;
+
+    public static NamespacedKey getAffixesKey() {
+        if (affixesKey == null) {
+            affixesKey = new NamespacedKey(BlightedSMP.getInstance(), "blighted_active_affix");
+        }
+        return affixesKey;
+    }
+
+    public static final double DEFAULT_SPAWN_PROBABILITY = SpawningBuilder.DEFAULT_PROBABILITY;
+    public static final SpawnMode DEFAULT_SPAWN_MODE = SpawningBuilder.DEFAULT_MODE;
 
     @Getter
-    private final double spawnProbability;
+    private double spawnProbability = DEFAULT_SPAWN_PROBABILITY;
 
     @Getter
-    private final SpawnMode spawnMode;
-
-    private SpawnProfile spawnProfile;
+    private SpawnMode spawnMode = DEFAULT_SPAWN_MODE;
 
     @Getter
     private double affixChance = 0.0;
@@ -46,118 +54,78 @@ public abstract class SpawnableEntity extends BlightedEntity {
     @Getter
     private int maxAffixes = 1;
 
+    private boolean eliteAuraStarted = false;
+
+    @Getter
+    private SpawnProfile spawnProfile = new SpawnProfile();
+
     /**
-     * Sets the chance for this entity to spawn with random elite affixes.
+     * Constructs a spawnable entity with identity requirements.
+     * The default spawn probability is 0.01 in REPLACEMENT mode.
      *
-     * @param affixChance probability in the range {@code [0.0, 1.0]}
-     * @throws IllegalArgumentException if {@code affixChance} is outside {@code [0.0, 1.0]}
+     * @param entityId   unique entity identifier
+     * @param name       display name
+     * @param entityType underlying a Minecraft entity type
      */
-    public void setAffixChance(double affixChance) {
+    protected SpawnableEntity(@NonNull String entityId, @NonNull String name, @NonNull EntityType entityType) {
+        super(entityId, name, entityType);
+    }
+
+    /**
+     * Configures spawning rules, probability, mode, and affixes using a fluent builder consumer.
+     *
+     * @param consumer action configuring the spawning builder
+     */
+    public void spawning(@NonNull Consumer<SpawningBuilder> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
+        SpawningBuilder builder = new SpawningBuilder();
+        builder.probability(this.spawnProbability);
+        builder.mode(this.spawnMode);
+        builder.affixes(this.affixChance, this.maxAffixes);
+        consumer.accept(builder);
+        this.spawnProbability = builder.getProbability();
+        this.spawnMode = builder.getMode();
+        this.affixChance = builder.getAffixChance();
+        this.maxAffixes = builder.getMaxAffixes();
+        this.spawnProfile = builder.buildProfile();
+    }
+
+    /**
+     * Sets elite affix rolling chance.
+     *
+     * @param affixChance probability in [0.0, 1.0]
+     * @return this entity
+     */
+    public SpawnableEntity affixChance(double affixChance) {
         if (affixChance < 0.0 || affixChance > 1.0) {
             throw new IllegalArgumentException("affixChance must be in [0.0, 1.0], got: " + affixChance);
         }
         this.affixChance = affixChance;
+        return this;
     }
 
     /**
-     * Sets the maximum number of elite affixes this entity can roll when spawned.
+     * Sets maximum number of rollable elite affixes.
      *
-     * @param maxAffixes maximum affix count
+     * @param maxAffixes maximum affixes
+     * @return this entity
      */
-    public void setMaxAffixes(int maxAffixes) {
+    public SpawnableEntity maxAffixes(int maxAffixes) {
         this.maxAffixes = Math.max(1, maxAffixes);
+        return this;
     }
 
     /**
-     * Constructs a spawnable entity with default damage and defense attributes in replacement mode.
+     * Evaluates whether this entity can spawn at the specified location and world.
      *
-     * @param entityId    unique entity identifier
-     * @param name        display name
-     * @param maxHealth   maximum health
-     * @param entityType  underlying a Minecraft entity type
-     * @param probability spawn probability in range {@code [0.0, 1.0]}
+     * @param location location to evaluate
+     * @param world    world to evaluate
+     * @return {@code true} if all spawn profile conditions are satisfied, {@code false} otherwise
      */
-    protected SpawnableEntity(String entityId, String name, int maxHealth, EntityType entityType, double probability) {
-        this(entityId, name, maxHealth, 1, 0, entityType, probability, SpawnMode.REPLACEMENT);
+    public boolean canSpawnAt(@Nullable Location location, @Nullable World world) {
+        return spawnProfile.canSpawn(location, world);
     }
 
-    /**
-     * Constructs a spawnable entity with default damage and defense attributes in the specified spawn mode.
-     *
-     * @param entityId    unique entity identifier
-     * @param name        display name
-     * @param maxHealth   maximum health
-     * @param entityType  underlying a Minecraft entity type
-     * @param probability spawn probability in range {@code [0.0, 1.0]}
-     * @param mode        spawn mode
-     */
-    protected SpawnableEntity(
-            String entityId, String name, int maxHealth, EntityType entityType, double probability, SpawnMode mode) {
-        this(entityId, name, maxHealth, 1, 0, entityType, probability, mode);
-    }
-
-    /**
-     * Constructs a spawnable entity with custom attack damage and zero defense in the specified spawn mode.
-     *
-     * @param entityId    unique entity identifier
-     * @param name        display name
-     * @param maxHealth   maximum health
-     * @param damage      base attack damage
-     * @param entityType  underlying a Minecraft entity type
-     * @param probability spawn probability in range {@code [0.0, 1.0]}
-     * @param mode        spawn mode
-     */
-    protected SpawnableEntity(
-            String entityId,
-            String name,
-            int maxHealth,
-            int damage,
-            EntityType entityType,
-            double probability,
-            SpawnMode mode) {
-        this(entityId, name, maxHealth, damage, 0, entityType, probability, mode);
-    }
-
-    /**
-     * Constructs a spawnable entity with full attribute specifications and spawn profile initialization.
-     *
-     * @param entityId    unique entity identifier
-     * @param name        display name
-     * @param maxHealth   maximum health
-     * @param damage      base attack damage
-     * @param defense     base armor defense
-     * @param entityType  underlying a Minecraft entity type
-     * @param probability spawn probability in range {@code [0.0, 1.0]}
-     * @param mode        spawn mode
-     * @throws IllegalArgumentException if {@code probability} is outside {@code [0.0, 1.0]}
-     */
-    protected SpawnableEntity(
-            String entityId,
-            String name,
-            int maxHealth,
-            int damage,
-            int defense,
-            EntityType entityType,
-            double probability,
-            SpawnMode mode) {
-        super(name, maxHealth, damage, defense, entityType);
-        if (probability < 0.0 || probability > 1.0) {
-            throw new IllegalArgumentException("spawnProbability must be in [0.0, 1.0], got: " + probability);
-        }
-
-        this.entityId = entityId;
-        this.spawnProbability = probability;
-        this.spawnMode = mode;
-        this.spawnProfile = new SpawnProfile();
-        defineSpawnConditions();
-    }
-
-    /**
-     * Spawns this entity at the specified location and rolls for elite affix assignment.
-     *
-     * @param location target spawn location
-     * @return spawned living entity
-     */
     @Override
     public LivingEntity spawn(Location location) {
         LivingEntity spawned = super.spawn(location);
@@ -172,23 +140,18 @@ public abstract class SpawnableEntity extends BlightedEntity {
                 }
 
                 spawned.getPersistentDataContainer()
-                        .set(AFFIXES_KEY, PersistentDataType.STRING, String.join(",", affixIds));
+                        .set(getAffixesKey(), PersistentDataType.STRING, String.join(",", affixIds));
             }
         }
 
         return spawned;
     }
 
-    /**
-     * Rehydrates an existing entity state, restoring persistent affixes if present.
-     *
-     * @param existing existing living entity instance in the world
-     */
     @Override
     protected void onRehydrate(LivingEntity existing) {
         super.onRehydrate(existing);
 
-        String persistentAffixes = existing.getPersistentDataContainer().get(AFFIXES_KEY, PersistentDataType.STRING);
+        String persistentAffixes = existing.getPersistentDataContainer().get(getAffixesKey(), PersistentDataType.STRING);
         if (persistentAffixes != null && !persistentAffixes.isEmpty()) {
             String[] affixIds = persistentAffixes.split(",");
             for (String affixId : affixIds) {
@@ -201,8 +164,6 @@ public abstract class SpawnableEntity extends BlightedEntity {
             }
         }
     }
-
-    private boolean eliteAuraStarted = false;
 
     private void applyAffix(EntityComponent affix) {
         addComponent(affix);
@@ -233,40 +194,13 @@ public abstract class SpawnableEntity extends BlightedEntity {
         });
     }
 
-    /**
-     * Hook method implemented by subclasses to register environment spawn conditions.
-     */
-    protected abstract void defineSpawnConditions();
-
-    /**
-     * Adds a spawn condition rule to this entity's spawn profile.
-     *
-     * @param condition spawn condition rule to add
-     */
-    protected void addCondition(SpawnCondition condition) {
-        spawnProfile.addCondition(condition);
-    }
-
-    /**
-     * Evaluates whether this entity can spawn at the specified location and world.
-     *
-     * @param location location to evaluate
-     * @param world    world to evaluate
-     * @return {@code true} if all spawn profile conditions are satisfied, {@code false} otherwise
-     */
-    public boolean canSpawnAt(Location location, World world) {
-        return spawnProfile.canSpawn(location, world);
-    }
-
-    /**
-     * Creates an independent clone of this spawnable entity definition.
-     *
-     * @return cloned entity definition
-     */
+    @NonNull
     @Override
-    public SpawnableEntity clone() {
-        SpawnableEntity cloned = (SpawnableEntity) super.clone();
-        cloned.spawnProfile = this.spawnProfile != null ? this.spawnProfile.copy() : new SpawnProfile();
-        return cloned;
+    public SpawnableEntity createInstance() {
+        SpawnableEntity fresh = EntitiesRegistry.createSpawnable(getEntityId());
+        if (fresh != null) {
+            return fresh;
+        }
+        return (SpawnableEntity) super.createInstance();
     }
 }
