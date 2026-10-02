@@ -1,12 +1,12 @@
 package fr.moussax.blightedSMP.engine.entities.spawnable;
 
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnCondition;
-import lombok.NoArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,22 +15,22 @@ import java.util.List;
  * <p>All registered conditions must be satisfied for spawning to be allowed.
  * Evaluation fails fast on the first failing condition.</p>
  */
-@NoArgsConstructor
-public final class SpawnProfile {
+public record SpawnProfile(List<SpawnCondition> conditions) {
 
-    private final List<SpawnCondition> conditions = new ArrayList<>();
-
-    private SpawnProfile(List<SpawnCondition> conditions) {
-        this.conditions.addAll(conditions);
+    /**
+     * Constructs a spawn profile with an immutable snapshot of conditions.
+     *
+     * @param conditions conditions to evaluate
+     */
+    public SpawnProfile(@NonNull List<SpawnCondition> conditions) {
+        this.conditions = List.copyOf(conditions);
     }
 
     /**
-     * Adds a spawn condition rule to this profile.
-     *
-     * @param condition condition rule to add
+     * Constructs an empty spawn profile permitting spawning everywhere.
      */
-    public void addCondition(@NonNull SpawnCondition condition) {
-        conditions.add(condition);
+    public SpawnProfile() {
+        this(Collections.emptyList());
     }
 
     /**
@@ -40,19 +40,26 @@ public final class SpawnProfile {
      * @param world    target spawn world
      * @return {@code true} if all conditions pass, {@code false} if any condition fails
      */
-    public boolean canSpawn(Location location, World world) {
+    public boolean canSpawn(@Nullable Location location, @Nullable World world) {
+        if (location == null || world == null) {
+            return false;
+        }
         for (SpawnCondition condition : conditions) {
-            if (!condition.testCanSpawnAt(location, world)) return false;
+            if (!condition.testCanSpawnAt(location, world)) {
+                return false;
+            }
         }
         return true;
     }
 
     /**
-     * Creates an independent copy of this spawn profile and its conditions.
+     * Returns an unmodifiable snapshot of registered spawn conditions.
      *
-     * @return a new spawn profile instance with identical conditions
+     * @return list of spawn conditions
      */
-    public SpawnProfile copy() {
-        return new SpawnProfile(this.conditions);
+    @Override
+    @NonNull
+    public List<SpawnCondition> conditions() {
+        return conditions;
     }
 }

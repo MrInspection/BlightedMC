@@ -5,7 +5,6 @@ import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.engine.entities.components.AffixRegistry;
 import fr.moussax.blightedSMP.engine.entities.components.EntityComponent;
 import fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry;
-import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnCondition;
 import fr.moussax.blightedSMP.engine.entities.spawnable.engine.SpawnMode;
 import lombok.Getter;
 import org.bukkit.Location;
@@ -16,54 +15,38 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Abstract base class for custom entities capable of spawning naturally in the world.
  *
  * <p>Extends {@link BlightedEntity} with spawn probabilities, spawn evaluation rules
- * ({@link SpawnProfile}), spawn modes ({@link SpawnMode}), and optional elite affix rolling.</p>
+ * ({@link SpawnProfile}), spawn modes ({@link SpawnMode}), and elite affix mechanics.</p>
  */
 public abstract class SpawnableEntity extends BlightedEntity {
 
-    /**
-     * Persistent data key storing comma-separated active affix IDs assigned to this entity.
-     */
-    public static final NamespacedKey AFFIXES_KEY =
-            new NamespacedKey(BlightedSMP.getInstance(), "blighted_active_affix");
+    private static NamespacedKey affixesKey;
 
-    @Getter
-    private double spawnProbability;
-
-    @Getter
-    private SpawnMode spawnMode;
-
-    private SpawnProfile spawnProfile;
-
-    /**
-     * Sets the natural spawn probability in the range {@code [0.0, 1.0]}.
-     *
-     * @param spawnProbability probability in [0.0, 1.0]
-     * @throws IllegalArgumentException if outside [0.0, 1.0]
-     */
-    public void setSpawnProbability(double spawnProbability) {
-        if (spawnProbability < 0.0 || spawnProbability > 1.0) {
-            throw new IllegalArgumentException("spawnProbability must be in [0.0, 1.0], got: " + spawnProbability);
+    public static NamespacedKey getAffixesKey() {
+        if (affixesKey == null) {
+            affixesKey = new NamespacedKey(BlightedSMP.getInstance(), "blighted_active_affix");
         }
-        this.spawnProbability = spawnProbability;
+        return affixesKey;
     }
 
-    /**
-     * Sets the spawn mode.
-     *
-     * @param spawnMode spawn mode
-     */
-    public void setSpawnMode(@NonNull SpawnMode spawnMode) {
-        this.spawnMode = Objects.requireNonNull(spawnMode, "spawnMode cannot be null");
-    }
+    public static final double DEFAULT_SPAWN_PROBABILITY = SpawningBuilder.DEFAULT_PROBABILITY;
+    public static final SpawnMode DEFAULT_SPAWN_MODE = SpawningBuilder.DEFAULT_MODE;
+
+    @Getter
+    private double spawnProbability = DEFAULT_SPAWN_PROBABILITY;
+
+    @Getter
+    private SpawnMode spawnMode = DEFAULT_SPAWN_MODE;
 
     @Getter
     private double affixChance = 0.0;
@@ -71,51 +54,78 @@ public abstract class SpawnableEntity extends BlightedEntity {
     @Getter
     private int maxAffixes = 1;
 
+    private boolean eliteAuraStarted = false;
+
+    @Getter
+    private SpawnProfile spawnProfile = new SpawnProfile();
+
     /**
-     * Sets the chance for this entity to spawn with random elite affixes.
+     * Constructs a spawnable entity with identity requirements.
+     * The default spawn probability is 0.01 in REPLACEMENT mode.
      *
-     * @param affixChance probability in the range {@code [0.0, 1.0]}
-     * @throws IllegalArgumentException if {@code affixChance} is outside {@code [0.0, 1.0]}
+     * @param entityId   unique entity identifier
+     * @param name       display name
+     * @param entityType underlying a Minecraft entity type
      */
-    public void setAffixChance(double affixChance) {
+    protected SpawnableEntity(@NonNull String entityId, @NonNull String name, @NonNull EntityType entityType) {
+        super(entityId, name, entityType);
+    }
+
+    /**
+     * Configures spawning rules, probability, mode, and affixes using a fluent builder consumer.
+     *
+     * @param consumer action configuring the spawning builder
+     */
+    public void spawning(@NonNull Consumer<SpawningBuilder> consumer) {
+        Objects.requireNonNull(consumer, "consumer cannot be null");
+        SpawningBuilder builder = new SpawningBuilder();
+        builder.probability(this.spawnProbability);
+        builder.mode(this.spawnMode);
+        builder.affixes(this.affixChance, this.maxAffixes);
+        consumer.accept(builder);
+        this.spawnProbability = builder.getProbability();
+        this.spawnMode = builder.getMode();
+        this.affixChance = builder.getAffixChance();
+        this.maxAffixes = builder.getMaxAffixes();
+        this.spawnProfile = builder.buildProfile();
+    }
+
+    /**
+     * Sets elite affix rolling chance.
+     *
+     * @param affixChance probability in [0.0, 1.0]
+     * @return this entity
+     */
+    public SpawnableEntity affixChance(double affixChance) {
         if (affixChance < 0.0 || affixChance > 1.0) {
             throw new IllegalArgumentException("affixChance must be in [0.0, 1.0], got: " + affixChance);
         }
         this.affixChance = affixChance;
+        return this;
     }
 
     /**
-     * Sets the maximum number of elite affixes this entity can roll when spawned.
+     * Sets maximum number of rollable elite affixes.
      *
-     * @param maxAffixes maximum affix count
+     * @param maxAffixes maximum affixes
+     * @return this entity
      */
-    public void setMaxAffixes(int maxAffixes) {
+    public SpawnableEntity maxAffixes(int maxAffixes) {
         this.maxAffixes = Math.max(1, maxAffixes);
-    }
-
-    public static final double DEFAULT_SPAWN_PROBABILITY = 0.01;
-    public static final SpawnMode DEFAULT_SPAWN_MODE = SpawnMode.REPLACEMENT;
-
-    /**
-     * Constructs a spawnable entity with basic identity requirements.
-     * Default spawn probability is 0.01 in REPLACEMENT mode.
-     *
-     * @param entityId   unique entity identifier
-     * @param name       display name
-     * @param entityType underlying Minecraft entity type
-     */
-    protected SpawnableEntity(@NonNull String entityId, @NonNull String name, @NonNull EntityType entityType) {
-        super(entityId, name, entityType);
-        this.spawnProbability = DEFAULT_SPAWN_PROBABILITY;
-        this.spawnMode = DEFAULT_SPAWN_MODE;
+        return this;
     }
 
     /**
-     * Spawns this entity at the specified location and rolls for elite affix assignment.
+     * Evaluates whether this entity can spawn at the specified location and world.
      *
-     * @param location target spawn location
-     * @return spawned living entity
+     * @param location location to evaluate
+     * @param world    world to evaluate
+     * @return {@code true} if all spawn profile conditions are satisfied, {@code false} otherwise
      */
+    public boolean canSpawnAt(@Nullable Location location, @Nullable World world) {
+        return spawnProfile.canSpawn(location, world);
+    }
+
     @Override
     public LivingEntity spawn(Location location) {
         LivingEntity spawned = super.spawn(location);
@@ -130,23 +140,18 @@ public abstract class SpawnableEntity extends BlightedEntity {
                 }
 
                 spawned.getPersistentDataContainer()
-                        .set(AFFIXES_KEY, PersistentDataType.STRING, String.join(",", affixIds));
+                        .set(getAffixesKey(), PersistentDataType.STRING, String.join(",", affixIds));
             }
         }
 
         return spawned;
     }
 
-    /**
-     * Rehydrates an existing entity state, restoring persistent affixes if present.
-     *
-     * @param existing existing living entity instance in the world
-     */
     @Override
     protected void onRehydrate(LivingEntity existing) {
         super.onRehydrate(existing);
 
-        String persistentAffixes = existing.getPersistentDataContainer().get(AFFIXES_KEY, PersistentDataType.STRING);
+        String persistentAffixes = existing.getPersistentDataContainer().get(getAffixesKey(), PersistentDataType.STRING);
         if (persistentAffixes != null && !persistentAffixes.isEmpty()) {
             String[] affixIds = persistentAffixes.split(",");
             for (String affixId : affixIds) {
@@ -159,8 +164,6 @@ public abstract class SpawnableEntity extends BlightedEntity {
             }
         }
     }
-
-    private boolean eliteAuraStarted = false;
 
     private void applyAffix(EntityComponent affix) {
         addComponent(affix);
@@ -189,44 +192,6 @@ public abstract class SpawnableEntity extends BlightedEntity {
                 world.spawnParticle(Particle.ENCHANT, center, 5, 0.5, 0.5, 0.5, 0.01);
             }
         });
-    }
-
-    /**
-     * Hook method implemented by subclasses to register environment spawn conditions.
-     * Invoked lazily when the spawn profile is first needed.
-     */
-    protected void defineSpawnConditions() {
-    }
-
-    private void ensureSpawnProfile() {
-        if (spawnProfile == null) {
-            spawnProfile = new SpawnProfile();
-            defineSpawnConditions();
-        }
-    }
-
-    /**
-     * Adds a spawn condition rule to this entity's spawn profile.
-     *
-     * @param condition spawn condition rule to add
-     */
-    protected void addCondition(@NonNull SpawnCondition condition) {
-        if (spawnProfile == null) {
-            spawnProfile = new SpawnProfile();
-        }
-        spawnProfile.addCondition(condition);
-    }
-
-    /**
-     * Evaluates whether this entity can spawn at the specified location and world.
-     *
-     * @param location location to evaluate
-     * @param world    world to evaluate
-     * @return {@code true} if all spawn profile conditions are satisfied, {@code false} otherwise
-     */
-    public boolean canSpawnAt(Location location, World world) {
-        ensureSpawnProfile();
-        return spawnProfile.canSpawn(location, world);
     }
 
     @NonNull

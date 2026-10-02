@@ -57,6 +57,6 @@ public final class SpawnEvaluator {
             }
         }
 
-        return null;
+        return eligible.getLast();
     }
 }
