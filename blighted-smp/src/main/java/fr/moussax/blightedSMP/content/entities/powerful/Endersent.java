@@ -3,11 +3,13 @@ package fr.moussax.blightedSMP.content.entities.powerful;
 import fr.moussax.blightedSMP.content.utils.ai.EndermanAI;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.engine.entities.attachment.AttachmentRole;
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedSMP.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
@@ -15,7 +17,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 
-import java.util.Objects;
 import java.util.Random;
 
 import static fr.moussax.blightedSMP.engine.loot.decorators.EntityLootRarity.*;
@@ -26,26 +27,28 @@ public class Endersent extends SpawnableEntity {
     private int projectileHits = 0;
     private boolean enraged = false;
     private boolean isEscaping = false;
-    private long lastTeleportSmash = 0;
     private int escapeTicks = 0;
 
     public Endersent() {
-        super("ENDERSENT", "Endersent", 200, EntityType.ENDERMAN, 0.002);
+        super("ENDERSENT", "Endersent", EntityType.ENDERMAN);
+        setMaxHealth(200);
         setDamage(20);
         setDroppedExp(40);
+        setSpawnProbability(0.002);
 
-        addAttribute(Attribute.FOLLOW_RANGE, 60);
-        addAttribute(Attribute.SCALE, 2);
-        addAttribute(Attribute.KNOCKBACK_RESISTANCE, 1.0);
-        addAttribute(Attribute.MOVEMENT_SPEED, 0.25);
+        attributes(attributes -> attributes
+                .followRange(60)
+                .scale(2)
+                .knockbackResistance(1.0)
+                .movementSpeed(0.25)
+        );
 
-        setLootTable(new EntityLootTableBuilder()
+        loot(table -> table
                 .maxDrops(2)
                 .addLoot(Material.ENDER_PEARL, 4, 8, 1.0)
                 .addLoot(Material.ENDER_EYE, 1, 3, 0.31)
                 .addLoot("ENCHANTED_ENDER_PEARL", 1, 4, 0.11, RARE)
                 .addGems(30, 0.03, VERY_RARE)
-                .build()
         );
 
         setBoss(true);
@@ -64,7 +67,7 @@ public class Endersent extends SpawnableEntity {
 
     private void tickSmash() {
         if (!enraged || isEscaping) return;
-        if (System.currentTimeMillis() - lastTeleportSmash < SMASH_COOLDOWN) return;
+        if (!isCooldownReady("smash", SMASH_COOLDOWN)) return;
 
         Player target = getNearestPlayer(30);
         if (target == null) return;
@@ -75,20 +78,20 @@ public class Endersent extends SpawnableEntity {
     }
 
     private void performTeleportSmash(Player target) {
-        lastTeleportSmash = System.currentTimeMillis();
+        triggerCooldown("smash");
 
-        entity.swingMainHand();
+        swingMainHand();
 
         Location behind = target.getLocation().add(target.getLocation().getDirection().multiply(-1.5));
         behind.setY(target.getLocation().getY());
 
         entity.teleport(behind);
-        entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+        playSound(Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
 
         addCoreDelayedAction(9L, () -> {
             if (!isAlive()) return;
-            entity.getWorld().spawnParticle(Particle.EXPLOSION, entity.getLocation(), 1);
-            entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.8f);
+            spawnParticle(Particle.EXPLOSION, 1);
+            playSound(Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.8f);
             damageNearbyPlayers(3.0, 14.0);
         });
     }
@@ -125,8 +128,8 @@ public class Endersent extends SpawnableEntity {
 
         Location location = entity.getLocation();
 
-        Objects.requireNonNull(location.getWorld()).spawnParticle(Particle.EXPLOSION_EMITTER, location, 1);
-        location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
+        spawnParticle(location, Particle.EXPLOSION_EMITTER, 1);
+        playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
 
         damageNearbyPlayers(4.0, 18.0);
 
@@ -137,9 +140,9 @@ public class Endersent extends SpawnableEntity {
 
         int count = 3 + new Random().nextInt(4);
         for (int i = 0; i < count; i++) {
-            BlightedEntity prototype = EntitiesRegistry.get("WATCHLING");
-            if (prototype == null) continue;
-            LivingEntity wEntity = prototype.spawn(
+            BlightedEntity watchling = EntitiesRegistry.create("WATCHLING");
+            if (watchling == null) continue;
+            LivingEntity wEntity = watchling.spawn(
                     location.clone().add((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
             );
             addAttachment(wEntity, AttachmentRole.SUBORDINATE);
@@ -162,7 +165,7 @@ public class Endersent extends SpawnableEntity {
         entity.setInvulnerable(false);
         entity.setAI(true);
 
-        entity.getWorld().playSound(reappearLoc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.5f);
+        playSound(reappearLoc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.5f);
     }
 
     @Override
@@ -173,16 +176,5 @@ public class Endersent extends SpawnableEntity {
     @Override
     protected void defineSpawnConditions() {
         addCondition(SpawnRules.biome(Biome.END_MIDLANDS));
-    }
-
-    @Override
-    public Endersent clone() {
-        Endersent clone = (Endersent) super.clone();
-        clone.projectileHits = 0;
-        clone.enraged = false;
-        clone.isEscaping = false;
-        clone.lastTeleportSmash = 0;
-        clone.escapeTicks = 0;
-        return clone;
     }
 }

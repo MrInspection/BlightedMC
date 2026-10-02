@@ -1,14 +1,27 @@
 package fr.moussax.blightedSMP.engine.entities;
 
-import fr.moussax.bedrock.utils.debug.Log;
 import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.entities.attachment.AttachmentRole;
 import fr.moussax.blightedSMP.engine.entities.attachment.EntityAttachment;
-import fr.moussax.blightedSMP.engine.entities.components.AffixRegistry;
+import fr.moussax.blightedSMP.engine.entities.attachment.EntityAttachmentManager;
+import fr.moussax.blightedSMP.engine.entities.boss.BossBarBuilder;
+import fr.moussax.blightedSMP.engine.entities.boss.EntityBossBarController;
 import fr.moussax.blightedSMP.engine.entities.components.EntityComponent;
+import fr.moussax.blightedSMP.engine.entities.components.EntityComponentManager;
 import fr.moussax.blightedSMP.engine.entities.defense.DamageType;
+import fr.moussax.blightedSMP.engine.entities.defense.DefensesBuilder;
 import fr.moussax.blightedSMP.engine.entities.defense.EntityDefenses;
 import fr.moussax.blightedSMP.engine.entities.defense.EntityImmunity;
+import fr.moussax.blightedSMP.engine.entities.equipment.EntityEquipmentBuilder;
+import fr.moussax.blightedSMP.engine.entities.equipment.EntityEquipmentHolder;
+import fr.moussax.blightedSMP.engine.entities.phases.EntityPhaseManager;
+import fr.moussax.blightedSMP.engine.entities.phases.EntityPhasesBuilder;
+import fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry;
+import fr.moussax.blightedSMP.engine.entities.state.EntityAttributeManager;
+import fr.moussax.blightedSMP.engine.entities.state.EntityAttributesBuilder;
+import fr.moussax.blightedSMP.engine.entities.state.EntityCooldowns;
+import fr.moussax.blightedSMP.engine.entities.util.EntityEffects;
+import fr.moussax.blightedSMP.engine.entities.util.EntitySpatialQueries;
 import fr.moussax.blightedSMP.engine.loot.LootContext;
 import fr.moussax.blightedSMP.engine.loot.LootTable;
 import fr.moussax.blightedSMP.engine.player.BlightedPlayer;
@@ -17,22 +30,22 @@ import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Biome;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
@@ -45,28 +58,27 @@ import java.util.function.Consumer;
  * <p>Instances are stateful and bound to one entity at runtime. API methods must
  * be called from the server thread unless stated otherwise.</p>
  */
-public abstract class BlightedEntity implements Cloneable {
+public abstract class BlightedEntity {
 
     public static final NamespacedKey ENTITY_ID_KEY = new NamespacedKey(BlightedSMP.getInstance(), "blighted_entity_id");
-    public static final NamespacedKey ATTACHMENT_OWNER_KEY = new NamespacedKey(BlightedSMP.getInstance(), "blighted_attachment_owner");
-    public static final NamespacedKey ATTACHMENT_ROLE_KEY = new NamespacedKey(BlightedSMP.getInstance(), "blighted_attachment_role");
-    public static final NamespacedKey ATTACHMENT_OFFSET_X_KEY = new NamespacedKey(BlightedSMP.getInstance(), "blighted_attachment_offset_x");
-    public static final NamespacedKey ATTACHMENT_OFFSET_Y_KEY = new NamespacedKey(BlightedSMP.getInstance(), "blighted_attachment_offset_y");
-    public static final NamespacedKey ATTACHMENT_OFFSET_Z_KEY = new NamespacedKey(BlightedSMP.getInstance(), "blighted_attachment_offset_z");
-    public static final NamespacedKey ATTACHMENT_SYNC_YAW_KEY = new NamespacedKey(BlightedSMP.getInstance(), "blighted_attachment_sync_yaw");
-    public static final NamespacedKey ATTACHMENT_SYNC_PITCH_KEY = new NamespacedKey(BlightedSMP.getInstance(), "blighted_attachment_sync_pitch");
     public static final String FAST_PASS_TAG = "blighted_opt";
 
-    private static final double BOSS_BAR_RANGE = 60.0;
-
-    private NavigableMap<Double, Runnable> phaseThresholds = new TreeMap<>(Collections.reverseOrder());
-    private LifecycleTaskManager coreTasks = new LifecycleTaskManager();
-    private LifecycleTaskManager phaseTasks = new LifecycleTaskManager();
-    private Map<String, EntityComponent> components = new HashMap<>();
-    protected Set<EntityAttachment> attachments = new CopyOnWriteArraySet<>();
-
-    private long lastDamageTick = -1L;
-    private UUID lastDamagerUuid = null;
+    @Getter
+    protected EntityAttachmentManager attachmentManager = new EntityAttachmentManager(this);
+    @Getter
+    protected EntityEquipmentHolder equipmentHolder = new EntityEquipmentHolder();
+    @Getter
+    protected EntityCooldowns cooldowns = new EntityCooldowns();
+    @Getter
+    protected EntityComponentManager componentManager = new EntityComponentManager();
+    @Getter
+    protected EntityPhaseManager phaseManager = new EntityPhaseManager(this, this::onPhaseTransition);
+    @Getter
+    protected EntityAttributeManager attributes = new EntityAttributeManager();
+    @Nullable
+    protected EntityBossBarController bossBarController;
+    @Getter
+    private EntityDefenses defenses = EntityDefenses.fromClass(getClass());
 
     @Getter
     protected String entityId;
@@ -79,21 +91,17 @@ public abstract class BlightedEntity implements Cloneable {
     @Getter
     protected int maxHealth;
     @Getter
-    @Setter
     protected int damage;
-    @Setter
+    @Getter
     protected int defense;
     @Setter
     @Getter
     protected int droppedExp = 0;
 
-    protected ItemStack itemInMainHand;
-    protected ItemStack itemInOffHand;
-    protected ItemStack[] armor;
-
-    @Setter
+    @Getter
     protected LootTable lootTable;
 
+    @Getter
     @Setter
     protected boolean isBoss = false;
 
@@ -101,55 +109,46 @@ public abstract class BlightedEntity implements Cloneable {
     @Setter
     protected boolean isPerformingAbility = false;
 
-    protected BossBar bossBar;
-    protected BarColor bossBarColor = BarColor.RED;
-    protected BarStyle bossBarStyle = BarStyle.SOLID;
-    protected Map<Attribute, Double> attributes = new HashMap<>();
-
     @Getter
-    private EntityDefenses defenses = EntityDefenses.fromClass(getClass());
-
     private boolean runtimeInitialized = false;
-    private boolean componentsInitialized = false;
+
+    public static final int DEFAULT_MAX_HEALTH = 20;
+    public static final int DEFAULT_DAMAGE = 2;
+    public static final int DEFAULT_DEFENSE = 0;
 
     /**
-     * Creates an entity with default damage and defense values.
+     * Creates an entity definition with basic identity requirements.
+     * Combat stats and behavior can be configured using fluent setters.
      *
+     * @param entityId   unique entity identifier
      * @param name       entity display name
-     * @param maxHealth  maximum health
      * @param entityType Bukkit entity type
      */
-    public BlightedEntity(@NonNull String name, int maxHealth, EntityType entityType) {
-        this(name, maxHealth, 1, 0, entityType);
+    public BlightedEntity(@NonNull String entityId, @NonNull String name, @NonNull EntityType entityType) {
+        this.entityId = Objects.requireNonNull(entityId, "entityId cannot be null");
+        this.name = Objects.requireNonNull(name, "name cannot be null");
+        this.entityType = Objects.requireNonNull(entityType, "entityType cannot be null");
+        this.maxHealth = DEFAULT_MAX_HEALTH;
+        this.damage = DEFAULT_DAMAGE;
+        this.defense = DEFAULT_DEFENSE;
     }
 
     /**
-     * Creates an entity with the given health and damage values.
+     * Obtains or creates the boss bar controller for this entity.
      *
-     * @param name       entity display name
-     * @param maxHealth  maximum health
-     * @param damage     base attack damage
-     * @param entityType Bukkit entity type
+     * @return the boss bar controller
      */
-    public BlightedEntity(@NonNull String name, int maxHealth, int damage, EntityType entityType) {
-        this(name, maxHealth, damage, 0, entityType);
-    }
-
-    /**
-     * Creates an entity with the given base combat stats.
-     *
-     * @param name       entity display name
-     * @param maxHealth  maximum health
-     * @param damage     base attack damage
-     * @param defense    base armor value
-     * @param entityType Bukkit entity type
-     */
-    public BlightedEntity(@NonNull String name, int maxHealth, int damage, int defense, EntityType entityType) {
-        this.name = name;
-        this.maxHealth = maxHealth;
-        this.damage = damage;
-        this.defense = defense;
-        this.entityType = entityType;
+    @NonNull
+    public EntityBossBarController getOrCreateBossBar() {
+        if (bossBarController == null) {
+            bossBarController = new EntityBossBarController(
+                    BlightedSMP.getInstance(),
+                    () -> entity,
+                    () -> name,
+                    () -> entityType
+            );
+        }
+        return bossBarController;
     }
 
     /**
@@ -168,16 +167,16 @@ public abstract class BlightedEntity implements Cloneable {
         entity.addScoreboardTag(FAST_PASS_TAG);
         entity.getPersistentDataContainer().set(ENTITY_ID_KEY, PersistentDataType.STRING, getEntityId());
 
-        initializeAttributes();
+        attributes.initialize(entity, maxHealth, damage, defense, isBoss);
         configureEquipment();
         onConfigureAI(entity);
 
         if (isBoss) {
-            createBossBar();
+            getOrCreateBossBar().create();
         }
 
         EntityManager.registerEntity(entity, this);
-        initComponents();
+        componentManager.init(entity);
         initRuntime();
 
         return entity;
@@ -194,22 +193,21 @@ public abstract class BlightedEntity implements Cloneable {
             entity.addScoreboardTag(FAST_PASS_TAG);
         }
 
-        rehydrateAttributes();
+        attributes.rehydrate(existing, maxHealth, damage, defense, isBoss);
         onConfigureAI(existing);
 
         if (isBoss) {
-            createBossBar();
+            getOrCreateBossBar().create();
         }
         EntityManager.registerEntity(existing, this);
 
-        initComponents();
+        componentManager.init(existing);
         onRehydrate(existing);
 
         if (!runtimeInitialized) {
             initRuntime();
         } else {
-            coreTasks.scheduleAll();
-            phaseTasks.scheduleAll();
+            phaseManager.scheduleAllTasks();
         }
     }
 
@@ -228,17 +226,12 @@ public abstract class BlightedEntity implements Cloneable {
      */
     public void cleanup() {
         Location currentLocation = entity != null ? entity.getLocation() : null;
-        if (currentLocation != null) {
-            for (EntityComponent component : components.values()) {
-                component.onDeath(this, currentLocation);
-            }
-        }
+        componentManager.onDeath(this, currentLocation);
 
         removeBossBar();
         killAllAttachments();
-        destroyComponents();
-        coreTasks.cancelAll();
-        phaseTasks.cancelAll();
+        componentManager.destroy(entity);
+        phaseManager.cancelAllTasks();
         EntityManager.unregisterEntity(entity);
     }
 
@@ -294,8 +287,8 @@ public abstract class BlightedEntity implements Cloneable {
      * @param healthPercentage threshold in the range {@code 0.0–1.0}
      * @param onTransition     action executed when the phase is triggered
      */
-    protected final void registerPhase(double healthPercentage, Runnable onTransition) {
-        phaseThresholds.put(healthPercentage, onTransition);
+    public final void registerPhase(double healthPercentage, Runnable onTransition) {
+        phaseManager.registerPhase(healthPercentage, onTransition);
     }
 
     /**
@@ -314,28 +307,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param currentHealth current health value
      */
     public final void evaluatePhases(double currentHealth) {
-        if (phaseThresholds.isEmpty()) return;
-        double healthPercentage = currentHealth / maxHealth;
-
-        while (!phaseThresholds.isEmpty() && healthPercentage <= phaseThresholds.firstKey()) {
-            Map.Entry<Double, Runnable> entry = phaseThresholds.pollFirstEntry();
-            if (entry == null) break;
-
-            phaseTasks.cancelAll();
-            phaseTasks = new LifecycleTaskManager();
-            entry.getValue().run();
-            long transitionDuration = onPhaseTransition(entry.getKey());
-
-            if (transitionDuration > 0) {
-                setPerformingAbility(true);
-                addCoreDelayedAction(transitionDuration, () -> {
-                    setPerformingAbility(false);
-                    phaseTasks.scheduleAll();
-                });
-            } else {
-                phaseTasks.scheduleAll();
-            }
-        }
+        phaseManager.evaluatePhases(currentHealth);
     }
 
     /**
@@ -347,7 +319,7 @@ public abstract class BlightedEntity implements Cloneable {
      */
     @SuppressWarnings("SameParameterValue")
     protected final void addCoreAbility(long delayTicks, long periodTicks, Runnable action) {
-        scheduleAbility(coreTasks, delayTicks, periodTicks, action);
+        phaseManager.addCoreAbility(delayTicks, periodTicks, action);
     }
 
     /**
@@ -358,7 +330,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param action      task action
      */
     protected final void addPhaseAbility(long delayTicks, long periodTicks, Runnable action) {
-        scheduleAbility(phaseTasks, delayTicks, periodTicks, action);
+        phaseManager.addPhaseAbility(delayTicks, periodTicks, action);
     }
 
     /**
@@ -368,7 +340,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param action     task action
      */
     protected final void addCoreDelayedAction(long delayTicks, Runnable action) {
-        scheduleDelayedAction(coreTasks, delayTicks, action);
+        phaseManager.addCoreDelayedAction(delayTicks, action);
     }
 
     /**
@@ -379,7 +351,7 @@ public abstract class BlightedEntity implements Cloneable {
      */
     @SuppressWarnings("SameParameterValue")
     protected final void addPhaseDelayedAction(long delayTicks, Runnable action) {
-        scheduleDelayedAction(phaseTasks, delayTicks, action);
+        phaseManager.addPhaseDelayedAction(delayTicks, action);
     }
 
     /**
@@ -431,13 +403,53 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     /**
+     * Returns the current Bukkit target of this entity if it is a {@link Mob}.
+     *
+     * @return current target living entity, or {@code null} if none or not a Mob
+     */
+    @Nullable
+    public LivingEntity getTarget() {
+        return entity instanceof Mob mob ? mob.getTarget() : null;
+    }
+
+    /**
+     * Returns the current Bukkit target of this entity if it is a {@link Player}.
+     *
+     * @return current target player, or {@code null} if none or target is not a Player
+     */
+    @Nullable
+    public Player getTargetPlayer() {
+        return entity instanceof Mob mob && mob.getTarget() instanceof Player player ? player : null;
+    }
+
+    /**
+     * Returns whether this mob currently has an active target.
+     *
+     * @return {@code true} if targeting an entity
+     */
+    public boolean hasTarget() {
+        return getTarget() != null;
+    }
+
+    /**
+     * Sets the target of this entity if it is a {@link Mob}.
+     *
+     * @param target new target entity, or {@code null} to clear
+     */
+    public void setTarget(@Nullable LivingEntity target) {
+        if (entity instanceof Mob mob) {
+            mob.setTarget(target);
+        }
+    }
+
+    /**
      * Returns nearby survival-mode players around the entity.
      *
      * @param radius search radius
      * @return nearby players, or an empty list if unavailable
      */
     public List<Player> getNearbyPlayers(double radius) {
-        return getNearbyPlayers(entity != null ? entity.getLocation() : null, radius);
+        return EntitySpatialQueries.getNearbyPlayers(entity != null ? entity.getLocation() : null, radius);
     }
 
     /**
@@ -448,18 +460,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return nearby players, or an empty list if the center is invalid
      */
     public List<Player> getNearbyPlayers(Location center, double radius) {
-        if (!isAlive() || center == null || center.getWorld() == null) return Collections.emptyList();
-        return center
-                .getWorld()
-                .getNearbyEntities(
-                        center,
-                        radius,
-                        radius,
-                        radius,
-                        entity -> entity instanceof Player player && player.getGameMode() == GameMode.SURVIVAL)
-                .stream()
-                .map(entity -> (Player) entity)
-                .toList();
+        return EntitySpatialQueries.getNearbyPlayers(center, radius);
     }
 
     /**
@@ -469,7 +470,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return nearest player, or {@code null} if none exists
      */
     public Player getNearestPlayer(double radius) {
-        return getNearestPlayer(entity != null ? entity.getLocation() : null, radius);
+        return EntitySpatialQueries.getNearestPlayer(entity != null ? entity.getLocation() : null, radius);
     }
 
     /**
@@ -480,10 +481,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return nearest player, or {@code null} if none exists
      */
     public Player getNearestPlayer(Location center, double radius) {
-        if (center == null) return null;
-        return getNearbyPlayers(center, radius).stream()
-                .min(Comparator.comparingDouble(player -> player.getLocation().distanceSquared(center)))
-                .orElse(null);
+        return EntitySpatialQueries.getNearestPlayer(center, radius);
     }
 
     /**
@@ -493,7 +491,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return nearby BlightedMC players
      */
     public List<BlightedPlayer> getNearbyBlightedPlayers(double radius) {
-        return getNearbyBlightedPlayers(entity != null ? entity.getLocation() : null, radius);
+        return EntitySpatialQueries.getNearbyBlightedPlayers(entity != null ? entity.getLocation() : null, radius);
     }
 
     /**
@@ -504,10 +502,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return nearby BlightedMC players
      */
     public List<BlightedPlayer> getNearbyBlightedPlayers(Location center, double radius) {
-        return getNearbyPlayers(center, radius).stream()
-                .map(BlightedPlayer::get)
-                .filter(Objects::nonNull)
-                .toList();
+        return EntitySpatialQueries.getNearbyBlightedPlayers(center, radius);
     }
 
     /**
@@ -517,7 +512,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return nearest BlightedMC player, or {@code null}
      */
     public BlightedPlayer getNearestBlightedPlayer(double radius) {
-        return getNearestBlightedPlayer(entity != null ? entity.getLocation() : null, radius);
+        return EntitySpatialQueries.getNearestBlightedPlayer(entity != null ? entity.getLocation() : null, radius);
     }
 
     /**
@@ -528,8 +523,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return nearest BlightedMC player, or {@code null}
      */
     public BlightedPlayer getNearestBlightedPlayer(Location center, double radius) {
-        Player target = getNearestPlayer(center, radius);
-        return target != null ? BlightedPlayer.get(target) : null;
+        return EntitySpatialQueries.getNearestBlightedPlayer(center, radius);
     }
 
     /**
@@ -555,10 +549,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param damageAmount damage dealt
      */
     public void damageNearbyPlayers(Location center, double radius, double damageAmount) {
-        List<Player> hitPlayers = getNearbyPlayers(center, radius);
-        for (Player player : hitPlayers) {
-            player.damage(damageAmount, entity);
-        }
+        EntitySpatialQueries.damageNearbyPlayers(center, radius, damageAmount, entity);
     }
 
     /**
@@ -568,7 +559,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param damageAmount damage dealt
      */
     public void damageNearbyPlayers(double radius, double damageAmount) {
-        damageNearbyPlayers(entity != null ? entity.getLocation() : null, radius, damageAmount);
+        EntitySpatialQueries.damageNearbyPlayers(entity != null ? entity.getLocation() : null, radius, damageAmount, entity);
     }
 
     /**
@@ -587,17 +578,8 @@ public abstract class BlightedEntity implements Cloneable {
             double knockbackStrength,
             double verticalKnockback
     ) {
-        List<Player> hitPlayers = getNearbyPlayers(center, radius);
-        for (Player player : hitPlayers) {
-            player.damage(damageAmount, entity);
-            Vector knockbackVector = player.getLocation().toVector().subtract(center.toVector()).setY(0);
-            if (knockbackVector.lengthSquared() > 0.001) {
-                knockbackVector.normalize().multiply(knockbackStrength).setY(verticalKnockback);
-            } else {
-                knockbackVector = new Vector(0, verticalKnockback, 0);
-            }
-            player.setVelocity(knockbackVector);
-        }
+        EntitySpatialQueries.damageAndKnockbackNearbyPlayers(
+                center, radius, damageAmount, knockbackStrength, verticalKnockback, entity);
     }
 
     /**
@@ -607,10 +589,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param cooldownTicks duration in ticks to put the shield on cooldown
      */
     public void disableShieldIfBlocking(Player target, int cooldownTicks) {
-        if (target != null && target.isBlocking()) {
-            target.setCooldown(Material.SHIELD, cooldownTicks);
-            target.getWorld().playSound(target.getLocation(), Sound.ITEM_SHIELD_BREAK, 1.0f, 0.8f);
-        }
+        EntitySpatialQueries.disableShieldIfBlocking(target, cooldownTicks);
     }
 
     /**
@@ -619,15 +598,224 @@ public abstract class BlightedEntity implements Cloneable {
      * @param target target location
      */
     public void faceLocation(Location target) {
-        if (!isAlive() || target == null) {
-            return;
-        }
-        Vector direction = target.toVector().subtract(entity.getLocation().toVector()).setY(0);
-        if (direction.lengthSquared() > 0.001) {
-            Location location = entity.getLocation();
-            location.setYaw((float) Math.toDegrees(-Math.atan2(direction.getX(), direction.getZ())));
-            entity.teleport(location);
-        }
+        EntitySpatialQueries.faceLocation(entity, target);
+    }
+
+    /**
+     * Configures this entity's loot table using a fluent builder consumer.
+     *
+     * @param consumer action configuring the entity loot table builder
+     */
+    public void loot(@NonNull Consumer<EntityLootTableBuilder> consumer) {
+        EntityLootTableBuilder builder = new EntityLootTableBuilder();
+        consumer.accept(builder);
+        this.lootTable = builder.build();
+    }
+
+    /**
+     * Configures this entity's equipment using a fluent builder consumer.
+     *
+     * @param consumer action configuring the entity equipment builder
+     */
+    public void equipment(@NonNull Consumer<EntityEquipmentBuilder> consumer) {
+        EntityEquipmentBuilder builder = new EntityEquipmentBuilder();
+        consumer.accept(builder);
+        equipmentHolder.applyBuilder(builder, entity);
+    }
+
+    /**
+     * Marks this entity as a boss and configures its boss bar appearance using a fluent consumer.
+     *
+     * @param consumer action configuring the boss bar builder
+     */
+    public void boss(@NonNull Consumer<BossBarBuilder> consumer) {
+        this.isBoss = true;
+        BossBarBuilder builder = new BossBarBuilder();
+        consumer.accept(builder);
+        getOrCreateBossBar().configure(builder);
+    }
+
+    /**
+     * Marks this entity as a boss with default boss bar appearance.
+     */
+    public void boss() {
+        this.isBoss = true;
+        getOrCreateBossBar();
+    }
+
+    /**
+     * Configures this entity's defenses (immunities and resistances) using a fluent consumer.
+     *
+     * @param consumer action configuring the defense builder
+     */
+    public void defenses(@NonNull Consumer<DefensesBuilder> consumer) {
+        consumer.accept(new DefensesBuilder(this));
+    }
+
+    /**
+     * Configures this entity's health-based phase transitions using a fluent consumer.
+     *
+     * @param consumer action configuring the phase builder
+     */
+    public void phases(@NonNull Consumer<EntityPhasesBuilder> consumer) {
+        consumer.accept(new EntityPhasesBuilder(this));
+    }
+
+    /**
+     * Configures mob attributes using a fluent consumer builder with typed convenience methods.
+     *
+     * @param consumer action configuring the attributes builder
+     */
+    public void attributes(@NonNull Consumer<EntityAttributesBuilder> consumer) {
+        EntityAttributesBuilder builder = new EntityAttributesBuilder();
+        consumer.accept(builder);
+        builder.applyTo(this.attributes, this.entity);
+    }
+
+    /**
+     * Plays a sound effect at the entity's current location.
+     *
+     * @param sound  sound to play
+     * @param volume volume level
+     * @param pitch  pitch modifier
+     */
+    public void playSound(@NonNull Sound sound, float volume, float pitch) {
+        EntityEffects.playSound(entity, sound, volume, pitch);
+    }
+
+    /**
+     * Plays a sound effect at the entity's current location with default volume and pitch (1.0f).
+     *
+     * @param sound sound to play
+     */
+    public void playSound(@NonNull Sound sound) {
+        EntityEffects.playSound(entity, sound, 1.0f, 1.0f);
+    }
+
+    /**
+     * Plays a sound effect at a specific world location.
+     *
+     * @param location location to play the sound at
+     * @param sound    sound to play
+     * @param volume   volume level
+     * @param pitch    pitch modifier
+     */
+    public void playSound(@NonNull Location location, @NonNull Sound sound, float volume, float pitch) {
+        EntityEffects.playSound(location, sound, volume, pitch);
+    }
+
+    /**
+     * Spawns particles at the entity's current location.
+     *
+     * @param particle particle type
+     * @param count    number of particles
+     */
+    public void spawnParticle(@NonNull Particle particle, int count) {
+        EntityEffects.spawnParticle(entity, particle, count);
+    }
+
+    /**
+     * Spawns particles at the entity's current location with random positional offsets.
+     *
+     * @param particle particle type
+     * @param count    number of particles
+     * @param offsetX  maximum X axis offset
+     * @param offsetY  maximum Y axis offset
+     * @param offsetZ  maximum Z axis offset
+     */
+    public void spawnParticle(@NonNull Particle particle, int count, double offsetX, double offsetY, double offsetZ) {
+        EntityEffects.spawnParticle(entity, particle, count, offsetX, offsetY, offsetZ);
+    }
+
+    /**
+     * Spawns particles at the entity's current location with custom particle data (e.g. DustOptions).
+     *
+     * @param particle particle type
+     * @param count    number of particles
+     * @param data     particle data object, or null
+     * @param <T>      particle data type
+     */
+    public <T> void spawnParticle(@NonNull Particle particle, int count, @Nullable T data) {
+        EntityEffects.spawnParticle(entity, particle, count, data);
+    }
+
+    /**
+     * Spawns particles at a specific world location.
+     *
+     * @param location location to spawn particles at
+     * @param particle particle type
+     * @param count    number of particles
+     */
+    public void spawnParticle(@NonNull Location location, @NonNull Particle particle, int count) {
+        EntityEffects.spawnParticle(location, particle, count);
+    }
+
+    /**
+     * Spawns particles at a specific world location with custom particle data (e.g. DustOptions).
+     *
+     * @param location location to spawn particles at
+     * @param particle particle type
+     * @param count    number of particles
+     * @param data     particle data object, or null
+     * @param <T>      particle data type
+     */
+    public <T> void spawnParticle(@NonNull Location location, @NonNull Particle particle, int count, @Nullable T data) {
+        EntityEffects.spawnParticle(location, particle, count, data);
+    }
+
+    /**
+     * Triggers the entity's main-hand swinging animation.
+     */
+    public void swingMainHand() {
+        EntityEffects.swingMainHand(entity);
+    }
+
+    /**
+     * Triggers the entity's off-hand swinging animation.
+     */
+    public void swingOffHand() {
+        EntityEffects.swingOffHand(entity);
+    }
+
+    /**
+     * Checks whether the cooldown for the specified ability key has expired.
+     *
+     * @param abilityKey     unique identifier for the ability
+     * @param cooldownMillis cooldown duration in milliseconds
+     * @return {@code true} if the cooldown has elapsed and the ability can run
+     */
+    public boolean isCooldownReady(@NonNull String abilityKey, long cooldownMillis) {
+        return cooldowns.isReady(abilityKey, cooldownMillis);
+    }
+
+    /**
+     * Sets or resets the cooldown timestamp for the specified ability to current system time.
+     *
+     * @param abilityKey unique identifier for the ability
+     */
+    public void triggerCooldown(@NonNull String abilityKey) {
+        cooldowns.trigger(abilityKey);
+    }
+
+    /**
+     * Checks if the ability cooldown has expired, and if so, immediately records
+     * the current timestamp and returns {@code true}.
+     *
+     * @param abilityKey     unique identifier for the ability
+     * @param cooldownMillis cooldown duration in milliseconds
+     * @return {@code true} if the cooldown was ready and was triggered
+     */
+    public boolean checkAndTriggerCooldown(@NonNull String abilityKey, long cooldownMillis) {
+        return cooldowns.checkAndTrigger(abilityKey, cooldownMillis);
+    }
+
+    /**
+     * Resets any recorded cooldown timestamp for the specified ability key.
+     *
+     * @param abilityKey unique identifier for the ability
+     */
+    public void resetCooldown(@NonNull String abilityKey) {
+        cooldowns.reset(abilityKey);
     }
 
     /**
@@ -639,7 +827,7 @@ public abstract class BlightedEntity implements Cloneable {
         if (!isAlive() || entity.getEquipment() == null) {
             return;
         }
-        entity.getEquipment().setItemInMainHand(equipped ? itemInMainHand : null);
+        entity.getEquipment().setItemInMainHand(equipped ? equipmentHolder.getItemInMainHand() : null);
     }
 
     /**
@@ -651,7 +839,208 @@ public abstract class BlightedEntity implements Cloneable {
         if (!isAlive() || entity.getEquipment() == null) {
             return;
         }
-        entity.getEquipment().setItemInOffHand(equipped ? itemInOffHand : null);
+        entity.getEquipment().setItemInOffHand(equipped ? equipmentHolder.getItemInOffHand() : null);
+    }
+
+    /**
+     * Sets the maximum health for this entity.
+     * If the entity is currently active in the world, dynamically updates
+     * the live {@link Attribute#MAX_HEALTH} and clamps current health.
+     *
+     * @param maxHealth maximum health value
+     */
+    public void setMaxHealth(double maxHealth) {
+        this.maxHealth = (int) Math.round(maxHealth);
+        setAttribute(Attribute.MAX_HEALTH, maxHealth);
+        if (isAlive() && entity != null) {
+            entity.setHealth(Math.min(entity.getHealth(), maxHealth));
+        }
+    }
+
+    /**
+     * Sets the live entity's current health, clamped between 0 and maximum health.
+     *
+     * @param health target health value
+     */
+    public void setHealth(double health) {
+        attributes.setHealth(entity, health, this.maxHealth);
+    }
+
+    /**
+     * Returns the live entity's current health, or {@code 0.0} if unspawned or dead.
+     *
+     * @return current health
+     */
+    public double getHealth() {
+        return attributes.getHealth(entity);
+    }
+
+    /**
+     * Sets the base attack damage value. Updates the live entity if active.
+     *
+     * @param damage attack damage
+     */
+    public void setDamage(int damage) {
+        this.damage = damage;
+        setAttribute(Attribute.ATTACK_DAMAGE, damage);
+    }
+
+    /**
+     * Sets the base defense/armor value. Updates the live entity if active.
+     *
+     * @param defense defense value
+     */
+    public void setDefense(int defense) {
+        this.defense = defense;
+        if (defense > 0 || isAlive()) {
+            setAttribute(Attribute.ARMOR, defense);
+        }
+    }
+
+    /**
+     * Sets the entity's helmet. Updates live equipment if the entity is active.
+     *
+     * @param helmet helmet item or null to unequip
+     */
+    public void setHelmet(@Nullable ItemStack helmet) {
+        equipmentHolder.setHelmet(helmet, entity);
+    }
+
+    /**
+     * Sets the entity's chestplate. Updates live equipment if the entity is active.
+     *
+     * @param chestplate chestplate item or null to unequip
+     */
+    public void setChestplate(@Nullable ItemStack chestplate) {
+        equipmentHolder.setChestplate(chestplate, entity);
+    }
+
+    /**
+     * Sets the entity's leggings. Updates live equipment if the entity is active.
+     *
+     * @param leggings leggings item or null to unequip
+     */
+    public void setLeggings(@Nullable ItemStack leggings) {
+        equipmentHolder.setLeggings(leggings, entity);
+    }
+
+    /**
+     * Sets the entity's boots. Updates live equipment if the entity is active.
+     *
+     * @param boots boots item or null to unequip
+     */
+    public void setBoots(@Nullable ItemStack boots) {
+        equipmentHolder.setBoots(boots, entity);
+    }
+
+    /**
+     * Sets all four armor slots in natural top-to-bottom order (helmet to boots).
+     * Any slot may be null to leave it unequipped.
+     *
+     * @param helmet     helmet item or null
+     * @param chestplate chestplate item or null
+     * @param leggings   leggings item or null
+     * @param boots      boots item or null
+     */
+    public void setArmor(
+            @Nullable ItemStack helmet,
+            @Nullable ItemStack chestplate,
+            @Nullable ItemStack leggings,
+            @Nullable ItemStack boots
+    ) {
+        equipmentHolder.setArmor(helmet, chestplate, leggings, boots, entity);
+    }
+
+    /**
+     * Clears all armor slots.
+     */
+    public void clearArmor() {
+        equipmentHolder.clearArmor(entity);
+    }
+
+    /**
+     * Clears all equipment slots (armor, main-hand, and off-hand).
+     */
+    public void clearEquipment() {
+        equipmentHolder.clearEquipment(entity);
+    }
+
+    /**
+     * Sets the main-hand item. Updates live equipment if the entity is active.
+     *
+     * @param item main-hand item or null to unequip
+     */
+    public void setItemInMainHand(@Nullable ItemStack item) {
+        equipmentHolder.setMainHand(item, entity);
+    }
+
+    /**
+     * Sets the off-hand item. Updates live equipment if the entity is active.
+     *
+     * @param item off-hand item or null to unequip
+     */
+    public void setItemInOffHand(@Nullable ItemStack item) {
+        equipmentHolder.setOffHand(item, entity);
+    }
+
+    /**
+     * Returns the helmet item from the live entity if active, or from the configured template.
+     *
+     * @return current helmet item, or null
+     */
+    @Nullable
+    public ItemStack getHelmet() {
+        return equipmentHolder.getHelmet(entity);
+    }
+
+    /**
+     * Returns the chestplate item from the live entity if active, or from the configured template.
+     *
+     * @return current chestplate item, or null
+     */
+    @Nullable
+    public ItemStack getChestplate() {
+        return equipmentHolder.getChestplate(entity);
+    }
+
+    /**
+     * Returns the leggings item from the live entity if active, or from the configured template.
+     *
+     * @return current leggings item, or null
+     */
+    @Nullable
+    public ItemStack getLeggings() {
+        return equipmentHolder.getLeggings(entity);
+    }
+
+    /**
+     * Returns the boots item from the live entity if active, or from the configured template.
+     *
+     * @return current boots item, or null
+     */
+    @Nullable
+    public ItemStack getBoots() {
+        return equipmentHolder.getBoots(entity);
+    }
+
+    /**
+     * Returns the main hand item from the live entity if active, or from the configured template.
+     *
+     * @return current main hand item, or null
+     */
+    @Nullable
+    public ItemStack getItemInMainHand() {
+        return equipmentHolder.getMainHand(entity);
+    }
+
+    /**
+     * Returns the off hand item from the live entity if active, or from the configured template.
+     *
+     * @return current off hand item, or null
+     */
+    @Nullable
+    public ItemStack getItemInOffHand() {
+        return equipmentHolder.getOffHand(entity);
     }
 
     /**
@@ -662,18 +1051,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return the created ItemDisplay attachment
      */
     public ItemDisplay attachItemDisplay(Vector offset, Consumer<ItemDisplay> configurator) {
-        if (!isAlive()) {
-            return null;
-        }
-        Vector localOffset = offset != null ? offset : new Vector(0, 0, 0);
-        Location spawnLoc = entity.getLocation().clone().add(localOffset);
-        ItemDisplay display = entity.getWorld().spawn(spawnLoc, ItemDisplay.class, itemDisplay -> {
-            if (configurator != null) {
-                configurator.accept(itemDisplay);
-            }
-        });
-        addAttachment(display, AttachmentRole.VISUAL, localOffset, true, false);
-        return display;
+        return attachmentManager.attachItemDisplay(offset, configurator);
     }
 
     /**
@@ -684,18 +1062,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return the created BlockDisplay attachment
      */
     public BlockDisplay attachBlockDisplay(Vector offset, Consumer<BlockDisplay> configurator) {
-        if (!isAlive()) {
-            return null;
-        }
-        Vector localOffset = offset != null ? offset : new Vector(0, 0, 0);
-        Location spawnLoc = entity.getLocation().clone().add(localOffset);
-        BlockDisplay display = entity.getWorld().spawn(spawnLoc, BlockDisplay.class, d -> {
-            if (configurator != null) {
-                configurator.accept(d);
-            }
-        });
-        addAttachment(display, AttachmentRole.VISUAL, localOffset, true, false);
-        return display;
+        return attachmentManager.attachBlockDisplay(offset, configurator);
     }
 
     /**
@@ -708,20 +1075,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return the created Interaction attachment
      */
     public Interaction attachHitbox(Vector offset, float width, float height, Consumer<Interaction> configurator) {
-        if (!isAlive()) {
-            return null;
-        }
-        Vector localOffset = offset != null ? offset : new Vector(0, 0, 0);
-        Location spawnLocation = entity.getLocation().clone().add(localOffset);
-        Interaction interaction = entity.getWorld().spawn(spawnLocation, Interaction.class, i -> {
-            i.setInteractionWidth(width);
-            i.setInteractionHeight(height);
-            if (configurator != null) {
-                configurator.accept(i);
-            }
-        });
-        addAttachment(interaction, AttachmentRole.HITBOX, localOffset, true, false);
-        return interaction;
+        return attachmentManager.attachHitbox(offset, width, height, configurator);
     }
 
     /**
@@ -730,7 +1084,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param attachmentEntity entity to attach
      */
     public void addAttachment(Entity attachmentEntity) {
-        addAttachment(attachmentEntity, AttachmentRole.SUBORDINATE, new Vector(0, 0, 0), true, false);
+        attachmentManager.addAttachment(attachmentEntity);
     }
 
     /**
@@ -740,7 +1094,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param role             attachment role
      */
     public void addAttachment(Entity attachmentEntity, AttachmentRole role) {
-        addAttachment(attachmentEntity, role, new Vector(0, 0, 0), true, false);
+        attachmentManager.addAttachment(attachmentEntity, role);
     }
 
     /**
@@ -751,7 +1105,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param offset           local 3D offset
      */
     public void addAttachment(Entity attachmentEntity, AttachmentRole role, Vector offset) {
-        addAttachment(attachmentEntity, role, offset, true, false);
+        attachmentManager.addAttachment(attachmentEntity, role, offset);
     }
 
     /**
@@ -764,111 +1118,21 @@ public abstract class BlightedEntity implements Cloneable {
      * @param syncPitch        whether vertical rotation follows base pitch
      */
     public void addAttachment(Entity attachmentEntity, AttachmentRole role, Vector offset, boolean syncYaw, boolean syncPitch) {
-        if (attachmentEntity == null) {
-            return;
-        }
-        Vector vector = offset != null ? offset : new Vector(0, 0, 0);
-        attachments.add(new EntityAttachment(attachmentEntity, role, vector, syncYaw, syncPitch));
-        EntityManager.registerAttachment(attachmentEntity, this);
-
-        if (entity != null) {
-            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING, entity.getUniqueId().toString());
-            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_ROLE_KEY, PersistentDataType.STRING, role.name());
-            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_X_KEY, PersistentDataType.DOUBLE, vector.getX());
-            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_Y_KEY, PersistentDataType.DOUBLE, vector.getY());
-            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_OFFSET_Z_KEY, PersistentDataType.DOUBLE, vector.getZ());
-            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_SYNC_YAW_KEY, PersistentDataType.BYTE, (byte) (syncYaw ? 1 : 0));
-            attachmentEntity.getPersistentDataContainer().set(ATTACHMENT_SYNC_PITCH_KEY, PersistentDataType.BYTE, (byte) (syncPitch ? 1 : 0));
-        }
-
-        if (attachmentEntity instanceof Display display) {
-            display.setTeleportDuration(1);
-            display.setInterpolationDuration(1);
-        }
-
-        if (attachmentEntity instanceof LivingEntity living) {
-            EntityEquipment equipment = living.getEquipment();
-            if (equipment != null) {
-                zeroEquipmentDropChances(equipment);
-            }
-        }
-        attachmentEntity.addScoreboardTag(FAST_PASS_TAG);
+        attachmentManager.addAttachment(attachmentEntity, role, offset, syncYaw, syncPitch);
     }
 
     /**
      * Synchronizes all registered attachments to their relative world position based on base location and facing yaw.
      */
     public void syncAttachments() {
-        if (!isAlive() || attachments.isEmpty()) {
-            return;
-        }
-
-        Location baseLocation = entity.getLocation();
-        double radians = Math.toRadians(baseLocation.getYaw());
-        double cos = Math.cos(radians);
-        double sin = Math.sin(radians);
-
-        for (EntityAttachment attachment : attachments) {
-            Entity attachedEntity = attachment.entity();
-            if (attachedEntity == null || !attachedEntity.isValid() || attachedEntity.isDead()) {
-                attachments.remove(attachment);
-                if (attachedEntity != null) {
-                    EntityManager.unregisterAttachment(attachedEntity);
-                }
-                continue;
-            }
-
-            if (attachment.role() == AttachmentRole.SUBORDINATE) {
-                continue;
-            }
-
-            if (entity != null && entity.getPassengers().contains(attachedEntity)) {
-                continue;
-            }
-
-            Vector offset = attachment.localOffset();
-            double xPrime = baseLocation.getX() + (offset.getX() * cos - offset.getZ() * sin);
-            double zPrime = baseLocation.getZ() + (offset.getX() * sin + offset.getZ() * cos);
-            double yPrime = baseLocation.getY() + offset.getY();
-
-            Location currentLocation = attachedEntity.getLocation();
-            float targetYaw = attachment.syncYaw() ? baseLocation.getYaw() : currentLocation.getYaw();
-            float targetPitch = attachment.syncPitch() ? baseLocation.getPitch() : currentLocation.getPitch();
-
-            if (currentLocation.getWorld() == baseLocation.getWorld()
-                    && Math.abs(currentLocation.getX() - xPrime) < 0.001
-                    && Math.abs(currentLocation.getY() - yPrime) < 0.001
-                    && Math.abs(currentLocation.getZ() - zPrime) < 0.001
-                    && Math.abs(currentLocation.getYaw() - targetYaw) < 0.1f
-                    && Math.abs(currentLocation.getPitch() - targetPitch) < 0.1f) {
-                continue;
-            }
-
-            Location targetLocation = new Location(baseLocation.getWorld(), xPrime, yPrime, zPrime, targetYaw, targetPitch);
-
-            attachedEntity.teleport(targetLocation);
-        }
+        attachmentManager.syncAttachments();
     }
 
     /**
      * Removes and destroys all attached entities.
      */
     public void killAllAttachments() {
-        if (attachments.isEmpty()) {
-            return;
-        }
-
-        for (EntityAttachment attachment : attachments) {
-            Entity attachmentEntity = attachment.entity();
-
-            if (attachmentEntity == null) {
-                continue;
-            }
-
-            EntityManager.unregisterAttachment(attachmentEntity);
-            attachmentEntity.remove();
-        }
-        attachments.clear();
+        attachmentManager.killAllAttachments();
     }
 
     /**
@@ -877,21 +1141,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param role attachment role to remove
      */
     public void killAttachments(AttachmentRole role) {
-        if (attachments.isEmpty() || role == null) {
-            return;
-        }
-
-        attachments.removeIf(attachment -> {
-            if (attachment.role() != role) {
-                return false;
-            }
-            Entity attachmentEntity = attachment.entity();
-            if (attachmentEntity != null) {
-                EntityManager.unregisterAttachment(attachmentEntity);
-                attachmentEntity.remove();
-            }
-            return true;
-        });
+        attachmentManager.killAttachments(role);
     }
 
     /**
@@ -900,12 +1150,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return {@code true} if a living body attachment exists
      */
     public boolean hasLivingBodyAttachment() {
-        for (EntityAttachment attachment : attachments) {
-            if (attachment.entity() instanceof LivingEntity living && !living.isDead()) {
-                return true;
-            }
-        }
-        return false;
+        return attachmentManager.hasLivingBodyAttachment();
     }
 
     /**
@@ -914,15 +1159,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return {@code true} if a non-dead subordinate attachment exists
      */
     public boolean hasSubordinateAttachments() {
-        for (EntityAttachment attachment : attachments) {
-            if (attachment.role() == AttachmentRole.SUBORDINATE
-                    && attachment.entity() != null
-                    && attachment.entity().isValid()
-                    && !attachment.entity().isDead()) {
-                return true;
-            }
-        }
-        return false;
+        return attachmentManager.hasSubordinateAttachments();
     }
 
     /**
@@ -932,20 +1169,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return {@code true} if damage was already processed this tick by the same attacker
      */
     public boolean shouldBlockSameTickDamage(Entity damager) {
-        if (damager == null) {
-            return false;
-        }
-
-        long currentTick = entity != null ? entity.getWorld().getGameTime() : System.currentTimeMillis();
-        UUID damagerUuid = damager.getUniqueId();
-
-        if (currentTick == lastDamageTick && Objects.equals(damagerUuid, lastDamagerUuid)) {
-            return true;
-        }
-
-        lastDamageTick = currentTick;
-        lastDamagerUuid = damagerUuid;
-        return false;
+        return attachmentManager.shouldBlockSameTickDamage(damager);
     }
 
     /**
@@ -956,10 +1180,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @param component component to register
      */
     public void addComponent(EntityComponent component) {
-        components.put(component.getId(), component);
-        if (componentsInitialized && entity != null) {
-            component.onInit(entity);
-        }
+        componentManager.addComponent(component, entity);
     }
 
     /**
@@ -968,7 +1189,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return active entity attachments
      */
     public Set<EntityAttachment> getAttachments() {
-        return Collections.unmodifiableSet(attachments);
+        return attachmentManager.getAttachments();
     }
 
     /**
@@ -978,9 +1199,8 @@ public abstract class BlightedEntity implements Cloneable {
      * @param <T> expected component type
      * @return component, or {@code null} if not registered
      */
-    @SuppressWarnings("unchecked")
     public <T extends EntityComponent> T getComponent(String id) {
-        return (T) components.get(id);
+        return componentManager.getComponent(id);
     }
 
     /**
@@ -991,15 +1211,7 @@ public abstract class BlightedEntity implements Cloneable {
      * @return matching component instance, or {@code null} if not registered
      */
     public <T extends EntityComponent> T getComponent(Class<T> componentClass) {
-        if (componentClass == null) {
-            return null;
-        }
-        for (EntityComponent component : components.values()) {
-            if (componentClass.isInstance(component)) {
-                return componentClass.cast(component);
-            }
-        }
-        return null;
+        return componentManager.getComponent(componentClass);
     }
 
     /**
@@ -1008,14 +1220,14 @@ public abstract class BlightedEntity implements Cloneable {
      * @return registered components
      */
     public Collection<EntityComponent> getComponents() {
-        return new ArrayList<>(components.values());
+        return componentManager.getComponents();
     }
 
     /**
      * Updates the boss bar progress to match the entity's health.
      */
     public void updateBossBar() {
-        if (bossBar == null) {
+        if (bossBarController == null || !bossBarController.isActive()) {
             return;
         }
         if (!isAlive()) {
@@ -1027,7 +1239,7 @@ public abstract class BlightedEntity implements Cloneable {
                 ? maxHealthAttribute.getValue()
                 : Math.max(1, this.maxHealth);
         double progress = entity.getHealth() / maxHealth;
-        bossBar.setProgress(Math.clamp(progress, 0.0, 1.0));
+        bossBarController.updateProgress(progress);
     }
 
     /**
@@ -1037,23 +1249,16 @@ public abstract class BlightedEntity implements Cloneable {
      * @param style bar style
      */
     public void setBossBarAppearance(BarColor color, BarStyle style) {
-        this.bossBarColor = color;
-        this.bossBarStyle = style;
-        if (bossBar != null) {
-            bossBar.setColor(color);
-            bossBar.setStyle(style);
-        }
+        getOrCreateBossBar().setAppearance(color, style);
     }
 
     /**
      * Removes the boss bar and all of its viewers.
      */
     public void removeBossBar() {
-        if (bossBar == null) {
-            return;
+        if (bossBarController != null) {
+            bossBarController.remove();
         }
-        bossBar.removeAll();
-        bossBar = null;
     }
 
     /**
@@ -1074,13 +1279,25 @@ public abstract class BlightedEntity implements Cloneable {
     }
 
     /**
-     * Sets an additional Bukkit attribute value.
+     * Sets an attribute base value. If the entity is currently active,
+     * updates the live Bukkit AttributeInstance immediately.
      *
-     * @param attribute attribute to configure
+     * @param attribute target attribute
      * @param value     base attribute value
      */
-    public void addAttribute(Attribute attribute, double value) {
-        attributes.put(attribute, value);
+    public void setAttribute(Attribute attribute, double value) {
+        attributes.setAttribute(attribute, value, entity);
+    }
+
+    /**
+     * Returns the effective base value for an attribute, querying the live
+     * entity if active, or the configured attribute map if unspawned.
+     *
+     * @param attribute target attribute
+     * @return effective base value, or 0.0 if not configured
+     */
+    public double getAttributeValue(Attribute attribute) {
+        return attributes.getAttributeValue(attribute, entity);
     }
 
     /**
@@ -1105,19 +1322,6 @@ public abstract class BlightedEntity implements Cloneable {
         return defenses.getResistancePercent(target, event);
     }
 
-    private void initComponents() {
-        if (componentsInitialized) {
-            return;
-        }
-        componentsInitialized = true;
-        components.values().forEach(component -> component.onInit(entity));
-    }
-
-    private void destroyComponents() {
-        components.values().forEach(component -> component.onDestroy(entity));
-        componentsInitialized = false;
-    }
-
     /**
      * Initializes runtime systems (behavior, tasks, phases). Executed once per instance.
      */
@@ -1126,92 +1330,17 @@ public abstract class BlightedEntity implements Cloneable {
             return;
         }
         onDefineBehavior();
-        if (bossBar != null) startBossBarTask();
 
         addCoreAbility(1L, 1L, this::syncAttachments);
-        addCoreAbility(5L, 5L, () -> {
-            for (EntityComponent component : components.values()) {
-                component.onTick(this);
-            }
-        });
+        addCoreAbility(5L, 5L, () -> componentManager.tick(this));
 
         runtimeInitialized = true;
-        coreTasks.scheduleAll();
-        evaluatePhases(maxHealth);
-    }
-
-    private void initializeAttributes() {
-        setAttribute(Attribute.MAX_HEALTH, maxHealth);
-        setAttribute(Attribute.ATTACK_DAMAGE, damage);
-        if (defense > 0) {
-            setAttribute(Attribute.ARMOR, defense);
-        }
-        attributes.forEach(this::setAttribute);
-
-        AttributeInstance maxHealthAttribute = entity.getAttribute(Attribute.MAX_HEALTH);
-        if (maxHealthAttribute != null) {
-            entity.setHealth(maxHealthAttribute.getValue());
-        }
-
-        lockEntityProperties();
-    }
-
-    private void rehydrateAttributes() {
-        setAttribute(Attribute.MAX_HEALTH, maxHealth);
-        setAttribute(Attribute.ATTACK_DAMAGE, damage);
-        if (defense > 0) {
-            setAttribute(Attribute.ARMOR, defense);
-        }
-        attributes.forEach(this::setAttribute);
-
-        AttributeInstance maxHealthAttribute = entity.getAttribute(Attribute.MAX_HEALTH);
-        if (maxHealthAttribute != null) {
-            entity.setHealth(Math.min(entity.getHealth(), maxHealthAttribute.getValue()));
-        }
-
-        lockEntityProperties();
-    }
-
-    private void lockEntityProperties() {
-        entity.setRemoveWhenFarAway(!isBoss);
-        entity.setPersistent(isBoss);
-        entity.setCanPickupItems(false);
-    }
-
-    private void setAttribute(Attribute attribute, double value) {
-        AttributeInstance instance = entity.getAttribute(attribute);
-        if (instance == null) {
-            return;
-        }
-        for (AttributeModifier modifier : new ArrayList<>(instance.getModifiers())) {
-            instance.removeModifier(modifier);
-        }
-        instance.setBaseValue(value);
+        phaseManager.scheduleAllCoreTasks();
+        phaseManager.evaluatePhases(maxHealth);
     }
 
     private void configureEquipment() {
-        if (armor == null && itemInMainHand == null && itemInOffHand == null) {
-            return;
-        }
-        EntityEquipment equipment = entity.getEquipment();
-        if (equipment == null) {
-            return;
-        }
-
-        if (armor != null) equipment.setArmorContents(armor);
-        if (itemInMainHand != null) equipment.setItemInMainHand(itemInMainHand);
-        if (itemInOffHand != null) equipment.setItemInOffHand(itemInOffHand);
-
-        zeroEquipmentDropChances(equipment);
-    }
-
-    private void zeroEquipmentDropChances(EntityEquipment equipment) {
-        equipment.setHelmetDropChance(0f);
-        equipment.setChestplateDropChance(0f);
-        equipment.setLeggingsDropChance(0f);
-        equipment.setBootsDropChance(0f);
-        equipment.setItemInMainHandDropChance(0f);
-        equipment.setItemInOffHandDropChance(0f);
+        equipmentHolder.applyTo(entity);
     }
 
     /**
@@ -1233,142 +1362,35 @@ public abstract class BlightedEntity implements Cloneable {
         defenses.addResistance(type, percent);
     }
 
-    private void scheduleAbility(LifecycleTaskManager manager, long delayTicks, long periodTicks, Runnable action) {
-        manager.addRepeatingTask(() -> {
-            if (!isAlive()) {
-                return;
-            }
-            try {
-                action.run();
-            } catch (Exception exception) {
-                Log.warn("BlightedEntity", "Ability threw an exception on entity '" + name + "': " + exception.getMessage());
-            }
-        }, delayTicks, periodTicks);
-        if (canScheduleTask()) manager.scheduleLast();
-    }
-
-    private void scheduleDelayedAction(LifecycleTaskManager manager, long delayTicks, Runnable action) {
-        manager.addDelayedTask(() -> {
-            if (!isAlive()) {
-                return;
-            }
-            try {
-                action.run();
-            } catch (Exception exception) {
-                Log.warn("BlightedEntity", "Delayed action threw an exception on entity '" + name + "': " + exception.getMessage());
-            }
-        }, delayTicks);
-        if (canScheduleTask()) manager.scheduleLast();
-    }
-
-    private boolean canScheduleTask() {
-        return entity != null && !entity.isDead() && runtimeInitialized;
-    }
-
-    private void createBossBar() {
-        if (bossBar != null) {
-            return;
-        }
-        if (entityType == EntityType.WITHER || entityType == EntityType.ENDER_DRAGON) {
-            return;
-        }
-        bossBar = Bukkit.createBossBar("§f§l" + name, bossBarColor, bossBarStyle);
-        bossBar.setProgress(1.0);
-    }
-
-    private void startBossBarTask() {
-        addCoreAbility(10L, 20L, this::manageBossBarViewers);
-    }
-
-    private void manageBossBarViewers() {
-        if (bossBar == null) {
-            return;
-        }
-        if (!isAlive()) {
-            removeBossBar();
-            return;
-        }
-
-        updateBossBar();
-
-        World world = entity.getWorld();
-        Location entityLocation = entity.getLocation();
-        double rangeSquared = BOSS_BAR_RANGE * BOSS_BAR_RANGE;
-
-        for (Player player : new ArrayList<>(bossBar.getPlayers())) {
-            if (!player.isOnline()
-                    || player.getWorld() != world
-                    || player.getLocation().distanceSquared(entityLocation) > rangeSquared) {
-                bossBar.removePlayer(player);
-            }
-        }
-
-        for (Player player : world.getPlayers()) {
-            if (player.getLocation().distanceSquared(entityLocation) <= rangeSquared
-                    && !bossBar.getPlayers().contains(player)) {
-                bossBar.addPlayer(player);
-            }
-        }
-    }
-
     /**
      * Returns whether the bound entity is currently valid and alive.
      *
      * @return {@code true} if the entity can still be used
      */
-    protected boolean isAlive() {
+    public boolean isAlive() {
         return entity != null && entity.isValid() && !entity.isDead();
     }
 
     /**
-     * Creates a detached copy of this entity definition.
+     * Creates a pristine, unspawned instance of this entity ready for world spawning.
+     * Instantiates via {@link fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry},
+     * or invokes the zero-argument constructor directly.
      *
-     * <p>The cloned instance is not bound to a Bukkit entity and has no active
-     * runtime tasks or boss bar.</p>
-     *
-     * @return detached clone
+     * @return fresh unspawned entity instance
      */
-    @Override
-    public BlightedEntity clone() {
+    @NonNull
+    public BlightedEntity createInstance() {
+        BlightedEntity fresh = EntitiesRegistry.create(getEntityId());
+        if (fresh != null) {
+            return fresh;
+        }
         try {
-            BlightedEntity clone = (BlightedEntity) super.clone();
-            clone.entity = null;
-            clone.bossBar = null;
-            clone.runtimeInitialized = false;
-            clone.componentsInitialized = false;
-            clone.attributes = new HashMap<>(this.attributes);
-            clone.attachments = new CopyOnWriteArraySet<>();
-            clone.defenses = this.defenses.copy();
-            clone.coreTasks = new LifecycleTaskManager();
-            clone.phaseTasks = new LifecycleTaskManager();
-            clone.armor = cloneArmor();
-            clone.itemInMainHand = cloneItem(this.itemInMainHand);
-            clone.itemInOffHand = cloneItem(this.itemInOffHand);
-            clone.phaseThresholds = new TreeMap<>(this.phaseThresholds);
-            clone.components = new HashMap<>();
-
-            for (Map.Entry<String, EntityComponent> entry : this.components.entrySet()) {
-                EntityComponent fresh = AffixRegistry.getAffixById(entry.getKey());
-                clone.components.put(entry.getKey(), fresh != null ? fresh : entry.getValue());
-            }
-
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("Clone failed", e);
+            var constructor = getClass().getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
+        } catch (Exception exception) {
+            throw new IllegalStateException("Failed to instantiate entity of type " + getClass().getName()
+                    + ". Ensure a public zero-argument constructor is present or register a factory.", exception);
         }
-    }
-
-    private ItemStack[] cloneArmor() {
-        if (this.armor == null) {
-            return null;
-        }
-
-        ItemStack[] cloned = new ItemStack[this.armor.length];
-        for (int i = 0; i < this.armor.length; i++) cloned[i] = cloneItem(this.armor[i]);
-        return cloned;
-    }
-
-    private ItemStack cloneItem(ItemStack item) {
-        return item != null ? item.clone() : null;
     }
 }

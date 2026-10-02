@@ -1,6 +1,6 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedSMP.engine.entities.EntityManager;
 import fr.moussax.blightedSMP.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import lombok.Getter;
@@ -40,7 +40,9 @@ public sealed abstract class BlightswornCreature extends SpawnableEntity
     }
 
     protected BlightswornCreature(String entityId, String name, EntityType entityType, int maxHealth, double spawnProbability) {
-        super(entityId, name, maxHealth, entityType, spawnProbability);
+        super(entityId, name, entityType);
+        setMaxHealth(maxHealth);
+        setSpawnProbability(spawnProbability);
         setupDefaultArmor();
     }
 
@@ -83,18 +85,18 @@ public sealed abstract class BlightswornCreature extends SpawnableEntity
     protected abstract void equipEnragedArmor(EntityEquipment equipment);
 
     private void setupDefaultArmor() {
-        armor = new ItemStack[]{
-                new ItemStack(Material.AIR),
-                new ItemStack(Material.AIR),
+        setArmor(
+                new ItemBuilder(Material.LEATHER_HELMET)
+                        .setLeatherColor(PHASE_ONE_COLOR)
+                        .unbreakable()
+                        .toItemStack(),
                 new ItemBuilder(Material.LEATHER_CHESTPLATE)
                         .setLeatherColor(PHASE_ONE_COLOR)
                         .unbreakable()
                         .toItemStack(),
-                new ItemBuilder(Material.LEATHER_HELMET)
-                        .setLeatherColor(PHASE_ONE_COLOR)
-                        .unbreakable()
-                        .toItemStack()
-        };
+                null,
+                null
+        );
     }
 
     private void evaluateResonance() {
@@ -103,7 +105,7 @@ public sealed abstract class BlightswornCreature extends SpawnableEntity
         boolean hasNearbyAlly = false;
 
         for (Entity nearby : entity.getNearbyEntities(12, 12, 12)) {
-            var blighted = BlightedEntitiesListener.getBlightedEntity(nearby);
+            var blighted = EntityManager.getBlightedEntity(nearby);
             if (!(blighted instanceof BlightswornCreature ally) || !ally.isAlive()) continue;
 
             hasNearbyAlly = true;
@@ -144,13 +146,5 @@ public sealed abstract class BlightswornCreature extends SpawnableEntity
             speedAttr.setBaseValue(baseSpeedBeforeResonance);
             baseSpeedBeforeResonance = -1;
         }
-    }
-
-    @Override
-    public BlightswornCreature clone() {
-        BlightswornCreature clone = (BlightswornCreature) super.clone();
-        clone.isResonating = false;
-        clone.baseSpeedBeforeResonance = -1;
-        return clone;
     }
 }

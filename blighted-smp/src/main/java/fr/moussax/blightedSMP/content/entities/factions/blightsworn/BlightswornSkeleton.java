@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,15 +19,14 @@ public final class BlightswornSkeleton extends BlightswornArcherArchetype {
 
     public BlightswornSkeleton() {
         super("BLIGHTSWORN_SKELETON", "Blightsworn Skeleton", EntityType.SKELETON);
-        itemInMainHand = new ItemStack(Material.BOW);
+        setItemInMainHand(new ItemStack(Material.BOW));
         setDamage(6);
         setDroppedExp(12);
-        setLootTable(new EntityLootTableBuilder()
+        loot(table -> table
                 .addLoot(Material.BONE, 2, 5, 1.0)
                 .addLoot(Material.ARROW, 2, 5, 1.0)
                 .addDamagedItem(Material.BOW, 0.1, 0.8, 0.15, RARE)
                 .addGems(5, 0.04, VERY_RARE)
-                .build()
         );
     }
 

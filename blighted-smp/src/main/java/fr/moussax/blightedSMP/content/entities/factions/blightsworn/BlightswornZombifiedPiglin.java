@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,16 +21,15 @@ public final class BlightswornZombifiedPiglin extends BlightswornEliteArchetype 
 
     public BlightswornZombifiedPiglin() {
         super("BLIGHTSWORN_ZOMBIFIED_PIGLIN", "Blightsworn Zombified Piglin", EntityType.ZOMBIFIED_PIGLIN);
-        itemInMainHand = new ItemStack(Material.GOLDEN_SWORD);
+        setItemInMainHand(new ItemStack(Material.GOLDEN_SWORD));
         setDamage(8);
         setDroppedExp(16);
-        setLootTable(new EntityLootTableBuilder()
+        loot(table -> table
                 .maxDrops(3)
                 .addLoot(Material.ROTTEN_FLESH, 2, 6, 1.0)
                 .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0)
                 .addLoot(Material.GOLD_INGOT, 1, 2, 0.15, RARE)
                 .addGems(5, 0.04, VERY_RARE)
-                .build()
         );
     }
 

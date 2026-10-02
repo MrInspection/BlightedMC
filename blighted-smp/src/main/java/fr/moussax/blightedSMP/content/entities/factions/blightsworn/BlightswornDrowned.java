@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import fr.moussax.bedrock.utils.ItemBuilder;
 import org.bukkit.GameMode;
@@ -36,16 +35,15 @@ public final class BlightswornDrowned extends BlightswornCreature {
         super("BLIGHTSWORN_DROWNED", "Blightsworn Drowned", EntityType.DROWNED, MAX_HEALTH);
         setDamage(6);
         setDroppedExp(10);
-        setLootTable(new EntityLootTableBuilder()
+        loot(table -> table
                 .addLoot(Material.ROTTEN_FLESH, 2, 5, 1.0)
                 .addLoot(Material.COPPER_INGOT, 1, 3, 0.4)
                 .addLoot(Material.NAUTILUS_SHELL, 0.08, RARE)
                 .addDamagedItem(Material.TRIDENT, 0.05, 0.80, 0.02, VERY_RARE)
                 .addGems(5, 0.04, VERY_RARE)
-                .build()
         );
 
-        itemInMainHand = new ItemBuilder(Material.TRIDENT).unbreakable().toItemStack();
+        setItemInMainHand(new ItemBuilder(Material.TRIDENT).unbreakable().toItemStack());
     }
 
     @Override
@@ -149,22 +147,20 @@ public final class BlightswornDrowned extends BlightswornCreature {
 
     @Override
     protected void equipEnragedArmor(EntityEquipment equipment) {
-        if (equipment == null) return;
-
-        equipment.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
-                .setArmorTrim(TrimMaterial.DIAMOND, TrimPattern.SILENCE)
-                .setLeatherColor(PHASE_TWO_COLOR)
-                .unbreakable()
-                .toItemStack()
+        setArmor(
+                new ItemBuilder(Material.LEATHER_HELMET)
+                        .setArmorTrim(TrimMaterial.DIAMOND, TrimPattern.SILENCE)
+                        .setLeatherColor(PHASE_TWO_COLOR)
+                        .unbreakable()
+                        .toItemStack(),
+                new ItemBuilder(Material.LEATHER_CHESTPLATE)
+                        .setArmorTrim(TrimMaterial.DIAMOND, TrimPattern.SILENCE)
+                        .setLeatherColor(PHASE_TWO_COLOR)
+                        .unbreakable()
+                        .toItemStack(),
+                new ItemBuilder(Material.IRON_LEGGINGS).unbreakable().toItemStack(),
+                new ItemBuilder(Material.IRON_BOOTS).unbreakable().toItemStack()
         );
-        equipment.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                .setArmorTrim(TrimMaterial.DIAMOND, TrimPattern.SILENCE)
-                .setLeatherColor(PHASE_TWO_COLOR)
-                .unbreakable()
-                .toItemStack()
-        );
-        equipment.setLeggings(new ItemBuilder(Material.IRON_LEGGINGS).unbreakable().toItemStack());
-        equipment.setBoots(new ItemBuilder(Material.IRON_BOOTS).unbreakable().toItemStack());
     }
 
     @Override
@@ -181,12 +177,5 @@ public final class BlightswornDrowned extends BlightswornCreature {
                         .and(SpawnRules.maxLightLevel(7))
                         .and(SpawnRules.notInLiquid().negate())
         );
-    }
-
-    @Override
-    public BlightswornDrowned clone() {
-        BlightswornDrowned clone = (BlightswornDrowned) super.clone();
-        clone.nextRepelTick = 0;
-        return clone;
     }
 }

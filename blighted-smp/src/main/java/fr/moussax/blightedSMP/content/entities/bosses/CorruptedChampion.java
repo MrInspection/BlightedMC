@@ -51,22 +51,24 @@ public class CorruptedChampion extends BlightedEntity {
     private int currentPhase = 1;
 
     public CorruptedChampion() {
-        super("Corrupted Champion", 350, MELEE_DAMAGE, EntityType.ZOMBIE);
-        addAttribute(Attribute.SCALE, 4.0);
-        addAttribute(Attribute.SPAWN_REINFORCEMENTS, 0.0);
-        addAttribute(Attribute.KNOCKBACK_RESISTANCE, 0.40);
-        setBoss(true);
-
-        armor = new ItemStack[]{
-                new ItemStack(Material.GOLDEN_BOOTS),
-                new ItemStack(Material.IRON_LEGGINGS),
-                new ItemBuilder(Material.GOLDEN_CHESTPLATE).setArmorTrim(TrimMaterial.GOLD, TrimPattern.SNOUT).toItemStack(),
-                new ItemBuilder(Material.PLAYER_HEAD)
+        super("CORRUPTED_CHAMPION", "Corrupted Champion", EntityType.ZOMBIE);
+        attributes(attributes -> attributes
+                .maxHealth(350)
+                .attackDamage(MELEE_DAMAGE)
+                .scale(4.0)
+                .knockbackResistance(0.40)
+                .set(Attribute.SPAWN_REINFORCEMENTS, 0.0)
+        );
+        boss();
+        equipment(equipment -> equipment
+                .helmet(new ItemBuilder(Material.PLAYER_HEAD)
                         .setCustomSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWFiNTRjMWNlOTQyYzIzMjFkNmRiYjgzMjQ1ZWJmM2ZmZDY5NmJmOWQxZjAyNDY3MzY0NzFmNjdmNzJiYTI1MCJ9fX0=")
-                        .toItemStack()
-        };
-
-        itemInMainHand = new ItemBuilder(Material.NETHERITE_SWORD).glow().toItemStack();
+                        .toItemStack())
+                .chestplate(new ItemBuilder(Material.GOLDEN_CHESTPLATE).setArmorTrim(TrimMaterial.GOLD, TrimPattern.SNOUT).toItemStack())
+                .leggings(Material.IRON_LEGGINGS)
+                .boots(Material.GOLDEN_BOOTS)
+                .mainHand(new ItemBuilder(Material.NETHERITE_SWORD).glow().toItemStack())
+        );
     }
 
     private static ItemStack createRocketBoots() {
@@ -137,7 +139,7 @@ public class CorruptedChampion extends BlightedEntity {
             return 0L;
         }
 
-        setBootsEquipped(armor != null && armor.length > 0 ? armor[0] : new ItemStack(Material.GOLDEN_BOOTS));
+        setBoots(new ItemStack(Material.GOLDEN_BOOTS));
 
         if (healthThreshold == 0.66) {
             currentPhase = 2;
@@ -277,7 +279,7 @@ public class CorruptedChampion extends BlightedEntity {
         }
 
         setPerformingAbility(true);
-        setBootsEquipped(RED_BOOTS);
+        setBoots(RED_BOOTS);
 
         if (entity instanceof Mob mob) {
             mob.setAI(false);
@@ -330,7 +332,7 @@ public class CorruptedChampion extends BlightedEntity {
 
             private void cleanup() {
                 cancel();
-                setBootsEquipped(armor != null && armor.length > 0 ? armor[0] : new ItemStack(Material.GOLDEN_BOOTS));
+                setBoots(new ItemStack(Material.GOLDEN_BOOTS));
                 if (entity instanceof Mob mob) {
                     mob.setAI(true);
                 }
@@ -724,9 +726,9 @@ public class CorruptedChampion extends BlightedEntity {
         Location targetLocation = spawnLocation.clone();
         targetLocation.setPitch(0);
         targetLocation.setYaw(spawnLocation.getYaw());
-        Giant giant = Objects.requireNonNull(spawnLocation.getWorld()).spawn(targetLocation, Giant.class, g -> {
-                    configureSwordGiant(g, scale);
-                    g.setCustomName("Dinnerbone");
+        Giant giant = Objects.requireNonNull(spawnLocation.getWorld()).spawn(targetLocation, Giant.class, giantEntity -> {
+                    configureSwordGiant(giantEntity, scale);
+                    giantEntity.setCustomName("Dinnerbone");
                 }
         );
         return giant;
@@ -751,13 +753,6 @@ public class CorruptedChampion extends BlightedEntity {
         Objects.requireNonNull(giant.getEquipment()).setItemInMainHand(new ItemBuilder(Material.NETHERITE_SWORD).glow().toItemStack());
     }
 
-    private void setBootsEquipped(ItemStack bootsItem) {
-        if (entity == null || entity.getEquipment() == null) {
-            return;
-        }
-        entity.getEquipment().setBoots(bootsItem);
-    }
-
     private boolean tryStartAbility() {
         if (isPerformingAbility()) {
             return false;
@@ -768,18 +763,6 @@ public class CorruptedChampion extends BlightedEntity {
 
     private void endAbility() {
         setPerformingAbility(false);
-    }
-
-    @Override
-    public String getEntityId() {
-        return "CORRUPTED_CHAMPION";
-    }
-
-    @Override
-    public CorruptedChampion clone() {
-        CorruptedChampion clone = (CorruptedChampion) super.clone();
-        clone.activeStabs = new CopyOnWriteArrayList<>();
-        return clone;
     }
 
     @Override

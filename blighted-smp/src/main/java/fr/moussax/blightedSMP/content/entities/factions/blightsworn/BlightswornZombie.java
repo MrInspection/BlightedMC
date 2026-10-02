@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -15,14 +14,13 @@ public final class BlightswornZombie extends BlightswornBruteArchetype {
         super("BLIGHTSWORN_ZOMBIE", "Blightsworn Zombie", EntityType.ZOMBIE);
         setDamage(6);
         setDroppedExp(12);
-        setLootTable(new EntityLootTableBuilder()
+        loot(table -> table
                 .maxDrops(3)
                 .addLoot(Material.ROTTEN_FLESH, 1, 2, 1.0)
                 .addLoot(Material.POTATO, 0.025)
                 .addLoot(Material.CARROT, 0.025)
                 .addLoot(Material.IRON_INGOT, 0.02, RARE)
                 .addGems(2, 0.01, VERY_RARE)
-                .build()
         );
     }
 

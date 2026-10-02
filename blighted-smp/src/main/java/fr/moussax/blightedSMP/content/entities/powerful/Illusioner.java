@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.powerful;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.components.impl.ShieldComponent;
 import fr.moussax.blightedSMP.engine.entities.rituals.AncientCreature;
 import fr.moussax.blightedSMP.engine.loot.decorators.EntityLootRarity;
@@ -13,10 +12,11 @@ import java.util.List;
 public class Illusioner extends AncientCreature {
 
     public Illusioner() {
-        super("Ancient Dummy", 20, EntityType.ILLUSIONER, 30);
+        super("ANCIENT_ILLUSIONER", "Ancient Dummy", EntityType.ILLUSIONER);
         setDamage(12);
+        setTimeAllowance(30);
 
-        this.lootTable = new EntityLootTableBuilder()
+        loot(table -> table
                 .maxDrops(4)
                 .addLoot(Material.SPECTRAL_ARROW, 4, 12, 0.6)
                 .addLoot(Material.GLASS_BOTTLE, 1, 2, 0.4)
@@ -27,7 +27,7 @@ public class Illusioner extends AncientCreature {
                         List.of(Enchantment.QUICK_CHARGE, Enchantment.PIERCING, Enchantment.POWER),
                         1, 7, 0.07, EntityLootRarity.RARE
                 )
-                .build();
+        );
     }
 
     @Override
@@ -37,10 +37,5 @@ public class Illusioner extends AncientCreature {
         if (getComponent("BLIGHTED_SHIELD") == null) {
             addComponent(new ShieldComponent(120));
         }
-    }
-
-    @Override
-    public String getEntityId() {
-        return "ANCIENT_ILLUSIONER";
     }
 }

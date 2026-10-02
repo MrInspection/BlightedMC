@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,18 +23,17 @@ public final class BlightswornWitherSkeleton extends BlightswornEliteArchetype {
 
     public BlightswornWitherSkeleton() {
         super("BLIGHTSWORN_WITHER_SKELETON", "Blightsworn Wither Skeleton", EntityType.WITHER_SKELETON);
-        setLootTable(new EntityLootTableBuilder()
+        loot(table -> table
                 .maxDrops(4)
                 .addLoot(Material.BONE, 2, 5, 1.0)
                 .addLoot(Material.COAL, 1, 3, 0.5)
                 .addLoot(Material.WITHER_SKELETON_SKULL, 0.03, VERY_RARE)
                 .addGems(5, 0.04, VERY_RARE)
-                .build()
         );
 
         setDamage(8);
         setDroppedExp(20);
-        itemInMainHand = new ItemStack(Material.STONE_SWORD);
+        setItemInMainHand(new ItemStack(Material.STONE_SWORD));
     }
 
     @Override

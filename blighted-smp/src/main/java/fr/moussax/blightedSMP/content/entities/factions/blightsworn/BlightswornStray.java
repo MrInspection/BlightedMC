@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -16,10 +15,10 @@ import static fr.moussax.blightedSMP.engine.loot.decorators.EntityLootRarity.*;
 public final class BlightswornStray extends BlightswornArcherArchetype {
     public BlightswornStray() {
         super("BLIGHTSWORN_STRAY", "Blightsworn Stray", EntityType.STRAY);
-        itemInMainHand = new ItemStack(Material.BOW);
+        setItemInMainHand(new ItemStack(Material.BOW));
         setDamage(6);
         setDroppedExp(12);
-        setLootTable(new EntityLootTableBuilder()
+        loot(table -> table
                 .maxDrops(4)
                 .addLoot(Material.BONE, 2, 5, 1.0)
                 .addLoot(Material.ARROW, 2, 5, 1.0)
@@ -31,7 +30,6 @@ public final class BlightswornStray extends BlightswornArcherArchetype {
                         0.4
                 )
                 .addGems(5, 0.04, VERY_RARE)
-                .build()
         );
     }
 

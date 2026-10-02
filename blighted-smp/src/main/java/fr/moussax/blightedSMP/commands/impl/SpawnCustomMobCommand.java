@@ -20,14 +20,12 @@ public final class SpawnCustomMobCommand extends AdminCommand {
             return false;
         }
 
-        BlightedEntity prototype = EntitiesRegistry.get(args[0].toUpperCase());
+        BlightedEntity entity = EntitiesRegistry.create(args[0].toUpperCase());
 
-        if (prototype == null) {
+        if (entity == null) {
             warn(player, "Unable to find §4" + args[0].toUpperCase() + " §cinto the registry.");
             return false;
         }
-
-        BlightedEntity entity = prototype.clone();
 
         if (entity instanceof AncientCreature ancientCreature) {
             ancientCreature.setSummoner(player);

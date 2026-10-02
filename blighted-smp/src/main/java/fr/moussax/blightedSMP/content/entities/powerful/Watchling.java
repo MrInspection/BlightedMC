@@ -1,7 +1,6 @@
 package fr.moussax.blightedSMP.content.entities.powerful;
 
 import fr.moussax.blightedSMP.content.utils.ai.EndermanAI;
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.spawnable.SpawnableEntity;
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Location;
@@ -11,7 +10,6 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.generator.structure.Structure;
 
@@ -23,21 +21,24 @@ public class Watchling extends SpawnableEntity {
 
     private static final long TELEPORT_COOLDOWN = 4000;
     private final Random random = new Random();
-    private long lastTeleportTime = 0;
 
     public Watchling() {
-        super("WATCHLING", "§dWatchling", 20, EntityType.ENDERMAN, 0.001);
-        addAttribute(Attribute.SCALE, 0.7);
-        addAttribute(Attribute.MOVEMENT_SPEED, 0.35);
-        addAttribute(Attribute.FOLLOW_RANGE, 50);
+        super("WATCHLING", "§dWatchling", EntityType.ENDERMAN);
+        setMaxHealth(20);
         setDamage(10);
         setDroppedExp(10);
+        setSpawnProbability(0.001);
 
-        setLootTable(new EntityLootTableBuilder()
+        attributes(attributes -> attributes
+                .scale(0.7)
+                .movementSpeed(0.35)
+                .followRange(50)
+        );
+
+        loot(table -> table
             .maxDrops(2)
             .addLoot(Material.ENDER_PEARL, 1, 2, 1.0)
             .addGems(5, 0.03, VERY_RARE)
-            .build()
         );
     }
 
@@ -47,22 +48,18 @@ public class Watchling extends SpawnableEntity {
     }
 
     private void handleCombatLogic() {
-        if (!isAlive() || !(entity instanceof Mob mob) || !(mob.getTarget() instanceof Player target)) return;
+        if (!isAlive()) return;
+        Player target = getTargetPlayer();
+        if (target == null) return;
 
         double distance = entity.getLocation().distance(target.getLocation());
 
-        if (distance > 6 && distance < 20 && canTeleport()) {
+        if (distance > 6 && distance < 20 && checkAndTriggerCooldown("teleport", TELEPORT_COOLDOWN)) {
             teleportToTarget(target);
         }
     }
 
-    private boolean canTeleport() {
-        return System.currentTimeMillis() - lastTeleportTime > TELEPORT_COOLDOWN;
-    }
-
     private void teleportToTarget(Player target) {
-        lastTeleportTime = System.currentTimeMillis();
-
         Location location = target.getLocation().add(
             (random.nextDouble() - 0.5) * 2,
             0,
@@ -70,7 +67,7 @@ public class Watchling extends SpawnableEntity {
         );
 
         entity.teleport(location);
-        entity.getWorld().playSound(location, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.5f);
+        playSound(location, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.5f);
 
         if (random.nextDouble() < 0.3) {
             performHeavyAttack(target);
@@ -78,14 +75,14 @@ public class Watchling extends SpawnableEntity {
     }
 
     private void performHeavyAttack(Player target) {
-        entity.swingMainHand();
-        entity.swingOffHand();
+        swingMainHand();
+        swingOffHand();
 
         addCoreDelayedAction(10L, () -> {
             if (!isAlive() || target.getLocation().distance(entity.getLocation()) > 3) return;
 
             target.damage(getDamage() * 2, entity);
-            entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 0.5f, 1.2f);
+            playSound(Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 0.5f, 1.2f);
 
             if (random.nextBoolean()) {
                 executeEscapeTeleport();
@@ -117,12 +114,5 @@ public class Watchling extends SpawnableEntity {
             .biome(Biome.END_BARRENS, Biome.END_MIDLANDS)
             .or(SpawnRules.insideStructure(Structure.END_CITY))
         );
-    }
-
-    @Override
-    public Watchling clone() {
-        Watchling clone = (Watchling) super.clone();
-        clone.lastTeleportTime = 0;
-        return clone;
     }
 }

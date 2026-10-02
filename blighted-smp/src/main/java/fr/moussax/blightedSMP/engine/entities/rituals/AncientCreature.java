@@ -5,6 +5,8 @@ import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.content.sound.BlightedSounds;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
 import fr.moussax.blightedSMP.engine.entities.attachment.AttachmentRole;
+import fr.moussax.blightedSMP.engine.entities.attachment.EntityAttachmentManager;
+import fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -38,10 +40,9 @@ public abstract class AncientCreature extends BlightedEntity {
             new NamespacedKey(BlightedSMP.getInstance(), "ancient_creature_hologram");
 
     @Getter
-    @Setter
-    protected int timeAllowance;
+    protected int timeAllowance = DEFAULT_TIME_ALLOWANCE_SECONDS;
     @Getter
-    protected int remainingSeconds;
+    protected int remainingSeconds = DEFAULT_TIME_ALLOWANCE_SECONDS;
     @Getter
     @Setter
     protected String summonerName = "Unknown";
@@ -53,81 +54,26 @@ public abstract class AncientCreature extends BlightedEntity {
     private boolean isCollapsing = false;
 
     /**
-     * Creates an ancient creature using the default time allowance.
+     * Creates an ancient creature with identity requirements using the default time allowance.
      *
+     * @param entityId   unique entity identifier
      * @param name       creature display name
-     * @param maxHealth  creature maximum health
      * @param entityType Bukkit entity type
      */
-    public AncientCreature(@NonNull String name, int maxHealth, EntityType entityType) {
-        this(name, maxHealth, 1, 0, entityType, DEFAULT_TIME_ALLOWANCE_SECONDS);
+    public AncientCreature(@NonNull String entityId, @NonNull String name, @NonNull EntityType entityType) {
+        super(entityId, name, entityType);
+        boss();
     }
 
     /**
-     * Creates an ancient creature using the default time allowance.
+     * Sets the time allowance to defeat this creature, in seconds.
+     * Also updates the remaining countdown seconds if the creature has not collapsed.
      *
-     * @param name       creature display name
-     * @param maxHealth  creature maximum health
-     * @param damage     base attack damage
-     * @param entityType Bukkit entity type
+     * @param timeAllowanceSeconds time allowed in seconds
      */
-    public AncientCreature(@NonNull String name, int maxHealth, int damage, EntityType entityType) {
-        this(name, maxHealth, damage, 0, entityType, DEFAULT_TIME_ALLOWANCE_SECONDS);
-    }
-
-    /**
-     * Creates an ancient creature using the default time allowance.
-     *
-     * @param name       creature display name
-     * @param maxHealth  creature maximum health
-     * @param damage     base attack damage
-     * @param defense    base armor value
-     * @param entityType Bukkit entity type
-     */
-    public AncientCreature(@NonNull String name, int maxHealth, int damage, int defense, EntityType entityType) {
-        this(name, maxHealth, damage, defense, entityType, DEFAULT_TIME_ALLOWANCE_SECONDS);
-    }
-
-    /**
-     * Creates an ancient creature using the specified time allowance.
-     *
-     * @param name                 creature display name
-     * @param maxHealth            creature maximum health
-     * @param entityType           Bukkit entity type
-     * @param timeAllowanceSeconds time allowed to defeat the creature, in seconds
-     */
-    public AncientCreature(@NonNull String name, int maxHealth, EntityType entityType, int timeAllowanceSeconds) {
-        this(name, maxHealth, 1, 0, entityType, timeAllowanceSeconds);
-    }
-
-    /**
-     * Creates an ancient creature using the specified damage and time allowance.
-     *
-     * @param name                 creature display name
-     * @param maxHealth            creature maximum health
-     * @param damage               base attack damage
-     * @param entityType           Bukkit entity type
-     * @param timeAllowanceSeconds time allowed to defeat the creature, in seconds
-     */
-    public AncientCreature(@NonNull String name, int maxHealth, int damage, EntityType entityType, int timeAllowanceSeconds) {
-        this(name, maxHealth, damage, 0, entityType, timeAllowanceSeconds);
-    }
-
-    /**
-     * Creates an ancient creature using the specified combat stats and time allowance.
-     *
-     * @param name                 creature display name
-     * @param maxHealth            creature maximum health
-     * @param damage               base attack damage
-     * @param defense              base armor value
-     * @param entityType           Bukkit entity type
-     * @param timeAllowanceSeconds time allowed to defeat the creature, in seconds
-     */
-    public AncientCreature(@NonNull String name, int maxHealth, int damage, int defense, EntityType entityType, int timeAllowanceSeconds) {
-        super(name, maxHealth, damage, defense, entityType);
+    public void setTimeAllowance(int timeAllowanceSeconds) {
         this.timeAllowance = timeAllowanceSeconds;
         this.remainingSeconds = timeAllowanceSeconds;
-        setBoss(true);
     }
 
     /**
@@ -192,7 +138,7 @@ public abstract class AncientCreature extends BlightedEntity {
             if (!(nearby instanceof TextDisplay display)) continue;
 
             PersistentDataContainer persistentDataContainer = display.getPersistentDataContainer();
-            String attachedOwner = persistentDataContainer.get(ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
+            String attachedOwner = persistentDataContainer.get(EntityAttachmentManager.ATTACHMENT_OWNER_KEY, PersistentDataType.STRING);
             if (!ownerUuid.equals(attachedOwner)) continue;
 
             if (persistentDataContainer.has(HOLOGRAM_KEY, PersistentDataType.BYTE)) {
@@ -293,5 +239,15 @@ public abstract class AncientCreature extends BlightedEntity {
     public void onDeath(Location location) {
         super.onDeath(location);
         BlightedSounds.ANCIENT_MOB_DEFEAT.play(location);
+    }
+
+    @NonNull
+    @Override
+    public AncientCreature createInstance() {
+        BlightedEntity fresh = EntitiesRegistry.create(getEntityId());
+        if (fresh instanceof AncientCreature ancient) {
+            return ancient;
+        }
+        return (AncientCreature) super.createInstance();
     }
 }

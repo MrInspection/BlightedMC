@@ -9,7 +9,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
-import static fr.moussax.blightedSMP.engine.entities.listeners.BlightedEntitiesListener.getBlightedEntity;
+import static fr.moussax.blightedSMP.engine.entities.EntityManager.getBlightedEntity;
 
 public final class EntityComponentListener implements Listener {
 

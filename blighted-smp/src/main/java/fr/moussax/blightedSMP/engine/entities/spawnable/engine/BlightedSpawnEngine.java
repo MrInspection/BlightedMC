@@ -1,7 +1,7 @@
 package fr.moussax.blightedSMP.engine.entities.spawnable.engine;
 
 import fr.moussax.blightedSMP.BlightedSMP;
-import fr.moussax.blightedSMP.engine.entities.registry.SpawnableEntitiesRegistry;
+import fr.moussax.blightedSMP.engine.entities.registry.EntitiesRegistry;
 import fr.moussax.blightedSMP.engine.entities.spawnable.SpawnableEntity;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -79,7 +79,7 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
 
     private void refreshCaches() {
         cachedIndependentEntities.clear();
-        for (SpawnableEntity entity : SpawnableEntitiesRegistry.getAll()) {
+        for (SpawnableEntity entity : EntitiesRegistry.getSpawnables()) {
             SpawnMode mode = entity.getSpawnMode();
             if (mode == SpawnMode.INDEPENDENT || mode == SpawnMode.HYBRID) {
                 cachedIndependentEntities.add(entity);
@@ -127,7 +127,7 @@ public final class BlightedSpawnEngine extends BukkitRunnable {
 
             SpawnableEntity selected = SpawnEvaluator.selectCandidate(cachedIndependentEntities, location, world, random);
             if (selected != null) {
-                selected.clone().spawn(location);
+                selected.createInstance().spawn(location);
                 return; // Stop scanning column once an entity spawns
             }
         }

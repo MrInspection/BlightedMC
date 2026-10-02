@@ -1,6 +1,5 @@
 package fr.moussax.blightedSMP.content.entities.factions.blightsworn;
 
-import fr.moussax.blightedSMP.engine.entities.EntityLootTableBuilder;
 import fr.moussax.blightedSMP.engine.entities.spawnable.condition.SpawnRules;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,13 +23,12 @@ public final class BlightswornPiglin extends BlightswornEliteArchetype {
 
     public BlightswornPiglin() {
         super("BLIGHTSWORN_PIGLIN", "Blightsworn Piglin", EntityType.PIGLIN);
-        itemInMainHand = new ItemStack(Material.GOLDEN_SWORD);
-        setLootTable(new EntityLootTableBuilder()
+        setItemInMainHand(new ItemStack(Material.GOLDEN_SWORD));
+        loot(table -> table
                 .addLoot(Material.GOLD_NUGGET, 2, 6, 1.0)
                 .addLoot(Material.GOLD_INGOT, 1, 3, 0.4)
                 .addDamagedItem(Material.CROSSBOW, 0.10, 0.80, 0.1, RARE)
                 .addGems(5, 0.04, VERY_RARE)
-                .build()
         );
         setDamage(8);
         setDroppedExp(16);

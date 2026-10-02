@@ -3,7 +3,7 @@ package fr.moussax.blightedSMP.engine.quest;
 import fr.moussax.blightedSMP.BlightedSMP;
 import fr.moussax.blightedSMP.engine.items.BlightedItem;
 import fr.moussax.blightedSMP.engine.entities.BlightedEntity;
-import fr.moussax.blightedSMP.engine.entities.listeners.BlightedEntitiesListener;
+import fr.moussax.blightedSMP.engine.entities.EntityManager;
 import fr.moussax.blightedSMP.content.entities.factions.blightsworn.BlightswornCreature;
 import fr.moussax.bedrock.text.Messenger;
 import org.bukkit.Bukkit;
@@ -39,7 +39,7 @@ public final class BlightedQuestListener implements Listener {
         Player killer = deadEntity.getKiller();
 
         if (killer != null) {
-            BlightedEntity blightedEntity = BlightedEntitiesListener.getBlightedEntity(deadEntity);
+            BlightedEntity blightedEntity = EntityManager.getBlightedEntity(deadEntity);
             if (blightedEntity instanceof BlightswornCreature) {
                 incrementCodexTrappedSouls(killer);
             }

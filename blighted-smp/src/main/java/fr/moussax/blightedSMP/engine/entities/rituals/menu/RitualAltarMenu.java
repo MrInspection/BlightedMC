@@ -17,7 +17,6 @@ import fr.moussax.blightedSMP.utils.Utilities;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -146,7 +145,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
         }
 
         boolean hasItems = requiredCounts.entrySet().stream()
-                .allMatch(e -> inventoryCounts.getOrDefault(e.getKey(), 0) >= e.getValue());
+                .allMatch(entry -> inventoryCounts.getOrDefault(entry.getKey(), 0) >= entry.getValue());
         boolean hasGems = blightedPlayer.hasGems(ritual.getGemsCost());
         boolean hasXp = player.getLevel() >= ritual.getLevelCost();
 
@@ -314,7 +313,7 @@ public final class RitualAltarMenu extends Menu implements TickableMenu {
 
         Bukkit.broadcastMessage("§5 ☤ §dThe §4" + ritual.getSummonedCreature().getName() + " §dhas been summoned by §f" + player.getName() + "§d.");
 
-        AncientCreature creature = (AncientCreature) ritual.getSummonedCreature().clone();
+        AncientCreature creature = ritual.getSummonedCreature().createInstance();
         creature.setSummoner(player);
         creature.spawn(location);
     }
